@@ -1,0 +1,39 @@
+﻿using Cell.Persistence;
+
+namespace Cell.Model
+{
+    internal static class CellModelFactory
+    {
+        private const int DefaultCellWidth = 125;
+        private const int DefaultCellHeight = 25;
+
+        internal static CellModel Create(int row, int column, CellType type, string sheet)
+        {
+            var model = new CellModel
+            {
+                Width = DefaultCellWidth,
+                Height = DefaultCellHeight,
+                CellType = type,
+                SheetName = sheet,
+                Row = row,
+                Column = column,
+            };
+            return TrackCell(model);
+        }
+
+        public static CellModel Copy(this CellModel modelToCopy)
+        {
+            var model = CellModel.DeserializeModel(CellModel.SerializeModel(modelToCopy));
+            model.ID = Utilities.GenerateUnqiueId(12);
+            return TrackCell(model);
+        }
+
+        private static CellModel TrackCell(CellModel model)
+        {
+            Cells.AddCell(model);
+            CellLoader.SaveCell(model);
+            return model;
+        }
+
+    }
+}

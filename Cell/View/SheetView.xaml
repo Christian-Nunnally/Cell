@@ -1,0 +1,257 @@
+﻿<UserControl x:Class="Cell.View.SheetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModel="clr-namespace:Cell.ViewModel" 
+             d:DataContext="{d:DesignInstance Type=viewModel:SheetViewModel}"
+             xmlns:local="clr-namespace:Cell.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!--   vvv SKIN vvv   -->
+        <SolidColorBrush x:Key="CellBackground" Color="#1e1e1e"/>
+        <SolidColorBrush x:Key="CellBorderColor" Color="#3D3D3D"/>
+        <SolidColorBrush x:Key="SelectedColor" Color="#383838"/>
+        <SolidColorBrush x:Key="SelectedBorderColor" Color="#707070"/>
+        <SolidColorBrush x:Key="ForegroundColor" Color="#ffffff"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#007acc"/>
+        <!--   ^^^ SKIN ^^^   -->
+    </UserControl.Resources>
+    <ListBox 
+    ItemsSource="{Binding Path=CellViewModels}" 
+    Margin="0" 
+    BorderThickness="0" 
+    Padding="0" 
+    Background="{StaticResource CellBackground}" 
+    Grid.RowSpan="3" 
+    Grid.ColumnSpan="3">
+        <ListBox.Resources>
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0"/>
+            </Style>
+
+            <Style TargetType="TextBox">
+                <Setter Property="Background" Value="{Binding BackgroundColor}"/>
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
+                <Setter Property="BorderBrush" Value="{Binding BorderColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Padding" Value="0"/>
+            </Style>
+
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="{Binding BackgroundColor}"/>
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border 
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{Binding BorderColor}"
+                                BorderThickness="1">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!--________________________________________________________________________________________________________________________________________________________________________________________________________________________-->
+            <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
+                <Grid>
+                    <Label Content="{Binding Text}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{StaticResource ForegroundColor}" Padding="0"/>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
+                <Grid>
+                    <Label Content="{Binding Text}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{StaticResource ForegroundColor}" Padding="0"/>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
+                <Label/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
+                <Label 
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    Content="{Binding Path=Text}"
+                    Margin="3"
+                    VerticalAlignment="Center"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
+                <CheckBox 
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    Margin="2"
+                    Content="{Binding Path=Text}" 
+                    Command="{Binding CheckboxCheckedCommand}"
+                    IsChecked="{Binding IsChecked}"
+                    Foreground="{StaticResource ForegroundColor}"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ButtonCellViewModel}">
+                <Button 
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    Command="{Binding ButtonClickedCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border 
+                                BorderBrush="{Binding BorderColor}"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                BorderThickness="1"
+                                Padding="0"
+                                Margin="3">
+                                    <Border.Style>
+                                        <Style>
+                                            <Setter Property="Border.Background" Value="{Binding BackgroundColor}"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="Border.IsMouseOver" Value="True">
+                                                    <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <ContentPresenter Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <Label 
+                    Content="{Binding Path=Text}"
+                    Margin="0"
+                    Padding="0"/>
+                </Button>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:TextboxCellViewModel}">
+                <TextBox 
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    Text="{Binding Path=Text, Mode=TwoWay}" 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    Margin="3"
+                    KeyDown="TextBoxKeyDown"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:DropdownCellViewModel}">
+                <ComboBox
+                    FontFamily="{Binding FontFamily}"
+                    FontSize="{Binding FontSize}"
+                    Text="{Binding Path=Value, Mode=TwoWay}" 
+                    ItemsSource="{Binding DropdownOptions}"
+                    SelectedItem="{Binding Value}"
+                    VerticalAlignment="Center"
+                    MinWidth="50"
+                    Margin="3"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ProgressCellViewModel}">
+                <Rectangle
+                    Margin="3"
+                    Fill="{Binding ForegroundColor}"
+                    HorizontalAlignment="Left"
+                    Width="{Binding ProgressBarWidth}"
+                    Height="{Binding ProgressBarHeight}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ListCellViewModel}">
+                <ListBox 
+                    Margin="3"
+                    BorderThickness="0"
+                    Background="{StaticResource CellBackground}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Label 
+                                Content="Hello world"
+                                Margin="3"
+                                Padding="0"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <Label/>
+                        <Label/>
+                        <Label/>
+                        <Label/>
+                        <Label/>
+                </ListBox>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
+                <Polyline 
+                    Margin="4" 
+                    Stroke="{Binding ForegroundColor}" 
+                    StrokeThickness="2" 
+                    StrokeMiterLimit="0"
+                    Points="{Binding DataPoints}">
+                </Polyline>
+            </DataTemplate>
+        </ListBox.Resources>
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <local:PanAndZoomCanvas 
+                    x:Name="canvas" 
+                    Loaded="PanZoomCanvasLoaded" 
+                    MouseDown="PanAndZoomCanvasMouseDown"
+                    HorizontalAlignment="Stretch"  
+                    VerticalAlignment="Stretch" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="Canvas.Left" Value="{Binding CanvasLeft, Mode=OneWay}"/>
+                <Setter Property="Canvas.Top" Value="{Binding CanvasTop, Mode=OneWay}"/>
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
+                <Setter Property="Control.Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border 
+                        Width="{Binding Width}" 
+                        Height="{Binding Height}"
+                        PreviewMouseDown="CellPreviewMouseDown"
+                        PreviewMouseMove="CellPreviewMouseMove"
+                        PreviewMouseUp="CellPreviewMouseUp"
+                        BorderThickness="{Binding BorderThickness}">
+                                <Border.Style>
+                                    <Style TargetType="{x:Type Border}">
+                                        <Setter Property="Border.BorderBrush" Value="{Binding BorderColor}"/>
+                                        <Setter Property="Border.CornerRadius" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                                <Setter Property="Border.BorderBrush" Value="{StaticResource SelectedBorderColor}"/>
+                                                <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="False">
+                                                <Setter Property="Border.BorderBrush" Value="{Binding BorderColor}"/>
+                                                <Setter Property="Border.Background" Value="{Binding BackgroundColor}"/>
+                                            </DataTrigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Border.BorderBrush" Value="{StaticResource SelectedBorderColor}"/>
+                                                <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <ContentPresenter 
+                                Content="{TemplateBinding Content}" 
+                                VerticalAlignment="Stretch" 
+                                HorizontalAlignment="Stretch"
+                                Margin="0"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ListBox.ItemContainerStyle>
+    </ListBox>
+</UserControl>
