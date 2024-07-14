@@ -7,8 +7,19 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <skins:SkinResourceDictionary DarkSource="Skins/DarkSkin.xaml" 
-                                              LightSource="Skins/LightSkin.xaml" />
+                <!--<skins:SkinResourceDictionary DarkSource="Skins/DarkSkin.xaml" 
+                                              LightSource="Skins/LightSkin.xaml" />-->
+
+                <ResourceDictionary>
+                    <!--   vvv SKIN vvv   -->
+                    <SolidColorBrush x:Key="CellBackground" Color="#1e1e1e"/>
+                    <SolidColorBrush x:Key="CellBorderColor" Color="#3D3D3D"/>
+                    <SolidColorBrush x:Key="SelectedColor" Color="#383838"/>
+                    <SolidColorBrush x:Key="SelectedBorderColor" Color="#707070"/>
+                    <SolidColorBrush x:Key="ForegroundColor" Color="#ffffff"/>
+                    <SolidColorBrush x:Key="AccentColor" Color="#007acc"/>
+                    <!--   ^^^ SKIN ^^^   -->
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

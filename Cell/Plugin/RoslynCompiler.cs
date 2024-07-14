@@ -35,6 +35,26 @@ namespace Cell.Plugin
             _compilation = CSharpCompilation.Create(_assemblyName = Guid.NewGuid().ToString(), new List<SyntaxTree> { syntax }, refs, options);
         }
 
+        public RoslynCompiler(string typeName, SyntaxTree syntax, Type[] typesToReference)
+        {
+            _typeName = typeName;
+            var refs = typesToReference.Select(h => MetadataReference.CreateFromFile(h.Assembly.Location) as MetadataReference).ToList();
+
+            //some default refeerences
+            refs.Add(MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).GetTypeInfo().Assembly.Location), "System.Runtime.dll")));
+            refs.Add(MetadataReference.CreateFromFile(typeof(Object).Assembly.Location));
+            refs.Add(MetadataReference.CreateFromFile(typeof(PluginContext).Assembly.Location));
+            refs.Add(MetadataReference.CreateFromFile(typeof(CellTextProvider).Assembly.Location));
+
+            //generate syntax tree from code and config compilation options
+            var options = new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                allowUnsafe: true,
+                optimizationLevel: OptimizationLevel.Release);
+
+            _compilation = CSharpCompilation.Create(_assemblyName = Guid.NewGuid().ToString(), new List<SyntaxTree> { syntax }, refs, options);
+        }
+
         public Type Compile()
         {
 

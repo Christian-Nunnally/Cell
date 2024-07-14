@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
     <PackageReference Include="Wpf.Controls.PanAndZoom" Version="2.3.4" />
   </ItemGroup>

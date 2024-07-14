@@ -1,13 +1,12 @@
 ﻿<Window 
-    x:Class="Cell.MainWindow"
+    x:Class="Cell.View.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:Cell"
-    xmlns:controls="clr-namespace:Cell.Controls" 
+    xmlns:local="clr-namespace:Cell.View"
     xmlns:viewModel="clr-namespace:Cell.ViewModel" 
-    d:DataContext="{d:DesignInstance Type=viewModel:SheetViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     mc:Ignorable="d"
     Title="MainWindow" 
     Height="450" 
@@ -15,40 +14,224 @@
     WindowStyle="None"
     WindowState="Normal" 
     ResizeMode="CanResize"
-    SizeChanged="Window_SizeChanged">
+    SizeChanged="Window_SizeChanged"
+    PreviewKeyDown="WindowPreviewKeyDown">
     <Window.Resources>
 
         <!--   vvv SKIN vvv   -->
         <SolidColorBrush x:Key="CellBackground" Color="#1e1e1e"/>
-        <SolidColorBrush x:Key="CellBorderColor" Color="#2d2d30"/>
-        <SolidColorBrush x:Key="CellHeaderColor" Color="#3e3e42"/>
-        <SolidColorBrush x:Key="ForgroundColor" Color="#ffffff"/>
-        <SolidColorBrush x:Key="SelectedColor" Color="#007acc"/>
+        <SolidColorBrush x:Key="CellBorderColor" Color="#3D3D3D"/>
+        <SolidColorBrush x:Key="SelectedColor" Color="#383838"/>
+        <SolidColorBrush x:Key="SelectedBorderColor" Color="#707070"/>
+        <SolidColorBrush x:Key="ForegroundColor" Color="#ffffff"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#007acc"/>
         <!--   ^^^ SKIN ^^^   -->
 
+        <!--COMBO BOX-->
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="20" />
+                </Grid.ColumnDefinitions>
+                <Border
+                  x:Name="Border" 
+                  Grid.ColumnSpan="2"
+                  CornerRadius="0"
+                  Background="{StaticResource CellBackground}"
+                  BorderBrush="{StaticResource CellBorderColor}"
+                  BorderThickness="1" />
+                <Border 
+                  Grid.Column="0"
+                  CornerRadius="0" 
+                  Margin="1" 
+                  Background="{StaticResource CellBackground}" 
+                  BorderBrush="{StaticResource CellBorderColor}"
+                  BorderThickness="0,0,1,0" />
+                <Path 
+                  x:Name="Arrow"
+                  Grid.Column="1"     
+                  Fill="{StaticResource ForegroundColor}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Data="M0,0 L0,2 L4,6 L8,2 L8,0 L4,4 z"
+                />
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="ToggleButton.IsMouseOver" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedColor}" />
+                </Trigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="true">
+                    <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedColor}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ComboBoxTextBox" TargetType="{x:Type TextBox}">
+            <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+        </ControlTemplate>
+
+        <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="MinHeight" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBox}">
+                        <Grid>
+                            <ToggleButton 
+                                Name="ToggleButton" 
+                                Template="{StaticResource ComboBoxToggleButton}" 
+                                Grid.Column="2" 
+                                Focusable="false"
+                                IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                            </ToggleButton>
+                            <ContentPresenter 
+                                Name="ContentSite" 
+                                IsHitTestVisible="False"  
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                Margin="3,3,23,3"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left" />
+                            <TextBox 
+                                x:Name="PART_EditableTextBox"
+                                Style="{x:Null}" 
+                                Template="{StaticResource ComboBoxTextBox}" 
+                                HorizontalAlignment="Left" 
+                                VerticalAlignment="Center" 
+                                Margin="3,3,23,3"
+                                Focusable="True" 
+                                Background="{StaticResource CellBackground}"
+                                Foreground="Green"
+                                Visibility="Hidden"
+                                IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup 
+                                Name="Popup"
+                                Placement="Bottom"
+                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                AllowsTransparency="True" 
+                                Focusable="False"
+                                PopupAnimation="Slide">
+                                <Grid 
+                                    Name="DropDown"
+                                    SnapsToDevicePixels="True"                
+                                    MinWidth="{TemplateBinding ActualWidth}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border 
+                                        x:Name="DropDownBorder"
+                                        Background="#FF3F3F3F"
+                                        BorderThickness="1"
+                                        BorderBrush="#888888"/>
+                                        <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                        </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasItems" Value="false">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="true">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="false"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="true">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,2,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable"  Value="true">
+                                <Setter Property="IsTabStop" Value="false"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+
+        <!-- SimpleStyles: ComboBoxItem -->
+        <Style x:Key="{x:Type ComboBoxItem}" TargetType="{x:Type ComboBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="true"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                        <Border Name="Border"
+                              Padding="2"
+                              SnapsToDevicePixels="true">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#FF4F4F4F"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="#888888"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- SimpleStyles: ComboBoxItem -->
+        
         <Style x:Key="TitleButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{StaticResource CellBackground}"></Setter>
-            <Setter Property="Foreground" Value="{StaticResource ForgroundColor}"></Setter>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"></Setter>
             <Setter Property="Width" Value="35"></Setter>
             <Setter Property="Height" Value="28"></Setter>
             <Setter Property="FontFamily" Value="Consolas"></Setter>
         </Style>
 
         <Style TargetType="Label">
-            <Setter Property="Foreground" Value="{StaticResource ForgroundColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
         </Style>
 
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="{StaticResource CellBackground}"/>
-            <Setter Property="Foreground" Value="{StaticResource ForgroundColor}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
             <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
 
-        <Style TargetType="Thumb">
-            <Setter Property="Visibility" Value="Hidden"/>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CellBackground}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border 
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource CellBorderColor}"
+                            BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
     </Window.Resources>
@@ -83,7 +266,7 @@
             <Label></Label>
        </DockPanel>
 
-        <Grid PreviewKeyDown="PreviewKeyDown">
+        <Grid >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="{Binding EditingSpaceLeft}"/>
                 <ColumnDefinition Width="*"/>
@@ -95,124 +278,22 @@
                 <RowDefinition Height="{Binding EditingSpaceBottom}"/>
             </Grid.RowDefinitions>
 
-            <ListBox 
-                ItemsSource="{Binding Path=CellViewModels}" 
+            <local:SheetView
                 Margin="0" 
                 BorderThickness="0" 
                 Padding="0" 
                 Background="{StaticResource CellBackground}" 
-                Grid.Row="1" 
-                Grid.Column="1">
-                <ListBox.Resources>
-                    <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
-                        <Border Background="{StaticResource CellHeaderColor}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                            <Grid>
-                                <Thumb Cursor="SizeNS" DragDelta="RowResizeTopThumbDelta">
-                                    <Thumb.Template>
-                                        <ControlTemplate TargetType="Thumb">
-                                            <Rectangle Fill="{StaticResource CellBackground}" Height="1" VerticalAlignment="Top" Margin="0,-1,0,0"/>
-                                        </ControlTemplate>
-                                    </Thumb.Template>
-                                </Thumb>
-                                <Label Content="{Binding Text}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{StaticResource ForgroundColor}" Padding="0"/>
-                                <Thumb Cursor="SizeNS" DragDelta="RowResizeBottomThumbDelta" DragStarted="RowResizeBottomThumbDragStarted" DragCompleted="RowResizeBottomThumbDragCompleted">
-                                    <Thumb.Template>
-                                        <ControlTemplate TargetType="Thumb">
-                                            <Rectangle Fill="{StaticResource CellBackground}" Height="1" VerticalAlignment="Bottom" Margin="0,0,0,-1"/>
-                                        </ControlTemplate>
-                                    </Thumb.Template>
-                                </Thumb>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
-                        <Border Background="{StaticResource CellHeaderColor}">
-                            <Grid>
-                                <Thumb Cursor="SizeWE">
-                                    <Thumb.Template>
-                                        <ControlTemplate TargetType="Thumb">
-                                            <Rectangle Fill="{StaticResource CellBackground}" Width="1" HorizontalAlignment="Left" Margin="-1,0,0,0"/>
-                                        </ControlTemplate>
-                                    </Thumb.Template>
-                                </Thumb>
-                                <Label Content="{Binding Text}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Foreground="{StaticResource ForgroundColor}" Padding="0"/>
-                                <Thumb Cursor="SizeWE">
-                                    <Thumb.Template>
-                                        <ControlTemplate TargetType="Thumb">
-                                            <Rectangle Fill="{StaticResource CellBackground}" Width="1" HorizontalAlignment="Right" Margin="0,0,-1,0"/>
-                                        </ControlTemplate>
-                                    </Thumb.Template>
-                                </Thumb>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                        <Label 
-                            Content="{Binding Path=Text}" 
-                            Foreground="{StaticResource ForgroundColor}"
-                            VerticalAlignment="Center"/>
-                    </DataTemplate>
-                    <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
-                        <CheckBox 
-                            Margin="4,0,0,0"
-                            Content="{Binding Path=Text}" 
-                            Foreground="{StaticResource ForgroundColor}"
-                            VerticalAlignment="Center"/>
-                    </DataTemplate>
-                </ListBox.Resources>
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <controls:PanAndZoomCanvas Loaded="PanZoomCanvasLoaded" x:Name="canvas" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Canvas.Left" Value="{Binding XTransformed, Mode=OneWay}"/>
-                        <Setter Property="Canvas.Top" Value="{Binding YTransformed, Mode=OneWay}"/>
-                        <Setter Property="Control.Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border 
-                                    Width="{Binding Width}" 
-                                    Height="{Binding Height}"
-                                    MouseDown="CellMouseDown"
-                                    BorderThickness="1">
-                                        <Border.Style>
-                                            <Style TargetType="{x:Type Border}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="True">
-                                                        <Setter Property="Border.BorderBrush" Value="{StaticResource SelectedColor}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="False">
-                                                        <Setter Property="Border.BorderBrush" Value="{StaticResource CellBorderColor}"/>
-                                                    </DataTrigger>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
-                                                    </Trigger>
-                                                    <Trigger Property="IsMouseOver" Value="False">
-                                                        <Setter Property="Border.Background" Value="{Binding BackgroundColor }"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <ContentPresenter 
-                                            Content="{TemplateBinding Content}" 
-                                            VerticalAlignment="Stretch" 
-                                            HorizontalAlignment="Stretch"
-                                            Margin="0"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
+                Grid.RowSpan="3" 
+                Grid.ColumnSpan="3"
+                DataContext="{Binding SheetViewModel}"
+                Loaded="OnSheetViewLoaded" />
 
             <Border
                 Grid.Row="0"
-                Grid.Column="0"
+                Grid.Column="1"
                 Grid.ColumnSpan="2"
                 BorderThickness="2"
+                DataContext="{Binding SheetViewModel}"
                 BorderBrush="{StaticResource CellBorderColor}"
                 Background="{StaticResource CellBackground}"
                 HorizontalAlignment="Stretch"
@@ -225,16 +306,11 @@
                         <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
                             <Label>Undefined</Label>
                         </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label>Text:</Label>
-                                    <TextBox Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" Width="100"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
+                        <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
                             <Label>Undefined</Label>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
+                            <TextBox Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Stretch" Margin="3" VerticalAlignment="Stretch" VerticalContentAlignment="Center" KeyDown="TextBoxKeyDown"/>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
@@ -244,6 +320,7 @@
                 Grid.Column="2"
                 Grid.RowSpan="2"
                 BorderThickness="2"
+                DataContext="{Binding SheetViewModel}"
                 BorderBrush="{StaticResource CellBorderColor}"
                 Background="{StaticResource CellBackground}"
                 HorizontalAlignment="Stretch"
@@ -257,20 +334,7 @@
                             <Label>Undefined</Label>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                            <StackPanel>
-                                <Button Content="CreateGetText" Click="CreateGetTextPluginFunctionButtonClicked"></Button>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label>GetText:</Label>
-                                    <TextBox Text="{Binding Path=GetTextFunctionName, UpdateSourceTrigger=LostFocus}" Width="100"/>
-                                </StackPanel>
-                                <TextBox Text="{Binding GetTextFunctionCode, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap"/>
-                                <Button Content="CreateOnEdit" Click="CreateOnEditPluginFunctionButtonClicked"></Button>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label>GetText:</Label>
-                                    <TextBox Text="{Binding Path=GetTextFunctionName, UpdateSourceTrigger=LostFocus}" Width="100"/>
-                                </StackPanel>
-                                <TextBox Text="{Binding GetTextFunctionCode, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap"/>
-                            </StackPanel>
+                            <Label>Undefined</Label>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
                             <Label>Undefined</Label>
@@ -283,68 +347,123 @@
                 Grid.Column="1"
                 Grid.ColumnSpan="2"
                 BorderThickness="2"
+                DataContext="{Binding SheetViewModel}"
                 BorderBrush="{StaticResource CellBorderColor}"
                 Background="{StaticResource CellBackground}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch">
-                <ContentControl Content="{Binding Path=SelectedCellViewModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
-                            <Label>Undefined</Label>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
-                            <Label>Undefined</Label>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                            <Label>Undefined</Label>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
-                            <Label>Undefined</Label>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
+                <Label Content="{Binding LastKeyPressed}"></Label>
             </Border>
             <Border
-                Grid.Row="1"
+                Grid.Row="0"
                 Grid.Column="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="3"
                 BorderThickness="2"
+                DataContext="{Binding SheetViewModel}"
                 BorderBrush="{StaticResource CellBorderColor}"
                 Background="{StaticResource CellBackground}"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
+                VerticalAlignment="Stretch"
+                Padding="5">
                 <ContentControl Content="{Binding Path=SelectedCellViewModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label>Height:</Label>
-                                    <TextBox Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" Width="100"/>
+                                    <Label Content="Height"/>
+                                    <TextBox Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
                                 </StackPanel>
+                                <Button Content="New Row ^" Click="CreateNewRowAboveButtonClicked"/>
+                                <Button Content="New Row v;" Click="CreateNewRowBelowButtonClicked"/>
+                                <Button Content="Delete Row" Click="DeleteRowButtonClicked"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label>Width:</Label>
-                                    <TextBox Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" Width="100"/>
+                                    <Label Content="Width"/>
+                                    <TextBox Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
                                 </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="&lt; New Column" Click="CreateNewColumnToTheLeftButtonClicked"/>
+                                    <Button Content="New Column &gt;" Click="CreateNewColumnToTheRightButtonClicked"/>
+                                </StackPanel>
+                                <Button Content="Delete Column" Click="DeleteColumnButtonClicked"/>
                             </StackPanel>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label>Color:</Label>
-                                    <TextBox Text="{Binding Path=BackgroundColorHex, UpdateSourceTrigger=LostFocus}" Width="100"/>
+                                    <Label Width="100" Content="Value"/>
+                                    <TextBox Text="{Binding Path=Value, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Background"/>
+                                    <TextBox Text="{Binding Path=BackgroundColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Foreground"/>
+                                    <TextBox Text="{Binding Path=ForegroundColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Border"/>
+                                    <TextBox Text="{Binding Path=BorderColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Outline"/>
+                                    <TextBox Text="{Binding Path=BorderThicknessString, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Font"/>
+                                    <TextBox Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Width="100" Content="Font Size"/>
+                                    <TextBox Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                </StackPanel>
+                                <Label Content="Type" HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Checkbox" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Button" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Dropdown" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="List" Width="100"/>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Label" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Textbox" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Progress" Width="100"/>
+                                        <Button Click="ChangeCellTypeButtonPressed" Content="Graph" Width="100"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Label Content="Functions" HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Populate" Width="65"/>
+                                    <TextBox Text="{Binding Path=GetTextFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                    <Button Content="Edit" Click="EditGetTextFunctionButtonClicked" Width="35"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Updated" Width="65"/>
+                                    <TextBox Text="{Binding Path=OnEditFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                                    <Button Content="Edit" Click="EditOnEditFunctionButtonClicked" Width="35"/>
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
-                            <Label>Undefined</Label>
+                        <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
+                            <StackPanel>
+                                <Button Content="Create Backup" Click="CreateBackupButtonClicked"/>
+                            </StackPanel>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>
             </Border>
+            <local:CodeEditor 
+                Loaded="OnCodeEditorLoaded" 
+                Grid.Column="1"
+                Grid.Row="1"
+                Margin="10"
+                MaxHeight="400"
+                MaxWidth="500"/>
         </Grid>
     </DockPanel>
 </Window>

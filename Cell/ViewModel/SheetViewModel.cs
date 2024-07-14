@@ -1,178 +1,149 @@
-﻿using Cell.Controls;
-using Cell.Model;
+﻿using Cell.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
+using Cell.Persistence;
 
 namespace Cell.ViewModel
 {
-    public class SheetViewModel : INotifyPropertyChanged
+    public class SheetViewModel(string sheetName) : PropertyChangedBase
     {
-        private const int BottomPanelHeight = 50;
-        private const int TopPanelHeight = 50;
-        private const int LeftPanelHeight = 250;
-        private const int RightPanelHeight = 250;
-
-        public SheetViewModel(string sheetName)
-        {
-            SheetName = sheetName;
-        }
-
         public void LoadCellViewModels()
         {
-            CellLoader.GetCellViewModelsForSheet(this).ForEach(x => CellViewModels.Add(x));
-            PopulateCells(); 
+            Cells.GetCellViewModelsForSheet(this).ForEach(x => CellViewModels.Add(x));
+            InitializeSheet(); 
         }
 
-        private const int DefaultCellWidth = 125;
-        private const int DefaultCellHeight = 25;
+        private CellViewModel? selectedCellViewModel;
 
-        private int editingSpaceTop;
-        private int editingSpaceBottom;
-        private int editingSpaceLeft;
-        private int editingSpaceRight;
-        public bool AreEditingPanelsOpen;
-        private CellViewModel selectedCellViewModel;
+        public string SheetName { get; private set; } = sheetName;
 
-        public string SheetName { get; private set; }
+        public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
-        public ObservableCollection<CellViewModel> CellViewModels { get; set; } = new ObservableCollection<CellViewModel>();
+        public IEnumerable<CellViewModel> SelectedCellViewModels => CellViewModels.Where(x => x.IsSelected);
 
         public IEnumerable<CellViewModel> RowCellViewModels => CellViewModels.OfType<RowCellViewModel>();
 
         public IEnumerable<CellViewModel> ColumnCellViewModels => CellViewModels.OfType<ColumnCellViewModel>();
 
-        public int Height { get; set; }
-
-        public int Width { get; set; }
-
-        public int EditingSpaceTop
+        private string lastKeyPressed = string.Empty;
+        public string LastKeyPressed
         {
-            get => editingSpaceTop;
+            get => lastKeyPressed;
             set
             {
-                editingSpaceTop = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EditingSpaceTop)));
+                lastKeyPressed = value;
+                OnPropertyChanged(nameof(LastKeyPressed));
             }
         }
 
-        public int EditingSpaceBottom
-        {
-            get => editingSpaceBottom;
-            set
-            {
-                editingSpaceBottom = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EditingSpaceBottom)));
-            }
-        }
-
-        public int EditingSpaceLeft
-        {
-            get => editingSpaceLeft;
-            set
-            {
-                editingSpaceLeft = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EditingSpaceLeft)));
-            }
-        }
-
-        public int EditingSpaceRight
-        {
-            get => editingSpaceRight;
-            set
-            {
-                editingSpaceRight = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EditingSpaceRight)));
-            }
-        }
-
-        public CellViewModel SelectedCellViewModel
+        public CellViewModel? SelectedCellViewModel
         {
             get => selectedCellViewModel;
             set
             {
+                if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged -= PropertyChangedOnSelectedCell;
                 selectedCellViewModel = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedCellViewModel)));
+                if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
+                OnPropertyChanged(nameof(SelectedCellViewModel));
             }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void AddRow()
+        private void PropertyChangedOnSelectedCell(object? sender, PropertyChangedEventArgs e)
         {
-            if (!ColumnCellViewModels.Any())
+            if (sender is null) return;
+            if (string.IsNullOrEmpty(e.PropertyName)) return;
+            foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
             {
-                var newModel2 = ColumnCellViewModel.CreateColumnCellModel(0, -DefaultCellHeight, DefaultCellWidth, DefaultCellHeight, SheetName, GetColumnName(ColumnCellViewModels.Count()));
-                var newViewModel2 = CellViewModel.CreateViewModelForModel(newModel2, this);
-                CellViewModels.Add(newViewModel2);
-            }
-
-            double totalHeight = RowCellViewModels.Sum(x => x.Height);
-            var newModel = RowCellViewModel.CreateRowCellModel(-DefaultCellWidth, totalHeight, DefaultCellWidth, DefaultCellHeight, SheetName, RowCellViewModels.Count().ToString());
-            var newViewModel = CellViewModel.CreateViewModelForModel(newModel, this);
-            CellViewModels.Add(newViewModel);
-
-            var currentColumns = ColumnCellViewModels.ToList();
-            foreach (var columnCellViewModel in currentColumns)
-            {
-                var newModel2 = CellViewModel.CreateCellModel(columnCellViewModel.X, totalHeight, columnCellViewModel.Width, DefaultCellHeight, SheetName, "Hello world");
-                var newViewModel2 = CellViewModel.CreateViewModelForModel(newModel2, this);
-                CellViewModels.Add(newViewModel2);
+                if (cell == sender) continue;
+                var cellType = cell.GetType();
+                var selectedType = sender.GetType();
+                if (cellType == selectedType || cellType.IsAssignableTo(selectedType))
+                {
+                    PropertyInfo? cellProperty = cellType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                    PropertyInfo? selectedProperty = selectedType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                    if (null != cellProperty && cellProperty.CanWrite && selectedProperty != null && selectedProperty.CanRead)
+                    {
+                        cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
+                    }
+                }
             }
         }
 
-        public void AddColumn()
-        {
-            if (!RowCellViewModels.Any())
-            {
-                var newModel2 = RowCellViewModel.CreateRowCellModel(-DefaultCellWidth, 0, DefaultCellWidth, DefaultCellHeight, SheetName, RowCellViewModels.Count().ToString());
-                var newViewModel2 = CellViewModel.CreateViewModelForModel(newModel2, this);
-                CellViewModels.Add(newViewModel2);
-            }
-
-            double totalWidth = ColumnCellViewModels.Sum(x => x.Width);
-
-            var newModel = ColumnCellViewModel.CreateColumnCellModel(totalWidth, -DefaultCellHeight, DefaultCellWidth, DefaultCellHeight, SheetName, GetColumnName(ColumnCellViewModels.Count()));
-            var newViewModel = CellViewModel.CreateViewModelForModel(newModel, this);
-            CellViewModels.Add(newViewModel);
-
-            var currentRows = RowCellViewModels.ToList();
-            foreach (var rowCellViewModel in currentRows)
-            {
-                var newModel2 = CellViewModel.CreateCellModel(totalWidth, rowCellViewModel.Y, DefaultCellWidth, rowCellViewModel.Height, SheetName, "Hello world");
-                var newViewModel2 = CellViewModel.CreateViewModelForModel(newModel2, this);
-                CellViewModels.Add(newViewModel2);
-            }
-        }
-
-        public static string GetColumnName(int columnNumber)
-        {
-            columnNumber += 1;
-            string columnName = "";
-            while (columnNumber > 0)
-            {
-                int modulo = (columnNumber - 1) % 26;
-                columnName = Convert.ToChar('A' + modulo) + columnName;
-                columnNumber = (columnNumber - modulo) / 26;
-            }
-            return columnName;
-        }
-
-        public void PopulateCells()
+        public void InitializeSheet()
         {
             if (RowCellViewModels.Any()) return;
-            AddRow();
-            for (int i = 0; i < 1; i++)
+
+            var corner = CellModelFactory.Create(0, 0, CellType.Corner, SheetName);
+            AddCell(corner);
+
+            var row = CellModelFactory.Create(1, 0, CellType.Row, SheetName);
+            AddCell(row);
+
+            var column = CellModelFactory.Create(0, 1, CellType.Column, SheetName);
+            AddCell(column);
+
+            var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
+            AddCell(cell);
+
+            UpdateLayout();
+        }
+
+        internal void UpdateLayout()
+        {
+            var cellModels = Cells.GetCellModelsForSheet(SheetName);
+            var cornerCell = cellModels.First(x => x.Row == 0 && x.Column == 0);
+            var lastCell = cornerCell;
+            var rowsInOrder = RowCellViewModelsSorted.ToList();
+            foreach (var rowCellViewModel in rowsInOrder)
             {
-                AddRow();
-                AddColumn();
+                rowCellViewModel.X = lastCell.X;
+                rowCellViewModel.Y = lastCell.Y + lastCell.Height;
+                lastCell = rowCellViewModel.Model;
             }
+            lastCell = cornerCell;
+            var columnsInOrder = ColumnCellViewModelsSorted.ToList();
+            foreach (var columnCellViewModel in columnsInOrder)
+            {
+                columnCellViewModel.X = lastCell.X + lastCell.Width;
+                columnCellViewModel.Y = lastCell.Y;
+                lastCell = columnCellViewModel.Model;
+            }
+            foreach (var cellModel in cellModels)
+            {
+                if (cellModel.Row == 0 || cellModel.Column == 0) continue;
+                var rowCell = Cells.GetCellModelForRow(cellModel.Row);
+                var columnCell = Cells.GetCellModelForColumn(cellModel.Column);
+                cellModel.X = columnCell?.X ?? cellModel.X;
+                cellModel.Width = columnCell?.Width ?? cellModel.Width;
+                cellModel.Y = rowCell?.Y ?? cellModel.Y;
+                cellModel.Height = rowCell?.Height ?? cellModel.Height;
+            }
+        }
+
+        public void AddCell(CellModel newModel)
+        {
+            var newViewModel = CellViewModelFactory.Create(newModel, this);
+            CellViewModels.Add(newViewModel);
+        }
+
+        public void DeleteCell(CellViewModel cell)
+        {
+            CellViewModels.Remove(cell);
+            Cells.RemoveCell(cell.Model);
+        }
+
+        public void DeleteCell(CellModel cell)
+        {
+            CellViewModels.Remove(CellViewModels.First(x => x.Model == cell));
+            Cells.RemoveCell(cell);
         }
 
         public void UnselectAllCells()
         {
             foreach (var cell in CellViewModels)
             {
-                cell.IsSelected = false;
+                UnselectCell(cell);
             }
         }
 
@@ -180,50 +151,46 @@ namespace Cell.ViewModel
         {
             cell.IsSelected = true;
             SelectedCellViewModel = cell;
-        }
 
-        public void OpenEditingPanels(PanAndZoomCanvas canvas)
-        {
-            AreEditingPanelsOpen = true;
-            canvas.PanCanvasBy(-LeftPanelHeight, -TopPanelHeight);
-            EditingSpaceTop = TopPanelHeight;
-            EditingSpaceBottom = BottomPanelHeight;
-            EditingSpaceLeft = LeftPanelHeight;
-            EditingSpaceRight = RightPanelHeight;
-        }
-
-        public void CloseEditingPanels(PanAndZoomCanvas canvas)
-        {
-            AreEditingPanelsOpen = false;
-            canvas.PanCanvasBy(LeftPanelHeight, TopPanelHeight);
-            EditingSpaceTop = 0;
-            EditingSpaceBottom = 0;
-            EditingSpaceLeft = 0;
-            EditingSpaceRight = 0;
-        }
-
-        public void ResizeRow(RowCellViewModel rowCell, double oldSize, double newSize)
-        {
-            foreach (var cellInRow in CellViewModels.Where(x => x.Y == rowCell.Y))
+            foreach (var cellToUnHighlight in CellViewModels)
             {
-                cellInRow.Height = newSize;
+                cellToUnHighlight.UnhighlightCell();
             }
-            foreach (var cellBelowRow in CellViewModels.Where(x => x.Y > rowCell.Y))
+            if (SelectedCellViewModels.Count() == 1)
             {
-                cellBelowRow.Y += newSize - oldSize;
+                if (PluginFunctionLoader.TryGetPopulateFunction(SelectedCellViewModel.Model.PopulateFunctionName, out var function))
+                {
+                    for (int i = 0; i < function.SheetDependencies.Count; i++)
+                    {
+                        var sheet = function.SheetDependencies[i];
+                        var row = function.RowDependencies[i];
+                        var column = function.ColumnDependencies[i];
+                        CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column)?.HighlightCell("#007acc");
+                    }
+                }
             }
         }
 
-        internal void ResizeColumn(ColumnCellViewModel columnCell, double oldSize, double newSize)
+        public void ChangeCellType(CellViewModel? cellViewModel, CellType newType)
         {
-            foreach (var cellInColumn in CellViewModels.Where(x => x.X == columnCell.X))
-            {
-                cellInColumn.Width = newSize;
-            }
-            foreach (var cellBesideColumn in CellViewModels.Where(x => x.X > columnCell.X))
-            {
-                cellBesideColumn.X += newSize - oldSize;
-            }
+            if (cellViewModel is null) return;
+            CellViewModels.Remove(cellViewModel);
+            cellViewModel.Model.CellType = newType;
+            var newViewModel = CellViewModelFactory.Create(cellViewModel.Model, this);
+            CellViewModels.Add(newViewModel);
         }
+
+        internal void UnselectCell(CellViewModel cell)
+        {
+            cell.IsSelected = false;
+            if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
+        }
+
+        private IOrderedEnumerable<CellViewModel> RowCellViewModelsSorted => RowCellViewModels.OrderBy(x => x.Model.Row);
+
+        private IOrderedEnumerable<CellViewModel> ColumnCellViewModelsSorted => ColumnCellViewModels.OrderBy(x => x.Model.Column);
+
+
+        public static readonly SheetViewModel NullSheet = new("null");
     }
 }

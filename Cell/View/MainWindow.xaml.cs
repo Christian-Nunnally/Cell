@@ -1,40 +1,44 @@
-﻿using Cell.Controls;
-using Cell.Model;
+﻿using Cell.Model;
+using Cell.Persistence;
 using Cell.ViewModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cell
+namespace Cell.View
 {
     public partial class MainWindow : Window
     {
-        private PanAndZoomCanvas panAndZoomCanvas;
+        public SheetView? SheetView;
 
-        public SheetViewModel SheetViewModel { get; set; } = new SheetViewModel("Default");
+        private ApplicationViewModel? application;
+
+        public CodeEditor? CodeEditor;
 
         public MainWindow()
         {
-            DataContext = SheetViewModel;
-            SheetViewModel.LoadCellViewModels();
             InitializeComponent();
         }
 
-        private void Rectangle_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        protected override void OnInitialized(EventArgs e)
         {
+            application = ApplicationViewModel.GetOrCreateInstance(this);
+            DataContext = application;
+            base.OnInitialized(e);
+            PersistenceManager.LoadAll();
+            application.SheetViewModel.LoadCellViewModels();
+        }
 
+        public void ChangeSheet(string sheetName)
+        {
+            application?.GoToSheet(sheetName);
         }
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
-                if (e.ClickCount == 2)
-                {
-                    AdjustWindowSize();
-                }
-                else
-                {
-                    Application.Current.MainWindow.DragMove();
-                }
+            if (e.ChangedButton != MouseButton.Left) return;
+            if (e.ClickCount == 2) AdjustWindowSize();
+            else Application.Current.MainWindow.DragMove();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -49,142 +53,135 @@ namespace Cell
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         private void AdjustWindowSize()
         {
-            if (this.WindowState == WindowState.Maximized)
-            {
-                this.WindowState = WindowState.Normal;
-            }
-            else
-            {
-                this.WindowState = WindowState.Maximized;
-            }
+            if (WindowState == WindowState.Maximized) WindowState = WindowState.Normal;
+            else WindowState = WindowState.Maximized;
 
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (this.WindowState == WindowState.Maximized)
+            if (WindowState == WindowState.Maximized) BorderThickness = new System.Windows.Thickness(8);
+            else BorderThickness = new System.Windows.Thickness(0);
+        }
+
+        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell))
             {
-                this.BorderThickness = new System.Windows.Thickness(8);
-            }
-            else
-            {
-                this.BorderThickness = new System.Windows.Thickness(0);
+                cell.AddColumnToTheLeft();
             }
         }
 
-        private void CellMouseDown(object sender, MouseButtonEventArgs e)
+        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (e.ClickCount == 2)
+            if (Utilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell))
             {
-                Temp();
-                return;
+                cell.AddColumnToTheRight();
             }
-            if (sender is FrameworkElement element)
+        }
+
+        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell))
             {
-                if (element.DataContext is CellViewModel cell)
+                cell.AddRowAbove();
+            }
+        }
+
+        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell))
+            {
+                cell.AddRowBelow();
+            }
+        }
+
+        private void ChangeCellTypeButtonPressed(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Content is string buttonContent && Enum.TryParse(typeof(CellType), buttonContent, out var newType) && newType is CellType cellType)
+            {
+                application?.ChangeSelectedCellsType(cellType);
+            }
+        }
+
+        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (SheetView is null) return;
+            foreach (var cell in SheetView.SheetViewModel.SelectedCellViewModels.OfType<RowCellViewModel>().ToList())
+            {
+                cell.DeleteRow();
+            }
+        }
+
+        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (SheetView is null) return;
+            foreach (var cell in SheetView.SheetViewModel.SelectedCellViewModels.OfType<ColumnCellViewModel>().ToList())
+            {
+                cell.DeleteColumn();
+            }
+        }
+
+        private void EditGetTextFunctionButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                if (string.IsNullOrEmpty(cell.GetTextFunctionName)) cell.GetTextFunctionName = "Untitled";
+                CodeEditor?.Show(cell.GetTextFunctionCode, x => cell.GetTextFunctionCode = x);
+            }
+        }
+
+        private void EditOnEditFunctionButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                if (string.IsNullOrEmpty(cell.OnEditFunctionName)) cell.OnEditFunctionName = "Untitled";
+                CodeEditor?.Show(cell.OnEditFunctionCode, x => cell.OnEditFunctionCode = x);
+            }
+        }
+
+        private void OnCodeEditorLoaded(object sender, RoutedEventArgs e)
+        {
+            CodeEditor = (CodeEditor)sender;
+        }
+
+        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
+        {
+            PersistenceManager.CreateBackup();
+        }
+
+        private void TextBoxKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && sender is TextBox textbox)
+            {
+                textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
+        }
+
+        private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            ApplicationViewModel.Instance.SheetViewModel.LastKeyPressed = e.Key.ToString();
+            if (e.IsDown && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if (e.Key == Key.C)
                 {
-                    if (e.ChangedButton == MouseButton.Left)
-                    {
-                        SheetViewModel.UnselectAllCells();
-                        SheetViewModel.SelectCell(cell);
-                    }
+                    application?.CopySelectedCells();
+                }
+                else if (e.Key == Key.V)
+                {
+                    application?.PasteCopiedCells();
                 }
             }
         }
 
-        private void PanZoomCanvasLoaded(object sender, RoutedEventArgs e)
+        private void OnSheetViewLoaded(object sender, RoutedEventArgs e)
         {
-            panAndZoomCanvas = sender as PanAndZoomCanvas;
-        }
-
-        private void Temp()
-        {
-            if (SheetViewModel.AreEditingPanelsOpen)
-            {
-                SheetViewModel.CloseEditingPanels(panAndZoomCanvas);
-            }
-            else
-            {
-                SheetViewModel.OpenEditingPanels(panAndZoomCanvas);
-            }
-        }
-
-        private void RowResizeTopThumbDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
-        {
-
-        }
-        double currentPosition = 0.0;
-
-        private void RowResizeBottomThumbDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
-        {
-            if (sender is FrameworkElement element)
-            {
-                if (element.DataContext is RowCellViewModel row)
-                {
-                    currentPosition += e.VerticalChange;
-                    //SheetViewModel.ResizeRow(row.Text, currentPosition);
-                }
-            }
-        }
-
-        private void RowResizeBottomThumbDragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
-        {
-            if (sender is FrameworkElement element)
-            {
-                if (element.DataContext is RowCellViewModel row)
-                {
-                    currentPosition = 0.0;
-                }
-            }
-        }
-
-        private void RowResizeBottomThumbDragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
-        {
-        }
-
-        private void PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.R)
-            {
-                SheetViewModel.AddRow();
-            }
-            else if (e.Key == Key.C)
-            {
-                SheetViewModel.AddColumn();
-            }
-            else if (e.Key == Key.L)
-            {
-                CellLoader.LoadCells(CellLoader.DefaultSaveLocation);
-                PluginFunctionLoader.LoadPlugins();
-            }
-            else if (e.Key == Key.S)
-            {
-                CellLoader.SaveCells(CellLoader.DefaultSaveLocation);
-                PluginFunctionLoader.SavePlugins();
-            }
-            else if (e.Key == Key.Escape)
-            {
-                SheetViewModel.UnselectAllCells();
-                SheetViewModel.CloseEditingPanels(panAndZoomCanvas);
-            }
-            else if (e.Key == Key.T)
-            {
-            }
-        }
-
-        private void CreateGetTextPluginFunctionButtonClicked(object sender, RoutedEventArgs e)
-        {
-            PluginFunctionLoader.CreateGetTextPluginFunction(SheetViewModel.SelectedCellViewModel.GetTextFunctionName);
-        }
-
-        private void CreateOnEditPluginFunctionButtonClicked(object sender, RoutedEventArgs e)
-        {
-            PluginFunctionLoader.CreateOnEditPluginFunction(SheetViewModel.SelectedCellViewModel.OnEditFunctionName);
+            SheetView = (SheetView)sender;
         }
     }
 }

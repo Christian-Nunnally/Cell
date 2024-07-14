@@ -1,55 +1,47 @@
 ﻿using Cell.Model;
+using Cell.Persistence;
+using Microsoft.CodeAnalysis;
+using System.Reflection;
 
 namespace Cell.Plugin
 {
     internal static class DynamicCellPluginExecutor
     {
-        public static string CompileAndRunTextProvider(PluginContext pluginContext, CellModel cell)
+        public static CompileResult CompileAndRunPopulate(PluginContext pluginContext, CellModel cell)
         {
-            string code = @"
-                using Cell.Model;
-                using Cell.Plugin;                
-
-                namespace Plugin
-                {
-                    public class Program
-                    {
-                        public static string GetText(PluginContext context, CellModel model)
-                        {
-                            return model.Height.ToString();
-                        }
-                    }
-                }
-            ";
-
-            var compiler = new RoslynCompiler("Plugin.Program", code, [typeof(Console)]);
-            var compiled = compiler.Compile();
-
-            return compiled?.GetMethod("GetText")?.Invoke(null, [pluginContext, cell]) as string ?? "Error during compile";
+            if (!PluginFunctionLoader.TryGetPopulateFunction(cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { Success = false, Result = "Populate function not found" };
+            try
+            {
+                var method = CompileMethod(populateFunction.SyntaxTree, "Populate");
+                var resultObject = method.Invoke(null, [pluginContext, cell]);
+                return new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
+            }
+            catch (Exception e)
+            {
+                return new CompileResult { Success = false, Result = e.Message };
+            }
         }
 
-        public static void CompileAndRunOnEditProvider(PluginContext pluginContext, CellModel cell)
+        public static CompileResult CompileAndRunTrigger(PluginContext pluginContext, CellModel cell)
         {
-            string code = @"
-                using Cell.Model;
-                using Cell.Plugin;                
+            if (!PluginFunctionLoader.TryGetTriggerFunction(cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { Success = false, Result = "Trigger function not found" };
+            try
+            {
+                var method = CompileMethod(triggerFunction.SyntaxTree, "Trigger");
+                method.Invoke(null, [pluginContext, cell]);
+                return new CompileResult { Success = true, Result = string.Empty };
+            }
+            catch (Exception e)
+            {
+                return new CompileResult { Success = false, Result = e.Message };
+            }
+        }
 
-                namespace Plugin
-                {
-                    public class Program
-                    {
-                        public static void OnEdit(PluginContext context, CellModel model)
-                        {
-                            model.Height.ToString();
-                        }
-                    }
-                }
-            ";
-
-            var compiler = new RoslynCompiler("Plugin.Program", code, [typeof(Console)]);
-            var compiled = compiler.Compile();
-
-            compiled?.GetMethod("OnEdit")?.Invoke(null, [pluginContext, cell]);
+        private static MethodInfo CompileMethod(SyntaxTree syntax, string methodName)
+        {
+            var compiler = new RoslynCompiler("Plugin.Program", syntax, [typeof(Console)]);
+            var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
+            return compiled.GetMethod(methodName) ?? throw new Exception("Error during compile - compiled object is null");
         }
     }
 }
