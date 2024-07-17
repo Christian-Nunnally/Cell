@@ -1,4 +1,6 @@
-﻿using Cell.ViewModel;
+﻿using Cell.Model;
+using Cell.Persistence;
+using Cell.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -45,6 +47,26 @@ namespace Cell.View
                         _selectingCells = true;
                         _selectionStart = cell;
                     }
+                    else
+                    {
+                        if (cell.Model.CellType == CellType.Row)
+                        {
+                            foreach (var rowCell in Cells.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
+                            {
+                                if (rowCell == cell.Model) continue;
+                                SheetViewModel.SelectCell(rowCell);
+                            }
+                        }
+                        else if (cell.Model.CellType == CellType.Column)
+                        {
+                            foreach (var columnCell in Cells.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
+                            {
+                                if (columnCell == cell.Model) continue;
+                                SheetViewModel.SelectCell(columnCell);
+                            }
+                        }
+                        SheetViewModel.UnselectCell(cell);
+                    }
                 }
             }
         }
@@ -58,9 +80,10 @@ namespace Cell.View
                     if (element.DataContext is CellViewModel cell)
                     {
                         var previouslySelectedCell = SheetViewModel.SelectedCellViewModel;
+
                         if (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down)
                         {
-                            if (CanSelectCell(cell)) SheetViewModel.SelectCell(cell);
+                            if (CanSelectCell(cell.Model)) SheetViewModel.SelectCell(cell);
                         }
                         else
                         {
@@ -73,7 +96,7 @@ namespace Cell.View
                             {
                                 for (var column = startColumn; column <= endColumn; column++)
                                 {
-                                    var cellToSelect = SheetViewModel.CellViewModels.FirstOrDefault(c => c.Row == row && c.Column == column);
+                                    var cellToSelect = Cells.GetCell(SheetViewModel.SheetName, row, column);
                                     if (CanSelectCell(cellToSelect)) SheetViewModel.SelectCell(cellToSelect!);
                                 }
                             }
@@ -87,11 +110,11 @@ namespace Cell.View
             }
         }
 
-        private bool CanSelectCell(CellViewModel? cell)
+        private bool CanSelectCell(CellModel? cell)
         {
             if (cell is null) return false;
-            if (cell is SpecialCellViewModel && IsSelectingSpecialCellsAllowed()) return false;
-            if (cell is not SpecialCellViewModel && IsSelectingNonSpecialCellsAllowed()) return false;
+            if (cell.CellType.IsSpecial() && IsSelectingSpecialCellsAllowed()) return false;
+            if (!cell.CellType.IsSpecial() && IsSelectingNonSpecialCellsAllowed()) return false;
             return true;
 
             bool IsSelectingSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.Where(x => x is not SpecialCellViewModel).Any();

@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Persistence;
 using Cell.ViewModel;
 
@@ -12,37 +13,37 @@ namespace Cell.Plugin
 
         public string GetCellValue(CellModel cellForSheet, int row, int column)
         {
-            return Cells.GetCellModelsForSheet(cellForSheet.SheetName).FirstOrDefault(x => x.Row == row && x.Column == column)?.Value ?? string.Empty;
+            return Cells.GetCell(cellForSheet.SheetName, row, column)?.Value ?? string.Empty;
         }
 
         public string GetText(string id)
         {
-            return Cells.GetCellModel(id).Text;
+            return Cells.GetCell(id).Text;
         }
 
         public double GetNumber(string id)
         {
-            return double.TryParse(Cells.GetCellModel(id).Text, out var result) ? result : 0;
+            return double.TryParse(Cells.GetCell(id).Text, out var result) ? result : 0;
         }
 
         public bool GetBoolean(string id)
         {
-            return bool.TryParse(Cells.GetCellModel(id).Text, out var result) && result;
+            return bool.TryParse(Cells.GetCell(id).Text, out var result) && result;
         }
 
         public void SetCell(string id, string value)
         {
-            Cells.GetCellModel(id).Text = value;
+            Cells.GetCell(id).Text = value;
         }
 
         public void SetCell(string id, double value)
         {
-            Cells.GetCellModel(id).Text = value.ToString();
+            Cells.GetCell(id).Text = value.ToString();
         }
 
         public void SetCell(string id, bool value)
         {
-            Cells.GetCellModel(id).Text = value.ToString();
+            Cells.GetCell(id).Text = value.ToString();
         }
 
         public void GoToSheet(string sheetName)
@@ -58,19 +59,37 @@ namespace Cell.Plugin
 
         public void GoToCell(string cellId)
         {
-            var model = Cells.GetCellModel(cellId);
+            var model = Cells.GetCell(cellId);
             GoToCell(model);
         }
 
-        public IOrderedEnumerable<string> GetData(string collection)
+        public IOrderedEnumerable<string> GetList(string collection)
         {
             return UserCollectionLoader.GetCollection(collection).OrderBy(x => 1);
         }
 
-        public void WriteData(string collection, string data)
+        public void AddToList(string collection, object data)
         {
-            UserCollectionLoader.AddToCollection(collection, data);
+            var serialized = data.ToString();
+            UserCollectionLoader.AddToCollection(collection, serialized ?? "");
         }
+
+        public string GetLastAdded(string collection)
+        {
+            return UserCollectionLoader.GetCollection(collection).Last();
+        }
+
+        public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
+        {
+            return UserList<T>.GetOrCreate(collection);// UserCollectionLoader.GetCollection(collection).Select(PluginModel.FromString<T>).OrderBy(x => 1);
+        }
+
+        public T GetLastAdded<T>(string collection) where T : new()
+        {
+            return PluginModel.FromString<T>(UserCollectionLoader.GetCollection(collection).Last());
+        }
+
+        public string[] SheetNames => [.. Cells.GetSheetNames()];
     }
 }
 

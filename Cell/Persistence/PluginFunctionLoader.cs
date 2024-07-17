@@ -9,126 +9,95 @@ namespace Cell.Persistence
     {
         public const string PopulateFunctionsDirectoryName = "Populate";
         public const string TriggerFunctionsDirectoryName = "Trigger";
+        public const string FunctionsDirectoryName = "Functions";
 
-        public static Dictionary<string, PluginFunction> PopulateFunctions { get; set; } = [];
-
-        public static Dictionary<string, PluginFunction> TriggerFunctions { get; set; } = [];
+        public static Dictionary<string, Dictionary<string, PluginFunction>> Namespaces { get; set; } = [];
 
         public static void LoadPlugins()
         {
-            var path = Path.Combine(PersistenceManager.SaveLocation, PopulateFunctionsDirectoryName);
-            if (Directory.Exists(path))
+            var functionsPath = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName);
+            if (Directory.Exists(functionsPath))
             {
-                foreach (var file in Directory.GetFiles(path))
+                foreach (var namespacePath in Directory.GetDirectories(functionsPath))
                 {
-                    var function = JsonSerializer.Deserialize<PluginFunction>(File.ReadAllText(file));
-                    if (function == null) continue;
-                    PopulateFunctions.Add(function.Name, function);
+                    foreach (var file in Directory.GetFiles(namespacePath))
+                    {
+                        var function = JsonSerializer.Deserialize<PluginFunction>(File.ReadAllText(file));
+                        if (function == null) continue;
+                        var space = Path.GetFileName(namespacePath);
+                        AddPluginFunctionToNamespace(space, function);
+                    }
                 }
             }
-            path = Path.Combine(PersistenceManager.SaveLocation, TriggerFunctionsDirectoryName);
-            if (Directory.Exists(path))
-            {
-                foreach (var file in Directory.GetFiles(path))
-                {
-                    var function = JsonSerializer.Deserialize<PluginFunction>(File.ReadAllText(file));
-                    if (function == null) continue;
-                    TriggerFunctions.Add(function.Name, function);
-                }
-            }
+        }
+
+        private static void AddPluginFunctionToNamespace(string space, PluginFunction function)
+        {
+            if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Name, function);
+            else Namespaces.Add(space, new Dictionary<string, PluginFunction> { { function.Name, function } });
         }
 
         public static void SavePlugins()
         {
-            foreach (var getTextPluginCode in PopulateFunctions.Values)
+            foreach (var namespaceFunctions in Namespaces)
             {
-                SavePluginFunction(getTextPluginCode, PopulateFunctionsDirectoryName);
-            }
-            foreach (var getTextPluginCode in TriggerFunctions.Values)
-            {
-                SavePluginFunction(getTextPluginCode, TriggerFunctionsDirectoryName);
+                foreach (var function in namespaceFunctions.Value.Values)
+                {
+                    var space = namespaceFunctions.Key;
+                    SavePluginFunction(space, function);
+                }
             }
         }
 
-        public static void SavePluginFunction(PluginFunction function, string subdirectoryName)
+        public static void SavePluginFunction(string space, PluginFunction function)
         {
-            var path = Path.Combine(PersistenceManager.SaveLocation, subdirectoryName);
-            Directory.CreateDirectory(path);
-            File.WriteAllText(Path.Combine(path, function.Name), JsonSerializer.Serialize(function));
+            var directory = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName, space);
+            Directory.CreateDirectory(directory);
+            var path = Path.Combine(directory, function.Name);
+            var serializedContent = JsonSerializer.Serialize(function);
+            File.WriteAllText(path, serializedContent);
         }
 
-        internal static bool TryGetPopulateFunction(string name, [MaybeNullWhen(false)] out PluginFunction function)
+        internal static PluginFunction? GetOrCreateFunction(string space, string name)
         {
-            if (PopulateFunctions.TryGetValue(name, out PluginFunction? value))
+            if (TryGetFunction(space, name, out var function)) return function;
+            return CreateFunction(space, name);
+        }
+
+        internal static bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)
+        {
+            if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {
-                function = value;
-                return true;
+                if (namespaceFunctions.TryGetValue(name, out var value))
+                {
+                    function = value;
+                    return true;
+                }
             }
             function = null;
             return false;
         }
 
-        internal static void SetPopulateFunction(string name, string value, bool createIfDoesNotExist)
+        internal static void UpdateFunctionCode(string space, string name, string value)
         {
-            if (PopulateFunctions.TryGetValue(name, out PluginFunction? function))
+            if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {
-                function.Code = value;
-                function.FindAndRefreshDependencies();
-                SavePluginFunction(function, PopulateFunctionsDirectoryName);
-            }
-            else if (createIfDoesNotExist)
-            {
-                CreatePopulateFunction(name, value);
-            }
-        }
-
-        public static void CreatePopulateFunction(string name, string code = "return \"Hello world\"")
-        {
-            if (PopulateFunctions.ContainsKey(name)) return;
-            var function = new PluginFunction
-            {
-                Name = name,
-                Code = code,
-                IsTrigger = false,
-            };
-            PopulateFunctions.Add(function.Name, function);
-        }
-
-        internal static bool TryGetTriggerFunction(string name, [MaybeNullWhen(false)] out PluginFunction function)
-        {
-            if (TriggerFunctions.TryGetValue(name, out PluginFunction? value))
-            {
-                function = value;
-                return true;
-            }
-            function = null;
-            return false;
-        }
-
-        internal static void TrySetTriggerFunction(string name, string value, bool createIfDoesNotExist)
-        {
-            if (TriggerFunctions.TryGetValue(name, out PluginFunction? function))
-            {
-                function.Code = value;
-                SavePluginFunction(function, TriggerFunctionsDirectoryName);
-            }
-            else if (createIfDoesNotExist)
-            {
-                CreateTriggerFunction(name, value);
+                if (namespaceFunctions.TryGetValue(name, out var function))
+                {
+                    function.Code = value;
+                    function.FindAndRefreshDependencies();
+                    SavePluginFunction(space, function);
+                }
             }
         }
 
-        public static void CreateTriggerFunction(string name, string code = "")
+        public static PluginFunction? CreateFunction(string space, string name, string code = "return \"Hello world\";")
         {
-            if (TriggerFunctions.ContainsKey(name)) return;
-            var function = new PluginFunction
-            {
-                Name = name,
-                Code = code,
-                IsTrigger = true,
-            };
-            TriggerFunctions.Add(function.Name, function);
-            SavePluginFunction(function, TriggerFunctionsDirectoryName);
+            if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
+            var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName);
+            AddPluginFunctionToNamespace(space, function);
+            return function;
         }
     }
 }

@@ -19,13 +19,13 @@
         <!--   ^^^ SKIN ^^^   -->
     </UserControl.Resources>
     <ListBox 
-    ItemsSource="{Binding Path=CellViewModels}" 
-    Margin="0" 
-    BorderThickness="0" 
-    Padding="0" 
-    Background="{StaticResource CellBackground}" 
-    Grid.RowSpan="3" 
-    Grid.ColumnSpan="3">
+        ItemsSource="{Binding Path=CellViewModels}" 
+        Margin="0" 
+        BorderThickness="0" 
+        Padding="0" 
+        Background="{StaticResource CellBackground}" 
+        Grid.RowSpan="3" 
+        Grid.ColumnSpan="3">
         <ListBox.Resources>
             <Style TargetType="Label">
                 <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
@@ -82,12 +82,13 @@
             <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
                 <Label/>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                <Label 
+            <DataTemplate DataType="{x:Type viewModel:LabelCellViewModel}">
+                <TextBlock 
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
-                    Content="{Binding Path=Text}"
+                    Text="{Binding Path=Text}"
                     Margin="3"
+                    TextDecorations="Strikethrough"
                     VerticalAlignment="Center"/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
@@ -171,6 +172,9 @@
                 <ListBox 
                     Margin="3"
                     BorderThickness="0"
+                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                    ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                    ItemsSource="{Binding ListItems}"
                     Background="{StaticResource CellBackground}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -180,19 +184,16 @@
                                 Padding="0"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
-                        <Label/>
-                        <Label/>
-                        <Label/>
-                        <Label/>
-                        <Label/>
                 </ListBox>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
                 <Polyline 
-                    Margin="4" 
                     Stroke="{Binding ForegroundColor}" 
                     StrokeThickness="2" 
                     StrokeMiterLimit="0"
+                    StrokeEndLineCap="Round"
+                    StrokeStartLineCap="Round"
+                    ClipToBounds="False"
                     Points="{Binding DataPoints}">
                 </Polyline>
             </DataTemplate>
@@ -216,12 +217,12 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBoxItem">
                             <Border 
-                        Width="{Binding Width}" 
-                        Height="{Binding Height}"
-                        PreviewMouseDown="CellPreviewMouseDown"
-                        PreviewMouseMove="CellPreviewMouseMove"
-                        PreviewMouseUp="CellPreviewMouseUp"
-                        BorderThickness="{Binding BorderThickness}">
+                                Width="{Binding Width}" 
+                                Height="{Binding Height}"
+                                PreviewMouseDown="CellPreviewMouseDown"
+                                PreviewMouseMove="CellPreviewMouseMove"
+                                PreviewMouseUp="CellPreviewMouseUp"
+                                BorderThickness="{Binding BorderThickness}">
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">
                                         <Setter Property="Border.BorderBrush" Value="{Binding BorderColor}"/>

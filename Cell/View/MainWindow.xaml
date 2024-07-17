@@ -14,19 +14,9 @@
     WindowStyle="None"
     WindowState="Normal" 
     ResizeMode="CanResize"
-    SizeChanged="Window_SizeChanged"
+    SizeChanged="WindowSizeChanged"
     PreviewKeyDown="WindowPreviewKeyDown">
     <Window.Resources>
-
-        <!--   vvv SKIN vvv   -->
-        <SolidColorBrush x:Key="CellBackground" Color="#1e1e1e"/>
-        <SolidColorBrush x:Key="CellBorderColor" Color="#3D3D3D"/>
-        <SolidColorBrush x:Key="SelectedColor" Color="#383838"/>
-        <SolidColorBrush x:Key="SelectedBorderColor" Color="#707070"/>
-        <SolidColorBrush x:Key="ForegroundColor" Color="#ffffff"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#007acc"/>
-        <!--   ^^^ SKIN ^^^   -->
-
         <!--COMBO BOX-->
         <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
             <Grid>
@@ -359,111 +349,20 @@
                 Grid.Column="0"
                 Grid.RowSpan="3"
                 BorderThickness="2"
-                DataContext="{Binding SheetViewModel}"
                 BorderBrush="{StaticResource CellBorderColor}"
                 Background="{StaticResource CellBackground}"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 Padding="5">
-                <ContentControl Content="{Binding Path=SelectedCellViewModel}">
-                    <ContentControl.Resources>
-                        <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Height"/>
-                                    <TextBox Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <Button Content="New Row ^" Click="CreateNewRowAboveButtonClicked"/>
-                                <Button Content="New Row v;" Click="CreateNewRowBelowButtonClicked"/>
-                                <Button Content="Delete Row" Click="DeleteRowButtonClicked"/>
-                            </StackPanel>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Width"/>
-                                    <TextBox Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="&lt; New Column" Click="CreateNewColumnToTheLeftButtonClicked"/>
-                                    <Button Content="New Column &gt;" Click="CreateNewColumnToTheRightButtonClicked"/>
-                                </StackPanel>
-                                <Button Content="Delete Column" Click="DeleteColumnButtonClicked"/>
-                            </StackPanel>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Value"/>
-                                    <TextBox Text="{Binding Path=Value, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Background"/>
-                                    <TextBox Text="{Binding Path=BackgroundColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Foreground"/>
-                                    <TextBox Text="{Binding Path=ForegroundColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Border"/>
-                                    <TextBox Text="{Binding Path=BorderColorHex, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Outline"/>
-                                    <TextBox Text="{Binding Path=BorderThicknessString, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Font"/>
-                                    <TextBox Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Width="100" Content="Font Size"/>
-                                    <TextBox Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                </StackPanel>
-                                <Label Content="Type" HorizontalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <StackPanel>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Checkbox" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Button" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Dropdown" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="List" Width="100"/>
-                                    </StackPanel>
-                                    <StackPanel>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Label" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Textbox" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Progress" Width="100"/>
-                                        <Button Click="ChangeCellTypeButtonPressed" Content="Graph" Width="100"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Label Content="Functions" HorizontalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Populate" Width="65"/>
-                                    <TextBox Text="{Binding Path=GetTextFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                    <Button Content="Edit" Click="EditGetTextFunctionButtonClicked" Width="35"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Updated" Width="65"/>
-                                    <TextBox Text="{Binding Path=OnEditFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                                    <Button Content="Edit" Click="EditOnEditFunctionButtonClicked" Width="35"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
-                            <StackPanel>
-                                <Button Content="Create Backup" Click="CreateBackupButtonClicked"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ContentControl.Resources>
-                </ContentControl>
+                <StackPanel>
+                    <local:EditCellPanel DataContext="{Binding SheetViewModel.SelectedCellViewModel}"/>
+                    <local:TypeSpecificEditCellPanel DataContext="{Binding SheetViewModel.SelectedCellViewModel}"/>
+                </StackPanel>
             </Border>
             <local:CodeEditor 
                 Loaded="OnCodeEditorLoaded" 
                 Grid.Column="1"
-                Grid.Row="1"
-                Margin="10"
-                MaxHeight="400"
-                MaxWidth="500"/>
+                Grid.Row="1"/>
         </Grid>
     </DockPanel>
 </Window>

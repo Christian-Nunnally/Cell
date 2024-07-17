@@ -52,7 +52,7 @@ namespace Cell.ViewModel
         }
         public void DeleteColumn()
         {
-            if (_sheetViewModel.ColumnCellViewModels.Count() == 1) return;
+            if (_sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Count() == 1) return;
             var cellsToDelete = Cells.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
             foreach (var cell in cellsToDelete)
             {
@@ -75,35 +75,43 @@ namespace Cell.ViewModel
             AddColumnAt(columnToInsertAt);
         }
 
-        private void AddColumnAt(int columnToInsertAt)
+        private void AddColumnAt(int index)
         {
-            IncrementColumnOfAllAtOrToTheRightOf(columnToInsertAt);
-            InsertColumnAtIndex(columnToInsertAt);
+            InsertColumnAtIndex(index);
             _sheetViewModel.UpdateLayout();
         }
 
         private void InsertColumnAtIndex(int index)
         {
+            IncrementColumnOfAllAtOrToTheRightOf(index);
+
             var columnModel = CellModelFactory.Create(0, index, CellType.Column, Model.SheetName);
             var column = CellViewModelFactory.Create(columnModel, _sheetViewModel);
             _sheetViewModel.CellViewModels.Add(column);
 
-            var rowIndexs = _sheetViewModel.RowCellViewModels.Select(x => x.Row).ToList();
+            var rowIndexs = _sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Select(x => x.Row).ToList();
             foreach (var rowIndex in rowIndexs)
             {
                 var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName);
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.CellViewModels.Add(cell);
+                
+                var cellAboveMergedId = Cells.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
+                var cellBelowMergedId = Cells.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(cellAboveMergedId) && cellAboveMergedId == cellBelowMergedId)
+                {
+                    cellModel.MergedWith = cellAboveMergedId;
+                }
             }
         }
 
-        private static void IncrementColumnOfAllAtOrToTheRightOf(int column, int amount = 1)
+        private void IncrementColumnOfAllAtOrToTheRightOf(int column, int amount = 1)
         {
             var cells = GetAllCellsAtOrToTheRightOf(column);
             foreach (var cell in cells) cell.Column += amount;
         }
 
-        private static IEnumerable<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.AllCells.Where(x => x.Column >= column);
+        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
 
         public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
     }

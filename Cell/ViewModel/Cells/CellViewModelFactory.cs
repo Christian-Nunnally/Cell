@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.Persistence;
 
 namespace Cell.ViewModel
 {
@@ -21,6 +22,11 @@ namespace Cell.ViewModel
                 CellType.Graph => new GraphCellViewModel(model, sheetViewModel),
                 _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
             };
+        }
+
+        public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
+        {
+            return Cells.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

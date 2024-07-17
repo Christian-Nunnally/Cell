@@ -8,7 +8,7 @@ namespace Cell.Persistence
     {
         public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static DateTime _lastBackupDate = DateTime.Now;
-        private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
 
         public static void SaveAll()
         {
@@ -26,7 +26,7 @@ namespace Cell.Persistence
 
         public static void CreateBackup()
         {
-            //if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
+            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
             var oldSaveLocation = SaveLocation;
             SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();
             SaveAll();

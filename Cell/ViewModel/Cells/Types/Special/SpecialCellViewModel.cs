@@ -3,10 +3,7 @@ using Cell.Model;
 
 namespace Cell.ViewModel
 {
-    public class SpecialCellViewModel : CellViewModel
+    public class SpecialCellViewModel(CellModel model, SheetViewModel sheet) : CellViewModel(model, sheet)
     {
-        public SpecialCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
-        {
-        }
     }
 }

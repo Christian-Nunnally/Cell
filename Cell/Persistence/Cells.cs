@@ -1,6 +1,5 @@
 ﻿using Cell.Model;
 using Cell.Plugin;
-using Cell.ViewModel;
 using System.Collections.ObjectModel;
 
 namespace Cell.Persistence
@@ -10,12 +9,11 @@ namespace Cell.Persistence
     /// </summary>
     internal static class Cells
     {
-        private readonly static Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
-        private readonly static Dictionary<string, CellModel> _cellsById = [];
-        private readonly static Dictionary<int, List<CellModel>> _rowCellsByIndex = [];
-        private readonly static Dictionary<int, List<CellModel>> _columnCellsByIndex = [];
-        private readonly static Dictionary<CellModel, int> _rowModelToRowIndexMap = [];
-        private readonly static Dictionary<CellModel, int> _columnModelToColumnIndexMap = [];
+        private static readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
+        private static readonly Dictionary<string, CellModel> _cellsById = [];
+
+        private static readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
+        private static readonly Dictionary<string, string> _cellsToLocation = [];
 
         public static readonly List<CellModel> _allCells = [];
         public static readonly ReadOnlyCollection<CellModel> AllCells = _allCells.AsReadOnly();
@@ -26,10 +24,7 @@ namespace Cell.Persistence
         {
             if (_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary))
             {
-                if (cellDictionary.ContainsKey(cellModel.ID))
-                {
-                    throw new InvalidOperationException("Cell already added");
-                }
+                if (cellDictionary.ContainsKey(cellModel.ID)) throw new InvalidOperationException("Cell already added");
                 cellDictionary.Add(cellModel.ID, cellModel);
             }
             else
@@ -39,32 +34,18 @@ namespace Cell.Persistence
             _cellsById.Add(cellModel.ID, cellModel);
             _allCells.Add(cellModel);
 
-            if (cellModel.Row == 0)
-            {
-                _columnModelToColumnIndexMap[cellModel] = cellModel.Column;
-                AddCellToColumnCellsByIndexMap(cellModel);
-            }
-            if (cellModel.Column == 0)
-            {
-                _rowModelToRowIndexMap[cellModel] = cellModel.Row;
-                AddCellToRowCellsByIndexMap(cellModel);
-            }
+            AddCellToCellByLocationMap(cellModel);
+            _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
             CellEditManager.StartMonitoringCellForEdits(cellModel);
             CellUpdateManager.StartMonitoringCellForUpdates(cellModel);
         }
 
-        private static void AddCellToColumnCellsByIndexMap(CellModel cellModel)
+        private static void AddCellToCellByLocationMap(CellModel cellModel)
         {
-            if (_columnCellsByIndex.TryGetValue(cellModel.Column, out var columnCells)) columnCells.Add(cellModel);
-            else _columnCellsByIndex.Add(cellModel.Column, [cellModel]);
-        }
-
-        private static void AddCellToRowCellsByIndexMap(CellModel cellModel)
-        {
-            if (_rowCellsByIndex.TryGetValue(cellModel.Row, out var rowCells)) rowCells.Add(cellModel);
-            else _rowCellsByIndex.Add(cellModel.Row, [cellModel]);
+            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation)) cellsAtLocation.Add(cellModel);
+            else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
         }
 
         public static void RemoveCell(CellModel cellModel)
@@ -77,27 +58,9 @@ namespace Cell.Persistence
                 CellUpdateManager.StopMonitoringCellForUpdates(cellModel);
                 _cellsById.Remove(cellModel.ID);
                 _allCells.Remove(cellModel);
-                if (cellModel.Column == 0)
-                {
-                    _rowModelToRowIndexMap.Remove(cellModel);
-                    _rowCellsByIndex[cellModel.Row].Remove(cellModel);
-                }
-                if (cellModel.Row == 0)
-                {
-                    _columnModelToColumnIndexMap.Remove(cellModel);
-                    _columnCellsByIndex[cellModel.Column].Remove(cellModel);
-                }
+                _cellsToLocation.Remove(cellModel.ID);
+                _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
             }
-        }
-
-        public static List<CellViewModel> GetCellViewModelsForSheet(SheetViewModel sheet)
-        {
-            return GetCellModelsForSheet(sheet.SheetName).Select(x => CellViewModelFactory.Create(x, sheet)).ToList();
-        }
-
-        public static CellModel GetCellModel(string cellId)
-        {
-            return _cellsById.TryGetValue(cellId, out var cellModel) ? cellModel : new CellModel();
         }
 
         public static List<CellModel> GetCellModelsForSheet(string sheetName)
@@ -109,35 +72,23 @@ namespace Cell.Persistence
             return [];
         }
 
-        public static CellModel? GetCellModelForRow(int row) => _rowCellsByIndex.TryGetValue(row, out var list) ? list.FirstOrDefault() : null;
+        public static CellModel GetCell(string cellId) => _cellsById.TryGetValue(cellId, out var cellModel) ? cellModel : new CellModel();
 
-        public static CellModel? GetCellModelForColumn(int column) => _columnCellsByIndex.TryGetValue(column, out var list) ? list.FirstOrDefault() : null;
+        public static CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
 
         private static void CellModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (sender is not CellModel model) return;
-            if (e.PropertyName == nameof(CellModel.Row))
+            if (e.PropertyName == nameof(CellModel.Row) || e.PropertyName == nameof(CellModel.Column) || e.PropertyName == nameof(CellModel.SheetName))
             {
-                if (model.Column == 0)
-                {
-                    var previousRow = _rowModelToRowIndexMap[model];
-                    _rowCellsByIndex[previousRow].Remove(model);
-                    _rowModelToRowIndexMap[model] = model.Row;
-                    AddCellToRowCellsByIndexMap(model);
-                }
+                var previousLocation = _cellsToLocation[model.ID];
+                _cellsByLocation[previousLocation].Remove(model);
+                _cellsToLocation[model.ID] = model.GetUnqiueLocationString();
+                AddCellToCellByLocationMap(model);
             }
-            else if (e.PropertyName == nameof(CellModel.Column))
-            {
-                if (model.Row == 0)
-                {
-                    var previousColumn = _columnModelToColumnIndexMap[model];
-                    _columnCellsByIndex[previousColumn].Remove(model);
-                    _columnModelToColumnIndexMap[model] = model.Column;
-                    AddCellToColumnCellsByIndexMap(model);
-                }
-            }
-
             CellLoader.SaveCell(model);
         }
+
+        public static List<string> GetSheetNames() => [.. _cellsBySheetMap.Keys];
     }
 }

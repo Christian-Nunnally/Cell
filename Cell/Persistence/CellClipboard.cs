@@ -26,12 +26,10 @@ namespace Cell.ViewModel
             {
                 var newRow = pasteIntoCell.Row + cellToPaste.Row - _centerOfCopy.Row;
                 var newColumn = pasteIntoCell.Column + cellToPaste.Column - _centerOfCopy.Column;
-                var cellToReplace = Cells.GetCellModelsForSheet(cellToPaste.SheetName).FirstOrDefault(x => x.Row == newRow && x.Column == newColumn);
+                var cellToReplace = Cells.GetCell(cellToPaste.SheetName, newRow, newColumn);
                 if (cellToReplace is null) continue;
                 if (cellToReplace.CellType.IsSpecial()) continue;
                 var pastedCell = cellToPaste.Copy();
-                pastedCell.X = cellToReplace.X;
-                pastedCell.Y = cellToReplace.Y;
                 pastedCell.Width = cellToReplace.Width;
                 pastedCell.Height = cellToReplace.Height;
                 pastedCell.Row = newRow;
@@ -40,6 +38,7 @@ namespace Cell.ViewModel
                 activeSheet.DeleteCell(cellToReplace);
                 activeSheet.AddCell(pastedCell);
             }
+            activeSheet.UpdateLayout();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 namespace Cell.Plugin
 {
-    internal struct CompileResult
+    public struct CompileResult
     {
         public string Result { get; set; }
 

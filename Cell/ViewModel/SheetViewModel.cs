@@ -10,7 +10,10 @@ namespace Cell.ViewModel
     {
         public void LoadCellViewModels()
         {
-            Cells.GetCellViewModelsForSheet(this).ForEach(x => CellViewModels.Add(x));
+            foreach (var cell in CellViewModelFactory.CreateCellViewModelsForSheet(this))
+            {
+                AddCell(cell);
+            }
             InitializeSheet(); 
         }
 
@@ -20,13 +23,13 @@ namespace Cell.ViewModel
 
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
-        public IEnumerable<CellViewModel> SelectedCellViewModels => CellViewModels.Where(x => x.IsSelected);
+        public List<CellViewModel> HighlightedCellViewModels { get; } = [];
 
-        public IEnumerable<CellViewModel> RowCellViewModels => CellViewModels.OfType<RowCellViewModel>();
-
-        public IEnumerable<CellViewModel> ColumnCellViewModels => CellViewModels.OfType<ColumnCellViewModel>();
+        public List<CellViewModel> SelectedCellViewModels { get; } = [];
 
         private string lastKeyPressed = string.Empty;
+        private bool _enableMultiEditSelectedCells = true;
+
         public string LastKeyPressed
         {
             get => lastKeyPressed;
@@ -51,6 +54,7 @@ namespace Cell.ViewModel
 
         private void PropertyChangedOnSelectedCell(object? sender, PropertyChangedEventArgs e)
         {
+            if (!_enableMultiEditSelectedCells) return;
             if (sender is null) return;
             if (string.IsNullOrEmpty(e.PropertyName)) return;
             foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
@@ -72,103 +76,96 @@ namespace Cell.ViewModel
 
         public void InitializeSheet()
         {
-            if (RowCellViewModels.Any()) return;
+            if (CellViewModels.Count == 0) AddDefaultCells();
+            UpdateLayout();
+        }
 
+        private void AddDefaultCells()
+        {
             var corner = CellModelFactory.Create(0, 0, CellType.Corner, SheetName);
             AddCell(corner);
-
             var row = CellModelFactory.Create(1, 0, CellType.Row, SheetName);
             AddCell(row);
-
             var column = CellModelFactory.Create(0, 1, CellType.Column, SheetName);
             AddCell(column);
-
             var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
             AddCell(cell);
-
-            UpdateLayout();
         }
 
         internal void UpdateLayout()
         {
-            var cellModels = Cells.GetCellModelsForSheet(SheetName);
-            var cornerCell = cellModels.First(x => x.Row == 0 && x.Column == 0);
-            var lastCell = cornerCell;
-            var rowsInOrder = RowCellViewModelsSorted.ToList();
-            foreach (var rowCellViewModel in rowsInOrder)
-            {
-                rowCellViewModel.X = lastCell.X;
-                rowCellViewModel.Y = lastCell.Y + lastCell.Height;
-                lastCell = rowCellViewModel.Model;
-            }
-            lastCell = cornerCell;
-            var columnsInOrder = ColumnCellViewModelsSorted.ToList();
-            foreach (var columnCellViewModel in columnsInOrder)
-            {
-                columnCellViewModel.X = lastCell.X + lastCell.Width;
-                columnCellViewModel.Y = lastCell.Y;
-                lastCell = columnCellViewModel.Model;
-            }
-            foreach (var cellModel in cellModels)
-            {
-                if (cellModel.Row == 0 || cellModel.Column == 0) continue;
-                var rowCell = Cells.GetCellModelForRow(cellModel.Row);
-                var columnCell = Cells.GetCellModelForColumn(cellModel.Column);
-                cellModel.X = columnCell?.X ?? cellModel.X;
-                cellModel.Width = columnCell?.Width ?? cellModel.Width;
-                cellModel.Y = rowCell?.Y ?? cellModel.Y;
-                cellModel.Height = rowCell?.Height ?? cellModel.Height;
-            }
+            _enableMultiEditSelectedCells = false;
+            var layout = new CellLayout(CellViewModels);
+            layout.UpdateLayout();
+            _enableMultiEditSelectedCells = true;
         }
 
         public void AddCell(CellModel newModel)
         {
             var newViewModel = CellViewModelFactory.Create(newModel, this);
-            CellViewModels.Add(newViewModel);
+            AddCell(newViewModel);
+        }
+
+        public void AddCell(CellViewModel cell)
+        {
+            CellViewModels.Add(cell);
         }
 
         public void DeleteCell(CellViewModel cell)
         {
             CellViewModels.Remove(cell);
+            SelectedCellViewModels.Remove(cell);
             Cells.RemoveCell(cell.Model);
         }
 
         public void DeleteCell(CellModel cell)
         {
-            CellViewModels.Remove(CellViewModels.First(x => x.Model == cell));
-            Cells.RemoveCell(cell);
+            var viewModel = CellViewModels.First(x => x.Model == cell);
+            DeleteCell(viewModel);
         }
 
         public void UnselectAllCells()
         {
-            foreach (var cell in CellViewModels)
+            foreach (var cell in SelectedCellViewModels.ToList())
             {
                 UnselectCell(cell);
             }
         }
 
+        public void SelectCell(CellModel cell) => SelectCell(CellViewModels.First(x => x.Model == cell));
+
         public void SelectCell(CellViewModel cell)
         {
+            if (cell.IsSelected) return;
             cell.IsSelected = true;
+            SelectedCellViewModels.Add(cell);
             SelectedCellViewModel = cell;
-
-            foreach (var cellToUnHighlight in CellViewModels)
+            UnhighlightAllCells();
+            if (SelectedCellViewModels.Count == 1)
             {
-                cellToUnHighlight.UnhighlightCell();
-            }
-            if (SelectedCellViewModels.Count() == 1)
-            {
-                if (PluginFunctionLoader.TryGetPopulateFunction(SelectedCellViewModel.Model.PopulateFunctionName, out var function))
+                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, SelectedCellViewModel.Model.PopulateFunctionName, out var function))
                 {
                     for (int i = 0; i < function.SheetDependencies.Count; i++)
                     {
                         var sheet = function.SheetDependencies[i];
                         var row = function.RowDependencies[i];
                         var column = function.ColumnDependencies[i];
-                        CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column)?.HighlightCell("#007acc");
+                        var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
+                        if (cellToHighlight == null) continue;
+                        cellToHighlight.HighlightCell("#007acc");
+                        HighlightedCellViewModels.Add(cellToHighlight);
                     }
                 }
             }
+        }
+
+        private void UnhighlightAllCells()
+        {
+            foreach (var cellToUnHighlight in HighlightedCellViewModels)
+            {
+                cellToUnHighlight.UnhighlightCell();
+            }
+            HighlightedCellViewModels.Clear();
         }
 
         public void ChangeCellType(CellViewModel? cellViewModel, CellType newType)
@@ -182,14 +179,12 @@ namespace Cell.ViewModel
 
         internal void UnselectCell(CellViewModel cell)
         {
+            SelectedCellViewModels.Remove(cell);
+            if (!cell.IsSelected) return;
             cell.IsSelected = false;
+            SelectedCellViewModels.Remove(cell);
             if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
         }
-
-        private IOrderedEnumerable<CellViewModel> RowCellViewModelsSorted => RowCellViewModels.OrderBy(x => x.Model.Row);
-
-        private IOrderedEnumerable<CellViewModel> ColumnCellViewModelsSorted => ColumnCellViewModels.OrderBy(x => x.Model.Column);
-
 
         public static readonly SheetViewModel NullSheet = new("null");
     }

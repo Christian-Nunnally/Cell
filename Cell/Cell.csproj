@@ -24,4 +24,10 @@
     <Resource Include="Skins\LightSkin.xaml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="View\TypeSpecificEditCellPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

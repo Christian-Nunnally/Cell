@@ -6,21 +6,53 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="35"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
-            <Button Content="x" Width="35" Click="CloseButtonClicked"/>
-        </StackPanel>
-        <avalonEdit:TextEditor
-                Grid.Row="1"
-				Name="textEditor"
-				FontFamily="Consolas"
-				FontSize="10pt"
-				SyntaxHighlighting="C#"
-			>Welcome to AvalonEdit!
-        </avalonEdit:TextEditor>
-    </Grid>
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="btv"/>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="False">
+        <Grid DockPanel.Dock="{Binding UserSetDockOrientation}" Height="{Binding UserSetHeight}" Width="{Binding UserSetWidth}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                <Button Content="x" Width="35" Click="CloseButtonClicked" VerticalAlignment="Stretch" Height="36"/>
+                <Button Content="test" Width="35" Click="TestCodeButtonClicked" VerticalAlignment="Stretch" Height="36"/>
+                <Button Content="pre" Width="35" Click="ShowTransformedSyntaxTreeButtonClicked" VerticalAlignment="Stretch" Height="36"/>
+                <DockPanel LastChildFill="False" Width="36" Height="36">
+                    <Button DockPanel.Dock="Top" Content="^" Width="36" Height="12"  FontFamily="Consolas" Padding="0" FontSize="11" Click="DockTopButtonClicked"/>
+                    <Button DockPanel.Dock="Bottom" Content="v" Width="36" Height="12" FontFamily="Consolas" Padding="0" FontSize="9" Click="DockBottomButtonClicked"/>
+                    <Button DockPanel.Dock="Left" Content="&lt;" Width="18" Height="12" FontFamily="Consolas" Padding="0" FontSize="9" Click="DockRightButtonClicked"/>
+                    <Button DockPanel.Dock="Right" Content="&gt;" Width="18" Height="12" FontFamily="Consolas" Padding="0" FontSize="9" Click="DockLeftButtonClicked"/>
+                </DockPanel>
+            </StackPanel>
+            <avalonEdit:TextEditor
+                    Grid.Row="1"
+				    Name="textEditor"
+				    FontFamily="Consolas"
+				    FontSize="10pt"
+				    SyntaxHighlighting="C#"
+                    Padding="4"/>
+            <avalonEdit:TextEditor
+                    Grid.Row="1"
+                    Name="syntaxTreePreviewViewer"
+				    FontFamily="Consolas"
+				    FontSize="10pt"
+				    SyntaxHighlighting="C#"
+                    Padding="4"
+                    Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}"/>
+
+            <TextBox
+                Grid.Row="2" 
+                Text="{Binding Path=ResultString}"
+                TextWrapping="Wrap"
+                Background="White"
+                Padding="4" 
+                FontFamily="Consolas" 
+                IsReadOnly="True"
+                VerticalContentAlignment="Top"
+                Foreground="{Binding ResultStringColor}"/>
+        </Grid>
+    </DockPanel>
 </UserControl>

@@ -11,20 +11,6 @@ namespace Cell.Model
 
         #region Layout Properties
 
-        public double X
-        {
-            get { return x; }
-            set { if (x != value) { x = value; OnPropertyChanged(nameof(X)); } }
-        }
-        private double x;
-
-        public double Y
-        {
-            get { return y; }
-            set { if (y != value) { y = value; OnPropertyChanged(nameof(Y)); } }
-        }
-        private double y;
-
         public double Width
         {
             get { return width; }
@@ -78,6 +64,13 @@ namespace Cell.Model
         }
         private string sheetName = string.Empty;
 
+        public string MergedWith
+        {
+            get { return mergedWith; }
+            set { mergedWith = value; OnPropertyChanged(nameof(MergedWith)); }
+        }
+        private string mergedWith = string.Empty;
+
         public string Text
         {
             get { return text; }
@@ -118,42 +111,42 @@ namespace Cell.Model
         public string BackgroundColorHex
         {
             get { return backgroundColorHex; }
-            set { backgroundColorHex = value; OnPropertyChanged(nameof(BackgroundColorHex)); }
+            set { if (backgroundColorHex == value) return; backgroundColorHex = value; OnPropertyChanged(nameof(BackgroundColorHex)); }
         }
         private string backgroundColorHex = "#1e1e1e";
 
         public string ForegroundColorHex
         {
             get { return foregroundColorHex; }
-            set { foregroundColorHex = value; OnPropertyChanged(nameof(ForegroundColorHex)); }
+            set { if (foregroundColorHex == value) return; foregroundColorHex = value; OnPropertyChanged(nameof(ForegroundColorHex)); }
         }
         private string foregroundColorHex = "#ffffff";
 
         public string BorderColorHex
         {
             get { return borderColorHex; }
-            set { borderColorHex = value; OnPropertyChanged(nameof(BorderColorHex)); }
+            set { if (borderColorHex == value) return; borderColorHex = value; OnPropertyChanged(nameof(BorderColorHex)); }
         }
         private string borderColorHex = "#2d2d30";
 
         public string BorderThicknessString
         {
             get { return borderThickness; }
-            set { borderThickness = value; OnPropertyChanged(nameof(BorderThicknessString)); }
+            set { if (borderThickness == value) return; borderThickness = value; OnPropertyChanged(nameof(BorderThicknessString)); }
         }
         private string borderThickness = "1,1,1,1";
 
         public double FontSize
         {
             get { return fontSize; }
-            set { fontSize = value; OnPropertyChanged(nameof(FontSize)); }
+            set { if (fontSize == value) return; fontSize = value; OnPropertyChanged(nameof(FontSize)); }
         }
         private double fontSize = 10;
 
         public string FontFamily
         {
             get { return font; }
-            set { font = value; OnPropertyChanged(nameof(FontFamily)); }
+            set { if (font == value) return; font = value; OnPropertyChanged(nameof(FontFamily)); }
         }
         private string font = "Consolas";
 
@@ -163,16 +156,16 @@ namespace Cell.Model
 
         public string PopulateFunctionName
         {
-            get { return getTextFunctionName; }
+            get { return populateFunctionName; }
             set 
             {
-                if (getTextFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetPopulateFunction(getTextFunctionName, out var function))
+                if (populateFunctionName == value) return;
+                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function))
                 {
                     function.StopListeningForDependencyChanges(this);
                 }
-                getTextFunctionName = value;
-                if (PluginFunctionLoader.TryGetPopulateFunction(getTextFunctionName, out var function2))
+                populateFunctionName = value;
+                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function2))
                 {
                     function2.StartListeningForDependencyChanges(this);
                     UpdateDependencySubscriptions(function2);
@@ -195,7 +188,7 @@ namespace Cell.Model
             }
         }
 
-        private string getTextFunctionName = string.Empty;
+        private string populateFunctionName = string.Empty;
 
         public string TriggerFunctionName
         {
@@ -223,11 +216,12 @@ namespace Cell.Model
 
         internal void SetStringProperty(string key, string value)
         {
-            if (StringProperties[key] != value)
+            if (StringProperties.TryGetValue(key, out var currentValue) && currentValue != value)
             {
                 StringProperties[key] = value;
                 OnPropertyChanged(nameof(StringProperties));
             }
+            else StringProperties.Add(key, value);
         }
 
         #endregion

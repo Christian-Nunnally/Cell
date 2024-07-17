@@ -24,7 +24,7 @@ namespace Cell.Plugin
 
         public static void SubscribeToCellValueUpdates(CellModel subscriber, string sheet, int row, int column)
         {
-            var key = GetUnqiueLocationString(sheet, row, column);
+            var key = Utilities.GetUnqiueLocationString(sheet, row, column);
             if (_cellsToNotifyOnUpdates.TryGetValue(key, out var subscribers) && !subscribers.Contains(subscriber)) subscribers.Add(subscriber);
             else _cellsToNotifyOnUpdates.Add(key, [subscriber]);
             if (_subcriptionsMadeByCells.TryGetValue(subscriber, out var subscriptions)) subscriptions.Add(key);
@@ -45,19 +45,17 @@ namespace Cell.Plugin
         {
             if (_cellsBeingUpdated.ContainsKey(cell.ID)) return;
             _cellsBeingUpdated.Add(cell.ID, cell);
-            var key = GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
+            var key = cell.GetUnqiueLocationString();
             if (_cellsToNotifyOnUpdates.TryGetValue(key, out var subscribers))
             {
                 foreach (var subscriber in subscribers)
                 {
-                    var result = DynamicCellPluginExecutor.CompileAndRunPopulate(new PluginContext(ApplicationViewModel.Instance), subscriber);
+                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), subscriber);
                     subscriber.Text = result.Result;
                     subscriber.Value = result.Result;
                 }
             }
             _cellsBeingUpdated.Remove(cell.ID);
         }
-
-        private static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
     }
 }

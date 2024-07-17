@@ -86,6 +86,7 @@ namespace Cell.ViewModel
             {
                 SheetViewModel.ChangeCellType(selectedCell, newType);
             }
+            SheetViewModel.UpdateLayout();
         }
 
         public static ApplicationViewModel GetOrCreateInstance(MainWindow mainWindow)
@@ -101,10 +102,11 @@ namespace Cell.ViewModel
             SheetViewModel.LoadCellViewModels();
         }
 
-        internal void GoToCell(CellModel cell)
+        internal void GoToCell(CellModel cellModel)
         {
-            GoToSheet(cell.SheetName);
-            MainWindow.SheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
+            GoToSheet(cellModel.SheetName);
+            var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
+            if (cell is not null) MainWindow.SheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
         }
 
         internal void CopySelectedCells()

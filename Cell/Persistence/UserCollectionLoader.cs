@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Cell.ViewModel;
+using System.IO;
 using System.Text.Json;
 
 namespace Cell.Persistence
@@ -6,6 +7,8 @@ namespace Cell.Persistence
     internal static class UserCollectionLoader
     {
         private static readonly Dictionary<string, List<string>> _collections = [];
+
+        public static IEnumerable<string> CollectionNames => _collections.Keys;
 
         internal static void AddToCollection(string collection, string data)
         {
@@ -20,13 +23,30 @@ namespace Cell.Persistence
             SaveCollection(collection, _collections[collection]);
         }
 
-        internal static IEnumerable<string> GetCollection(string collection)
+        internal static IEnumerable<string> GetCollection(string collection) => _collections.TryGetValue(collection, out List<string>? value) ? value : (IEnumerable<string>)([]);
+
+        public static bool CreateEmptyCollection(string collection)
         {
-            if (_collections.TryGetValue(collection, out List<string>? value))
+            if (!_collections.ContainsKey(collection))
             {
-                return value;
+                _collections.Add(collection, []);
+                SaveCollection(collection, _collections[collection]);
+                return true;
             }
-            return [];
+            return false;
+        }
+
+        internal static void SaveCollections()
+        {
+            foreach (var collection in _collections) SaveCollection(collection.Key, collection.Value);
+        }
+
+        private static void SaveCollection(string key, List<string> collection)
+        {
+            var directory = GetSaveDirectory();
+            var path = Path.Combine(directory, key);
+            var serializedCollection = JsonSerializer.Serialize(collection);
+            File.WriteAllText(path, serializedCollection);
         }
 
         internal static void LoadCollections()
@@ -43,27 +63,22 @@ namespace Cell.Persistence
             }
         }
 
-        internal static void SaveCollections()
-        {
-            foreach (var collection in _collections)
-            {
-                SaveCollection(collection.Key, collection.Value);
-            }
-        }
-
-        private static void SaveCollection(string key, List<string> collection)
-        {
-            var directory = GetSaveDirectory();
-            var path = Path.Combine(directory, key);
-            var serializedCollection = JsonSerializer.Serialize(collection);
-            File.WriteAllText(path, serializedCollection);
-        }
-
         private static string GetSaveDirectory()
         {
             var directory = Path.Combine(PersistenceManager.SaveLocation, "Collections");
             Directory.CreateDirectory(directory);
             return directory;
+        }
+
+        public static string GetDataTypeStringForCollection(string collection)
+        {
+            foreach (var cell in Cells.AllCells)
+            {
+                if (!cell.StringProperties.TryGetValue(nameof(ListCellViewModel.CollectionName), out var name) || name != collection) continue;
+                if (!cell.StringProperties.TryGetValue(nameof(ListCellViewModel.CollectionType), out var type)) continue;
+                return type;
+            }
+            return string.Empty;
         }
     }
 }

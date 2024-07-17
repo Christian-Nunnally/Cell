@@ -26,9 +26,7 @@ namespace Cell.ViewModel
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.X) ||
-                e.PropertyName == nameof(CellModel.Y) ||
-                e.PropertyName == nameof(CellModel.Width) ||
+            if (e.PropertyName == nameof(CellModel.Width) ||
                 e.PropertyName == nameof(CellModel.Height) ||
                 e.PropertyName == nameof(CellModel.Text) ||
                 e.PropertyName == nameof(CellModel.Value) ||
@@ -42,21 +40,19 @@ namespace Cell.ViewModel
 
         public CellModel Model => _model;
 
-        public double CanvasLeft => _model.X;
-
-        public double CanvasTop => _model.Y;
-
         public virtual double X
         {
-            get => _model.X;
-            set { _model.X = value; OnPropertyChanged(nameof(X)); }
+            get => _x;
+            set { _x = value; OnPropertyChanged(nameof(X)); }
         }
+        private double _x;
 
         public virtual double Y
         {
-            get => _model.Y;
-            set { _model.Y = value; OnPropertyChanged(nameof(Y)); }
+            get => _y;
+            set { _y = value; OnPropertyChanged(nameof(Y)); }
         }
+        private double _y;
 
         public virtual double Width
         {
@@ -123,54 +119,60 @@ namespace Cell.ViewModel
             }
         }
 
-        public virtual string GetTextFunctionName
+        public virtual string PopulateFunctionName
         {
             get => _model.PopulateFunctionName;
             set
             {
-                _model.PopulateFunctionName = value;
-                OnPropertyChanged(nameof(GetTextFunctionName));
-                OnPropertyChanged(nameof(GetTextFunctionCode));
+                if (PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, value) is not null)
+                {
+                    _model.PopulateFunctionName = value;
+                    OnPropertyChanged(nameof(PopulateFunctionName));
+                    OnPropertyChanged(nameof(PopulateFunctionCode));
+                }
             }
         }
 
-        public virtual string GetTextFunctionCode
+        public virtual string PopulateFunctionCode
         {
-            get => PluginFunctionLoader.TryGetPopulateFunction(GetTextFunctionName, out var code) ? code.Code : string.Empty;
+            get => PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, PopulateFunctionName, out var code) ? code.Code : string.Empty;
             set
             {
-                PluginFunctionLoader.SetPopulateFunction(GetTextFunctionName, value, !string.IsNullOrWhiteSpace(value));
-                UpdateTextFromGetTextFunction();
-                OnPropertyChanged(nameof(GetTextFunctionCode));
+                PluginFunctionLoader.UpdateFunctionCode(PluginFunctionLoader.PopulateFunctionsDirectoryName, PopulateFunctionName, value);
+                PopulateText();
+                OnPropertyChanged(nameof(PopulateFunctionCode));
             }
         }
 
-        public virtual string OnEditFunctionName
+        public virtual string TriggerFunctionName
         {
             get => _model.TriggerFunctionName;
             set
             {
-                _model.TriggerFunctionName = value;
-                OnPropertyChanged(nameof(OnEditFunctionName));
-                OnPropertyChanged(nameof(OnEditFunctionCode));
+                if (PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, value) is not null)
+                {
+                    _model.TriggerFunctionName = value;
+                    OnPropertyChanged(nameof(TriggerFunctionName));
+                    OnPropertyChanged(nameof(TriggerFunctionCode));
+                };
             }
         }
 
-        public virtual string OnEditFunctionCode
+        public virtual string TriggerFunctionCode
         {
-            get => PluginFunctionLoader.TryGetTriggerFunction(GetTextFunctionName, out var code) ? code.Code : string.Empty;
+            get => PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, TriggerFunctionName, out var code) ? code.Code : string.Empty;
             set
             {
-                PluginFunctionLoader.TrySetTriggerFunction(OnEditFunctionName, value, !string.IsNullOrWhiteSpace(value));
-                OnPropertyChanged(nameof(OnEditFunctionCode));
+                PluginFunctionLoader.UpdateFunctionCode(PluginFunctionLoader.TriggerFunctionsDirectoryName, TriggerFunctionName, value);
+                OnPropertyChanged(nameof(TriggerFunctionCode));
             }
         }
 
-        public void UpdateTextFromGetTextFunction()
+        public void PopulateText()
         {
-            if (GetTextFunctionName != string.Empty)
+            if (PopulateFunctionName != string.Empty)
             {
-                var result = DynamicCellPluginExecutor.CompileAndRunPopulate(new PluginContext(ApplicationViewModel.Instance), _model);
+                var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), _model);
                 if (result.Success)
                 {
                     Text = result.Result;

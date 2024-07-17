@@ -1,4 +1,5 @@
 ﻿
+
 namespace Cell.Model
 {
     internal static class Utilities
@@ -16,5 +17,9 @@ namespace Cell.Model
 
             return new string(stringChars);
         }
+
+        public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
+
+        public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.SheetName, model.Row, model.Column);
     }
 }
