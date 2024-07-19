@@ -1,4 +1,5 @@
 ﻿
+using System.ComponentModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -6,18 +7,26 @@ namespace Cell.Model.Plugin
 {
     [JsonDerivedType(typeof(PluginModel), typeDiscriminator: "base")]
     [JsonDerivedType(typeof(TodoItem), typeDiscriminator: "todoItem")]
-    public class PluginModel
+    public class PluginModel : INotifyPropertyChanged
     {
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         override public string ToString()
         {
-            return JsonSerializer.Serialize(this);
+            return ID;
         }
 
-        public static T FromString<T>(string json) where T : new()
+        public string ID 
+        { 
+            get => _id; 
+            set { if (value != _id) { _id = value; OnPropertyChanged(nameof(ID)); } }
+        }
+        private string _id = Utilities.GenerateUnqiueId(12);
+
+        public void OnPropertyChanged(string propertyName)
         {
-            return JsonSerializer.Deserialize<T>(json) ?? new T();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public string ID { get; set; } = Utilities.GenerateUnqiueId(12);
     }
 }

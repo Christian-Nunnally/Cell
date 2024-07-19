@@ -4,9 +4,20 @@ using System.Windows.Media;
 
 namespace Cell.ViewModel
 {
-    public class GraphCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
+    public class GraphCellViewModel : CellViewModel
     {
         private readonly List<Point> _rawDataPoints = [];
+
+        public GraphCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
+        {
+            model.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(Text))
+                {
+                    Text = model.Text;
+                }
+            };
+        }
 
         public PointCollection DataPoints { get; set; } = ScaleAndCenterPoints(
             [
@@ -20,12 +31,12 @@ namespace Cell.ViewModel
                 new Point(35, 3),
             ], 115, 15);
 
-        public override string Value
+        public override string Text
         {
-            get => base.Value;
+            get => base.Text;
             set
             {
-                base.Value = value;
+                base.Text = value;
                 if (double.TryParse(value, out double result))
                 {
                     _rawDataPoints.Add(new Point(_rawDataPoints.Count, result));

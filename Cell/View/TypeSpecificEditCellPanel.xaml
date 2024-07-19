@@ -20,6 +20,18 @@
                         <Label Content="Data Type" Width="100"/>
                         <TextBox Text="{Binding CollectionType, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Display Path" Width="100"/>
+                        <TextBox Text="{Binding DisplayPath, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:DropdownCellViewModel}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Items" Width="50"/>
+                        <TextBox Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" Width="150" KeyDown="TextBoxKeyDown"/>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CellViewModel}">

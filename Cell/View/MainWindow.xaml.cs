@@ -1,5 +1,6 @@
 ﻿using Cell.Persistence;
 using Cell.ViewModel;
+using ICSharpCode.AvalonEdit.Editing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -65,10 +66,12 @@ namespace Cell.View
             {
                 if (e.Key == Key.C)
                 {
+                    if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return;
                     ApplicationViewModel.Instance.CopySelectedCells();
                 }
                 else if (e.Key == Key.V)
                 {
+                    if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return;
                     ApplicationViewModel.Instance.PasteCopiedCells();
                 }
             }
@@ -84,9 +87,13 @@ namespace Cell.View
             SheetView = (SheetView)sender;
         }
 
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
+        private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
+            {
+                if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                e.Handled = true;
+            }
         }
     }
 }

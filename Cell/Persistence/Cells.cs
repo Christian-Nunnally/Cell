@@ -38,8 +38,8 @@ namespace Cell.Persistence
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            CellEditManager.StartMonitoringCellForEdits(cellModel);
-            CellUpdateManager.StartMonitoringCellForUpdates(cellModel);
+            CellTriggerManager.StartMonitoringCellForEdits(cellModel);
+            CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
         }
 
         private static void AddCellToCellByLocationMap(CellModel cellModel)
@@ -54,8 +54,8 @@ namespace Cell.Persistence
             {
                 cellDictionary.Remove(cellModel.ID);
                 CellLoader.DeleteCell(cellModel);
-                CellEditManager.StopMonitoringCellForEdits(cellModel);
-                CellUpdateManager.StopMonitoringCellForUpdates(cellModel);
+                CellTriggerManager.StopMonitoringCellForEdits(cellModel);
+                CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
                 _cellsById.Remove(cellModel.ID);
                 _allCells.Remove(cellModel);
                 _cellsToLocation.Remove(cellModel.ID);

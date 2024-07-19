@@ -6,7 +6,7 @@ namespace Cell.Plugin
     /// <summary>
     /// Responsible for executing the OnEdit function of a cell when the value changes.
     /// </summary>
-    public static class CellEditManager
+    public static class CellTriggerManager
     {
         private readonly static Dictionary<string, CellModel> _cellsBeingEdited = [];
 
@@ -27,7 +27,7 @@ namespace Cell.Plugin
             var result = DynamicCellPluginExecutor.RunTrigger(new PluginContext(ApplicationViewModel.Instance), cell);
             if (!result.Success)
             {
-                cell.Text = result.Result;
+                cell.ErrorText = result.Result;
             }
             _cellsBeingEdited.Remove(cell.ID);
         }

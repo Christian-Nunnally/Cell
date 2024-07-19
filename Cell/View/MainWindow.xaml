@@ -211,7 +211,7 @@
                         <Border 
                             Background="{TemplateBinding Background}"
                             BorderBrush="{StaticResource CellBorderColor}"
-                            BorderThickness="1">
+                            BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>
@@ -224,6 +224,177 @@
             </Style.Triggers>
         </Style>
 
+        <Style TargetType="ToggleButton">
+            <Setter Property="Background" Value="{StaticResource CellBackground}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border 
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource CellBorderColor}"
+                            BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                </Trigger>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--Control colors.-->
+        <Color x:Key="WindowColor">#FFE8EDF9</Color>
+        <Color x:Key="ContentAreaColorLight">#FFC5CBF9</Color>
+        <Color x:Key="ContentAreaColorDark">#FF7381F9</Color>
+
+        <Color x:Key="DisabledControlLightColor">#FFE8EDF9</Color>
+        <Color x:Key="DisabledControlDarkColor">#FFC5CBF9</Color>
+        <Color x:Key="DisabledForegroundColor">#FF888888</Color>
+
+        <Color x:Key="SelectedBackgroundColor">#FFC5CBF9</Color>
+        <Color x:Key="SelectedUnfocusedColor">#FFDDDDDD</Color>
+
+        <Color x:Key="ControlLightColor">White</Color>
+        <Color x:Key="ControlMediumColor">#FF7381F9</Color>
+        <Color x:Key="ControlDarkColor">#FF211AA9</Color>
+
+        <Color x:Key="ControlMouseOverColor">#FF3843C4</Color>
+        <Color x:Key="ControlPressedColor">#FF211AA9</Color>
+
+
+        <Color x:Key="GlyphColor">#FF444444</Color>
+        <Color x:Key="GlyphMouseOver">sc#1, 0.004391443, 0.002428215, 0.242281124</Color>
+
+        <!--Border colors-->
+        <Color x:Key="BorderLightColor">#FFCCCCCC</Color>
+        <Color x:Key="BorderMediumColor">#FF888888</Color>
+        <Color x:Key="BorderDarkColor">#FF444444</Color>
+
+        <Color x:Key="PressedBorderLightColor">#FF888888</Color>
+        <Color x:Key="PressedBorderDarkColor">#FF444444</Color>
+
+        <Color x:Key="DisabledBorderLightColor">#FFAAAAAA</Color>
+        <Color x:Key="DisabledBorderDarkColor">#FF888888</Color>
+
+        <Color x:Key="DefaultBorderBrushDarkColor">Black</Color>
+
+        <!--Control-specific resources.-->
+        <Color x:Key="HeaderTopColor">#FFC5CBF9</Color>
+        <Color x:Key="DatagridCurrentCellBorderColor">Black</Color>
+        <Color x:Key="SliderTrackDarkColor">#FFC5CBF9</Color>
+
+        <Color x:Key="NavButtonFrameColor">#FF3843C4</Color>
+
+        <LinearGradientBrush x:Key="MenuPopupBrush"
+                     EndPoint="0.5,1"
+                     StartPoint="0.5,0">
+            <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="0" />
+            <GradientStop Color="{DynamicResource ControlMediumColor}"
+                Offset="0.5" />
+            <GradientStop Color="{DynamicResource ControlLightColor}"
+                Offset="1" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="ProgressBarIndicatorAnimatedFill"
+                     StartPoint="0,0"
+                     EndPoint="1,0">
+            <LinearGradientBrush.GradientStops>
+                <GradientStopCollection>
+                    <GradientStop Color="#000000FF"
+                    Offset="0" />
+                    <GradientStop Color="#600000FF"
+                    Offset="0.4" />
+                    <GradientStop Color="#600000FF"
+                    Offset="0.6" />
+                    <GradientStop Color="#000000FF"
+                    Offset="1" />
+                </GradientStopCollection>
+            </LinearGradientBrush.GradientStops>
+        </LinearGradientBrush>
+
+        <Style x:Key="{x:Type CheckBox}" TargetType="{x:Type CheckBox}">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="FocusVisualStyle" Value="{DynamicResource CheckBoxFocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Border x:Name="Border"
+                                    Width="16"
+                                    Height="16"
+                                    CornerRadius="0"
+                                    BorderThickness="1"
+                                    BorderBrush="{StaticResource CellBorderColor}"
+                                    Background="{StaticResource CellBackground}">
+                                    <Grid>
+                                        <Path 
+                                            Visibility="Collapsed"
+                                            Width="9"
+                                            Height="9"
+                                            x:Name="CheckMark"
+                                            SnapsToDevicePixels="False"
+                                            Stroke="{StaticResource ForegroundColor}"
+                                            StrokeThickness="2"
+                                            StrokeEndLineCap="Round"
+                                            StrokeStartLineCap="Round"
+                                            StrokeMiterLimit=".1"
+                                            Data="F1 M 1.1,5L 3.5,7.5L 7.9,1"/>
+                                        <Path Visibility="Collapsed" x:Name="InderminateMark"/>
+                                    </Grid>
+                                </Border>
+                            </BulletDecorator.Bullet>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled" />
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CheckStates">
+                                    <VisualState x:Name="Checked">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="CheckMark">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}" />
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Unchecked" />
+                                    <VisualState x:Name="Indeterminate">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Visibility)" Storyboard.TargetName="InderminateMark">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{x:Static Visibility.Visible}" />
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter 
+                                Margin="4,0,0,0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                RecognizesAccessKey="True" />
+                        </BulletDecorator>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="28"/>
@@ -236,22 +407,31 @@
             Background="{StaticResource CellBackground}">
             <Button 
                 x:Name="CloseButton" 
-                Style="{StaticResource TitleButtonStyle}"
                 Content="x"
                 Click="CloseButton_Click"
-                DockPanel.Dock="Right" 
+                DockPanel.Dock="Right"
+                BorderThickness="0"
+                Width="35"
+                Height="28"
+                FontFamily="Consolas"
                 WindowChrome.IsHitTestVisibleInChrome="True"/>
             <Button 
                 x:Name="MaxButton" Content="☐"
-                Style="{StaticResource TitleButtonStyle}"
                 Click="MaximizeButton_Click"
                 DockPanel.Dock="Right" 
+                BorderThickness="0"
+                Width="35"
+                Height="28"
+                FontFamily="Consolas"
                 WindowChrome.IsHitTestVisibleInChrome="True"/>
             <Button 
                 x:Name="MinButton" Content="-"
-                Style="{StaticResource TitleButtonStyle}"
                 Click="MinimizeButton_Click"
                 DockPanel.Dock="Right" 
+                BorderThickness="0"
+                Width="35"
+                Height="28"
+                FontFamily="Consolas"
                 WindowChrome.IsHitTestVisibleInChrome="True"/>
             <Label></Label>
        </DockPanel>
@@ -291,16 +471,16 @@
                 <ContentControl Content="{Binding Path=SelectedCellViewModel}">
                     <ContentControl.Resources>
                         <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
-                            <Label>Undefined</Label>
+                            <Label></Label>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
-                            <Label>Undefined</Label>
+                            <Label></Label>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
-                            <Label>Undefined</Label>
+                            <Label></Label>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                            <TextBox Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Stretch" Margin="3" VerticalAlignment="Stretch" VerticalContentAlignment="Center" KeyDown="TextBoxKeyDown"/>
+                            <TextBox Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" HorizontalAlignment="Stretch" Margin="3" VerticalAlignment="Stretch" VerticalContentAlignment="Center" PreviewKeyDown="TextBoxPreviewKeyDown" AcceptsReturn="True"/>
                         </DataTemplate>
                     </ContentControl.Resources>
                 </ContentControl>

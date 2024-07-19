@@ -85,7 +85,6 @@ namespace Cell.Persistence
                 if (namespaceFunctions.TryGetValue(name, out var function))
                 {
                     function.Code = value;
-                    function.FindAndRefreshDependencies();
                     SavePluginFunction(space, function);
                 }
             }

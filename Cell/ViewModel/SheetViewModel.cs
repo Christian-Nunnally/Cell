@@ -152,8 +152,18 @@ namespace Cell.ViewModel
                         var column = function.ColumnDependencies[i];
                         var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                         if (cellToHighlight == null) continue;
-                        cellToHighlight.HighlightCell("#007acc");
+                        cellToHighlight.HighlightCell("#04385c");
                         HighlightedCellViewModels.Add(cellToHighlight);
+                    }
+
+                    foreach (var collectionReference in function.CollectionDependencies)
+                    {
+                        var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
+                        foreach (var cellToHighlight in cellsToHighlight)
+                        {
+                            cellToHighlight.HighlightCell("#04385c");
+                            HighlightedCellViewModels.Add(cellToHighlight);
+                        }
                     }
                 }
             }

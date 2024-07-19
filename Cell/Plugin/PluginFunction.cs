@@ -1,7 +1,5 @@
-﻿
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
-using Cell.Persistence;
 using System.Text.Json.Serialization;
 using Cell.Plugin;
 using System.Reflection;
@@ -11,34 +9,33 @@ namespace Cell.Model
 {
     public partial class PluginFunction
     {
-        private const string classHeader = @"
-            using System;
-            using Cell.Model;
-            using Cell.Model.Plugin;
-            using Cell.Plugin;                
+        private const string codeHeader = @"using System;
+using System.Collections.Generic;
+using Cell.Model;
+using Cell.ViewModel;
+using Cell.Model.Plugin;
+using Cell.Plugin;                
 
-            namespace Plugin
-            {
-                public class Program
-                {";
+namespace Plugin
+{
+    public class Program
+    {
+        public static ";
 
-        private const string classFooter = @"
-                }
-            }";
+        private const string codeFooter = @"
+        }
+    }
+}";
 
-        private const string populateHeader = @"
-                    public static object PluginMethod(PluginContext c, CellModel cell)
-                    {
-                        ";
-        private const string triggerHeader = @"
-                    public static void PluginMethod(PluginContext c, CellModel cell)
-                    {
-                        ";
-        private const string methodFooter = @"
-                    }";
+        private const string methodHeader = @" PluginMethod(PluginContext c, CellModel cell)
+        {
+            ";
 
         private string code = string.Empty;
         private readonly List<CellModel> _cellsToNotify = [];
+        private bool _isSyntaxTreeValid;
+
+        public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
         public List<string> SheetDependencies { get; set; } = [];
 
@@ -60,20 +57,26 @@ namespace Cell.Model
         [JsonIgnore]
         public CompileResult CompileResult { get; private set; }
 
+        public PluginFunction()
+        {
+        }
+
         public PluginFunction(string name, string code, bool isTrigger)
         {
             Name = name;
-            DoesFunctionReturnObject = isTrigger;
+            DoesFunctionReturnObject = !isTrigger;
             Code = code;
         }
 
         public string Code
         {
-            get => code; set
+            get => code; 
+            set
             {
+                _compiledMethod = null;
                 code = value;
                 FindAndRefreshDependencies();
-                Compile();
+                if (_isSyntaxTreeValid) Compile();
             }
         }
 
@@ -82,9 +85,10 @@ namespace Cell.Model
 
         public void FindAndRefreshDependencies()
         {
+            _isSyntaxTreeValid = false;
             ClearAllDependencies();
-            var methodHeader = DoesFunctionReturnObject ? triggerHeader : populateHeader;
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(classHeader + methodHeader + code + methodFooter + classFooter);
+            var returnValue = DoesFunctionReturnObject ? "object" : "void";
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(codeHeader + returnValue + methodHeader + code + codeFooter);
             SyntaxNode? root = syntaxTree.GetRoot();
 
             var cellLocationSyntaxRewriter = new FindAndReplaceCellLocationsSyntaxRewriter();
@@ -98,14 +102,14 @@ namespace Cell.Model
 
             var collectionReferenceSyntaxRewriter = new FindAndReplaceCollectionReferencesSyntaxWalker();
             root = collectionReferenceSyntaxRewriter.Visit(root);
+            if (!collectionReferenceSyntaxRewriter.Result.Success) return;
+
             if (root is null) throw new Exception("Syntax root should not be null after rewrite.");
             SyntaxTree = root.SyntaxTree;
+            _isSyntaxTreeValid = true;
             CollectionDependencies.AddRange(collectionReferenceSyntaxRewriter.CollectionReferences);
 
             NotifyDependenciesHaveChanged();
-
-            // TODO: move this to the plugin function loader unless you want testtesttest to be saved.
-            PluginFunctionLoader.SavePluginFunction(DoesFunctionReturnObject ? PluginFunctionLoader.TriggerFunctionsDirectoryName : PluginFunctionLoader.PopulateFunctionsDirectoryName, this);
         }
 
         private void ClearAllDependencies()
@@ -138,9 +142,9 @@ namespace Cell.Model
             _cellsToNotify.Add(cell);
         }
 
-        private MethodInfo? Compile()
+        public MethodInfo? Compile()
         {
-            _compiledMethod = null;
+            if (!_isSyntaxTreeValid) FindAndRefreshDependencies();
             try
             {
                 var compiler = new RoslynCompiler("Plugin.Program", SyntaxTree, [typeof(Console)]);

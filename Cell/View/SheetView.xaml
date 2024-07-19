@@ -31,6 +31,8 @@
                 <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="Margin" Value="0"/>
+                <Setter Property="HorizontalAlignment" Value="{Binding HorizontalAlignmentForView}"/>
+                <Setter Property="VerticalAlignment" Value="{Binding VerticalAlignmentForView}"/>
             </Style>
 
             <Style TargetType="TextBox">
@@ -84,12 +86,16 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:LabelCellViewModel}">
                 <TextBlock 
+                    Margin="3"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
                     Text="{Binding Path=Text}"
-                    Margin="3"
-                    TextDecorations="Strikethrough"
-                    VerticalAlignment="Center"/>
+                    TextDecorations="{Binding TextDecorationsForView}"
+                    FontWeight="{Binding FontWeightForView}"
+                    FontStyle="{Binding FontStyleForView}"
+                    TextAlignment="{Binding TextAlignmentForView}"
+                    VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
+                    HorizontalAlignment="{Binding HorizontalAlignmentForView}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CheckboxCellViewModel}">
                 <CheckBox 
@@ -100,7 +106,8 @@
                     Command="{Binding CheckboxCheckedCommand}"
                     IsChecked="{Binding IsChecked}"
                     Foreground="{StaticResource ForegroundColor}"
-                    VerticalAlignment="Center"
+                    VerticalAlignment="{Binding VerticalAlignmentForView}"
+                    HorizontalAlignment="{Binding HorizontalAlignmentForView}"
                     VerticalContentAlignment="Center"/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:ButtonCellViewModel}">
@@ -110,33 +117,41 @@
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch"
                     Command="{Binding ButtonClickedCommand}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border 
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border 
                                 BorderBrush="{Binding BorderColor}"
                                 VerticalAlignment="Stretch"
                                 HorizontalAlignment="Stretch"
                                 BorderThickness="1"
                                 Padding="0"
                                 Margin="3">
-                                    <Border.Style>
-                                        <Style>
-                                            <Setter Property="Border.Background" Value="{Binding BackgroundColor}"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="Border.IsMouseOver" Value="True">
-                                                    <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <ContentPresenter Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Button.Template>
-                        <Label 
-                    Content="{Binding Path=Text}"
-                    Margin="0"
-                    Padding="0"/>
+                                <Border.Style>
+                                    <Style>
+                                        <Setter Property="Border.Background" Value="{Binding BackgroundColor}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="Border.IsMouseOver" Value="True">
+                                                <Setter Property="Border.Background" Value="{StaticResource SelectedColor}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <ContentPresenter Margin="0" HorizontalAlignment="{Binding HorizontalAlignmentForViewCenter}" VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock 
+                        Margin="3"
+                        FontFamily="{Binding FontFamily}"
+                        FontSize="{Binding FontSize}"
+                        Text="{Binding Path=Text}"
+                        TextDecorations="{Binding TextDecorationsForView}"
+                        FontWeight="{Binding FontWeightForView}"
+                        FontStyle="{Binding FontStyleForView}"
+                        TextAlignment="{Binding TextAlignmentForView}"
+                        VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
+                        HorizontalAlignment="{Binding HorizontalAlignmentForView}" 
+                        />
                 </Button>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:TextboxCellViewModel}">
@@ -153,9 +168,9 @@
                 <ComboBox
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
-                    Text="{Binding Path=Value, Mode=TwoWay}" 
+                    Text="{Binding Path=Text, Mode=TwoWay}" 
                     ItemsSource="{Binding DropdownOptions}"
-                    SelectedItem="{Binding Value}"
+                    SelectedItem="{Binding Text}"
                     VerticalAlignment="Center"
                     MinWidth="50"
                     Margin="3"/>
@@ -175,13 +190,17 @@
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                     ItemsSource="{Binding ListItems}"
-                    Background="{StaticResource CellBackground}">
+                    DisplayMemberPath="{Binding DisplayPath}"
+                    SelectedItem="{Binding Text}"
+                    Background="{Binding BackgroundColor}"
+                    Foreground="{Binding ForegroundColor}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Label 
-                                Content="Hello world"
-                                Margin="3"
-                                Padding="0"/>
+                                    Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ForegroundColor}"
+                                    Content="{Binding}"
+                                    Margin="3"
+                                    Padding="0"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                 </ListBox>
@@ -210,8 +229,6 @@
         </ListBox.ItemsPanel>
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
-                <Setter Property="Canvas.Left" Value="{Binding CanvasLeft, Mode=OneWay}"/>
-                <Setter Property="Canvas.Top" Value="{Binding CanvasTop, Mode=OneWay}"/>
                 <Setter Property="Foreground" Value="{Binding ForegroundColor}"/>
                 <Setter Property="Control.Template">
                     <Setter.Value>
@@ -244,10 +261,10 @@
                                     </Style>
                                 </Border.Style>
                                 <ContentPresenter 
-                                Content="{TemplateBinding Content}" 
-                                VerticalAlignment="Stretch" 
-                                HorizontalAlignment="Stretch"
-                                Margin="0"/>
+                                    Content="{TemplateBinding Content}" 
+                                    VerticalAlignment="Stretch" 
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0"/>
                             </Border>
                         </ControlTemplate>
                     </Setter.Value>

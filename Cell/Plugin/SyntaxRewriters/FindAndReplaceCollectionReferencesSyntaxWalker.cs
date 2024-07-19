@@ -9,6 +9,8 @@ namespace Cell.Plugin.SyntaxRewriters
     {
         public readonly List<string> CollectionReferences = [];
 
+        public CompileResult Result { get; private set; } = new CompileResult { Success = true };
+
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -20,6 +22,7 @@ namespace Cell.Plugin.SyntaxRewriters
                 {
                     CollectionReferences.Add(variableName);
                     var dataType = UserCollectionLoader.GetDataTypeStringForCollection(variableName);
+                    if (string.IsNullOrWhiteSpace(dataType)) Result = new CompileResult { Success = false, Result = $"Datatype for Collection {variableName} does not exist or cells have not loaded yet." };
                     return SyntaxFactory.ParseExpression($"c.GetUserList<{dataType}>(\"{variableName}\")");
                 }
             }

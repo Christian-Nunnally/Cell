@@ -28,7 +28,7 @@ namespace Cell.Plugin.SyntaxRewriters
                     (var row, var column) = GetCellLocationFromVariable(variableName);
                     Locations.Add((string.Empty, row, column));
 
-                    return SyntaxFactory.ParseExpression($"c.GetCellValue({sheetName}, {row}, {column})");
+                    return SyntaxFactory.ParseExpression($"c.GetCell({sheetName}, {row}, {column})");
                 }
             }
             return node;

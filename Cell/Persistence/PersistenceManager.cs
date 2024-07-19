@@ -19,8 +19,8 @@ namespace Cell.Persistence
 
         public static void LoadAll()
         {
-            PluginFunctionLoader.LoadPlugins();
             UserCollectionLoader.LoadCollections();
+            PluginFunctionLoader.LoadPlugins();
             CellLoader.LoadCells();
         }
 

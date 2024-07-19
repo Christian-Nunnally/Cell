@@ -12,13 +12,14 @@ namespace Cell.ViewModel
             UpdateDropdownItems(model.Text);
         }
 
-        public override string Text 
-        { 
-            get => base.Text;
+        public string CommaSeperatedItems
+        {
+            get => Model.GetStringProperty(nameof(CommaSeperatedItems));
             set
             {
+                Model.SetStringProperty(nameof(CommaSeperatedItems), value);
                 UpdateDropdownItems(value);
-                base.Text = value;
+                OnPropertyChanged(nameof(CommaSeperatedItems));
             }
         }
 

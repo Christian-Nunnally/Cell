@@ -5,7 +5,7 @@ namespace Cell.ViewModel
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
-        private const int BottomPanelHeight = 35;
+        private const int BottomPanelHeight = 0;
         private const int TopPanelHeight = 35;
         private const int LeftPanelHeight = 215;
         private const int RightPanelHeight = 0;

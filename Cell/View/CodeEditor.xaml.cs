@@ -1,9 +1,13 @@
 ﻿using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Plugin;
+using Cell.Plugin.SyntaxRewriters;
 using Cell.ViewModel;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Cell.View
@@ -41,6 +45,79 @@ namespace Cell.View
             UserSetDockOrientation = Dock.Left;
             UserSetWidth = 200;
             UserSetHeight = double.NaN;
+            textEditor.TextArea.TextEntering += OnTextEntering;
+            textEditor.TextArea.TextEntered += OnTextEntered;
+        }
+
+        CompletionWindow? completionWindow;
+
+        private void OnTextEntered(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text == ".")
+            {
+                var offset = textEditor.TextArea.Caret.Offset - 1;
+                var text = textEditor.TextArea.Document.Text;
+                
+                while(offset > 0 && char.IsLetterOrDigit(text[offset - 1]))
+                {
+                    offset--;
+                }
+                var preceedingName = text[offset..(textEditor.TextArea.Caret.Offset - 1)];
+
+                if (preceedingName == "c")
+                {
+                    completionWindow = new CompletionWindow(textEditor.TextArea);
+                    IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+                    data.Add(new PluginContextCompletionData("GoToSheet"));
+                    data.Add(new PluginContextCompletionData("GoToCell"));
+                    data.Add(new PluginContextCompletionData("SheetNames"));
+                    completionWindow.Show();
+                    completionWindow.Closed += delegate {
+                        completionWindow = null;
+                    };
+                }
+                else if (FindAndReplaceCellLocationsSyntaxRewriter.IsCellLocation(preceedingName))
+                {
+                    completionWindow = new CompletionWindow(textEditor.TextArea);
+                    IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+                    foreach (var property in typeof(CellModel).GetProperties())
+                    {
+                        data.Add(new PluginContextCompletionData(property.Name));
+                    }
+                    completionWindow.Show();
+                    completionWindow.Closed += delegate {
+                        completionWindow = null;
+                    };
+                }
+                else if (FindAndReplaceCollectionReferencesSyntaxWalker.IsCollectionName(preceedingName))
+                {
+                    completionWindow = new CompletionWindow(textEditor.TextArea);
+                    IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+                    foreach (var property in typeof(UserList<PluginModel>).GetMethods())
+                    {
+                        data.Add(new PluginContextCompletionData(property.Name));
+                    }
+                    completionWindow.Show();
+                    completionWindow.Closed += delegate {
+                        completionWindow = null;
+                    };
+                }
+            }
+        }
+
+        private void OnTextEntering(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text.Length > 0 && completionWindow != null)
+            {
+                if (!char.IsLetterOrDigit(e.Text[0]))
+                {
+                    // Whenever a non-letter is typed while the completion window is open,
+                    // insert the currently selected element.
+                    completionWindow.CompletionList.RequestInsertion(e);
+                }
+            }
+            // Do not set e.Handled=true.
+            // We still want to insert the character that was typed.
         }
 
         public void Show(string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)

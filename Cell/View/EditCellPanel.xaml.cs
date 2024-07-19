@@ -116,17 +116,23 @@ namespace Cell.View
             var bottomRightCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
             if (bottomRightCell is null) return;
 
-            for ( var r = topLeftCell.Row; r <= bottomRightCell.Row; r++)
+            var sheetName = ApplicationViewModel.Instance.SheetViewModel.SheetName;
+            var cellsToMerge = new List<CellModel>();
+            for (var r = topLeftCell.Row; r <= bottomRightCell.Row; r++)
             {
                 for (var c = topLeftCell.Column; c <= bottomRightCell.Column; c++)
                 {
-                    var sheetName = ApplicationViewModel.Instance.SheetViewModel.SheetName;
                     var cell = Cells.GetCell(sheetName, r, c);
                     if (cell is not null)
                     {
-                        cell.MergedWith = topLeftCell.ID;
+                        if (!string.IsNullOrWhiteSpace(cell.MergedWith)) return;
+                        cellsToMerge.Add(cell);
                     }
                 }
+            }
+            foreach (var cell in cellsToMerge)
+            {
+                cell.MergedWith = topLeftCell.ID;
             }
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
@@ -145,6 +151,111 @@ namespace Cell.View
                 selectedCell.Model.MergedWith = string.Empty;
             }
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+        }
+
+        private void SetAlignmentToTopLeftButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
+                cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            }
+        }
+
+        private void SetAlignmentToTopButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
+                cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            }
+        }
+            
+        private void SetAlignmentToTopRightButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
+                cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            }
+        }
+
+        private void SetAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
+                cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            }
+        }
+
+        private void SetAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Center;
+                cell.VerticalAlignmentForView = VerticalAlignment.Center;
+            }
+        }
+
+        private void SetAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
+                cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            }
+        }
+
+        private void SetAlignmentToBottomLeftButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
+                cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            }
+        }
+
+        private void SetAlignmentToBottomButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
+                cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            }
+        }
+
+        private void SetAlignmentToBottomRightButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
+                cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            }
+        }
+
+        private void SetTextAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.TextAlignmentForView = TextAlignment.Left;
+            }
+        }
+
+        private void SetTextAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.TextAlignmentForView = TextAlignment.Center;
+            }
+        }
+
+        private void SetTextAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                cell.TextAlignmentForView = TextAlignment.Right;
+            }
         }
     }
 }

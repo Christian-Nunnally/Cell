@@ -1,5 +1,7 @@
 ﻿using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Persistence;
+using Cell.Plugin;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel
@@ -7,31 +9,12 @@ namespace Cell.ViewModel
     public class ListCellViewModel : CellViewModel
     {
 
-        public ObservableCollection<string> ListItems { get; set; } = [];
+        public ObservableCollection<PluginModel> ListItems { get; set; } = [];
 
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
-            UpdateListItems(model.Text);
-        }
-
-        public override string Text
-        {
-            get => base.Text;
-            set
-            {
-                UpdateListItems(value);
-                base.Text = value;
-            }
-        }
-
-        private void UpdateListItems(string value)
-        {
-            ListItems.Clear();
-            var splitValues = value.Split(",");
-            foreach (var item in splitValues.Where(s => !string.IsNullOrWhiteSpace(s)))
-            {
-                ListItems.Add(item);
-            }
+            CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+            UpdateList();
         }
 
         public string CollectionName
@@ -39,11 +22,12 @@ namespace Cell.ViewModel
             get => Model.GetStringProperty(nameof(CollectionName));
             set
             {
-                if (UserCollectionLoader.CreateEmptyCollection(value))
-                {
-                    Model.SetStringProperty(nameof(CollectionName), value);
-                    OnPropertyChanged(nameof(CollectionName));
-                }
+                CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
+                Model.SetStringProperty(nameof(CollectionName), value);
+                UserCollectionLoader.CreateEmptyCollection(CollectionName);
+                CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                UpdateList();
+                OnPropertyChanged(nameof(CollectionName));
             }
         }
 
@@ -54,6 +38,25 @@ namespace Cell.ViewModel
             {
                 Model.SetStringProperty(nameof(CollectionType), value);
                 OnPropertyChanged(nameof(CollectionType));
+            }
+        }
+
+        public string DisplayPath
+        {
+            get => Model.GetStringProperty(nameof(DisplayPath));
+            set
+            {
+                Model.SetStringProperty(nameof(DisplayPath), value);
+                OnPropertyChanged(nameof(DisplayPath));
+            }
+        }
+
+        internal void UpdateList()
+        {
+            ListItems.Clear();
+            foreach (var item in UserCollectionLoader.GetCollection(CollectionName))
+            {
+                ListItems.Add(item);
             }
         }
     }

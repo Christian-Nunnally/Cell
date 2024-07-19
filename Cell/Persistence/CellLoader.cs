@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Exceptions;
+using Cell.Model;
 using System.IO;
 
 namespace Cell.Persistence
@@ -13,6 +14,13 @@ namespace Cell.Persistence
                 foreach (var directory in Directory.GetDirectories(sheetsPath))
                 {
                     LoadSheet(directory);
+                }
+            }
+            foreach (var cell in Cells.AllCells)
+            {
+                if (cell.NeedsUpdateDependencySubscriptionsToBeCalled)
+                {
+                    if (!cell.UpdateDependencySubscriptions()) throw new ProjectLoadException($"Unable to update dependency subscriptions for {cell.ID} even after all cells have been loaded.");
                 }
             }
         }

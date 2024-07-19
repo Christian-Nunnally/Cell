@@ -29,7 +29,6 @@ namespace Cell.ViewModel
             if (e.PropertyName == nameof(CellModel.Width) ||
                 e.PropertyName == nameof(CellModel.Height) ||
                 e.PropertyName == nameof(CellModel.Text) ||
-                e.PropertyName == nameof(CellModel.Value) ||
                 e.PropertyName == nameof(CellModel.Row) ||
                 e.PropertyName == nameof(CellModel.Column))
             {
@@ -89,18 +88,8 @@ namespace Cell.ViewModel
             get => _model.Text;
             set
             {
-                _model.Text = value;
+                _model.Text = value?.Replace("\\n", "\n") ?? string.Empty;
                 OnPropertyChanged(nameof(Text));
-            }
-        }
-
-        public virtual string Value
-        {
-            get => _model.Value;
-            set
-            {
-                _model.Value = value;
-                OnPropertyChanged(nameof(Value));
             }
         }
 
@@ -198,6 +187,52 @@ namespace Cell.ViewModel
             set { _model.FontFamily = value; OnPropertyChanged(nameof(FontFamily)); }
         }
 
+        public virtual bool IsFontBold
+        {
+            get => _model.IsFontBold;
+            set { _model.IsFontBold = value; OnPropertyChanged(nameof(IsFontBold)); OnPropertyChanged(nameof(FontWeightForView)); }
+        }
+
+        public FontWeight FontWeightForView => IsFontBold ? FontWeights.Bold : FontWeights.Normal;
+
+        public virtual bool IsFontItalic
+        {
+            get => _model.IsFontItalic;
+            set { _model.IsFontItalic = value; OnPropertyChanged(nameof(IsFontItalic)); OnPropertyChanged(nameof(FontStyleForView)); }
+        }
+
+        public FontStyle FontStyleForView => IsFontItalic ? FontStyles.Italic : FontStyles.Normal;
+
+        public virtual bool IsFontStrikethrough
+        {
+            get => _model.IsFontStrikethrough;
+            set { _model.IsFontStrikethrough = value; OnPropertyChanged(nameof(IsFontStrikethrough)); OnPropertyChanged(nameof(TextDecorationsForView)); }
+        }
+
+        public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
+
+        public virtual HorizontalAlignment HorizontalAlignmentForViewCenter => HorizontalAlignmentForView == HorizontalAlignment.Stretch ? HorizontalAlignment.Center : HorizontalAlignmentForView;
+
+        public virtual HorizontalAlignment HorizontalAlignmentForView
+        {
+            get => _model.HorizontalAlignment;
+            set { _model.HorizontalAlignment = value; OnPropertyChanged(nameof(HorizontalAlignmentForView)); OnPropertyChanged(nameof(HorizontalAlignmentForViewCenter)); }
+        }
+
+        public virtual VerticalAlignment VerticalAlignmentForViewCenter => VerticalAlignmentForView == VerticalAlignment.Stretch ? VerticalAlignment.Center : VerticalAlignmentForView;
+
+        public virtual VerticalAlignment VerticalAlignmentForView
+        {
+            get => _model.VerticalAlignment;
+            set { _model.VerticalAlignment = value; OnPropertyChanged(nameof(VerticalAlignmentForView)); OnPropertyChanged(nameof(VerticalAlignmentForViewCenter)); }
+        }
+
+        public virtual TextAlignment TextAlignmentForView
+        {
+            get => _model.TextAlignmentForView;
+            set { _model.TextAlignmentForView = value; OnPropertyChanged(nameof(TextAlignmentForView)); }
+        }
+
         public virtual string BorderThicknessString
         { 
             get => Model.BorderThicknessString;
@@ -214,6 +249,13 @@ namespace Cell.ViewModel
         public bool UpdateBorderThickness(string stringBorderThickness)
         {
             var split = stringBorderThickness.Split(',');
+            if (split.Length == 1)
+            {
+                if (!double.TryParse(split[0], out var size)) return false;
+                BorderThickness = new Thickness(size, size, size, size);
+                OnPropertyChanged(nameof(BorderThickness));
+                return true;
+            }
             if (split.Length != 4) return false;
             if (!double.TryParse(split[0], out var left)) return false;
             if (!double.TryParse(split[1], out var top)) return false;
