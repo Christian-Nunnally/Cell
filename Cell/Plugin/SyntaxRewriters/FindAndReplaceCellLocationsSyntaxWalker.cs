@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Cell.Model;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ namespace Cell.Plugin.SyntaxRewriters
 {
     public partial class FindAndReplaceCellLocationsSyntaxRewriter : CSharpSyntaxRewriter
     {
-        public readonly List<(string Sheet, int Row, int Column)> Locations = [];
+        public readonly List<CellLocationDependency> LocationReferences = [];
 
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
@@ -26,7 +27,7 @@ namespace Cell.Plugin.SyntaxRewriters
                 if (IsCellLocation(variableName))
                 {
                     (var row, var column) = GetCellLocationFromVariable(variableName);
-                    Locations.Add((string.Empty, row, column));
+                    LocationReferences.Add(new CellLocationDependency(sheetName == "cell" ? string.Empty : sheetName, row, column));
 
                     return SyntaxFactory.ParseExpression($"c.GetCell({sheetName}, {row}, {column})");
                 }

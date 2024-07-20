@@ -1,4 +1,5 @@
-﻿using Cell.Exceptions;
+﻿using Cell.Data;
+using Cell.Exceptions;
 using Cell.Model.Plugin;
 using Cell.Plugin;
 using Cell.ViewModel;

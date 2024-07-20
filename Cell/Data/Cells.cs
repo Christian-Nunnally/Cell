@@ -1,8 +1,9 @@
 ﻿using Cell.Model;
+using Cell.Persistence;
 using Cell.Plugin;
 using System.Collections.ObjectModel;
 
-namespace Cell.Persistence
+namespace Cell.Data
 {
     /// <summary>
     /// Contains all cells in the entire application.
@@ -40,7 +41,7 @@ namespace Cell.Persistence
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            CellTriggerManager.StartMonitoringCellForEdits(cellModel);
+            CellTriggerManager.StartMonitoringCell(cellModel);
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
@@ -57,7 +58,7 @@ namespace Cell.Persistence
             {
                 cellDictionary.Remove(cellModel.ID);
                 _cellLoader.DeleteCell(cellModel);
-                CellTriggerManager.StopMonitoringCellForEdits(cellModel);
+                CellTriggerManager.StopMonitoringCell(cellModel);
                 CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
                 _cellsById.Remove(cellModel.ID);
                 _allCells.Remove(cellModel);

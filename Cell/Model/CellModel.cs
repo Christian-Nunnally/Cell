@@ -1,4 +1,5 @@
-﻿using Cell.Persistence;
+﻿using Cell.Data;
+using Cell.Persistence;
 using Cell.Plugin;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,7 +9,7 @@ namespace Cell.Model
 {
     public class CellModel : PropertyChangedBase
     {
-        public event Action<CellModel, EditContext>? OnCellEdited;
+        public event Action<CellModel, EditContext>? CellTriggered;
         public event Action<CellModel>? AfterCellEdited;
 
         #region Layout Properties
@@ -82,7 +83,7 @@ namespace Cell.Model
                 var oldValue = text;
                 text = value;
                 OnPropertyChanged(nameof(Text));
-                OnCellEdited?.Invoke(this, new EditContext(nameof(Text), text, oldValue));
+                CellTriggered?.Invoke(this, new EditContext(nameof(Text), text, oldValue));
                 AfterCellEdited?.Invoke(this);
             }
         }
@@ -222,6 +223,14 @@ namespace Cell.Model
                 OnPropertyChanged(nameof(PopulateFunctionName));
             }
         }
+        private string populateFunctionName = string.Empty;
+
+        public string TriggerFunctionName
+        {
+            get { return triggerFunctionName; }
+            set { triggerFunctionName = value; OnPropertyChanged(nameof(TriggerFunctionName)); }
+        }
+        private string triggerFunctionName = string.Empty;
 
         public bool NeedsUpdateDependencySubscriptionsToBeCalled;
 
@@ -258,15 +267,6 @@ namespace Cell.Model
             NeedsUpdateDependencySubscriptionsToBeCalled = false;
             return true;
         }
-
-        private string populateFunctionName = string.Empty;
-
-        public string TriggerFunctionName
-        {
-            get { return triggerFunctionName; }
-            set { triggerFunctionName = value; OnPropertyChanged(nameof(TriggerFunctionName)); }
-        }
-        private string triggerFunctionName = string.Empty;
 
         #endregion
 
@@ -388,10 +388,7 @@ namespace Cell.Model
 
         public static CellModel DeserializeModel(string serializedModel) => JsonSerializer.Deserialize<CellModel>(serializedModel) ?? throw new InvalidOperationException("DeserializeModel failed.");
 
-        internal void TriggerCellEdited(EditContext editContext)
-        {
-            OnCellEdited?.Invoke(this, editContext);
-        }
+        internal void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
 
         #endregion
     }

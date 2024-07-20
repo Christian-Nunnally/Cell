@@ -12,7 +12,8 @@ namespace Cell.Model
 
             for (int i = 0; i < stringChars.Length; i++)
             {
-                stringChars[i] = chars[random.Next(chars.Length)];
+                var randomNumberInRange = random.Next(chars.Length);
+                stringChars[i] = chars[randomNumberInRange];
             }
 
             return new string(stringChars);

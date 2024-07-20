@@ -172,7 +172,7 @@ namespace Cell.View
         private void TestCodeButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_currentCell is null) return;
-            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue);
+            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue ? "void" : "object");
             var compiled = function.CompiledMethod;
             var result = function.CompileResult;
             if (result.Success)
@@ -209,7 +209,7 @@ namespace Cell.View
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
                 return;
             }
-            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue);
+            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue ? "void" : "object");
             var syntaxTree = function.SyntaxTree;
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;

@@ -1,5 +1,5 @@
-﻿using Cell.Model;
-using Cell.Persistence;
+﻿using Cell.Data;
+using Cell.Model;
 
 namespace Cell.ViewModel
 {
@@ -24,21 +24,33 @@ namespace Cell.ViewModel
 
             foreach (var cellToPaste in _clipboard)
             {
-                var newRow = pasteIntoCell.Row + cellToPaste.Row - _centerOfCopy.Row;
-                var newColumn = pasteIntoCell.Column + cellToPaste.Column - _centerOfCopy.Column;
-                var cellToReplace = Cells.GetCell(cellToPaste.SheetName, newRow, newColumn);
-                if (cellToReplace is null) continue;
-                if (cellToReplace.CellType.IsSpecial()) continue;
-                var pastedCell = cellToPaste.Copy();
-                pastedCell.Width = cellToReplace.Width;
-                pastedCell.Height = cellToReplace.Height;
-                pastedCell.Row = newRow;
-                pastedCell.Column = newColumn;
-
-                activeSheet.DeleteCell(cellToReplace);
-                activeSheet.AddCell(pastedCell);
+                PasteCopiedCell(activeSheet, pasteIntoCell, cellToPaste, _centerOfCopy);
             }
             activeSheet.UpdateLayout();
+        }
+
+        private void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        {
+            var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
+            var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
+            var cellToReplace = Cells.GetCell(cellToPaste.SheetName, newRow, newColumn);
+            if (cellToReplace is null) return;
+            if (cellToReplace.CellType.IsSpecial()) return;
+
+            var pastedCell = CopyCellWithUpdatedLocationProperties(newRow, newColumn, cellToReplace, cellToPaste);
+            activeSheet.DeleteCell(cellToReplace);
+            activeSheet.AddCell(pastedCell);
+        }
+
+        private static CellModel CopyCellWithUpdatedLocationProperties(int newRow, int newColumn, CellModel cellToReplace, CellModel cellToPaste)
+        {
+            var pastedCell = cellToPaste.Copy();
+            pastedCell.SheetName = cellToReplace.SheetName;
+            pastedCell.Width = cellToReplace.Width;
+            pastedCell.Height = cellToReplace.Height;
+            pastedCell.Row = newRow;
+            pastedCell.Column = newColumn;
+            return pastedCell;
         }
     }
 }

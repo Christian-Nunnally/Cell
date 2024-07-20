@@ -7,35 +7,11 @@ namespace Cell.Model
 {
     internal class ApplicationSettings : PropertyChangedBase
     {
+        private const string ApplicationSettingsSaveDirectory = "Application";
+        private const string ApplicationSettingsSaveFile = "Settings.json";
         private static ApplicationSettings? _instance;
 
-        public ApplicationSettings()
-        {
-        }
-
-        public static ApplicationSettings CreateInstance()
-        {
-            var path = Path.Combine(PersistenceManager.SaveLocation, "Application", "Settings.json");
-            if (File.Exists(path))
-            {
-                _instance = JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(path)) ?? new ApplicationSettings();
-            }
-            else
-            {
-                _instance = new ApplicationSettings();
-            }
-            _instance.PropertyChanged += (s, e) => _instance.Save();
-            return _instance;
-        }
-
-        private void Save()
-        {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, "Application");
-            Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, "Settings.json");
-            var serialized = JsonSerializer.Serialize(this);
-            File.WriteAllText(path, serialized);
-        }
+        public ApplicationSettings() { } // Required for serialization
 
         public static ApplicationSettings Instance => _instance ??= CreateInstance();
 
@@ -59,5 +35,27 @@ namespace Cell.Model
             set { if (codeEditorDockPosition != value) { codeEditorDockPosition = value; OnPropertyChanged(nameof(CodeEditorDockPosition)); } }
         }
         private Dock codeEditorDockPosition = Dock.Left;
+
+        public static ApplicationSettings CreateInstance()
+        {
+            _instance = Load() ?? new ApplicationSettings();
+            _instance.PropertyChanged += (s, e) => _instance.Save();
+            return _instance;
+        }
+
+        private static ApplicationSettings? Load()
+        {
+            var path = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
+            return File.Exists(path) ? JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(path)) : null;
+        }
+
+        private void Save()
+        {
+            var directory = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory);
+            Directory.CreateDirectory(directory);
+            var path = Path.Combine(directory, ApplicationSettingsSaveDirectory);
+            var serialized = JsonSerializer.Serialize(this);
+            File.WriteAllText(path, serialized);
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Data;
+using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel;
 using System.Windows;

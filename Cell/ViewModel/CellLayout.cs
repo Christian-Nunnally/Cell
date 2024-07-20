@@ -1,4 +1,4 @@
-﻿using Cell.Persistence;
+﻿using Cell.Data;
 
 namespace Cell.ViewModel
 {
@@ -29,15 +29,6 @@ namespace Cell.ViewModel
         private void LayoutRowCells()
         {
             var lastCell = _corner;
-            //List<RowCellViewModel> autoWidthRows = [];
-            //foreach (var rowCellViewModel in _rows.Skip(1))
-            //{
-            //    if (double.IsNaN(rowCellViewModel.Height))
-            //    {
-            //        autoWidthRows += rowCellViewModel;
-            //    }
-            //    lastCell = rowCellViewModel;
-            //}
             foreach (var rowCellViewModel in _rows.Skip(1))
             {
                 rowCellViewModel.X = 0;
@@ -62,41 +53,51 @@ namespace Cell.ViewModel
             foreach (var cell in _cells)
             {
                 if (IsRowOrColumn(cell)) continue;
-                if (!string.IsNullOrEmpty(cell.Model.MergedWith))
-                {
-                    LayoutMergedCell(cell);
-                }
-                else
-                {
-                    LayoutCell(cell);
-                }
+                if (IsMergedCell(cell)) LayoutMergedCell(cell);
+                else LayoutCell(cell);
             }
 
-            static bool IsRowOrColumn(CellViewModel cellModel) => cellModel.Row == 0 || cellModel.Column == 0;
+            static bool IsRowOrColumn(CellViewModel cell) => cell.Row == 0 || cell.Column == 0;
+            static bool IsMergedCell(CellViewModel cell) => !string.IsNullOrEmpty(cell.Model.MergedWith);
         }
 
         private void LayoutMergedCell(CellViewModel cellModel)
         {
-            var totalWidth = 0.0;
-            var totalHeight = 0.0;
-            if (cellModel.Model.MergedWith == cellModel.ID)
+            var height = ComputeMergedCellsHeight(cellModel);
+            var width = ComputeMergedCellsWidth(cellModel);
+            LayoutCell(cellModel, width, height);
+        }
+
+        private static double ComputeMergedCellsWidth(CellViewModel cell)
+        {
+            bool isHiddenByMerge = cell.Model.MergedWith != cell.ID;
+            if (isHiddenByMerge) return 0;
+
+            var result = 0.0;
+            var currentColumn = cell.Column;
+            var currentCell = Cells.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
+            while (currentCell?.MergedWith == cell.ID)
             {
-                var currentRow = cellModel.Row;
-                var currentColumn = cellModel.Column;
-                var currentCell = Cells.GetCell(cellModel.Model.SheetName, currentRow, cellModel.Column);
-                while (currentCell != null && currentCell.MergedWith == cellModel.ID)
-                {
-                    totalHeight += Cells.GetCell(cellModel.Model.SheetName, currentRow, 0)?.Height ?? 0;
-                    currentCell = Cells.GetCell(cellModel.Model.SheetName, ++currentRow, cellModel.Column);
-                }
-                currentCell = Cells.GetCell(cellModel.Model.SheetName, cellModel.Row, currentColumn);
-                while (currentCell != null && currentCell.MergedWith == cellModel.ID)
-                {
-                    totalWidth += Cells.GetCell(cellModel.Model.SheetName, 0, currentColumn)?.Width ?? 0;
-                    currentCell = Cells.GetCell(cellModel.Model.SheetName, cellModel.Row, ++currentColumn);
-                }
+                result += Cells.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
+                currentCell = Cells.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
             }
-            LayoutCell(cellModel, totalWidth, totalHeight);
+            return result;
+        }
+
+        private static double ComputeMergedCellsHeight(CellViewModel cell)
+        {
+            bool isHiddenByMerge = cell.Model.MergedWith != cell.ID;
+            if (isHiddenByMerge) return 0;
+
+            var result = 0.0;
+            var currentRow = cell.Row;
+            var currentCell = Cells.GetCell(cell.Model.SheetName, currentRow, cell.Column);
+            while (currentCell?.MergedWith == cell.ID)
+            {
+                result += Cells.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
+                currentCell = Cells.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
+            }
+            return result;
         }
 
         private void LayoutCell(CellViewModel cell)

@@ -1,4 +1,4 @@
-﻿using Cell.Persistence;
+﻿using Cell.Data;
 
 namespace Cell.Model
 {

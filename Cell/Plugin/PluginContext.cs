@@ -1,6 +1,6 @@
-﻿using Cell.Model;
+﻿using Cell.Data;
+using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.ViewModel;
 
 #pragma warning disable CA1822 // Mark members as static. Justification: Making methods static causes the user to have to type the entire PluginContext type name to call methods, which is not user-friendly.

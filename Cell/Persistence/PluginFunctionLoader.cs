@@ -94,7 +94,7 @@ namespace Cell.Persistence
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
-            var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName);
+            var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName ? "void" : "object");
             AddPluginFunctionToNamespace(space, function);
             return function;
         }

@@ -10,17 +10,17 @@ namespace Cell.Plugin
     {
         private readonly static Dictionary<string, CellModel> _cellsBeingEdited = [];
 
-        public static void StartMonitoringCellForEdits(CellModel model)
+        public static void StartMonitoringCell(CellModel model)
         {
-            model.OnCellEdited += CellEdited;
+            model.CellTriggered += CellTriggered;
         }
 
-        public static void StopMonitoringCellForEdits(CellModel model)
+        public static void StopMonitoringCell(CellModel model)
         {
-            model.OnCellEdited -= CellEdited;
+            model.CellTriggered -= CellTriggered;
         }
 
-        public static void CellEdited(CellModel cell, EditContext editContext)
+        public static void CellTriggered(CellModel cell, EditContext editContext)
         {
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);

@@ -4,37 +4,21 @@ using System.Text.Json.Serialization;
 using Cell.Plugin;
 using System.Reflection;
 using Cell.Plugin.SyntaxRewriters;
+using Cell.Exceptions;
 
 namespace Cell.Model
 {
     public partial class PluginFunction
     {
-        private const string codeHeader = @"using System;
-using System.Collections.Generic;
-using Cell.Model;
-using Cell.ViewModel;
-using Cell.Model.Plugin;
-using Cell.Plugin;                
-
-namespace Plugin
-{
-    public class Program
-    {
-        public static ";
-
-        private const string codeFooter = @"
-        }
-    }
-}";
-
-        private const string methodHeader = @" PluginMethod(PluginContext c, CellModel cell)
-        {
-            ";
+        private const string codeHeader = "using System; using System.Collections.Generic; using Cell.Model; using Cell.ViewModel; using Cell.Model.Plugin; using Cell.Plugin;\n\nnamespace Plugin { public class Program { public static ";
+        private const string codeFooter = "\n}}}";
+        private const string methodHeader = " PluginMethod(PluginContext c, CellModel cell) {\n";
 
         private string code = string.Empty;
         private readonly List<CellModel> _cellsToNotify = [];
         private bool _isSyntaxTreeValid;
-
+        private MethodInfo? _compiledMethod;
+        
         public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
         public List<CellLocationDependency> LocationDependencies { get; set; } = [];
@@ -43,24 +27,26 @@ namespace Plugin
 
         public string Name { get; set; } = string.Empty;
 
-        public bool DoesFunctionReturnObject { get; set; } = false;
+        public string ReturnType { get; set; } = "void";
 
         [JsonIgnore]
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
 
-        private MethodInfo? _compiledMethod;
-
         [JsonIgnore]
         public CompileResult CompileResult { get; private set; }
 
-        public PluginFunction()
-        {
-        }
 
-        public PluginFunction(string name, string code, bool isTrigger)
+        [JsonIgnore]
+        public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
+
+        private string FullCode => codeHeader + ReturnType + methodHeader + code + codeFooter;
+        
+        public PluginFunction() { }
+
+        public PluginFunction(string name, string code, string returnType)
         {
             Name = name;
-            DoesFunctionReturnObject = !isTrigger;
+            ReturnType = returnType;
             Code = code;
         }
 
@@ -69,66 +55,63 @@ namespace Plugin
             get => code; 
             set
             {
-                _compiledMethod = null;
+                if (code == value) return;
                 code = value;
-                FindAndRefreshDependencies();
+                _compiledMethod = null;
+                ExtractAndTransformDependencies();
                 if (_isSyntaxTreeValid) Compile();
             }
         }
 
-        [JsonIgnore]
-        public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
-
-        public void FindAndRefreshDependencies()
+        public void ExtractAndTransformDependencies()
         {
             _isSyntaxTreeValid = false;
-            LocationDependencies.Clear();
-            var returnValue = DoesFunctionReturnObject ? "object" : "void";
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(codeHeader + returnValue + methodHeader + code + codeFooter);
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
             SyntaxNode? root = syntaxTree.GetRoot();
-
-            var cellLocationSyntaxRewriter = new FindAndReplaceCellLocationsSyntaxRewriter();
-            root = cellLocationSyntaxRewriter.Visit(root);
-            if (root is null) throw new Exception("Syntax root should not be null after rewrite.");
-            SyntaxTree = root.SyntaxTree;
-            foreach (var (Sheet, Row, Column) in cellLocationSyntaxRewriter.Locations)
+            try
             {
-                LocationDependencies.Add(new CellLocationDependency(Sheet, Row, Column));
+                root = ExtractAndTransformCellLocationReferences(root);
+                root = ExtractAndTransformCollectionReferences(root);
             }
-
-            var collectionReferenceSyntaxRewriter = new FindAndReplaceCollectionReferencesSyntaxWalker();
-            root = collectionReferenceSyntaxRewriter.Visit(root);
-            if (!collectionReferenceSyntaxRewriter.Result.Success) return;
-
-            if (root is null) throw new Exception("Syntax root should not be null after rewrite.");
+            catch (PluginFunctionSyntaxTransformException)
+            {
+                return;
+            }
             SyntaxTree = root.SyntaxTree;
             _isSyntaxTreeValid = true;
-            CollectionDependencies.AddRange(collectionReferenceSyntaxRewriter.CollectionReferences);
-
             NotifyDependenciesHaveChanged();
         }
 
-        private void NotifyDependenciesHaveChanged()
+        private SyntaxNode ExtractAndTransformCollectionReferences(SyntaxNode? root)
         {
-            _cellsToNotify.ForEach(cell => cell.UpdateDependencySubscriptions(this));
+            CollectionDependencies.Clear();
+            var collectionReferenceSyntaxRewriter = new FindAndReplaceCollectionReferencesSyntaxWalker();
+            root = collectionReferenceSyntaxRewriter.Visit(root) ?? throw new Exception("Syntax root should not be null after rewrite.");
+            var resultStatus = collectionReferenceSyntaxRewriter.Result;
+            if (!resultStatus.Success) throw new PluginFunctionSyntaxTransformException(resultStatus.Result);
+            var foundDependencies = collectionReferenceSyntaxRewriter.CollectionReferences;
+            CollectionDependencies.AddRange(foundDependencies);
+            return root;
         }
 
-        internal void StopListeningForDependencyChanges(CellModel cell)
+        private SyntaxNode ExtractAndTransformCellLocationReferences(SyntaxNode? root)
         {
-            _cellsToNotify.Remove(cell);
-        }
-
-        internal void StartListeningForDependencyChanges(CellModel cell)
-        {
-            _cellsToNotify.Add(cell);
+            LocationDependencies.Clear();
+            var cellLocationSyntaxRewriter = new FindAndReplaceCellLocationsSyntaxRewriter();
+            root = cellLocationSyntaxRewriter.Visit(root) ?? throw new Exception("Syntax root should not be null after rewrite.");
+            SyntaxTree = root.SyntaxTree;
+            var foundDependencies = cellLocationSyntaxRewriter.LocationReferences;
+            LocationDependencies.AddRange(foundDependencies);
+            return root;
         }
 
         public MethodInfo? Compile()
         {
-            if (!_isSyntaxTreeValid) FindAndRefreshDependencies();
+            if (!_isSyntaxTreeValid) ExtractAndTransformDependencies();
             try
             {
-                var compiler = new RoslynCompiler("Plugin.Program", SyntaxTree, [typeof(Console)]);
+                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console) };
+                var compiler = new RoslynCompiler(SyntaxTree, typesToAddAssemblyReferencesFor);
                 var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
                 _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
                 CompileResult = new CompileResult { Success = true, Result = "" };
@@ -139,5 +122,11 @@ namespace Plugin
             }
             return _compiledMethod;
         }
+
+        private void NotifyDependenciesHaveChanged() => _cellsToNotify.ForEach(cell => cell.UpdateDependencySubscriptions(this));
+
+        internal void StopListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Remove(cell);
+
+        internal void StartListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Add(cell);
     }
 }

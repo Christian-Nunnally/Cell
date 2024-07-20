@@ -1,5 +1,5 @@
-﻿using Cell.Model;
-using Cell.Persistence;
+﻿using Cell.Data;
+using Cell.Model;
 
 namespace Cell.ViewModel
 {

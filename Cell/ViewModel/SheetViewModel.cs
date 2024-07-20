@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using Cell.Persistence;
+using Cell.Data;
 
 namespace Cell.ViewModel
 {
