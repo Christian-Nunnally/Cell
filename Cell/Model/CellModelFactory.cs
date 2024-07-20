@@ -18,22 +18,16 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            return TrackCell(model);
+            Cells.AddCell(model);
+            return model;
         }
 
         public static CellModel Copy(this CellModel modelToCopy)
         {
             var model = CellModel.DeserializeModel(CellModel.SerializeModel(modelToCopy));
             model.ID = Utilities.GenerateUnqiueId(12);
-            return TrackCell(model);
-        }
-
-        private static CellModel TrackCell(CellModel model)
-        {
             Cells.AddCell(model);
-            CellLoader.SaveCell(model);
             return model;
         }
-
     }
 }

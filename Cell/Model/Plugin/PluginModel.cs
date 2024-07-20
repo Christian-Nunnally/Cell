@@ -1,6 +1,5 @@
 ﻿
 using System.ComponentModel;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Cell.Model.Plugin
@@ -12,10 +11,7 @@ namespace Cell.Model.Plugin
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        override public string ToString()
-        {
-            return ID;
-        }
+        override public string ToString() => ID;
 
         public string ID 
         { 

@@ -22,8 +22,6 @@ namespace Cell.Model
         public static bool IsSpecial(this CellType value)
         {
             CellType isSpecialType = CellType.Corner | CellType.Row | CellType.Column;
-
-            // Check if any of the flagsToCheck are set in 'value'
             return (value & isSpecialType) != 0;
         }
     }

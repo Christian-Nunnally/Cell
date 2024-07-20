@@ -9,6 +9,8 @@ namespace Cell.Persistence
     /// </summary>
     internal static class Cells
     {
+        private static readonly CellLoader _cellLoader = new(PersistenceManager.SaveLocation);
+
         private static readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private static readonly Dictionary<string, CellModel> _cellsById = [];
 
@@ -20,7 +22,7 @@ namespace Cell.Persistence
 
         public static IEnumerable<string> SheetNames => _cellsBySheetMap.Keys;
 
-        public static void AddCell(CellModel cellModel)
+        public static void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
             if (_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary))
             {
@@ -40,6 +42,7 @@ namespace Cell.Persistence
             cellModel.PropertyChanged += CellModelPropertyChanged;
             CellTriggerManager.StartMonitoringCellForEdits(cellModel);
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
+            if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
 
         private static void AddCellToCellByLocationMap(CellModel cellModel)
@@ -53,7 +56,7 @@ namespace Cell.Persistence
             if (_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary))
             {
                 cellDictionary.Remove(cellModel.ID);
-                CellLoader.DeleteCell(cellModel);
+                _cellLoader.DeleteCell(cellModel);
                 CellTriggerManager.StopMonitoringCellForEdits(cellModel);
                 CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
                 _cellsById.Remove(cellModel.ID);
@@ -86,7 +89,7 @@ namespace Cell.Persistence
                 _cellsToLocation[model.ID] = model.GetUnqiueLocationString();
                 AddCellToCellByLocationMap(model);
             }
-            CellLoader.SaveCell(model);
+            _cellLoader.SaveCell(model);
         }
 
         public static List<string> GetSheetNames() => [.. _cellsBySheetMap.Keys];

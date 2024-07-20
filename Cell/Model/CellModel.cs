@@ -3,7 +3,6 @@ using Cell.Plugin;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Cell.Model
 {
@@ -216,7 +215,7 @@ namespace Cell.Model
                 if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function2))
                 {
                     function2.StartListeningForDependencyChanges(this);
-                    var method = function2.CompiledMethod;
+                    var _ = function2.CompiledMethod;
                     UpdateDependencySubscriptions(function2);
                 }
 
@@ -231,7 +230,7 @@ namespace Cell.Model
             if (string.IsNullOrWhiteSpace(populateFunctionName)) return false;
             if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function))
             {
-                var method = function.CompiledMethod;
+                var _ = function.CompiledMethod;
                 return UpdateDependencySubscriptions(function);
             }
             return false;
@@ -245,13 +244,10 @@ namespace Cell.Model
                 return false;
             }
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
-            for (int i = 0; i < function.SheetDependencies.Count; i++)
+            foreach (var locationDependency in function.LocationDependencies)
             {
-                var sheetName = function.SheetDependencies[i];
-                var row = function.RowDependencies[i];
-                var column = function.ColumnDependencies[i];
-                sheetName = string.IsNullOrWhiteSpace(sheetName) ? SheetName : sheetName;
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
+                var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
+                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, locationDependency.Row, locationDependency.Column);
             }
 
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
@@ -330,6 +326,28 @@ namespace Cell.Model
             OnPropertyChanged(nameof(BooleanProperties));
         }
 
+        public int CellsMergedToRight
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(MergedWith)) return 0;
+                var count = 0;
+                while (Cells.GetCell(SheetName, Row, Column + 1 + count)?.MergedWith == MergedWith) count++;
+                return count;
+            }
+        }
+
+        public int CellsMergedBelow
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(MergedWith)) return 0;
+                var count = 0;
+                while (Cells.GetCell(SheetName, Row + 1 + count, Column)?.MergedWith == MergedWith) count++;
+                return count;
+            }
+        }
+
         #endregion
 
         #region Numeric Properties
@@ -369,6 +387,11 @@ namespace Cell.Model
         public static string SerializeModel(CellModel model) => JsonSerializer.Serialize(model);
 
         public static CellModel DeserializeModel(string serializedModel) => JsonSerializer.Deserialize<CellModel>(serializedModel) ?? throw new InvalidOperationException("DeserializeModel failed.");
+
+        internal void TriggerCellEdited(EditContext editContext)
+        {
+            OnCellEdited?.Invoke(this, editContext);
+        }
 
         #endregion
     }

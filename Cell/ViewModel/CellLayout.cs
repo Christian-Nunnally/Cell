@@ -29,6 +29,15 @@ namespace Cell.ViewModel
         private void LayoutRowCells()
         {
             var lastCell = _corner;
+            //List<RowCellViewModel> autoWidthRows = [];
+            //foreach (var rowCellViewModel in _rows.Skip(1))
+            //{
+            //    if (double.IsNaN(rowCellViewModel.Height))
+            //    {
+            //        autoWidthRows += rowCellViewModel;
+            //    }
+            //    lastCell = rowCellViewModel;
+            //}
             foreach (var rowCellViewModel in _rows.Skip(1))
             {
                 rowCellViewModel.X = 0;

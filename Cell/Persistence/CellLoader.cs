@@ -4,70 +4,66 @@ using System.IO;
 
 namespace Cell.Persistence
 {
-    static class CellLoader
+    public class CellLoader(string saveDirectory)
     {
-        public static void LoadCells()
+        private const string SheetsSaveDirectory = "Sheets";
+        private readonly string _saveDirectory = saveDirectory;
+
+        public void LoadCells()
         {
-            var sheetsPath = Path.Combine(PersistenceManager.SaveLocation, "Sheets");
-            if (Directory.Exists(sheetsPath))
+            LoadCellsInternal();
+            ComputeDependenciesThatDependOnCellsToBeLoaded();
+        }
+
+        private void LoadCellsInternal()
+        {
+            var sheetsPath = Path.Combine(_saveDirectory, SheetsSaveDirectory);
+            if (!Directory.Exists(sheetsPath)) return;
+            foreach (var directory in Directory.GetDirectories(sheetsPath)) LoadSheet(directory);
+        }
+
+        private static void ComputeDependenciesThatDependOnCellsToBeLoaded()
+        {
+            foreach (var cell in Cells.AllCells.Where(x => x.NeedsUpdateDependencySubscriptionsToBeCalled))
             {
-                foreach (var directory in Directory.GetDirectories(sheetsPath))
-                {
-                    LoadSheet(directory);
-                }
-            }
-            foreach (var cell in Cells.AllCells)
-            {
-                if (cell.NeedsUpdateDependencySubscriptionsToBeCalled)
-                {
-                    if (!cell.UpdateDependencySubscriptions()) throw new ProjectLoadException($"Unable to update dependency subscriptions for {cell.ID} even after all cells have been loaded.");
-                }
+                if (!cell.UpdateDependencySubscriptions()) throw new ProjectLoadException($"Unable to update dependency subscriptions for {cell.ID} even after all cells have been loaded.");
             }
         }
 
         private static void LoadSheet(string directory)
         {
-            foreach (var file in Directory.GetFiles(directory))
-            {
-                LoadCell(file);
-            }
+            foreach (var file in Directory.GetFiles(directory)) LoadCell(file);
+        }
+
+        public void SaveCells()
+        {
+            foreach (var sheet in Cells.SheetNames) SaveSheet(sheet);
+        }
+
+        private void SaveSheet(string sheet)
+        {
+            foreach (var cell in Cells.GetCellModelsForSheet(sheet)) SaveCell(cell);
+        }
+
+        public void SaveCell(CellModel cell)
+        {
+            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(Path.Combine(directory, cell.ID), CellModel.SerializeModel(cell));
         }
 
         private static CellModel LoadCell(string file)
         {
             var cell = CellModel.DeserializeModel(File.ReadAllText(file));
-            Cells.AddCell(cell);
+            Cells.AddCell(cell, saveAfterAdding: false);
             return cell;
         }
 
-        public static void DeleteCell(CellModel cellModel)
+        public void DeleteCell(CellModel cellModel)
         {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, "Sheets", cellModel.SheetName);
+            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cellModel.SheetName);
             if (!Directory.Exists(directory)) return;
             File.Delete(Path.Combine(directory, cellModel.ID));
-        }
-
-        public static void SaveCells()
-        {
-            foreach (var sheet in Cells.SheetNames)
-            {
-                SaveSheet(sheet);
-            }
-        }
-
-        private static void SaveSheet(string sheet)
-        {
-            foreach (var cell in Cells.GetCellModelsForSheet(sheet))
-            {
-                SaveCell(cell);
-            }
-        }
-
-        public static void SaveCell(CellModel cell)
-        {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, "Sheets", cell.SheetName);
-            Directory.CreateDirectory(directory);
-            File.WriteAllText(Path.Combine(directory, cell.ID), CellModel.SerializeModel(cell));
         }
     }
 }

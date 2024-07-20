@@ -136,20 +136,24 @@ namespace Cell.ViewModel
 
         public void SelectCell(CellViewModel cell)
         {
+            if (!string.IsNullOrWhiteSpace(cell.Model.MergedWith))
+            {
+                cell = CellViewModels.First(x => x.Model.ID == cell.Model.MergedWith);
+            }
+            SelectedCellViewModel = cell;
             if (cell.IsSelected) return;
             cell.IsSelected = true;
             SelectedCellViewModels.Add(cell);
-            SelectedCellViewModel = cell;
             UnhighlightAllCells();
             if (SelectedCellViewModels.Count == 1)
             {
                 if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, SelectedCellViewModel.Model.PopulateFunctionName, out var function))
                 {
-                    for (int i = 0; i < function.SheetDependencies.Count; i++)
+                    foreach(var locationDependencies in function.LocationDependencies)
                     {
-                        var sheet = function.SheetDependencies[i];
-                        var row = function.RowDependencies[i];
-                        var column = function.ColumnDependencies[i];
+                        var sheet = locationDependencies.SheetName;
+                        var row = locationDependencies.Row;
+                        var column = locationDependencies.Column;
                         var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                         if (cellToHighlight == null) continue;
                         cellToHighlight.HighlightCell("#04385c");
@@ -194,6 +198,25 @@ namespace Cell.ViewModel
             cell.IsSelected = false;
             SelectedCellViewModels.Remove(cell);
             if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
+        }
+
+        public void MoveSelectionDown() => MoveSelection(0, 1);
+
+        public void MoveSelectionLeft() => MoveSelection(-1, 0);
+
+        public void MoveSelectionUp() => MoveSelection(0, -1);
+
+        public void MoveSelectionRight() => MoveSelection(1, 0);
+
+        public void MoveSelection(int columnOffset, int rowOffset)
+        {
+            if (SelectedCellViewModel is null) return;
+            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight;
+            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow;
+            var cellToSelect = CellViewModels.FirstOrDefault(x => x.Column == SelectedCellViewModel.Column + columnOffset && x.Row == SelectedCellViewModel.Row + rowOffset);
+            if (cellToSelect is null) return;
+            UnselectAllCells();
+            SelectCell(cellToSelect);
         }
 
         public static readonly SheetViewModel NullSheet = new("null");

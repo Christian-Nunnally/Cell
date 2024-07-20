@@ -62,19 +62,57 @@ namespace Cell.View
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
             ApplicationViewModel.Instance.SheetViewModel.LastKeyPressed = e.Key.ToString();
+            if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
             if (e.IsDown && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 if (e.Key == Key.C)
                 {
-                    if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return;
                     ApplicationViewModel.Instance.CopySelectedCells();
+                    e.Handled = true;
                 }
                 else if (e.Key == Key.V)
                 {
-                    if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return;
                     ApplicationViewModel.Instance.PasteCopiedCells();
+                    e.Handled = true;
                 }
             }
+            else if (e.Key == Key.Tab)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel.MoveSelectionLeft();
+                else ApplicationViewModel.Instance.SheetViewModel.MoveSelectionRight();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel.MoveSelectionUp();
+                else ApplicationViewModel.Instance.SheetViewModel.MoveSelectionDown();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Up)
+            {
+                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionUp();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Down)
+            {
+                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionDown();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Left)
+            {
+                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionLeft();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Right)
+            {
+                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionRight();
+                e.Handled = true;
+            }
+        }
+
+        private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
+        {
+            ApplicationViewModel.Instance.ToggleEditingPanels();
         }
 
         private void OnCodeEditorLoaded(object sender, RoutedEventArgs e)

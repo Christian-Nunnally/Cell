@@ -28,12 +28,6 @@ namespace Cell.View
         {
             if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
-                if (e.ClickCount == 2)
-                {
-                    if (PanAndZoomCanvas is null) return;
-                    if (ApplicationViewModel.Instance.ToggleEditingPanels()) SheetViewModel.SelectCell(cell);
-                    return;
-                }
                 if (e.ChangedButton == MouseButton.Left)
                 {
                     var wasSelected = cell.IsSelected;
@@ -68,6 +62,10 @@ namespace Cell.View
                         SheetViewModel.UnselectCell(cell);
                     }
                 }
+                else if (e.ChangedButton == MouseButton.Middle)
+                {
+                    ApplicationViewModel.Instance.GoToCell(cell.Model);
+                }
             }
         }
 
@@ -79,8 +77,6 @@ namespace Cell.View
                 {
                     if (element.DataContext is CellViewModel cell)
                     {
-                        var previouslySelectedCell = SheetViewModel.SelectedCellViewModel;
-
                         if (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down)
                         {
                             if (CanSelectCell(cell.Model)) SheetViewModel.SelectCell(cell);
@@ -100,10 +96,8 @@ namespace Cell.View
                                     if (CanSelectCell(cellToSelect)) SheetViewModel.SelectCell(cellToSelect!);
                                 }
                             }
-                        }
-                        if (previouslySelectedCell?.IsSelected ?? false)
-                        {
-                            SheetViewModel.SelectCell(previouslySelectedCell);
+                            var topLeftCell = Cells.GetCell(SheetViewModel.SheetName, startRow, startColumn);
+                            if (topLeftCell is not null) SheetViewModel.SelectCell(topLeftCell);
                         }
                     }
                 }
@@ -139,11 +133,33 @@ namespace Cell.View
             }
         }
 
-        private void PanAndZoomCanvasMouseDown(object sender, MouseButtonEventArgs e)
+        private void TextBoxKeyDownForCell(object sender, KeyEventArgs e)
         {
-            if (e.ClickCount == 2)
+            if (sender is not TextBox textbox) return;
+            if (e.Key == Key.Enter)
             {
-                if (PanAndZoomCanvas is not null) ApplicationViewModel.Instance.ToggleEditingPanels();
+                textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                if (Keyboard.Modifiers == ModifierKeys.Shift) SheetViewModel?.MoveSelectionUp();
+                else SheetViewModel?.MoveSelectionDown();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Tab)
+            {
+                textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                if (Keyboard.Modifiers == ModifierKeys.Shift) SheetViewModel?.MoveSelectionLeft();
+                else SheetViewModel?.MoveSelectionRight();
+                e.Handled = true;
+            }
+        }
+
+        private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.DataContext is TextboxCellViewModel cell)
+                {
+                    cell.SetTextBox(textBox);
+                }
             }
         }
     }

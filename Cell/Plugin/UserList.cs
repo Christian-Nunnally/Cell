@@ -48,6 +48,15 @@ namespace Cell.Plugin
             UserCollectionLoader.RemoveFromCollection(_collectionName, item.ID);
         }
 
+        public void RemoveAt(int index)
+        {
+            if (index < 0 || index >= _orderedList.Count) return;
+            var model = _orderedList[index];
+            _orderedList.RemoveAt(index);
+            _idMap.Remove(model.ID);
+            UserCollectionLoader.RemoveFromCollection(_collectionName, model.ID);
+        }
+
         public T GetLast()
         {
             return _orderedList.Last();

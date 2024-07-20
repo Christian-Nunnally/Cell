@@ -156,13 +156,14 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:TextboxCellViewModel}">
                 <TextBox 
+                    Loaded="CellTextBoxLoaded"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
                     Text="{Binding Path=Text, Mode=TwoWay}" 
                     VerticalAlignment="Stretch"
                     HorizontalAlignment="Stretch"
                     Margin="3"
-                    KeyDown="TextBoxKeyDown"/>
+                    KeyDown="TextBoxKeyDownForCell"/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:DropdownCellViewModel}">
                 <ComboBox
@@ -222,7 +223,6 @@
                 <local:PanAndZoomCanvas 
                     x:Name="canvas" 
                     Loaded="PanZoomCanvasLoaded" 
-                    MouseDown="PanAndZoomCanvasMouseDown"
                     HorizontalAlignment="Stretch"  
                     VerticalAlignment="Stretch" />
             </ItemsPanelTemplate>

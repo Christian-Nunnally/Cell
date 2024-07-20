@@ -38,7 +38,7 @@ namespace Cell.Persistence
                 {
                     if (collection.TryGetValue(model.ID, out var pluginModel))
                     {
-                        SaveItem(collectionName, model.ID, model);
+                        SaveItem(collectionName, pluginModel.ID, pluginModel);
                         CellPopulateManager.NotifyCollectionUpdated(collectionName);
                     }
                 }

@@ -8,7 +8,6 @@ namespace Cell.ViewModel
 {
     public class ListCellViewModel : CellViewModel
     {
-
         public ObservableCollection<PluginModel> ListItems { get; set; } = [];
 
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)

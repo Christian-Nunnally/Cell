@@ -5,6 +5,7 @@ namespace Cell.ViewModel
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
+        private readonly CellClipboard _cellClipboard = new();
         private const int BottomPanelHeight = 0;
         private const int TopPanelHeight = 35;
         private const int LeftPanelHeight = 215;
@@ -29,6 +30,28 @@ namespace Cell.ViewModel
         private int editingSpaceLeft;
         private int editingSpaceRight;
         public bool AreEditingPanelsOpen;
+
+        public double ApplicationWindowWidth
+        {
+            get { return _applicationWindowWidth; }
+            set
+            {
+                _applicationWindowWidth = value;
+                OnPropertyChanged(nameof(ApplicationWindowWidth));
+            }
+        }
+        private double _applicationWindowWidth = 1200;
+
+        public double ApplicationWindowHeight
+        {
+            get { return _applicationWindowHeight; }
+            set
+            {
+                _applicationWindowHeight = value;
+                OnPropertyChanged(nameof(ApplicationWindowHeight));
+            }
+        }
+        private double _applicationWindowHeight = 1300;
 
         public SheetViewModel SheetViewModel
         {
@@ -99,7 +122,7 @@ namespace Cell.ViewModel
         {
             if (SheetViewModel.SheetName == sheetName) return;
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
-            SheetViewModel.LoadCellViewModels();
+            if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
         }
 
         internal void GoToCell(CellModel cellModel)
@@ -111,12 +134,12 @@ namespace Cell.ViewModel
 
         internal void CopySelectedCells()
         {
-            CellClipboard.CopySelectedCells(SheetViewModel);
+            _cellClipboard.CopySelectedCells(SheetViewModel);
         }
 
         internal void PasteCopiedCells()
         {
-            CellClipboard.PasteCopiedCells(SheetViewModel);
+            _cellClipboard.PasteCopiedCells(SheetViewModel);
         }
 
         public bool ToggleEditingPanels()

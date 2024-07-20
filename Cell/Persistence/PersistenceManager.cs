@@ -14,14 +14,14 @@ namespace Cell.Persistence
         {
             PluginFunctionLoader.SavePlugins();
             UserCollectionLoader.SaveCollections();
-            CellLoader.SaveCells();
+            new CellLoader(SaveLocation).SaveCells();
         }
 
         public static void LoadAll()
         {
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
-            CellLoader.LoadCells();
+            new CellLoader(SaveLocation).LoadCells();
         }
 
         public static void CreateBackup()

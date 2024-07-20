@@ -11,8 +11,11 @@ namespace Cell.ViewModel
             get => Model.GetBooleanProperty(nameof(IsChecked));
             set
             {
+                var oldValue = IsChecked;
+                if (oldValue == value) return;
                 Model.SetBooleanProperty(nameof(IsChecked), value);
                 OnPropertyChanged(nameof(IsChecked));
+                Model.TriggerCellEdited(new EditContext(nameof(IsChecked), IsChecked, oldValue));
             }
         }
 
@@ -31,20 +34,12 @@ namespace Cell.ViewModel
             }
         }
 
-        public ICommand CheckboxCheckedCommand
-        {
-            get
-            {
-                return _checkboxCheckedCommand ??= new RelayCommand(x => CanExecute, x => CheckboxChecked());
-            }
-        }
+        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CanExecute, x => CheckboxChecked());
 
         public static bool CanExecute => true;
 
-        public void CheckboxChecked()
+        public static void CheckboxChecked()
         {
-            //IsChecked = !IsChecked;
-            //CellTriggerManager.CellEdited(Model, new EditContext(nameof(CheckboxCellViewModel.IsChecked), IsChecked.ToString(), (!IsChecked).ToString()));
         }
     }
 

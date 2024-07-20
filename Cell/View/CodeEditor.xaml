@@ -10,7 +10,7 @@
         <BooleanToVisibilityConverter x:Key="btv"/>
     </UserControl.Resources>
     <DockPanel LastChildFill="False">
-        <Grid DockPanel.Dock="{Binding UserSetDockOrientation}" Height="{Binding UserSetHeight}" Width="{Binding UserSetWidth}">
+        <Grid DockPanel.Dock="{Binding UserSetDockOrientation}" Height="{Binding UserSetHeight}" Width="{Binding UserSetWidth}" Background="{StaticResource CellBackground}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="36"/>
                 <RowDefinition Height="*"/>
@@ -54,5 +54,14 @@
                 VerticalContentAlignment="Top"
                 Foreground="{Binding ResultStringColor}"/>
         </Grid>
+        <Rectangle 
+            DockPanel.Dock="{Binding UserSetDockOrientation}" 
+            Fill="{StaticResource SelectedBorderColor}" 
+            Height="{Binding UserSetHeightOfResizeBar}" 
+            Width="{Binding UserSetWidthOfResizeBar}"
+            Cursor="{Binding DockOrientationCursor}"
+            MouseDown="CodeWindowResizerRectangleMouseDown" 
+            MouseMove="CodeWindowResizerRectangleMouseMove" 
+            MouseUp="CodeWindowResizerRectangleMouseUp"/>
     </DockPanel>
 </UserControl>

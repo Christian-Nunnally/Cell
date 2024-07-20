@@ -9,8 +9,10 @@
     d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     mc:Ignorable="d"
     Title="MainWindow" 
-    Height="450" 
-    Width="800"
+    Height="{Binding ApplicationWindowWidth}" 
+    Width="{Binding ApplicationWindowWidth}"
+    d:Width="500"
+    d:Height="500"
     WindowStyle="None"
     WindowState="Normal" 
     ResizeMode="CanResize"
@@ -433,8 +435,17 @@
                 Height="28"
                 FontFamily="Consolas"
                 WindowChrome.IsHitTestVisibleInChrome="True"/>
+            <Button 
+                Content="..."
+                Click="ToggleEditPanelButtonClick"
+                DockPanel.Dock="Left" 
+                BorderThickness="0"
+                Width="35"
+                Height="28"
+                FontFamily="Consolas"
+                WindowChrome.IsHitTestVisibleInChrome="True"/>
             <Label></Label>
-       </DockPanel>
+        </DockPanel>
 
         <Grid >
             <Grid.ColumnDefinitions>
