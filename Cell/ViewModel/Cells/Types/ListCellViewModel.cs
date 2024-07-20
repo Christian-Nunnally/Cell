@@ -52,8 +52,12 @@ namespace Cell.ViewModel
 
         internal void UpdateList()
         {
+            // TODO: can I just bind directly to the underlying list and fire property change notifs?
             ListItems.Clear();
-            foreach (var item in UserCollectionLoader.GetCollection(CollectionName))
+
+            var collection = UserCollectionLoader.GetCollection(CollectionName);
+            if (collection == null) return;
+            foreach (var item in collection.Items)
             {
                 ListItems.Add(item);
             }

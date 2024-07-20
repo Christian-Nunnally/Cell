@@ -194,5 +194,10 @@ namespace Cell.Plugin
                 UnsubscribeFromReference(model, subscription.Key, referenceToSubscriberMap, subscriberToReferenceMap);
             }
         }
+
+        internal static void NotifyCollectionUpdated(object name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

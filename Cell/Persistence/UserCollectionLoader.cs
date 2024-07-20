@@ -11,23 +11,16 @@ namespace Cell.Persistence
 {
     internal static class UserCollectionLoader
     {
-        private static readonly Dictionary<string, Dictionary<string, PluginModel>> _collections = [];
+        private static readonly Dictionary<string, UserCollection> _collections = [];
 
         public static IEnumerable<string> CollectionNames => _collections.Keys;
 
-        internal static void AddToCollection(string collection, PluginModel model)
+        internal static void AddToCollection(string collectionName, PluginModel model)
         {
-            if (_collections.TryGetValue(collection, out Dictionary<string, PluginModel>? value))
-            {
-                if (value.ContainsKey(model.ID)) return;
-                value.Add(model.ID, model);
-            }
-            else
-            {
-                _collections.Add(collection, new Dictionary<string, PluginModel> {{model.ID, model}});
-            }
-            SaveItem(collection, model.ID, model);
-            CellPopulateManager.NotifyCollectionUpdated(collection);
+            var collection = GetCollection(collectionName) ?? CreateAndTrackNewCollection(collectionName);
+            collection.Add(model);
+            SaveItem(collectionName, model.ID, model);
+            CellPopulateManager.NotifyCollectionUpdated(collectionName);
             model.PropertyChanged += PluginModelPropertyChanged;
         }
 
@@ -46,16 +39,35 @@ namespace Cell.Persistence
             }
         }
 
-        public static IEnumerable<PluginModel> GetCollection(string collection) => _collections.TryGetValue(collection, out Dictionary<string, PluginModel>? value) ? value.Values : ([]);
+        public static UserCollection? GetCollection(string collection) => _collections.TryGetValue(collection, out UserCollection? value) ? value : null;
 
-        public static bool CreateEmptyCollection(string collection)
+        public static bool CreateEmptyCollection(string collectionName)
         {
-            if (!_collections.ContainsKey(collection))
+            if (!_collections.ContainsKey(collectionName))
             {
-                _collections.Add(collection, []);
+                CreateAndTrackNewCollection(collectionName);
                 return true;
             }
             return false;
+        }
+
+        private static UserCollection CreateAndTrackNewCollection(string collection)
+        {
+            var userCollection = new UserCollection(collection);
+            userCollection.ItemAdded += UserCollectionItemAdded;
+            userCollection.ItemRemoved += UserCollectionItemRemoved;
+            _collections.Add(collection, userCollection);
+            return userCollection;
+        }
+
+        private static void UserCollectionItemAdded(UserCollection collection, PluginModel model)
+        {
+            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+        }
+
+        private static void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
+        {
+            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
         public static void SaveCollections()
@@ -63,9 +75,9 @@ namespace Cell.Persistence
             foreach (var collection in _collections) SaveCollection(collection.Key, collection.Value);
         }
 
-        public static void SaveCollection(string collectionName, Dictionary<string, PluginModel> collection)
+        public static void SaveCollection(string collectionName, UserCollection collection)
         {
-            foreach (var (id, model) in collection) SaveItem(collectionName, id, model);
+            foreach (var model in collection.Items) SaveItem(collectionName, model.ID, model);
         }
 
         private static void SaveItem(string collectionName, string id, PluginModel model)
@@ -84,11 +96,11 @@ namespace Cell.Persistence
             {
                 foreach (var directory in Directory.GetDirectories(collectionsDirectory))
                 {
-                    var collection = new Dictionary<string, PluginModel>();
+                    var collection = new UserCollection(Path.GetFileName(directory));
                     foreach (var file in Directory.GetFiles(directory))
                     {
                         var model = JsonSerializer.Deserialize<PluginModel>(File.ReadAllText(file)) ?? throw new ProjectLoadException($"Failed to load collection {directory} because of mode {file} is not a valid {nameof(PluginModel)}");
-                        collection.Add(Path.GetFileName(file), model);
+                        collection.Add(model);
                         model.PropertyChanged += PluginModelPropertyChanged;
                     }
                     _collections.Add(Path.GetFileName(directory), collection);

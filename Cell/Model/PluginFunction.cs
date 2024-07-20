@@ -18,7 +18,8 @@ namespace Cell.Model
         private readonly List<CellModel> _cellsToNotify = [];
         private bool _isSyntaxTreeValid;
         private MethodInfo? _compiledMethod;
-        
+
+        [JsonIgnore]
         public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
         public List<CellLocationDependency> LocationDependencies { get; set; } = [];
@@ -67,6 +68,7 @@ namespace Cell.Model
         {
             _isSyntaxTreeValid = false;
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
+            
             SyntaxNode? root = syntaxTree.GetRoot();
             try
             {
@@ -80,6 +82,14 @@ namespace Cell.Model
             SyntaxTree = root.SyntaxTree;
             _isSyntaxTreeValid = true;
             NotifyDependenciesHaveChanged();
+        }
+
+        public SemanticModel GetSemanticModel()
+        {
+            var compilation = CSharpCompilation.Create("PluginAssembly")
+                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
+                .AddSyntaxTrees(SyntaxTree);
+            return compilation.GetSemanticModel(SyntaxTree);
         }
 
         private SyntaxNode ExtractAndTransformCollectionReferences(SyntaxNode? root)

@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Plugin;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -53,6 +54,8 @@ namespace Cell.View
             UserSetHeight = double.NaN;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
+
+            CodeCompletionWindowFactory.RegisterTypesInAssembly(typeof(TodoItem).Assembly);
         }
 
         private CompletionWindow? completionWindow;
@@ -63,7 +66,7 @@ namespace Cell.View
             {
                 TextArea textArea = textEditor.TextArea;
                 var type = GetVariableTypePriorToCarot(textArea);
-                completionWindow = CodeCompletionWindowFactory.Create(textArea, type);
+                completionWindow = CodeCompletionWindowFactory.Create(textArea, type, _doesFunctionReturnValue);
                 if (completionWindow is not null)
                 {
                     completionWindow.Show();

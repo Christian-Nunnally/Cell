@@ -510,6 +510,7 @@
                             <Button Content="→" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToRightButtonClick"/>
                         </StackPanel>
                     </StackPanel>
+                    <Button Content="Index" Click="IndexButtonClicked" Width="100"/>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">

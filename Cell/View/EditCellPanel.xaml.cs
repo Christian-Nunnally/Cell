@@ -258,5 +258,23 @@ namespace Cell.View
                 cell.TextAlignmentForView = TextAlignment.Right;
             }
         }
+
+        private void IndexButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            {
+                var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
+                var leftmost = selectedCells.Select(x => x.Column).Min();
+                var topmost = selectedCells.Select(x => x.Row).Min();
+                var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
+                if (topLeftCell is null) return;
+                foreach (var selectedCell in selectedCells)
+                {
+                    if (selectedCell == topLeftCell) continue;
+                    var distance = (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row);
+                    selectedCell.Index = topLeftCell.Index + distance;
+                }
+            }
+        }
     }
 }

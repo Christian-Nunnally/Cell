@@ -287,7 +287,7 @@ namespace Cell.Model
 
         internal void SetStringProperty(string key, string value)
         {
-            if (StringProperties.TryGetValue(key, out var currentValue) && currentValue != value)
+            if (StringProperties.TryGetValue(key, out var currentValue))
             {
                 if (currentValue == value) return;
                 StringProperties[key] = value;

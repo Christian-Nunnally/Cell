@@ -61,7 +61,7 @@ namespace Cell.Persistence
         internal static PluginFunction? GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
-            return CreateFunction(space, name);
+            return CreateFunction(space, name, string.Empty);
         }
 
         internal static bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)
@@ -90,12 +90,13 @@ namespace Cell.Persistence
             }
         }
 
-        public static PluginFunction? CreateFunction(string space, string name, string code = "return \"Hello world\";")
+        public static PluginFunction? CreateFunction(string space, string name, string code)
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
             var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName ? "void" : "object");
             AddPluginFunctionToNamespace(space, function);
+            SavePluginFunction(space, function);
             return function;
         }
     }

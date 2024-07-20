@@ -9,14 +9,12 @@ namespace Cell.Plugin
         public static Dictionary<string, UserList<T>> UserListsOfT { get; } = [];
 
         private readonly string _collectionName;
-        private readonly List<T> _orderedList;
-        private readonly Dictionary<string, T> _idMap;
+        private readonly UserCollection _userCollection;
 
         private UserList(string collectionName)
         {
             _collectionName = collectionName;
-            _orderedList = UserCollectionLoader.GetCollection(collectionName).OfType<T>().ToList();
-            _idMap = _orderedList.ToDictionary(item => item.ID);
+            _userCollection = UserCollectionLoader.GetCollection(collectionName) ?? throw new Exception("Can't find userlist");
         }
 
         public static UserList<T> GetOrCreate(string collectionName)
@@ -25,46 +23,43 @@ namespace Cell.Plugin
             {
                 return UserListsOfT[collectionName];
             }
+            var newUserList = new UserList<T>(collectionName);
             UserList.AllUserListNames.Add(collectionName);
-            UserListsOfT.Add(collectionName, new UserList<T>(collectionName));
+            UserListsOfT.Add(collectionName, newUserList);
             return UserListsOfT[collectionName];
         }
 
-        public IEnumerator<T> GetEnumerator() => _orderedList.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => _userCollection?.Items.OfType<T>().GetEnumerator() ?? new List<T>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void Add(T item)
         {
-            _orderedList.Add(item);
-            _idMap.Add(item.ID, item);
             UserCollectionLoader.AddToCollection(_collectionName, item);
         }
 
         public void Remove(T item)
         {
-            _orderedList.Remove(item);
-            _idMap.Remove(item.ID);
             UserCollectionLoader.RemoveFromCollection(_collectionName, item.ID);
         }
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= _orderedList.Count) return;
-            var model = _orderedList[index];
-            _orderedList.RemoveAt(index);
-            _idMap.Remove(model.ID);
+            if (_userCollection == null) return;
+            if (index < 0 || index >= _userCollection.Items.Count) return;
+            var model = _userCollection.Items[index];
+            _userCollection.Remove(model);
             UserCollectionLoader.RemoveFromCollection(_collectionName, model.ID);
         }
 
-        public T GetLast()
+        public void Sort(Comparison<T> comparison)
         {
-            return _orderedList.Last();
+            _userCollection?.Sort((a, b) => comparison((T)a, (T)b));
         }
 
         public T? this[int key]
         {
-            get => key >= 0 && key < _orderedList.Count ? _orderedList[key] : new T();
+            get => key >= 0 && key < _userCollection.Items.Count ? (T)_userCollection.Items[key] : new T();
         }
     }
 

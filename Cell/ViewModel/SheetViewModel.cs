@@ -91,6 +91,35 @@ namespace Cell.ViewModel
             AddCell(column);
             var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
             AddCell(cell);
+
+            var columnViewModel = CellViewModels.OfType<ColumnCellViewModel>().First();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+
+            var rowViewModel = CellViewModels.OfType<RowCellViewModel>().First();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
         }
 
         internal void UpdateLayout()

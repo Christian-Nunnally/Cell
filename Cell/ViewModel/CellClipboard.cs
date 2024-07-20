@@ -29,11 +29,11 @@ namespace Cell.ViewModel
             activeSheet.UpdateLayout();
         }
 
-        private void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private static void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
             var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            var cellToReplace = Cells.GetCell(cellToPaste.SheetName, newRow, newColumn);
+            var cellToReplace = Cells.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
             if (cellToReplace is null) return;
             if (cellToReplace.CellType.IsSpecial()) return;
 
