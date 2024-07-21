@@ -226,7 +226,7 @@
             </Style.Triggers>
         </Style>
 
-        <Style TargetType="ToggleButton">
+        <!--<Style TargetType="ToggleButton" x:Key="ToggleButtonBaseStyle">
             <Setter Property="Background" Value="{StaticResource CellBackground}"/>
             <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
             <Setter Property="Height" Value="25"/>
@@ -250,7 +250,7 @@
                     <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
                 </Trigger>
             </Style.Triggers>
-        </Style>
+        </Style>-->
 
         <!--Control colors.-->
         <Color x:Key="WindowColor">#FFE8EDF9</Color>

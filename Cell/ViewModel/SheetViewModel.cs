@@ -215,10 +215,13 @@ namespace Cell.ViewModel
         public void ChangeCellType(CellViewModel? cellViewModel, CellType newType)
         {
             if (cellViewModel is null) return;
+            SelectedCellViewModels.Remove(cellViewModel);
+            HighlightedCellViewModels.Remove(cellViewModel);
             CellViewModels.Remove(cellViewModel);
             cellViewModel.Model.CellType = newType;
             var newViewModel = CellViewModelFactory.Create(cellViewModel.Model, this);
             CellViewModels.Add(newViewModel);
+            SelectCell(newViewModel);
         }
 
         internal void UnselectCell(CellViewModel cell)

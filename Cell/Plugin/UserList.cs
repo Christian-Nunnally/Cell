@@ -8,13 +8,12 @@ namespace Cell.Plugin
     {
         public static Dictionary<string, UserList<T>> UserListsOfT { get; } = [];
 
-        private readonly string _collectionName;
         private readonly UserCollection _userCollection;
 
         private UserList(string collectionName)
         {
-            _collectionName = collectionName;
-            _userCollection = UserCollectionLoader.GetCollection(collectionName) ?? throw new Exception("Can't find userlist");
+            if (string.IsNullOrWhiteSpace(collectionName)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(collectionName));
+            _userCollection = UserCollectionLoader.GetOrCreateCollection(collectionName);
         }
 
         public static UserList<T> GetOrCreate(string collectionName)
@@ -35,12 +34,12 @@ namespace Cell.Plugin
 
         public void Add(T item)
         {
-            UserCollectionLoader.AddToCollection(_collectionName, item);
+            _userCollection.Add(item);
         }
 
         public void Remove(T item)
         {
-            UserCollectionLoader.RemoveFromCollection(_collectionName, item.ID);
+            _userCollection.Remove(item);
         }
 
         public void RemoveAt(int index)
@@ -49,7 +48,6 @@ namespace Cell.Plugin
             if (index < 0 || index >= _userCollection.Items.Count) return;
             var model = _userCollection.Items[index];
             _userCollection.Remove(model);
-            UserCollectionLoader.RemoveFromCollection(_collectionName, model.ID);
         }
 
         public void Sort(Comparison<T> comparison)

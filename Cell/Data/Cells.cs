@@ -13,13 +13,10 @@ namespace Cell.Data
         private static readonly CellLoader _cellLoader = new(PersistenceManager.SaveLocation);
 
         private static readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
-        private static readonly Dictionary<string, CellModel> _cellsById = [];
-
         private static readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private static readonly Dictionary<string, string> _cellsToLocation = [];
 
-        public static readonly List<CellModel> _allCells = [];
-        public static readonly ReadOnlyCollection<CellModel> AllCells = _allCells.AsReadOnly();
+        public static readonly IEnumerable<CellModel> AllCells = _cellsBySheetMap.Values.SelectMany(x => x.Values);
 
         public static IEnumerable<string> SheetNames => _cellsBySheetMap.Keys;
 
@@ -34,8 +31,6 @@ namespace Cell.Data
             {
                 _cellsBySheetMap.Add(cellModel.SheetName, new Dictionary<string, CellModel> { { cellModel.ID, cellModel } });
             }
-            _cellsById.Add(cellModel.ID, cellModel);
-            _allCells.Add(cellModel);
 
             AddCellToCellByLocationMap(cellModel);
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
@@ -60,8 +55,6 @@ namespace Cell.Data
                 _cellLoader.DeleteCell(cellModel);
                 CellTriggerManager.StopMonitoringCell(cellModel);
                 CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
-                _cellsById.Remove(cellModel.ID);
-                _allCells.Remove(cellModel);
                 _cellsToLocation.Remove(cellModel.ID);
                 _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
             }
@@ -75,8 +68,6 @@ namespace Cell.Data
             }
             return [];
         }
-
-        public static CellModel GetCell(string cellId) => _cellsById.TryGetValue(cellId, out var cellModel) ? cellModel : new CellModel();
 
         public static CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
 

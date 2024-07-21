@@ -282,7 +282,7 @@ namespace Cell.Model
         internal string GetStringProperty(string key)
         {
             if (StringProperties.TryGetValue(key, out var value)) return value;
-            return "";
+            return string.Empty;
         }
 
         internal void SetStringProperty(string key, string value)

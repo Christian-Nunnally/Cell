@@ -17,6 +17,7 @@
         <xctk:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />
         <xctk:AdditionConverter x:Key="AdditionConverter" />
         <xctk:ColorModeToTabItemSelectedConverter x:Key="ColorModeToTabItemSelectedConverter" />
+        <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
         <converters:RGBHexColorConverter x:Key="HexToColorConverter" />
 
         <ControlTemplate x:Key="TabItemTemplate" TargetType="{x:Type xctk:ColorPickerTabItem}">
@@ -442,34 +443,104 @@
                             HeaderForeground="{StaticResource ForegroundColor}"
                             TabForeground="{StaticResource ForegroundColor}"
                             ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"/>
-                        <TextBox Text="{Binding Path=BorderThicknessString, UpdateSourceTrigger=LostFocus}" Width="75" KeyDown="TextBoxKeyDown"/>
+                        <TextBox Text="{Binding Path=BorderThicknessString, UpdateSourceTrigger=LostFocus}" Width="50" KeyDown="TextBoxKeyDown"/>
+                        <Grid>
+                            <ToggleButton x:Name="TogglePopupButton" Content="⇆" FontSize="14" Width="25" >
+                                <ToggleButton.Style>
+                                    <Style TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                        <Setter Property="Background" Value="{StaticResource CellBackground}"/>
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}"/>
+                                        <Setter Property="IsHitTestVisible" Value="True"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                    <Border 
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{StaticResource CellBorderColor}"
+                                                        BorderThickness="1">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding ElementName=Popup, Path=IsOpen}" Value="True">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+
+                            <Popup StaysOpen="False" IsOpen="{Binding IsChecked, ElementName=TogglePopupButton, Mode=TwoWay}"
+                                   PlacementTarget="{Binding ElementName=TogglePopupButton}" PopupAnimation="Slide" 
+                                        x:Name="Popup" Placement="Bottom">
+                                <Border BorderThickness="4" BorderBrush="{StaticResource SelectedBorderColor}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="↖" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopLeftButtonClick"/>
+                                            <Button Content="↑" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopButtonClick"/>
+                                            <Button Content="↗" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopRightButtonClick"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="←" Width="20" Height="20" FontSize="14" Click="SetAlignmentToLeftButtonClick"/>
+                                            <Button Content="•" Width="20" Height="20" FontSize="14" Click="SetAlignmentToCenterButtonClick"/>
+                                            <Button Content="→" Width="20" Height="20" FontSize="14" Click="SetAlignmentToRightButtonClick"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="↙" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomLeftButtonClick"/>
+                                            <Button Content="↓" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomButtonClick"/>
+                                            <Button Content="↘" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomRightButtonClick"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="←" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToLeftButtonClick"/>
+                                            <Button Content="•" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToCenterButtonClick"/>
+                                            <Button Content="→" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToRightButtonClick"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="50" Content="Font"/>
                         <TextBox Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" Width="75" KeyDown="TextBoxKeyDown"/>
-                        <TextBox Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" Width="27" KeyDown="TextBoxKeyDown"/>
+                        <TextBox Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" Width="27" KeyDown="TextBoxKeyDown" HorizontalContentAlignment="Center"/>
                         <ToggleButton Content="b" FontWeight="Bold" Width="16" IsChecked="{Binding IsFontBold}" />
                         <ToggleButton Content="i" FontStyle="Italic" Width="16" IsChecked="{Binding IsFontItalic}"/>
                         <ToggleButton Width="16" IsChecked="{Binding IsFontStrikethrough}">
                             <TextBlock TextDecorations="Strikethrough" Text="s"/>
                         </ToggleButton>
                     </StackPanel>
-                    <Label Content="Type" HorizontalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal">
-                        <StackPanel>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Checkbox" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Button" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Dropdown" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="List" Width="100"/>
-                        </StackPanel>
-                        <StackPanel>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Label" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Textbox" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Progress" Width="100"/>
-                            <Button Click="ChangeCellTypeButtonPressed" Content="Graph" Width="100"/>
-                        </StackPanel>
+                        <Label Content="Type" HorizontalAlignment="Center" Width="50"/>
+                        <ComboBox Text="{Binding CellType, Mode=OneWay, Converter={StaticResource EnumToStringConverter}}" SelectionChanged="CellTypeComboBoxSelectionChanged" Width="150">
+                            <Label Content="Label"/>
+                            <Label Content="Textbox"/>
+                            <Label Content="Checkbox"/>
+                            <Label Content="Button"/>
+                            <Label Content="Dropdown"/>
+                            <Label Content="List"/>
+                            <Label Content="Progress"/>
+                            <Label Content="Graph"/>
+                        </ComboBox>
                     </StackPanel>
-                    <Label Content="Functions" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Merge" Click="MergeButtonClicked" Width="100"/>
+                        <Button Content="Unmerge" Click="UnmergeButtonClicked" Width="100"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Functions" Width="100"/>
+                        <Button Content="Index" Click="IndexButtonClicked" Width="65"/>
+                        <TextBox Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" Width="35" HorizontalContentAlignment="Center" KeyDown="TextBoxKeyDown"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Populate" Width="65"/>
                         <TextBox Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
@@ -480,37 +551,6 @@
                         <TextBox Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
                         <Button Content="Edit" Click="EditOnEditFunctionButtonClicked" Width="35"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Index" Width="100"/>
-                        <TextBox Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Merge" Click="MergeButtonClicked" Width="100"/>
-                        <Button Content="Unmerge" Click="UnmergeButtonClicked" Width="100"/>
-                    </StackPanel>
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="↖" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopLeftButtonClick"/>
-                            <Button Content="↑" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopButtonClick"/>
-                            <Button Content="↗" Width="20" Height="20" FontSize="14" Click="SetAlignmentToTopRightButtonClick"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="←" Width="20" Height="20" FontSize="14" Click="SetAlignmentToLeftButtonClick"/>
-                            <Button Content="•" Width="20" Height="20" FontSize="14" Click="SetAlignmentToCenterButtonClick"/>
-                            <Button Content="→" Width="20" Height="20" FontSize="14" Click="SetAlignmentToRightButtonClick"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="↙" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomLeftButtonClick"/>
-                            <Button Content="↓" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomButtonClick"/>
-                            <Button Content="↘" Width="20" Height="20" FontSize="14" Click="SetAlignmentToBottomRightButtonClick"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="←" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToLeftButtonClick"/>
-                            <Button Content="•" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToCenterButtonClick"/>
-                            <Button Content="→" Width="20" Height="20" FontSize="14" Click="SetTextAlignmentToRightButtonClick"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <Button Content="Index" Click="IndexButtonClicked" Width="100"/>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">

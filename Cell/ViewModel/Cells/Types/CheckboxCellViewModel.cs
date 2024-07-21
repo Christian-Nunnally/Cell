@@ -43,7 +43,7 @@ namespace Cell.ViewModel
         }
     }
 
-    public static class ClassCheckbocCellModelExtensions
+    public static class CheckboxCellModelExtensions
     {
         public static bool IsChecked(this CellModel model)
         {
@@ -53,6 +53,11 @@ namespace Cell.ViewModel
         public static void Check(this CellModel model)
         {
             model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), true);
+        }
+
+        public static void Check(this CellModel model, bool check)
+        {
+            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
         }
 
         public static void Uncheck(this CellModel model)

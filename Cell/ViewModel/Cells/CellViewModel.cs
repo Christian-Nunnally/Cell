@@ -83,6 +83,12 @@ namespace Cell.ViewModel
             set { _model.Index = value; OnPropertyChanged(nameof(Index)); }
         }
 
+        public virtual CellType CellType
+        {
+            get => _model.CellType;
+            set { _model.CellType = value; OnPropertyChanged(nameof(CellType)); }
+        }
+
         public virtual string Text
         {
             get => _model.Text;

@@ -23,7 +23,7 @@ namespace Cell.ViewModel
             {
                 CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
-                UserCollectionLoader.CreateEmptyCollection(CollectionName);
+                UserCollectionLoader.GetOrCreateCollection(CollectionName);
                 CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
                 UpdateList();
                 OnPropertyChanged(nameof(CollectionName));
@@ -40,27 +40,28 @@ namespace Cell.ViewModel
             }
         }
 
-        public string DisplayPath
-        {
-            get => Model.GetStringProperty(nameof(DisplayPath));
-            set
-            {
-                Model.SetStringProperty(nameof(DisplayPath), value);
-                OnPropertyChanged(nameof(DisplayPath));
-            }
-        }
-
         internal void UpdateList()
         {
-            // TODO: can I just bind directly to the underlying list and fire property change notifs?
             ListItems.Clear();
-
-            var collection = UserCollectionLoader.GetCollection(CollectionName);
+            var collection = UserCollectionLoader.GetOrCreateCollection(CollectionName);
             if (collection == null) return;
             foreach (var item in collection.Items)
             {
                 ListItems.Add(item);
             }
+        }
+    }
+
+    public static class ListboxCellModelExtensions
+    {
+        public static bool IsCollection(this CellModel model, string collectionName)
+        {
+            return model.GetStringProperty(nameof(ListCellViewModel.CollectionName)) == collectionName;
+        }
+
+        public static string GetCollectionType(this CellModel model)
+        {
+            return model.GetStringProperty(nameof(ListCellViewModel.CollectionType));
         }
     }
 }

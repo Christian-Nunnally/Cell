@@ -49,10 +49,9 @@ namespace Cell.View
                 cell.AddRowBelow();
             }
         }
-
-        private void ChangeCellTypeButtonPressed(object sender, RoutedEventArgs e)
+        private void CellTypeComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is Button button && button.Content is string buttonContent && Enum.TryParse(typeof(CellType), buttonContent, out var newType) && newType is CellType cellType)
+            if (e.AddedItems.Count == 1 && e.AddedItems[0] is Label label && Enum.TryParse(typeof(CellType), label.Content.ToString(), out var newType) && newType is CellType cellType)
             {
                 ApplicationViewModel.Instance.ChangeSelectedCellsType(cellType);
             }

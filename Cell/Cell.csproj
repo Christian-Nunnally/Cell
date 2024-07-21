@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="Skins\DarkSkin.xaml" />
-    <Page Remove="Skins\LightSkin.xaml" />
+    <Page Remove="View\Skins\DarkSkin.xaml" />
+    <Page Remove="View\Skins\LightSkin.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Skins\DarkSkin.xaml" />
-    <Resource Include="Skins\LightSkin.xaml" />
+    <Resource Include="View\Skins\DarkSkin.xaml" />
+    <Resource Include="View\Skins\LightSkin.xaml" />
   </ItemGroup>
 
   <ItemGroup>

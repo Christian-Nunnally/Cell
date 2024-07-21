@@ -18,11 +18,9 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Data Type" Width="100"/>
-                        <TextBox Text="{Binding CollectionType, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="Display Path" Width="100"/>
-                        <TextBox Text="{Binding DisplayPath, UpdateSourceTrigger=LostFocus}" Width="100" KeyDown="TextBoxKeyDown"/>
+                        <ComboBox SelectedItem="{Binding CollectionType}" Width="100">
+                            TodoItem
+                        </ComboBox>
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>

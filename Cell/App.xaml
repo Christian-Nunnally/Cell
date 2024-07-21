@@ -19,6 +19,34 @@
                     <SolidColorBrush x:Key="ForegroundColor" Color="#ffffff"/>
                     <SolidColorBrush x:Key="AccentColor" Color="#007acc"/>
                     <!--   ^^^ SKIN ^^^   -->
+
+
+                    <Style TargetType="{x:Type ToggleButton}" >
+                        <Setter Property="Background" Value="{StaticResource CellBackground}"/>
+                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+                        <Setter Property="Height" Value="25"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border 
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{StaticResource CellBorderColor}"
+                                        BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{StaticResource SelectedColor}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

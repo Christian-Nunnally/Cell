@@ -191,14 +191,14 @@
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                     ItemsSource="{Binding ListItems}"
-                    DisplayMemberPath="{Binding DisplayPath}"
                     SelectedItem="{Binding Text}"
                     Background="{Binding BackgroundColor}"
                     Foreground="{Binding ForegroundColor}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
+                            <!--Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ForegroundColor}"-->
                                 <Label 
-                                    Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ForegroundColor}"
+                                    Foreground="Red"
                                     Content="{Binding}"
                                     Margin="3"
                                     Padding="0"/>

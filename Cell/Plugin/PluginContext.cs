@@ -27,12 +27,6 @@ namespace Cell.Plugin
             _application.GoToCell(cell);
         }
 
-        public void GoToCell(string cellId)
-        {
-            var model = Cells.GetCell(cellId);
-            GoToCell(model);
-        }
-
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
             return UserList<T>.GetOrCreate(collection);
