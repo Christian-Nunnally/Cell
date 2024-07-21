@@ -8,7 +8,7 @@ using Cell.Exceptions;
 
 namespace Cell.Model
 {
-    public partial class PluginFunction
+    public partial class PluginFunction : PropertyChangedBase
     {
         private const string codeHeader = "using System; using System.Collections.Generic; using Cell.Model; using Cell.ViewModel; using Cell.Model.Plugin; using Cell.Plugin;\n\nnamespace Plugin { public class Program { public static ";
         private const string codeFooter = "\n}}}";
@@ -22,7 +22,7 @@ namespace Cell.Model
         [JsonIgnore]
         public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
-        public List<CellLocationDependency> LocationDependencies { get; set; } = [];
+        public List<CellLocation> LocationDependencies { get; set; } = [];
 
         public List<string> CollectionDependencies { get; set; } = [];
 
@@ -58,6 +58,7 @@ namespace Cell.Model
             {
                 if (code == value) return;
                 code = value;
+                NotifyPropertyChanged(nameof(Code));
                 _compiledMethod = null;
                 ExtractAndTransformDependencies();
                 if (_isSyntaxTreeValid) Compile();

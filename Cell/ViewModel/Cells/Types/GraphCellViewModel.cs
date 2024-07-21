@@ -54,7 +54,7 @@ namespace Cell.ViewModel
                 _rawDataPoints[i] = new Point(i, _rawDataPoints[i].Y);
             }
             DataPoints = ScaleAndCenterPoints(_rawDataPoints, (int)Model.Width - 10, (int)Model.Height - 10);
-            OnPropertyChanged(nameof(DataPoints));
+            NotifyPropertyChanged(nameof(DataPoints));
         }
 
         static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)

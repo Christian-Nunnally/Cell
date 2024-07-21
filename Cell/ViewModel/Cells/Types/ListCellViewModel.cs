@@ -26,7 +26,7 @@ namespace Cell.ViewModel
                 UserCollectionLoader.GetOrCreateCollection(CollectionName);
                 CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
                 UpdateList();
-                OnPropertyChanged(nameof(CollectionName));
+                NotifyPropertyChanged(nameof(CollectionName));
             }
         }
 
@@ -36,7 +36,8 @@ namespace Cell.ViewModel
             set
             {
                 Model.SetStringProperty(nameof(CollectionType), value);
-                OnPropertyChanged(nameof(CollectionType));
+                UserCollectionLoader.SaveCollectionType(CollectionName, value);
+                NotifyPropertyChanged(nameof(CollectionType));
             }
         }
 

@@ -19,7 +19,7 @@ namespace Cell.ViewModel
             {
                 Model.SetStringProperty(nameof(CommaSeperatedItems), value);
                 UpdateDropdownItems(value);
-                OnPropertyChanged(nameof(CommaSeperatedItems));
+                NotifyPropertyChanged(nameof(CommaSeperatedItems));
             }
         }
 

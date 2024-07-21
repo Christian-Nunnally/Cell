@@ -77,7 +77,8 @@ namespace Cell.Persistence
         private static void LoadCollection(string directory)
         {
             var collection = new UserCollection(Path.GetFileName(directory));
-            Directory.GetFiles(directory).Select(LoadItem).ToList().ForEach(collection.Add);
+            Directory.GetFiles(directory).Where(x => Path.GetFileName(x) != "type").Select(LoadItem).ToList().ForEach(collection.Add);
+            collection.Type = LoadCollectionType(collection.Name);
             StartTrackingCollection(collection);
         }
 
@@ -114,5 +115,19 @@ namespace Cell.Persistence
             .Where(x => x.IsCollection(collection) && !string.IsNullOrWhiteSpace(x.GetCollectionType()))
             .Select(x => x.GetCollectionType())
             .FirstOrDefault(string.Empty);
+
+        internal static void SaveCollectionType(string collectionName, string value)
+        {
+            var directory = Path.Combine(GetSaveDirectory(), collectionName);
+            Directory.CreateDirectory(directory);
+            var path  = Path.Combine(directory, "type");
+            File.WriteAllText(path, value);
+        }
+
+        internal static string LoadCollectionType(string collectionName)
+        {
+            var path = Path.Combine(GetSaveDirectory(), collectionName, "type");
+            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+        }
     }
 }

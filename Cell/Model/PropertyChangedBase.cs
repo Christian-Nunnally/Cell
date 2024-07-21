@@ -6,12 +6,12 @@ namespace Cell.Model
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName)
+        public void NotifyPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected void OnPropertyChanged(string propertyName, string propertyName2)
+        public void NotifyPropertyChanged(string propertyName, string propertyName2)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName2));

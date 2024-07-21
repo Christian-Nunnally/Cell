@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="View\Skins\DarkSkin.xaml" />
-    <Page Remove="View\Skins\LightSkin.xaml" />
+    <Page Remove="View\Skin\Dark.xaml" />
+    <Page Remove="View\Skin\Light.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,14 +21,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="View\Skins\DarkSkin.xaml" />
-    <Resource Include="View\Skins\LightSkin.xaml" />
+    <Resource Include="View\Skin\Dark.xaml" />
+    <Resource Include="View\Skin\Light.xaml" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Update="View\TypeSpecificEditCellPanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="View\Converters\Converters.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿using Cell.Skins;
-using System.Windows;
+﻿using System.Windows;
 
 namespace Cell
 {
@@ -8,6 +7,5 @@ namespace Cell
     /// </summary>
     public partial class App : Application
     {
-        public static Skin Skin { get; set; } = Skin.Dark;
     }
 }

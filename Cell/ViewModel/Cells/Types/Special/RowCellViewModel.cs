@@ -7,13 +7,13 @@ namespace Cell.ViewModel
     {
         public RowCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
-            OnPropertyChanged(nameof(Text));
+            NotifyPropertyChanged(nameof(Text));
             model.PropertyChanged += ModelPropertyChanged;
         }
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.Row)) OnPropertyChanged(nameof(Text));
+            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
         }
 
         public override double Height

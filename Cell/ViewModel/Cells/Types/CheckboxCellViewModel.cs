@@ -14,7 +14,7 @@ namespace Cell.ViewModel
                 var oldValue = IsChecked;
                 if (oldValue == value) return;
                 Model.SetBooleanProperty(nameof(IsChecked), value);
-                OnPropertyChanged(nameof(IsChecked));
+                NotifyPropertyChanged(nameof(IsChecked));
                 Model.TriggerCellEdited(new EditContext(nameof(IsChecked), IsChecked, oldValue));
             }
         }
@@ -30,7 +30,7 @@ namespace Cell.ViewModel
         {
             if (e.PropertyName == nameof(CellModel.BooleanProperties))
             {
-                OnPropertyChanged(nameof(IsChecked));
+                NotifyPropertyChanged(nameof(IsChecked));
             }
         }
 

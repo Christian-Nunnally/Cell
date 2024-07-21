@@ -1,7 +1,7 @@
 ﻿
 namespace Cell.Model
 {
-    public class CellLocationDependency(string sheetName, int row, int column)
+    public class CellLocation(string sheetName, int row, int column)
     {
         public string SheetName { get; set; } = sheetName;
 

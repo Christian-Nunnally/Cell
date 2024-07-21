@@ -8,7 +8,7 @@ namespace Cell.Plugin.SyntaxRewriters
 {
     public partial class FindAndReplaceCellLocationsSyntaxRewriter : CSharpSyntaxRewriter
     {
-        public readonly List<CellLocationDependency> LocationReferences = [];
+        public readonly List<CellLocation> LocationReferences = [];
 
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
@@ -27,7 +27,7 @@ namespace Cell.Plugin.SyntaxRewriters
                 if (IsCellLocation(variableName))
                 {
                     (var row, var column) = GetCellLocationFromVariable(variableName);
-                    LocationReferences.Add(new CellLocationDependency(sheetName == "cell" ? string.Empty : sheetName, row, column));
+                    LocationReferences.Add(new CellLocation(sheetName == "cell" ? string.Empty : sheetName, row, column));
 
                     return SyntaxFactory.ParseExpression($"c.GetCell({sheetName}, {row}, {column})");
                 }

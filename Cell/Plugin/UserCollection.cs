@@ -18,6 +18,8 @@ namespace Cell.Plugin
 
         public string Name => _name;
 
+        public string Type { get; internal set; } = string.Empty;
+
         public void Add(PluginModel item)
         {
             if (_items.ContainsKey(item.ID)) return;

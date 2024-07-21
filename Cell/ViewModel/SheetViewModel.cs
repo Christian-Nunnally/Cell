@@ -37,7 +37,7 @@ namespace Cell.ViewModel
             set
             {
                 lastKeyPressed = value;
-                OnPropertyChanged(nameof(LastKeyPressed));
+                NotifyPropertyChanged(nameof(LastKeyPressed));
             }
         }
 
@@ -49,7 +49,7 @@ namespace Cell.ViewModel
                 if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged -= PropertyChangedOnSelectedCell;
                 selectedCellViewModel = value;
                 if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
-                OnPropertyChanged(nameof(SelectedCellViewModel));
+                NotifyPropertyChanged(nameof(SelectedCellViewModel));
             }
         }
 

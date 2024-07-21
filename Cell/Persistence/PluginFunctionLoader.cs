@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 using Cell.Model;
@@ -35,6 +36,13 @@ namespace Cell.Persistence
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Name, function);
             else Namespaces.Add(space, new Dictionary<string, PluginFunction> { { function.Name, function } });
+            function.PropertyChanged += OnPluginFunctionPropertyChanged;
+        }
+
+        private static void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not PluginFunction function) return;
+            SavePluginFunction(function.ReturnType == "void" ? TriggerFunctionsDirectoryName : PopulateFunctionsDirectoryName, function);
         }
 
         public static void SavePlugins()
@@ -58,7 +66,7 @@ namespace Cell.Persistence
             File.WriteAllText(path, serializedContent);
         }
 
-        internal static PluginFunction? GetOrCreateFunction(string space, string name)
+        internal static PluginFunction GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
             return CreateFunction(space, name, string.Empty);
@@ -78,22 +86,10 @@ namespace Cell.Persistence
             return false;
         }
 
-        internal static void UpdateFunctionCode(string space, string name, string value)
+        public static PluginFunction CreateFunction(string space, string name, string code)
         {
-            if (Namespaces.TryGetValue(space, out var namespaceFunctions))
-            {
-                if (namespaceFunctions.TryGetValue(name, out var function))
-                {
-                    function.Code = value;
-                    SavePluginFunction(space, function);
-                }
-            }
-        }
-
-        public static PluginFunction? CreateFunction(string space, string name, string code)
-        {
-            if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
-            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return null;
+            if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName ? "void" : "object");
             AddPluginFunctionToNamespace(space, function);
             SavePluginFunction(space, function);

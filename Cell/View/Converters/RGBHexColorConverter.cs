@@ -9,6 +9,11 @@ namespace Cell.View.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not string hex) return Colors.Green;
+            return ConvertHexStringToColor(hex);
+        }
+
+        public static Color ConvertHexStringToColor(string hex)
+        {
             if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
             try
             {

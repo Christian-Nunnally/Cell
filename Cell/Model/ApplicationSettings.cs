@@ -18,21 +18,21 @@ namespace Cell.Model
         public double CodeEditorWidth
         {
             get { return codeEditorWidth; }
-            set { if (codeEditorWidth != value) { codeEditorWidth = value; OnPropertyChanged(nameof(CodeEditorWidth)); } }
+            set { if (codeEditorWidth != value) { codeEditorWidth = value; NotifyPropertyChanged(nameof(CodeEditorWidth)); } }
         }
         private double codeEditorWidth = 400;
 
         public double CodeEditorHeight
         {
             get { return codeEditorHeight; }
-            set { if (codeEditorHeight != value) { codeEditorHeight = value; OnPropertyChanged(nameof(CodeEditorHeight)); } }
+            set { if (codeEditorHeight != value) { codeEditorHeight = value; NotifyPropertyChanged(nameof(CodeEditorHeight)); } }
         }
         private double codeEditorHeight = 400;
 
         public Dock CodeEditorDockPosition
         {
             get { return codeEditorDockPosition; }
-            set { if (codeEditorDockPosition != value) { codeEditorDockPosition = value; OnPropertyChanged(nameof(CodeEditorDockPosition)); } }
+            set { if (codeEditorDockPosition != value) { codeEditorDockPosition = value; NotifyPropertyChanged(nameof(CodeEditorDockPosition)); } }
         }
         private Dock codeEditorDockPosition = Dock.Left;
 

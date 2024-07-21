@@ -1,4 +1,7 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
+using Cell.Exceptions;
+using System.Text.Json;
 
 namespace Cell.Model
 {
@@ -24,7 +27,8 @@ namespace Cell.Model
 
         public static CellModel Copy(this CellModel modelToCopy)
         {
-            var model = CellModel.DeserializeModel(CellModel.SerializeModel(modelToCopy));
+            var serialized = JsonSerializer.Serialize(modelToCopy);
+            var model = JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new ProjectLoadException("Unable to copy model");
             model.ID = Utilities.GenerateUnqiueId(12);
             Cells.AddCell(model);
             return model;

@@ -17,12 +17,12 @@ namespace Cell.ViewModel
             private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); 
         }
 
-        private ApplicationViewModel(MainWindow mainWindow)
+        private ApplicationViewModel(ApplicationView mainWindow)
         {
             MainWindow = mainWindow;
         }
 
-        public readonly MainWindow MainWindow;
+        public readonly ApplicationView MainWindow;
         private static ApplicationViewModel? instance;
         private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate("Default");
         private int editingSpaceTop;
@@ -37,7 +37,7 @@ namespace Cell.ViewModel
             set
             {
                 _applicationWindowWidth = value;
-                OnPropertyChanged(nameof(ApplicationWindowWidth));
+                NotifyPropertyChanged(nameof(ApplicationWindowWidth));
             }
         }
         private double _applicationWindowWidth = 1200;
@@ -48,7 +48,7 @@ namespace Cell.ViewModel
             set
             {
                 _applicationWindowHeight = value;
-                OnPropertyChanged(nameof(ApplicationWindowHeight));
+                NotifyPropertyChanged(nameof(ApplicationWindowHeight));
             }
         }
         private double _applicationWindowHeight = 1300;
@@ -59,7 +59,7 @@ namespace Cell.ViewModel
             set
             {
                 sheetViewModel = value;
-                OnPropertyChanged(nameof(SheetViewModel));
+                NotifyPropertyChanged(nameof(SheetViewModel));
             }
         }
 
@@ -69,7 +69,7 @@ namespace Cell.ViewModel
             set
             {
                 editingSpaceTop = value;
-                OnPropertyChanged(nameof(EditingSpaceTop));
+                NotifyPropertyChanged(nameof(EditingSpaceTop));
             }
         }
 
@@ -79,7 +79,7 @@ namespace Cell.ViewModel
             set
             {
                 editingSpaceBottom = value;
-                OnPropertyChanged(nameof(EditingSpaceBottom));
+                NotifyPropertyChanged(nameof(EditingSpaceBottom));
             }
         }
 
@@ -89,7 +89,7 @@ namespace Cell.ViewModel
             set
             {
                 editingSpaceLeft = value;
-                OnPropertyChanged(nameof(EditingSpaceLeft));
+                NotifyPropertyChanged(nameof(EditingSpaceLeft));
             }
         }
 
@@ -99,7 +99,7 @@ namespace Cell.ViewModel
             set
             {
                 editingSpaceRight = value;
-                OnPropertyChanged(nameof(EditingSpaceRight));
+                NotifyPropertyChanged(nameof(EditingSpaceRight));
             }
         }
 
@@ -112,7 +112,7 @@ namespace Cell.ViewModel
             SheetViewModel.UpdateLayout();
         }
 
-        public static ApplicationViewModel GetOrCreateInstance(MainWindow mainWindow)
+        public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
         {
             instance ??= new ApplicationViewModel(mainWindow);
             return instance;

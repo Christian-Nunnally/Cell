@@ -1,7 +1,7 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
 using Cell.Plugin;
-using System.Collections.ObjectModel;
+using Cell.Common;
 
 namespace Cell.Data
 {

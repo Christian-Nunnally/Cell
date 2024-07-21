@@ -13,8 +13,8 @@ namespace Cell.ViewModel
         {
             if (e.PropertyName == nameof(CellModel.Text))
             {
-                OnPropertyChanged(nameof(ProgressBarWidth));
-                OnPropertyChanged(nameof(ProgressBarHeight));
+                NotifyPropertyChanged(nameof(ProgressBarWidth));
+                NotifyPropertyChanged(nameof(ProgressBarHeight));
             }
         }
 
@@ -29,8 +29,8 @@ namespace Cell.ViewModel
             set 
             { 
                 base.Text = value; 
-                OnPropertyChanged(nameof(ProgressBarWidth));
-                OnPropertyChanged(nameof(ProgressBarHeight)); 
+                NotifyPropertyChanged(nameof(ProgressBarWidth));
+                NotifyPropertyChanged(nameof(ProgressBarHeight)); 
             }
         }
     }

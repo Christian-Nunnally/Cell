@@ -26,7 +26,7 @@ namespace Cell.View
 
         private void CellPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (Utilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
+            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
                 if (e.ChangedButton == MouseButton.Left)
                 {

@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.ViewModel;
 
 namespace Cell.Plugin

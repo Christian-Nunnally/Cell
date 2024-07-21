@@ -7,11 +7,11 @@ using System.Windows.Input;
 
 namespace Cell.View
 {
-    public partial class MainWindow : Window
+    public partial class ApplicationView : Window
     {
         public SheetView? SheetView;
 
-        public MainWindow()
+        public ApplicationView()
         {
             InitializeComponent();
         }
@@ -24,24 +24,17 @@ namespace Cell.View
             ApplicationViewModel.Instance.SheetViewModel.LoadCellViewModels();
         }
 
-        private void TitleBarMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton != MouseButton.Left) return;
-            if (e.ClickCount == 2) AdjustWindowSize();
-            else Application.Current.MainWindow.DragMove();
-        }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        private void OnCloseButtonClicked(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
 
-        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        private void MaximizeButtonClick(object sender, RoutedEventArgs e)
         {
             AdjustWindowSize();
         }
 
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        private void MinimizeButtonClick(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }

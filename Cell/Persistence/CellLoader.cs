@@ -2,6 +2,7 @@
 using Cell.Exceptions;
 using Cell.Model;
 using System.IO;
+using System.Text.Json;
 
 namespace Cell.Persistence
 {
@@ -12,23 +13,9 @@ namespace Cell.Persistence
 
         public void LoadCells()
         {
-            LoadCellsInternal();
-            ComputeDependenciesThatDependOnCellsToBeLoaded();
-        }
-
-        private void LoadCellsInternal()
-        {
             var sheetsPath = Path.Combine(_saveDirectory, SheetsSaveDirectory);
             if (!Directory.Exists(sheetsPath)) return;
             foreach (var directory in Directory.GetDirectories(sheetsPath)) LoadSheet(directory);
-        }
-
-        private static void ComputeDependenciesThatDependOnCellsToBeLoaded()
-        {
-            foreach (var cell in Cells.AllCells.Where(x => x.NeedsUpdateDependencySubscriptionsToBeCalled))
-            {
-                if (!cell.UpdateDependencySubscriptions()) throw new ProjectLoadException($"Unable to update dependency subscriptions for {cell.ID} even after all cells have been loaded.");
-            }
         }
 
         private static void LoadSheet(string directory)
@@ -50,12 +37,15 @@ namespace Cell.Persistence
         {
             var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
             Directory.CreateDirectory(directory);
-            File.WriteAllText(Path.Combine(directory, cell.ID), CellModel.SerializeModel(cell));
+            var serialized = JsonSerializer.Serialize(cell);
+            var path = Path.Combine(directory, cell.ID);
+            File.WriteAllText(path, serialized);
         }
 
         private static CellModel LoadCell(string file)
         {
-            var cell = CellModel.DeserializeModel(File.ReadAllText(file));
+            var text = File.ReadAllText(file) ?? throw new ProjectLoadException($"Loading file failed at {file}"); ;
+            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new ProjectLoadException($"Deserialization failed for {File.ReadAllText(file)} at {file}");
             Cells.AddCell(cell, saveAfterAdding: false);
             return cell;
         }
@@ -64,7 +54,8 @@ namespace Cell.Persistence
         {
             var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cellModel.SheetName);
             if (!Directory.Exists(directory)) return;
-            File.Delete(Path.Combine(directory, cellModel.ID));
+            var path = Path.Combine(directory, cellModel.ID);
+            File.Delete(path);
         }
     }
 }

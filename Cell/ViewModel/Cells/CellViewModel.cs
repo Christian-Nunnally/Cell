@@ -1,13 +1,13 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.Persistence;
 using Cell.Plugin;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 
 namespace Cell.ViewModel
 {
-    public abstract partial class CellViewModel : PropertyChangedBase
+    public abstract class CellViewModel : PropertyChangedBase
     {
         protected SheetViewModel _sheetViewModel;
         private readonly CellModel _model;
@@ -32,7 +32,7 @@ namespace Cell.ViewModel
                 e.PropertyName == nameof(CellModel.Row) ||
                 e.PropertyName == nameof(CellModel.Column))
             {
-                OnPropertyChanged(e.PropertyName);
+                NotifyPropertyChanged(e.PropertyName);
                 return;
             }
         }
@@ -42,51 +42,51 @@ namespace Cell.ViewModel
         public virtual double X
         {
             get => _x;
-            set { _x = value; OnPropertyChanged(nameof(X)); }
+            set { _x = value; NotifyPropertyChanged(nameof(X)); }
         }
         private double _x;
 
         public virtual double Y
         {
             get => _y;
-            set { _y = value; OnPropertyChanged(nameof(Y)); }
+            set { _y = value; NotifyPropertyChanged(nameof(Y)); }
         }
         private double _y;
 
         public virtual double Width
         {
             get => _model.Width;
-            set { _model.Width = value; OnPropertyChanged(nameof(Width)); }
+            set { _model.Width = value; NotifyPropertyChanged(nameof(Width)); }
         }
 
         public virtual double Height
         {
             get => _model.Height;
-            set { _model.Height = value; OnPropertyChanged(nameof(Height)); }
+            set { _model.Height = value; NotifyPropertyChanged(nameof(Height)); }
         }
 
         public virtual int Row
         {
             get => _model.Row;
-            set { _model.Row = value; OnPropertyChanged(nameof(Row)); }
+            set { _model.Row = value; NotifyPropertyChanged(nameof(Row)); }
         }
 
         public virtual int Column
         {
             get => _model.Column;
-            set { _model.Column = value; OnPropertyChanged(nameof(Column)); }
+            set { _model.Column = value; NotifyPropertyChanged(nameof(Column)); }
         }
 
         public virtual int Index
         {
             get => _model.Index;
-            set { _model.Index = value; OnPropertyChanged(nameof(Index)); }
+            set { _model.Index = value; NotifyPropertyChanged(nameof(Index)); }
         }
 
         public virtual CellType CellType
         {
             get => _model.CellType;
-            set { _model.CellType = value; OnPropertyChanged(nameof(CellType)); }
+            set { _model.CellType = value; NotifyPropertyChanged(nameof(CellType)); }
         }
 
         public virtual string Text
@@ -95,7 +95,7 @@ namespace Cell.ViewModel
             set
             {
                 _model.Text = value?.Replace("\\n", "\n") ?? string.Empty;
-                OnPropertyChanged(nameof(Text));
+                NotifyPropertyChanged(nameof(Text));
             }
         }
 
@@ -110,7 +110,7 @@ namespace Cell.ViewModel
             set
             {
                 isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
+                NotifyPropertyChanged(nameof(IsSelected));
             }
         }
 
@@ -122,20 +122,8 @@ namespace Cell.ViewModel
                 if (PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, value) is not null)
                 {
                     _model.PopulateFunctionName = value;
-                    OnPropertyChanged(nameof(PopulateFunctionName));
-                    OnPropertyChanged(nameof(PopulateFunctionCode));
+                    NotifyPropertyChanged(nameof(PopulateFunctionName));
                 }
-            }
-        }
-
-        public virtual string PopulateFunctionCode
-        {
-            get => PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, PopulateFunctionName, out var code) ? code.Code : string.Empty;
-            set
-            {
-                PluginFunctionLoader.UpdateFunctionCode(PluginFunctionLoader.PopulateFunctionsDirectoryName, PopulateFunctionName, value);
-                PopulateText();
-                OnPropertyChanged(nameof(PopulateFunctionCode));
             }
         }
 
@@ -147,36 +135,17 @@ namespace Cell.ViewModel
                 if (PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, value) is not null)
                 {
                     _model.TriggerFunctionName = value;
-                    OnPropertyChanged(nameof(TriggerFunctionName));
-                    OnPropertyChanged(nameof(TriggerFunctionCode));
+                    NotifyPropertyChanged(nameof(TriggerFunctionName));
                 };
-            }
-        }
-
-        public virtual string TriggerFunctionCode
-        {
-            get => PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, TriggerFunctionName, out var code) ? code.Code : string.Empty;
-            set
-            {
-                PluginFunctionLoader.UpdateFunctionCode(PluginFunctionLoader.TriggerFunctionsDirectoryName, TriggerFunctionName, value);
-                OnPropertyChanged(nameof(TriggerFunctionCode));
             }
         }
 
         public void PopulateText()
         {
-            if (PopulateFunctionName != string.Empty)
-            {
-                var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), _model);
-                if (result.Success)
-                {
-                    Text = result.Result;
-                }
-                else
-                {
-                    Text = result.Result;
-                }
-            }
+            if (string.IsNullOrEmpty(PopulateFunctionName)) return;
+            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), _model);
+            if (result.Success) Text = result.Result;
+            else Model.ErrorText = result.Result;
         }
 
         #region Style Properties
@@ -184,19 +153,19 @@ namespace Cell.ViewModel
         public virtual double FontSize
         {
             get => _model.FontSize;
-            set { _model.FontSize = value; OnPropertyChanged(nameof(FontSize)); }
+            set { _model.FontSize = value; NotifyPropertyChanged(nameof(FontSize)); }
         }
 
         public virtual string FontFamily
         {
             get => _model.FontFamily;
-            set { _model.FontFamily = value; OnPropertyChanged(nameof(FontFamily)); }
+            set { _model.FontFamily = value; NotifyPropertyChanged(nameof(FontFamily)); }
         }
 
         public virtual bool IsFontBold
         {
             get => _model.IsFontBold;
-            set { _model.IsFontBold = value; OnPropertyChanged(nameof(IsFontBold)); OnPropertyChanged(nameof(FontWeightForView)); }
+            set { _model.IsFontBold = value; NotifyPropertyChanged(nameof(IsFontBold)); NotifyPropertyChanged(nameof(FontWeightForView)); }
         }
 
         public FontWeight FontWeightForView => IsFontBold ? FontWeights.Bold : FontWeights.Normal;
@@ -204,7 +173,7 @@ namespace Cell.ViewModel
         public virtual bool IsFontItalic
         {
             get => _model.IsFontItalic;
-            set { _model.IsFontItalic = value; OnPropertyChanged(nameof(IsFontItalic)); OnPropertyChanged(nameof(FontStyleForView)); }
+            set { _model.IsFontItalic = value; NotifyPropertyChanged(nameof(IsFontItalic)); NotifyPropertyChanged(nameof(FontStyleForView)); }
         }
 
         public FontStyle FontStyleForView => IsFontItalic ? FontStyles.Italic : FontStyles.Normal;
@@ -212,7 +181,7 @@ namespace Cell.ViewModel
         public virtual bool IsFontStrikethrough
         {
             get => _model.IsFontStrikethrough;
-            set { _model.IsFontStrikethrough = value; OnPropertyChanged(nameof(IsFontStrikethrough)); OnPropertyChanged(nameof(TextDecorationsForView)); }
+            set { _model.IsFontStrikethrough = value; NotifyPropertyChanged(nameof(IsFontStrikethrough)); NotifyPropertyChanged(nameof(TextDecorationsForView)); }
         }
 
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
@@ -222,7 +191,7 @@ namespace Cell.ViewModel
         public virtual HorizontalAlignment HorizontalAlignmentForView
         {
             get => _model.HorizontalAlignment;
-            set { _model.HorizontalAlignment = value; OnPropertyChanged(nameof(HorizontalAlignmentForView)); OnPropertyChanged(nameof(HorizontalAlignmentForViewCenter)); }
+            set { _model.HorizontalAlignment = value; NotifyPropertyChanged(nameof(HorizontalAlignmentForView)); NotifyPropertyChanged(nameof(HorizontalAlignmentForViewCenter)); }
         }
 
         public virtual VerticalAlignment VerticalAlignmentForViewCenter => VerticalAlignmentForView == VerticalAlignment.Stretch ? VerticalAlignment.Center : VerticalAlignmentForView;
@@ -230,13 +199,13 @@ namespace Cell.ViewModel
         public virtual VerticalAlignment VerticalAlignmentForView
         {
             get => _model.VerticalAlignment;
-            set { _model.VerticalAlignment = value; OnPropertyChanged(nameof(VerticalAlignmentForView)); OnPropertyChanged(nameof(VerticalAlignmentForViewCenter)); }
+            set { _model.VerticalAlignment = value; NotifyPropertyChanged(nameof(VerticalAlignmentForView)); NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter)); }
         }
 
         public virtual TextAlignment TextAlignmentForView
         {
             get => _model.TextAlignmentForView;
-            set { _model.TextAlignmentForView = value; OnPropertyChanged(nameof(TextAlignmentForView)); }
+            set { _model.TextAlignmentForView = value; NotifyPropertyChanged(nameof(TextAlignmentForView)); }
         }
 
         public virtual string BorderThicknessString
@@ -247,29 +216,20 @@ namespace Cell.ViewModel
                 if (UpdateBorderThickness(value))
                 {
                     Model.BorderThicknessString = value;
-                    OnPropertyChanged(nameof(BorderThicknessString));
+                    NotifyPropertyChanged(nameof(BorderThicknessString));
                 }
             }
         }
 
         public bool UpdateBorderThickness(string stringBorderThickness)
         {
-            var split = stringBorderThickness.Split(',');
-            if (split.Length == 1)
+            if (Utilities.TryParseStringIntoThickness(stringBorderThickness, out var thickness))
             {
-                if (!double.TryParse(split[0], out var size)) return false;
-                BorderThickness = new Thickness(size, size, size, size);
-                OnPropertyChanged(nameof(BorderThickness));
+                BorderThickness = thickness;
+                NotifyPropertyChanged(nameof(BorderThickness));
                 return true;
             }
-            if (split.Length != 4) return false;
-            if (!double.TryParse(split[0], out var left)) return false;
-            if (!double.TryParse(split[1], out var top)) return false;
-            if (!double.TryParse(split[2], out var right)) return false;
-            if (!double.TryParse(split[3], out var bottom)) return false;
-            BorderThickness = new Thickness(left, top, right, bottom);
-            OnPropertyChanged(nameof(BorderThickness));
-            return true;
+            return false;
         }
 
         public virtual Thickness BorderThickness { get; private set; }
@@ -279,13 +239,13 @@ namespace Cell.ViewModel
         public void HighlightCell(string color)
         {
             BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
-            OnPropertyChanged(nameof(BackgroundColor));
+            NotifyPropertyChanged(nameof(BackgroundColor));
         }
 
         public void UnhighlightCell()
         {
             BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
-            OnPropertyChanged(nameof(BackgroundColor));
+            NotifyPropertyChanged(nameof(BackgroundColor));
         }
 
         public virtual string BackgroundColorHex
@@ -293,11 +253,10 @@ namespace Cell.ViewModel
             get => _model.BackgroundColorHex;
             set
             {
-                if (!IsHexidecimalColorCode().IsMatch(value)) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.BackgroundColorHex = value;
                 BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
-                OnPropertyChanged(nameof(BackgroundColorHex));
-                OnPropertyChanged(nameof(BackgroundColor));
+                NotifyPropertyChanged(nameof(BackgroundColor), nameof(BackgroundColorHex));
             }
         }
 
@@ -308,11 +267,10 @@ namespace Cell.ViewModel
             get => _model.ForegroundColorHex;
             set
             {
-                if (!IsHexidecimalColorCode().IsMatch(value)) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.ForegroundColorHex = value;
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
-                OnPropertyChanged(nameof(ForegroundColorHex));
-                OnPropertyChanged(nameof(ForegroundColor));
+                NotifyPropertyChanged(nameof(ForegroundColor), nameof(ForegroundColorHex));
             }
         }
 
@@ -323,16 +281,12 @@ namespace Cell.ViewModel
             get => _model.BorderColorHex;
             set
             {
-                if (!IsHexidecimalColorCode().IsMatch(value)) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.BorderColorHex = value;
                 BorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BorderColorHex));
-                OnPropertyChanged(nameof(BorderColorHex));
-                OnPropertyChanged(nameof(BorderColor));
+                NotifyPropertyChanged(nameof(BorderColor), nameof(BorderColorHex));
             }
         }
-
-        [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
-        private static partial Regex IsHexidecimalColorCode();
 
         #endregion
     }
