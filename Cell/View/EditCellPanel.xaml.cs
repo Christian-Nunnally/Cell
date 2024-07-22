@@ -43,14 +43,21 @@ namespace Cell.View
             if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
             cell.AddRowBelow();
         }
-        private void CellTypeComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CellTypeComboBoxSelectionChanged(object sender, EventArgs e)
         {
-            if (e.AddedItems.Count != 1 || e.AddedItems[0] is not Label label) return;
+            var comboBox = sender as ComboBox;
+            if (comboBox == null) return;
+            if (comboBox.SelectedValue is not Label label) return;
             var cellTypeString = label.Content.ToString();
             if (Enum.TryParse(cellTypeString, out CellType newType))
             {
                 ApplicationViewModel.Instance.ChangeSelectedCellsType(newType);
             }
+        }
+
+        private void ComboBox_DropDownClosed(object sender, EventArgs e)
+        {
+
         }
 
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
@@ -142,14 +149,7 @@ namespace Cell.View
         {
             foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
             {
-                if (selectedCell is null) return;
-                var cells = ApplicationViewModel.Instance.SheetViewModel.CellViewModels.Where(x => x.Model.MergedWith == selectedCell.ID);
-                foreach (var cell in cells)
-                {
-                    if (selectedCell == cell) continue;
-                    cell.Model.MergedWith = string.Empty;
-                }
-                selectedCell.Model.MergedWith = string.Empty;
+                ApplicationViewModel.Instance.SheetViewModel.UnmergeCell(selectedCell);
             }
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }

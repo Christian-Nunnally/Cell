@@ -36,6 +36,18 @@
                 <Setter Property="Padding" Value="0" />
             </Style>
 
+            <Style
+                x:Key="CellCheckBoxStyle"
+                BasedOn="{StaticResource {x:Type CheckBox}}"
+                TargetType="{x:Type CheckBox}">
+                <Setter Property="Background" Value="{Binding ContentBackgroundColor}" />
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
+                <Setter Property="BorderBrush" Value="{Binding ContentBorderColor}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+
             <Style TargetType="Button">
                 <Setter Property="Background" Value="{Binding BackgroundColor}" />
                 <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
@@ -105,11 +117,14 @@
                     HorizontalAlignment="{Binding HorizontalAlignmentForView}"
                     VerticalAlignment="{Binding VerticalAlignmentForView}"
                     VerticalContentAlignment="Center"
+                    Background="{Binding ContentBackgroundColor}"
+                    BorderBrush="{Binding ContentBorderColor}"
+                    BorderThickness="{Binding ContentBorderThickness}"
                     Command="{Binding CheckboxCheckedCommand}"
                     Content="{Binding Path=Text}"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
-                    Foreground="{StaticResource ForegroundColor}"
+                    Foreground="{Binding ForegroundColor}"
                     IsChecked="{Binding IsChecked}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:ButtonCellViewModel}">
@@ -126,11 +141,11 @@
                                 Padding="0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
-                                BorderBrush="{Binding BorderColor}"
-                                BorderThickness="1">
+                                BorderBrush="{Binding ContentBorderColor}"
+                                BorderThickness="{Binding ContentBorderThickness}">
                                 <Border.Style>
                                     <Style>
-                                        <Setter Property="Border.Background" Value="{Binding BackgroundColor}" />
+                                        <Setter Property="Border.Background" Value="{Binding ContentBackgroundColor}" />
                                         <Style.Triggers>
                                             <Trigger Property="Border.IsMouseOver" Value="True">
                                                 <Setter Property="Border.Background" Value="{StaticResource SelectedColor}" />
@@ -163,6 +178,9 @@
                     Margin="3"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    Background="{Binding ContentBackgroundColor}"
+                    BorderBrush="{Binding ContentBorderColor}"
+                    BorderThickness="{Binding ContentBorderThickness}"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
                     KeyDown="TextBoxKeyDownForCell"
@@ -171,9 +189,12 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:DropdownCellViewModel}">
                 <ComboBox
-                    MinWidth="50"
+                    MinWidth="30"
                     Margin="3"
-                    VerticalAlignment="Center"
+                    VerticalAlignment="Stretch"
+                    Background="{Binding ContentBackgroundColor}"
+                    Foreground="{Binding ForegroundColor}"
+                    BorderBrush="{Binding ContentBorderColor}"
                     FontFamily="{Binding FontFamily}"
                     FontSize="{Binding FontSize}"
                     ItemsSource="{Binding DropdownOptions}"
@@ -190,9 +211,11 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:ListCellViewModel}">
                 <ListBox
+                    x:Name="CellListBox"
                     Margin="3"
-                    Background="{Binding BackgroundColor}"
-                    BorderThickness="0"
+                    Background="{Binding ContentBackgroundColor}"
+                    BorderThickness="{Binding ContentBorderThickness}"
+                    BorderBrush="{Binding ContentBorderColor}"
                     Foreground="{Binding ForegroundColor}"
                     ItemsSource="{Binding ListItems}"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
@@ -204,7 +227,9 @@
                                 Margin="3"
                                 Padding="0"
                                 Content="{Binding}"
-                                Foreground="Red" />
+                                FontFamily="{Binding DataContext.FontFamily, ElementName=CellListBox}"
+                                FontSize="{Binding DataContext.FontSize, ElementName=CellListBox}"
+                                Foreground="{Binding DataContext.ForegroundColor, ElementName=CellListBox}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -253,12 +278,12 @@
                                         SnapsToDevicePixels="True" />
                                 </Border>
                                 <Border
-                                    Background="#66666666"
-                                    BorderBrush="#77777777"
-                                    BorderThickness="1"
+                                    Background="{Binding SelectionColor}"
+                                    BorderBrush="{Binding SelectionBorderColor}"
+                                    BorderThickness="2"
                                     IsHitTestVisible="False"
                                     SnapsToDevicePixels="True"
-                                    Visibility="{Binding IsSelected, Converter={StaticResource btv}}" />
+                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource btv}}" />
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>

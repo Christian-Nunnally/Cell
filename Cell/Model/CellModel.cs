@@ -105,26 +105,12 @@ namespace Cell.Model
         }
         private int index = 0;
 
-        public string BackgroundColorHex
+        public string[] ColorHexes
         {
-            get { return backgroundColorHex; }
-            set { if (backgroundColorHex == value) return; backgroundColorHex = value; NotifyPropertyChanged(nameof(BackgroundColorHex)); }
+            get { return colorHexes; }
+            set { if (colorHexes == value) return; colorHexes = value; NotifyPropertyChanged(nameof(ColorHexes)); }
         }
-        private string backgroundColorHex = "#1e1e1e";
-
-        public string ForegroundColorHex
-        {
-            get { return foregroundColorHex; }
-            set { if (foregroundColorHex == value) return; foregroundColorHex = value; NotifyPropertyChanged(nameof(ForegroundColorHex)); }
-        }
-        private string foregroundColorHex = "#ffffff";
-
-        public string BorderColorHex
-        {
-            get { return borderColorHex; }
-            set { if (borderColorHex == value) return; borderColorHex = value; NotifyPropertyChanged(nameof(BorderColorHex)); }
-        }
-        private string borderColorHex = "#2d2d30";
+        private string[] colorHexes = ["#1e1e1e", "#2d2d30", "#1e1e1e", "#2d2d30", "#ffffff"];
 
         public string BorderThicknessString
         {
@@ -132,6 +118,13 @@ namespace Cell.Model
             set { if (borderThickness == value) return; borderThickness = value; NotifyPropertyChanged(nameof(BorderThicknessString)); }
         }
         private string borderThickness = "1,1,1,1";
+
+        public string ContentBorderThicknessString
+        {
+            get { return contentBorderThickness; }
+            set { if (contentBorderThickness == value) return; contentBorderThickness = value; NotifyPropertyChanged(nameof(ContentBorderThicknessString)); }
+        }
+        private string contentBorderThickness = "1,1,1,1";
 
         public double FontSize
         {

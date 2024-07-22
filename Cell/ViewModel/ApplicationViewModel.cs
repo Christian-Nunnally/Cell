@@ -132,9 +132,9 @@ namespace Cell.ViewModel
             if (cell is not null) MainWindow.SheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
         }
 
-        internal void CopySelectedCells()
+        internal void CopySelectedCells(bool copyTextOnly)
         {
-            _cellClipboard.CopySelectedCells(SheetViewModel);
+            _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
         }
 
         internal void PasteCopiedCells()

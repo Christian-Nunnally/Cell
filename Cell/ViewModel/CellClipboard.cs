@@ -7,9 +7,11 @@ namespace Cell.ViewModel
     {
         private CellModel? _centerOfCopy;
         private IEnumerable<CellModel> _clipboard = [];
+        private bool _copyTextOnly = false;
 
-        public void CopySelectedCells(SheetViewModel activeSheet)
+        public void CopySelectedCells(SheetViewModel activeSheet, bool copyTextOnly)
         {
+            _copyTextOnly = copyTextOnly;
             _centerOfCopy = activeSheet.SelectedCellViewModel?.Model;
             _clipboard = activeSheet.SelectedCellViewModels.Select(c => c.Model).ToList();
         }
@@ -22,11 +24,21 @@ namespace Cell.ViewModel
             if (_centerOfCopy is null) return;
             if (!_clipboard.Any()) return;
 
-            foreach (var cellToPaste in _clipboard)
+            if (_copyTextOnly)
             {
-                PasteCopiedCell(activeSheet, pasteIntoCell, cellToPaste, _centerOfCopy);
+                foreach (var cellToPaste in _clipboard)
+                {
+                    PasteCopiedCellTextOnly(activeSheet, pasteIntoCell, cellToPaste, _centerOfCopy);
+                }
             }
-            activeSheet.UpdateLayout();
+            else
+            {
+                foreach (var cellToPaste in _clipboard)
+                {
+                    PasteCopiedCell(activeSheet, pasteIntoCell, cellToPaste, _centerOfCopy);
+                }
+                activeSheet.UpdateLayout();
+            }
         }
 
         private static void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
@@ -40,6 +52,17 @@ namespace Cell.ViewModel
             var pastedCell = CopyCellWithUpdatedLocationProperties(newRow, newColumn, cellToReplace, cellToPaste);
             activeSheet.DeleteCell(cellToReplace);
             activeSheet.AddCell(pastedCell);
+        }
+
+        private static void PasteCopiedCellTextOnly(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        {
+            var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
+            var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
+            var cellToReplace = Cells.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
+            if (cellToReplace is null) return;
+            if (cellToReplace.CellType.IsSpecial()) return;
+
+            cellToReplace.Text = cellToPaste.Text;
         }
 
         private static CellModel CopyCellWithUpdatedLocationProperties(int newRow, int newColumn, CellModel cellToReplace, CellModel cellToPaste)

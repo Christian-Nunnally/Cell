@@ -35,13 +35,10 @@ namespace Cell.View
                     {
                         SheetViewModel.UnselectAllCells();
                     }
-                    if (!wasSelected)
-                    {
-                        SheetViewModel.SelectCell(cell);
-                        _selectingCells = true;
-                        _selectionStart = cell;
-                    }
-                    else
+                    SheetViewModel.SelectCell(cell);
+                    _selectingCells = true;
+                    _selectionStart = cell;
+                    if (wasSelected)
                     {
                         if (cell.Model.CellType == CellType.Row)
                         {
@@ -50,6 +47,7 @@ namespace Cell.View
                                 if (rowCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(rowCell);
                             }
+                            SheetViewModel.UnselectCell(cell);
                         }
                         else if (cell.Model.CellType == CellType.Column)
                         {
@@ -58,8 +56,8 @@ namespace Cell.View
                                 if (columnCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(columnCell);
                             }
+                            SheetViewModel.UnselectCell(cell);
                         }
-                        SheetViewModel.UnselectCell(cell);
                     }
                 }
                 else if (e.ChangedButton == MouseButton.Middle)

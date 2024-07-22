@@ -19,8 +19,10 @@
                     BorderThickness="1,1,1,0"
                     Opacity="0" />
             </Border>
-                <!--HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"-->
+            <!--
+                HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+            -->
             <ContentPresenter
                 x:Name="contentPresenter"
                 Margin="{TemplateBinding Padding}"
@@ -197,7 +199,7 @@
                             IsTabStop="True"
                             Style="{TemplateBinding ButtonStyle}">
                             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="1">
-                                <Rectangle Margin="5" Fill="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
+                                <Rectangle Margin="2" Fill="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                             </Border>
                         </ToggleButton>
 

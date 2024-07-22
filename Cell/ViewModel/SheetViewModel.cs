@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Cell.Persistence;
 using Cell.Data;
+using System.Windows.Media;
 
 namespace Cell.ViewModel
 {
@@ -46,10 +47,22 @@ namespace Cell.ViewModel
             get => selectedCellViewModel;
             set
             {
-                if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged -= PropertyChangedOnSelectedCell;
+                _enableMultiEditSelectedCells = false;
+                if (selectedCellViewModel is not null)
+                {
+                    selectedCellViewModel.PropertyChanged -= PropertyChangedOnSelectedCell;
+                    selectedCellViewModel.SelectionColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"));
+                }
                 selectedCellViewModel = value;
-                if (selectedCellViewModel is not null) selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
+                if (selectedCellViewModel is not null)
+                {
+                    selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
+                    selectedCellViewModel.SelectionColor = SelectedCellViewModels.Count > 1
+                        ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"))
+                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00000000")); 
+                }
                 NotifyPropertyChanged(nameof(SelectedCellViewModel));
+                _enableMultiEditSelectedCells = true;
             }
         }
 
@@ -151,6 +164,7 @@ namespace Cell.ViewModel
         public void DeleteCell(CellModel cell)
         {
             var viewModel = CellViewModels.First(x => x.Model == cell);
+            if (viewModel.Model.MergedWith == viewModel.Model.ID) UnmergeCell(viewModel);
             DeleteCell(viewModel);
         }
 
@@ -166,6 +180,7 @@ namespace Cell.ViewModel
 
         public void SelectCell(CellViewModel cell)
         {
+            UnhighlightAllCells();
             if (!string.IsNullOrWhiteSpace(cell.Model.MergedWith))
             {
                 cell = CellViewModels.First(x => x.Model.ID == cell.Model.MergedWith);
@@ -174,7 +189,6 @@ namespace Cell.ViewModel
             if (cell.IsSelected) return;
             cell.IsSelected = true;
             SelectedCellViewModels.Add(cell);
-            UnhighlightAllCells();
             if (SelectedCellViewModels.Count == 1)
             {
                 if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, SelectedCellViewModel.Model.PopulateFunctionName, out var function))
@@ -186,7 +200,7 @@ namespace Cell.ViewModel
                         var column = locationDependencies.Column;
                         var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                         if (cellToHighlight == null) continue;
-                        cellToHighlight.HighlightCell("#04385c");
+                        cellToHighlight.HighlightCell("#04385c66");
                         HighlightedCellViewModels.Add(cellToHighlight);
                     }
 
@@ -195,7 +209,7 @@ namespace Cell.ViewModel
                         var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
                         foreach (var cellToHighlight in cellsToHighlight)
                         {
-                            cellToHighlight.HighlightCell("#04385c");
+                            cellToHighlight.HighlightCell("#04385c66");
                             HighlightedCellViewModels.Add(cellToHighlight);
                         }
                     }
@@ -227,10 +241,11 @@ namespace Cell.ViewModel
         internal void UnselectCell(CellViewModel cell)
         {
             SelectedCellViewModels.Remove(cell);
-            if (!cell.IsSelected) return;
             cell.IsSelected = false;
-            SelectedCellViewModels.Remove(cell);
-            if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
+            if (SelectedCellViewModel == cell)
+            {
+                SelectedCellViewModel = null;
+            }
         }
 
         public void MoveSelectionDown() => MoveSelection(0, 1);
@@ -250,6 +265,17 @@ namespace Cell.ViewModel
             if (cellToSelect is null) return;
             UnselectAllCells();
             SelectCell(cellToSelect);
+        }
+
+        public void UnmergeCell(CellViewModel mergedCell)
+        {
+            var cells = CellViewModels.Where(x => x.Model.MergedWith == mergedCell.ID);
+            foreach (var cell in cells)
+            {
+                if (mergedCell == cell) continue;
+                cell.Model.MergedWith = string.Empty;
+            }
+            mergedCell.Model.MergedWith = string.Empty;
         }
 
         public static readonly SheetViewModel NullSheet = new("null");

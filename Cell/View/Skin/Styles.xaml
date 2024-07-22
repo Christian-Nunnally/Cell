@@ -89,6 +89,10 @@
     <Style TargetType="{x:Type CheckBox}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type CheckBox}">
@@ -98,9 +102,9 @@
                                 x:Name="Border"
                                 Width="16"
                                 Height="16"
-                                Background="{StaticResource CellBackground}"
-                                BorderBrush="{StaticResource CellBorderColor}"
-                                BorderThickness="1"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="0">
                                 <Grid>
                                     <Path
@@ -109,7 +113,7 @@
                                         Height="9"
                                         Data="F1 M 1.1,5L 3.5,7.5L 7.9,1"
                                         SnapsToDevicePixels="False"
-                                        Stroke="{StaticResource ForegroundColor}"
+                                        Stroke="{TemplateBinding Foreground}"
                                         StrokeEndLineCap="Round"
                                         StrokeMiterLimit=".1"
                                         StrokeStartLineCap="Round"
@@ -161,6 +165,8 @@
         <Setter Property="MinWidth" Value="100" />
         <Setter Property="MinHeight" Value="10" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBox}">
@@ -168,8 +174,13 @@
                         <ToggleButton
                             Name="ToggleButton"
                             Grid.Column="2"
+                            Height="Auto"
+                            VerticalAlignment="Stretch"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
                             ClickMode="Press"
                             Focusable="false"
+                            Foreground="{TemplateBinding Foreground}"
                             IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                             Template="{StaticResource ComboBoxToggleButton}" />
                         <ContentPresenter
@@ -186,7 +197,7 @@
                             Margin="3,0,23,0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Background="{StaticResource CellBackground}"
+                            Background="{TemplateBinding Background}"
                             Focusable="True"
                             Foreground="Green"
                             IsReadOnly="{TemplateBinding IsReadOnly}"
@@ -207,10 +218,13 @@
                                 SnapsToDevicePixels="True">
                                 <Border
                                     x:Name="DropDownBorder"
-                                    Background="#FF3F3F3F"
-                                    BorderBrush="#888888"
-                                    BorderThickness="1" />
-                                <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}" />
+                                <ScrollViewer
+                                    Margin="4,6,4,6"
+                                    Foreground="{TemplateBinding Foreground}"
+                                    SnapsToDevicePixels="True">
                                     <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                 </ScrollViewer>
                             </Grid>
@@ -219,9 +233,6 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="HasItems" Value="false">
                             <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="#888888" />
                         </Trigger>
                         <Trigger Property="IsGrouping" Value="true">
                             <Setter Property="ScrollViewer.CanContentScroll" Value="false" />
@@ -244,8 +255,6 @@
 
     <Style TargetType="{x:Type ComboBoxItem}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="OverridesDefaultStyle" Value="true" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ComboBoxItem}">
@@ -257,10 +266,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="true">
-                            <Setter TargetName="Border" Property="Background" Value="#FF4F4F4F" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="#888888" />
+                            <Setter TargetName="Border" Property="Background" Value="#ff00ffaa" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

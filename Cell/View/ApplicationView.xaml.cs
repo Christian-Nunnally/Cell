@@ -56,11 +56,11 @@ namespace Cell.View
         {
             ApplicationViewModel.Instance.SheetViewModel.LastKeyPressed = e.Key.ToString();
             if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
-            if (e.IsDown && Keyboard.Modifiers == ModifierKeys.Control)
+            if (e.IsDown && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
                 if (e.Key == Key.C)
                 {
-                    ApplicationViewModel.Instance.CopySelectedCells();
+                    ApplicationViewModel.Instance.CopySelectedCells((Keyboard.Modifiers & ModifierKeys.Shift) == 0);
                     e.Handled = true;
                 }
                 else if (e.Key == Key.V)

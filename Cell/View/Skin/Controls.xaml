@@ -16,24 +16,22 @@
             <Border
                 x:Name="Border"
                 Grid.ColumnSpan="2"
-                Background="{StaticResource CellBackground}"
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="1"
-                CornerRadius="0" />
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" />
             <Border
                 Grid.Column="0"
                 Margin="1"
-                Background="{StaticResource CellBackground}"
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="0,0,1,0"
-                CornerRadius="0" />
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="0,0,1,0" />
             <Path
                 x:Name="Arrow"
                 Grid.Column="1"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Data="M-2,0 L-2,2 L2,6 L6,2 L6,0 L2,4 z"
-                Fill="{StaticResource ForegroundColor}" />
+                Fill="{TemplateBinding Foreground}" />
         </Grid>
         <ControlTemplate.Triggers>
             <Trigger Property="ToggleButton.IsMouseOver" Value="true">

@@ -46,25 +46,36 @@
                     <StackPanel Orientation="Horizontal">
                         <Label Width="50" Content="Color" />
                         <xctk:ColorPicker
+                            Width="37"
+                            Background="AliceBlue"
+                            ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding BackgroundColorHex, Converter={StaticResource HexToColorConverter}}" />
+                        <xctk:ColorPicker
+                            Width="38"
+                            Background="AliceBlue"
+                            ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding ContentBackgroundColorHex, Converter={StaticResource HexToColorConverter}}" />
+                        <xctk:ColorPicker
                             Width="75"
                             ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
                             Foreground="{StaticResource ForegroundColor}"
                             Loaded="ColorPicker_Loaded"
                             SelectedColor="{Binding ForegroundColorHex, Converter={StaticResource HexToColorConverter}}" />
-                        <xctk:ColorPicker
-                            Width="75"
-                            Background="AliceBlue"
-                            ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
-                            Loaded="ColorPicker_Loaded"
-                            SelectedColor="{Binding BackgroundColorHex, Converter={StaticResource HexToColorConverter}}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="50" Content="Border" />
                         <xctk:ColorPicker
-                            Width="75"
+                            Width="37"
                             ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
                             Loaded="ColorPicker_Loaded"
                             SelectedColor="{Binding BorderColorHex, Converter={StaticResource HexToColorConverter}}" />
+                        <xctk:ColorPicker
+                            Width="38"
+                            ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding ContentBorderColorHex, Converter={StaticResource HexToColorConverter}}" />
                         <TextBox
                             Width="50"
                             KeyDown="TextBoxKeyDown"
@@ -177,6 +188,10 @@
                             </Popup>
                         </Grid>
                     </StackPanel>
+                    <TextBox
+                        Width="50"
+                        KeyDown="TextBoxKeyDown"
+                        Text="{Binding Path=ContentBorderThicknessString, UpdateSourceTrigger=LostFocus}" />
                     <StackPanel Orientation="Horizontal">
                         <Label Width="50" Content="Font" />
                         <TextBox
@@ -209,7 +224,7 @@
                             Content="Type" />
                         <ComboBox
                             Width="150"
-                            SelectionChanged="CellTypeComboBoxSelectionChanged"
+                            DropDownClosed="CellTypeComboBoxSelectionChanged"
                             Text="{Binding CellType, Mode=OneWay, Converter={StaticResource EnumToStringConverter}}">
                             <Label Content="Label" />
                             <Label Content="Textbox" />
@@ -223,18 +238,7 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Button
-                            Width="100"
-                            Click="MergeButtonClicked"
-                            Content="Merge" />
-                        <Button
-                            Width="100"
-                            Click="UnmergeButtonClicked"
-                            Content="Unmerge" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Functions" />
-                        <Button
-                            Width="65"
+                            Width="50"
                             Click="IndexButtonClicked"
                             Content="Index" />
                         <TextBox
@@ -242,28 +246,36 @@
                             HorizontalContentAlignment="Center"
                             KeyDown="TextBoxKeyDown"
                             Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" />
+                        <Button
+                            Width="54"
+                            Click="MergeButtonClicked"
+                            Content="Merge" />
+                        <Button
+                            Width="61"
+                            Click="UnmergeButtonClicked"
+                            Content="Unmerge" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="65" Content="Populate" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
                         <Button
                             Width="35"
                             Click="EditGetTextFunctionButtonClicked"
                             Content="Edit" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="65" Content="Updated" />
                         <TextBox
                             Width="100"
                             KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
+                            Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="65" Content="Updated" />
                         <Button
                             Width="35"
                             Click="EditOnEditFunctionButtonClicked"
                             Content="Edit" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
