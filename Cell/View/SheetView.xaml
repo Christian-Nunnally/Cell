@@ -200,7 +200,6 @@
                     SelectedItem="{Binding Text}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <!--  Foreground="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}, Path=DataContext.ForegroundColor}"  -->
                             <Label
                                 Margin="3"
                                 Padding="0"
@@ -233,42 +232,34 @@
         <ListBox.ItemContainerStyle>
             <Style TargetType="ListBoxItem">
                 <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
                 <Setter Property="Control.Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBoxItem">
-                            <Border
+                            <Grid
                                 Width="{Binding Width}"
                                 Height="{Binding Height}"
-                                BorderThickness="{Binding BorderThickness}"
+                                Background="{Binding BackgroundColor}"
                                 PreviewMouseDown="CellPreviewMouseDown"
                                 PreviewMouseMove="CellPreviewMouseMove"
-                                PreviewMouseUp="CellPreviewMouseUp">
-                                <Border.Style>
-                                    <Style TargetType="{x:Type Border}">
-                                        <Setter Property="Border.BorderBrush" Value="{Binding BorderColor}" />
-                                        <Setter Property="Border.CornerRadius" Value="1" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="True">
-                                                <Setter Property="Border.BorderBrush" Value="{StaticResource SelectedBorderColor}" />
-                                                <Setter Property="Border.Background" Value="{StaticResource SelectedColor}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Value="False">
-                                                <Setter Property="Border.BorderBrush" Value="{Binding BorderColor}" />
-                                                <Setter Property="Border.Background" Value="{Binding BackgroundColor}" />
-                                            </DataTrigger>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Border.BorderBrush" Value="{StaticResource SelectedBorderColor}" />
-                                                <Setter Property="Border.Background" Value="{StaticResource SelectedColor}" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <ContentPresenter
-                                    Margin="0"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Stretch"
-                                    Content="{TemplateBinding Content}" />
-                            </Border>
+                                PreviewMouseUp="CellPreviewMouseUp"
+                                SnapsToDevicePixels="True">
+                                <Border BorderBrush="{Binding BorderColor}" BorderThickness="{Binding BorderThickness}">
+                                    <ContentPresenter
+                                        Margin="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Content="{TemplateBinding Content}"
+                                        SnapsToDevicePixels="True" />
+                                </Border>
+                                <Border
+                                    Background="#66666666"
+                                    BorderBrush="#77777777"
+                                    BorderThickness="1"
+                                    IsHitTestVisible="False"
+                                    SnapsToDevicePixels="True"
+                                    Visibility="{Binding IsSelected, Converter={StaticResource btv}}" />
+                            </Grid>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>

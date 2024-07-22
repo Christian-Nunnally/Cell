@@ -244,8 +244,8 @@ namespace Cell.ViewModel
         public void MoveSelection(int columnOffset, int rowOffset)
         {
             if (SelectedCellViewModel is null) return;
-            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight;
-            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow;
+            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight();
+            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow();
             var cellToSelect = CellViewModels.FirstOrDefault(x => x.Column == SelectedCellViewModel.Column + columnOffset && x.Row == SelectedCellViewModel.Row + rowOffset);
             if (cellToSelect is null) return;
             UnselectAllCells();

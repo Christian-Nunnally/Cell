@@ -24,7 +24,7 @@ namespace Cell.Plugin
         {
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);
-            var result = DynamicCellPluginExecutor.RunTrigger(new PluginContext(ApplicationViewModel.Instance), cell);
+            var result = DynamicCellPluginExecutor.RunTrigger(new PluginContext(ApplicationViewModel.Instance, cell.Index), cell);
             if (!result.Success)
             {
                 cell.ErrorText = result.Result;

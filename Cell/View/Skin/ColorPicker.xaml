@@ -19,11 +19,11 @@
                     BorderThickness="1,1,1,0"
                     Opacity="0" />
             </Border>
+                <!--HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"-->
             <ContentPresenter
                 x:Name="contentPresenter"
                 Margin="{TemplateBinding Padding}"
-                HorizontalAlignment="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                VerticalAlignment="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
                 ContentSource="Header"
                 Focusable="False"
                 RecognizesAccessKey="True"

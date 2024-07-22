@@ -182,12 +182,12 @@ namespace Cell.View
             {
                 if (_doesFunctionReturnValue)
                 {
-                    var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance), _currentCell.Model]);
+                    var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Model.Index), _currentCell.Model]);
                     result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
                 }
                 else
                 {
-                    compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance), _currentCell.Model]);
+                    compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Model.Index), _currentCell.Model]);
                     result = new CompileResult { Success = true, Result = "Success" };
                 }
             }

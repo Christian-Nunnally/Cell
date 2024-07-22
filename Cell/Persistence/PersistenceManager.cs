@@ -1,4 +1,5 @@
 ﻿
+using Cell.Exceptions;
 using System.IO;
 using System.IO.Compression;
 
@@ -6,6 +7,7 @@ namespace Cell.Persistence
 {
     internal class PersistenceManager
     {
+        public const string Version = "0.0.0";
         public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static DateTime _lastBackupDate = DateTime.Now;
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
@@ -15,14 +17,29 @@ namespace Cell.Persistence
             PluginFunctionLoader.SavePlugins();
             UserCollectionLoader.SaveCollections();
             new CellLoader(SaveLocation).SaveCells();
+            SaveVersion();
+        }
+
+        private static void SaveVersion()
+        {
+            var versionPath = Path.Combine(SaveLocation, "version");
+            File.WriteAllText(versionPath, Version);
         }
 
         public static void LoadAll()
         {
+            var versionSchema = LoadVersion();
+            if (Version != versionSchema) throw new ProjectLoadException($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
             new CellLoader(SaveLocation).LoadCells();
         }
+
+        private static string LoadVersion()
+        {
+            var versionPath = Path.Combine(SaveLocation, "version");
+            if (!File.Exists(versionPath)) return Version;
+            return File.ReadAllText(versionPath);}
 
         public static void CreateBackup()
         {

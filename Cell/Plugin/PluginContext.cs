@@ -7,9 +7,11 @@ using Cell.ViewModel;
 
 namespace Cell.Plugin
 {
-    public class PluginContext(ApplicationViewModel application)
+    public class PluginContext(ApplicationViewModel application, int index)
     {
         private readonly ApplicationViewModel _application = application;
+
+        public int Index { get; set; } = index;
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column)
         {

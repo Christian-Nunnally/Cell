@@ -91,7 +91,7 @@ namespace Cell.Plugin
             {
                 foreach (var subscriber in subscribers.Keys)
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), subscriber);
+                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
                         subscriber.Text = result.Result;
@@ -115,7 +115,7 @@ namespace Cell.Plugin
             {
                 foreach (var subscriber in subscribers.Keys)
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), subscriber);
+                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
                         subscriber.Text = result.Result;

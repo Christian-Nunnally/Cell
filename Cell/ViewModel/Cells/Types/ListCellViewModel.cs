@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.Persistence;
 using Cell.Plugin;
 using System.Collections.ObjectModel;
@@ -8,7 +7,7 @@ namespace Cell.ViewModel
 {
     public class ListCellViewModel : CellViewModel
     {
-        public ObservableCollection<PluginModel> ListItems { get; set; } = [];
+        public ObservableCollection<object> ListItems { get; set; } = [];
 
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
@@ -46,9 +45,21 @@ namespace Cell.ViewModel
             ListItems.Clear();
             var collection = UserCollectionLoader.GetOrCreateCollection(CollectionName);
             if (collection == null) return;
-            foreach (var item in collection.Items)
+            if (!string.IsNullOrEmpty(PopulateFunctionName))
             {
-                ListItems.Add(item);
+                int i = 0;
+                foreach (var item in collection.Items)
+                {
+                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, i++), Model);
+                    ListItems.Add(result.Result);
+                }
+            }
+            else
+            {
+                foreach (var item in collection.Items)
+                {
+                    ListItems.Add(item);
+                }
             }
         }
     }

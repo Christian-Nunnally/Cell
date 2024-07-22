@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Persistence;
 using Cell.Plugin;
 using System.Text.Json.Serialization;
@@ -253,7 +252,7 @@ namespace Cell.Model
 
         public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
-        internal bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) ? value : false;
+        internal bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
 
         internal void SetBooleanProperty(string key, bool value)
         {
@@ -282,26 +281,6 @@ namespace Cell.Model
         }
 
         internal void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
-
-        public int CellsMergedToRight
-        {
-            get
-            {
-                var count = 0;
-                while (!string.IsNullOrWhiteSpace(MergedWith) && Cells.GetCell(SheetName, Row, Column + 1 + count)?.MergedWith == MergedWith) count++;
-                return count;
-            }
-        }
-
-        public int CellsMergedBelow
-        {
-            get
-            {
-                var count = 0;
-                while (!string.IsNullOrWhiteSpace(MergedWith) && Cells.GetCell(SheetName, Row + 1 + count, Column)?.MergedWith == MergedWith) count++;
-                return count;
-            }
-        }
 
         public static readonly CellModel Empty = new();
     }

@@ -143,7 +143,7 @@ namespace Cell.ViewModel
         public void PopulateText()
         {
             if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance), _model);
+            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, _model.Index), _model);
             if (result.Success) Text = result.Result;
             else Model.ErrorText = result.Result;
         }

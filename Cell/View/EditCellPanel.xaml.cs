@@ -77,7 +77,10 @@ namespace Cell.View
             {
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, cell.PopulateFunctionName);
-                CodeEditorViewModel.Show(function.Code, x => function.Code = x, false, cell);
+                CodeEditorViewModel.Show(function.Code, x => {
+                    function.Code = x;
+                    (cell as ListCellViewModel)?.UpdateList();
+                }, false, cell);
             }
         }
 
@@ -266,6 +269,15 @@ namespace Cell.View
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#6fa9dc"), "!"));
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#d8d8d8"), "!"));
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#d0cece"), "!"));
+
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#ebe5f1"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#f6dfec"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#fbdae1"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#fcdac5"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#edf5e0"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#e2f3ee"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#def3f8"), "!"));
+            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#deebf7"), "!"));
         }
     }
 }

@@ -114,7 +114,7 @@ namespace Cell.Persistence
         public static string GetDataTypeStringForCollection(string collection) => Cells.AllCells
             .Where(x => x.IsCollection(collection) && !string.IsNullOrWhiteSpace(x.GetCollectionType()))
             .Select(x => x.GetCollectionType())
-            .FirstOrDefault(string.Empty);
+            .FirstOrDefault() ?? GetOrCreateCollection(collection).Type;
 
         internal static void SaveCollectionType(string collectionName, string value)
         {
