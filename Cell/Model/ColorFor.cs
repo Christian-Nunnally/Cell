@@ -8,5 +8,6 @@ namespace Cell.Model
         ContentBackground = 2,
         ContentBorder = 3,
         Foreground = 4,
+        ContentHighlight = 5,
     }
 }

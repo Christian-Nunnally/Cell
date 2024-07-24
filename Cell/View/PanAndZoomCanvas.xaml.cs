@@ -14,6 +14,7 @@ namespace Cell.View
         
         public double YPan { get; private set; }
 
+        public bool IsPanningEnabled { get; set; } = true;
 
         private MatrixTransform _transform = new();
         private Point _initialMousePosition;
@@ -60,6 +61,7 @@ namespace Cell.View
         {
             if (e.RightButton == MouseButtonState.Pressed)
             {
+                if (!IsPanningEnabled) return;
                 Point mousePosition = _transform.Inverse.Transform(e.GetPosition(this));
                 Vector delta = Point.Subtract(mousePosition, _initialMousePosition);
                 var translate = new TranslateTransform(delta.X, delta.Y);
@@ -105,21 +107,23 @@ namespace Cell.View
 
         private void PanAndZoomCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (!IsPanningEnabled) return;
             double scaleFactor = Zoomfactor;
-            if (e.Delta < 0)
-            {
-                scaleFactor = 1.0f / scaleFactor;
-                CurrentZoom *= scaleFactor;
-            }
-            else
-            {
-                CurrentZoom *= scaleFactor;
-            }
+            if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
+            ZoomCanvas(e.GetPosition(this), scaleFactor);
+        }
 
-            Point mousePostion = e.GetPosition(this);
+        public void ZoomCanvasTo(Point centerOfZoom, double zoom)
+        {
+            double scaleFactor = zoom / CurrentZoom;
+            ZoomCanvas(centerOfZoom, scaleFactor);
+        }
 
+        private void ZoomCanvas(Point centerOfZoom, double scaleFactor)
+        {
+            CurrentZoom *= scaleFactor;
             Matrix scaleMatrix = _transform.Matrix;
-            scaleMatrix.ScaleAt(scaleFactor, scaleFactor, mousePostion.X, mousePostion.Y);
+            scaleMatrix.ScaleAt(scaleFactor, scaleFactor, centerOfZoom.X, centerOfZoom.Y);
             _transform.Matrix = scaleMatrix;
 
             foreach (UIElement child in this.Children)

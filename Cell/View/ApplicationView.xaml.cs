@@ -1,6 +1,8 @@
-﻿using Cell.Persistence;
+﻿using Cell.Model;
+using Cell.Persistence;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.Editing;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -125,6 +127,17 @@ namespace Cell.View
                 if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 e.Handled = true;
             }
+        }
+
+        private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+            if (SheetView is null) return;
+            if (SheetView.PanAndZoomCanvas is null) return;
+            SheetView.PanAndZoomCanvas.PanCanvasTo(CellModelFactory.DefaultCellWidth, CellModelFactory.DefaultCellHeight);
+            SheetView.PanAndZoomCanvas.ZoomCanvasTo(new Point(0, 0), 1);
+            SheetView.PanAndZoomCanvas.IsPanningEnabled = !SheetView.PanAndZoomCanvas.IsPanningEnabled;
+            button.Content = SheetView.PanAndZoomCanvas.IsPanningEnabled ? "🔓": "🔒";
         }
     }
 }

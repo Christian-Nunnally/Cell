@@ -7,8 +7,8 @@ namespace Cell.Model
 {
     internal static class CellModelFactory
     {
-        private const int DefaultCellWidth = 125;
-        private const int DefaultCellHeight = 25;
+        public const int DefaultCellWidth = 125;
+        public const int DefaultCellHeight = 25;
 
         internal static CellModel Create(int row, int column, CellType type, string sheet)
         {

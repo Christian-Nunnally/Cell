@@ -45,8 +45,7 @@ namespace Cell.View
         }
         private void CellTypeComboBoxSelectionChanged(object sender, EventArgs e)
         {
-            var comboBox = sender as ComboBox;
-            if (comboBox == null) return;
+            if (sender is not ComboBox comboBox) return;
             if (comboBox.SelectedValue is not Label label) return;
             var cellTypeString = label.Content.ToString();
             if (Enum.TryParse(cellTypeString, out CellType newType))
@@ -114,35 +113,68 @@ namespace Cell.View
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
             var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var leftmost = selectedCells.Select(x => x.Column).Min();
-            var topmost = selectedCells.Select(x => x.Row).Min();
-            var rightmost = selectedCells.Select(x => x.Column).Max();
-            var bottommost = selectedCells.Select(x => x.Row).Max();
+            MergeCells(selectedCells);
+        }
 
-            var topLeftCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
+        private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
+            var rows = selectedCells.Select(x => x.Row).Distinct().ToList();
+            foreach (var row in rows)
+            {
+                var cellsToMerge = selectedCells.Where(x => x.Row == row).ToList();
+                MergeCells(cellsToMerge);
+            }
+        }
+
+        private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
+            var columns = selectedCells.Select(x => x.Column).Distinct().ToList();
+            foreach (var column in columns)
+            {
+                var cellsToMerge = selectedCells.Where(x => x.Column == column).ToList();
+                MergeCells(cellsToMerge);
+            }
+        }
+
+        private static void MergeCells(List<CellViewModel> cells)
+        {
+            if (cells.Count < 2) return;
+            var leftmost = cells.Select(x => x.Column).Min();
+            var topmost = cells.Select(x => x.Row).Min();
+            var rightmost = cells.Select(x => x.Column).Max();
+            var bottommost = cells.Select(x => x.Row).Max();
+
+            var topLeftCell = cells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
             if (topLeftCell is null) return;
-            var bottomRightCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
+            var bottomRightCell = cells.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
             if (bottomRightCell is null) return;
 
-            var sheetName = ApplicationViewModel.Instance.SheetViewModel.SheetName;
-            var cellsToMerge = new List<CellModel>();
-            for (var r = topLeftCell.Row; r <= bottomRightCell.Row; r++)
+            var sheetName = topLeftCell.Model.SheetName;
+            var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName);
+            if (cellsToMerge.Any(cell => cell.IsMerged())) return;
+            SetMergedWithToCellsId(cellsToMerge, topLeftCell);
+            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+        }
+
+        private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellViewModel topLeftCell)
+        {
+            foreach (var cell in cellsToMerge) cell.MergedWith = topLeftCell.ID;
+        }
+
+        private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName)
+        {
+            var cells = new List<CellModel>();
+            for (var row = startRow; row <= endRow; row++)
             {
-                for (var c = topLeftCell.Column; c <= bottomRightCell.Column; c++)
+                for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = Cells.GetCell(sheetName, r, c);
-                    if (cell is not null)
-                    {
-                        if (!string.IsNullOrWhiteSpace(cell.MergedWith)) return;
-                        cellsToMerge.Add(cell);
-                    }
+                    var cell = Cells.GetCell(sheetName, row, column);
+                    if (cell is not null) cells.Add(cell);
                 }
             }
-            foreach (var cell in cellsToMerge)
-            {
-                cell.MergedWith = topLeftCell.ID;
-            }
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+            return cells;
         }
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
@@ -243,10 +275,13 @@ namespace Cell.View
             var topmost = selectedCells.Select(x => x.Row).Min();
             var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
             if (topLeftCell is null) return;
+            var isLinearSelection = selectedCells.Select(x => x.Column).Distinct().Count() == 1 || selectedCells.Select(x => x.Row).Distinct().Count() == 1;
             foreach (var selectedCell in selectedCells)
             {
                 if (selectedCell == topLeftCell) continue;
-                var distance = (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row);
+                var distance = isLinearSelection 
+                    ? (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row) 
+                    : selectedCell.Row - topLeftCell.Row;
                 selectedCell.Index = topLeftCell.Index + distance;
             }
         }

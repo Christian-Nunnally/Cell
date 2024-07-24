@@ -1,4 +1,5 @@
 ﻿
+
 namespace Cell.Model.Plugin
 {
     [Serializable]
@@ -11,12 +12,12 @@ namespace Cell.Model.Plugin
         }
         private string _title = string.Empty;
 
-        public string Description
+        public string Notes
         {
-            get => _description;
-            set { if (value != _description) { _description = value; OnPropertyChanged(nameof(Description)); } }
+            get => _notes;
+            set { if (value != _notes) { _notes = value; OnPropertyChanged(nameof(Notes)); } }
         }
-        private string _description = string.Empty;
+        private string _notes = string.Empty;
 
         public bool IsComplete
         {
@@ -39,6 +40,13 @@ namespace Cell.Model.Plugin
         }
         private DateTime _creationDate = DateTime.Now;
 
+        public DateTime CompletionDate
+        {
+            get => _completionDate;
+            set { if (value != _completionDate) { _completionDate = value; OnPropertyChanged(nameof(CompletionDate)); } }
+        }
+        private DateTime _completionDate;
+
         public int Priority
         {
             get => _priority;
@@ -46,9 +54,16 @@ namespace Cell.Model.Plugin
         }
         private int _priority = 0;
 
+        public int Status
+        {
+            get => _status;
+            set { if (value != _status) { _status = value; OnPropertyChanged(nameof(Status)); } }
+        }
+        private int _status = 0;
+
         override public string ToString()
         {
-            return $"{(IsComplete ? "✓" : "☐")} {Title} - {Description}";
+            return $"{(IsComplete ? "✓" : "☐")} {Title} - {Notes}";
         }
     }
 }

@@ -9,6 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="View/Skin/Dark.xaml" />
                 <ResourceDictionary Source="View/Skin/Controls.xaml" />
+                <ResourceDictionary Source="View/Controls/generic.xaml" />
                 <ResourceDictionary Source="View/Skin/Styles.xaml" />
                 <ResourceDictionary Source="View/Converters/Converters.xaml" />
                 <ResourceDictionary Source="View/Skin/ColorPicker.xaml" />

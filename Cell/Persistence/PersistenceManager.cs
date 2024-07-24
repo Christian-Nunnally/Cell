@@ -9,7 +9,7 @@ namespace Cell.Persistence
     {
         public const string Version = "0.0.0";
         public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
-        private static DateTime _lastBackupDate = DateTime.Now;
+        private static DateTime _lastBackupDate = DateTime.Now + MinimumBackupInterval;
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
 
         public static void SaveAll()
@@ -30,6 +30,7 @@ namespace Cell.Persistence
         {
             var versionSchema = LoadVersion();
             if (Version != versionSchema) throw new ProjectLoadException($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
+            SaveVersion();
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
             new CellLoader(SaveLocation).LoadCells();

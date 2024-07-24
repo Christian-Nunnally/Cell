@@ -50,6 +50,11 @@
                 Content="..."
                 DockPanel.Dock="Left"
                 Style="{StaticResource TitleButtonStyle}" />
+            <Button
+                Click="TogglePanLockButtonClick"
+                Content="🔒"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}" />
             <Label />
         </DockPanel>
 

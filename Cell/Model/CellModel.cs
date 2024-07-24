@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Persistence;
 using Cell.Plugin;
+using System.Drawing.Printing;
 using System.Text.Json.Serialization;
 using System.Windows;
 
@@ -110,21 +111,28 @@ namespace Cell.Model
             get { return colorHexes; }
             set { if (colorHexes == value) return; colorHexes = value; NotifyPropertyChanged(nameof(ColorHexes)); }
         }
-        private string[] colorHexes = ["#1e1e1e", "#2d2d30", "#1e1e1e", "#2d2d30", "#ffffff"];
+        private string[] colorHexes = ["#1e1e1e", "#2d2d30", "#1e1e1e", "#2d2d30", "#ffffff", "#ff00ff"];
 
         public string BorderThicknessString
         {
             get { return borderThickness; }
             set { if (borderThickness == value) return; borderThickness = value; NotifyPropertyChanged(nameof(BorderThicknessString)); }
         }
-        private string borderThickness = "1,1,1,1";
+        private string borderThickness = "1";
 
         public string ContentBorderThicknessString
         {
             get { return contentBorderThickness; }
             set { if (contentBorderThickness == value) return; contentBorderThickness = value; NotifyPropertyChanged(nameof(ContentBorderThicknessString)); }
         }
-        private string contentBorderThickness = "1,1,1,1";
+        private string contentBorderThickness = "1";
+
+        public string MarginString
+        {
+            get { return margin; }
+            set { if (margin == value) return; margin = value; NotifyPropertyChanged(nameof(MarginString)); }
+        }
+        private string margin = "0";
 
         public double FontSize
         {

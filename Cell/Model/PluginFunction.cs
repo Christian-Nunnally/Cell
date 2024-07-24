@@ -10,7 +10,7 @@ namespace Cell.Model
 {
     public partial class PluginFunction : PropertyChangedBase
     {
-        private const string codeHeader = "using System; using System.Collections.Generic; using Cell.Model; using Cell.ViewModel; using Cell.Model.Plugin; using Cell.Plugin;\n\nnamespace Plugin { public class Program { public static ";
+        private const string codeHeader = "using System; using System.Linq; using System.Collections.Generic; using Cell.Model; using Cell.ViewModel; using Cell.Model.Plugin; using Cell.Plugin;\n\nnamespace Plugin { public class Program { public static ";
         private const string codeFooter = "\n}}}";
         private const string methodHeader = " PluginMethod(PluginContext c, CellModel cell) {\n";
 
@@ -80,6 +80,10 @@ namespace Cell.Model
             {
                 return;
             }
+            catch (InvalidCastException)
+            {
+                return;
+            }
             SyntaxTree = root.SyntaxTree;
             _isSyntaxTreeValid = true;
             NotifyDependenciesHaveChanged();
@@ -121,7 +125,7 @@ namespace Cell.Model
             if (!_isSyntaxTreeValid) ExtractAndTransformDependencies();
             try
             {
-                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console) };
+                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console), typeof(System.Linq.Enumerable) };
                 var compiler = new RoslynCompiler(SyntaxTree, typesToAddAssemblyReferencesFor);
                 var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
                 _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
