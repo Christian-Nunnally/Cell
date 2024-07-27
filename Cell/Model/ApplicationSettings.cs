@@ -36,6 +36,13 @@ namespace Cell.Model
         }
         private Dock codeEditorDockPosition = Dock.Left;
 
+        public string LastLoadedSheet
+        {
+            get { return lastLoadedSheet; }
+            set { if (lastLoadedSheet != value) { lastLoadedSheet = value; NotifyPropertyChanged(nameof(LastLoadedSheet)); } }
+        }
+        private string lastLoadedSheet = "Default";
+
         public static ApplicationSettings CreateInstance()
         {
             _instance = Load() ?? new ApplicationSettings();
@@ -46,14 +53,16 @@ namespace Cell.Model
         private static ApplicationSettings? Load()
         {
             var path = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
-            return File.Exists(path) ? JsonSerializer.Deserialize<ApplicationSettings>(File.ReadAllText(path)) : null;
+            if (!File.Exists(path)) return null;
+            var text = File.ReadAllText(path);
+            return JsonSerializer.Deserialize<ApplicationSettings>(text);
         }
 
         private void Save()
         {
             var directory = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory);
             Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, ApplicationSettingsSaveDirectory);
+            var path = Path.Combine(directory, ApplicationSettingsSaveFile);
             var serialized = JsonSerializer.Serialize(this);
             File.WriteAllText(path, serialized);
         }

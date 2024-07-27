@@ -1,0 +1,17 @@
+"filename", "language", "JSON", "C#", "Properties", "comment", "blank", "total"
+"c:\Users\chris\source\repos\Cell\Cell\bin\Debug\net8.0-windows\Cell.deps.json", "JSON", -313, 0, 0, 0, 0, -313
+"c:\Users\chris\source\repos\Cell\Cell\bin\Debug\net8.0-windows\Cell.runtimeconfig.json", "JSON", -18, 0, 0, 0, 0, -18
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\App.g.cs", "C#", 0, -54, 0, -18, -14, -86
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\Cell.AssemblyInfo.cs", "C#", 0, -11, 0, -10, -5, -26
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\Cell.GeneratedMSBuildEditorConfig.editorconfig", "Properties", 0, 0, -21, 0, -1, -22
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\Cell.sourcelink.json", "JSON", -1, 0, 0, 0, 0, -1
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs", "C#", 0, -26, 0, -27, -10, -63
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\ApplicationView.g.cs", "C#", 0, -135, 0, -15, -42, -192
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\CellTextEditBar.g.cs", "C#", 0, -69, 0, -15, -15, -99
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\CodeEditor.g.cs", "C#", 0, -130, 0, -15, -38, -183
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\EditCellPanel.g.cs", "C#", 0, -338, 0, -15, -99, -452
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\PanAndZoomCanvas.g.cs", "C#", 0, -51, 0, -15, -12, -78
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\SheetView.g.cs", "C#", 0, -88, 0, -15, -23, -126
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\TitleBarSheetNavigation.g.cs", "C#", 0, -77, 0, -15, -17, -109
+"c:\Users\chris\source\repos\Cell\Cell\obj\Debug\net8.0-windows\View\TypeSpecificEditCellPanel.g.cs", "C#", 0, -75, 0, -15, -17, -107
+"Total", "-", -332, -1054, -21, -175, -293, -1875

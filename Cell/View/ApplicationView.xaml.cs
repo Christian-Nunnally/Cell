@@ -2,7 +2,6 @@
 using Cell.Persistence;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.Editing;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -138,6 +137,32 @@ namespace Cell.View
             SheetView.PanAndZoomCanvas.ZoomCanvasTo(new Point(0, 0), 1);
             SheetView.PanAndZoomCanvas.IsPanningEnabled = !SheetView.PanAndZoomCanvas.IsPanningEnabled;
             button.Content = SheetView.PanAndZoomCanvas.IsPanningEnabled ? "🔓": "🔒";
+        }
+
+        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+            if (button.Content is not Label label) return;
+            if (label.Content is not string sheetName) return;
+            ApplicationViewModel.Instance.GoToSheet(sheetName);
+        }
+
+        private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (ApplicationViewModel.Instance.IsAddingSheet)
+            {
+                if (!string.IsNullOrEmpty(ApplicationViewModel.Instance.NewSheetName))
+                {
+                    ApplicationViewModel.Instance.GoToSheet(ApplicationViewModel.Instance.NewSheetName);
+                }
+                ApplicationViewModel.Instance.NewSheetName = string.Empty;
+                ApplicationViewModel.Instance.IsAddingSheet = false;
+            }
+            else
+            {
+                ApplicationViewModel.Instance.IsAddingSheet = true;
+                ApplicationViewModel.Instance.NewSheetName = "Untitled";
+            }
         }
     }
 }

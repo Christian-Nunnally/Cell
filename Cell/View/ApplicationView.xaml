@@ -55,7 +55,10 @@
                 Content="🔒"
                 DockPanel.Dock="Left"
                 Style="{StaticResource TitleButtonStyle}" />
-            <Label />
+            <local:TitleBarSheetNavigation
+                DataContext="{Binding}"
+                DockPanel.Dock="Bottom"
+                WindowChrome.IsHitTestVisibleInChrome="True" />
         </DockPanel>
 
         <Grid>

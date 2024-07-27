@@ -1,12 +1,13 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
+using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel
 {
     public class CornerCellViewModel(CellModel model, SheetViewModel sheetViewModel) : SpecialCellViewModel(model, sheetViewModel)
     {
-        public List<string> SheetNames => Cells.GetSheetNames();
+        public ObservableCollection<string> SheetNames => Cells.SheetNames;
 
         public List<string> PopulateFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Populate", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
 

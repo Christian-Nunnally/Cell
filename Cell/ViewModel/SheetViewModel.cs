@@ -76,14 +76,11 @@ namespace Cell.ViewModel
                 if (cell == sender) continue;
                 var cellType = cell.GetType();
                 var selectedType = sender.GetType();
-                if (cellType == selectedType || cellType.IsAssignableTo(selectedType))
+                PropertyInfo? cellProperty = cellType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                PropertyInfo? selectedProperty = selectedType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (null != cellProperty && cellProperty.CanWrite && selectedProperty != null && selectedProperty.CanRead)
                 {
-                    PropertyInfo? cellProperty = cellType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
-                    PropertyInfo? selectedProperty = selectedType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
-                    if (null != cellProperty && cellProperty.CanWrite && selectedProperty != null && selectedProperty.CanRead)
-                    {
-                        cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
-                    }
+                    cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
                 }
             }
         }
@@ -191,17 +188,18 @@ namespace Cell.ViewModel
             SelectedCellViewModels.Add(cell);
             if (SelectedCellViewModels.Count == 1)
             {
-                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, SelectedCellViewModel.Model.PopulateFunctionName, out var function))
+                if (PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var function))
                 {
                     foreach(var locationDependencies in function.LocationDependencies)
                     {
                         var sheet = locationDependencies.SheetName;
                         var row = locationDependencies.Row;
                         var column = locationDependencies.Column;
+                        if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
+                        if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
                         var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                         if (cellToHighlight == null) continue;
-                        cellToHighlight.HighlightCell("#04385c66");
-                        HighlightedCellViewModels.Add(cellToHighlight);
+                        HighlightCell(cellToHighlight, "#0438ff44");
                     }
 
                     foreach (var collectionReference in function.CollectionDependencies)
@@ -209,15 +207,22 @@ namespace Cell.ViewModel
                         var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
                         foreach (var cellToHighlight in cellsToHighlight)
                         {
-                            cellToHighlight.HighlightCell("#04385c66");
-                            HighlightedCellViewModels.Add(cellToHighlight);
+                            HighlightCell(cellToHighlight, "#0438ff44");
                         }
                     }
                 }
             }
         }
 
-        private void UnhighlightAllCells()
+        public void HighlightCell(CellViewModel cellToHighlight, string color)
+        {
+            _enableMultiEditSelectedCells = false;
+            cellToHighlight.HighlightCell(color);
+            HighlightedCellViewModels.Add(cellToHighlight);
+            _enableMultiEditSelectedCells = true;
+        }
+
+        public void UnhighlightAllCells()
         {
             foreach (var cellToUnHighlight in HighlightedCellViewModels)
             {

@@ -2,6 +2,7 @@
 using Cell.Persistence;
 using Cell.Plugin;
 using Cell.Common;
+using System.Collections.ObjectModel;
 
 namespace Cell.Data
 {
@@ -15,10 +16,11 @@ namespace Cell.Data
         private static readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private static readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private static readonly Dictionary<string, string> _cellsToLocation = [];
+        private static readonly ObservableCollection<string> _sheetNames = [];
 
         public static readonly IEnumerable<CellModel> AllCells = _cellsBySheetMap.Values.SelectMany(x => x.Values);
 
-        public static IEnumerable<string> SheetNames => _cellsBySheetMap.Keys;
+        public static ObservableCollection<string> SheetNames => _sheetNames;
 
         public static void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
@@ -30,6 +32,7 @@ namespace Cell.Data
             else
             {
                 _cellsBySheetMap.Add(cellModel.SheetName, new Dictionary<string, CellModel> { { cellModel.ID, cellModel } });
+                _sheetNames.Add(cellModel.SheetName);
             }
 
             AddCellToCellByLocationMap(cellModel);
@@ -49,14 +52,17 @@ namespace Cell.Data
 
         public static void RemoveCell(CellModel cellModel)
         {
-            if (_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary))
+            if (!_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary)) return;
+            cellDictionary.Remove(cellModel.ID);
+            _cellLoader.DeleteCell(cellModel);
+            CellTriggerManager.StopMonitoringCell(cellModel);
+            CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
+            _cellsToLocation.Remove(cellModel.ID);
+            _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
+            if (cellDictionary.Count == 0)
             {
-                cellDictionary.Remove(cellModel.ID);
-                _cellLoader.DeleteCell(cellModel);
-                CellTriggerManager.StopMonitoringCell(cellModel);
-                CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
-                _cellsToLocation.Remove(cellModel.ID);
-                _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
+                _cellsBySheetMap.Remove(cellModel.SheetName);
+                _sheetNames.Remove(cellModel.SheetName);
             }
         }
 
@@ -80,10 +86,40 @@ namespace Cell.Data
                 _cellsByLocation[previousLocation].Remove(model);
                 _cellsToLocation[model.ID] = model.GetUnqiueLocationString();
                 AddCellToCellByLocationMap(model);
+
+                if (e.PropertyName == nameof(CellModel.SheetName))
+                {
+                    // Remove
+                    var previousSheetName = previousLocation.Split('_')[0];
+                    if (_cellsBySheetMap.TryGetValue(previousSheetName, out var cellsInOldSheet))
+                    {
+                        cellsInOldSheet.Remove(model.ID);
+                        if (cellsInOldSheet.Count == 0)
+                        {
+                            _cellsBySheetMap.Remove(previousSheetName);
+                            _sheetNames.Remove(previousSheetName);
+                        }
+                    }
+
+                    // Add
+                    if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellsInNewSheet))
+                    {
+                        cellsInNewSheet.Add(model.ID, model);
+                    }
+                    else
+                    {
+                        _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
+                        _sheetNames.Add(model.SheetName);
+                    }
+                }
             }
             _cellLoader.SaveCell(model);
         }
 
-        public static List<string> GetSheetNames() => [.. _cellsBySheetMap.Keys];
+        public static void RenameSheet(string oldSheetName, string newSheetName)
+        {
+            _cellLoader.RenameSheet(oldSheetName, newSheetName);
+            GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
+        }
     }
 }

@@ -33,6 +33,13 @@ namespace Cell.Persistence
             foreach (var cell in Cells.GetCellModelsForSheet(sheet)) SaveCell(cell);
         }
 
+        public void RenameSheet(string oldName, string newName)
+        {
+            var oldDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, oldName);
+            var newDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, newName);
+            Directory.Move(oldDirectory, newDirectory);
+        }
+
         public void SaveCell(CellModel cell)
         {
             var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);

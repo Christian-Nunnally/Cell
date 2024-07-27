@@ -95,7 +95,6 @@
                 FontSize="10pt"
                 SyntaxHighlighting="C#"
                 Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}" />
-
             <TextBox
                 Grid.Row="2"
                 Padding="4"

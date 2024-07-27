@@ -6,6 +6,7 @@ namespace Cell.ViewModel
 {
     public class GraphCellViewModel : CellViewModel
     {
+        private bool _addingPoint = false;
         private readonly List<Point> _rawDataPoints = [];
 
         public GraphCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
@@ -15,6 +16,16 @@ namespace Cell.ViewModel
                 if (args.PropertyName == nameof(Text))
                 {
                     Text = model.Text;
+                }
+
+                if (args.PropertyName == nameof(Width))
+                {
+                    UpdatePoints();
+                }
+
+                if (args.PropertyName == nameof(Height))
+                {
+                    UpdatePoints();
                 }
             };
         }
@@ -29,19 +40,22 @@ namespace Cell.ViewModel
                 new Point(25, 44),
                 new Point(30, 2),
                 new Point(35, 3),
-            ], 115, 15);
+            ], 10, 10);
 
         public override string Text
         {
             get => base.Text;
             set
             {
-                base.Text = value;
+                if (_addingPoint) return;
+                _addingPoint = true;
+                    base.Text = value;
                 if (double.TryParse(value, out double result))
                 {
-                    _rawDataPoints.Add(new Point(_rawDataPoints.Count, result));
+                    _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
                     UpdatePoints();
                 }
+                _addingPoint = false;
             }
         }
 
@@ -59,6 +73,8 @@ namespace Cell.ViewModel
 
         static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
         {
+            if (points.Count == 0) return [];
+
             // Find the current bounding box of the points
             double minX = points.Min(p => p.X);
             double minY = points.Min(p => p.Y);
@@ -73,9 +89,9 @@ namespace Cell.ViewModel
             List<Point> scaledAndCenteredPoints = [];
             foreach (var point in points)
             {
-                double scaledX = (point.X - minX) * scaleX + 4;
-                double scaledY = (point.Y - minY) * scaleY + 4;
-                scaledAndCenteredPoints.Add(new Point(scaledX, scaledY));
+                double scaledX = (point.X - minX) * scaleX;
+                double scaledY = (point.Y - minY) * scaleY;
+                scaledAndCenteredPoints.Add(new Point(scaledX + 1, scaledY + 1));
             }
 
             return [.. scaledAndCenteredPoints];

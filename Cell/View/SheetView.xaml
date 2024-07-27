@@ -124,20 +124,6 @@
                     FontSize="{Binding FontSize}"
                     Foreground="{Binding ForegroundColor}"
                     IsChecked="{Binding IsChecked, Mode=TwoWay}" />
-                <!--<CheckBox
-                    Margin="2"
-                    HorizontalAlignment="{Binding HorizontalAlignmentForView}"
-                    VerticalAlignment="{Binding VerticalAlignmentForView}"
-                    VerticalContentAlignment="Center"
-                    Background="{Binding ContentBackgroundColor}"
-                    BorderBrush="{Binding ContentBorderColor}"
-                    BorderThickness="{Binding ContentBorderThickness}"
-                    Command="{Binding CheckboxCheckedCommand}"
-                    Content="{Binding Path=Text}"
-                    FontFamily="{Binding FontFamily}"
-                    FontSize="{Binding FontSize}"
-                    Foreground="{Binding ForegroundColor}"
-                    IsChecked="{Binding IsChecked}" />-->
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:ButtonCellViewModel}">
                 <Button
@@ -149,7 +135,7 @@
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border
-                                Margin="3"
+                                Margin="{Binding Margin}"
                                 Padding="0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Stretch"
@@ -187,9 +173,11 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:TextboxCellViewModel}">
                 <TextBox
-                    Margin="3"
+                    Margin="{Binding Margin}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="{Binding HorizontalAlignmentForViewCenter}"
+                    VerticalContentAlignment="{Binding VerticalAlignmentForViewCenter}"
                     Background="{Binding ContentBackgroundColor}"
                     BorderBrush="{Binding ContentBorderColor}"
                     BorderThickness="{Binding ContentBorderThickness}"
@@ -202,8 +190,10 @@
             <DataTemplate DataType="{x:Type viewModel:DropdownCellViewModel}">
                 <controls:BetterComboBox
                     MinWidth="30"
-                    Margin="3"
+                    Margin="{Binding Margin}"
                     VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="{Binding HorizontalAlignmentForViewCenter}"
+                    VerticalContentAlignment="{Binding VerticalAlignmentForViewCenter}"
                     Background="{Binding ContentBackgroundColor}"
                     BorderBrush="{Binding ContentBorderColor}"
                     FontFamily="{Binding FontFamily}"
@@ -219,14 +209,14 @@
                     x:Name="progressRectangle"
                     Width="{Binding ProgressBarWidth, NotifyOnTargetUpdated=True}"
                     Height="{Binding ProgressBarHeight}"
-                    Margin="3"
+                    Margin="{Binding Margin}"
                     HorizontalAlignment="Left"
                     Fill="{Binding ForegroundColor}" />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:ListCellViewModel}">
                 <ListBox
                     x:Name="CellListBox"
-                    Margin="3"
+                    Margin="{Binding Margin}"
                     Background="{Binding ContentBackgroundColor}"
                     BorderBrush="{Binding ContentBorderColor}"
                     BorderThickness="{Binding ContentBorderThickness}"
@@ -250,7 +240,6 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
                 <Polyline
-                    ClipToBounds="False"
                     Points="{Binding DataPoints}"
                     Stroke="{Binding ForegroundColor}"
                     StrokeEndLineCap="Round"

@@ -53,20 +53,21 @@ namespace Cell.ViewModel
             var syntaxTree = function.SyntaxTree;
             var sematicModel = function.GetSemanticModel();
             var variableNode = syntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclarationSyntax>().FirstOrDefault(x => x.Variables.First().Identifier.Text == type);
-            if (variableNode == null) return null;
-            var typeInfo = sematicModel.GetTypeInfo(variableNode.Type);
-
-            if (typeInfo.Type is not null)
+            if (variableNode != null)
             {
-                var completionWindow = new CompletionWindow(textArea);
-                var data = completionWindow.CompletionList.CompletionData;
-                // TODO: which one?
-                var name = typeInfo.Type.GetFullMetadataName();
-                var name2 = typeInfo.Type.ToString();
-                GetMembersOfType(name).ForEach(x => data.Add(new PluginContextCompletionData(x)));
-                return completionWindow;
-            }
+                var typeInfo = sematicModel.GetTypeInfo(variableNode.Type);
 
+                if (typeInfo.Type is not null)
+                {
+                    var completionWindow = new CompletionWindow(textArea);
+                    var data = completionWindow.CompletionList.CompletionData;
+                    // TODO: which one?
+                    var name = typeInfo.Type.GetFullMetadataName();
+                    var name2 = typeInfo.Type.ToString();
+                    GetMembersOfType(name).ForEach(x => data.Add(new PluginContextCompletionData(x)));
+                    return completionWindow;
+                }
+            }
             if (type == "c")
             {
                 var completionWindow = new CompletionWindow(textArea);
@@ -76,7 +77,7 @@ namespace Cell.ViewModel
                 data.Add(new PluginContextCompletionData("SheetNames"));
                 return completionWindow;
             }
-            else if (FindAndReplaceCellLocationsSyntaxRewriter.IsCellLocation(type))
+            else if (type == "cell" || CellReferenceToCodeSyntaxRewriter.IsCellLocation(type))
             {
                 var completionWindow = new CompletionWindow(textArea);
                 IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;

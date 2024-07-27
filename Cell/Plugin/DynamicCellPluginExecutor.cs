@@ -9,7 +9,7 @@ namespace Cell.Plugin
 
         public static CompileResult RunPopulate(PluginContext pluginContext, CellModel cell)
         {
-            if (!PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { Success = false, Result = "Populate function not found" };
+            if (!PluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { Success = false, Result = "Populate function not found" };
             var method = populateFunction.CompiledMethod;
             if (populateFunction.CompileResult.Success)
             {
@@ -24,7 +24,7 @@ namespace Cell.Plugin
 
         public static CompileResult RunTrigger(PluginContext pluginContext, CellModel cell)
         {
-            if (!PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { Success = false, Result = "Trigger function not found" };
+            if (!PluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { Success = false, Result = "Trigger function not found" };
             var method = triggerFunction.CompiledMethod;
             if (triggerFunction.CompileResult.Success)
             {

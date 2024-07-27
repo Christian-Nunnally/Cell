@@ -64,10 +64,14 @@ namespace Cell.View
                 if (!IsPanningEnabled) return;
                 Point mousePosition = _transform.Inverse.Transform(e.GetPosition(this));
                 Vector delta = Point.Subtract(mousePosition, _initialMousePosition);
+
+                //XPan += delta.X;
+                //YPan += delta.Y;
+                //PanChanged?.Invoke();
+                //ArrangeItemsForPanAndZoom();
                 var translate = new TranslateTransform(delta.X, delta.Y);
                 _transform.Matrix = translate.Value * _transform.Matrix;
-
-                foreach (UIElement child in this.Children)
+                foreach (UIElement child in Children)
                 {
                     child.RenderTransform = _transform;
                 }

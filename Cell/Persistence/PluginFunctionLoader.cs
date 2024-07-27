@@ -8,8 +8,6 @@ namespace Cell.Persistence
 {
     public static class PluginFunctionLoader
     {
-        public const string PopulateFunctionsDirectoryName = "Populate";
-        public const string TriggerFunctionsDirectoryName = "Trigger";
         public const string FunctionsDirectoryName = "Functions";
 
         public static Dictionary<string, Dictionary<string, PluginFunction>> Namespaces { get; set; } = [];
@@ -42,7 +40,7 @@ namespace Cell.Persistence
         private static void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not PluginFunction function) return;
-            SavePluginFunction(function.ReturnType == "void" ? TriggerFunctionsDirectoryName : PopulateFunctionsDirectoryName, function);
+            SavePluginFunction(function.ReturnType, function);
         }
 
         public static void SavePlugins()
@@ -59,6 +57,7 @@ namespace Cell.Persistence
 
         public static void SavePluginFunction(string space, PluginFunction function)
         {
+            if (string.IsNullOrEmpty(function.Name)) return;
             var directory = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName, space);
             Directory.CreateDirectory(directory);
             var path = Path.Combine(directory, function.Name);
@@ -90,7 +89,7 @@ namespace Cell.Persistence
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
-            var function = new PluginFunction(name, code, space == TriggerFunctionsDirectoryName ? "void" : "object");
+            var function = new PluginFunction(name, code, space);
             AddPluginFunctionToNamespace(space, function);
             SavePluginFunction(space, function);
             return function;

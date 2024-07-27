@@ -29,8 +29,9 @@ namespace Cell.ViewModel
         private void LayoutRowCells()
         {
             var lastCell = _corner;
-            foreach (var rowCellViewModel in _rows.Skip(1))
+            foreach (var cellViewModel in _rows.Skip(1))
             {
+                RowCellViewModel rowCellViewModel = (RowCellViewModel)cellViewModel;
                 rowCellViewModel.X = 0;
                 rowCellViewModel.Y = lastCell.Y + lastCell.Height;
                 lastCell = rowCellViewModel;

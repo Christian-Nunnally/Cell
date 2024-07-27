@@ -12,17 +12,16 @@
                 <ControlTemplate TargetType="{x:Type local:BetterCheckBox}">
                     <Border
                         x:Name="CheckBoxBorder"
-                        CornerRadius="1"
                         Width="{TemplateBinding Width}"
                         Height="{TemplateBinding Height}"
                         HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                         VerticalAlignment="{TemplateBinding VerticalAlignment}"
                         BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="1">
                         <Grid>
-                            <Rectangle
-                                Fill="{TemplateBinding Foreground}"
-                                Visibility="{Binding IsChecked, Converter={StaticResource btv}}" />
+                            <Rectangle Fill="{TemplateBinding Background}" />
+                            <Rectangle Fill="{TemplateBinding Foreground}" Visibility="{Binding IsChecked, Converter={StaticResource btv}}" />
                             <Path
                                 x:Name="CheckMark"
                                 Width="9"

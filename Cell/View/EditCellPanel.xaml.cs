@@ -82,11 +82,11 @@ namespace Cell.View
             if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, cell.PopulateFunctionName);
-                CodeEditorViewModel.Show(function.Code, x => {
-                    function.Code = x;
+                var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
+                CodeEditorViewModel.Show(function.GetUserFriendlyCode(cell.Model), x => {
+                    function.SetUserFriendlyCode(x, cell.Model);
                     (cell as ListCellViewModel)?.UpdateList();
-                }, false, cell);
+                }, true, cell);
             }
         }
 
@@ -95,8 +95,8 @@ namespace Cell.View
             if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
                 if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction(PluginFunctionLoader.TriggerFunctionsDirectoryName, cell.TriggerFunctionName);
-                CodeEditorViewModel.Show(function.Code, x => function.Code = x, false, cell);
+                var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
+                CodeEditorViewModel.Show(function.GetUserFriendlyCode(cell.Model), x => function.SetUserFriendlyCode(x, cell.Model), false, cell);
             }
         }
 

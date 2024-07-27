@@ -41,7 +41,7 @@ namespace Cell.Model
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
         private string FullCode => codeHeader + ReturnType + methodHeader + code + codeFooter;
-        
+
         public PluginFunction() { }
 
         public PluginFunction(string name, string code, string returnType)
@@ -53,7 +53,7 @@ namespace Cell.Model
 
         public string Code
         {
-            get => code; 
+            get => code;
             set
             {
                 if (code == value) return;
@@ -65,6 +65,18 @@ namespace Cell.Model
             }
         }
 
+        public void SetUserFriendlyCode(string userFriendlyCode, CellModel cell)
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(userFriendlyCode);
+            Code = new CellReferenceToCodeSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+        }
+
+        public string GetUserFriendlyCode(CellModel cell)
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Code);
+            return new CodeToCellReferenceSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+        }
+
         public void ExtractAndTransformDependencies()
         {
             _isSyntaxTreeValid = false;
@@ -73,7 +85,7 @@ namespace Cell.Model
             SyntaxNode? root = syntaxTree.GetRoot();
             try
             {
-                root = ExtractAndTransformCellLocationReferences(root);
+                ExtractCellLocationReferences(root);
                 root = ExtractAndTransformCollectionReferences(root);
             }
             catch (PluginFunctionSyntaxTransformException)
@@ -109,15 +121,13 @@ namespace Cell.Model
             return root;
         }
 
-        private SyntaxNode ExtractAndTransformCellLocationReferences(SyntaxNode? root)
+        private void ExtractCellLocationReferences(SyntaxNode? root)
         {
             LocationDependencies.Clear();
-            var cellLocationSyntaxRewriter = new FindAndReplaceCellLocationsSyntaxRewriter();
-            root = cellLocationSyntaxRewriter.Visit(root) ?? throw new Exception("Syntax root should not be null after rewrite.");
-            SyntaxTree = root.SyntaxTree;
-            var foundDependencies = cellLocationSyntaxRewriter.LocationReferences;
+            var walker = new CellReferenceSyntaxWalker();
+            walker.Visit(root);
+            var foundDependencies = walker.LocationReferences;
             LocationDependencies.AddRange(foundDependencies);
-            return root;
         }
 
         public MethodInfo? Compile()

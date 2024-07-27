@@ -1,7 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Persistence;
 using Cell.Plugin;
-using System.Drawing.Printing;
+using Cell.ViewModel;
 using System.Text.Json.Serialization;
 using System.Windows;
 
@@ -96,6 +96,13 @@ namespace Cell.Model
         public double Value
         {
             get => double.TryParse(Text, out var value) ? value : 0;
+            set => Text = value.ToString();
+        }
+
+        [JsonIgnore]
+        public DateTime Date
+        {
+            get => DateTime.TryParse(Text, out var value) ? value : DateTime.MinValue;
             set => Text = value.ToString();
         }
 
@@ -196,12 +203,12 @@ namespace Cell.Model
             set
             {
                 if (populateFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function))
+                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function))
                 {
                     function.StopListeningForDependencyChanges(this);
                 }
                 populateFunctionName = value;
-                if (PluginFunctionLoader.TryGetFunction(PluginFunctionLoader.PopulateFunctionsDirectoryName, populateFunctionName, out var function2))
+                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function2))
                 {
                     function2.StartListeningForDependencyChanges(this);
                     var _ = function2.CompiledMethod;
@@ -226,7 +233,9 @@ namespace Cell.Model
             foreach (var locationDependency in function.LocationDependencies)
             {
                 var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, locationDependency.Row, locationDependency.Column);
+                var row = locationDependency.ResolveRow(this);
+                var column = locationDependency.ResolveColumn(this);
+                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
             }
 
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
@@ -238,9 +247,9 @@ namespace Cell.Model
 
         public Dictionary<string, string> StringProperties { get; set; } = [];
 
-        internal string GetStringProperty(string key) => StringProperties.TryGetValue(key, out var value) ? value : string.Empty;
+        public string GetStringProperty(string key) => StringProperties.TryGetValue(key, out var value) ? value : string.Empty;
 
-        internal void SetStringProperty(string key, string value)
+        public void SetStringProperty(string key, string value)
         {
             if (StringProperties.TryGetValue(key, out var currentValue))
             {
@@ -249,13 +258,14 @@ namespace Cell.Model
             }
             else StringProperties.Add(key, value);
             NotifyPropertyChanged(nameof(StringProperties));
+            NotifyPropertyChanged(key);
         }
 
         public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
-        internal bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
+        public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
 
-        internal void SetBooleanProperty(string key, bool value)
+        public void SetBooleanProperty(string key, bool value)
         {
             if (BooleanProperties.TryGetValue(key, out var currentValue))
             {
@@ -264,13 +274,14 @@ namespace Cell.Model
             }
             else BooleanProperties.Add(key, value);
             NotifyPropertyChanged(nameof(BooleanProperties));
+            NotifyPropertyChanged(key);
         }
 
         public Dictionary<string, double> NumericProperties { get; set; } = [];
 
-        internal double GetNumericProperty(string key) => NumericProperties.TryGetValue(key, out var value) ? value : 0;
+        public double GetNumericProperty(string key) => NumericProperties.TryGetValue(key, out var value) ? value : 0;
 
-        internal void SetNumericProperty(string key, double value)
+        public void SetNumericProperty(string key, double value)
         {
             if (NumericProperties.TryGetValue(key, out var currentValue) && currentValue != value)
             {
@@ -279,10 +290,23 @@ namespace Cell.Model
             }
             else NumericProperties.Add(key, value);
             NotifyPropertyChanged(nameof(NumericProperties));
+            NotifyPropertyChanged(key);
         }
 
-        internal void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
+        public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
 
         public static readonly CellModel Empty = new();
+
+        // API extensions (move to api model object)
+        public void SetItems(string commaSeperatedItems)
+        {
+            SetStringProperty(nameof(DropdownCellViewModel.CommaSeperatedItems), commaSeperatedItems);
+        }
+
+        public void SetBackground(string color)
+        {
+            ColorHexes[(int)ColorFor.Background] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
     }
 }

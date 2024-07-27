@@ -9,8 +9,8 @@ namespace Cell.Persistence
     {
         public const string Version = "0.0.0";
         public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
-        private static DateTime _lastBackupDate = DateTime.Now + MinimumBackupInterval;
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
+        private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
 
         public static void SaveAll()
         {
@@ -34,6 +34,7 @@ namespace Cell.Persistence
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
             new CellLoader(SaveLocation).LoadCells();
+            CreateBackup();
         }
 
         private static string LoadVersion()

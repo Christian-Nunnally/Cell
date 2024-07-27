@@ -16,8 +16,11 @@ namespace Cell.ViewModel
                 if (_textBox is null) return;
                 if (value)
                 {
-                    _textBox.Focus();
-                    _textBox.SelectAll();
+                    if (_sheetViewModel.SelectedCellViewModels.Count < 2)
+                    {
+                        _textBox.Focus();
+                        _textBox.SelectAll();
+                    }
                 }
             }
         }

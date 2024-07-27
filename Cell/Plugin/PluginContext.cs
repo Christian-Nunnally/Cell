@@ -34,7 +34,7 @@ namespace Cell.Plugin
             return UserList<T>.GetOrCreate(collection);
         }
 
-        public string[] SheetNames => [.. Cells.GetSheetNames()];
+        public string[] SheetNames => [.. Cells.SheetNames];
     }
 }
 

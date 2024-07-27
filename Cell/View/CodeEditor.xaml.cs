@@ -175,7 +175,8 @@ namespace Cell.View
         private void TestCodeButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_currentCell is null) return;
-            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue ? "void" : "object");
+            var function = new PluginFunction("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
+            function.SetUserFriendlyCode(textEditor.Text, _currentCell.Model);
             var compiled = function.CompiledMethod;
             var result = function.CompileResult;
             if (result.Success)

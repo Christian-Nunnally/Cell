@@ -14,6 +14,7 @@ namespace Cell.View
     {
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
+        private CellViewModel? _currentCellMouseIsOver;
 
         public PanAndZoomCanvas? PanAndZoomCanvas;
 
@@ -69,11 +70,11 @@ namespace Cell.View
 
         private void CellPreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed && _selectingCells)
+            if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
             {
-                if (sender is FrameworkElement element)
+                if (_currentCellMouseIsOver != cell)
                 {
-                    if (element.DataContext is CellViewModel cell)
+                    if (e.LeftButton == MouseButtonState.Pressed && _selectingCells)
                     {
                         if (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down)
                         {
@@ -98,7 +99,13 @@ namespace Cell.View
                             if (topLeftCell is not null) SheetViewModel.SelectCell(topLeftCell);
                         }
                     }
+                    else
+                    {
+                        SheetViewModel.UnhighlightAllCells();
+                        SheetViewModel.HighlightCell(cell, "#44444488");
+                    }
                 }
+                _currentCellMouseIsOver = cell;
             }
         }
 
@@ -121,6 +128,7 @@ namespace Cell.View
         private void PanZoomCanvasLoaded(object sender, RoutedEventArgs e)
         {
             PanAndZoomCanvas = sender as PanAndZoomCanvas;
+            if (PanAndZoomCanvas == null) return;
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)

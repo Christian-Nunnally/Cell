@@ -1,7 +1,7 @@
 ﻿
 namespace Cell.Model
 {
-    enum ColorFor
+    public enum ColorFor
     {
         Background = 0,
         Border = 1,

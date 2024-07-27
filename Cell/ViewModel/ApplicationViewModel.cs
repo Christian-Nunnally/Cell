@@ -1,5 +1,7 @@
-﻿using Cell.Model;
+﻿using Cell.Data;
+using Cell.Model;
 using Cell.View;
+using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel
 {
@@ -24,11 +26,7 @@ namespace Cell.ViewModel
 
         public readonly ApplicationView MainWindow;
         private static ApplicationViewModel? instance;
-        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate("Default");
-        private int editingSpaceTop;
-        private int editingSpaceBottom;
-        private int editingSpaceLeft;
-        private int editingSpaceRight;
+        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
         public bool AreEditingPanelsOpen;
 
         public double ApplicationWindowWidth
@@ -72,6 +70,7 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(EditingSpaceTop));
             }
         }
+        private int editingSpaceTop;
 
         public int EditingSpaceBottom
         {
@@ -82,6 +81,7 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(EditingSpaceBottom));
             }
         }
+        private int editingSpaceBottom;
 
         public int EditingSpaceLeft
         {
@@ -92,6 +92,7 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(EditingSpaceLeft));
             }
         }
+        private int editingSpaceLeft;
 
         public int EditingSpaceRight
         {
@@ -102,6 +103,32 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(EditingSpaceRight));
             }
         }
+        private int editingSpaceRight;
+
+        public bool IsAddingSheet
+        {
+            get => _isAddingSheet;
+            set
+            {
+                _isAddingSheet = value;
+                NotifyPropertyChanged(nameof(IsAddingSheet));
+            }
+        }
+        private bool _isAddingSheet;
+
+        public string NewSheetName
+        {
+            get => _newSheetName;
+            set
+            {
+                _newSheetName = value;
+                NotifyPropertyChanged(nameof(NewSheetName));
+            }
+        }
+        private string _newSheetName;
+
+        public ObservableCollection<string> SheetNames => Cells.SheetNames;
+
 
         public void ChangeSelectedCellsType(CellType newType)
         {
@@ -123,6 +150,7 @@ namespace Cell.ViewModel
             if (SheetViewModel.SheetName == sheetName) return;
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
+            ApplicationSettings.Instance.LastLoadedSheet = sheetName;
         }
 
         internal void GoToCell(CellModel cellModel)
@@ -169,6 +197,11 @@ namespace Cell.ViewModel
             EditingSpaceBottom = 0;
             EditingSpaceLeft = 0;
             EditingSpaceRight = 0;
+        }
+
+        internal void RenameSheet(string oldSheetName, string newSheetName)
+        {
+            Cells.RenameSheet(oldSheetName, newSheetName);
         }
     }
 }
