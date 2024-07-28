@@ -111,7 +111,7 @@ namespace Cell.Persistence
             return directory;
         }
 
-        public static string GetDataTypeStringForCollection(string collection) => Cells.AllCells
+        public static string GetDataTypeStringForCollection(string collection) => Cells.Instance.AllCells
             .Where(x => x.IsCollection(collection) && !string.IsNullOrWhiteSpace(x.GetCollectionType()))
             .Select(x => x.GetCollectionType())
             .FirstOrDefault() ?? GetOrCreateCollection(collection).Type;

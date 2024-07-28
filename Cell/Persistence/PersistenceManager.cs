@@ -1,4 +1,5 @@
 ﻿
+using Cell.Data;
 using Cell.Exceptions;
 using System.IO;
 using System.IO.Compression;
@@ -23,6 +24,7 @@ namespace Cell.Persistence
         private static void SaveVersion()
         {
             var versionPath = Path.Combine(SaveLocation, "version");
+            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
             File.WriteAllText(versionPath, Version);
         }
 
@@ -30,6 +32,7 @@ namespace Cell.Persistence
         {
             var versionSchema = LoadVersion();
             if (Version != versionSchema) throw new ProjectLoadException($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
+            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
             SaveVersion();
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
@@ -45,6 +48,8 @@ namespace Cell.Persistence
 
         public static void CreateBackup()
         {
+            // Make sure cells instance is created with the correct save location
+            var _ = Cells.Instance;
             if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
             var oldSaveLocation = SaveLocation;
             SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();

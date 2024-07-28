@@ -21,7 +21,7 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            Cells.AddCell(model);
+            Cells.Instance.AddCell(model);
             return model;
         }
 
@@ -30,7 +30,7 @@ namespace Cell.Model
             var serialized = JsonSerializer.Serialize(modelToCopy);
             var model = JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new ProjectLoadException("Unable to copy model");
             model.ID = Utilities.GenerateUnqiueId(12);
-            Cells.AddCell(model);
+            Cells.Instance.AddCell(model);
             return model;
         }
     }

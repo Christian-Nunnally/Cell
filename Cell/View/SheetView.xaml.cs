@@ -43,7 +43,7 @@ namespace Cell.View
                     {
                         if (cell.Model.CellType == CellType.Row)
                         {
-                            foreach (var rowCell in Cells.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
+                            foreach (var rowCell in Cells.Instance.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
                             {
                                 if (rowCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(rowCell);
@@ -52,7 +52,7 @@ namespace Cell.View
                         }
                         else if (cell.Model.CellType == CellType.Column)
                         {
-                            foreach (var columnCell in Cells.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
+                            foreach (var columnCell in Cells.Instance.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
                             {
                                 if (columnCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(columnCell);
@@ -91,11 +91,11 @@ namespace Cell.View
                             {
                                 for (var column = startColumn; column <= endColumn; column++)
                                 {
-                                    var cellToSelect = Cells.GetCell(SheetViewModel.SheetName, row, column);
+                                    var cellToSelect = Cells.Instance.GetCell(SheetViewModel.SheetName, row, column);
                                     if (CanSelectCell(cellToSelect)) SheetViewModel.SelectCell(cellToSelect!);
                                 }
                             }
-                            var topLeftCell = Cells.GetCell(SheetViewModel.SheetName, startRow, startColumn);
+                            var topLeftCell = Cells.Instance.GetCell(SheetViewModel.SheetName, startRow, startColumn);
                             if (topLeftCell is not null) SheetViewModel.SelectCell(topLeftCell);
                         }
                     }

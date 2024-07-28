@@ -155,7 +155,7 @@ namespace Cell.ViewModel
         {
             CellViewModels.Remove(cell);
             SelectedCellViewModels.Remove(cell);
-            Cells.RemoveCell(cell.Model);
+            Cells.Instance.RemoveCell(cell.Model);
         }
 
         public void DeleteCell(CellModel cell)

@@ -26,7 +26,7 @@ namespace Cell.ViewModel
 
         public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
         {
-            return Cells.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
+            return Cells.Instance.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

@@ -76,11 +76,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentColumn = cell.Column;
-            var currentCell = Cells.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
+            var currentCell = Cells.Instance.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += Cells.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
-                currentCell = Cells.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
+                result += Cells.Instance.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
+                currentCell = Cells.Instance.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
             }
             return result;
         }
@@ -92,11 +92,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentRow = cell.Row;
-            var currentCell = Cells.GetCell(cell.Model.SheetName, currentRow, cell.Column);
+            var currentCell = Cells.Instance.GetCell(cell.Model.SheetName, currentRow, cell.Column);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += Cells.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
-                currentCell = Cells.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
+                result += Cells.Instance.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
+                currentCell = Cells.Instance.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
             }
             return result;
         }

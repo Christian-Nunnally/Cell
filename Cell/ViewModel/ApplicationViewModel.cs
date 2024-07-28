@@ -127,7 +127,7 @@ namespace Cell.ViewModel
         }
         private string _newSheetName;
 
-        public ObservableCollection<string> SheetNames => Cells.SheetNames;
+        public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
 
 
         public void ChangeSelectedCellsType(CellType newType)
@@ -201,7 +201,7 @@ namespace Cell.ViewModel
 
         internal void RenameSheet(string oldSheetName, string newSheetName)
         {
-            Cells.RenameSheet(oldSheetName, newSheetName);
+            Cells.Instance.RenameSheet(oldSheetName, newSheetName);
         }
     }
 }

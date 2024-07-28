@@ -15,7 +15,7 @@ namespace Cell.Plugin
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column)
         {
-            return Cells.GetCell(cellForSheet.SheetName, row, column) ?? CellModel.Empty;
+            return Cells.Instance.GetCell(cellForSheet.SheetName, row, column) ?? CellModel.Empty;
         }
 
         public void GoToSheet(string sheetName)
@@ -34,7 +34,7 @@ namespace Cell.Plugin
             return UserList<T>.GetOrCreate(collection);
         }
 
-        public string[] SheetNames => [.. Cells.SheetNames];
+        public string[] SheetNames => [.. Cells.Instance.SheetNames];
     }
 }
 

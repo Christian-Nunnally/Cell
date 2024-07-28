@@ -53,7 +53,7 @@ namespace Cell.ViewModel
         public void DeleteColumn()
         {
             if (_sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Count() == 1) return;
-            var cellsToDelete = Cells.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
+            var cellsToDelete = Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
             foreach (var cell in cellsToDelete)
             {
                 _sheetViewModel.DeleteCell(cell);
@@ -96,8 +96,8 @@ namespace Cell.ViewModel
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.CellViewModels.Add(cell);
                 
-                var cellAboveMergedId = Cells.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
-                var cellBelowMergedId = Cells.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
+                var cellAboveMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
+                var cellBelowMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(cellAboveMergedId) && cellAboveMergedId == cellBelowMergedId)
                 {
                     cellModel.MergedWith = cellAboveMergedId;
@@ -111,7 +111,7 @@ namespace Cell.ViewModel
             foreach (var cell in cells) cell.Column += amount;
         }
 
-        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
+        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
 
         public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
     }

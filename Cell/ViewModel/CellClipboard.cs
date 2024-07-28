@@ -71,7 +71,7 @@ namespace Cell.ViewModel
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
             var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            cellToReplace = Cells.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
+            cellToReplace = Cells.Instance.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;

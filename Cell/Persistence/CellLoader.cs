@@ -25,12 +25,12 @@ namespace Cell.Persistence
 
         public void SaveCells()
         {
-            foreach (var sheet in Cells.SheetNames) SaveSheet(sheet);
+            foreach (var sheet in Cells.Instance.SheetNames) SaveSheet(sheet);
         }
 
         private void SaveSheet(string sheet)
         {
-            foreach (var cell in Cells.GetCellModelsForSheet(sheet)) SaveCell(cell);
+            foreach (var cell in Cells.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
         }
 
         public void RenameSheet(string oldName, string newName)
@@ -53,7 +53,7 @@ namespace Cell.Persistence
         {
             var text = File.ReadAllText(file) ?? throw new ProjectLoadException($"Loading file failed at {file}"); ;
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new ProjectLoadException($"Deserialization failed for {File.ReadAllText(file)} at {file}");
-            Cells.AddCell(cell, saveAfterAdding: false);
+            Cells.Instance.AddCell(cell, saveAfterAdding: false);
             return cell;
         }
 

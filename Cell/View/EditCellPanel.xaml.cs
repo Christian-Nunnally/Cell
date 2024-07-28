@@ -170,7 +170,7 @@ namespace Cell.View
             {
                 for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = Cells.GetCell(sheetName, row, column);
+                    var cell = Cells.Instance.GetCell(sheetName, row, column);
                     if (cell is not null) cells.Add(cell);
                 }
             }

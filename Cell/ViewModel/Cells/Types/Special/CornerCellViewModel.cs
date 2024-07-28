@@ -7,7 +7,7 @@ namespace Cell.ViewModel
 {
     public class CornerCellViewModel(CellModel model, SheetViewModel sheetViewModel) : SpecialCellViewModel(model, sheetViewModel)
     {
-        public ObservableCollection<string> SheetNames => Cells.SheetNames;
+        public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
 
         public List<string> PopulateFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Populate", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
 
