@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Converters;
+using Cell.View.ToolWindow;
 using Cell.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +14,7 @@ namespace Cell.View
     /// <summary>
     /// Interaction logic for EditCellPanel.xaml
     /// </summary>
-    public partial class EditCellPanel : UserControl
+    public partial class EditCellPanel : UserControl, IToolWindow
     {
         public EditCellPanel()
         {
@@ -83,10 +84,13 @@ namespace Cell.View
             {
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
-                CodeEditorViewModel.Show(function.GetUserFriendlyCode(cell.Model), x => {
+                var code = function.GetUserFriendlyCode(cell.Model);
+                var editor = new FloatingCodeEditor(code, x =>
+                {
                     function.SetUserFriendlyCode(x, cell.Model);
                     (cell as ListCellViewModel)?.UpdateList();
                 }, true, cell);
+                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor);
             }
         }
 
@@ -313,6 +317,10 @@ namespace Cell.View
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#e2f3ee"), "!"));
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#def3f8"), "!"));
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#deebf7"), "!"));
+        }
+
+        public void Close()
+        {
         }
     }
 }

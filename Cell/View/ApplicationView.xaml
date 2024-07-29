@@ -12,6 +12,7 @@
     d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     d:Height="500"
     d:Width="500"
+    AllowsTransparency="True"
     PreviewKeyDown="WindowPreviewKeyDown"
     ResizeMode="CanResize"
     SizeChanged="WindowSizeChanged"
@@ -47,7 +48,17 @@
                 Style="{StaticResource TitleButtonStyle}" />
             <Button
                 Click="ToggleEditPanelButtonClick"
-                Content="..."
+                Content="#"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}" />
+            <Button
+                Click="OpenSpecialEditPanelButtonClick"
+                Content="✎"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}" />
+            <Button
+                Click="OpenTextEditPanelButtonClick"
+                Content="⌶"
                 DockPanel.Dock="Left"
                 Style="{StaticResource TitleButtonStyle}" />
             <Button
@@ -62,20 +73,7 @@
         </DockPanel>
 
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="{Binding EditingSpaceLeft}" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="{Binding EditingSpaceRight}" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="{Binding EditingSpaceTop}" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="{Binding EditingSpaceBottom}" />
-            </Grid.RowDefinitions>
-
             <local:SheetView
-                Grid.RowSpan="3"
-                Grid.ColumnSpan="3"
                 Margin="0"
                 Padding="0"
                 Background="{StaticResource CellBackground}"
@@ -83,40 +81,12 @@
                 DataContext="{Binding SheetViewModel}"
                 Loaded="OnSheetViewLoaded" />
 
-            <Border
-                Grid.Row="0"
-                Grid.Column="1"
-                Grid.ColumnSpan="2"
-                Background="{StaticResource CellBackground}"
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="2">
-                <local:CellTextEditBar DataContext="{Binding SheetViewModel.SelectedCellViewModel}" />
-            </Border>
-            <Border
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="2"
-                Background="{StaticResource CellBackground}"
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="2"
-                DataContext="{Binding SheetViewModel}" />
-            <Border
-                Grid.Row="0"
-                Grid.RowSpan="3"
-                Grid.Column="0"
-                Padding="5"
-                Background="{StaticResource CellBackground}"
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="2">
-                <StackPanel>
-                    <local:EditCellPanel DataContext="{Binding SheetViewModel.SelectedCellViewModel}" />
-                    <local:TypeSpecificEditCellPanel DataContext="{Binding SheetViewModel.SelectedCellViewModel}" />
-                </StackPanel>
-            </Border>
             <local:CodeEditor
                 Grid.Row="1"
                 Grid.Column="1"
                 Loaded="OnCodeEditorLoaded" />
+
+            <Canvas x:Name="_toolWindowCanvas" />
         </Grid>
     </DockPanel>
 </Window>

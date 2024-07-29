@@ -439,5 +439,149 @@ namespace Cell.ViewModel
         }
 
         #endregion
+
+        public string BorderThicknessTop
+        {
+            get => BorderThickness.Top.ToString();
+            set
+            {
+                BorderThicknessString = $"{value},{value},{value},{value}";
+                NotifyBorderThicknessChanged();
+            }
+        }
+
+        public string BorderThicknessLeft
+        {
+            get => BorderThickness.Top.ToString();
+            set
+            {
+                BorderThicknessString = $"{value},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
+                NotifyBorderThicknessChanged();
+            }
+        }
+
+        public string BorderThicknessBottom
+        {
+            get => BorderThickness.Top.ToString();
+            set
+            {
+                BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{BorderThickness.Right},{value}";
+                NotifyBorderThicknessChanged();
+            }
+        }
+
+        public string BorderThicknessRight
+        {
+            get => BorderThickness.Top.ToString();
+            set
+            {
+                BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
+                NotifyBorderThicknessChanged();
+            }
+        }
+
+        public void NotifyBorderThicknessChanged()
+        {
+            NotifyPropertyChanged(nameof(BorderThicknessTop));
+            NotifyPropertyChanged(nameof(BorderThicknessLeft));
+            NotifyPropertyChanged(nameof(BorderThicknessBottom));
+            NotifyPropertyChanged(nameof(BorderThicknessRight));
+        }
+
+        public string ContentBorderThicknessTop
+        {
+            get => ContentBorderThickness.Top.ToString();
+            set
+            {
+                ContentBorderThicknessString = $"{value},{value},{value},{value}";
+                NotifyContentBorderThicknessChanged();
+            }
+        }
+
+        public string ContentBorderThicknessLeft
+        {
+            get => ContentBorderThickness.Top.ToString();
+            set
+            {
+                ContentBorderThicknessString = $"{value},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}";
+                NotifyContentBorderThicknessChanged();
+            }
+        }
+
+        public string ContentBorderThicknessBottom
+        {
+            get => ContentBorderThickness.Top.ToString();
+            set
+            {
+                ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{ContentBorderThickness.Right},{value}";
+                NotifyContentBorderThicknessChanged();
+            }
+        }
+
+        public string ContentBorderThicknessRight
+        {
+            get => ContentBorderThickness.Top.ToString();
+            set
+            {
+                ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}";
+                NotifyContentBorderThicknessChanged();
+            }
+        }
+
+        public void NotifyContentBorderThicknessChanged()
+        {
+            NotifyPropertyChanged(nameof(ContentBorderThicknessTop));
+            NotifyPropertyChanged(nameof(ContentBorderThicknessLeft));
+            NotifyPropertyChanged(nameof(ContentBorderThicknessBottom));
+            NotifyPropertyChanged(nameof(ContentBorderThicknessRight));
+        }
+
+        public string MarginTop
+        {
+            get => Margin.Top.ToString();
+            set
+            {
+                MarginString = $"{value},{value},{value},{value}";
+                NotifyMarginChanged();
+            }
+        }
+
+        public string MarginLeft
+        {
+            get => Margin.Top.ToString();
+            set
+            {
+                MarginString = $"{value},{Margin.Top},{value},{Margin.Bottom}";
+                NotifyMarginChanged();
+            }
+        }
+
+        public string MarginBottom
+        {
+            get => Margin.Top.ToString();
+            set
+            {
+                MarginString = $"{Margin.Left},{Margin.Top},{Margin.Right},{value}";
+                NotifyMarginChanged();
+            }
+        }
+
+        public string MarginRight
+        {
+            get => Margin.Top.ToString();
+            set
+            {
+                MarginString = $"{Margin.Left},{Margin.Top},{value},{Margin.Bottom}";
+                NotifyMarginChanged();
+            }
+        }
+
+        public void NotifyMarginChanged()
+        {
+            NotifyPropertyChanged(nameof(MarginTop));
+            NotifyPropertyChanged(nameof(MarginLeft));
+            NotifyPropertyChanged(nameof(MarginBottom));
+            NotifyPropertyChanged(nameof(MarginRight));
+        }
     }
 }

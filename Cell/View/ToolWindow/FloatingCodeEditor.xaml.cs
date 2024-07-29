@@ -16,27 +16,17 @@ namespace Cell.View
     /// <summary>
     /// Interaction logic for CodeEditor.xaml
     /// </summary>
-    public partial class CodeEditor : UserControl, INotifyPropertyChanged
+    public partial class FloatingCodeEditor : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
-        private Action<string> onCloseCallback = x => { };
-        private CellViewModel? _currentCell;
-        private bool _doesFunctionReturnValue;
+        private readonly Action<string> onCloseCallback = x => { };
+        private readonly CellViewModel? _currentCell;
+        private readonly bool _doesFunctionReturnValue;
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
-#pragma warning disable CA1822 // Mark members as static. Justification: This property is used in XAML.
-        public Dock UserSetDockOrientation => ApplicationSettings.Instance.CodeEditorDockPosition;
-#pragma warning restore CA1822 // Mark members as static
-
-        public Cursor DockOrientationCursor => UserSetDockOrientation == Dock.Left || UserSetDockOrientation == Dock.Right ? Cursors.SizeWE : Cursors.SizeNS;
 
         public double UserSetHeight { get; set; }
 
         public double UserSetWidth { get; set; }
-
-        public double UserSetHeightOfResizeBar => double.IsNaN(UserSetHeight) ? double.NaN : 5;
-
-        public double UserSetWidthOfResizeBar => double.IsNaN(UserSetWidth) ? double.NaN : 5;
 
         public string ResultString { get; set; } = string.Empty;
 
@@ -46,22 +36,30 @@ namespace Cell.View
 
         public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? Brushes.Black : Brushes.Red;
 
-        private static bool _haveAssembliesBeenRegistered;
+        // TODO Make private
+        public static bool _haveAssembliesBeenRegistered;
 
-        public CodeEditor()
+        public FloatingCodeEditor(string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
         {
             InitializeComponent();
             DataContext = this;
             Visibility = Visibility.Collapsed;
             UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
-            UserSetHeight = double.NaN;
+            UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
 
-            if (!FloatingCodeEditor._haveAssembliesBeenRegistered)
+            _currentCell = currentCell;
+            _doesFunctionReturnValue = doesFunctionReturnValue;
+            textEditor.Text = code;
+            onCloseCallback = callback;
+            Visibility = Visibility.Visible;
+            NotifyDockPropertiesChanged();
+
+            if (!_haveAssembliesBeenRegistered)
             {
                 CodeCompletionWindowFactory.RegisterTypesInAssembly(typeof(TodoItem).Assembly);
-                FloatingCodeEditor._haveAssembliesBeenRegistered = true;
+                _haveAssembliesBeenRegistered = true;
             }
         }
 
@@ -108,75 +106,10 @@ namespace Cell.View
             // We still want to insert the character that was typed.
         }
 
-        public void Show(string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
-        {
-            Close();
-            _currentCell = currentCell;
-            _doesFunctionReturnValue = doesFunctionReturnValue;
-            textEditor.Text = code;
-            onCloseCallback = callback;
-            Visibility = Visibility.Visible;
-            NotifyDockPropertiesChanged();
-        }
-
-        public void Close()
-        {
-            if (Visibility == Visibility.Visible) onCloseCallback(textEditor.Text);
-            Visibility = Visibility.Collapsed;
-        }
-
-        private void CloseButtonClicked(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void DockLeftButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.CodeEditorDockPosition = Dock.Left;
-            NotifyDockPropertiesChanged();
-        }
-
-        private void DockRightButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.CodeEditorDockPosition = Dock.Right;
-            NotifyDockPropertiesChanged();
-        }
-
-        private void DockTopButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.CodeEditorDockPosition = Dock.Top;
-            NotifyDockPropertiesChanged();
-        }
-
-        private void DockBottomButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.CodeEditorDockPosition = Dock.Bottom;
-            NotifyDockPropertiesChanged();
-        }
-
-        private void SetWdithAndHeightAccordingToDockPosition()
-        {
-            if (ApplicationSettings.Instance.CodeEditorDockPosition == Dock.Left || ApplicationSettings.Instance.CodeEditorDockPosition == Dock.Right)
-            {
-                UserSetHeight = double.NaN;
-                UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
-            }
-            else
-            {
-                UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
-                UserSetWidth = double.NaN;
-            }
-        }
-
         private void NotifyDockPropertiesChanged()
         {
-            SetWdithAndHeightAccordingToDockPosition();
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetDockOrientation)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeightOfResizeBar)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidthOfResizeBar)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DockOrientationCursor)));
         }
 
         private void TestCodeButtonClicked(object sender, RoutedEventArgs e)
@@ -230,49 +163,41 @@ namespace Cell.View
         private bool _resizing;
         private Point _resizingStartPosition;
 
-        private void CodeWindowResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            _resizing = true;
-            _resizingStartPosition = e.GetPosition(this);
-            Mouse.Capture(sender as IInputElement);
-        }
-
-        private void CodeWindowResizerRectangleMouseMove(object sender, MouseEventArgs e)
-        {
-            if (_resizing)
-            {
-                var mousePosition = e.GetPosition(this);
-                if (UserSetDockOrientation == Dock.Left)
-                {
-                    var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                    ApplicationSettings.Instance.CodeEditorWidth = Math.Max(50, ApplicationSettings.Instance.CodeEditorWidth - delta.X);
-                }
-                else if (UserSetDockOrientation == Dock.Right)
-                {
-                    var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                    ApplicationSettings.Instance.CodeEditorWidth = Math.Max(50, ApplicationSettings.Instance.CodeEditorWidth + delta.X);
-                }
-                else if (UserSetDockOrientation == Dock.Top)
-                {
-                    var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                    ApplicationSettings.Instance.CodeEditorHeight = Math.Max(50, ApplicationSettings.Instance.CodeEditorHeight - delta.Y);
-                }
-                else if (UserSetDockOrientation == Dock.Bottom)
-                {
-                    var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                    ApplicationSettings.Instance.CodeEditorHeight = Math.Max(50, ApplicationSettings.Instance.CodeEditorHeight + delta.Y);
-                }
-                _resizingStartPosition = mousePosition;
-                NotifyDockPropertiesChanged();
-            }
-        }
-
         private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
 
         private void CodeWindowResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
             _resizing = false;
             Mouse.Capture(null);
+        }
+
+        public void Close()
+        {
+            onCloseCallback?.Invoke(textEditor.Text);
+        }
+
+        public double GetWidth()
+        {
+            return ApplicationSettings.Instance.CodeEditorWidth;
+        }
+
+        public double GetHeight()
+        {
+            return ApplicationSettings.Instance.CodeEditorHeight;
+        }
+
+        public void SetWidth(double width)
+        {
+            ApplicationSettings.Instance.CodeEditorWidth = width;
+            UserSetWidth = width;
+            NotifyDockPropertiesChanged();
+        }
+
+        public void SetHeight(double height)
+        {
+            ApplicationSettings.Instance.CodeEditorHeight = height;
+            UserSetHeight = height;
+            NotifyDockPropertiesChanged();
         }
     }
 }

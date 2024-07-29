@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel"
+    MinWidth="200"
     d:DataContext="{d:DesignInstance Type=viewModel:CellViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"

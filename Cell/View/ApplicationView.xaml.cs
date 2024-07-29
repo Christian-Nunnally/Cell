@@ -4,6 +4,7 @@ using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Cell.View
@@ -107,6 +108,23 @@ namespace Cell.View
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.ToggleEditingPanels();
+            var editPanel = new EditCellPanel();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
+        }
+
+        private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
+        {
+            var editPanel = new TypeSpecificEditCellPanel();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
+        }
+
+        private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
+        {
+            var editPanel = new CellTextEditBar();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
         }
 
         private void OnCodeEditorLoaded(object sender, RoutedEventArgs e)
@@ -163,6 +181,26 @@ namespace Cell.View
                 ApplicationViewModel.Instance.IsAddingSheet = true;
                 ApplicationViewModel.Instance.NewSheetName = "Untitled";
             }
+        }
+
+        public void ShowToolWindow(UserControl content)
+        {
+            var toolbox = new FloatingToolWindow(_toolWindowCanvas);
+            toolbox.SetContent(content);
+
+            Canvas.SetLeft(toolbox, 100); 
+            Canvas.SetTop(toolbox, 100);
+
+            _toolWindowCanvas.Children.Add(toolbox);
+
+            //// Optional: Add dragging functionality
+            //toolbox.MouseLeftButtonDown += Toolbox_MouseLeftButtonDown;
+            //toolbox.MouseMove += Toolbox_MouseMove;
+        }
+
+        private void RemoveToolWindow(FloatingToolWindow toolbox)
+        {
+            _toolWindowCanvas.Children.Remove(toolbox);
         }
     }
 }

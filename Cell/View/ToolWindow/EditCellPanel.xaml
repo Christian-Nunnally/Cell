@@ -1,0 +1,552 @@
+﻿<UserControl
+    x:Class="Cell.View.EditCellPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cell.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    d:DataContext="{d:DesignInstance Type=viewModel:CellViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <ContentControl Content="{Binding}">
+        <ContentControl.Resources>
+            <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Height" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <Button Click="CreateNewRowAboveButtonClicked" Content="Insert Row Above" />
+                    <Button Click="CreateNewRowBelowButtonClicked" Content="Insert Row Below" />
+                    <Button Click="DeleteRowButtonClicked" Content="Delete Row" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Width" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <Button Click="CreateNewColumnToTheLeftButtonClicked" Content="Insert Column to Left" />
+                    <Button Click="CreateNewColumnToTheRightButtonClicked" Content="Insert Column to Right" />
+                    <Button Click="DeleteColumnButtonClicked" Content="Delete Column" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
+                <StackPanel>
+                    <Grid>
+                        <xctk:ColorPicker
+                            Height="150"
+                            ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
+                            Foreground="{StaticResource ForegroundColor}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding BorderColorHex, Converter={StaticResource HexToColorConverter}}"
+                            Style="{StaticResource TestColorPicker}" />
+                        <xctk:ColorPicker
+                            Margin="10"
+                            ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
+                            Foreground="{StaticResource ForegroundColor}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding BackgroundColorHex, Converter={StaticResource HexToColorConverter}}"
+                            Style="{StaticResource TestColorPicker}" />
+                        <xctk:ColorPicker
+                            Margin="30"
+                            ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
+                            Foreground="{StaticResource ForegroundColor}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding ContentBorderColorHex, Converter={StaticResource HexToColorConverter}}"
+                            Style="{StaticResource TestColorPicker}" />
+                        <xctk:ColorPicker
+                            Margin="40"
+                            ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
+                            Foreground="{StaticResource ForegroundColor}"
+                            Loaded="ColorPicker_Loaded"
+                            SelectedColor="{Binding ContentBackgroundColorHex, Converter={StaticResource HexToColorConverter}}"
+                            Style="{StaticResource TestColorPicker}" />
+                        <Grid Margin="40">
+                            <ToggleButton
+                                x:Name="TextFormattingTogglePopupButton"
+                                Grid.Row="1"
+                                Grid.Column="1">
+                                <ToggleButton.Style>
+                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                                        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                                        <Setter Property="IsHitTestVisible" Value="True" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                    <TextBlock
+                                                        Grid.Row="1"
+                                                        Grid.Column="1"
+                                                        Padding="0"
+                                                        HorizontalAlignment="{Binding HorizontalAlignmentForView}"
+                                                        VerticalAlignment="{Binding VerticalAlignmentForView}"
+                                                        FontFamily="{Binding FontFamily}"
+                                                        FontSize="20"
+                                                        FontStyle="{Binding FontStyleForView}"
+                                                        FontWeight="{Binding FontWeightForView}"
+                                                        Text="Text"
+                                                        TextDecorations="{Binding TextDecorationsForView}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Foreground" Value="{StaticResource SelectedBorderColor}" />
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding ElementName=TextFormattingPopup, Path=IsOpen}" Value="True">
+                                                <Setter Property="IsHitTestVisible" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Popup
+                                x:Name="TextFormattingPopup"
+                                IsOpen="{Binding IsChecked, ElementName=TextFormattingTogglePopupButton, Mode=TwoWay}"
+                                Placement="Bottom"
+                                PlacementTarget="{Binding ElementName=TextFormattingTogglePopupButton}"
+                                PopupAnimation="Slide"
+                                StaysOpen="False">
+                                <Border
+                                    Background="{StaticResource CellBackground}"
+                                    BorderBrush="{StaticResource SelectedBorderColor}"
+                                    BorderThickness="4">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox
+                                                Width="125"
+                                                KeyDown="TextBoxKeyDown"
+                                                Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" />
+                                            <TextBox
+                                                Width="25"
+                                                HorizontalContentAlignment="Center"
+                                                KeyDown="TextBoxKeyDown"
+                                                Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" />
+                                            <ToggleButton
+                                                Width="25"
+                                                Content="b"
+                                                FontWeight="Bold"
+                                                IsChecked="{Binding IsFontBold}" />
+                                            <ToggleButton
+                                                Width="25"
+                                                Content="i"
+                                                FontStyle="Italic"
+                                                IsChecked="{Binding IsFontItalic}" />
+                                            <ToggleButton Width="25" IsChecked="{Binding IsFontStrikethrough}">
+                                                <TextBlock Text="s" TextDecorations="Strikethrough" />
+                                            </ToggleButton>
+
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <xctk:ColorPicker
+                                                Width="25"
+                                                ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                                Foreground="{StaticResource ForegroundColor}"
+                                                Loaded="ColorPicker_Loaded"
+                                                SelectedColor="{Binding ForegroundColorHex, Converter={StaticResource HexToColorConverter}}" />
+                                            <Label Width="75" Content="Foreground" />
+                                            <xctk:ColorPicker
+                                                Width="25"
+                                                ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                                Loaded="ColorPicker_Loaded"
+                                                SelectedColor="{Binding ContentHighlightColorHex, Converter={StaticResource HexToColorConverter}}" />
+                                            <Label Width="75" Content="Highlight" />
+                                            <Grid>
+                                                <ToggleButton
+                                                    x:Name="TogglePopupButton"
+                                                    Width="25"
+                                                    Content="⇆"
+                                                    FontSize="14">
+                                                    <ToggleButton.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                                                            <Setter Property="Background" Value="{StaticResource CellBackground}" />
+                                                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                                                            <Setter Property="IsHitTestVisible" Value="True" />
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                                        <Border
+                                                                            Background="{TemplateBinding Background}"
+                                                                            BorderBrush="{StaticResource CellBorderColor}"
+                                                                            BorderThickness="1">
+                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                                                </Trigger>
+                                                                <Trigger Property="IsChecked" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                                                </Trigger>
+                                                                <DataTrigger Binding="{Binding ElementName=Popup, Path=IsOpen}" Value="True">
+                                                                    <Setter Property="IsHitTestVisible" Value="False" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ToggleButton.Style>
+                                                </ToggleButton>
+                                                <Popup
+                                                    x:Name="Popup"
+                                                    IsOpen="{Binding IsChecked, ElementName=TogglePopupButton, Mode=TwoWay}"
+                                                    Placement="Bottom"
+                                                    PlacementTarget="{Binding ElementName=TogglePopupButton}"
+                                                    PopupAnimation="Slide"
+                                                    StaysOpen="False">
+                                                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Button
+                                                                    Click="SetAlignmentToTopLeftButtonClick"
+                                                                    Content="↖"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToTopButtonClick"
+                                                                    Content="↑"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToTopRightButtonClick"
+                                                                    Content="↗"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Button
+                                                                    Click="SetAlignmentToLeftButtonClick"
+                                                                    Content="←"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToCenterButtonClick"
+                                                                    Content="•"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToRightButtonClick"
+                                                                    Content="→"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Button
+                                                                    Click="SetAlignmentToBottomLeftButtonClick"
+                                                                    Content="↙"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToBottomButtonClick"
+                                                                    Content="↓"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetAlignmentToBottomRightButtonClick"
+                                                                    Content="↘"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                            </StackPanel>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Button
+                                                                    Click="SetTextAlignmentToLeftButtonClick"
+                                                                    Content="←"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetTextAlignmentToCenterButtonClick"
+                                                                    Content="•"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                                <Button
+                                                                    Click="SetTextAlignmentToRightButtonClick"
+                                                                    Content="→"
+                                                                    Style="{StaticResource AlignmentButtonStyle}" />
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Popup>
+                                            </Grid>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="0,22"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding BorderThicknessLeft}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="0,22"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding BorderThicknessRight}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="10,43"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding MarginLeft}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="10,43"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding MarginRight}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="21,64"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding ContentBorderThicknessLeft}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="21,64"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding ContentBorderThicknessRight}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="22,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding BorderThicknessTop}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="22,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding BorderThicknessBottom}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="43,10"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding MarginTop}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="43,10"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding MarginBottom}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="64,21"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding ContentBorderThicknessTop}" />
+                        <TextBox
+                            Width="22"
+                            Height="22"
+                            Margin="64,21"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            HorizontalContentAlignment="Center"
+                            BorderBrush="{StaticResource ForegroundColor}"
+                            BorderThickness="1"
+                            Text="{Binding ContentBorderThicknessBottom}" />
+
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Grid>
+                            <ToggleButton
+                                x:Name="MergeTogglePopupButton"
+                                Width="25"
+                                Content="⇔"
+                                FontSize="16">
+                                <ToggleButton.Style>
+                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                                        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                                        <Setter Property="IsHitTestVisible" Value="True" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                    <Border
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{StaticResource CellBorderColor}"
+                                                        BorderThickness="1">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding ElementName=MergePopup, Path=IsOpen}" Value="True">
+                                                <Setter Property="IsHitTestVisible" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Popup
+                                x:Name="MergePopup"
+                                IsOpen="{Binding IsChecked, ElementName=MergeTogglePopupButton, Mode=TwoWay}"
+                                Placement="Bottom"
+                                PlacementTarget="{Binding ElementName=MergeTogglePopupButton}"
+                                PopupAnimation="Slide"
+                                StaysOpen="False">
+                                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                                    <StackPanel>
+                                        <Button
+                                            Width="70"
+                                            Click="MergeButtonClicked"
+                                            Content="Merge" />
+                                        <Button
+                                            Width="70"
+                                            Click="MergeAcrossButtonClicked"
+                                            Content="Across" />
+                                        <Button
+                                            Width="70"
+                                            Click="MergeDownButtonClicked"
+                                            Content="Down" />
+                                        <Button
+                                            Width="70"
+                                            Click="UnmergeButtonClicked"
+                                            Content="Unmerge" />
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <Button
+                            Width="25"
+                            Click="IndexButtonClicked"
+                            Content="Idx" />
+                        <TextBox
+                            Width="25"
+                            HorizontalContentAlignment="Center"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label
+                            Width="50"
+                            HorizontalAlignment="Center"
+                            Content="Type" />
+                        <ComboBox
+                            Width="150"
+                            DropDownClosed="CellTypeComboBoxSelectionChanged"
+                            Text="{Binding CellType, Mode=OneWay, Converter={StaticResource EnumToStringConverter}}">
+                            <Label Content="Label" />
+                            <Label Content="Textbox" />
+                            <Label Content="Checkbox" />
+                            <Label Content="Button" />
+                            <Label Content="Dropdown" />
+                            <Label Content="List" />
+                            <Label Content="Progress" />
+                            <Label Content="Graph" />
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="65" Content="Populate" />
+                        <Button
+                            Width="35"
+                            Click="EditGetTextFunctionButtonClicked"
+                            Content="Edit" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="65" Content="Updated" />
+                        <Button
+                            Width="35"
+                            Click="EditOnEditFunctionButtonClicked"
+                            Content="Edit" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
+                <StackPanel>
+                    <Label Content="Sheets" />
+                    <ListBox ItemsSource="{Binding SheetNames}" />
+                    <Label Content="Functions" />
+                    <ListBox ItemsSource="{Binding PopulateFunctionNames}" />
+                    <ListBox ItemsSource="{Binding TriggerFunctionNames}" />
+                    <Label Content="Collections" />
+                    <ListBox ItemsSource="{Binding CollectionNames}" />
+                    <Button Click="CreateBackupButtonClicked" Content="Create Backup" />
+                </StackPanel>
+            </DataTemplate>
+        </ContentControl.Resources>
+    </ContentControl>
+</UserControl>
