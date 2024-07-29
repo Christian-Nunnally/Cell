@@ -293,30 +293,21 @@ namespace Cell.View
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is not ColorPicker colorPicker) return;
+            var colors = new List<string> { "#c17188", "#c3776f", "#b8825c", "#a48f54", "#8a9b5c", "#6da471", "#50aa8f", "#3dadaf", "#4aadca", "#6fa9dc", "#d8d8d8", "#d0cece" };
             colorPicker.AvailableColors.Clear();
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#9678b5"), "I"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#b272a1"), "Love"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#c17188"), "You"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#c3776f"), "Roxy"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#b8825c"), "<3"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#a48f54"), "You"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#8a9b5c"), "Can"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#6da471"), "Name"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#50aa8f"), "These"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#3dadaf"), "Colors"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#4aadca"), "Here"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#6fa9dc"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#d8d8d8"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#d0cece"), "!"));
+            colorPicker.AvailableColorsSortingMode = ColorSortingMode.Alphabetical;
+            AddColorsToColorPicker(colorPicker, colors, 1.0f);
+            AddColorsToColorPicker(colorPicker, colors, .1f);
+            AddColorsToColorPicker(colorPicker, colors, 1.9f);
+        }
 
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#ebe5f1"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#f6dfec"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#fbdae1"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#fcdac5"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#edf5e0"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#e2f3ee"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#def3f8"), "!"));
-            colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#deebf7"), "!"));
+        public void AddColorsToColorPicker(ColorPicker colorPicker, List<string> colors, float brightnessFactor)
+        {
+            foreach (var color in colors)
+            {
+                var adjustedColor = ColorAdjuster.AdjustBrightness(color, brightnessFactor);
+                colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor(adjustedColor), ""));
+            }
         }
 
         public void Close()
