@@ -230,18 +230,22 @@ namespace Cell.Model
         {
             if (!function.IsSyntaxTreeValid) throw new InvalidOperationException("Cannot update dependency subscriptions for a function with invalid syntax tree.");
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
-            foreach (var locationDependency in function.LocationDependencies)
-            {
-                var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
-                var row = locationDependency.ResolveRow(this);
-                var column = locationDependency.ResolveColumn(this);
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
-            }
-
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
-            foreach (var collectionName in function.CollectionDependencies)
+            if (!string.IsNullOrWhiteSpace(function.Code))
             {
-                CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
+                foreach (var locationDependency in function.LocationDependencies)
+                {
+                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
+                    var row = locationDependency.ResolveRow(this);
+                    var column = locationDependency.ResolveColumn(this);
+                    if (row == Row && column == Column) continue;
+                    CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
+                }
+                CellPopulateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
+                foreach (var collectionName in function.CollectionDependencies)
+                {
+                    CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
+                }
             }
         }
 

@@ -55,6 +55,16 @@ namespace Cell.View
             }
         }
 
+        private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+            var cellTypeString = button.Content is Label label ? label.Content.ToString() : button.Content.ToString();
+            if (Enum.TryParse(cellTypeString, out CellType newType))
+            {
+                ApplicationViewModel.Instance.ChangeSelectedCellsType(newType);
+            }
+        }
+
         private void ComboBox_DropDownClosed(object sender, EventArgs e)
         {
 
@@ -75,32 +85,6 @@ namespace Cell.View
             {
                 ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
                 cell.DeleteColumn();
-            }
-        }
-
-        private void EditGetTextFunctionButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
-                var code = function.GetUserFriendlyCode(cell.Model);
-                var editor = new FloatingCodeEditor(code, x =>
-                {
-                    function.SetUserFriendlyCode(x, cell.Model);
-                    (cell as ListCellViewModel)?.UpdateList();
-                }, true, cell);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor);
-            }
-        }
-
-        private void EditOnEditFunctionButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
-                CodeEditorViewModel.Show(function.GetUserFriendlyCode(cell.Model), x => function.SetUserFriendlyCode(x, cell.Model), false, cell);
             }
         }
 
@@ -271,29 +255,10 @@ namespace Cell.View
             cell.TextAlignmentForView = TextAlignment.Right;
         }
 
-        private void IndexButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var leftmost = selectedCells.Select(x => x.Column).Min();
-            var topmost = selectedCells.Select(x => x.Row).Min();
-            var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
-            if (topLeftCell is null) return;
-            var isLinearSelection = selectedCells.Select(x => x.Column).Distinct().Count() == 1 || selectedCells.Select(x => x.Row).Distinct().Count() == 1;
-            foreach (var selectedCell in selectedCells)
-            {
-                if (selectedCell == topLeftCell) continue;
-                var distance = isLinearSelection 
-                    ? (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row) 
-                    : selectedCell.Row - topLeftCell.Row;
-                selectedCell.Index = topLeftCell.Index + distance;
-            }
-        }
-
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is not ColorPicker colorPicker) return;
-            var colors = new List<string> { "#c17188", "#c3776f", "#b8825c", "#a48f54", "#8a9b5c", "#6da471", "#50aa8f", "#3dadaf", "#4aadca", "#6fa9dc", "#d8d8d8", "#d0cece" };
+            var colors = new List<string> { "#9678b5", "#b272a1", "#c17188", "#c3776f", "#b8825c", "#a48f54", "#8a9b5c", "#6da471", "#50aa8f", "#3dadaf", "#4aadca", "#6fa9dc"};
             colorPicker.AvailableColors.Clear();
             colorPicker.AvailableColorsSortingMode = ColorSortingMode.Alphabetical;
             AddColorsToColorPicker(colorPicker, colors, 1.0f);
@@ -313,5 +278,14 @@ namespace Cell.View
         public void Close()
         {
         }
+
+        public string GetTitle()
+        {
+            return ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel?.GetName() ?? "";
+        }
+
+        public List<CommandViewModel> GetToolBarCommands() => [
+            //new CommandViewModel("void", new RelayCommand(x => true, x => {})),
+            ];
     }
 }

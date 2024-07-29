@@ -127,11 +127,6 @@ namespace Cell.View
             ShowToolWindow(editPanel);
         }
 
-        private void OnCodeEditorLoaded(object sender, RoutedEventArgs e)
-        {
-            CodeEditorViewModel.SetCodeEditorView((CodeEditor)sender);
-        }
-
         private void OnSheetViewLoaded(object sender, RoutedEventArgs e)
         {
             SheetView = (SheetView)sender;
@@ -190,6 +185,13 @@ namespace Cell.View
 
             Canvas.SetLeft(toolbox, 100); 
             Canvas.SetTop(toolbox, 100);
+
+            foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
+            {
+                var currentSize = child.DesiredSize;
+                var x = Canvas.GetLeft(child);
+                var y = Canvas.GetTop(child);
+            }
 
             _toolWindowCanvas.Children.Add(toolbox);
 

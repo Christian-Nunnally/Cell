@@ -6,11 +6,11 @@
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel"
+    MinWidth="200"
     d:DataContext="{d:DesignInstance Type=viewModel:CellViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    mc:Ignorable="d"
-    MinWidth="200">
+    mc:Ignorable="d">
     <ContentControl Content="{Binding}">
         <ContentControl.Resources>
             <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
@@ -23,14 +23,75 @@
                 <Label />
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
-                <TextBox
-                    Margin="3"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    VerticalContentAlignment="Center"
-                    AcceptsReturn="True"
-                    PreviewKeyDown="TextBoxPreviewKeyDown"
-                    Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" />
+                <StackPanel>
+                    <DockPanel>
+                        <TextBox
+                            Width="35"
+                            HorizontalContentAlignment="Center"
+                            DockPanel.Dock="Right"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" />
+                        <TextBox
+                            Padding="4"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            VerticalContentAlignment="Center"
+                            AcceptsReturn="True"
+                            FontSize="15"
+                            PreviewKeyDown="TextBoxPreviewKeyDown"
+                            Text="{Binding Path=Text, UpdateSourceTrigger=LostFocus}" />
+
+                    </DockPanel>
+
+                    <UniformGrid Columns="2">
+                        <StackPanel Grid.Column="0">
+                            <Label
+                                HorizontalAlignment="Center"
+                                Content="▲"
+                                FontSize="15" />
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="When [" />
+                                <Label Content="{Binding PrettyCellLocationDependencyNames}" />
+                                <Label Content="]," />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Content="or [" />
+                                <Label Content="{Binding PrettyCellCollectionDependencyNames}" />
+                                <Label Content="] change," />
+                            </StackPanel>
+                            <Label Content="this cell is set by" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Width="35"
+                                    Click="EditPopulateFunctionButtonClicked"
+                                    Content="Edit" />
+                                <TextBox
+                                    Width="100"
+                                    KeyDown="TextBoxKeyDown"
+                                    Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <Label
+                                HorizontalAlignment="Center"
+                                Content="▼"
+                                FontSize="15" />
+                            <Label Content="When text changes," />
+                            <Label Content="checkbox checked," />
+                            <Label Content="or button pressed, run" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Width="35"
+                                    Click="EditTriggerFunctionButtonClicked"
+                                    Content="Edit" />
+                                <TextBox
+                                    Width="100"
+                                    KeyDown="TextBoxKeyDown"
+                                    Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
             </DataTemplate>
         </ContentControl.Resources>
     </ContentControl>

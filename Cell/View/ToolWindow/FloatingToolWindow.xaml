@@ -21,6 +21,7 @@
                     Height="28"
                     Background="{StaticResource ToolWindowHeaderColor}"
                     LastChildFill="False">
+                    <Label Content="{Binding ToolWindowTitle}" DockPanel.Dock="Left" />
                     <Button
                         Width="28"
                         Height="28"
@@ -28,6 +29,26 @@
                         Click="CloseButtonClicked"
                         Content="x"
                         DockPanel.Dock="Right" />
+                    <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Height="28"
+                                    VerticalAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch"
+                                    BorderThickness="0"
+                                    Command="{Binding Command}">
+                                    <Label Padding="10,0" Content="{Binding Name}" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </DockPanel>
             </Border>
             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,2,2">
@@ -43,7 +64,8 @@
             MouseMove="ResizerRectangleMouseMove"
             MouseUp="ResizerRectangleMouseUp"
             RadiusX="5"
-            RadiusY="5">
+            RadiusY="5"
+            Visibility="{Binding IsToolWindowResizeable, Converter={StaticResource btv}}">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />

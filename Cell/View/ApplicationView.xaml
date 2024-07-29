@@ -81,11 +81,6 @@
                 DataContext="{Binding SheetViewModel}"
                 Loaded="OnSheetViewLoaded" />
 
-            <local:CodeEditor
-                Grid.Row="1"
-                Grid.Column="1"
-                Loaded="OnCodeEditorLoaded" />
-
             <Canvas x:Name="_toolWindowCanvas" />
         </Grid>
     </DockPanel>

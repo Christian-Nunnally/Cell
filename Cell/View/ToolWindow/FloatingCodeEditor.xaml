@@ -13,27 +13,12 @@
         Height="{Binding UserSetHeight}"
         Background="{StaticResource CellBackground}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="36" />
             <RowDefinition Height="*" />
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
-        <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal">
-            <Button
-                Width="35"
-                Height="36"
-                VerticalAlignment="Stretch"
-                Click="TestCodeButtonClicked"
-                Content="test" />
-            <Button
-                Width="35"
-                Height="36"
-                VerticalAlignment="Stretch"
-                Click="ShowTransformedSyntaxTreeButtonClicked"
-                Content="pre" />
-        </StackPanel>
         <avalonEdit:TextEditor
             Name="textEditor"
-            Grid.Row="1"
+            Grid.Row="0"
             Padding="4"
             FontFamily="Consolas"
             FontSize="10pt"
@@ -47,7 +32,7 @@
             SyntaxHighlighting="C#"
             Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}" />
         <TextBox
-            Grid.Row="2"
+            Grid.Row="1"
             Padding="4"
             VerticalContentAlignment="Top"
             Background="White"

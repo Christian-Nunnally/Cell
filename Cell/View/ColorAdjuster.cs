@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Cell.View
 {
     class ColorAdjuster
@@ -14,26 +9,24 @@ namespace Cell.View
             brightnessFactor = Math.Max(0f, brightnessFactor);
 
             // Remove the leading '#'
-            if (hexColor.StartsWith("#"))
+            if (hexColor.StartsWith('#'))
             {
-                hexColor = hexColor.Substring(1);
+                hexColor = hexColor[1..];
             }
 
             // Parse the hex color into RGB components
-            int r = Convert.ToInt32(hexColor.Substring(0, 2), 16);
+            int r = Convert.ToInt32(hexColor[..2], 16);
             int g = Convert.ToInt32(hexColor.Substring(2, 2), 16);
             int b = Convert.ToInt32(hexColor.Substring(4, 2), 16);
 
             // Convert RGB to HSL
-            float h, s, l;
-            ColorToHSL(r, g, b, out h, out s, out l);
+            ColorToHSL(r, g, b, out float h, out float s, out float l);
 
             // Adjust the lightness
             l = Math.Max(0f, Math.Min(1f, l * brightnessFactor));
 
             // Convert HSL back to RGB
-            int newR, newG, newB;
-            HSLToColor(h, s, l, out newR, out newG, out newB);
+            HSLToColor(h, s, l, out int newR, out int newG, out int newB);
 
             // Convert back to hex
             return $"#{newR:X2}{newG:X2}{newB:X2}";

@@ -291,133 +291,169 @@
                         </Grid>
 
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="0,22"
+                            Width="20"
+                            Height="20"
+                            Margin="0,45"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding BorderThicknessLeft}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="0,22"
+                            Width="20"
+                            Height="20"
+                            Margin="0,45"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding BorderThicknessRight}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="10,43"
+                            Width="20"
+                            Height="20"
+                            Margin="10,65"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BackgroundColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding MarginLeft}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="10,43"
+                            Width="20"
+                            Height="20"
+                            Margin="10,65"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BackgroundColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding MarginRight}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="21,64"
+                            Width="20"
+                            Height="20"
+                            Margin="30,65"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding ContentBorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding ContentBorderThicknessLeft}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="21,64"
+                            Width="20"
+                            Height="20"
+                            Margin="30,65"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding ContentBorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding ContentBorderThicknessRight}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="22,0"
+                            Width="20"
+                            Height="20"
+                            Margin="70,0"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding BorderThicknessTop}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="22,0"
+                            Width="20"
+                            Height="20"
+                            Margin="70,0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding BorderThicknessBottom}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="43,10"
+                            Width="20"
+                            Height="20"
+                            Margin="90,10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BackgroundColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding MarginTop}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="43,10"
+                            Width="20"
+                            Height="20"
+                            Margin="90,10"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding BackgroundColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding MarginBottom}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="64,21"
+                            Width="20"
+                            Height="20"
+                            Margin="90,30"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding ContentBorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding ContentBorderThicknessTop}" />
                         <TextBox
-                            Width="22"
-                            Height="22"
-                            Margin="64,21"
+                            Width="20"
+                            Height="20"
+                            Margin="90,30"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Center"
-                            BorderBrush="{StaticResource ForegroundColor}"
-                            BorderThickness="1"
+                            Background="{Binding ContentBackgroundColor}"
+                            BorderBrush="{Binding ContentBorderColor}"
+                            BorderThickness="2"
+                            FontWeight="Bold"
+                            Foreground="{Binding ForegroundColor}"
                             Text="{Binding ContentBorderThicknessBottom}" />
 
-                    </Grid>
-
-                    <StackPanel Orientation="Horizontal">
                         <Grid>
                             <ToggleButton
                                 x:Name="MergeTogglePopupButton"
                                 Width="25"
+                                Height="25"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
                                 Content="⇔"
                                 FontSize="16">
                                 <ToggleButton.Style>
@@ -432,7 +468,8 @@
                                                     <Border
                                                         Background="{TemplateBinding Background}"
                                                         BorderBrush="{StaticResource CellBorderColor}"
-                                                        BorderThickness="1">
+                                                        BorderThickness="1"
+                                                        CornerRadius="4">
                                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                     </Border>
                                                 </ControlTemplate>
@@ -481,58 +518,89 @@
                                 </Border>
                             </Popup>
                         </Grid>
-                        <Button
-                            Width="25"
-                            Click="IndexButtonClicked"
-                            Content="Idx" />
-                        <TextBox
-                            Width="25"
-                            HorizontalContentAlignment="Center"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
 
-                    <StackPanel Orientation="Horizontal">
-                        <Label
-                            Width="50"
-                            HorizontalAlignment="Center"
-                            Content="Type" />
-                        <ComboBox
-                            Width="150"
-                            DropDownClosed="CellTypeComboBoxSelectionChanged"
-                            Text="{Binding CellType, Mode=OneWay, Converter={StaticResource EnumToStringConverter}}">
-                            <Label Content="Label" />
-                            <Label Content="Textbox" />
-                            <Label Content="Checkbox" />
-                            <Label Content="Button" />
-                            <Label Content="Dropdown" />
-                            <Label Content="List" />
-                            <Label Content="Progress" />
-                            <Label Content="Graph" />
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="65" Content="Populate" />
-                        <Button
-                            Width="35"
-                            Click="EditGetTextFunctionButtonClicked"
-                            Content="Edit" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="65" Content="Updated" />
-                        <Button
-                            Width="35"
-                            Click="EditOnEditFunctionButtonClicked"
-                            Content="Edit" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
+                        <Grid>
+                            <ToggleButton
+                                x:Name="TypeTogglePopupButton"
+                                Margin="46,40"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Content="{Binding CellType}"
+                                FontSize="10">
+                                <ToggleButton.Style>
+                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                                        <Setter Property="IsHitTestVisible" Value="True" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding ElementName=TypePopup, Path=IsOpen}" Value="True">
+                                                <Setter Property="IsHitTestVisible" Value="False" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Popup
+                                x:Name="TypePopup"
+                                IsOpen="{Binding IsChecked, ElementName=TypeTogglePopupButton, Mode=TwoWay}"
+                                Placement="Bottom"
+                                PlacementTarget="{Binding ElementName=TypeTogglePopupButton}"
+                                PopupAnimation="Slide"
+                                StaysOpen="False">
+                                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                                    <StackPanel>
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Label" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Textbox" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Checkbox" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Button" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Dropdown" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="List" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Progress" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Graph" />
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </Grid>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">

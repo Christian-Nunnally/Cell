@@ -21,6 +21,7 @@ namespace Cell.View
         private readonly Action<string> onCloseCallback = x => { };
         private readonly CellViewModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
+        private readonly PluginFunction _function;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,10 +37,9 @@ namespace Cell.View
 
         public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? Brushes.Black : Brushes.Red;
 
-        // TODO Make private
-        public static bool _haveAssembliesBeenRegistered;
+        private static bool _haveAssembliesBeenRegistered;
 
-        public FloatingCodeEditor(string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
+        public FloatingCodeEditor(PluginFunction function, string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
         {
             InitializeComponent();
             DataContext = this;
@@ -48,7 +48,7 @@ namespace Cell.View
             UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
-
+            _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = doesFunctionReturnValue;
             textEditor.Text = code;
@@ -112,7 +112,7 @@ namespace Cell.View
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
         }
 
-        private void TestCodeButtonClicked(object sender, RoutedEventArgs e)
+        private void TestCode()
         {
             if (_currentCell is null) return;
             var function = new PluginFunction("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
@@ -145,7 +145,7 @@ namespace Cell.View
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
         }
 
-        private void ShowTransformedSyntaxTreeButtonClicked(object sender, RoutedEventArgs e)
+        private void ToggleSyntaxTreePreview()
         {
             if (IsTransformedSyntaxTreeViewerVisible)
             {
@@ -158,17 +158,6 @@ namespace Cell.View
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
-        }
-
-        private bool _resizing;
-        private Point _resizingStartPosition;
-
-        private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
-
-        private void CodeWindowResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            _resizing = false;
-            Mouse.Capture(null);
         }
 
         public void Close()
@@ -199,5 +188,15 @@ namespace Cell.View
             UserSetHeight = height;
             NotifyDockPropertiesChanged();
         }
+
+        public string GetTitle()
+        {
+            return _currentCell == null ? "" : $"{_function.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
+        }
+
+        public List<CommandViewModel> GetToolBarCommands() => [
+            new CommandViewModel("Test Code", new RelayCommand(x => true, x => TestCode())),
+            new CommandViewModel("Syntax", new RelayCommand(x => true, x => ToggleSyntaxTreePreview()))
+            ];
     }
 }

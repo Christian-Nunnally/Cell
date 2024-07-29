@@ -36,6 +36,11 @@ namespace Cell.Plugin
             SubscribeToReference(subscriber, key, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
         }
 
+        public static List<string> GetAllLocationSubscriptions(CellModel subscriber)
+        {
+            return GetAllSubscriptions(subscriber, _locationSubcriptionsMadeByCells);
+        }
+
         public static void UnsubscribeFromAllLocationUpdates(CellModel model)
         {
             UnsubscribeFromAllReferences(model, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
@@ -49,6 +54,11 @@ namespace Cell.Plugin
         public static void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
         {
             SubscribeToReference(subscriber, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
+        }
+
+        public static List<string> GetAllCollectionSubscriptions(CellModel subscriber)
+        {
+            return GetAllSubscriptions(subscriber, _collectionSubcriptionsMadeByCells);
         }
 
         public static void UnsubscribeFromAllCollectionUpdates(CellModel model)
@@ -196,9 +206,12 @@ namespace Cell.Plugin
             }
         }
 
-        internal static void NotifyCollectionUpdated(object name)
+        private static List<string> GetAllSubscriptions(
+            CellModel model,
+            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
         {
-            throw new NotImplementedException();
+            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return new();
+            return [.. subscriptions.Keys];
         }
     }
 }

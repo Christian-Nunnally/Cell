@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.Persistence;
 using Cell.Plugin;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 
@@ -583,5 +584,13 @@ namespace Cell.ViewModel
             NotifyPropertyChanged(nameof(MarginBottom));
             NotifyPropertyChanged(nameof(MarginRight));
         }
+
+        internal string GetName() =>  $"{ColumnCellViewModel.GetColumnName(Column)}{Row}";
+
+        [JsonIgnore]
+        public string PrettyCellLocationDependencyNames => string.Join(',', CellPopulateManager.GetAllLocationSubscriptions(Model));
+
+        [JsonIgnore]
+        public string PrettyCellCollectionDependencyNames => string.Join(',', CellPopulateManager.GetAllCollectionSubscriptions(Model));
     }
 }
