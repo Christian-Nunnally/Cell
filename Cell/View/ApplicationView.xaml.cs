@@ -1,5 +1,6 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
+using Cell.View.ToolWindow;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows;
@@ -68,6 +69,16 @@ namespace Cell.View
                 else if (e.Key == Key.V)
                 {
                     ApplicationViewModel.Instance.PasteCopiedCells();
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Z)
+                {
+                    UndoRedoManager.Undo();
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Y)
+                {
+                    UndoRedoManager.Redo();
                     e.Handled = true;
                 }
             }
@@ -184,7 +195,7 @@ namespace Cell.View
             toolbox.SetContent(content);
 
             Canvas.SetLeft(toolbox, 100); 
-            Canvas.SetTop(toolbox, 100);
+            Canvas.SetTop(toolbox, 100 + _toolWindowCanvas.Children.Cast<UIElement>().Count() * 200);
 
             foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
             {
@@ -199,6 +210,15 @@ namespace Cell.View
             //toolbox.MouseLeftButtonDown += Toolbox_MouseLeftButtonDown;
             //toolbox.MouseMove += Toolbox_MouseMove;
         }
+
+        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
+        {
+            var helpWindow = new HelpWindow();
+            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(helpWindow);
+        }
+
+
 
         private void RemoveToolWindow(FloatingToolWindow toolbox)
         {

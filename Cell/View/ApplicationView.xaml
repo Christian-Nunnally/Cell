@@ -50,22 +50,32 @@
                 Click="ToggleEditPanelButtonClick"
                 Content="#"
                 DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}" />
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Opens the cell format editor" />
             <Button
                 Click="OpenSpecialEditPanelButtonClick"
                 Content="✎"
                 DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}" />
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Opens the cell settings editor" />
             <Button
                 Click="OpenTextEditPanelButtonClick"
                 Content="⌶"
                 DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}" />
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Opens the cell content editor" />
             <Button
                 Click="TogglePanLockButtonClick"
                 Content="🔒"
                 DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}" />
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Toggles the ability to pan and zoom. Useful for creating a nice UI." />
+            <Button
+                Click="ShowHelpButtonClick"
+                Content="?"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Shows a window with helpful information about what you have highlighted." />
             <local:TitleBarSheetNavigation
                 DataContext="{Binding}"
                 DockPanel.Dock="Bottom"

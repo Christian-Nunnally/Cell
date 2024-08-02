@@ -205,6 +205,7 @@ namespace Cell.ViewModel
         {
             if (string.IsNullOrEmpty(PopulateFunctionName)) return;
             var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, _model.Index), _model);
+            if (result.Result == null) return;
             if (result.Success) Text = result.Result;
             else Model.ErrorText = result.Result;
         }
@@ -588,9 +589,14 @@ namespace Cell.ViewModel
         internal string GetName() =>  $"{ColumnCellViewModel.GetColumnName(Column)}{Row}";
 
         [JsonIgnore]
-        public string PrettyCellLocationDependencyNames => string.Join(',', CellPopulateManager.GetAllLocationSubscriptions(Model));
+        public IEnumerable<string> PrettyCellLocationDependencyNames => CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
+            {
+                var split = x.Replace($"{Model.SheetName}_", "").Split('_');
+                if (split.Length == 2) return $"{ColumnCellViewModel.GetColumnName(int.Parse(split[1]))}{split[0]}";
+                return $"{split[0]}_{ColumnCellViewModel.GetColumnName(int.Parse(split[2]))}{split[1]}";
+            });
 
         [JsonIgnore]
-        public string PrettyCellCollectionDependencyNames => string.Join(',', CellPopulateManager.GetAllCollectionSubscriptions(Model));
+        public List<string> PrettyDependencyNames => CellPopulateManager.GetAllCollectionSubscriptions(Model).Concat(PrettyCellLocationDependencyNames).ToList();
     }
 }

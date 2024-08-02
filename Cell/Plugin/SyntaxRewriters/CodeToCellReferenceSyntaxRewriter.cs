@@ -12,35 +12,64 @@ namespace Cell.Plugin.SyntaxRewriters
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
-            if (CellReferenceSyntaxWalker.TryGetCellReferenceFromNode(node, out var sheetName, out var rowValue, out var columnValue, out var isRowRelative, out var isColumnRelative))
+            if (CellReferenceSyntaxWalker.TryGetCellReferenceFromNode(node, out var cellReference))
             {
-                var sheetPrefix = string.IsNullOrEmpty(sheetName) ? string.Empty : $"{sheetName}_";
+                var sheetPrefix = string.IsNullOrEmpty(cellReference.SheetName) ? string.Empty : $"{cellReference.SheetName}_";
 
                 string? relativitySymbol = null;
-                if (!isRowRelative && !isColumnRelative)
+                if (!cellReference.IsRowRelative && !cellReference.IsColumnRelative)
                 {
                     relativitySymbol = "B_";
                 }
-                if (!isRowRelative)
+                if (!cellReference.IsRowRelative)
                 {
                     relativitySymbol ??= "R_";
                 }
                 else
                 {
-                    rowValue += cell.Row;
+                    cellReference.Row += cell.Row;
                 }
-                if (!isColumnRelative)
+                if (!cellReference.IsColumnRelative)
                 {
                     relativitySymbol ??= "C_";
                 }
                 else
                 {
-                    columnValue += cell.Column;
+                    cellReference.Column += cell.Column;
                 }
                 relativitySymbol ??= string.Empty;
 
+                string rangePart = string.Empty;
+                string? rangeRelativitySymbol = null;
+                if (cellReference.IsRange)
+                {
+                    if (!cellReference.IsRowRelativeRangeEnd && !cellReference.IsColumnRelativeRangeEnd)
+                    {
+                        rangeRelativitySymbol = "B_";
+                    }
+                    if (!cellReference.IsRowRelativeRangeEnd)
+                    {
+                        rangeRelativitySymbol ??= "R_";
+                    }
+                    else
+                    {
+                        cellReference.RowRangeEnd += cell.Row;
+                    }
+                    if (!cellReference.IsColumnRelativeRangeEnd)
+                    {
+                        rangeRelativitySymbol ??= "C_";
+                    }
+                    else
+                    {
+                        cellReference.ColumnRangeEnd += cell.Column;
+                    }
+                    rangeRelativitySymbol ??= string.Empty;
 
-                var cellLocation = $"{sheetPrefix}{relativitySymbol}{ColumnCellViewModel.GetColumnName(columnValue)}{rowValue}";
+                    rangePart = $"_Range_{rangeRelativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.ColumnRangeEnd)}{cellReference.RowRangeEnd}";
+                }
+
+
+                var cellLocation = $"{sheetPrefix}{relativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.Column)}{cellReference.Row}{rangePart}";
                 return SyntaxFactory.ParseExpression(cellLocation);
             }
             return node;

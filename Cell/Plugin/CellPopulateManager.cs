@@ -104,13 +104,13 @@ namespace Cell.Plugin
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
-                        subscriber.Text = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;
                         subscriber.ErrorText = string.Empty;
                     }
                     else
                     {
-                        subscriber.Text = result.Result;// "Error";
-                        subscriber.ErrorText = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
+                        if (result.Result != null) subscriber.ErrorText = result.Result;
                     }
                 }
             }
@@ -128,21 +128,24 @@ namespace Cell.Plugin
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
-                        subscriber.Text = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;
                         subscriber.ErrorText = string.Empty;
                     }
                     else
                     {
-                        subscriber.Text = result.Result;// "Error";
-                        subscriber.ErrorText = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
+                        if (result.Result != null) subscriber.ErrorText = result.Result;
                     }
                 }
             }
             _collectionsBeingUpdated.Remove(userCollectionName);
 
-            foreach (var listCell in _listCellsToUpdateWhenCollectionsChange[userCollectionName])
+            if (_listCellsToUpdateWhenCollectionsChange.ContainsKey(userCollectionName))
             {
-                listCell.UpdateList();
+                foreach (var listCell in _listCellsToUpdateWhenCollectionsChange[userCollectionName])
+                {
+                    listCell.UpdateList();
+                }
             }
         }
 

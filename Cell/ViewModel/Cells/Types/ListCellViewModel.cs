@@ -40,6 +40,17 @@ namespace Cell.ViewModel
             }
         }
 
+        public string SelectedItem
+
+        {
+            get => Model.GetStringProperty(nameof(SelectedItem));
+            set
+            {
+                Model.SetStringProperty(nameof(SelectedItem), value);
+                NotifyPropertyChanged(nameof(SelectedItem));
+            }
+        }
+
         internal void UpdateList()
         {
             ListItems.Clear();

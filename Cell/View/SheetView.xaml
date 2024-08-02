@@ -21,11 +21,8 @@
         ItemsSource="{Binding Path=CellViewModels}">
         <ListBox.Resources>
             <Style TargetType="Label">
-                <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Margin" Value="0" />
-                <Setter Property="HorizontalAlignment" Value="{Binding HorizontalAlignmentForView}" />
-                <Setter Property="VerticalAlignment" Value="{Binding VerticalAlignmentForView}" />
             </Style>
 
             <Style TargetType="TextBox">
@@ -217,6 +214,7 @@
                 <ListBox
                     x:Name="CellListBox"
                     Margin="{Binding Margin}"
+                    HorizontalContentAlignment="{Binding HorizontalAlignmentForView}"
                     Background="{Binding ContentBackgroundColor}"
                     BorderBrush="{Binding ContentBorderColor}"
                     BorderThickness="{Binding ContentBorderThickness}"
@@ -224,12 +222,15 @@
                     ItemsSource="{Binding ListItems}"
                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
-                    SelectedItem="{Binding Text}">
+                    SelectedItem="{Binding Text}"
+                    SelectedValue="{Binding SelectedItem}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Label
                                 Margin="3"
                                 Padding="0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
                                 Content="{Binding}"
                                 FontFamily="{Binding DataContext.FontFamily, ElementName=CellListBox}"
                                 FontSize="{Binding DataContext.FontSize, ElementName=CellListBox}"

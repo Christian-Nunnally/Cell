@@ -1,6 +1,6 @@
 ﻿
+using Cell.Common;
 using Cell.Data;
-using Cell.Exceptions;
 using System.IO;
 using System.IO.Compression;
 
@@ -31,7 +31,7 @@ namespace Cell.Persistence
         public static void LoadAll()
         {
             var versionSchema = LoadVersion();
-            if (Version != versionSchema) throw new ProjectLoadException($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
+            if (Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
             if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
             SaveVersion();
             UserCollectionLoader.LoadCollections();

@@ -43,7 +43,8 @@
                                     VerticalAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     BorderThickness="0"
-                                    Command="{Binding Command}">
+                                    Command="{Binding Command}"
+                                    ToolTip="{Binding ToolTip}">
                                     <Label Padding="10,0" Content="{Binding Name}" />
                                 </Button>
                             </DataTemplate>

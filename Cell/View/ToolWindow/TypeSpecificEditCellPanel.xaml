@@ -41,6 +41,15 @@
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
+                <StackPanel Orientation="Horizontal">
+                    <Label Width="100" Content="Max Points" />
+                    <TextBox
+                        Width="100"
+                        KeyDown="TextBoxKeyDown"
+                        Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
                 <StackPanel />
             </DataTemplate>

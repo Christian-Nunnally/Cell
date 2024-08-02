@@ -129,13 +129,15 @@ namespace Cell.ViewModel
 
         public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
 
-
         public void ChangeSelectedCellsType(CellType newType)
         {
-            foreach (var selectedCell in SheetViewModel.SelectedCellViewModels.ToList())
+            UndoRedoManager.RecordCellStatesOntoUndoStack(SheetViewModel.SelectedCellViewModels.Select(x => x.Model));
+            var selectedCells = SheetViewModel.SelectedCellViewModels.ToList();
+            foreach (var selectedCell in selectedCells)
             {
-                SheetViewModel.ChangeCellType(selectedCell, newType);
+                selectedCell.CellType = newType;
             }
+            selectedCells.ForEach(x => SheetViewModel.SelectCell(x.Model));
             SheetViewModel.UpdateLayout();
         }
 
@@ -201,6 +203,7 @@ namespace Cell.ViewModel
 
         internal void RenameSheet(string oldSheetName, string newSheetName)
         {
+            if (oldSheetName == newSheetName) return;
             Cells.Instance.RenameSheet(oldSheetName, newSheetName);
         }
     }

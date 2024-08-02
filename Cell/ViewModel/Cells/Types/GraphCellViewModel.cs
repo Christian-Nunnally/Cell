@@ -1,4 +1,6 @@
 ﻿using Cell.Model;
+using Cell.Persistence;
+using System.Collections;
 using System.Windows;
 using System.Windows.Media;
 
@@ -15,19 +17,20 @@ namespace Cell.ViewModel
             {
                 if (args.PropertyName == nameof(Text))
                 {
-                    Text = model.Text;
+                    UpdatePointsFromCellText();
                 }
 
                 if (args.PropertyName == nameof(Width))
                 {
-                    UpdatePoints();
+                    UpdatePointsScaling();
                 }
 
                 if (args.PropertyName == nameof(Height))
                 {
-                    UpdatePoints();
+                    UpdatePointsScaling();
                 }
             };
+            UpdatePointsFromCellText();
         }
 
         public PointCollection DataPoints { get; set; } = ScaleAndCenterPoints(
@@ -49,19 +52,60 @@ namespace Cell.ViewModel
             {
                 if (_addingPoint) return;
                 _addingPoint = true;
-                    base.Text = value;
-                if (double.TryParse(value, out double result))
-                {
-                    _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
-                    UpdatePoints();
-                }
+                base.Text = value;
+                UpdatePointsFromCellText();
                 _addingPoint = false;
             }
         }
 
-        public void UpdatePoints()
+        public string MaxPointsString
         {
-            while(_rawDataPoints.Count > 8) _rawDataPoints.RemoveAt(0);
+            get => MaxPoints.ToString();
+            set
+            {
+                if (int.TryParse(value, out var intValue))
+                {
+                    MaxPoints = intValue;
+                    NotifyPropertyChanged(nameof(MaxPoints));
+                }
+            }
+        }
+
+        public int MaxPoints
+        {
+            get => (int)Model.GetNumericProperty(nameof(MaxPoints));
+            set
+            {
+                Model.SetNumericProperty(nameof(MaxPoints), value);
+                NotifyPropertyChanged(nameof(MaxPoints));
+                NotifyPropertyChanged(nameof(MaxPointsString));
+            }
+        }
+
+        private void UpdatePointsFromCellText()
+        {
+            if (!Text.Contains(',') && double.TryParse(Text, out double result))
+            {
+                _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
+            }
+            else
+            {
+                var split = Text.Split(',');
+                _rawDataPoints.Clear();
+                foreach (var s in split)
+                {
+                    if (double.TryParse(s, out double r))
+                    {
+                        _rawDataPoints.Add(new Point(_rawDataPoints.Count, -r));
+                    }
+                }
+            }
+            UpdatePointsScaling();
+        }
+
+        public void UpdatePointsScaling()
+        {
+            while(_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
 
             for (int i = 0; i < _rawDataPoints.Count; i++)
             {

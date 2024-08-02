@@ -81,7 +81,7 @@ namespace Cell.View
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Auto-Index", new RelayCommand(x => true, x => IndexSelectedCells())),
+            new CommandViewModel("Auto-Index", new RelayCommand(x => true, x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
             ];
 
         public void Close()

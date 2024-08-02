@@ -343,7 +343,7 @@
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
-                        <!--TODO Make this binding only happen for "better" combo boxes-->
+                        <!--  TODO Make this binding only happen for "better" combo boxes  -->
                         <Trigger Property="IsHighlighted" Value="true">
                             <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource AncestorType=controls:BetterComboBox}, Path=HighlightBrush}" />
                         </Trigger>

@@ -61,6 +61,13 @@ namespace Cell.Model.Plugin
         }
         private int _status = 0;
 
+        public int Category
+        {
+            get => _category;
+            set { if (value != _category) { _category = value; OnPropertyChanged(nameof(Category)); } }
+        }
+        private int _category = 0;
+
         override public string ToString()
         {
             return $"{(IsComplete ? "✓" : "☐")} {Title} - {Notes}";

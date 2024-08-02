@@ -44,16 +44,6 @@ namespace Cell.View
             if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
             cell.AddRowBelow();
         }
-        private void CellTypeComboBoxSelectionChanged(object sender, EventArgs e)
-        {
-            if (sender is not ComboBox comboBox) return;
-            if (comboBox.SelectedValue is not Label label) return;
-            var cellTypeString = label.Content.ToString();
-            if (Enum.TryParse(cellTypeString, out CellType newType))
-            {
-                ApplicationViewModel.Instance.ChangeSelectedCellsType(newType);
-            }
-        }
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
         {

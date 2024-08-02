@@ -59,29 +59,18 @@ namespace CellTest
             AssertRoundTrip(given, expected, new CodeToCellReferenceSyntaxRewriter(cell), new CellReferenceToCodeSyntaxRewriter(cell));
         }
 
-        //[Fact]
-        //public void CodeAbsoluteGetCellReferenceWithAbsoluteSheet_CodeToCellReferenceSyntaxWalker_UserFriendlyAbsoluteCellReferenceReturnedWithSheetName()
-        //{
-        //    var given = "c.GetCell(\"Default\", 1, 1)";
-        //    var expected = "Default_A1";
-        //    AssertRoundTrip(given, expected, new CodeToCellReferenceSyntaxRewriter(), new CellReferenceToCodeSyntaxRewriter());
-        //}
-
-        //[Fact]
-        //public void CodeAbsoluteGetCellReferenceDifferentColumnAndRow_CodeToCellReferenceSyntaxWalker_UserFriendlyAbsoluteCellReferenceReturned()
-        //{
-        //    var given = "c.GetCell(cell, 4, 6)";
-        //    var expected = "F4";
-        //    AssertRoundTrip(given, expected, new CodeToCellReferenceSyntaxRewriter(), new CellReferenceToCodeSyntaxRewriter());
-        //}
-
-        //[Fact]
-        //public void test()
-        //{
-        //    var given = "R_F4;";
-        //    var expected = "c.GetCell(cell, 4, 6);";
-        //    AssertRoundTrip(given, expected, new CellReferenceToCodeSyntaxRewriter(), new CodeToCellReferenceSyntaxRewriter());
-        //}
+        [Fact]
+        public void Range()
+        {
+            var cell = new CellModel
+            {
+                Row = 2,
+                Column = 2
+            };
+            var given = "c.GetCell(cell, cell.Row + -1, cell.Column + -1, cell.Row + -1, cell.Column + -1)";
+            var expected = "A1_Range_A1";
+            AssertRoundTrip(given, expected, new CodeToCellReferenceSyntaxRewriter(cell), new CellReferenceToCodeSyntaxRewriter(cell));
+        }
 
         private static void AssertRoundTrip(string given, string expected, CSharpSyntaxRewriter converter, CSharpSyntaxRewriter convertBack)
         {

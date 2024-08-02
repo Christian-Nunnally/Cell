@@ -87,14 +87,14 @@ namespace Cell.ViewModel
 
             var columnModel = CellModelFactory.Create(0, index, CellType.Column, Model.SheetName);
             var column = CellViewModelFactory.Create(columnModel, _sheetViewModel);
-            _sheetViewModel.CellViewModels.Add(column);
+            _sheetViewModel.AddCell(column);
 
             var rowIndexs = _sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Select(x => x.Row).ToList();
             foreach (var rowIndex in rowIndexs)
             {
                 var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName);
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
-                _sheetViewModel.CellViewModels.Add(cell);
+                _sheetViewModel.AddCell(cell);
                 
                 var cellAboveMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
                 var cellBelowMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;

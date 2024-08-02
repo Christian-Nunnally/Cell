@@ -18,7 +18,7 @@ namespace Cell.View
 
         public string ToolWindowTitle => _content?.GetTitle() ?? "";
 
-        public ObservableCollection<CommandViewModel> Commands { get; set; } = new();
+        public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
 
         public bool IsToolWindowResizeable => _resizableContent != null;
 
@@ -35,10 +35,7 @@ namespace Cell.View
             _resizableContent = content as IResizableToolWindow;
             DataContext = this;
 
-            if (_content != null)
-            {
-                _content.GetToolBarCommands().ForEach(Commands.Add);
-            }
+            _content?.GetToolBarCommands().ForEach(Commands.Add);
         }
 
         private void CloseButtonClicked(object sender, RoutedEventArgs e)

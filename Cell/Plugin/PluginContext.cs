@@ -11,11 +11,28 @@ namespace Cell.Plugin
     {
         private readonly ApplicationViewModel _application = application;
 
+        public EditContext E { get; set; } = new EditContext("");
+
         public int Index { get; set; } = index;
 
-        public CellModel GetCell(CellModel cellForSheet, int row, int column)
+        public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
+
+        public CellRange GetCell(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCell(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
+
+        public CellModel GetCell(string sheet, int row, int column) => Cells.Instance.GetCell(sheet, row, column) ?? CellModel.Empty;
+
+        public CellRange GetCell(string sheet, int row, int column, int rowRangeEnd, int columnRangeEnd)
         {
-            return Cells.Instance.GetCell(cellForSheet.SheetName, row, column) ?? CellModel.Empty;
+            var cells = new List<CellModel>();
+            for (var r = row; r <= rowRangeEnd; r++)
+            {
+                for (var c = column; c <= columnRangeEnd; c++)
+                {
+                    var cell = GetCell(sheet, r, c);
+                    if (cell is not null) cells.Add(GetCell(sheet, r, c));
+                }
+            }
+            return new CellRange(cells);
         }
 
         public void GoToSheet(string sheetName)
