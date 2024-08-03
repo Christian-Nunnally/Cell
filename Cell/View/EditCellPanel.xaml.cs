@@ -289,6 +289,7 @@ namespace Cell.View
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is not ColorPicker colorPicker) return;
+            colorPicker.AvailableColorsSortingMode = ColorSortingMode.Alphabetical;
             colorPicker.AvailableColors.Clear();
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#9678b5"), "I"));
             colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor("#b272a1"), "Love"));
