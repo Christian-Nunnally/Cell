@@ -5,6 +5,7 @@ using System.Reflection;
 using Cell.Persistence;
 using Cell.Data;
 using System.Windows.Media;
+using Cell.Common;
 
 namespace Cell.ViewModel
 {

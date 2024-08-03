@@ -1,5 +1,7 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
+using Cell.Persistence;
 using Cell.View;
 using System.Collections.ObjectModel;
 

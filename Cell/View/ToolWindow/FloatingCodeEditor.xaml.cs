@@ -1,5 +1,6 @@
 ﻿using Cell.Model;
 using Cell.Model.Plugin;
+using Cell.Persistence;
 using Cell.Plugin;
 using Cell.View.ToolWindow;
 using Cell.ViewModel;
