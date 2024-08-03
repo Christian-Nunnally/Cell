@@ -19,7 +19,7 @@ namespace Cell.ViewModel
 
         public void ButtonClicked()
         {
-            CellTriggerManager.CellTriggered(Model, new EditContext("Button", "Down", "Up"));
+            CellTriggerManager.CellTriggered(Model, new EditContext("Button"));
         }
     }
 }

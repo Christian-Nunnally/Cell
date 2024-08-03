@@ -43,11 +43,20 @@ namespace Cell.Data
             CellTriggerManager.StartMonitoringCell(cellModel);
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
+
+            // Uncomment when you need to delete stacked cells.
+            //if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation) && cellsAtLocation.Count > 1)
+            //{
+            //    RemoveCell(cellsAtLocation[0]);
+            //}
         }
 
         private void AddCellToCellByLocationMap(CellModel cellModel)
         {
-            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation)) cellsAtLocation.Add(cellModel);
+            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
+            {
+                cellsAtLocation.Add(cellModel);
+            }
             else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
         }
 
@@ -58,6 +67,8 @@ namespace Cell.Data
             _cellLoader.DeleteCell(cellModel);
             CellTriggerManager.StopMonitoringCell(cellModel);
             CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
+            CellPopulateManager.UnsubscribeFromAllLocationUpdates(cellModel);
+            CellPopulateManager.UnsubscribeFromAllCollectionUpdates(cellModel);
             _cellsToLocation.Remove(cellModel.ID);
             _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
             if (cellDictionary.Count == 0)

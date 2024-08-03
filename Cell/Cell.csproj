@@ -26,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="View\TypeSpecificEditCellPanel.xaml.cs">
+    <Compile Update="View\ToolWindow\FloatingCodeEditor.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\ToolWindow\TypeSpecificEditCellPanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

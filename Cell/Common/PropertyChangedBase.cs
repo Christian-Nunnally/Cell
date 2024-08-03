@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Cell.Model
+namespace Cell.Common
 {
     public class PropertyChangedBase : INotifyPropertyChanged
     {

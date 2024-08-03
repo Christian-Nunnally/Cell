@@ -138,7 +138,6 @@
                         <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="BorderThickness" Value="1" />
                                 <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
                                 <Setter Property="Background" Value="{StaticResource CellBackground}" />
                                 <Setter Property="BorderThickness" Value="1" />
@@ -168,17 +167,48 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Border BorderThickness="10">
-                        <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="1">
-                            <Rectangle Height="20" Margin="2" Fill="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
-                        </Border>
+                    <Border>
+                        <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0" />
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="BorderThickness" Value="1" />
-                                <Setter Property="CornerRadius" Value="11" />
+                                <Setter Property="CornerRadius" Value="13" />
+                                <Setter Property="ClipToBounds" Value="False" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="Background" Value="{StaticResource CellBackground}" />
-                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderThickness" Value="10" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="BackgroundColorPickerToggleButtonStyle" TargetType="ToggleButton">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border BorderThickness="0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="5" />
+                                <Setter Property="Background" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
+                                <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
@@ -227,19 +257,13 @@
                             x:Name="PART_ColorPickerToggleButton"
                             MinHeight="22"
                             Padding="0"
-                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
                             Background="{StaticResource CellBackground}"
-                            BorderBrush="{StaticResource CellBorderColor}"
+                            BorderBrush="White"
                             BorderThickness="0"
                             IsChecked="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                             IsHitTestVisible="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolConverter}}"
                             IsTabStop="True"
-                            Style="{TemplateBinding ButtonStyle}">
-                            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="1">
-                                <Rectangle Margin="2" Fill="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
-                            </Border>
-                        </ToggleButton>
+                            Style="{TemplateBinding ButtonStyle}" />
 
                         <Popup
                             x:Name="PART_ColorPickerPalettePopup"

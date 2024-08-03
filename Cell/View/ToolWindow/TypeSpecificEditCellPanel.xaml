@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel"
+    MinWidth="200"
     d:DataContext="{d:DesignInstance Type=viewModel:CellViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -38,6 +39,15 @@
                             KeyDown="TextBoxKeyDown"
                             Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" />
                     </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
+                <StackPanel Orientation="Horizontal">
+                    <Label Width="100" Content="Max Points" />
+                    <TextBox
+                        Width="100"
+                        KeyDown="TextBoxKeyDown"
+                        Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModel:CellViewModel}">

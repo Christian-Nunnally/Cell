@@ -1,5 +1,5 @@
-﻿using Cell.Data;
-using Cell.Exceptions;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Plugin;
 using Cell.ViewModel;
@@ -94,7 +94,7 @@ namespace Cell.Persistence
         private static PluginModel LoadItem(string path)
         {
             var text = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new ProjectLoadException($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
+            return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
         private static void DeleteItem(string collectionName, string idToRemove)

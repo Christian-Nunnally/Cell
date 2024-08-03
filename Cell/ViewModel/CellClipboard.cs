@@ -79,7 +79,7 @@ namespace Cell.ViewModel
 
         private static CellModel CopyCellWithUpdatedLocationProperties(CellModel cellToReplace, CellModel cellToPaste)
         {
-            var pastedCell = cellToPaste.Copy();
+            var pastedCell = cellToPaste.CopyAndTrackNewCell();
             pastedCell.SheetName = cellToReplace.SheetName;
             pastedCell.Width = cellToReplace.Width;
             pastedCell.Height = cellToReplace.Height;

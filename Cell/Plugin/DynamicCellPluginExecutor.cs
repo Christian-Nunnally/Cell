@@ -1,5 +1,6 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
+using System.Collections;
 
 namespace Cell.Plugin
 {
@@ -14,12 +15,29 @@ namespace Cell.Plugin
             if (populateFunction.CompileResult.Success)
             {
                 var resultObject = method?.Invoke(null, [pluginContext, cell]);
-                var result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
+                var resultString = ConvertReturnedObjectToString(resultObject);
+                var result = new CompileResult { Success = true, Result = resultString };
                 Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, result, false);
                 return result;
             }
             Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, populateFunction.CompileResult, false);
             return populateFunction.CompileResult;
+        }
+
+        private static string? ConvertReturnedObjectToString(object? resultObject)
+        {
+            if (resultObject is null) return null;
+            if (resultObject is IEnumerable resultEnumerable && resultObject is not string)
+            {
+                var resultString = "";
+                foreach (var item in resultEnumerable)
+                {
+                    resultString += item?.ToString() + ",";
+                }
+                if (resultString.Length > 0) return resultString[..^1];
+                return resultString;
+            }
+            return resultObject?.ToString() ?? "";
         }
 
         public static CompileResult RunTrigger(PluginContext pluginContext, CellModel cell)

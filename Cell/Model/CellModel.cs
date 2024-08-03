@@ -36,7 +36,7 @@ namespace Cell.Model
         public string ID
         {
             get => id;
-            set { if (id != value) { id = value; NotifyPropertyChanged(nameof(ID)); } }
+            set { if (id != null) { id = value; NotifyPropertyChanged(nameof(ID)); } }
         }
         private string id = Utilities.GenerateUnqiueId(12);
 
@@ -78,7 +78,6 @@ namespace Cell.Model
                 text = value;
                 NotifyPropertyChanged(nameof(Text));
                 CellTriggered?.Invoke(this, new EditContext(nameof(Text), text, oldValue));
-                // TODO: do we want to run populate after on edit?
                 AfterCellEdited?.Invoke(this);
             }
         }
@@ -230,18 +229,38 @@ namespace Cell.Model
         {
             if (!function.IsSyntaxTreeValid) throw new InvalidOperationException("Cannot update dependency subscriptions for a function with invalid syntax tree.");
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
-            foreach (var locationDependency in function.LocationDependencies)
-            {
-                var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
-                var row = locationDependency.ResolveRow(this);
-                var column = locationDependency.ResolveColumn(this);
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
-            }
-
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
-            foreach (var collectionName in function.CollectionDependencies)
+            if (!string.IsNullOrWhiteSpace(function.Code))
             {
-                CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
+                foreach (var locationDependency in function.LocationDependencies)
+                {
+                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
+
+                    var row = locationDependency.ResolveRow(this);
+                    var column = locationDependency.ResolveColumn(this);
+                    if (row == Row && column == Column) continue;
+                    if (locationDependency.IsRange)
+                    {
+                        var rowRangeEnd = locationDependency.ResolveRowRangeEnd(this);
+                        var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(this);
+                        for (var r = row; r <= rowRangeEnd; r++)
+                        {
+                            for (var c = column; c <= columnRangeEnd; c++)
+                            {
+                                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, r, c);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
+                    }
+                }
+                CellPopulateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
+                foreach (var collectionName in function.CollectionDependencies)
+                {
+                    CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
+                }
             }
         }
 
@@ -303,10 +322,19 @@ namespace Cell.Model
             SetStringProperty(nameof(DropdownCellViewModel.CommaSeperatedItems), commaSeperatedItems);
         }
 
+        public void SetItems(IEnumerable<object> objects)
+        {
+            SetStringProperty(nameof(DropdownCellViewModel.CommaSeperatedItems), string.Join(',', objects));
+        }
+
         public void SetBackground(string color)
         {
             ColorHexes[(int)ColorFor.Background] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
+
+        public string SelectedItem => GetStringProperty(nameof(ListCellViewModel.SelectedItem));
+
+        public override string ToString() => Text;
     }
 }

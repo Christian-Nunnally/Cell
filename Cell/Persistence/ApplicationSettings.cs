@@ -1,9 +1,9 @@
-﻿using Cell.Persistence;
+﻿using Cell.Common;
 using System.IO;
 using System.Text.Json;
 using System.Windows.Controls;
 
-namespace Cell.Model
+namespace Cell.Persistence
 {
     internal class ApplicationSettings : PropertyChangedBase
     {

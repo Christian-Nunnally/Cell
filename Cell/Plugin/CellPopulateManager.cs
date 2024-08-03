@@ -36,6 +36,11 @@ namespace Cell.Plugin
             SubscribeToReference(subscriber, key, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
         }
 
+        public static List<string> GetAllLocationSubscriptions(CellModel subscriber)
+        {
+            return GetAllSubscriptions(subscriber, _locationSubcriptionsMadeByCells);
+        }
+
         public static void UnsubscribeFromAllLocationUpdates(CellModel model)
         {
             UnsubscribeFromAllReferences(model, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
@@ -49,6 +54,11 @@ namespace Cell.Plugin
         public static void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
         {
             SubscribeToReference(subscriber, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
+        }
+
+        public static List<string> GetAllCollectionSubscriptions(CellModel subscriber)
+        {
+            return GetAllSubscriptions(subscriber, _collectionSubcriptionsMadeByCells);
         }
 
         public static void UnsubscribeFromAllCollectionUpdates(CellModel model)
@@ -94,13 +104,13 @@ namespace Cell.Plugin
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
-                        subscriber.Text = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;
                         subscriber.ErrorText = string.Empty;
                     }
                     else
                     {
-                        subscriber.Text = result.Result;// "Error";
-                        subscriber.ErrorText = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
+                        if (result.Result != null) subscriber.ErrorText = result.Result;
                     }
                 }
             }
@@ -118,21 +128,24 @@ namespace Cell.Plugin
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)
                     {
-                        subscriber.Text = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;
                         subscriber.ErrorText = string.Empty;
                     }
                     else
                     {
-                        subscriber.Text = result.Result;// "Error";
-                        subscriber.ErrorText = result.Result;
+                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
+                        if (result.Result != null) subscriber.ErrorText = result.Result;
                     }
                 }
             }
             _collectionsBeingUpdated.Remove(userCollectionName);
 
-            foreach (var listCell in _listCellsToUpdateWhenCollectionsChange[userCollectionName])
+            if (_listCellsToUpdateWhenCollectionsChange.ContainsKey(userCollectionName))
             {
-                listCell.UpdateList();
+                foreach (var listCell in _listCellsToUpdateWhenCollectionsChange[userCollectionName])
+                {
+                    listCell.UpdateList();
+                }
             }
         }
 
@@ -196,9 +209,12 @@ namespace Cell.Plugin
             }
         }
 
-        internal static void NotifyCollectionUpdated(object name)
+        private static List<string> GetAllSubscriptions(
+            CellModel model,
+            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
         {
-            throw new NotImplementedException();
+            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return new();
+            return [.. subscriptions.Keys];
         }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
+using Cell.View.ToolWindow;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Cell.View
@@ -69,6 +71,16 @@ namespace Cell.View
                     ApplicationViewModel.Instance.PasteCopiedCells();
                     e.Handled = true;
                 }
+                else if (e.Key == Key.Z)
+                {
+                    UndoRedoManager.Undo();
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Y)
+                {
+                    UndoRedoManager.Redo();
+                    e.Handled = true;
+                }
             }
             else if (e.Key == Key.Tab)
             {
@@ -107,11 +119,23 @@ namespace Cell.View
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.ToggleEditingPanels();
+            var editPanel = new EditCellPanel();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
         }
 
-        private void OnCodeEditorLoaded(object sender, RoutedEventArgs e)
+        private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            CodeEditorViewModel.SetCodeEditorView((CodeEditor)sender);
+            var editPanel = new TypeSpecificEditCellPanel();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
+        }
+
+        private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
+        {
+            var editPanel = new CellTextEditBar();
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(editPanel);
         }
 
         private void OnSheetViewLoaded(object sender, RoutedEventArgs e)
@@ -163,6 +187,42 @@ namespace Cell.View
                 ApplicationViewModel.Instance.IsAddingSheet = true;
                 ApplicationViewModel.Instance.NewSheetName = "Untitled";
             }
+        }
+
+        public void ShowToolWindow(UserControl content)
+        {
+            var toolbox = new FloatingToolWindow(_toolWindowCanvas);
+            toolbox.SetContent(content);
+
+            Canvas.SetLeft(toolbox, 100); 
+            Canvas.SetTop(toolbox, 100 + _toolWindowCanvas.Children.Cast<UIElement>().Count() * 200);
+
+            foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
+            {
+                var currentSize = child.DesiredSize;
+                var x = Canvas.GetLeft(child);
+                var y = Canvas.GetTop(child);
+            }
+
+            _toolWindowCanvas.Children.Add(toolbox);
+
+            //// Optional: Add dragging functionality
+            //toolbox.MouseLeftButtonDown += Toolbox_MouseLeftButtonDown;
+            //toolbox.MouseMove += Toolbox_MouseMove;
+        }
+
+        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
+        {
+            var helpWindow = new HelpWindow();
+            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ShowToolWindow(helpWindow);
+        }
+
+
+
+        private void RemoveToolWindow(FloatingToolWindow toolbox)
+        {
+            _toolWindowCanvas.Children.Remove(toolbox);
         }
     }
 }

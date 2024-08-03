@@ -71,14 +71,14 @@ namespace Cell.ViewModel
 
             var rowModel = CellModelFactory.Create(index, 0, CellType.Row, Model.SheetName);
             var row = CellViewModelFactory.Create(rowModel, _sheetViewModel);
-            _sheetViewModel.CellViewModels.Add(row);
+            _sheetViewModel.AddCell(row);
 
             var columnIndexs = _sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Select(x => x.Column).ToList();
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(index, columnIndex, CellType.Label, Model.SheetName);
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
-                _sheetViewModel.CellViewModels.Add(cell);
+                _sheetViewModel.AddCell(cell);
 
                 var firstSideMergeId = Cells.Instance.GetCell(Model.SheetName, index - 1, columnIndex)?.MergedWith ?? string.Empty;
                 var secondSideMergeId = Cells.Instance.GetCell(Model.SheetName, index + 1, columnIndex)?.MergedWith ?? string.Empty;

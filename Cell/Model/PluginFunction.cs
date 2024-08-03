@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 using Cell.Plugin;
 using System.Reflection;
 using Cell.Plugin.SyntaxRewriters;
-using Cell.Exceptions;
+using Cell.Common;
 
 namespace Cell.Model
 {
@@ -22,7 +22,7 @@ namespace Cell.Model
         [JsonIgnore]
         public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
-        public List<CellLocation> LocationDependencies { get; set; } = [];
+        public List<CellReference> LocationDependencies { get; set; } = [];
 
         public List<string> CollectionDependencies { get; set; } = [];
 
@@ -67,6 +67,7 @@ namespace Cell.Model
 
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel cell)
         {
+            userFriendlyCode = userFriendlyCode.Replace("..", "_Range_");
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(userFriendlyCode);
             Code = new CellReferenceToCodeSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
         }
@@ -74,7 +75,8 @@ namespace Cell.Model
         public string GetUserFriendlyCode(CellModel cell)
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Code);
-            return new CodeToCellReferenceSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+            var rawCode = new CodeToCellReferenceSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+            return rawCode.Replace("_Range_", "..");
         }
 
         public void ExtractAndTransformDependencies()
@@ -88,7 +90,7 @@ namespace Cell.Model
                 ExtractCellLocationReferences(root);
                 root = ExtractAndTransformCollectionReferences(root);
             }
-            catch (PluginFunctionSyntaxTransformException)
+            catch (CellError)
             {
                 return;
             }
@@ -115,7 +117,7 @@ namespace Cell.Model
             var collectionReferenceSyntaxRewriter = new FindAndReplaceCollectionReferencesSyntaxWalker();
             root = collectionReferenceSyntaxRewriter.Visit(root) ?? throw new Exception("Syntax root should not be null after rewrite.");
             var resultStatus = collectionReferenceSyntaxRewriter.Result;
-            if (!resultStatus.Success) throw new PluginFunctionSyntaxTransformException(resultStatus.Result);
+            if (!resultStatus.Success) throw new CellError(resultStatus.Result);
             var foundDependencies = collectionReferenceSyntaxRewriter.CollectionReferences;
             CollectionDependencies.AddRange(foundDependencies);
             return root;

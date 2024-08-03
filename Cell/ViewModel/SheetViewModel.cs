@@ -5,6 +5,7 @@ using System.Reflection;
 using Cell.Persistence;
 using Cell.Data;
 using System.Windows.Media;
+using Cell.Common;
 
 namespace Cell.ViewModel
 {
@@ -105,28 +106,8 @@ namespace Cell.ViewModel
             var columnViewModel = CellViewModels.OfType<ColumnCellViewModel>().First();
             columnViewModel.AddColumnToTheRight();
             columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
 
             var rowViewModel = CellViewModels.OfType<RowCellViewModel>().First();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
             rowViewModel.AddRowBelow();
             rowViewModel.AddRowBelow();
             rowViewModel.AddRowBelow();
@@ -149,10 +130,24 @@ namespace Cell.ViewModel
         public void AddCell(CellViewModel cell)
         {
             CellViewModels.Add(cell);
+            cell.Model.PropertyChanged += CellModelPropertyChanged;
+        }
+
+        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var model = sender as CellModel ?? throw new NullReferenceException("This handler is only for use with non null CellModel objects.");
+            var viewModel = CellViewModels.FirstOrDefault(x => x.Model == model);
+            if (viewModel == null) return;
+            if (e.PropertyName == nameof(CellModel.CellType))
+            {
+                var newType = model.CellType;
+                ReinstantiateCellsViewModel(viewModel);
+            }
         }
 
         public void DeleteCell(CellViewModel cell)
         {
+            cell.Model.PropertyChanged -= CellModelPropertyChanged;
             CellViewModels.Remove(cell);
             SelectedCellViewModels.Remove(cell);
             Cells.Instance.RemoveCell(cell.Model);
@@ -192,14 +187,42 @@ namespace Cell.ViewModel
                 {
                     foreach(var locationDependencies in function.LocationDependencies)
                     {
-                        var sheet = locationDependencies.SheetName;
-                        var row = locationDependencies.Row;
-                        var column = locationDependencies.Column;
-                        if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
-                        if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
-                        var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
-                        if (cellToHighlight == null) continue;
-                        HighlightCell(cellToHighlight, "#0438ff44");
+                        if (locationDependencies.IsRange)
+                        {
+                            var sheet = locationDependencies.SheetName;
+                            if (sheet != SheetName) continue;
+                            var row = locationDependencies.Row;
+                            var column = locationDependencies.Column;
+                            if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
+                            if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
+
+                            var rowRangeEnd = locationDependencies.RowRangeEnd;
+                            var columnRangeEnd = locationDependencies.ColumnRangeEnd;
+                            if (locationDependencies.IsColumnRelativeRangeEnd) columnRangeEnd += SelectedCellViewModel.Column;
+                            if (locationDependencies.IsRowRelativeRangeEnd) rowRangeEnd += SelectedCellViewModel.Row;
+
+                            for (var r = row; r <= rowRangeEnd; r++)
+                            {
+                                for (var c = column; c <= columnRangeEnd; c++)
+                                {
+                                    var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == r && x.Column == c);
+                                    if (cellToHighlight == null) continue;
+                                    HighlightCell(cellToHighlight, "#0438ff44");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var sheet = locationDependencies.SheetName;
+                            if (sheet != SheetName) continue;
+                            var row = locationDependencies.Row;
+                            var column = locationDependencies.Column;
+                            if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
+                            if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
+                            var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
+                            if (cellToHighlight == null) continue;
+                            HighlightCell(cellToHighlight, "#0438ff44");
+                        }
                     }
 
                     foreach (var collectionReference in function.CollectionDependencies)
@@ -231,16 +254,14 @@ namespace Cell.ViewModel
             HighlightedCellViewModels.Clear();
         }
 
-        public void ChangeCellType(CellViewModel? cellViewModel, CellType newType)
+        public void ReinstantiateCellsViewModel(CellViewModel? cellViewModel)
         {
             if (cellViewModel is null) return;
             SelectedCellViewModels.Remove(cellViewModel);
             HighlightedCellViewModels.Remove(cellViewModel);
             CellViewModels.Remove(cellViewModel);
-            cellViewModel.Model.CellType = newType;
             var newViewModel = CellViewModelFactory.Create(cellViewModel.Model, this);
             CellViewModels.Add(newViewModel);
-            SelectCell(newViewModel);
         }
 
         internal void UnselectCell(CellViewModel cell)

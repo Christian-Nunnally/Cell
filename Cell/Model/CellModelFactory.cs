@@ -1,6 +1,5 @@
 ﻿using Cell.Common;
 using Cell.Data;
-using Cell.Exceptions;
 using System.Text.Json;
 
 namespace Cell.Model
@@ -28,7 +27,12 @@ namespace Cell.Model
         public static CellModel Copy(this CellModel modelToCopy)
         {
             var serialized = JsonSerializer.Serialize(modelToCopy);
-            var model = JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new ProjectLoadException("Unable to copy model");
+            return JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new CellError("Unable to copy model");
+        }
+
+        public static CellModel CopyAndTrackNewCell(this CellModel modelToCopy)
+        {
+            var model = modelToCopy.Copy();
             model.ID = Utilities.GenerateUnqiueId(12);
             Cells.Instance.AddCell(model);
             return model;

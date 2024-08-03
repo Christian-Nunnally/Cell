@@ -1,5 +1,5 @@
-﻿using Cell.Data;
-using Cell.Exceptions;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using System.IO;
 using System.Text.Json;
@@ -51,8 +51,8 @@ namespace Cell.Persistence
 
         private static CellModel LoadCell(string file)
         {
-            var text = File.ReadAllText(file) ?? throw new ProjectLoadException($"Loading file failed at {file}"); ;
-            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new ProjectLoadException($"Deserialization failed for {File.ReadAllText(file)} at {file}");
+            var text = File.ReadAllText(file) ?? throw new CellError($"Loading file failed at {file}"); ;
+            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {File.ReadAllText(file)} at {file}");
             Cells.Instance.AddCell(cell, saveAfterAdding: false);
             return cell;
         }

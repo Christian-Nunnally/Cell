@@ -8,57 +8,61 @@ namespace Cell.Plugin.SyntaxRewriters
 {
     public partial class CellReferenceSyntaxWalker : CSharpSyntaxWalker
     {
-        public readonly List<CellLocation> LocationReferences = [];
+        public readonly List<CellReference> LocationReferences = [];
 
         public override void Visit(SyntaxNode? node)
         {
             base.Visit(node);
-            if (TryGetCellReferenceFromNode(node, out var sheetName, out var rowValue, out var columnValue, out var isRowRelative, out var isColumnRelative))
+            if (TryGetCellReferenceFromNode(node, out var cellReference))
             {
-                LocationReferences.Add(new CellLocation(sheetName, rowValue, columnValue, isRowRelative, isColumnRelative));
+                LocationReferences.Add(cellReference);
             }
         }
 
-        public static bool TryGetCellReferenceFromNode(SyntaxNode? node, out string sheetName, out int rowValue, out int columnValue, out bool isRowRelative, out bool isColumnRelative)
+        public static bool TryGetCellReferenceFromNode(SyntaxNode? node, out CellReference cellReference)
         {
-            sheetName = string.Empty;
-            rowValue = 0;
-            columnValue = 0;
-            isColumnRelative = false;
-            isRowRelative = false;
-
+            cellReference = new CellReference();
             if (!DoesNodeMatchCellReferenceSyntax(node, out var arguments)) return false;
+            var sheetName = arguments[0].ToString();
+            if (sheetName != "cell" && sheetName.StartsWith('"') && sheetName.EndsWith('"')) cellReference.SheetName = sheetName[1..^1];
 
-            var sheetSyntax = arguments[0];
-            var rowSyntax = arguments[1];
-            var columnSyntax = arguments[2];
+            if (!TryParsePositionFromArgument(arguments[1], out var position, out var isRelative)) return false;
+            cellReference.Row = position;
+            cellReference.IsRowRelative = isRelative;
 
-            sheetName = sheetSyntax.ToString();
-            var row = rowSyntax.ToString();
-            var column = columnSyntax.ToString();
+            if (!TryParsePositionFromArgument(arguments[2], out position, out isRelative)) return false;
+            cellReference.Column = position;
+            cellReference.IsColumnRelative = isRelative;
 
-            if (rowSyntax.Expression is BinaryExpressionSyntax rowBinaryExpression)
+            if (arguments.Count == 5)
             {
-                if (rowBinaryExpression.Left is MemberAccessExpressionSyntax memberAccessExpression && memberAccessExpression.ToString() == "cell.Row")
+                cellReference.IsRange = true;
+                if (!TryParsePositionFromArgument(arguments[3], out position, out isRelative)) return false;
+                cellReference.RowRangeEnd = position;
+                cellReference.IsRowRelativeRangeEnd = isRelative;
+
+                if (!TryParsePositionFromArgument(arguments[4], out position, out isRelative)) return false;
+                cellReference.ColumnRangeEnd = position;
+                cellReference.IsColumnRelativeRangeEnd = isRelative;
+            }
+            return true;
+        }
+
+        private static bool TryParsePositionFromArgument(ArgumentSyntax argumentSyntax, out int position, out bool isRelative)
+        {
+            isRelative = false;
+            position = 0;
+            var row = argumentSyntax.ToString();
+            if (argumentSyntax.Expression is BinaryExpressionSyntax rowBinaryExpression)
+            {
+                if (rowBinaryExpression.Left is MemberAccessExpressionSyntax memberAccessExpression && (memberAccessExpression.ToString() == "cell.Row" || memberAccessExpression.ToString() == "cell.Column"))
                 {
                     row = rowBinaryExpression.Right.ToString();
-                    isRowRelative = true;
+                    isRelative = true;
                 }
             }
-
-            if (columnSyntax.Expression is BinaryExpressionSyntax columnBinaryExpression)
-            {
-                if (columnBinaryExpression.Left is MemberAccessExpressionSyntax columnMemberAccessExpression && columnMemberAccessExpression.ToString() == "cell.Column")
-                {
-                    column = columnBinaryExpression.Right.ToString();
-                    isColumnRelative = true;
-                }
-            }
-
-            if (!int.TryParse(row, out rowValue)) return false;
-            if (!int.TryParse(column, out columnValue)) return false;
-            if (sheetName != "cell" && sheetName.StartsWith('"') && sheetName.EndsWith('"')) sheetName = sheetName[1..^1];
-            if (sheetName == "cell") sheetName = string.Empty;
+            if (!int.TryParse(row, out var rowValue)) return false;
+            position = rowValue;
             return true;
         }
 
@@ -71,7 +75,7 @@ namespace Cell.Plugin.SyntaxRewriters
             if (memberAccessExpressionSyntax.Name.Identifier.Text != "GetCell") return false;
             if (memberAccessExpressionSyntax.Expression is not IdentifierNameSyntax identifierName) return false;
             if (identifierName.Identifier.Text != "c") return false;
-            if (syntax.ArgumentList.Arguments.Count != 3) return false;
+            if (!(syntax.ArgumentList.Arguments.Count == 3 || syntax.ArgumentList.Arguments.Count == 5)) return false;
             arguments = syntax.ArgumentList.Arguments;
             return true;
         }
