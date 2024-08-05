@@ -11,6 +11,7 @@ namespace Cell.ViewModel
 
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
+            if (CollectionName == string.Empty) return;
             CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
             UpdateList();
         }
@@ -22,9 +23,12 @@ namespace Cell.ViewModel
             {
                 CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
-                UserCollectionLoader.GetOrCreateCollection(CollectionName);
-                CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
-                UpdateList();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    UserCollectionLoader.GetOrCreateCollection(CollectionName);
+                    CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                    UpdateList();
+                }
                 NotifyPropertyChanged(nameof(CollectionName));
             }
         }
@@ -62,6 +66,7 @@ namespace Cell.ViewModel
                 foreach (var item in collection.Items)
                 {
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, i++), Model);
+                    if (result.Result == null) continue;
                     ListItems.Add(result.Result);
                 }
             }

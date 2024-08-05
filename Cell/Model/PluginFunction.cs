@@ -1,80 +1,70 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
-using System.Text.Json.Serialization;
 using Cell.Plugin;
 using System.Reflection;
-using Cell.Plugin.SyntaxRewriters;
+using Cell.Plugin.SyntaxWalkers;
 using Cell.Common;
 
 namespace Cell.Model
 {
-    public partial class PluginFunction : PropertyChangedBase
+    public partial class PluginFunction
     {
-        private const string codeHeader = "using System; using System.Linq; using System.Collections.Generic; using Cell.Model; using Cell.ViewModel; using Cell.Model.Plugin; using Cell.Plugin;\n\nnamespace Plugin { public class Program { public static ";
-        private const string codeFooter = "\n}}}";
-        private const string methodHeader = " PluginMethod(PluginContext c, CellModel cell) {\n";
-
-        private string code = string.Empty;
         private readonly List<CellModel> _cellsToNotify = [];
         private bool _isSyntaxTreeValid;
         private MethodInfo? _compiledMethod;
 
-        [JsonIgnore]
         public bool IsSyntaxTreeValid => _isSyntaxTreeValid;
 
         public List<CellReference> LocationDependencies { get; set; } = [];
 
         public List<string> CollectionDependencies { get; set; } = [];
 
-        public string Name { get; set; } = string.Empty;
+        public PluginFunctionModel Model { get; set; }
 
-        public string ReturnType { get; set; } = "void";
-
-        [JsonIgnore]
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
 
-        [JsonIgnore]
         public CompileResult CompileResult { get; private set; }
 
-
-        [JsonIgnore]
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
-        private string FullCode => codeHeader + ReturnType + methodHeader + code + codeFooter;
-
-        public PluginFunction() { }
-
-        public PluginFunction(string name, string code, string returnType)
+        public PluginFunction(PluginFunctionModel model)
         {
-            Name = name;
-            ReturnType = returnType;
-            Code = code;
+            Model = model;
+            Model.PropertyChanged += ModelPropertyChanged;
+            AttemptToRecompileMethod();
         }
 
-        public string Code
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            get => code;
-            set
+            if (e.PropertyName == nameof(PluginFunctionModel.Code))
             {
-                if (code == value) return;
-                code = value;
-                NotifyPropertyChanged(nameof(Code));
-                _compiledMethod = null;
-                ExtractAndTransformDependencies();
-                if (_isSyntaxTreeValid) Compile();
+                AttemptToRecompileMethod();
             }
+        }
+
+        private void AttemptToRecompileMethod()
+        {
+            _compiledMethod = null;
+            ExtractAndTransformDependencies();
+            if (_isSyntaxTreeValid) Compile();
         }
 
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel cell)
         {
             userFriendlyCode = userFriendlyCode.Replace("..", "_Range_");
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(userFriendlyCode);
-            Code = new CellReferenceToCodeSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+            Model.Code = new CellReferenceToCodeSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
+
+            // Populate cells that use this function as populate:
+            foreach (var cellModel in _cellsToNotify)
+            {
+                cellModel.PopulateText();
+            }
         }
 
         public string GetUserFriendlyCode(CellModel cell)
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Code);
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Model.Code);
             var rawCode = new CodeToCellReferenceSyntaxRewriter(cell).Visit(syntaxTree.GetRoot())?.ToFullString() ?? string.Empty;
             return rawCode.Replace("_Range_", "..");
         }
@@ -82,7 +72,7 @@ namespace Cell.Model
         public void ExtractAndTransformDependencies()
         {
             _isSyntaxTreeValid = false;
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Model.FullCode);
             
             SyntaxNode? root = syntaxTree.GetRoot();
             try

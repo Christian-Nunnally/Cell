@@ -17,7 +17,7 @@ namespace Cell.View
     /// <summary>
     /// Interaction logic for CodeEditor.xaml
     /// </summary>
-    public partial class FloatingCodeEditor : UserControl, INotifyPropertyChanged, IResizableToolWindow
+    public partial class CodeEditor : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
         private readonly Action<string> onCloseCallback = x => { };
         private readonly CellViewModel? _currentCell;
@@ -40,10 +40,10 @@ namespace Cell.View
 
         private static bool _haveAssembliesBeenRegistered;
 
-        public FloatingCodeEditor(PluginFunction function, string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
+        public CodeEditor(PluginFunction function, string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
         {
-            InitializeComponent();
             DataContext = this;
+            InitializeComponent();
             Visibility = Visibility.Collapsed;
             UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
             UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
@@ -116,7 +116,8 @@ namespace Cell.View
         private void TestCode()
         {
             if (_currentCell is null) return;
-            var function = new PluginFunction("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
+            var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
+            var function = new PluginFunction(model);
             function.SetUserFriendlyCode(textEditor.Text, _currentCell.Model);
             var compiled = function.CompiledMethod;
             var result = function.CompileResult;
@@ -154,7 +155,10 @@ namespace Cell.View
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
                 return;
             }
-            var function = new PluginFunction("testtesttest", textEditor.Text, !_doesFunctionReturnValue ? "void" : "object");
+            var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
+            var function = new PluginFunction(model);
+            if (_currentCell is null) return;
+            function.SetUserFriendlyCode(textEditor.Text, _currentCell.Model);
             var syntaxTree = function.SyntaxTree;
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;
@@ -192,7 +196,7 @@ namespace Cell.View
 
         public string GetTitle()
         {
-            return _currentCell == null ? "" : $"{_function.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
+            return _currentCell == null ? "" : $"{_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [

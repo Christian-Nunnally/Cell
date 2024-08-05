@@ -31,11 +31,18 @@ namespace Cell.View
         public void SetContent(UserControl content)
         {
             ContentHost.Content = content;
+            content.DataContextChanged += ContentDataContextChanged;
             _content = content as IToolWindow;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
             _resizableContent = content as IResizableToolWindow;
             DataContext = this;
 
             _content?.GetToolBarCommands().ForEach(Commands.Add);
+        }
+
+        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
         }
 
         private void CloseButtonClicked(object sender, RoutedEventArgs e)

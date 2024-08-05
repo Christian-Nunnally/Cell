@@ -16,6 +16,7 @@ namespace Cell.Persistence
 
         public static UserCollection GetOrCreateCollection(string name)
         {
+            if (name == string.Empty) throw new CellError("Collection name cannot be empty");
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
             var userCollection = new UserCollection(name);
             StartTrackingCollection(userCollection);

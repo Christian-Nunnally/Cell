@@ -1,7 +1,7 @@
 ﻿
 using Cell.Model;
 
-namespace Cell.Plugin.SyntaxRewriters
+namespace Cell.Plugin.SyntaxWalkers
 {
     public class CellReference
     {

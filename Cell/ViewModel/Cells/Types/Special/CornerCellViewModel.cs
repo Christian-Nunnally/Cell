@@ -9,9 +9,9 @@ namespace Cell.ViewModel
     {
         public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
 
-        public List<string> PopulateFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Populate", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
+        public List<string> PopulateFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Populate", out var result) ? result.Values.Select(x => x.Model.Name).ToList() : [];
 
-        public List<string> TriggerFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Trigger", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
+        public List<string> TriggerFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Trigger", out var result) ? result.Values.Select(x => x.Model.Name).ToList() : [];
 
         public List<string> CollectionNames => UserCollectionLoader.CollectionNames.ToList();
 

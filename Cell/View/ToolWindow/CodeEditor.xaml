@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Cell.View.FloatingCodeEditor"
+    x:Class="Cell.View.CodeEditor"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -23,14 +23,15 @@
             FontFamily="Consolas"
             FontSize="10pt"
             SyntaxHighlighting="C#" />
-        <avalonEdit:TextEditor
-            Name="syntaxTreePreviewViewer"
-            Grid.Row="1"
-            Padding="4"
-            FontFamily="Consolas"
-            FontSize="10pt"
-            SyntaxHighlighting="C#"
-            Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}" />
+        <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}">
+            <avalonEdit:TextEditor
+                Name="syntaxTreePreviewViewer"
+                Grid.Row="1"
+                Padding="4"
+                FontFamily="Consolas"
+                FontSize="10pt"
+                SyntaxHighlighting="C#" />
+        </Border>
         <TextBox
             Grid.Row="1"
             Padding="4"

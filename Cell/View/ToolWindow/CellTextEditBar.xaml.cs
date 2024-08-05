@@ -33,7 +33,7 @@ namespace Cell.View
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
                 var code = function.GetUserFriendlyCode(cell.Model);
-                var editor = new FloatingCodeEditor(function, code, x =>
+                var editor = new CodeEditor(function, code, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
                     (cell as ListCellViewModel)?.UpdateList();
@@ -49,7 +49,7 @@ namespace Cell.View
                 if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
                 var code = function.GetUserFriendlyCode(cell.Model);
-                var editor = new FloatingCodeEditor(function, code, x =>
+                var editor = new CodeEditor(function, code, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
                 }, true, cell);

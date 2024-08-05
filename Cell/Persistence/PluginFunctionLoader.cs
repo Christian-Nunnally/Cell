@@ -21,8 +21,10 @@ namespace Cell.Persistence
                 {
                     foreach (var file in Directory.GetFiles(namespacePath))
                     {
-                        var function = JsonSerializer.Deserialize<PluginFunction>(File.ReadAllText(file));
-                        if (function == null) continue;
+
+                        var model = JsonSerializer.Deserialize<PluginFunctionModel>(File.ReadAllText(file));
+                        if (model == null) continue;
+                        var function = new PluginFunction(model);
                         var space = Path.GetFileName(namespacePath);
                         AddPluginFunctionToNamespace(space, function);
                     }
@@ -32,14 +34,14 @@ namespace Cell.Persistence
 
         private static void AddPluginFunctionToNamespace(string space, PluginFunction function)
         {
-            if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Name, function);
-            else Namespaces.Add(space, new Dictionary<string, PluginFunction> { { function.Name, function } });
-            function.PropertyChanged += OnPluginFunctionPropertyChanged;
+            if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Model.Name, function);
+            else Namespaces.Add(space, new Dictionary<string, PluginFunction> { { function.Model.Name, function } });
+            function.Model.PropertyChanged += OnPluginFunctionPropertyChanged;
         }
 
         private static void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not PluginFunction function) return;
+            if (sender is not PluginFunctionModel function) return;
             SavePluginFunction(function.ReturnType, function);
         }
 
@@ -50,12 +52,12 @@ namespace Cell.Persistence
                 foreach (var function in namespaceFunctions.Value.Values)
                 {
                     var space = namespaceFunctions.Key;
-                    SavePluginFunction(space, function);
+                    SavePluginFunction(space, function.Model);
                 }
             }
         }
 
-        public static void SavePluginFunction(string space, PluginFunction function)
+        public static void SavePluginFunction(string space, PluginFunctionModel function)
         {
             if (string.IsNullOrEmpty(function.Name)) return;
             var directory = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName, space);
@@ -89,9 +91,10 @@ namespace Cell.Persistence
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
-            var function = new PluginFunction(name, code, space);
+            var model = new PluginFunctionModel(name, code, space);
+            var function = new PluginFunction(model);
             AddPluginFunctionToNamespace(space, function);
-            SavePluginFunction(space, function);
+            SavePluginFunction(space, function.Model);
             return function;
         }
     }

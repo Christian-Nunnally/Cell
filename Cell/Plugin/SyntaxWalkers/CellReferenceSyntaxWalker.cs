@@ -1,10 +1,9 @@
-﻿using Cell.Model;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Cell.Plugin.SyntaxRewriters
+namespace Cell.Plugin.SyntaxWalkers
 {
     public partial class CellReferenceSyntaxWalker : CSharpSyntaxWalker
     {

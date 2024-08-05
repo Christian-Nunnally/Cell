@@ -597,6 +597,6 @@ namespace Cell.ViewModel
             });
 
         [JsonIgnore]
-        public List<string> PrettyDependencyNames => CellPopulateManager.GetAllCollectionSubscriptions(Model).Concat(PrettyCellLocationDependencyNames).ToList();
+        public List<string> PrettyDependencyNames => [.. CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
     }
 }

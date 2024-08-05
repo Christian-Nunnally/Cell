@@ -230,7 +230,7 @@ namespace Cell.Model
             if (!function.IsSyntaxTreeValid) throw new InvalidOperationException("Cannot update dependency subscriptions for a function with invalid syntax tree.");
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
-            if (!string.IsNullOrWhiteSpace(function.Code))
+            if (!string.IsNullOrWhiteSpace(function.Model.Code))
             {
                 foreach (var locationDependency in function.LocationDependencies)
                 {
@@ -336,5 +336,14 @@ namespace Cell.Model
         public string SelectedItem => GetStringProperty(nameof(ListCellViewModel.SelectedItem));
 
         public override string ToString() => Text;
+
+        public void PopulateText()
+        {
+            if (string.IsNullOrEmpty(PopulateFunctionName)) return;
+            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, Index), this);
+            if (result.Result == null) return;
+            if (result.Success) Text = result.Result;
+            else ErrorText = result.Result;
+        }
     }
 }

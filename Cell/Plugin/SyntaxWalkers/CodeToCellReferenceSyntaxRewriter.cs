@@ -3,7 +3,7 @@ using Cell.ViewModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Plugin.SyntaxRewriters
+namespace Cell.Plugin.SyntaxWalkers
 {
     public partial class CodeToCellReferenceSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
     {

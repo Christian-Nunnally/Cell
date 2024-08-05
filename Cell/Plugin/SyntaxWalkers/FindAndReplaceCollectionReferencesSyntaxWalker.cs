@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Cell.Plugin.SyntaxRewriters
+namespace Cell.Plugin.SyntaxWalkers
 {
     public class FindAndReplaceCollectionReferencesSyntaxWalker : CSharpSyntaxRewriter
     {
