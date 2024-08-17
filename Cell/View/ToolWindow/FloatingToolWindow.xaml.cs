@@ -37,7 +37,11 @@ namespace Cell.View
             _resizableContent = content as IResizableToolWindow;
             DataContext = this;
 
-            _content?.GetToolBarCommands().ForEach(Commands.Add);
+            if (_content != null)
+            {
+                _content.GetToolBarCommands().ForEach(Commands.Add);
+                _content.RequestClose = RequestClose;
+            }
         }
 
         private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -47,8 +51,13 @@ namespace Cell.View
 
         private void CloseButtonClicked(object sender, RoutedEventArgs e)
         {
+            RequestClose();
+        }
+
+        private void RequestClose()
+        {
             _canvas.Children.Remove(this);
-            _content?.Close();
+            _content?.HandleBeingClosed();
         }
 
         private void Toolbox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

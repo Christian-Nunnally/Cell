@@ -20,23 +20,31 @@
             Name="textEditor"
             Grid.Row="0"
             Padding="4"
+            Background="{StaticResource CellBackground}"
             FontFamily="Consolas"
             FontSize="10pt"
-            SyntaxHighlighting="C#" />
+            Foreground="{StaticResource ForegroundColor}"
+            HorizontalScrollBarVisibility="Auto"
+            SyntaxHighlighting="C#"
+            VerticalScrollBarVisibility="Auto" />
         <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}">
             <avalonEdit:TextEditor
                 Name="syntaxTreePreviewViewer"
                 Grid.Row="1"
                 Padding="4"
+                Background="{StaticResource CellBackground}"
                 FontFamily="Consolas"
                 FontSize="10pt"
-                SyntaxHighlighting="C#" />
+                Foreground="{StaticResource ForegroundColor}"
+                HorizontalScrollBarVisibility="Auto"
+                SyntaxHighlighting="C#"
+                VerticalScrollBarVisibility="Auto" />
         </Border>
         <TextBox
             Grid.Row="1"
             Padding="4"
             VerticalContentAlignment="Top"
-            Background="White"
+            Background="{StaticResource CellBackground}"
             FontFamily="Consolas"
             Foreground="{Binding ResultStringColor}"
             IsReadOnly="True"

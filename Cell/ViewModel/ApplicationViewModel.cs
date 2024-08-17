@@ -15,6 +15,8 @@ namespace Cell.ViewModel
         private const int LeftPanelHeight = 215;
         private const int RightPanelHeight = 0;
 
+        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
+
         public static ApplicationViewModel Instance 
         { 
             get => instance ?? throw new NullReferenceException("Application instance not set"); 
@@ -154,6 +156,7 @@ namespace Cell.ViewModel
             if (SheetViewModel.SheetName == sheetName) return;
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
+            MainWindow.ShowSheetView(sheetViewModel);
             ApplicationSettings.Instance.LastLoadedSheet = sheetName;
         }
 
@@ -161,7 +164,7 @@ namespace Cell.ViewModel
         {
             GoToSheet(cellModel.SheetName);
             var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
-            if (cell is not null) MainWindow.SheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
+            if (cell is not null) MainWindow.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
         }
 
         internal void CopySelectedCells(bool copyTextOnly)

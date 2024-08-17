@@ -1,8 +1,8 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Converters;
 using Cell.View.ToolWindow;
+using Cell.View.Utilities;
 using Cell.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +16,8 @@ namespace Cell.View
     /// </summary>
     public partial class EditCellPanel : UserControl, IToolWindow
     {
+        public Action? RequestClose { get; set; }
+
         public EditCellPanel()
         {
             InitializeComponent();
@@ -148,7 +150,7 @@ namespace Cell.View
             {
                 for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = Cells.Instance.GetCell(sheetName, row, column);
+                    var cell = Data.Cells.Instance.GetCell(sheetName, row, column);
                     if (cell is not null) cells.Add(cell);
                 }
             }
@@ -256,7 +258,7 @@ namespace Cell.View
             AddColorsToColorPicker(colorPicker, colors, 1.9f);
         }
 
-        public void AddColorsToColorPicker(ColorPicker colorPicker, List<string> colors, float brightnessFactor)
+        public static void AddColorsToColorPicker(ColorPicker colorPicker, List<string> colors, float brightnessFactor)
         {
             foreach (var color in colors)
             {
@@ -265,7 +267,7 @@ namespace Cell.View
             }
         }
 
-        public void Close()
+        public void HandleBeingClosed()
         {
         }
 

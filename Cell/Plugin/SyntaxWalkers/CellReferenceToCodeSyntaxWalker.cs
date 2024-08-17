@@ -17,7 +17,7 @@ namespace Cell.Plugin.SyntaxWalkers
             if (node is IdentifierNameSyntax identifierSyntax)
             {
                 var variableName = identifierSyntax.Identifier.ToString();
-                var splitVariableName = variableName.Split('_');
+                var cellReference = variableName.Split('_');
 
                 // Possible formats:
                 // "SheetName_C4"
@@ -31,53 +31,55 @@ namespace Cell.Plugin.SyntaxWalkers
                 // "R_C4_Range_R_C5"
 
                 var sheetName = "cell";
-                if (splitVariableName.Length > 1)
+                var hasSheetReference = cellReference.Length > 1 && !IsRelativitySymbol(cellReference[0]) && !IsCellLocation(cellReference[0]);
+                if (hasSheetReference)
                 {
-                    var possibleSheetName = splitVariableName[0];
-                    if (!IsCellLocation(possibleSheetName) && possibleSheetName != "R" && possibleSheetName != "C" && possibleSheetName != "B")
-                    {
-                        sheetName = $"\"{possibleSheetName}\"";
-                        splitVariableName = splitVariableName[1..];
-                    }
+                    sheetName = $"\"{cellReference[0]}\"";
+                    cellReference = cellReference[1..];
                 }
 
-                var rangeIndex = splitVariableName.ToList().IndexOf("Range");
-
+                var rangeIndex = cellReference.ToList().IndexOf("Range");
+                var isRangeReference = rangeIndex >= 0;
                 var rangeArguments = "";
-                if (rangeIndex >= 0)
+                if (isRangeReference)
                 {
-                    var rangeVariableName = splitVariableName[(rangeIndex+1)..];
-                    var rangeRelativitySymbol = "";
-                    var rangeCellName = rangeVariableName[0];
-                    if (rangeVariableName.Length == 2)
-                    {
-                        rangeRelativitySymbol = rangeVariableName[0];
-                        rangeCellName = rangeVariableName[1];
-                    }
-
-                    if (IsCellLocation(rangeCellName))
-                    {
-                        rangeArguments = CalculateArgumentStringFromCellLocation(rangeCellName, rangeRelativitySymbol);
-                    }
-
-                    splitVariableName = splitVariableName[..rangeIndex];
+                    var endOfRangePartOfCellReference = cellReference[(rangeIndex + 1)..];
+                    rangeArguments = GetArgumentStringFromCellReference(endOfRangePartOfCellReference);
+                    if (string.IsNullOrEmpty(rangeArguments)) return node;
+                    cellReference = cellReference[..rangeIndex];
                 }
 
-                var relativitySymbol = "";
-                var cellLocationName = splitVariableName[0];
-                if (splitVariableName.Length == 2)
-                {
-                    relativitySymbol = splitVariableName[0];
-                    cellLocationName = splitVariableName[1];
-                }
-
-                if (IsCellLocation(cellLocationName))
-                {
-                    string cellLocationArguments = CalculateArgumentStringFromCellLocation(cellLocationName, relativitySymbol);
-                    return SyntaxFactory.ParseExpression($"c.GetCell({sheetName}{cellLocationArguments}{rangeArguments})");
-                }
+                string cellLocationArguments = GetArgumentStringFromCellReference(cellReference);
+                if (string.IsNullOrEmpty(cellLocationArguments)) return node;
+                return SyntaxFactory.ParseExpression($"c.GetCell({sheetName}{cellLocationArguments}{rangeArguments})");
             }
             return node;
+        }
+
+        private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
+
+        /// <param name="cellReference">Looks like (A1, B_A1, R_A1, C_A1)</param>
+        private string GetArgumentStringFromCellReference(string[] cellReference)
+        {
+            var (rangeRelativitySymbol, rangeCellLocationName) = GetRelativitySymbolAndCellLocationNameFromCellReference(cellReference);
+            if (IsCellLocation(rangeCellLocationName))
+            {
+                return CalculateArgumentStringFromCellLocation(rangeCellLocationName, rangeRelativitySymbol);
+            }
+
+            return string.Empty;
+        }
+
+        private static (string RelativitySymbol, string CellReferenceName) GetRelativitySymbolAndCellLocationNameFromCellReference(string[] cellReference)
+        {
+            var relativitySymbol = "";
+            var cellLocationName = cellReference[0];
+            if (cellReference.Length == 2)
+            {
+                relativitySymbol = cellReference[0];
+                cellLocationName = cellReference[1];
+            }
+            return (relativitySymbol, cellLocationName);
         }
 
         private string CalculateArgumentStringFromCellLocation(string cellLocationName, string relativitySymbol)

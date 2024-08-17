@@ -1,4 +1,5 @@
-﻿using Cell.Model.Plugin;
+﻿using Cell.Common;
+using Cell.Model.Plugin;
 using Cell.Persistence;
 using System.Collections;
 
@@ -13,7 +14,7 @@ namespace Cell.Plugin
         private UserList(string collectionName)
         {
             if (string.IsNullOrWhiteSpace(collectionName)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(collectionName));
-            _userCollection = UserCollectionLoader.GetOrCreateCollection(collectionName);
+            _userCollection = UserCollectionLoader.GetCollection(collectionName) ?? throw new CellError($"Collection {collectionName} does not exist");
         }
 
         public static UserList<T> GetOrCreate(string collectionName)
@@ -59,6 +60,8 @@ namespace Cell.Plugin
         {
             get => key >= 0 && key < _userCollection.Items.Count ? (T)_userCollection.Items[key] : new T();
         }
+
+        public int Count => _userCollection?.Items.Count ?? 0;
     }
 
     public class UserList

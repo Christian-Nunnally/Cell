@@ -2,6 +2,7 @@
 using Cell.Model.Plugin;
 using Cell.Persistence;
 using Cell.Plugin;
+using Cell.View.Skin;
 using Cell.View.ToolWindow;
 using Cell.ViewModel;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -20,9 +21,9 @@ namespace Cell.View
     public partial class CodeEditor : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
         private readonly Action<string> onCloseCallback = x => { };
-        private readonly CellViewModel? _currentCell;
+        private readonly CellModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
-        private readonly PluginFunction _function;
+        private readonly PluginFunctionViewModel _function;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -38,12 +39,17 @@ namespace Cell.View
 
         public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? Brushes.Black : Brushes.Red;
 
+        public Action? RequestClose { get; set; }
+
         private static bool _haveAssembliesBeenRegistered;
 
-        public CodeEditor(PluginFunction function, string code, Action<string> callback, bool doesFunctionReturnValue, CellViewModel currentCell)
+        public CodeEditor(PluginFunctionViewModel function, Action<string> callback, CellModel? currentCell)
         {
             DataContext = this;
             InitializeComponent();
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
+
             Visibility = Visibility.Collapsed;
             UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
             UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
@@ -51,8 +57,8 @@ namespace Cell.View
             textEditor.TextArea.TextEntered += OnTextEntered;
             _function = function;
             _currentCell = currentCell;
-            _doesFunctionReturnValue = doesFunctionReturnValue;
-            textEditor.Text = code;
+            _doesFunctionReturnValue = function.Model.ReturnType != "void";
+            textEditor.Text = function.GetUserFriendlyCode(currentCell); ;
             onCloseCallback = callback;
             Visibility = Visibility.Visible;
             NotifyDockPropertiesChanged();
@@ -117,20 +123,20 @@ namespace Cell.View
         {
             if (_currentCell is null) return;
             var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
-            var function = new PluginFunction(model);
-            function.SetUserFriendlyCode(textEditor.Text, _currentCell.Model);
+            var function = new PluginFunctionViewModel(model);
+            function.SetUserFriendlyCode(textEditor.Text, _currentCell);
             var compiled = function.CompiledMethod;
             var result = function.CompileResult;
             if (result.Success)
             {
                 if (_doesFunctionReturnValue)
                 {
-                    var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Model.Index), _currentCell.Model]);
+                    var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
                     result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
                 }
                 else
                 {
-                    compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Model.Index), _currentCell.Model]);
+                    compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
                     result = new CompileResult { Success = true, Result = "Success" };
                 }
             }
@@ -141,7 +147,7 @@ namespace Cell.View
         private void DisplayResult(CompileResult result)
         {
             _lastCompileResult = result;
-            ResultString = result.Result;
+            ResultString = result.Result ?? "null";
             ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultString)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
@@ -156,16 +162,16 @@ namespace Cell.View
                 return;
             }
             var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
-            var function = new PluginFunction(model);
+            var function = new PluginFunctionViewModel(model);
             if (_currentCell is null) return;
-            function.SetUserFriendlyCode(textEditor.Text, _currentCell.Model);
+            function.SetUserFriendlyCode(textEditor.Text, _currentCell);
             var syntaxTree = function.SyntaxTree;
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
         }
 
-        public void Close()
+        public void HandleBeingClosed()
         {
             onCloseCallback?.Invoke(textEditor.Text);
         }

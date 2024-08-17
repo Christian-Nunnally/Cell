@@ -24,16 +24,21 @@ namespace Cell.Model
         public string Name
         {
             get { return _name; }
-            set { if (_name == value) return; _name = value; NotifyPropertyChanged(nameof(Name)); }
+            set 
+            { 
+                if (_name == value) return;
+                _name = value; 
+                NotifyPropertyChanged(nameof(Name));
+            }
         }
-        private string _name;
+        private string _name = string.Empty;
 
         public string ReturnType
         {
             get { return _returnType; }
             set { if (_returnType == value) return; _returnType = value; NotifyPropertyChanged(nameof(ReturnType)); }
         }
-        private string _returnType;
+        private string _returnType = string.Empty;
 
         public string Code 
         { 
@@ -47,7 +52,7 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(Code));
             }
         }
-        private string _code = "";
+        private string _code = string.Empty;
 
         public ulong Fingerprint { get; private set; }
 

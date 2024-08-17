@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -37,27 +36,23 @@ namespace Cell.View.Controls
 
         private Border? _checkboxBorder;
 
-        private Border CheckBoxBorder
+        private void SetCheckBoxBorder(Border value)
         {
-            get => _checkboxBorder;
-            set
+            if (_checkboxBorder != null)
             {
-                if (_checkboxBorder != null)
-                {
-                    _checkboxBorder.MouseDown -= new MouseButtonEventHandler(CheckBoxBorderMouseDown);
-                }
-                _checkboxBorder = value;
+                _checkboxBorder.MouseDown -= new MouseButtonEventHandler(CheckBoxBorderMouseDown);
+            }
+            _checkboxBorder = value;
 
-                if (_checkboxBorder != null)
-                {
-                    _checkboxBorder.MouseDown += new MouseButtonEventHandler(CheckBoxBorderMouseDown);
-                }
+            if (_checkboxBorder != null)
+            {
+                _checkboxBorder.MouseDown += new MouseButtonEventHandler(CheckBoxBorderMouseDown);
             }
         }
 
         public override void OnApplyTemplate()
         {
-            CheckBoxBorder = GetTemplateChild("CheckBoxBorder") as Border ?? throw new Exception("Expected element named CheckBoxBorder in control template.");
+            SetCheckBoxBorder(GetTemplateChild("CheckBoxBorder") as Border ?? throw new Exception("Expected element named CheckBoxBorder in control template."));
         }
 
         private void CheckBoxBorderMouseDown(object sender, MouseButtonEventArgs e)

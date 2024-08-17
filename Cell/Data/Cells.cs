@@ -44,7 +44,7 @@ namespace Cell.Data
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
 
-            // Uncomment when you need to delete stacked cells.
+            //Uncomment when you need to delete stacked cells.
             //if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation) && cellsAtLocation.Count > 1)
             //{
             //    RemoveCell(cellsAtLocation[0]);

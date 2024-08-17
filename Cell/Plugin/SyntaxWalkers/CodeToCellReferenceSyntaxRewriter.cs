@@ -68,7 +68,6 @@ namespace Cell.Plugin.SyntaxWalkers
                     rangePart = $"_Range_{rangeRelativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.ColumnRangeEnd)}{cellReference.RowRangeEnd}";
                 }
 
-
                 var cellLocation = $"{sheetPrefix}{relativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.Column)}{cellReference.Row}{rangePart}";
                 return SyntaxFactory.ParseExpression(cellLocation);
             }

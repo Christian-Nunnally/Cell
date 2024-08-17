@@ -20,6 +20,7 @@ namespace Cell.ViewModel
                 CellType.Progress => new ProgressCellViewModel(model, sheetViewModel),
                 CellType.List => new ListCellViewModel(model, sheetViewModel),
                 CellType.Graph => new GraphCellViewModel(model, sheetViewModel),
+                CellType.Date => new DateCellViewModel(model, sheetViewModel),
                 _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
             };
         }

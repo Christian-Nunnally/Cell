@@ -90,8 +90,8 @@
                                                         Grid.Row="1"
                                                         Grid.Column="1"
                                                         Padding="0"
-                                                        HorizontalAlignment="{Binding HorizontalAlignmentForView}"
-                                                        VerticalAlignment="{Binding VerticalAlignmentForView}"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
                                                         FontFamily="{Binding FontFamily}"
                                                         FontSize="20"
                                                         FontStyle="{Binding FontStyleForView}"
@@ -596,6 +596,10 @@
                                             Width="70"
                                             Click="ChangeCellTypeCellClicked"
                                             Content="Graph" />
+                                        <Button
+                                            Width="70"
+                                            Click="ChangeCellTypeCellClicked"
+                                            Content="Date" />
                                     </StackPanel>
                                 </Border>
                             </Popup>

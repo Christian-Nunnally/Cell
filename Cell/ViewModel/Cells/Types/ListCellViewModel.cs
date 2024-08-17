@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Persistence;
 using Cell.Plugin;
 using System.Collections.ObjectModel;
@@ -7,6 +8,11 @@ namespace Cell.ViewModel
 {
     public class ListCellViewModel : CellViewModel
     {
+        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used in binding")]
+        public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
+
         public ObservableCollection<object> ListItems { get; set; } = [];
 
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
@@ -25,22 +31,33 @@ namespace Cell.ViewModel
                 Model.SetStringProperty(nameof(CollectionName), value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    UserCollectionLoader.GetOrCreateCollection(CollectionName);
                     CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
                     UpdateList();
                 }
                 NotifyPropertyChanged(nameof(CollectionName));
             }
-        }
+        }   
 
-        public string CollectionType
+        public string MaxItemsString
         {
-            get => Model.GetStringProperty(nameof(CollectionType));
+            get => MaxNumberOfItems.ToString();
             set
             {
-                Model.SetStringProperty(nameof(CollectionType), value);
-                UserCollectionLoader.SaveCollectionType(CollectionName, value);
-                NotifyPropertyChanged(nameof(CollectionType));
+                if (int.TryParse(MaxItemsString, out int result))
+                {
+                    MaxNumberOfItems = result;
+                }
+            }
+        }
+
+        public int MaxNumberOfItems
+        {
+            get => (int)Model.GetNumericProperty(nameof(MaxNumberOfItems), 40);
+            set
+            {
+                Model.SetNumericProperty(nameof(MaxNumberOfItems), value);
+                NotifyPropertyChanged(nameof(MaxNumberOfItems));
+                UpdateList();
             }
         }
 
@@ -58,7 +75,7 @@ namespace Cell.ViewModel
         internal void UpdateList()
         {
             ListItems.Clear();
-            var collection = UserCollectionLoader.GetOrCreateCollection(CollectionName);
+            var collection = UserCollectionLoader.GetCollection(CollectionName);
             if (collection == null) return;
             if (!string.IsNullOrEmpty(PopulateFunctionName))
             {
@@ -68,6 +85,7 @@ namespace Cell.ViewModel
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, i++), Model);
                     if (result.Result == null) continue;
                     ListItems.Add(result.Result);
+                    if (ListItems.Count >= MaxNumberOfItems) break;
                 }
             }
             else
@@ -75,21 +93,9 @@ namespace Cell.ViewModel
                 foreach (var item in collection.Items)
                 {
                     ListItems.Add(item);
+                    if (ListItems.Count >= MaxNumberOfItems) break;
                 }
             }
-        }
-    }
-
-    public static class ListboxCellModelExtensions
-    {
-        public static bool IsCollection(this CellModel model, string collectionName)
-        {
-            return model.GetStringProperty(nameof(ListCellViewModel.CollectionName)) == collectionName;
-        }
-
-        public static string GetCollectionType(this CellModel model)
-        {
-            return model.GetStringProperty(nameof(ListCellViewModel.CollectionType));
         }
     }
 }

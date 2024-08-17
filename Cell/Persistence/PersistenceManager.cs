@@ -36,7 +36,8 @@ namespace Cell.Persistence
             SaveVersion();
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
-            new CellLoader(SaveLocation).LoadCells();
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            new CellLoader(SaveLocation).LoadAndAddCells();
             CreateBackup();
         }
 
@@ -69,6 +70,16 @@ namespace Cell.Persistence
             var zipPath = folderPath + ".zip";
             ZipFile.CreateFromDirectory(folderPath, zipPath);
             Directory.Delete(folderPath, true);
+        }
+
+        public static void ExportSheet(string sheetName)
+        {
+            new CellLoader(SaveLocation).ExportSheetTemplate(sheetName);
+        }
+
+        public static void ImportSheet(string templateName, string sheetName)
+        {
+            new CellLoader(SaveLocation).ImportSheetTemplate(templateName, sheetName);
         }
     }
 }

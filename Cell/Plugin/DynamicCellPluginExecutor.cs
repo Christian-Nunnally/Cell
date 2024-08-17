@@ -60,5 +60,24 @@ namespace Cell.Plugin
             var logStart = isTrigger ? $"Trigger: {functionName}" : $"Populate: {functionName}";
             Logs.Add($"{logStart} - {sheet} - {row} - {column} - {compileResult.Success} - {compileResult.Result}");
         }
+
+        internal static int? RunSortFilter(PluginContext pluginContext, string functionName)
+        {
+            if (!PluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
+            var method = populateFunction.CompiledMethod;
+            if (populateFunction.CompileResult.Success)
+            {
+                var resultObject = method?.Invoke(null, [pluginContext, null]);
+                return ConvertReturnedObjectToSortFilterResult(resultObject);
+            }
+            return 0;
+        }
+
+        private static int? ConvertReturnedObjectToSortFilterResult(object? resultObject)
+        {
+            if (resultObject is null) return null;
+            if (int.TryParse(resultObject.ToString(), out var resultInt)) return resultInt;
+            return null;
+        }
     }
 }

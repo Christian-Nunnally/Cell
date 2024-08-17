@@ -1,5 +1,6 @@
 ﻿
 
+
 namespace Cell.Model.Plugin
 {
     [Serializable]
@@ -61,16 +62,16 @@ namespace Cell.Model.Plugin
         }
         private int _status = 0;
 
-        public int Category
+        public string Category
         {
             get => _category;
             set { if (value != _category) { _category = value; OnPropertyChanged(nameof(Category)); } }
         }
-        private int _category = 0;
+        private string _category = string.Empty;
 
         override public string ToString()
         {
-            return $"{(IsComplete ? "✓" : "☐")} {Title} - {Notes}";
+            return $"{Priority} - {(IsComplete ? "✅" : "❎")} {Title} - {Notes}";
         }
     }
 }

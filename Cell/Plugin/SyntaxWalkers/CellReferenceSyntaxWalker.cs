@@ -69,7 +69,6 @@ namespace Cell.Plugin.SyntaxWalkers
         {
             arguments = SyntaxFactory.SeparatedList<ArgumentSyntax>();
             if (node is not InvocationExpressionSyntax syntax) return false;
-            if (syntax is null) return false;
             if (syntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax) return false;
             if (memberAccessExpressionSyntax.Name.Identifier.Text != "GetCell") return false;
             if (memberAccessExpressionSyntax.Expression is not IdentifierNameSyntax identifierName) return false;

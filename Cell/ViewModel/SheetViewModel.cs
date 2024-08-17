@@ -183,56 +183,84 @@ namespace Cell.ViewModel
             SelectedCellViewModels.Add(cell);
             if (SelectedCellViewModels.Count == 1)
             {
-                if (PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var function))
+                if (PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
                 {
-                    foreach(var locationDependencies in function.LocationDependencies)
+                    if (ApplicationSettings.Instance.HighlightPopulateCellDependencies)
                     {
-                        if (locationDependencies.IsRange)
-                        {
-                            var sheet = locationDependencies.SheetName;
-                            if (sheet != SheetName) continue;
-                            var row = locationDependencies.Row;
-                            var column = locationDependencies.Column;
-                            if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
-                            if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
+                        HighlightCellDependenciesOfFunction(populate);
+                    }
 
-                            var rowRangeEnd = locationDependencies.RowRangeEnd;
-                            var columnRangeEnd = locationDependencies.ColumnRangeEnd;
-                            if (locationDependencies.IsColumnRelativeRangeEnd) columnRangeEnd += SelectedCellViewModel.Column;
-                            if (locationDependencies.IsRowRelativeRangeEnd) rowRangeEnd += SelectedCellViewModel.Row;
+                    if (ApplicationSettings.Instance.HighlightPopulateCollectionDependencies)
+                    {
+                        HighlightCollectionDependenciesForFunction(populate);
+                    }
+                }
+                if (PluginFunctionLoader.TryGetFunction("void", SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
+                {
+                    if (ApplicationSettings.Instance.HighlightTriggerCellDependencies)
+                    {
+                        HighlightCellDependenciesOfFunction(trigger);
+                    }
 
-                            for (var r = row; r <= rowRangeEnd; r++)
-                            {
-                                for (var c = column; c <= columnRangeEnd; c++)
-                                {
-                                    var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == r && x.Column == c);
-                                    if (cellToHighlight == null) continue;
-                                    HighlightCell(cellToHighlight, "#0438ff44");
-                                }
-                            }
-                        }
-                        else
+                    if (ApplicationSettings.Instance.HighlightTriggerCollectionDependencies)
+                    {
+                        HighlightCollectionDependenciesForFunction(trigger);
+                    }
+                }
+            }
+        }
+
+        private void HighlightCollectionDependenciesForFunction(PluginFunctionViewModel function)
+        {
+            foreach (var collectionReference in function.CollectionDependencies)
+            {
+                var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
+                foreach (var cellToHighlight in cellsToHighlight)
+                {
+                    HighlightCell(cellToHighlight, "#0438ff44");
+                }
+            }
+        }
+
+        private void HighlightCellDependenciesOfFunction(PluginFunctionViewModel function)
+        {
+            foreach (var locationDependencies in function.LocationDependencies)
+            {
+                if (locationDependencies.IsRange)
+                {
+                    var sheet = locationDependencies.SheetName;
+                    if (sheet != SheetName) continue;
+                    var row = locationDependencies.Row;
+                    var column = locationDependencies.Column;
+                    if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
+                    if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
+
+                    var rowRangeEnd = locationDependencies.RowRangeEnd;
+                    var columnRangeEnd = locationDependencies.ColumnRangeEnd;
+                    if (locationDependencies.IsColumnRelativeRangeEnd) columnRangeEnd += SelectedCellViewModel.Column;
+                    if (locationDependencies.IsRowRelativeRangeEnd) rowRangeEnd += SelectedCellViewModel.Row;
+
+                    for (var r = row; r <= rowRangeEnd; r++)
+                    {
+                        for (var c = column; c <= columnRangeEnd; c++)
                         {
-                            var sheet = locationDependencies.SheetName;
-                            if (sheet != SheetName) continue;
-                            var row = locationDependencies.Row;
-                            var column = locationDependencies.Column;
-                            if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
-                            if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
-                            var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
+                            var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == r && x.Column == c);
                             if (cellToHighlight == null) continue;
                             HighlightCell(cellToHighlight, "#0438ff44");
                         }
                     }
-
-                    foreach (var collectionReference in function.CollectionDependencies)
-                    {
-                        var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
-                        foreach (var cellToHighlight in cellsToHighlight)
-                        {
-                            HighlightCell(cellToHighlight, "#0438ff44");
-                        }
-                    }
+                }
+                else
+                {
+                    var sheet = locationDependencies.SheetName;
+                    if (sheet != SheetName) continue;
+                    var row = locationDependencies.Row;
+                    var column = locationDependencies.Column;
+                    if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
+                    if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
+                    var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
+                    if (cellToHighlight == null) continue;
+                    HighlightCell(cellToHighlight, "#0438ff44");
                 }
             }
         }

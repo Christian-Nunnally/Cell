@@ -15,6 +15,7 @@ namespace Cell.Model
         Dropdown = 1 << 8,
         List     = 1 << 9,
         Graph    = 1 << 10,
+        Date     = 1 << 11,
     }
 
     public static class CellTypeExtensions

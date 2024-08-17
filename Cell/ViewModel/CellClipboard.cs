@@ -54,6 +54,7 @@ namespace Cell.ViewModel
         private static void PasteSingleCell(SheetViewModel activeSheet, CellModel cellToPaste, CellModel cellToReplace)
         {
             var pastedCell = CopyCellWithUpdatedLocationProperties(cellToReplace, cellToPaste);
+            // TODO: just change the properties on the existing cell. do not delete and add; this will cause issues with undo/redo. Or make undo/redo work with this.
             activeSheet.DeleteCell(cellToReplace);
             activeSheet.AddCell(pastedCell);
             var populateName = pastedCell.PopulateFunctionName;

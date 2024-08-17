@@ -1,12 +1,15 @@
 ﻿
 using Cell.Common;
 using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace Cell.Model.Plugin
 {
     [JsonDerivedType(typeof(PluginModel), typeDiscriminator: "base")]
     [JsonDerivedType(typeof(TodoItem), typeDiscriminator: "todoItem")]
+    [JsonDerivedType(typeof(TransactionItem), typeDiscriminator: "transactionItem")]
+    [JsonDerivedType(typeof(BudgetCategoryItem), typeDiscriminator: "budgetCategoryItem")]
     public class PluginModel : INotifyPropertyChanged
     {
 
@@ -24,6 +27,17 @@ namespace Cell.Model.Plugin
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private static List<string>? _cachedDataTypeNames;
+
+        public static IEnumerable<string> GetPluginDataTypeNames()
+        {
+            return _cachedDataTypeNames ??= Utilities
+                .GetTypesInNamespace(Assembly.GetExecutingAssembly(), "Cell.Model.Plugin")
+                .Where(x => x.BaseType == typeof(PluginModel))
+                .Select(x => x.Name)
+                .ToList();
         }
     }
 }

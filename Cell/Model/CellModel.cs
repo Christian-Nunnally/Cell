@@ -83,6 +83,8 @@ namespace Cell.Model
         }
         private string text = string.Empty;
 
+        public string UserFriendlyCellName => $"{ColumnCellViewModel.GetColumnName(Column)}{Row}";
+
         [JsonIgnore]
         public string ErrorText
         {
@@ -221,13 +223,29 @@ namespace Cell.Model
         public string TriggerFunctionName
         {
             get { return triggerFunctionName; }
-            set { triggerFunctionName = value; NotifyPropertyChanged(nameof(TriggerFunctionName)); }
+            set
+            {
+                if (triggerFunctionName == value) return;
+                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function))
+                {
+                    function.StopListeningForDependencyChanges(this);
+                }
+                triggerFunctionName = value;
+                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function2))
+                {
+                    function2.StartListeningForDependencyChanges(this);
+                    var _ = function2.CompiledMethod;
+                    UpdateDependencySubscriptions(function2);
+                }
+                NotifyPropertyChanged(nameof(TriggerFunctionName));
+            }
         }
         private string triggerFunctionName = string.Empty;
 
-        public void UpdateDependencySubscriptions(PluginFunction function)
+        public void UpdateDependencySubscriptions(PluginFunctionViewModel function)
         {
-            if (!function.IsSyntaxTreeValid) throw new InvalidOperationException("Cannot update dependency subscriptions for a function with invalid syntax tree.");
+            if (function.Model.ReturnType == "void") return;
+
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
             if (!string.IsNullOrWhiteSpace(function.Model.Code))
@@ -298,7 +316,7 @@ namespace Cell.Model
 
         public Dictionary<string, double> NumericProperties { get; set; } = [];
 
-        public double GetNumericProperty(string key) => NumericProperties.TryGetValue(key, out var value) ? value : 0;
+        public double GetNumericProperty(string key, double defaultValue = 0) => NumericProperties.TryGetValue(key, out var value) ? value : defaultValue;
 
         public void SetNumericProperty(string key, double value)
         {
@@ -330,6 +348,36 @@ namespace Cell.Model
         public void SetBackground(string color)
         {
             ColorHexes[(int)ColorFor.Background] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
+
+        public void SetForeground(string color)
+        {
+            ColorHexes[(int)ColorFor.Foreground] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
+
+        public void SetBorder(string color)
+        {
+            ColorHexes[(int)ColorFor.Border] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
+
+        public void SetContentBorder(string color)
+        {
+            ColorHexes[(int)ColorFor.ContentBorder] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
+
+        public void SetContentBackground(string color)
+        {
+            ColorHexes[(int)ColorFor.ContentBackground] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
+        }
+
+        public void SetContentHighlight(string color)
+        {
+            ColorHexes[(int)ColorFor.ContentHighlight] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 

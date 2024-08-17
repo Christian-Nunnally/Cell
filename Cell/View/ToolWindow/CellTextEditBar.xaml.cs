@@ -1,5 +1,6 @@
 ﻿using Cell.Persistence;
 using Cell.View.ToolWindow;
+using Cell.View.Utilities;
 using Cell.ViewModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,6 +13,8 @@ namespace Cell.View
     /// </summary>
     public partial class CellTextEditBar : UserControl, IToolWindow
     {
+        public Action? RequestClose { get; set; }
+
         public CellTextEditBar()
         {
             InitializeComponent();
@@ -32,12 +35,11 @@ namespace Cell.View
             {
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
-                var code = function.GetUserFriendlyCode(cell.Model);
-                var editor = new CodeEditor(function, code, x =>
+                var editor = new CodeEditor(function, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
                     (cell as ListCellViewModel)?.UpdateList();
-                }, true, cell);
+                }, cell.Model);
                 ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor);
             }
         }
@@ -48,11 +50,10 @@ namespace Cell.View
             {
                 if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
                 var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
-                var code = function.GetUserFriendlyCode(cell.Model);
-                var editor = new CodeEditor(function, code, x =>
+                var editor = new CodeEditor(function, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
-                }, true, cell);
+                }, cell.Model);
                 ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor);
             }
         }
@@ -84,7 +85,7 @@ namespace Cell.View
             new CommandViewModel("Auto-Index", new RelayCommand(x => true, x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
             ];
 
-        public void Close()
+        public void HandleBeingClosed()
         {
         }
 

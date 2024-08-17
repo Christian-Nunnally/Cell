@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 namespace Cell.Persistence
 {
-    internal class ApplicationSettings : PropertyChangedBase
+    public class ApplicationSettings : PropertyChangedBase
     {
         private const string ApplicationSettingsSaveDirectory = "Application";
         private const string ApplicationSettingsSaveFile = "Settings.json";
@@ -29,6 +29,20 @@ namespace Cell.Persistence
         }
         private double codeEditorHeight = 400;
 
+        public double FunctionManagerWindowWidth
+        {
+            get { return functionManagerWindowWidth; }
+            set { if (functionManagerWindowWidth != value) { functionManagerWindowWidth = value; NotifyPropertyChanged(nameof(FunctionManagerWindowWidth)); } }
+        }
+        private double functionManagerWindowWidth = 400;
+
+        public double FunctionManagerWindowHeight
+        {
+            get { return functionManagerWindowHeight; }
+            set { if (functionManagerWindowHeight != value) { functionManagerWindowHeight = value; NotifyPropertyChanged(nameof(FunctionManagerWindowHeight)); } }
+        }
+        private double functionManagerWindowHeight = 400;
+
         public Dock CodeEditorDockPosition
         {
             get { return codeEditorDockPosition; }
@@ -42,6 +56,34 @@ namespace Cell.Persistence
             set { if (lastLoadedSheet != value) { lastLoadedSheet = value; NotifyPropertyChanged(nameof(LastLoadedSheet)); } }
         }
         private string lastLoadedSheet = "Default";
+
+        public bool HighlightPopulateCellDependencies
+        {
+            get { return highlightPopulateCellDependencies; }
+            set { if (highlightPopulateCellDependencies != value) { highlightPopulateCellDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCellDependencies)); } }
+        }
+        private bool highlightPopulateCellDependencies = true;
+
+        public bool HighlightPopulateCollectionDependencies
+        {
+            get { return highlightPopulateCollectionDependencies; }
+            set { if (highlightPopulateCollectionDependencies != value) { highlightPopulateCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCollectionDependencies)); } }
+        }
+        private bool highlightPopulateCollectionDependencies = true;
+
+        public bool HighlightTriggerCellDependencies
+        {
+            get { return highlightTriggerCellDependencies; }
+            set { if (highlightTriggerCellDependencies != value) { highlightTriggerCellDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCellDependencies)); } }
+        }
+        private bool highlightTriggerCellDependencies = true;
+
+        public bool HighlightTriggerCollectionDependencies
+        {
+            get { return highlightTriggerCollectionDependencies; }
+            set { if (highlightTriggerCollectionDependencies != value) { highlightTriggerCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCollectionDependencies)); } }
+        }
+        private bool highlightTriggerCollectionDependencies = true;
 
         public static ApplicationSettings CreateInstance()
         {

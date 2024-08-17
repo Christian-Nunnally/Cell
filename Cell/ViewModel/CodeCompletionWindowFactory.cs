@@ -2,13 +2,13 @@
 using Cell.Model;
 using Cell.Plugin.SyntaxWalkers;
 using Cell.Plugin;
-using Cell.View;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
 using System.Reflection;
+using Cell.Persistence;
 
 namespace Cell.ViewModel
 {
@@ -50,7 +50,7 @@ namespace Cell.ViewModel
         public static CompletionWindow? Create(TextArea textArea, string type, bool doesFunctionReturnValue)
         {
             var model = new PluginFunctionModel("testtesttest", textArea.Document.Text, doesFunctionReturnValue ? "object" : "void");
-            var function = new PluginFunction(model);
+            var function = new PluginFunctionViewModel(model);
             var syntaxTree = function.SyntaxTree;
             var sematicModel = function.GetSemanticModel();
             var variableNode = syntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclarationSyntax>().FirstOrDefault(x => x.Variables.First().Identifier.Text == type);
@@ -88,7 +88,7 @@ namespace Cell.ViewModel
                 }
                 return completionWindow;
             }
-            else if (FindAndReplaceCollectionReferencesSyntaxWalker.IsCollectionName(type))
+            else if (UserCollectionLoader.CollectionNames.Contains(type))
             {
                 var completionWindow = new CompletionWindow(textArea);
                 IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;

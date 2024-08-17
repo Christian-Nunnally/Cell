@@ -1,0 +1,14 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel">
+    <DataTemplate DataType="{x:Type viewModel:GraphCellViewModel}">
+        <Polyline
+            Points="{Binding DataPoints}"
+            Stroke="{Binding ForegroundColor}"
+            StrokeEndLineCap="Round"
+            StrokeMiterLimit="0"
+            StrokeStartLineCap="Round"
+            StrokeThickness="2" />
+    </DataTemplate>
+</ResourceDictionary>

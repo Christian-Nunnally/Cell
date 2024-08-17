@@ -17,16 +17,17 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Collection" />
+                        <ComboBox
+                            Width="100"
+                            ItemsSource="{Binding CollectionNames}"
+                            SelectedItem="{Binding CollectionName}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Max Items" />
                         <TextBox
                             Width="100"
                             KeyDown="TextBoxKeyDown"
-                            Text="{Binding CollectionName, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Data Type" />
-                        <ComboBox Width="100" SelectedItem="{Binding CollectionType}">
-                            TodoItem
-                        </ComboBox>
+                            Text="{Binding MaxItemsString, UpdateSourceTrigger=LostFocus}" />
                     </StackPanel>
                 </StackPanel>
             </DataTemplate>

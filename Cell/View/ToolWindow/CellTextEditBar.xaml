@@ -65,11 +65,6 @@
                                     FontFamily="Consolas"
                                     Foreground="{StaticResource ForegroundColor}"
                                     Text="This function sets this cells text" />
-                                <TextBlock
-                                    Margin="3,5,3,3"
-                                    FontFamily="Consolas"
-                                    Foreground="{StaticResource ForegroundColor}"
-                                    Text="{Binding PrettyCellCollectionDependencyNames}" />
                             </StackPanel>
                             <StackPanel
                                 MinWidth="200"
@@ -146,18 +141,6 @@
                                         </Border>
                                     </Popup>
                                 </Grid>
-                                <TextBlock
-                                    Margin="3,0,3,3"
-                                    FontFamily="Consolas"
-                                    Foreground="{StaticResource ForegroundColor}"
-                                    Text="{Binding PrettyCellLocationDependencyNames}"
-                                    Visibility="Collapsed" />
-                                <TextBlock
-                                    Margin="3,0,3,3"
-                                    FontFamily="Consolas"
-                                    Foreground="{StaticResource ForegroundColor}"
-                                    Text="{Binding PrettyCellCollectionDependencyNames}"
-                                    Visibility="Collapsed" />
                                 <TextBlock
                                     Margin="3,0,3,3"
                                     FontFamily="Consolas"
