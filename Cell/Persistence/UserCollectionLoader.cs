@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 namespace Cell.Persistence
@@ -38,28 +37,10 @@ namespace Cell.Persistence
             }
         }
 
-        private static void EnsureLinkedToBaseCollection(UserCollection collection)
-        {
-            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
-            {
-                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
-                collection.BecomeViewIntoCollection(baseCollection);
-            }
-        }
-
-        private static void UnlinkFromBaseCollection(UserCollection collection)
-        {
-            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
-            {
-                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
-                collection.StopBeingViewIntoCollection(baseCollection);
-            }
-        }
-
         public static void ProcessCollectionRename(string oldName, string newName)
         {
             if (!_collections.TryGetValue(oldName, out var collection)) return;
-            if (_collections.TryGetValue(newName, out var newCollection)) return;
+            if (_collections.ContainsKey(newName)) return;
             _collections.Remove(oldName);
             _collections.Add(newName, collection);
             var oldDirectory = Path.Combine(GetSaveDirectory(), oldName);
@@ -92,12 +73,6 @@ namespace Cell.Persistence
             return collection;
         }
 
-        private static void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (sender is not UserCollectionModel model) return;
-            SaveCollectionSettings(model);
-        }
-
         internal static void DeleteCollection(UserCollection collection)
         {
             UnlinkFromBaseCollection(collection);
@@ -106,14 +81,22 @@ namespace Cell.Persistence
             Directory.Delete(directory, true);
         }
 
-        private static void StopTrackingCollection(UserCollection userCollection)
+        internal static void LinkUpBaseCollectionsAfterLoad()
         {
-            userCollection.ItemAdded -= UserCollectionItemAdded;
-            userCollection.ItemRemoved -= UserCollectionItemRemoved;
-            userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
-            userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
-            _collections.Remove(userCollection.Name);
-            ObservableCollections.Remove(userCollection);
+            var loadedCollections = new List<string>();
+            while (loadedCollections.Count != ObservableCollections.Count)
+            {
+                foreach (var collection in ObservableCollections)
+                {
+                    if (loadedCollections.Contains(collection.Name)) continue;
+                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
+                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
+                    {
+                        loadedCollections.Add(collection.Name);
+                        EnsureLinkedToBaseCollection(collection);
+                    }
+                }
+            }
         }
 
         private static void DeleteItem(string collectionName, string idToRemove)
@@ -121,6 +104,15 @@ namespace Cell.Persistence
             var directory = Path.Combine(GetSaveDirectory(), collectionName);
             var path = Path.Combine(directory, idToRemove);
             if (File.Exists(path)) File.Delete(path);
+        }
+
+        private static void EnsureLinkedToBaseCollection(UserCollection collection)
+        {
+            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
+            {
+                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
+                collection.BecomeViewIntoCollection(baseCollection);
+            }
         }
 
         private static string GetSaveDirectory()
@@ -182,6 +174,25 @@ namespace Cell.Persistence
             ObservableCollections.Add(userCollection);
         }
 
+        private static void StopTrackingCollection(UserCollection userCollection)
+        {
+            userCollection.ItemAdded -= UserCollectionItemAdded;
+            userCollection.ItemRemoved -= UserCollectionItemRemoved;
+            userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
+            userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
+            _collections.Remove(userCollection.Name);
+            ObservableCollections.Remove(userCollection);
+        }
+
+        private static void UnlinkFromBaseCollection(UserCollection collection)
+        {
+            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
+            {
+                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
+                collection.StopBeingViewIntoCollection(baseCollection);
+            }
+        }
+
         private static void UserCollectionItemAdded(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
@@ -200,22 +211,10 @@ namespace Cell.Persistence
             CellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
-        internal static void LinkUpBaseCollectionsAfterLoad()
+        private static void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var loadedCollections = new List<string>();
-            while (loadedCollections.Count != ObservableCollections.Count)
-            {
-                foreach (var collection in ObservableCollections)
-                {
-                    if (loadedCollections.Contains(collection.Name)) continue;
-                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
-                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
-                    {
-                        loadedCollections.Add(collection.Name);
-                        EnsureLinkedToBaseCollection(collection);
-                    }
-                }
-            }
+            if (sender is not UserCollectionModel model) return;
+            SaveCollectionSettings(model);
         }
     }
 }

@@ -8,7 +8,7 @@
     <converters:BrushToColorConverter x:Key="BrushToColorConverter" />
 
     <Style TargetType="{x:Type avalonEdit:TextEditor}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="FontFamily" Value="Consolas" />
         <Setter Property="FontSize" Value="10pt" />
@@ -17,7 +17,7 @@
     </Style>
 
     <Style TargetType="{x:Type ToggleButton}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="Height" Value="25" />
         <Setter Property="Template">
@@ -26,7 +26,7 @@
                     <Border
                         Background="{TemplateBinding Background}"
                         BorderBrush="{StaticResource CellBorderColor}"
-                        BorderThickness="1">
+                        BorderThickness="{TemplateBinding BorderThickness}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
@@ -39,11 +39,14 @@
             <Trigger Property="IsChecked" Value="True">
                 <Setter Property="Background" Value="{StaticResource SelectedColor}" />
             </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
+            </Trigger>
         </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type Button}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="Height" Value="25" />
         <Setter Property="Template">
@@ -62,6 +65,9 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource SelectedColor}" />
             </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
+            </Trigger>
         </Style.Triggers>
     </Style>
 
@@ -70,7 +76,18 @@
         BasedOn="{StaticResource {x:Type Button}}"
         TargetType="{x:Type Button}">
         <Setter Property="Background" Value="{StaticResource CellBackground}" />
-        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+        <Setter Property="Width" Value="35" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+    </Style>
+
+    <Style
+        x:Key="TitleButtonToggleButtonStyle"
+        BasedOn="{StaticResource {x:Type ToggleButton}}"
+        TargetType="{x:Type ToggleButton}">
+        <Setter Property="Background" Value="{StaticResource CellBackground}" />
         <Setter Property="Width" Value="35" />
         <Setter Property="Height" Value="28" />
         <Setter Property="BorderThickness" Value="0" />
@@ -94,7 +111,7 @@
     </Style>
 
     <Style TargetType="{x:Type TextBox}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -105,7 +122,7 @@
     <Style TargetType="{x:Type CheckBox}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="OverridesDefaultStyle" Value="true" />
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -189,7 +206,7 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -216,13 +233,7 @@
                             ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                             ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                             IsHitTestVisible="False" />
-                        <Popup
-                            Name="Popup"
-                            AllowsTransparency="True"
-                            Focusable="False"
-                            IsOpen="{TemplateBinding IsDropDownOpen}"
-                            Placement="Bottom"
-                            PopupAnimation="Slide">
+                        <Popup Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}">
                             <Grid
                                 Name="DropDown"
                                 MinWidth="{TemplateBinding ActualWidth}"
@@ -269,7 +280,7 @@
         <Setter Property="MinWidth" Value="100" />
         <Setter Property="MinHeight" Value="10" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="HighlightBrush" Value="{StaticResource SelectedColor}" />
         <Setter Property="Template">
@@ -297,13 +308,7 @@
                             ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                             ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                             IsHitTestVisible="False" />
-                        <Popup
-                            Name="Popup"
-                            AllowsTransparency="True"
-                            Focusable="False"
-                            IsOpen="{TemplateBinding IsDropDownOpen}"
-                            Placement="Bottom"
-                            PopupAnimation="Slide">
+                        <Popup Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}">
                             <Grid
                                 Name="DropDown"
                                 MinWidth="{TemplateBinding ActualWidth}"
@@ -397,7 +402,7 @@
 
     <Style TargetType="{x:Type ListBox}">
         <Setter Property="SnapsToDevicePixels" Value="true" />
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
@@ -410,6 +415,7 @@
                 <ControlTemplate TargetType="{x:Type ListBox}">
                     <Border
                         x:Name="Bd"
+                        Background="{TemplateBinding Background}"
                         BorderBrush="{TemplateBinding BorderBrush}"
                         BorderThickness="{TemplateBinding BorderThickness}"
                         SnapsToDevicePixels="true">
@@ -431,6 +437,13 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type Popup}">
+        <Setter Property="AllowsTransparency" Value="True" />
+        <Setter Property="Placement" Value="Bottom" />
+        <Setter Property="PopupAnimation" Value="Slide" />
+        <Setter Property="StaysOpen" Value="False" />
     </Style>
 
 </ResourceDictionary>

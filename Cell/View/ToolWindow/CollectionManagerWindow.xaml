@@ -300,6 +300,7 @@
                 <avalonEdit:TextEditor
                     Name="_itemJsonEditor"
                     FontFamily="Consolas"
+                    Margin="0,10"
                     Foreground="{StaticResource ForegroundColor}"
                     SyntaxHighlighting="Json"
                     TextChanged="ItemJsonEditorTextChanged" />

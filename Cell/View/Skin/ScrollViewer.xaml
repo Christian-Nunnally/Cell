@@ -110,7 +110,7 @@
             </Grid.RowDefinitions>
             <Border
                 Grid.RowSpan="3"
-                Background="{StaticResource CellBackground}"
+                Background="{StaticResource ControlBackground}"
                 CornerRadius="2" />
             <RepeatButton
                 Grid.Row="0"
@@ -153,7 +153,7 @@
             </Grid.ColumnDefinitions>
             <Border
                 Grid.ColumnSpan="3"
-                Background="{StaticResource CellBackground}"
+                Background="{StaticResource ControlBackground}"
                 CornerRadius="2" />
             <RepeatButton
                 Grid.Column="0"

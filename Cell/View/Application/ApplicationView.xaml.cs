@@ -137,21 +137,21 @@ namespace Cell.View
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.ToggleEditingPanels();
-            var editPanel = new EditCellPanel();
+            var editPanel = new CellFormatEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
         }
 
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            var editPanel = new TypeSpecificEditCellPanel();
+            var editPanel = new CellSettingsEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
         }
 
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            var editPanel = new CellTextEditBar();
+            var editPanel = new CellContentEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
         }
@@ -269,8 +269,8 @@ namespace Cell.View
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            var functionManagerViewModel = new PluginFunctionToolWindowViewModel(PluginFunctionLoader.ObservableFunctions);
-            var functionManager = new PluginFunctionManagerWindow(functionManagerViewModel);
+            var functionManagerViewModel = new FunctionManagerWindowViewModel(PluginFunctionLoader.ObservableFunctions);
+            var functionManager = new FunctionManagerWindow(functionManagerViewModel);
             ShowToolWindow(functionManager);
         }
 

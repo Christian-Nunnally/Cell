@@ -1,4 +1,5 @@
 ﻿using Cell.View.ToolWindow;
+using Cell.ViewModel;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;

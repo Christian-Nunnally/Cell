@@ -16,8 +16,6 @@
             FontSize="14">
             <ToggleButton.Style>
                 <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                    <Setter Property="Background" Value="{StaticResource CellBackground}" />
-                    <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
                     <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
                     <Setter Property="IsHitTestVisible" Value="True" />
                     <Setter Property="Template">
@@ -33,12 +31,6 @@
                         </Setter.Value>
                     </Setter>
                     <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-                        </Trigger>
                         <DataTrigger Binding="{Binding ElementName=[TODO]Popup, Path=IsOpen}" Value="True">
                             <Setter Property="IsHitTestVisible" Value="False" />
                         </DataTrigger>
@@ -49,10 +41,7 @@
         <Popup
             x:Name="[TODO]Popup"
             IsOpen="{Binding IsChecked, ElementName=[TODO]PopupButton, Mode=TwoWay}"
-            Placement="Bottom"
-            PlacementTarget="{Binding ElementName=[TODO]PopupButton}"
-            PopupAnimation="Slide"
-            StaysOpen="False">
+            PlacementTarget="{Binding ElementName=[TODO]PopupButton}">
             <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
                 <StackPanel>
                     <Label Content="[TODO]" />

@@ -6,7 +6,6 @@
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel"
-    Title="MainWindow"
     Width="{Binding ApplicationWindowWidth}"
     Height="{Binding ApplicationWindowWidth}"
     d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
@@ -47,39 +46,10 @@
                 DockPanel.Dock="Right"
                 Style="{StaticResource TitleButtonStyle}" />
             <Grid>
-                <ToggleButton
-                    x:Name="SettingTitleButtonPopupButton"
-                    Width="25"
-                    BorderThickness="0"
-                    Content="⚙️"
-                    FontFamily="Consolas"
-                    FontSize="12"
-                    WindowChrome.IsHitTestVisibleInChrome="True">
+                <ToggleButton x:Name="SettingTitleButtonPopupButton" Content="⚙️">
                     <ToggleButton.Style>
-                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                            <Setter Property="Background" Value="{StaticResource CellBackground}" />
-                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                            <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
-                            <Setter Property="IsHitTestVisible" Value="True" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                        <Border
-                                            Background="{TemplateBinding Background}"
-                                            BorderBrush="{StaticResource CellBorderColor}"
-                                            BorderThickness="{TemplateBinding BorderThickness}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
+                        <Style BasedOn="{StaticResource TitleButtonToggleButtonStyle}" TargetType="{x:Type ToggleButton}">
                             <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-                                </Trigger>
                                 <DataTrigger Binding="{Binding ElementName=SettingTitleButtonPopup, Path=IsOpen}" Value="True">
                                     <Setter Property="IsHitTestVisible" Value="False" />
                                 </DataTrigger>
@@ -90,11 +60,8 @@
                 <Popup
                     x:Name="SettingTitleButtonPopup"
                     IsOpen="{Binding IsChecked, ElementName=SettingTitleButtonPopupButton, Mode=TwoWay}"
-                    Placement="Bottom"
-                    PlacementTarget="{Binding ElementName=SettingTitleButtonPopupButton}"
-                    PopupAnimation="Slide"
-                    StaysOpen="False">
-                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                    PlacementTarget="{Binding ElementName=SettingTitleButtonPopupButton}">
+                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4,0,4,4">
                         <StackPanel>
                             <Button
                                 Click="TogglePanLockButtonClick"
@@ -106,21 +73,25 @@
                                 Content="⬜←"
                                 DockPanel.Dock="Left"
                                 IsChecked="{Binding ApplicationSettings.HighlightPopulateCellDependencies}"
+                                Style="{StaticResource TitleButtonToggleButtonStyle}"
                                 ToolTip="When enabled, selecting a single cell will cause cells used by the populate function to highlight." />
                             <ToggleButton
                                 Content="⬜→"
                                 DockPanel.Dock="Left"
                                 IsChecked="{Binding ApplicationSettings.HighlightTriggerCellDependencies}"
+                                Style="{StaticResource TitleButtonToggleButtonStyle}"
                                 ToolTip="When enabled, selecting a single cell will cause cells used by the trigger function to highlight." />
                             <ToggleButton
                                 Content="≡←"
                                 DockPanel.Dock="Left"
                                 IsChecked="{Binding ApplicationSettings.HighlightPopulateCollectionDependencies}"
+                                Style="{StaticResource TitleButtonToggleButtonStyle}"
                                 ToolTip="When enabled, selecting a single cell will cause collections used by the populate function to highlight." />
                             <ToggleButton
                                 Content="≡→"
                                 DockPanel.Dock="Left"
                                 IsChecked="{Binding ApplicationSettings.HighlightTriggerCollectionDependencies}"
+                                Style="{StaticResource TitleButtonToggleButtonStyle}"
                                 ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
                             <Button
                                 Click="ShowHelpButtonClick"
@@ -167,7 +138,6 @@
                 DockPanel.Dock="Bottom"
                 WindowChrome.IsHitTestVisibleInChrome="True" />
         </DockPanel>
-
         <Grid>
             <ContentControl x:Name="_sheetViewContentControl" />
             <Canvas x:Name="_toolWindowCanvas" />

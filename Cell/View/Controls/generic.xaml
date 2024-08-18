@@ -6,7 +6,7 @@
     <converters:BrushToColorConverter x:Key="BrushToColor" />
     <BooleanToVisibilityConverter x:Key="btv" />
     <Style TargetType="{x:Type local:BetterCheckBox}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
+        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:BetterCheckBox}">

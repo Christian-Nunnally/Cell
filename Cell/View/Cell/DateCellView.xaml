@@ -204,12 +204,7 @@
                                 Fill="{TemplateBinding Background}"
                                 RadiusX="1"
                                 RadiusY="1" />
-                            <Popup
-                                x:Name="PART_Popup"
-                                AllowsTransparency="True"
-                                Placement="Bottom"
-                                PlacementTarget="{Binding ElementName=PART_TextBox}"
-                                StaysOpen="False" />
+                            <Popup x:Name="PART_Popup" PlacementTarget="{Binding ElementName=PART_TextBox}" />
                         </Grid>
                     </Grid>
                 </ControlTemplate>

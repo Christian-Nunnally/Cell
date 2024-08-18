@@ -4,13 +4,13 @@ using Cell.Persistence;
 using Cell.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel;
-using System.ComponentModel;
+using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CollectionManagerWindow : UserControl, IResizableToolWindow, INotifyPropertyChanged
+    public partial class CollectionManagerWindow : UserControl, IResizableToolWindow
     {
         private readonly CollectionManagerWindowViewModel _viewModel;
         public CollectionManagerWindow(CollectionManagerWindowViewModel viewModel)
@@ -22,8 +22,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public Action? RequestClose { get; set; }
 
@@ -96,20 +94,12 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void EditItemButtonClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is CellModel cell)
-            {
-                throw new Exception("Not implemented");
-            }
-        }
-
         private void EditSortAndFilterFunctionButtonClick(object sender, RoutedEventArgs e)
         {
             var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
             var function = PluginFunctionLoader.GetOrCreateFunction("object", functionName);
-            var editor = new CodeEditor(function, x =>
+            var editor = new CodeEditorWindow(function, x =>
             {
                 function.SetUserFriendlyCode(x, null);
                 _viewModel.SelectedCollection?.RefreshSortAndFilter();
