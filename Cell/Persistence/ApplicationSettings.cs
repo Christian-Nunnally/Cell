@@ -95,7 +95,7 @@ namespace Cell.Persistence
 
         private static ApplicationSettings? Load()
         {
-            var path = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
+            var path = Path.Combine(PersistenceManager.CurrentRootPath, ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
             if (!File.Exists(path)) return null;
             var text = File.ReadAllText(path);
             return JsonSerializer.Deserialize<ApplicationSettings>(text);
@@ -103,7 +103,7 @@ namespace Cell.Persistence
 
         private void Save()
         {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, ApplicationSettingsSaveDirectory);
+            var directory = Path.Combine(PersistenceManager.CurrentRootPath, ApplicationSettingsSaveDirectory);
             Directory.CreateDirectory(directory);
             var path = Path.Combine(directory, ApplicationSettingsSaveFile);
             var serialized = JsonSerializer.Serialize(this);

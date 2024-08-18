@@ -7,11 +7,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    MouseDown="Toolbox_MouseDown"
+    MouseMove="Toolbox_MouseMove"
+    MouseUp="Toolbox_MouseLeftButtonUp"
     mc:Ignorable="d">
-    <Grid
-        MouseDown="Toolbox_MouseDown"
-        MouseMove="Toolbox_MouseMove"
-        MouseUp="Toolbox_MouseLeftButtonUp">
+    <Grid>
         <DockPanel Background="{StaticResource CellBackground}">
             <Border
                 BorderBrush="{StaticResource CellBorderColor}"

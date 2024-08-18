@@ -81,7 +81,7 @@ namespace Cell.View.ToolWindow
                 {
                     capturedFunction.SetUserFriendlyCode(x, cell);
                 }, cell);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor);
+                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
             }
         }
 

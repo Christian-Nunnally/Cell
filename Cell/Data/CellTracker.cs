@@ -11,7 +11,7 @@ namespace Cell.Data
     /// </summary>
     internal class CellTracker
     {
-        private readonly CellLoader _cellLoader = new(PersistenceManager.SaveLocation);
+        private readonly CellLoader _cellLoader = new(PersistenceManager.CurrentRootPath);
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];

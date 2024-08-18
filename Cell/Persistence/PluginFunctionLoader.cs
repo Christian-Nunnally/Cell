@@ -31,7 +31,7 @@ namespace Cell.Persistence
             var model = new PluginFunctionModel(name, code, space);
             var function = new FunctionViewModel(model);
             AddPluginFunctionToNamespace(space, function);
-            SavePluginFunction(PersistenceManager.SaveLocation, space, function.Model);
+            SavePluginFunction(PersistenceManager.CurrentRootPath, space, function.Model);
             return function;
         }
 
@@ -42,7 +42,7 @@ namespace Cell.Persistence
 
         public static void LoadPlugins()
         {
-            var functionsPath = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName);
+            var functionsPath = Path.Combine(PersistenceManager.CurrentRootPath, FunctionsDirectoryName);
             if (Directory.Exists(functionsPath))
             {
                 foreach (var namespacePath in Directory.GetDirectories(functionsPath))
@@ -76,7 +76,7 @@ namespace Cell.Persistence
                 foreach (var function in namespaceFunctions.Value.Values)
                 {
                     var space = namespaceFunctions.Key;
-                    SavePluginFunction(PersistenceManager.SaveLocation, space, function.Model);
+                    SavePluginFunction(PersistenceManager.CurrentRootPath, space, function.Model);
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace Cell.Persistence
                 ObservableFunctions.Remove(function);
 
                 if (string.IsNullOrEmpty(function.Model.Name)) return;
-                var directory = Path.Combine(PersistenceManager.SaveLocation, FunctionsDirectoryName, function.Model.ReturnType);
+                var directory = Path.Combine(PersistenceManager.CurrentRootPath, FunctionsDirectoryName, function.Model.ReturnType);
                 Directory.CreateDirectory(directory);
                 var path = Path.Combine(directory, function.Model.Name);
                 File.Delete(path);
@@ -120,7 +120,7 @@ namespace Cell.Persistence
         private static void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not PluginFunctionModel function) return;
-            SavePluginFunction(PersistenceManager.SaveLocation, function.ReturnType, function);
+            SavePluginFunction(PersistenceManager.CurrentRootPath, function.ReturnType, function);
         }
     }
 }

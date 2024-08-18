@@ -45,10 +45,12 @@ namespace Cell.Persistence
             var directory = Path.Combine(_saveDirectory, TemplatesSaveDirectory, sheetName);
             if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
+            var cellDirectory = Path.Combine(directory, "Cells");
+            Directory.CreateDirectory(cellDirectory);
             foreach (var copiedCell in copiedCells)
             {
                 var serialized = JsonSerializer.Serialize(copiedCell);
-                var cellPath = Path.Combine(directory, "Cells", copiedCell.ID);
+                var cellPath = Path.Combine(cellDirectory, copiedCell.ID);
                 File.WriteAllText(cellPath, serialized);
             }
 

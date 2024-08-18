@@ -30,7 +30,7 @@ namespace Cell.Persistence
 
         public static void LoadCollections()
         {
-            var collectionsDirectory = Path.Combine(PersistenceManager.SaveLocation, "Collections");
+            var collectionsDirectory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
             if (!Directory.Exists(collectionsDirectory)) return;
             foreach (var directory in Directory.GetDirectories(collectionsDirectory))
             {
@@ -118,7 +118,7 @@ namespace Cell.Persistence
 
         private static string GetSaveDirectory()
         {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, "Collections");
+            var directory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
             Directory.CreateDirectory(directory);
             return directory;
         }

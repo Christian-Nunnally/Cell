@@ -48,8 +48,19 @@ namespace Cell.View.Application
             }
         }
 
-        public void ShowToolWindow(UserControl content)
+        public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
         {
+            if (!allowDuplicates)
+            {
+                foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
+                {
+                    if (child is FloatingToolWindow floatingToolWindow && floatingToolWindow.ContentHost.Content.GetType() == content.GetType())
+                    {
+                        return;
+                    }
+                }
+            }
+
             var toolbox = new FloatingToolWindow(_toolWindowCanvas);
             toolbox.SetContent(content);
 

@@ -36,7 +36,14 @@ namespace Cell.Model
 
         public string SortAndFilterFunctionName
         {
-            get { return _sortAndFilterFunctionName; }
+            get 
+            {
+                if (string.IsNullOrEmpty(BasedOnCollectionName))
+                {
+                    return "Not used by base collections";
+                }
+                return _sortAndFilterFunctionName; 
+            }
             set
             {
                 if (value == null) return;
