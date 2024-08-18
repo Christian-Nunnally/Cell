@@ -1,5 +1,4 @@
-﻿using Cell.ViewModel;
-using Cell.ViewModel.Cells;
+﻿using Cell.ViewModel.Cells;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,28 +9,16 @@ namespace Cell.View.Application
     public partial class PanAndZoomCanvas : Canvas
     {
         private readonly Dictionary<CellViewModel, FrameworkElement> _viewModelToViewMap = [];
-        private Color _backgroundColor = Color.FromArgb(0xFF, 0x33, 0x33, 0x33);
         private Point _initialMousePosition;
         private MatrixTransform _transform = new();
         public PanAndZoomCanvas()
         {
             InitializeComponent();
-            BackgroundColor = _backgroundColor;
 
             PreviewMouseDown += PanAndZoomCanvas_MouseDown;
             PreviewMouseUp += PanAndZoomCanvas_MouseUp;
             PreviewMouseMove += PanAndZoomCanvas_MouseMove;
             MouseWheel += PanAndZoomCanvas_MouseWheel;
-        }
-
-        public Color BackgroundColor
-        {
-            get => _backgroundColor;
-            set
-            {
-                _backgroundColor = value;
-                Background = new SolidColorBrush(_backgroundColor);
-            }
         }
 
         public double CurrentZoom { get; set; } = 1.0;

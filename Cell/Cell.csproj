@@ -10,8 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="View\Skin\Dark.xaml" />
-    <Page Remove="View\Skin\Light.xaml" />
+    <Page Remove="View\Skin\Colors.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="View\Skin\Dark.xaml" />
-    <Resource Include="View\Skin\Light.xaml" />
+    <Resource Include="View\Skin\Colors.xaml" />
   </ItemGroup>
 
 </Project>

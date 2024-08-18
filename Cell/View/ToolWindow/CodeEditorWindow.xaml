@@ -14,10 +14,10 @@
         Width="{Binding UserSetWidth}"
         Height="{Binding UserSetHeight}"
         Background="{StaticResource CellBackground}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="50" />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="{Binding ResultColumnWidth}" />
+        </Grid.ColumnDefinitions>
         <avalonEdit:TextEditor
             Name="textEditor"
             Grid.Row="0"
@@ -43,7 +43,7 @@
                 VerticalScrollBarVisibility="Auto" />
         </Border>
         <TextBox
-            Grid.Row="1"
+            Grid.Column="1"
             Padding="4"
             VerticalContentAlignment="Top"
             Background="{StaticResource CellBackground}"

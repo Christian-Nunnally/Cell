@@ -19,6 +19,8 @@ namespace Cell.View.ToolWindow
 {
     /// <summary>
     /// Interaction logic for CodeEditor.xaml
+    /// 
+    /// TODO: make view model for this.
     /// </summary>
     public partial class CodeEditorWindow : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
@@ -48,6 +50,7 @@ namespace Cell.View.ToolWindow
             onCloseCallback = callback;
             Visibility = Visibility.Visible;
             NotifyDockPropertiesChanged();
+            DisplayResult(_function.CompileResult);
 
             if (!_haveAssembliesBeenRegistered)
             {
@@ -58,13 +61,15 @@ namespace Cell.View.ToolWindow
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        public double ResultColumnWidth => ResultString == string.Empty ? 0 : 200;
+
         public bool IsTransformedSyntaxTreeViewerVisible { get; set; }
 
         public Action? RequestClose { get; set; }
 
-        public string ResultString { get; set; } = string.Empty;
+        public string? ResultString { get; set; } = string.Empty;
 
-        public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? Brushes.Black : Brushes.Red;
+        public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
 
         public double UserSetHeight { get; set; }
 
@@ -120,10 +125,11 @@ namespace Cell.View.ToolWindow
         private void DisplayResult(CompileResult result)
         {
             _lastCompileResult = result;
-            ResultString = result.Result ?? "null";
+            ResultString = result.Result ?? "";
             ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultString)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultColumnWidth)));
         }
 
         private void NotifyDockPropertiesChanged()

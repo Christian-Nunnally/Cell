@@ -1,5 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Model;
+using Cell.View.Skin;
 
 namespace Cell.ViewModel.Cells.Types.Special
 {
@@ -11,7 +12,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
+        public override string BackgroundColorHex { get => ColorConstants.ToolWindowHeaderColorConstantHex; set => base.BackgroundColorHex = value; }
 
         public override string Text
         {

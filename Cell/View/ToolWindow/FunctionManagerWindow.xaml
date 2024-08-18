@@ -2,6 +2,7 @@
     x:Class="Cell.View.ToolWindow.FunctionManagerWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -37,7 +38,7 @@
                 Grid.Column="2"
                 VerticalAlignment="Center"
                 Content="Sheet" />
-            <ComboBox
+            <controls:BetterComboBox
                 Grid.Column="3"
                 Height="25"
                 ItemsSource="{Binding SheetNameOptions}"
@@ -111,7 +112,7 @@
                                 Click="DeleteFunctionButtonClicked"
                                 Content="❌"
                                 FontSize="9"
-                                Foreground="#ff5555"
+                                Foreground="{StaticResource ErrorForegroundColor}"
                                 ToolTip="Delete this function"
                                 Visibility="Hidden" />
                             <TextBlock
@@ -127,7 +128,7 @@
                                         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding WasCompileSuccessful}" Value="False">
-                                                <Setter Property="Foreground" Value="#ff6666" />
+                                                <Setter Property="Foreground" Value="{StaticResource ErrorForegroundColor}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -146,7 +147,7 @@
                                             <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding WasCompileSuccessful}" Value="False">
-                                                    <Setter Property="Foreground" Value="#ff6666" />
+                                                    <Setter Property="Foreground" Value="{StaticResource ErrorForegroundColor}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

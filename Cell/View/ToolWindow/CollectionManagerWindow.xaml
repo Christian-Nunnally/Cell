@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -47,8 +48,8 @@
                     HorizontalContentAlignment="Right"
                     Content="item type"
                     Visibility="{Binding CollectionTypeSettingVisibility}" />
-                <ComboBox
-                    Name="_collectionTypeOptionsComboBox"
+                <controls:BetterComboBox
+                    x:Name="_collectionTypeOptionsComboBox"
                     Width="150"
                     Height="25"
                     ItemsSource="{Binding PluginTypeNames}"
@@ -61,8 +62,8 @@
                     HorizontalContentAlignment="Right"
                     Content="collection"
                     Visibility="{Binding CollectionBaseSettingVisibility}" />
-                <ComboBox
-                    Name="_collectionBaseOptionsComboBox"
+                <controls:BetterComboBox
+                    x:Name="_collectionBaseOptionsComboBox"
                     Width="150"
                     Height="25"
                     ItemsSource="{Binding CollectionBaseOptions}"
@@ -153,7 +154,7 @@
                                     Click="DeleteCollectionButtonClicked"
                                     Content="❌"
                                     FontSize="9"
-                                    Foreground="#ff5555"
+                                    Foreground="{StaticResource ErrorForegroundColor}"
                                     ToolTip="Delete this collection"
                                     Visibility="Hidden" />
                                 <StackPanel
@@ -256,7 +257,7 @@
                                     Click="RemoveItemFromCollectionClick"
                                     Content="❌"
                                     FontSize="9"
-                                    Foreground="#ff5555"
+                                    Foreground="{StaticResource ErrorForegroundColor}"
                                     ToolTip="Remove this item from the collection (will delete if not stored in another collection)"
                                     Visibility="Hidden" />
                                 <TextBlock

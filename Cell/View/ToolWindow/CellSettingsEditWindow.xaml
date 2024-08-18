@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cell="clr-namespace:Cell.ViewModel.Cells"
     xmlns:cellTypes="clr-namespace:Cell.ViewModel.Cells.Types"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -18,7 +19,7 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Collection" />
-                        <ComboBox
+                        <controls:BetterComboBox
                             Width="100"
                             ItemsSource="{Binding CollectionNames}"
                             SelectedItem="{Binding CollectionName}" />

@@ -15,7 +15,7 @@
                     x:Name="innerBorder"
                     Margin="-1"
                     Background="{TemplateBinding Background}"
-                    BorderBrush="#ACACAC"
+                    BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="1,1,1,0"
                     Opacity="0" />
             </Border>
@@ -77,12 +77,12 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="_outerBorder" Property="BorderBrush" Value="#FFFF0000" />
-                            <Setter TargetName="_innerBorder" Property="BorderBrush" Value="#FFFFFF00" />
+                            <Setter TargetName="_outerBorder" Property="BorderBrush" Value="{StaticResource ForegroundColor}" />
+                            <Setter TargetName="_innerBorder" Property="BorderBrush" Value="{StaticResource CellBackground}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="_outerBorder" Property="BorderBrush" Value="#FFFF0000" />
-                            <Setter TargetName="_innerBorder" Property="BorderBrush" Value="#FFFFFF00" />
+                            <Setter TargetName="_outerBorder" Property="BorderBrush" Value="{StaticResource ForegroundColor}" />
+                            <Setter TargetName="_innerBorder" Property="BorderBrush" Value="{StaticResource CellBackground}" />
                         </Trigger>
                         <DataTrigger Binding="{Binding DisplayColorTooltip, RelativeSource={RelativeSource AncestorType={x:Type xctk:ColorPicker}}}" Value="False">
                             <Setter TargetName="mainGrid" Property="ToolTip" Value="{x:Static sys:String.Empty}" />

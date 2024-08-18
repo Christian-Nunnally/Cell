@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Persistence;
+using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
@@ -15,7 +16,13 @@ namespace Cell.Model
         public static readonly CellModel Empty = new();
         private string borderThickness = "1";
         private CellType cellType = CellType.None;
-        private string[] colorHexes = ["#1e1e1e", "#2d2d30", "#1e1e1e", "#2d2d30", "#ffffff", "#ff00ff"];
+        private string[] colorHexes = [
+            ColorConstants.BackgroundColorConstantHex,
+            ColorConstants.BorderColorConstantHex,
+            ColorConstants.ControlBackgroundColorConstantHex,
+            ColorConstants.BorderColorConstantHex,
+            ColorConstants.ForegroundColorConstantHex,
+            ColorConstants.AccentColorConstantHex];
         private int column;
         private string contentBorderThickness = "1";
         private string errorText = string.Empty;
@@ -184,7 +191,24 @@ namespace Cell.Model
         public string SheetName
         {
             get => sheetName;
-            set { if (sheetName != value) { sheetName = value; NotifyPropertyChanged(nameof(SheetName)); } }
+            set 
+            {
+                if (sheetName == value) return;
+                sheetName = value; 
+                NotifyPropertyChanged(nameof(SheetName));
+
+                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function1))
+                {
+                    var _ = function1.CompiledMethod;
+                    UpdateDependencySubscriptions(function1);
+                }
+
+                if (PluginFunctionLoader.TryGetFunction("object", triggerFunctionName, out var function2))
+                {
+                    var _ = function2.CompiledMethod;
+                    UpdateDependencySubscriptions(function2);
+                }
+            }
         }
 
         public Dictionary<string, string> StringProperties { get; set; } = [];
@@ -352,6 +376,7 @@ namespace Cell.Model
         public void UpdateDependencySubscriptions(FunctionViewModel function)
         {
             if (function.Model.ReturnType == "void") return;
+            if (string.IsNullOrWhiteSpace(SheetName)) return;
 
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);

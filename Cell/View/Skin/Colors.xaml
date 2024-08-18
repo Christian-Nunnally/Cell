@@ -1,0 +1,15 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:colorConstants="clr-namespace:Cell.View.Skin;assembly=Cell">
+    <SolidColorBrush x:Key="CellBackground" Color="{x:Static colorConstants:ColorConstants.BackgroundColorConstant}" />
+    <SolidColorBrush x:Key="ControlBackground" Color="{x:Static colorConstants:ColorConstants.ControlBackgroundColorConstant}" />
+    <SolidColorBrush x:Key="CellBorderColor" Color="{x:Static colorConstants:ColorConstants.BorderColorConstant}" />
+    <SolidColorBrush x:Key="SelectedColor" Color="{x:Static colorConstants:ColorConstants.SelectedColorConstant}" />
+    <SolidColorBrush x:Key="SelectedBorderColor" Color="{x:Static colorConstants:ColorConstants.SelectedBorderColorConstant}" />
+    <SolidColorBrush x:Key="ForegroundColor" Color="{x:Static colorConstants:ColorConstants.ForegroundColorConstant}" />
+    <SolidColorBrush x:Key="AccentColor" Color="{x:Static colorConstants:ColorConstants.AccentColorConstant}" />
+    <SolidColorBrush x:Key="ToolWindowHeaderColor" Color="{x:Static colorConstants:ColorConstants.ToolWindowHeaderColorConstant}" />
+    <SolidColorBrush x:Key="ErrorForegroundColor" Color="{x:Static colorConstants:ColorConstants.ErrorForegroundColorConstant}" />
+</ResourceDictionary>
+
