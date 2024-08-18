@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class GraphCellViewModel : CellViewModel
     {

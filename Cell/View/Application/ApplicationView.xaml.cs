@@ -1,7 +1,9 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
+using Cell.View.Cells;
 using Cell.View.ToolWindow;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.Editing;
 using System.Windows;
@@ -9,7 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace Cell.View
+namespace Cell.View.Application
 {
     public partial class ApplicationView : Window
     {
@@ -116,7 +118,7 @@ namespace Cell.View
 
         private void OnCloseButtonClicked(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
 
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
@@ -278,6 +280,11 @@ namespace Cell.View
         {
             if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(8);
             else BorderThickness = new Thickness(0);
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+
         }
     }
 }

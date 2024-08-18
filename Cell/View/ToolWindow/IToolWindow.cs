@@ -1,4 +1,4 @@
-﻿using Cell.ViewModel;
+﻿using Cell.ViewModel.Application;
 
 namespace Cell.View.ToolWindow
 {

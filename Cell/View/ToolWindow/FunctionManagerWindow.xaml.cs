@@ -1,6 +1,7 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 
@@ -55,7 +56,7 @@ namespace Cell.View.ToolWindow
 
         private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is PluginFunctionViewModel function)
+            if (sender is Button button && button.DataContext is FunctionViewModel function)
             {
                 if (function.UsageCount != 0)
                 {

@@ -1,15 +1,16 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Converters;
-using Cell.View.ToolWindow;
-using Cell.View.Utilities;
-using Cell.ViewModel;
+using Cell.ViewModel.Cells;
+using Cell.ViewModel.Application;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xceed.Wpf.Toolkit;
+using Cell.ViewModel.Cells.Types.Special;
+using Cell.Common;
 
-namespace Cell.View
+namespace Cell.View.ToolWindow
 {
     /// <summary>
     /// Interaction logic for EditCellPanel.xaml
@@ -34,7 +35,9 @@ namespace Cell.View
 
         public string GetTitle()
         {
-            return ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel?.GetName() ?? "";
+            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
+            if (currentlySelectedCell is null) return "Select a cell to edit";
+            return $"Format editor - {currentlySelectedCell.GetName()}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
@@ -52,7 +55,7 @@ namespace Cell.View
             {
                 for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = Data.Cells.Instance.GetCell(sheetName, row, column);
+                    var cell = Data.CellTracker.Instance.GetCell(sheetName, row, column);
                     if (cell is not null) cells.Add(cell);
                 }
             }

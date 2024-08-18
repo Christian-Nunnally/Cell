@@ -2,7 +2,7 @@
 using Cell.Data;
 using Cell.Model;
 using Cell.View.ToolWindow;
-using Cell.ViewModel;
+using Cell.ViewModel.Execution;
 using System.IO;
 using System.Text.Json;
 
@@ -37,7 +37,7 @@ namespace Cell.Persistence
 
         public void ExportSheetTemplate(string sheetName)
         {
-            var copiedCells = Cells.Instance.GetCellModelsForSheet(sheetName).Select(c => c.Copy());
+            var copiedCells = CellTracker.Instance.GetCellModelsForSheet(sheetName).Select(c => c.Copy());
             foreach (var copiedCell in copiedCells)
             {
                 copiedCell.SheetName = "";
@@ -48,13 +48,21 @@ namespace Cell.Persistence
             foreach (var copiedCell in copiedCells)
             {
                 var serialized = JsonSerializer.Serialize(copiedCell);
-                var cellPath = Path.Combine(directory, copiedCell.ID);
+                var cellPath = Path.Combine(directory, "Cells", copiedCell.ID);
                 File.WriteAllText(cellPath, serialized);
             }
 
+            var usedCollections = new List<string>();
             foreach (var function in PluginFunctionLoader.ObservableFunctions.Where(x => x.CellsThatUseFunction.Any(c => c.SheetName == sheetName)))
             {
                 PluginFunctionLoader.SavePluginFunction(directory, function.Model.ReturnType, function.Model);
+                usedCollections.AddRange(function.CollectionDependencies);
+            }
+            usedCollections = usedCollections.Distinct().ToList();
+            foreach (var collection in usedCollections)
+            {
+                var collectionDirectory = Path.Combine(directory, "Collections", collection);
+                UserCollectionLoader.ExportCollection(collection, collectionDirectory);
             }
         }
 
@@ -63,9 +71,10 @@ namespace Cell.Persistence
             var templatesDirectory = Path.Combine(_saveDirectory, TemplatesSaveDirectory);
             if (!Directory.Exists(templatesDirectory)) return;
             var templatePath = Path.Combine(templatesDirectory, templateName);
-            if (!Directory.Exists(templatePath)) return;
+            var cellsPath = Path.Combine(templatePath, "Cells");
+            if (!Directory.Exists(cellsPath)) return;
 
-            var cellsToAdd = LoadSheet(templatePath);
+            var cellsToAdd = LoadSheet(cellsPath);
             var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
             FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
 
@@ -76,16 +85,39 @@ namespace Cell.Persistence
                 return;
             }
 
+            var collectionsBeingImported = new List<string>();
+            var collectionsDirectory = Path.Combine(templatePath, "Collections");
+            if (Directory.Exists(collectionsDirectory))
+            {
+                foreach (var collectionDirectory in Directory.GetDirectories(collectionsDirectory))
+                {
+                    var collectionName = Path.GetFileName(collectionDirectory);
+                    collectionsBeingImported.Add(collectionName);
+                }
+            }
+            var conflictingCollection = collectionsBeingImported.FirstOrDefault(UserCollectionLoader.CollectionNames.Contains);
+            if (conflictingCollection is not null)
+            {
+                DialogWindow.ShowDialog("Import canceled", $"A collection with the name '{conflictingCollection}' already exists. Please rename that collection before importing.");
+                return;
+            }
+
             foreach (var cell in cellsToAdd)
             {
-                Cells.Instance.AddCell(cell, saveAfterAdding: true);
+                CellTracker.Instance.AddCell(cell, saveAfterAdding: true);
             }
 
             foreach (var functionModel in functionsBeingImported)
             {
-                var function = new PluginFunctionViewModel(functionModel);
+                var function = new FunctionViewModel(functionModel);
                 PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
                 PluginFunctionLoader.SavePluginFunction(_saveDirectory, functionModel.ReturnType, functionModel);
+            }
+
+            foreach (var collectionName in collectionsBeingImported)
+            {
+                var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
+                UserCollectionLoader.ImportCollection(collectionDirectory, collectionName);
             }
         }
 
@@ -114,7 +146,7 @@ namespace Cell.Persistence
 
         public void SaveCells()
         {
-            foreach (var sheet in Cells.Instance.SheetNames) SaveSheet(sheet);
+            foreach (var sheet in CellTracker.Instance.SheetNames) SaveSheet(sheet);
         }
 
         private static bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
@@ -130,7 +162,7 @@ namespace Cell.Persistence
             }
             return true;
 
-            static PluginFunctionViewModel? GetExistingFunction(PluginFunctionModel function)
+            static FunctionViewModel? GetExistingFunction(PluginFunctionModel function)
             {
                 return PluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }
@@ -174,7 +206,7 @@ namespace Cell.Persistence
         private static CellModel LoadAndAddCell(string file)
         {
             var cell = LoadCell(file);
-            Cells.Instance.AddCell(cell, saveAfterAdding: false);
+            CellTracker.Instance.AddCell(cell, saveAfterAdding: false);
             return cell;
         }
 
@@ -185,7 +217,7 @@ namespace Cell.Persistence
 
         private void SaveSheet(string sheet)
         {
-            foreach (var cell in Cells.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
+            foreach (var cell in CellTracker.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
         }
     }
 }

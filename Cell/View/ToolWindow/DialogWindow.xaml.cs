@@ -1,4 +1,6 @@
-﻿using Cell.ViewModel;
+﻿using Cell.Common;
+using Cell.ViewModel;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 

@@ -1,19 +1,21 @@
 ﻿<UserControl
-    x:Class="Cell.View.CellFormatEditWindow"
+    x:Class="Cell.View.ToolWindow.CellFormatEditWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cell="clr-namespace:Cell.ViewModel.Cells"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewModel="clr-namespace:Cell.ViewModel"
+    xmlns:special="clr-namespace:Cell.ViewModel.Cells.Types.Special"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    d:DataContext="{d:DesignInstance Type=viewModel:CellViewModel}"
+    d:DataContext="{d:DesignInstance Type=cell:CellViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <ContentControl Content="{Binding}">
         <ContentControl.Resources>
-            <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
+            <DataTemplate DataType="{x:Type special:RowCellViewModel}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Height" />
@@ -27,7 +29,7 @@
                     <Button Click="DeleteRowButtonClicked" Content="Delete Row" />
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
+            <DataTemplate DataType="{x:Type special:ColumnCellViewModel}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Width" />
@@ -41,7 +43,7 @@
                     <Button Click="DeleteColumnButtonClicked" Content="Delete Column" />
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:CellViewModel}">
+            <DataTemplate DataType="{x:Type cell:CellViewModel}">
                 <StackPanel>
                     <Grid>
                         <xctk:ColorPicker
@@ -284,6 +286,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding BorderThicknessLeft}" />
                         <TextBox
                             Width="20"
@@ -297,6 +300,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding BorderThicknessRight}" />
                         <TextBox
                             Width="20"
@@ -310,6 +314,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding MarginLeft}" />
                         <TextBox
                             Width="20"
@@ -323,6 +328,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding MarginRight}" />
                         <TextBox
                             Width="20"
@@ -336,6 +342,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding ContentBorderThicknessLeft}" />
                         <TextBox
                             Width="20"
@@ -349,6 +356,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding ContentBorderThicknessRight}" />
                         <TextBox
                             Width="20"
@@ -375,6 +383,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding BorderThicknessBottom}" />
                         <TextBox
                             Width="20"
@@ -401,6 +410,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding MarginBottom}" />
                         <TextBox
                             Width="20"
@@ -427,6 +437,7 @@
                             BorderThickness="2"
                             FontWeight="Bold"
                             Foreground="{Binding ForegroundColor}"
+                            Opacity=".5"
                             Text="{Binding ContentBorderThicknessBottom}" />
 
                         <Grid>
@@ -571,17 +582,8 @@
                     </Grid>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type viewModel:CornerCellViewModel}">
-                <StackPanel>
-                    <Label Content="Sheets" />
-                    <ListBox ItemsSource="{Binding SheetNames}" />
-                    <Label Content="Functions" />
-                    <ListBox ItemsSource="{Binding PopulateFunctionNames}" />
-                    <ListBox ItemsSource="{Binding TriggerFunctionNames}" />
-                    <Label Content="Collections" />
-                    <ListBox ItemsSource="{Binding CollectionNames}" />
-                    <Button Click="CreateBackupButtonClicked" Content="Create Backup" />
-                </StackPanel>
+            <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
+                <Label />
             </DataTemplate>
         </ContentControl.Resources>
     </ContentControl>

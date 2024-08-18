@@ -1,7 +1,10 @@
 ﻿using Cell.Common;
+using Cell.Execution;
 using Cell.Persistence;
-using Cell.Plugin;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells.Types;
+using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Execution;
 using System.Text.Json.Serialization;
 using System.Windows;
 
@@ -346,7 +349,7 @@ namespace Cell.Model
 
         public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
 
-        public void UpdateDependencySubscriptions(PluginFunctionViewModel function)
+        public void UpdateDependencySubscriptions(FunctionViewModel function)
         {
             if (function.Model.ReturnType == "void") return;
 

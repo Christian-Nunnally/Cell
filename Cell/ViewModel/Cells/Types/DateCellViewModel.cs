@@ -1,11 +1,11 @@
 ﻿using Cell.Model;
 using System.Windows.Controls;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class DateCellViewModel : CellViewModel
     {
-        internal DatePicker picker = new DatePicker();
+        internal DatePicker picker = new();
         public DateCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             model.PropertyChanged += ModelPropertyChanged;

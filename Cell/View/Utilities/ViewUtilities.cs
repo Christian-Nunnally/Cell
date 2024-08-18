@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
-namespace Cell.View.Utilities
+namespace Cell.View
 {
     public static class ViewUtilities
     {

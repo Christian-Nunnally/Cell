@@ -1,10 +1,12 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Execution;
+using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.Plugin;
 using Cell.View.Skin;
-using Cell.View.ToolWindow;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
@@ -13,7 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Cell.View
+namespace Cell.View.ToolWindow
 {
     /// <summary>
     /// Interaction logic for CodeEditor.xaml
@@ -22,12 +24,12 @@ namespace Cell.View
     {
         private readonly CellModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
-        private readonly PluginFunctionViewModel _function;
+        private readonly FunctionViewModel _function;
         private readonly Action<string> onCloseCallback = x => { };
         private static bool _haveAssembliesBeenRegistered;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-        public CodeEditorWindow(PluginFunctionViewModel function, Action<string> callback, CellModel? currentCell)
+        public CodeEditorWindow(FunctionViewModel function, Action<string> callback, CellModel? currentCell)
         {
             DataContext = this;
             InitializeComponent();
@@ -75,7 +77,7 @@ namespace Cell.View
 
         public string GetTitle()
         {
-            return _currentCell == null ? "" : $"{_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
+            return _currentCell == null ? $"Code Editor - {_function.Model.Name}" : $"Code Editor - {_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
@@ -165,7 +167,7 @@ namespace Cell.View
         {
             if (_currentCell is null) return;
             var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
-            var function = new PluginFunctionViewModel(model);
+            var function = new FunctionViewModel(model);
             function.SetUserFriendlyCode(textEditor.Text, _currentCell);
             var compiled = function.CompiledMethod;
             var result = function.CompileResult;
@@ -195,7 +197,7 @@ namespace Cell.View
                 return;
             }
             var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
-            var function = new PluginFunctionViewModel(model);
+            var function = new FunctionViewModel(model);
             if (_currentCell is null) return;
             function.SetUserFriendlyCode(textEditor.Text, _currentCell);
             var syntaxTree = function.SyntaxTree;

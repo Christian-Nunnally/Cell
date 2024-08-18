@@ -1,12 +1,13 @@
-﻿using Cell.Persistence;
-using Cell.View.ToolWindow;
-using Cell.View.Utilities;
-using Cell.ViewModel;
+﻿using Cell.Common;
+using Cell.Persistence;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells;
+using Cell.ViewModel.Cells.Types;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cell.View
+namespace Cell.View.ToolWindow
 {
     /// <summary>
     /// Interaction logic for CellTextEditBar.xaml
@@ -22,7 +23,9 @@ namespace Cell.View
 
         public string GetTitle()
         {
-            return ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel?.GetName() ?? "";
+            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
+            if (currentlySelectedCell is null) return "Select a cell to edit";
+            return $"Content editor - {currentlySelectedCell.GetName()}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [

@@ -1,12 +1,11 @@
-﻿using Cell.View.ToolWindow;
-using Cell.ViewModel;
+﻿using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cell.View
+namespace Cell.View.ToolWindow
 {
     /// <summary>
     /// Interaction logic for FloatingToolWindow.xaml
@@ -97,7 +96,7 @@ namespace Cell.View
             e.Handled = true;
         }
 
-        private void Toolbox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Toolbox_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is FloatingToolWindow toolbox)
             {

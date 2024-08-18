@@ -1,10 +1,11 @@
 ﻿using Cell.ViewModel;
+using Cell.ViewModel.Cells;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Cell.View
+namespace Cell.View.Application
 {
     public partial class PanAndZoomCanvas : Canvas
     {

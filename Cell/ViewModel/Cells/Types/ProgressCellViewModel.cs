@@ -1,6 +1,6 @@
 ﻿using Cell.Model;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class ProgressCellViewModel : CellViewModel
     {

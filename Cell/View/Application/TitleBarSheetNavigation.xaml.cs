@@ -1,12 +1,12 @@
 ﻿using Cell.Persistence;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
 using Microsoft.Win32;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cell.View
+namespace Cell.View.Application
 {
     /// <summary>
     /// Interaction logic for TitleBarSheetNavigation.xaml
@@ -26,7 +26,7 @@ namespace Cell.View
             {
                 isRenameingSheet = false;
                 ApplicationViewModel.Instance.IsAddingSheet = false;
-                ApplicationViewModel.Instance.RenameSheet(sheetBeingRenamed, ApplicationViewModel.Instance.NewSheetName);
+                ApplicationViewModel.RenameSheet(sheetBeingRenamed, ApplicationViewModel.Instance.NewSheetName);
                 return;
             }
             if (ApplicationViewModel.Instance.IsAddingSheet)

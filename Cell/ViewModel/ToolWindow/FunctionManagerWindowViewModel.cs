@@ -1,21 +1,22 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model;
+using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
     public class FunctionManagerWindowViewModel : PropertyChangedBase
     {
-        private readonly ObservableCollection<PluginFunctionViewModel> _functions;
+        private readonly ObservableCollection<FunctionViewModel> _functions;
         private string filterSheet = "All";
         private string filterString = string.Empty;
         private bool includePopulateFunctions = true;
         private bool includeTriggerFunctions = true;
-        private PluginFunctionViewModel? selectedFunction;
+        private FunctionViewModel? selectedFunction;
         private double userSetHeight;
         private double userSetWidth;
-        public FunctionManagerWindowViewModel(ObservableCollection<PluginFunctionViewModel> pluginFunctions)
+        public FunctionManagerWindowViewModel(ObservableCollection<FunctionViewModel> pluginFunctions)
         {
             _functions = pluginFunctions;
             _functions.CollectionChanged += FunctionsCollectionChanged;
@@ -24,7 +25,7 @@ namespace Cell.ViewModel.ToolWindow
                 Functions.Add(function);
             }
             SheetNameOptions.Add("All");
-            foreach (var sheet in Cells.Instance.SheetNames)
+            foreach (var sheet in CellTracker.Instance.SheetNames)
             {
                 SheetNameOptions.Add(sheet);
             }
@@ -52,7 +53,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public ObservableCollection<PluginFunctionViewModel> Functions { get; set; } = [];
+        public ObservableCollection<FunctionViewModel> Functions { get; set; } = [];
 
         public bool IncludePopulateFunctions
         {
@@ -80,7 +81,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public ObservableCollection<string> ReferencedCollectionsByTheSelectedFunction { get; set; } = [];
 
-        public PluginFunctionViewModel? SelectedFunction
+        public FunctionViewModel? SelectedFunction
         {
             get => selectedFunction; set
             {
@@ -148,7 +149,7 @@ namespace Cell.ViewModel.ToolWindow
             FilterVisibleFunctions();
         }
 
-        private bool IsFunctionIncludedInFilter(PluginFunctionViewModel function)
+        private bool IsFunctionIncludedInFilter(FunctionViewModel function)
         {
             if (!function.Model.Name.Contains(filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
             if (filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == filterSheet)) return false;

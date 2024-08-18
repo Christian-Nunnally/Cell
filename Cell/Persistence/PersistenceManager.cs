@@ -14,7 +14,7 @@ namespace Cell.Persistence
         public static void CreateBackup()
         {
             // Make sure cells instance is created with the correct save location
-            var _ = Cells.Instance;
+            var _ = CellTracker.Instance;
             if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
             var oldSaveLocation = SaveLocation;
             SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();

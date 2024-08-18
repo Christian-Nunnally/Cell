@@ -1,8 +1,9 @@
 ﻿using Cell.Common;
+using Cell.Data;
+using Cell.Execution;
+using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Plugin;
-using Cell.Plugin.SyntaxWalkers;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -139,6 +140,27 @@ namespace Cell.Persistence
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
+        public static void ExportCollection(string collectionName, string toDirectory)
+        {
+            var fromDirectory = Path.Combine(GetSaveDirectory(), collectionName);
+            CopyFilesRecursively(fromDirectory, toDirectory);
+        }
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
         private static void SaveCollection(UserCollection collection)
         {
             SaveCollectionSettings(collection.Model);
@@ -215,6 +237,12 @@ namespace Cell.Persistence
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
+        }
+
+        internal static void ImportCollection(string collectionDirectory, string collectionName)
+        {
+            var toDirectory = Path.Combine(GetSaveDirectory(), collectionName);
+            CopyFilesRecursively(collectionDirectory, toDirectory);
         }
     }
 }

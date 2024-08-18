@@ -1,4 +1,4 @@
-﻿namespace Cell.View
+﻿namespace Cell.Common
 {
     public class ColorAdjuster
     {

@@ -2,7 +2,6 @@
     x:Class="Cell.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Cell"
     StartupUri="View/Application/ApplicationView.xaml">
     <Application.Resources>
         <ResourceDictionary>

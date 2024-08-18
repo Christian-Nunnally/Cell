@@ -1,7 +1,7 @@
 ﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.Plugin;
 using Cell.View.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Text.Json;

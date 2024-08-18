@@ -1,12 +1,14 @@
 ﻿using Cell.Common;
+using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
-using Cell.Plugin;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells.Types.Special;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells
 {
     public abstract class CellViewModel : PropertyChangedBase
     {
@@ -23,26 +25,6 @@ namespace Cell.ViewModel
             _sheetViewModel = sheet;
             _model = model;
 
-            //var randomDouble = new Random().NextDouble();
-            //var randomDouble2 = new Random().NextDouble();
-            //LinearGradientBrush linear = new LinearGradientBrush();
-            //linear.ColorInterpolationMode = ColorInterpolationMode.SRgbLinearInterpolation ;
-            //linear.StartPoint = new Point(0, 0);
-            //linear.EndPoint = new Point(randomDouble, 1- randomDouble);
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#9678b5"), 0.0));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#b272a1"), 0.09));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#c17188"), 0.18));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#c3776f"), 0.27));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#b8825c"), 0.36));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#a48f54"), 0.45));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#8a9b5c"), 0.54));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#6da471"), 0.63));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#50aa8f"), 0.72));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#3dadaf"), 0.81));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#4aadca"), 0.9));
-            //linear.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#6fa9dc"), 1.0));
-
-            //BackgroundColor = linear;
             BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
             ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
             ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));

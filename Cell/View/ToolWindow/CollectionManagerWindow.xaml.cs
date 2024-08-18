@@ -1,9 +1,9 @@
-﻿using Cell.Model;
+﻿using Cell.Data;
+using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.Plugin;
 using Cell.View.Skin;
-using Cell.ViewModel;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;

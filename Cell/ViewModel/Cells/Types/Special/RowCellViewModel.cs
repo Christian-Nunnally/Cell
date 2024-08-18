@@ -1,7 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Model;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types.Special
 {
     public class RowCellViewModel : SpecialCellViewModel
     {
@@ -43,7 +43,7 @@ namespace Cell.ViewModel
         public void DeleteRow()
         {
             if (_sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Count() == 1) return;
-            var cellsToDelete = Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
+            var cellsToDelete = CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
             foreach (var cell in cellsToDelete)
             {
                 _sheetViewModel.DeleteCell(cell);
@@ -58,7 +58,7 @@ namespace Cell.ViewModel
             _sheetViewModel.UpdateLayout();
         }
 
-        private List<CellModel> GetAllCellsAtOrBelow(int row) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
+        private List<CellModel> GetAllCellsAtOrBelow(int row) => CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
 
         private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
         {
@@ -81,8 +81,8 @@ namespace Cell.ViewModel
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.AddCell(cell);
 
-                var firstSideMergeId = Cells.Instance.GetCell(Model.SheetName, index - 1, columnIndex)?.MergedWith ?? string.Empty;
-                var secondSideMergeId = Cells.Instance.GetCell(Model.SheetName, index + 1, columnIndex)?.MergedWith ?? string.Empty;
+                var firstSideMergeId = CellTracker.Instance.GetCell(Model.SheetName, index - 1, columnIndex)?.MergedWith ?? string.Empty;
+                var secondSideMergeId = CellTracker.Instance.GetCell(Model.SheetName, index + 1, columnIndex)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(firstSideMergeId) && firstSideMergeId == secondSideMergeId)
                 {
                     cellModel.MergedWith = firstSideMergeId;

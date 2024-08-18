@@ -18,7 +18,7 @@ namespace Cell.Model
         {
             var model = modelToCopy.Copy();
             model.ID = Utilities.GenerateUnqiueId(12);
-            Cells.Instance.AddCell(model);
+            CellTracker.Instance.AddCell(model);
             return model;
         }
 
@@ -33,7 +33,7 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            Cells.Instance.AddCell(model);
+            CellTracker.Instance.AddCell(model);
             return model;
         }
     }

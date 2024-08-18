@@ -1,8 +1,9 @@
-﻿using Cell.Model;
-using Cell.Plugin;
+﻿using Cell.Common;
+using Cell.Execution;
+using Cell.Model;
 using System.Windows.Input;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public static class CheckboxCellModelExtensions
     {

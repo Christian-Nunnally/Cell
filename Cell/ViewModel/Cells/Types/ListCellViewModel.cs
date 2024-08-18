@@ -1,10 +1,11 @@
-﻿using Cell.Model;
+﻿using Cell.Execution;
+using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.Plugin;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class ListCellViewModel : CellViewModel
     {

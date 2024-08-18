@@ -1,7 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Model;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types.Special
 {
     public class ColumnCellViewModel : SpecialCellViewModel
     {
@@ -63,7 +63,7 @@ namespace Cell.ViewModel
         public void DeleteColumn()
         {
             if (_sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Count() == 1) return;
-            var cellsToDelete = Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
+            var cellsToDelete = CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
             foreach (var cell in cellsToDelete)
             {
                 _sheetViewModel.DeleteCell(cell);
@@ -78,7 +78,7 @@ namespace Cell.ViewModel
             _sheetViewModel.UpdateLayout();
         }
 
-        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
+        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
 
         private void IncrementColumnOfAllAtOrToTheRightOf(int column, int amount = 1)
         {
@@ -101,8 +101,8 @@ namespace Cell.ViewModel
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.AddCell(cell);
 
-                var cellAboveMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
-                var cellBelowMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
+                var cellAboveMergedId = CellTracker.Instance.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
+                var cellBelowMergedId = CellTracker.Instance.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(cellAboveMergedId) && cellAboveMergedId == cellBelowMergedId)
                 {
                     cellModel.MergedWith = cellAboveMergedId;
