@@ -6,13 +6,6 @@ namespace Cell.Plugin
 {
     public class PluginContextCompletionData(string text) : ICompletionData
     {
-        public System.Windows.Media.ImageSource? Image
-        {
-            get { return null; }
-        }
-
-        public string Text { get; private set; } = text;
-
         // Use this property if you want to show a fancy UIElement in the list.
         public object Content
         {
@@ -24,7 +17,14 @@ namespace Cell.Plugin
             get { return "Description for " + Text; }
         }
 
+        public System.Windows.Media.ImageSource? Image
+        {
+            get { return null; }
+        }
+
         public double Priority => 0;
+
+        public string Text { get; private set; } = text;
 
         public void Complete(TextArea textArea, ISegment completionSegment,
             EventArgs insertionRequestEventArgs)

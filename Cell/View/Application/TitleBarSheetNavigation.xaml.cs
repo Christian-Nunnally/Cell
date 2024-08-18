@@ -15,32 +15,9 @@ namespace Cell.View
     {
         private bool isRenameingSheet = false;
         private string sheetBeingRenamed = string.Empty;
-
         public TitleBarSheetNavigation()
         {
             InitializeComponent();
-        }
-
-        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button button) return;
-            if (button.Content is not Label label) return;
-            if (label.Content is not string sheetName) return;
-            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
-            {
-                isRenameingSheet = true;
-                sheetBeingRenamed = sheetName;
-                ApplicationViewModel.Instance.IsAddingSheet = true;
-                ApplicationViewModel.Instance.NewSheetName = sheetName;
-            }
-            else if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0 && ApplicationViewModel.Instance.SheetViewModel.SheetName == sheetName)
-            {
-                PersistenceManager.ExportSheet(sheetName);
-            }
-            else
-            {
-                ApplicationViewModel.Instance.GoToSheet(sheetName);
-            }
         }
 
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
@@ -83,6 +60,28 @@ namespace Cell.View
             {
                 ApplicationViewModel.Instance.IsAddingSheet = true;
                 ApplicationViewModel.Instance.NewSheetName = "Untitled";
+            }
+        }
+
+        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button) return;
+            if (button.Content is not Label label) return;
+            if (label.Content is not string sheetName) return;
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            {
+                isRenameingSheet = true;
+                sheetBeingRenamed = sheetName;
+                ApplicationViewModel.Instance.IsAddingSheet = true;
+                ApplicationViewModel.Instance.NewSheetName = sheetName;
+            }
+            else if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0 && ApplicationViewModel.Instance.SheetViewModel.SheetName == sheetName)
+            {
+                PersistenceManager.ExportSheet(sheetName);
+            }
+            else
+            {
+                ApplicationViewModel.Instance.GoToSheet(sheetName);
             }
         }
     }

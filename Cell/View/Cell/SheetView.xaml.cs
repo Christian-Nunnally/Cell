@@ -12,17 +12,26 @@ namespace Cell.View
     /// </summary>
     public partial class SheetView : UserControl
     {
+        public PanAndZoomCanvas? PanAndZoomCanvas;
+        private CellViewModel? _currentCellMouseIsOver;
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
-        private CellViewModel? _currentCellMouseIsOver;
-
-        public PanAndZoomCanvas? PanAndZoomCanvas;
-
-        public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
-
         public SheetView()
         {
             InitializeComponent();
+        }
+
+        public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
+
+        private bool CanSelectCell(CellModel? cell)
+        {
+            if (cell is null) return false;
+            if (cell.CellType.IsSpecial() && IsSelectingSpecialCellsAllowed()) return false;
+            if (!cell.CellType.IsSpecial() && IsSelectingNonSpecialCellsAllowed()) return false;
+            return true;
+
+            bool IsSelectingSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.Where(x => x is not SpecialCellViewModel).Any();
+            bool IsSelectingNonSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.OfType<SpecialCellViewModel>().Any();
         }
 
         private void CellPreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -109,17 +118,6 @@ namespace Cell.View
             }
         }
 
-        private bool CanSelectCell(CellModel? cell)
-        {
-            if (cell is null) return false;
-            if (cell.CellType.IsSpecial() && IsSelectingSpecialCellsAllowed()) return false;
-            if (!cell.CellType.IsSpecial() && IsSelectingNonSpecialCellsAllowed()) return false;
-            return true;
-
-            bool IsSelectingSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.Where(x => x is not SpecialCellViewModel).Any();
-            bool IsSelectingNonSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.OfType<SpecialCellViewModel>().Any();
-        }
-
         private void CellPreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             _selectingCells = false;
@@ -138,35 +136,5 @@ namespace Cell.View
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
         }
-
-        //private void TextBoxKeyDownForCell(object sender, KeyEventArgs e)
-        //{
-        //    if (sender is not TextBox textbox) return;
-        //    if (e.Key == Key.Enter)
-        //    {
-        //        textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-        //        if (Keyboard.Modifiers == ModifierKeys.Shift) SheetViewModel?.MoveSelectionUp();
-        //        else SheetViewModel?.MoveSelectionDown();
-        //        e.Handled = true;
-        //    }
-        //    else if (e.Key == Key.Tab)
-        //    {
-        //        textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-        //        if (Keyboard.Modifiers == ModifierKeys.Shift) SheetViewModel?.MoveSelectionLeft();
-        //        else SheetViewModel?.MoveSelectionRight();
-        //        e.Handled = true;
-        //    }
-        //}
-
-        //private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
-        //{
-        //    if (sender is TextBox textBox)
-        //    {
-        //        if (textBox.DataContext is TextboxCellViewModel cell)
-        //        {
-        //            cell.SetTextBox(textBox);
-        //        }
-        //    }
-        //}
     }
 }

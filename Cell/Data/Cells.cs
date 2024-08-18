@@ -1,7 +1,7 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.Persistence;
 using Cell.Plugin;
-using Cell.Common;
 using System.Collections.ObjectModel;
 
 namespace Cell.Data
@@ -12,14 +12,14 @@ namespace Cell.Data
     internal class Cells
     {
         private readonly CellLoader _cellLoader = new(PersistenceManager.SaveLocation);
-
-        private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
+        private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
         private readonly ObservableCollection<string> _sheetNames = [];
+        private static Cells? _instance;
+        public static Cells Instance => _instance ??= new Cells();
 
         public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
-        private static Cells? _instance;
 
         public ObservableCollection<string> SheetNames => _sheetNames;
 
@@ -43,21 +43,17 @@ namespace Cell.Data
             CellTriggerManager.StartMonitoringCell(cellModel);
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
-
-            //Uncomment when you need to delete stacked cells.
-            //if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation) && cellsAtLocation.Count > 1)
-            //{
-            //    RemoveCell(cellsAtLocation[0]);
-            //}
         }
 
-        private void AddCellToCellByLocationMap(CellModel cellModel)
+        public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
+
+        public List<CellModel> GetCellModelsForSheet(string sheetName)
         {
-            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
+            if (_cellsBySheetMap.TryGetValue(sheetName, out var cellDictionary))
             {
-                cellsAtLocation.Add(cellModel);
+                return [.. cellDictionary.Values];
             }
-            else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
+            return [];
         }
 
         public void RemoveCell(CellModel cellModel)
@@ -78,16 +74,20 @@ namespace Cell.Data
             }
         }
 
-        public List<CellModel> GetCellModelsForSheet(string sheetName)
+        public void RenameSheet(string oldSheetName, string newSheetName)
         {
-            if (_cellsBySheetMap.TryGetValue(sheetName, out var cellDictionary))
-            {
-                return [.. cellDictionary.Values];
-            }
-            return [];
+            _cellLoader.RenameSheet(oldSheetName, newSheetName);
+            GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
         }
 
-        public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
+        private void AddCellToCellByLocationMap(CellModel cellModel)
+        {
+            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
+            {
+                cellsAtLocation.Add(cellModel);
+            }
+            else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
+        }
 
         private void CellModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -127,13 +127,5 @@ namespace Cell.Data
             }
             _cellLoader.SaveCell(model);
         }
-
-        public void RenameSheet(string oldSheetName, string newSheetName)
-        {
-            _cellLoader.RenameSheet(oldSheetName, newSheetName);
-            GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
-        }
-
-        public static Cells Instance => _instance ??= new Cells();
     }
 }

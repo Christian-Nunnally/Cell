@@ -8,16 +8,6 @@ namespace Cell.Plugin.SyntaxWalkers
     public partial class CellReferenceSyntaxWalker : CSharpSyntaxWalker
     {
         public readonly List<CellReference> LocationReferences = [];
-
-        public override void Visit(SyntaxNode? node)
-        {
-            base.Visit(node);
-            if (TryGetCellReferenceFromNode(node, out var cellReference))
-            {
-                LocationReferences.Add(cellReference);
-            }
-        }
-
         public static bool TryGetCellReferenceFromNode(SyntaxNode? node, out CellReference cellReference)
         {
             cellReference = new CellReference();
@@ -47,6 +37,28 @@ namespace Cell.Plugin.SyntaxWalkers
             return true;
         }
 
+        public override void Visit(SyntaxNode? node)
+        {
+            base.Visit(node);
+            if (TryGetCellReferenceFromNode(node, out var cellReference))
+            {
+                LocationReferences.Add(cellReference);
+            }
+        }
+
+        private static bool DoesNodeMatchCellReferenceSyntax(SyntaxNode? node, [MaybeNullWhen(false)] out SeparatedSyntaxList<ArgumentSyntax> arguments)
+        {
+            arguments = SyntaxFactory.SeparatedList<ArgumentSyntax>();
+            if (node is not InvocationExpressionSyntax syntax) return false;
+            if (syntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax) return false;
+            if (memberAccessExpressionSyntax.Name.Identifier.Text != "GetCell") return false;
+            if (memberAccessExpressionSyntax.Expression is not IdentifierNameSyntax identifierName) return false;
+            if (identifierName.Identifier.Text != "c") return false;
+            if (!(syntax.ArgumentList.Arguments.Count == 3 || syntax.ArgumentList.Arguments.Count == 5)) return false;
+            arguments = syntax.ArgumentList.Arguments;
+            return true;
+        }
+
         private static bool TryParsePositionFromArgument(ArgumentSyntax argumentSyntax, out int position, out bool isRelative)
         {
             isRelative = false;
@@ -64,19 +76,5 @@ namespace Cell.Plugin.SyntaxWalkers
             position = rowValue;
             return true;
         }
-
-        private static bool DoesNodeMatchCellReferenceSyntax(SyntaxNode? node, [MaybeNullWhen(false)] out SeparatedSyntaxList<ArgumentSyntax> arguments)
-        {
-            arguments = SyntaxFactory.SeparatedList<ArgumentSyntax>();
-            if (node is not InvocationExpressionSyntax syntax) return false;
-            if (syntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax) return false;
-            if (memberAccessExpressionSyntax.Name.Identifier.Text != "GetCell") return false;
-            if (memberAccessExpressionSyntax.Expression is not IdentifierNameSyntax identifierName) return false;
-            if (identifierName.Identifier.Text != "c") return false;
-            if (!(syntax.ArgumentList.Arguments.Count == 3 || syntax.ArgumentList.Arguments.Count == 5)) return false;
-            arguments = syntax.ArgumentList.Arguments;
-            return true;
-        }
     }
 }
-

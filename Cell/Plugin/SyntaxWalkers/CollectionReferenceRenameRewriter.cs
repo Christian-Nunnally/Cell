@@ -5,9 +5,8 @@ namespace Cell.Plugin.SyntaxWalkers
 {
     public class CollectionReferenceRenameRewriter(string oldName, string newName) : CSharpSyntaxRewriter
     {
-        private readonly string _oldName = oldName;
         private readonly string _newName = newName;
-
+        private readonly string _oldName = oldName;
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -22,4 +21,3 @@ namespace Cell.Plugin.SyntaxWalkers
         }
     }
 }
-

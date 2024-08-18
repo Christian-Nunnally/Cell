@@ -10,86 +10,20 @@ namespace Cell.Plugin
     internal class CellPopulateManager
     {
         private readonly static Dictionary<string, CellModel> _cellsBeingUpdated = [];
-        private readonly static List<string> _collectionsBeingUpdated = [];
-
-        private readonly static Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnLocationUpdates = [];
-        private readonly static Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
-
         private readonly static Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnCollectionUpdates = [];
+        private readonly static Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnLocationUpdates = [];
+        private readonly static List<string> _collectionsBeingUpdated = [];
         private readonly static Dictionary<CellModel, Dictionary<string, int>> _collectionSubcriptionsMadeByCells = [];
-
         private readonly static Dictionary<string, List<ListCellViewModel>> _listCellsToUpdateWhenCollectionsChange = [];
-
-        public static void StartMonitoringCellForUpdates(CellModel model)
-        {
-            model.AfterCellEdited += NotifyCellValueUpdated;
-        }
-
-        public static void StopMonitoringCellForUpdates(CellModel model)
-        {
-            model.AfterCellEdited -= NotifyCellValueUpdated;
-        }
-
-        public static void SubscribeToUpdatesAtLocation(CellModel subscriber, string sheet, int row, int column)
-        {
-            var key = Utilities.GetUnqiueLocationString(sheet, row, column);
-            SubscribeToReference(subscriber, key, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
-        }
-
-        public static List<string> GetAllLocationSubscriptions(CellModel subscriber)
-        {
-            return GetAllSubscriptions(subscriber, _locationSubcriptionsMadeByCells);
-        }
-
-        public static void UnsubscribeFromAllLocationUpdates(CellModel model)
-        {
-            UnsubscribeFromAllReferences(model, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
-        }
-
-        public static void UnsubscribeFromUpdatesAtLocation(CellModel model, string locationString)
-        {
-            UnsubscribeFromReference(model, locationString, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
-        }
-
-        public static void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
-        {
-            SubscribeToReference(subscriber, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
-        }
-
+        private readonly static Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
         public static List<string> GetAllCollectionSubscriptions(CellModel subscriber)
         {
             return GetAllSubscriptions(subscriber, _collectionSubcriptionsMadeByCells);
         }
 
-        public static void UnsubscribeFromAllCollectionUpdates(CellModel model)
+        public static List<string> GetAllLocationSubscriptions(CellModel subscriber)
         {
-            UnsubscribeFromAllReferences(model, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
-        }
-
-        public static void UnsubscribeFromCollectionUpdates(CellModel model, string collectionName)
-        {
-            UnsubscribeFromReference(model, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
-        }
-
-        public static void SubscribeToCollectionUpdates(ListCellViewModel subscriber, string collectionName)
-        {
-            if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
-            {
-                subscribers.Add(subscriber);
-            }
-            else
-            {
-                _listCellsToUpdateWhenCollectionsChange.Add(collectionName, [subscriber]);
-            }
-        }
-
-        public static void UnsubscribeFromCollectionUpdates(ListCellViewModel subscriber, string collectionName)
-        {
-            if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
-            {
-                subscribers.Remove(subscriber);
-                if (subscribers.Count == 0) _listCellsToUpdateWhenCollectionsChange.Remove(collectionName);
-            }
+            return GetAllSubscriptions(subscriber, _locationSubcriptionsMadeByCells);
         }
 
         public static void NotifyCellValueUpdated(CellModel cell)
@@ -149,6 +83,76 @@ namespace Cell.Plugin
             }
         }
 
+        public static void StartMonitoringCellForUpdates(CellModel model)
+        {
+            model.AfterCellEdited += NotifyCellValueUpdated;
+        }
+
+        public static void StopMonitoringCellForUpdates(CellModel model)
+        {
+            model.AfterCellEdited -= NotifyCellValueUpdated;
+        }
+
+        public static void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
+        {
+            SubscribeToReference(subscriber, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
+        }
+
+        public static void SubscribeToCollectionUpdates(ListCellViewModel subscriber, string collectionName)
+        {
+            if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
+            {
+                subscribers.Add(subscriber);
+            }
+            else
+            {
+                _listCellsToUpdateWhenCollectionsChange.Add(collectionName, [subscriber]);
+            }
+        }
+
+        public static void SubscribeToUpdatesAtLocation(CellModel subscriber, string sheet, int row, int column)
+        {
+            var key = Utilities.GetUnqiueLocationString(sheet, row, column);
+            SubscribeToReference(subscriber, key, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+        }
+
+        public static void UnsubscribeFromAllCollectionUpdates(CellModel model)
+        {
+            UnsubscribeFromAllReferences(model, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
+        }
+
+        public static void UnsubscribeFromAllLocationUpdates(CellModel model)
+        {
+            UnsubscribeFromAllReferences(model, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+        }
+
+        public static void UnsubscribeFromCollectionUpdates(CellModel model, string collectionName)
+        {
+            UnsubscribeFromReference(model, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
+        }
+
+        public static void UnsubscribeFromCollectionUpdates(ListCellViewModel subscriber, string collectionName)
+        {
+            if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
+            {
+                subscribers.Remove(subscriber);
+                if (subscribers.Count == 0) _listCellsToUpdateWhenCollectionsChange.Remove(collectionName);
+            }
+        }
+
+        public static void UnsubscribeFromUpdatesAtLocation(CellModel model, string locationString)
+        {
+            UnsubscribeFromReference(model, locationString, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+        }
+
+        private static List<string> GetAllSubscriptions(
+            CellModel model,
+            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
+        {
+            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return new();
+            return [.. subscriptions.Keys];
+        }
+
         private static void SubscribeToReference(
             CellModel subscriber,
             string reference,
@@ -178,8 +182,20 @@ namespace Cell.Plugin
             }
         }
 
+        private static void UnsubscribeFromAllReferences(
+            CellModel model,
+            Dictionary<string, Dictionary<CellModel, int>> referenceToSubscriberMap,
+            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
+        {
+            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return;
+            foreach (var subscription in subscriptions.ToList())
+            {
+                UnsubscribeFromReference(model, subscription.Key, referenceToSubscriberMap, subscriberToReferenceMap);
+            }
+        }
+
         private static void UnsubscribeFromReference(
-            CellModel model, 
+            CellModel model,
             string locationString,
             Dictionary<string, Dictionary<CellModel, int>> referenceToSubscriberMap,
             Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
@@ -195,26 +211,6 @@ namespace Cell.Plugin
             if (value == 1) subscribers.Remove(model);
             else subscribers[model] = --value;
             if (subscribers.Count == 0) referenceToSubscriberMap.Remove(locationString);
-        }
-
-        private static void UnsubscribeFromAllReferences(
-            CellModel model,
-            Dictionary<string, Dictionary<CellModel, int>> referenceToSubscriberMap,
-            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
-        {
-            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return;
-            foreach (var subscription in subscriptions.ToList())
-            {
-                UnsubscribeFromReference(model, subscription.Key, referenceToSubscriberMap, subscriberToReferenceMap);
-            }
-        }
-
-        private static List<string> GetAllSubscriptions(
-            CellModel model,
-            Dictionary<CellModel, Dictionary<string, int>> subscriberToReferenceMap)
-        {
-            if (!subscriberToReferenceMap.TryGetValue(model, out var subscriptions)) return new();
-            return [.. subscriptions.Keys];
         }
     }
 }

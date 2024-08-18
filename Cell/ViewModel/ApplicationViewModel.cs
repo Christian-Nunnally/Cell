@@ -9,40 +9,31 @@ namespace Cell.ViewModel
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
-        private readonly CellClipboard _cellClipboard = new();
         private const int BottomPanelHeight = 0;
-        private const int TopPanelHeight = 35;
         private const int LeftPanelHeight = 215;
         private const int RightPanelHeight = 0;
-
-        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
-
-        public static ApplicationViewModel Instance 
-        { 
-            get => instance ?? throw new NullReferenceException("Application instance not set"); 
-            private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); 
-        }
-
+        private const int TopPanelHeight = 35;
+        public readonly ApplicationView MainWindow;
+        private readonly CellClipboard _cellClipboard = new();
+        public bool AreEditingPanelsOpen;
+        private static ApplicationViewModel? instance;
+        private double _applicationWindowHeight = 1300;
+        private double _applicationWindowWidth = 1200;
+        private bool _isAddingSheet;
+        private string _newSheetName;
+        private int editingSpaceBottom;
+        private int editingSpaceLeft;
+        private int editingSpaceRight;
+        private int editingSpaceTop;
+        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
         private ApplicationViewModel(ApplicationView mainWindow)
         {
             MainWindow = mainWindow;
         }
 
-        public readonly ApplicationView MainWindow;
-        private static ApplicationViewModel? instance;
-        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
-        public bool AreEditingPanelsOpen;
+        public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
-        public double ApplicationWindowWidth
-        {
-            get { return _applicationWindowWidth; }
-            set
-            {
-                _applicationWindowWidth = value;
-                NotifyPropertyChanged(nameof(ApplicationWindowWidth));
-            }
-        }
-        private double _applicationWindowWidth = 1200;
+        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
 
         public double ApplicationWindowHeight
         {
@@ -53,15 +44,44 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(ApplicationWindowHeight));
             }
         }
-        private double _applicationWindowHeight = 1300;
 
-        public SheetViewModel SheetViewModel
+        public double ApplicationWindowWidth
         {
-            get { return sheetViewModel; }
+            get { return _applicationWindowWidth; }
             set
             {
-                sheetViewModel = value;
-                NotifyPropertyChanged(nameof(SheetViewModel));
+                _applicationWindowWidth = value;
+                NotifyPropertyChanged(nameof(ApplicationWindowWidth));
+            }
+        }
+
+        public int EditingSpaceBottom
+        {
+            get => editingSpaceBottom;
+            set
+            {
+                editingSpaceBottom = value;
+                NotifyPropertyChanged(nameof(EditingSpaceBottom));
+            }
+        }
+
+        public int EditingSpaceLeft
+        {
+            get => editingSpaceLeft;
+            set
+            {
+                editingSpaceLeft = value;
+                NotifyPropertyChanged(nameof(EditingSpaceLeft));
+            }
+        }
+
+        public int EditingSpaceRight
+        {
+            get => editingSpaceRight;
+            set
+            {
+                editingSpaceRight = value;
+                NotifyPropertyChanged(nameof(EditingSpaceRight));
             }
         }
 
@@ -74,40 +94,6 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(EditingSpaceTop));
             }
         }
-        private int editingSpaceTop;
-
-        public int EditingSpaceBottom
-        {
-            get => editingSpaceBottom;
-            set
-            {
-                editingSpaceBottom = value;
-                NotifyPropertyChanged(nameof(EditingSpaceBottom));
-            }
-        }
-        private int editingSpaceBottom;
-
-        public int EditingSpaceLeft
-        {
-            get => editingSpaceLeft;
-            set
-            {
-                editingSpaceLeft = value;
-                NotifyPropertyChanged(nameof(EditingSpaceLeft));
-            }
-        }
-        private int editingSpaceLeft;
-
-        public int EditingSpaceRight
-        {
-            get => editingSpaceRight;
-            set
-            {
-                editingSpaceRight = value;
-                NotifyPropertyChanged(nameof(EditingSpaceRight));
-            }
-        }
-        private int editingSpaceRight;
 
         public bool IsAddingSheet
         {
@@ -118,7 +104,6 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(IsAddingSheet));
             }
         }
-        private bool _isAddingSheet;
 
         public string NewSheetName
         {
@@ -129,9 +114,24 @@ namespace Cell.ViewModel
                 NotifyPropertyChanged(nameof(NewSheetName));
             }
         }
-        private string _newSheetName;
 
         public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
+
+        public SheetViewModel SheetViewModel
+        {
+            get { return sheetViewModel; }
+            set
+            {
+                sheetViewModel = value;
+                NotifyPropertyChanged(nameof(SheetViewModel));
+            }
+        }
+
+        public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
+        {
+            instance ??= new ApplicationViewModel(mainWindow);
+            return instance;
+        }
 
         public void ChangeSelectedCellsType(CellType newType)
         {
@@ -145,36 +145,22 @@ namespace Cell.ViewModel
             SheetViewModel.UpdateLayout();
         }
 
-        public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
+        public void CloseEditingPanels()
         {
-            instance ??= new ApplicationViewModel(mainWindow);
-            return instance;
+            AreEditingPanelsOpen = false;
+            EditingSpaceTop = 0;
+            EditingSpaceBottom = 0;
+            EditingSpaceLeft = 0;
+            EditingSpaceRight = 0;
         }
 
-        internal void GoToSheet(string sheetName)
+        public void OpenEditingPanels()
         {
-            if (SheetViewModel.SheetName == sheetName) return;
-            SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
-            if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
-            MainWindow.ShowSheetView(sheetViewModel);
-            ApplicationSettings.Instance.LastLoadedSheet = sheetName;
-        }
-
-        internal void GoToCell(CellModel cellModel)
-        {
-            GoToSheet(cellModel.SheetName);
-            var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
-            if (cell is not null) MainWindow.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
-        }
-
-        internal void CopySelectedCells(bool copyTextOnly)
-        {
-            _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
-        }
-
-        internal void PasteCopiedCells()
-        {
-            _cellClipboard.PasteCopiedCells(SheetViewModel);
+            AreEditingPanelsOpen = true;
+            EditingSpaceTop = TopPanelHeight;
+            EditingSpaceBottom = BottomPanelHeight;
+            EditingSpaceLeft = LeftPanelHeight;
+            EditingSpaceRight = RightPanelHeight;
         }
 
         public bool ToggleEditingPanels()
@@ -188,22 +174,30 @@ namespace Cell.ViewModel
             return true;
         }
 
-        public void OpenEditingPanels()
+        internal void CopySelectedCells(bool copyTextOnly)
         {
-            AreEditingPanelsOpen = true;
-            EditingSpaceTop = TopPanelHeight;
-            EditingSpaceBottom = BottomPanelHeight;
-            EditingSpaceLeft = LeftPanelHeight;
-            EditingSpaceRight = RightPanelHeight;
+            _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
         }
 
-        public void CloseEditingPanels()
+        internal void GoToCell(CellModel cellModel)
         {
-            AreEditingPanelsOpen = false;
-            EditingSpaceTop = 0;
-            EditingSpaceBottom = 0;
-            EditingSpaceLeft = 0;
-            EditingSpaceRight = 0;
+            GoToSheet(cellModel.SheetName);
+            var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
+            if (cell is not null) MainWindow.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
+        }
+
+        internal void GoToSheet(string sheetName)
+        {
+            if (SheetViewModel.SheetName == sheetName) return;
+            SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
+            if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
+            MainWindow.ShowSheetView(sheetViewModel);
+            ApplicationSettings.Instance.LastLoadedSheet = sheetName;
+        }
+
+        internal void PasteCopiedCells()
+        {
+            _cellClipboard.PasteCopiedCells(SheetViewModel);
         }
 
         internal void RenameSheet(string oldSheetName, string newSheetName)

@@ -4,12 +4,12 @@ namespace Cell.View.ToolWindow
 {
     internal interface IToolWindow
     {
-        void HandleBeingClosed();
+        public Action? RequestClose { get; set; }
 
         string GetTitle();
 
         List<CommandViewModel> GetToolBarCommands();
 
-        public Action? RequestClose { get; set; }
+        void HandleBeingClosed();
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Cell.Plugin
+﻿namespace Cell.Plugin
 {
     public abstract class CellTextProvider
     {

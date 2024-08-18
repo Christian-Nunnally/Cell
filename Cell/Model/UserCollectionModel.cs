@@ -5,6 +5,25 @@ namespace Cell.Model
 {
     public class UserCollectionModel : PropertyChangedBase
     {
+        private string _sortAndFilterFunctionName = string.Empty;
+        private string name = string.Empty;
+        public UserCollectionModel()
+        {
+        }
+
+        public UserCollectionModel(string name, string type, string basedOnCollection)
+        {
+            Name = name;
+            ItemTypeName = type;
+            BasedOnCollectionName = basedOnCollection;
+        }
+
+        public string BasedOnCollectionName { get; set; } = string.Empty;
+
+        public string ItemTypeName { get; set; } = string.Empty;
+
+        public string ItemTypeOrBasedOnCollectionName => BasedOnCollectionName == string.Empty ? ItemTypeName : BasedOnCollectionName;
+
         public string Name
         {
             get => name; set
@@ -14,8 +33,6 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(Name));
             }
         }
-
-        public string BasedOnCollectionName { get; set; } = string.Empty;
 
         public string SortAndFilterFunctionName
         {
@@ -31,23 +48,6 @@ namespace Cell.Model
                 }
                 NotifyPropertyChanged(nameof(SortAndFilterFunctionName));
             }
-        }
-        private string _sortAndFilterFunctionName = string.Empty;
-        private string name = string.Empty;
-
-        public string ItemTypeName { get; set; } = string.Empty;
-
-        public string ItemTypeOrBasedOnCollectionName => BasedOnCollectionName == string.Empty ? ItemTypeName : BasedOnCollectionName;
-
-        public UserCollectionModel()
-        {
-        }
-
-        public UserCollectionModel(string name, string type, string basedOnCollection)
-        {
-            Name = name;
-            ItemTypeName = type;
-            BasedOnCollectionName = basedOnCollection;
         }
     }
 }

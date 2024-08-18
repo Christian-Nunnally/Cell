@@ -13,52 +13,6 @@ namespace Cell.Persistence
         private const string SheetsSaveDirectory = "Sheets";
         private const string TemplatesSaveDirectory = "Templates";
         private readonly string _saveDirectory = saveDirectory;
-
-        public void LoadAndAddCells()
-        {
-            var sheetsPath = Path.Combine(_saveDirectory, SheetsSaveDirectory);
-            if (!Directory.Exists(sheetsPath)) return;
-            foreach (var directory in Directory.GetDirectories(sheetsPath)) LoadAndAddSheet(directory);
-        }
-
-        private static void LoadAndAddSheet(string directory)
-        {
-            foreach (var file in Directory.GetFiles(directory)) LoadAndAddCell(file);
-        }
-
-        public static IEnumerable<CellModel> LoadSheet(string directory)
-        {
-            var result = new List<CellModel>();
-            foreach (var file in Directory.GetFiles(directory)) result.Add(LoadAndAddCell(file));
-            return result;
-        }
-
-        public void SaveCells()
-        {
-            foreach (var sheet in Cells.Instance.SheetNames) SaveSheet(sheet);
-        }
-
-        private void SaveSheet(string sheet)
-        {
-            foreach (var cell in Cells.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
-        }
-
-        public void RenameSheet(string oldName, string newName)
-        {
-            var oldDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, oldName);
-            var newDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, newName);
-            Directory.Move(oldDirectory, newDirectory);
-        }
-
-        public void SaveCell(CellModel cell)
-        {
-            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
-            Directory.CreateDirectory(directory);
-            var serialized = JsonSerializer.Serialize(cell);
-            var path = Path.Combine(directory, cell.ID);
-            File.WriteAllText(path, serialized);
-        }
-
         public static CellModel LoadCell(string file)
         {
             var text = File.ReadAllText(file) ?? throw new CellError($"Loading file failed at {file}"); ;
@@ -66,11 +20,11 @@ namespace Cell.Persistence
             return cell;
         }
 
-        private static CellModel LoadAndAddCell(string file)
+        public static IEnumerable<CellModel> LoadSheet(string directory)
         {
-            var cell = LoadCell(file);
-            Cells.Instance.AddCell(cell, saveAfterAdding: false);
-            return cell;
+            var result = new List<CellModel>();
+            foreach (var file in Directory.GetFiles(directory)) result.Add(LoadAndAddCell(file));
+            return result;
         }
 
         public void DeleteCell(CellModel cellModel)
@@ -118,7 +72,7 @@ namespace Cell.Persistence
             var functionsBeingImported = GetFunctionsFromTemplate(templatesDirectory);
             if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
             {
-               DialogWindow.ShowDialog("Import canceled", reason);
+                DialogWindow.ShowDialog("Import canceled", reason);
                 return;
             }
 
@@ -133,6 +87,34 @@ namespace Cell.Persistence
                 PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
                 PluginFunctionLoader.SavePluginFunction(_saveDirectory, functionModel.ReturnType, functionModel);
             }
+        }
+
+        public void LoadAndAddCells()
+        {
+            var sheetsPath = Path.Combine(_saveDirectory, SheetsSaveDirectory);
+            if (!Directory.Exists(sheetsPath)) return;
+            foreach (var directory in Directory.GetDirectories(sheetsPath)) LoadAndAddSheet(directory);
+        }
+
+        public void RenameSheet(string oldName, string newName)
+        {
+            var oldDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, oldName);
+            var newDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, newName);
+            Directory.Move(oldDirectory, newDirectory);
+        }
+
+        public void SaveCell(CellModel cell)
+        {
+            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
+            Directory.CreateDirectory(directory);
+            var serialized = JsonSerializer.Serialize(cell);
+            var path = Path.Combine(directory, cell.ID);
+            File.WriteAllText(path, serialized);
+        }
+
+        public void SaveCells()
+        {
+            foreach (var sheet in Cells.Instance.SheetNames) SaveSheet(sheet);
         }
 
         private static bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
@@ -154,6 +136,14 @@ namespace Cell.Persistence
             }
         }
 
+        private static void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
+        {
+            foreach (var cell in cells.Where(cell => cell.MergedWith != string.Empty))
+            {
+                cell.MergedWith = oldIdToNewIdMap[cell.MergedWith];
+            }
+        }
+
         private static List<PluginFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
         {
             var functionsBeingImported = new List<PluginFunctionModel>();
@@ -168,14 +158,6 @@ namespace Cell.Persistence
             return functionsBeingImported;
         }
 
-        private static void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
-        {
-            foreach (var cell in cells.Where(cell => cell.MergedWith != string.Empty))
-            {
-                cell.MergedWith = oldIdToNewIdMap[cell.MergedWith];
-            }
-        }
-
         private static Dictionary<string, string> GiveCellsNewUniqueIndentities(string sheetName, IEnumerable<CellModel> cells)
         {
             var oldIdToNewIdMap = new Dictionary<string, string>();
@@ -187,6 +169,23 @@ namespace Cell.Persistence
                 cell.SheetName = sheetName;
             }
             return oldIdToNewIdMap;
+        }
+
+        private static CellModel LoadAndAddCell(string file)
+        {
+            var cell = LoadCell(file);
+            Cells.Instance.AddCell(cell, saveAfterAdding: false);
+            return cell;
+        }
+
+        private static void LoadAndAddSheet(string directory)
+        {
+            foreach (var file in Directory.GetFiles(directory)) LoadAndAddCell(file);
+        }
+
+        private void SaveSheet(string sheet)
+        {
+            foreach (var cell in Cells.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
         }
     }
 }

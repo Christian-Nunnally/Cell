@@ -7,6 +7,7 @@ namespace Cell.ViewModel
     public class ButtonCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
     {
         private ICommand? _buttonClickedCommand;
+        public static bool CanExecute => true;
 
         public ICommand ButtonClickedCommand
         {
@@ -15,7 +16,6 @@ namespace Cell.ViewModel
                 return _buttonClickedCommand ??= new RelayCommand(x => CanExecute, x => ButtonClicked());
             }
         }
-        public static bool CanExecute => true;
 
         public void ButtonClicked()
         {

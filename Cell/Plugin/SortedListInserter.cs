@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Cell.Plugin
+﻿namespace Cell.Plugin
 {
     public class SortedListInserter<T>
     {
         private readonly Func<int, int> _getSortValue;
-
         public SortedListInserter(Func<int, int> getSortValue)
         {
             _getSortValue = getSortValue ?? throw new ArgumentNullException(nameof(getSortValue));

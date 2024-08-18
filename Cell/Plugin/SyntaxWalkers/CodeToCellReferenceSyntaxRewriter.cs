@@ -8,7 +8,6 @@ namespace Cell.Plugin.SyntaxWalkers
     public partial class CodeToCellReferenceSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
     {
         private readonly CellModel cell = cell;
-
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -75,4 +74,3 @@ namespace Cell.Plugin.SyntaxWalkers
         }
     }
 }
-

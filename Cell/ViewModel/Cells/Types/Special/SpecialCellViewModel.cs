@@ -1,5 +1,4 @@
-﻿
-using Cell.Model;
+﻿using Cell.Model;
 
 namespace Cell.ViewModel
 {

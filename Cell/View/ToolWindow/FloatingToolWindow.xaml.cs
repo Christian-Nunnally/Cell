@@ -16,18 +16,21 @@ namespace Cell.View
         private readonly Canvas _canvas;
         private IToolWindow? _content;
         private IResizableToolWindow? _resizableContent;
-
-        public string ToolWindowTitle => _content?.GetTitle() ?? "";
-
-        public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
-
-        public bool IsToolWindowResizeable => _resizableContent != null;
-
+        private bool _resizing;
+        private Point _resizingStartPosition;
         public FloatingToolWindow(Canvas canvas)
         {
             InitializeComponent();
             _canvas = canvas;
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
+
+        public bool IsToolWindowResizeable => _resizableContent != null;
+
+        public string ToolWindowTitle => _content?.GetTitle() ?? "";
 
         public void SetContent(UserControl content)
         {
@@ -45,14 +48,16 @@ namespace Cell.View
             }
         }
 
-        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-        }
+        private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
 
         private void CloseButtonClicked(object sender, RoutedEventArgs e)
         {
             RequestClose();
+        }
+
+        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
         }
 
         private void RequestClose()
@@ -60,42 +65,6 @@ namespace Cell.View
             _canvas.Children.Remove(this);
             _content?.HandleBeingClosed();
         }
-
-        private void Toolbox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is FloatingToolWindow toolbox)
-            {
-                var offset = e.GetPosition(_canvas);
-                offset.X -= Canvas.GetLeft(toolbox);
-                offset.Y -= Canvas.GetTop(toolbox);
-                toolbox.Tag = offset;
-                toolbox.CaptureMouse();
-            }
-        }
-
-        private void Toolbox_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (sender is FloatingToolWindow toolbox && toolbox.IsMouseCaptured)
-            {
-                var position = e.GetPosition(_canvas);
-                var offset = (Point)toolbox.Tag;
-                Canvas.SetLeft(toolbox, position.X - offset.X);
-                Canvas.SetTop(toolbox, position.Y - offset.Y);
-            }
-        }
-
-        private void Toolbox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is FloatingToolWindow toolbox)
-            {
-                toolbox.ReleaseMouseCapture();
-            }
-        }
-
-        private bool _resizing;
-        private Point _resizingStartPosition;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -128,6 +97,35 @@ namespace Cell.View
             e.Handled = true;
         }
 
-        private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
+        private void Toolbox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FloatingToolWindow toolbox)
+            {
+                var offset = e.GetPosition(_canvas);
+                offset.X -= Canvas.GetLeft(toolbox);
+                offset.Y -= Canvas.GetTop(toolbox);
+                toolbox.Tag = offset;
+                toolbox.CaptureMouse();
+            }
+        }
+
+        private void Toolbox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FloatingToolWindow toolbox)
+            {
+                toolbox.ReleaseMouseCapture();
+            }
+        }
+
+        private void Toolbox_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (sender is FloatingToolWindow toolbox && toolbox.IsMouseCaptured)
+            {
+                var position = e.GetPosition(_canvas);
+                var offset = (Point)toolbox.Tag;
+                Canvas.SetLeft(toolbox, position.X - offset.X);
+                Canvas.SetTop(toolbox, position.Y - offset.Y);
+            }
+        }
     }
 }

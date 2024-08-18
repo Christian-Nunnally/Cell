@@ -1,37 +1,23 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Data;
+using Cell.Model;
+using Cell.Persistence;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
-using Cell.Persistence;
-using Cell.Data;
 using System.Windows.Media;
-using Cell.Common;
 
 namespace Cell.ViewModel
 {
     public class SheetViewModel(string sheetName) : PropertyChangedBase
     {
-        public void LoadCellViewModels()
-        {
-            foreach (var cell in CellViewModelFactory.CreateCellViewModelsForSheet(this))
-            {
-                AddCell(cell);
-            }
-            InitializeSheet(); 
-        }
-
+        public static readonly SheetViewModel NullSheet = new("null");
+        private bool _enableMultiEditSelectedCells = true;
+        private string lastKeyPressed = string.Empty;
         private CellViewModel? selectedCellViewModel;
-
-        public string SheetName { get; private set; } = sheetName;
-
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
         public List<CellViewModel> HighlightedCellViewModels { get; } = [];
-
-        public List<CellViewModel> SelectedCellViewModels { get; } = [];
-
-        private string lastKeyPressed = string.Empty;
-        private bool _enableMultiEditSelectedCells = true;
 
         public string LastKeyPressed
         {
@@ -60,66 +46,16 @@ namespace Cell.ViewModel
                     selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
                     selectedCellViewModel.SelectionColor = SelectedCellViewModels.Count > 1
                         ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"))
-                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00000000")); 
+                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00000000"));
                 }
                 NotifyPropertyChanged(nameof(SelectedCellViewModel));
                 _enableMultiEditSelectedCells = true;
             }
         }
 
-        private void PropertyChangedOnSelectedCell(object? sender, PropertyChangedEventArgs e)
-        {
-            if (!_enableMultiEditSelectedCells) return;
-            if (sender is null) return;
-            if (string.IsNullOrEmpty(e.PropertyName)) return;
-            foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
-            {
-                if (cell == sender) continue;
-                var cellType = cell.GetType();
-                var selectedType = sender.GetType();
-                PropertyInfo? cellProperty = cellType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
-                PropertyInfo? selectedProperty = selectedType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
-                if (null != cellProperty && cellProperty.CanWrite && selectedProperty != null && selectedProperty.CanRead)
-                {
-                    cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
-                }
-            }
-        }
+        public List<CellViewModel> SelectedCellViewModels { get; } = [];
 
-        public void InitializeSheet()
-        {
-            if (CellViewModels.Count == 0) AddDefaultCells();
-            UpdateLayout();
-        }
-
-        private void AddDefaultCells()
-        {
-            var corner = CellModelFactory.Create(0, 0, CellType.Corner, SheetName);
-            AddCell(corner);
-            var row = CellModelFactory.Create(1, 0, CellType.Row, SheetName);
-            AddCell(row);
-            var column = CellModelFactory.Create(0, 1, CellType.Column, SheetName);
-            AddCell(column);
-            var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
-            AddCell(cell);
-
-            var columnViewModel = CellViewModels.OfType<ColumnCellViewModel>().First();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-
-            var rowViewModel = CellViewModels.OfType<RowCellViewModel>().First();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-        }
-
-        internal void UpdateLayout()
-        {
-            _enableMultiEditSelectedCells = false;
-            var layout = new CellLayout(CellViewModels);
-            layout.UpdateLayout();
-            _enableMultiEditSelectedCells = true;
-        }
+        public string SheetName { get; private set; } = sheetName;
 
         public void AddCell(CellModel newModel)
         {
@@ -133,16 +69,11 @@ namespace Cell.ViewModel
             cell.Model.PropertyChanged += CellModelPropertyChanged;
         }
 
-        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        public void DeleteCell(CellModel cell)
         {
-            var model = sender as CellModel ?? throw new NullReferenceException("This handler is only for use with non null CellModel objects.");
-            var viewModel = CellViewModels.FirstOrDefault(x => x.Model == model);
-            if (viewModel == null) return;
-            if (e.PropertyName == nameof(CellModel.CellType))
-            {
-                var newType = model.CellType;
-                ReinstantiateCellsViewModel(viewModel);
-            }
+            var viewModel = CellViewModels.First(x => x.Model == cell);
+            if (viewModel.Model.MergedWith == viewModel.Model.ID) UnmergeCell(viewModel);
+            DeleteCell(viewModel);
         }
 
         public void DeleteCell(CellViewModel cell)
@@ -153,19 +84,56 @@ namespace Cell.ViewModel
             Cells.Instance.RemoveCell(cell.Model);
         }
 
-        public void DeleteCell(CellModel cell)
+        public void HighlightCell(CellViewModel cellToHighlight, string color)
         {
-            var viewModel = CellViewModels.First(x => x.Model == cell);
-            if (viewModel.Model.MergedWith == viewModel.Model.ID) UnmergeCell(viewModel);
-            DeleteCell(viewModel);
+            _enableMultiEditSelectedCells = false;
+            cellToHighlight.HighlightCell(color);
+            HighlightedCellViewModels.Add(cellToHighlight);
+            _enableMultiEditSelectedCells = true;
         }
 
-        public void UnselectAllCells()
+        public void InitializeSheet()
         {
-            foreach (var cell in SelectedCellViewModels.ToList())
+            if (CellViewModels.Count == 0) AddDefaultCells();
+            UpdateLayout();
+        }
+
+        public void LoadCellViewModels()
+        {
+            foreach (var cell in CellViewModelFactory.CreateCellViewModelsForSheet(this))
             {
-                UnselectCell(cell);
+                AddCell(cell);
             }
+            InitializeSheet();
+        }
+
+        public void MoveSelection(int columnOffset, int rowOffset)
+        {
+            if (SelectedCellViewModel is null) return;
+            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight();
+            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow();
+            var cellToSelect = CellViewModels.FirstOrDefault(x => x.Column == SelectedCellViewModel.Column + columnOffset && x.Row == SelectedCellViewModel.Row + rowOffset);
+            if (cellToSelect is null) return;
+            UnselectAllCells();
+            SelectCell(cellToSelect);
+        }
+
+        public void MoveSelectionDown() => MoveSelection(0, 1);
+
+        public void MoveSelectionLeft() => MoveSelection(-1, 0);
+
+        public void MoveSelectionRight() => MoveSelection(1, 0);
+
+        public void MoveSelectionUp() => MoveSelection(0, -1);
+
+        public void ReinstantiateCellsViewModel(CellViewModel? cellViewModel)
+        {
+            if (cellViewModel is null) return;
+            SelectedCellViewModels.Remove(cellViewModel);
+            HighlightedCellViewModels.Remove(cellViewModel);
+            CellViewModels.Remove(cellViewModel);
+            var newViewModel = CellViewModelFactory.Create(cellViewModel.Model, this);
+            CellViewModels.Add(newViewModel);
         }
 
         public void SelectCell(CellModel cell) => SelectCell(CellViewModels.First(x => x.Model == cell));
@@ -210,15 +178,82 @@ namespace Cell.ViewModel
             }
         }
 
-        private void HighlightCollectionDependenciesForFunction(PluginFunctionViewModel function)
+        public void UnhighlightAllCells()
         {
-            foreach (var collectionReference in function.CollectionDependencies)
+            foreach (var cellToUnHighlight in HighlightedCellViewModels)
             {
-                var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
-                foreach (var cellToHighlight in cellsToHighlight)
-                {
-                    HighlightCell(cellToHighlight, "#0438ff44");
-                }
+                cellToUnHighlight.UnhighlightCell();
+            }
+            HighlightedCellViewModels.Clear();
+        }
+
+        public void UnmergeCell(CellViewModel mergedCell)
+        {
+            var cells = CellViewModels.Where(x => x.Model.MergedWith == mergedCell.ID);
+            foreach (var cell in cells)
+            {
+                if (mergedCell == cell) continue;
+                cell.Model.MergedWith = string.Empty;
+            }
+            mergedCell.Model.MergedWith = string.Empty;
+        }
+
+        public void UnselectAllCells()
+        {
+            foreach (var cell in SelectedCellViewModels.ToList())
+            {
+                UnselectCell(cell);
+            }
+        }
+
+        internal void UnselectCell(CellViewModel cell)
+        {
+            SelectedCellViewModels.Remove(cell);
+            cell.IsSelected = false;
+            if (SelectedCellViewModel == cell)
+            {
+                SelectedCellViewModel = null;
+            }
+        }
+
+        internal void UpdateLayout()
+        {
+            _enableMultiEditSelectedCells = false;
+            var layout = new CellLayout(CellViewModels);
+            layout.UpdateLayout();
+            _enableMultiEditSelectedCells = true;
+        }
+
+        private void AddDefaultCells()
+        {
+            var corner = CellModelFactory.Create(0, 0, CellType.Corner, SheetName);
+            AddCell(corner);
+            var row = CellModelFactory.Create(1, 0, CellType.Row, SheetName);
+            AddCell(row);
+            var column = CellModelFactory.Create(0, 1, CellType.Column, SheetName);
+            AddCell(column);
+            var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
+            AddCell(cell);
+
+            var columnViewModel = CellViewModels.OfType<ColumnCellViewModel>().First();
+            columnViewModel.AddColumnToTheRight();
+            columnViewModel.AddColumnToTheRight();
+
+            var rowViewModel = CellViewModels.OfType<RowCellViewModel>().First();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+            rowViewModel.AddRowBelow();
+        }
+
+        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var model = sender as CellModel ?? throw new NullReferenceException("This handler is only for use with non null CellModel objects.");
+            var viewModel = CellViewModels.FirstOrDefault(x => x.Model == model);
+            if (viewModel == null) return;
+            if (e.PropertyName == nameof(CellModel.CellType))
+            {
+                var newType = model.CellType;
+                ReinstantiateCellsViewModel(viewModel);
             }
         }
 
@@ -265,73 +300,35 @@ namespace Cell.ViewModel
             }
         }
 
-        public void HighlightCell(CellViewModel cellToHighlight, string color)
+        private void HighlightCollectionDependenciesForFunction(PluginFunctionViewModel function)
         {
-            _enableMultiEditSelectedCells = false;
-            cellToHighlight.HighlightCell(color);
-            HighlightedCellViewModels.Add(cellToHighlight);
-            _enableMultiEditSelectedCells = true;
-        }
-
-        public void UnhighlightAllCells()
-        {
-            foreach (var cellToUnHighlight in HighlightedCellViewModels)
+            foreach (var collectionReference in function.CollectionDependencies)
             {
-                cellToUnHighlight.UnhighlightCell();
-            }
-            HighlightedCellViewModels.Clear();
-        }
-
-        public void ReinstantiateCellsViewModel(CellViewModel? cellViewModel)
-        {
-            if (cellViewModel is null) return;
-            SelectedCellViewModels.Remove(cellViewModel);
-            HighlightedCellViewModels.Remove(cellViewModel);
-            CellViewModels.Remove(cellViewModel);
-            var newViewModel = CellViewModelFactory.Create(cellViewModel.Model, this);
-            CellViewModels.Add(newViewModel);
-        }
-
-        internal void UnselectCell(CellViewModel cell)
-        {
-            SelectedCellViewModels.Remove(cell);
-            cell.IsSelected = false;
-            if (SelectedCellViewModel == cell)
-            {
-                SelectedCellViewModel = null;
+                var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
+                foreach (var cellToHighlight in cellsToHighlight)
+                {
+                    HighlightCell(cellToHighlight, "#0438ff44");
+                }
             }
         }
 
-        public void MoveSelectionDown() => MoveSelection(0, 1);
-
-        public void MoveSelectionLeft() => MoveSelection(-1, 0);
-
-        public void MoveSelectionUp() => MoveSelection(0, -1);
-
-        public void MoveSelectionRight() => MoveSelection(1, 0);
-
-        public void MoveSelection(int columnOffset, int rowOffset)
+        private void PropertyChangedOnSelectedCell(object? sender, PropertyChangedEventArgs e)
         {
-            if (SelectedCellViewModel is null) return;
-            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight();
-            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow();
-            var cellToSelect = CellViewModels.FirstOrDefault(x => x.Column == SelectedCellViewModel.Column + columnOffset && x.Row == SelectedCellViewModel.Row + rowOffset);
-            if (cellToSelect is null) return;
-            UnselectAllCells();
-            SelectCell(cellToSelect);
-        }
-
-        public void UnmergeCell(CellViewModel mergedCell)
-        {
-            var cells = CellViewModels.Where(x => x.Model.MergedWith == mergedCell.ID);
-            foreach (var cell in cells)
+            if (!_enableMultiEditSelectedCells) return;
+            if (sender is null) return;
+            if (string.IsNullOrEmpty(e.PropertyName)) return;
+            foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
             {
-                if (mergedCell == cell) continue;
-                cell.Model.MergedWith = string.Empty;
+                if (cell == sender) continue;
+                var cellType = cell.GetType();
+                var selectedType = sender.GetType();
+                PropertyInfo? cellProperty = cellType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                PropertyInfo? selectedProperty = selectedType.GetProperty(e.PropertyName, BindingFlags.Public | BindingFlags.Instance);
+                if (null != cellProperty && cellProperty.CanWrite && selectedProperty != null && selectedProperty.CanRead)
+                {
+                    cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
+                }
             }
-            mergedCell.Model.MergedWith = string.Empty;
         }
-
-        public static readonly SheetViewModel NullSheet = new("null");
     }
 }

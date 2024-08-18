@@ -10,11 +10,10 @@ namespace Cell.Plugin
     {
         private readonly CSharpCompilation _compilation;
         private readonly string _typeName = "Plugin.Program";
-
         public RoslynCompiler(SyntaxTree syntax, Type[] typesToReference)
         {
             var refs = typesToReference.Select(GetMetadataReferenceForType).ToList();
-            
+
             var reference = GetRuntimeMetadataReference();
             refs.Add(reference);
             reference = GetMetadataReferenceForType(typeof(object));
@@ -27,24 +26,6 @@ namespace Cell.Plugin
             var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
 
             _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], refs, options);
-        }
-
-        private static PortableExecutableReference GetRuntimeMetadataReference()
-        {
-            var garbageCollectorType = typeof(System.Runtime.GCSettings);
-            var garbageCollectorTypeInfo = garbageCollectorType.GetTypeInfo();
-            var garbageCollectorAssembly = garbageCollectorTypeInfo.Assembly;
-            var assemblyLocation = garbageCollectorAssembly.Location;
-            var directory = Path.GetDirectoryName(assemblyLocation) ?? throw new Exception($"Could not get directory name from {assemblyLocation}");
-            var systemRuntimeDllPath = Path.Combine(directory, "System.Runtime.dll");
-            return MetadataReference.CreateFromFile(systemRuntimeDllPath);
-        }
-
-        private PortableExecutableReference GetMetadataReferenceForType(Type type)
-        {
-            var assembly = type.Assembly;
-            var location = assembly.Location;
-            return MetadataReference.CreateFromFile(location);
         }
 
         public Type Compile()
@@ -72,6 +53,24 @@ namespace Cell.Plugin
 
             var generatedAssembly = AssemblyLoadContext.Default.LoadFromStream(ms) ?? throw new Exception("Could not load generated assembly");
             return generatedAssembly.GetType(_typeName) ?? throw new Exception($"Unable to get type '{_typeName}' from assembly");
+        }
+
+        private static PortableExecutableReference GetRuntimeMetadataReference()
+        {
+            var garbageCollectorType = typeof(System.Runtime.GCSettings);
+            var garbageCollectorTypeInfo = garbageCollectorType.GetTypeInfo();
+            var garbageCollectorAssembly = garbageCollectorTypeInfo.Assembly;
+            var assemblyLocation = garbageCollectorAssembly.Location;
+            var directory = Path.GetDirectoryName(assemblyLocation) ?? throw new Exception($"Could not get directory name from {assemblyLocation}");
+            var systemRuntimeDllPath = Path.Combine(directory, "System.Runtime.dll");
+            return MetadataReference.CreateFromFile(systemRuntimeDllPath);
+        }
+
+        private PortableExecutableReference GetMetadataReferenceForType(Type type)
+        {
+            var assembly = type.Assembly;
+            var location = assembly.Location;
+            return MetadataReference.CreateFromFile(location);
         }
     }
 }

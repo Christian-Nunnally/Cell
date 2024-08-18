@@ -9,17 +9,6 @@ namespace Cell.Plugin
     public static class CellTriggerManager
     {
         private readonly static Dictionary<string, CellModel> _cellsBeingEdited = [];
-
-        public static void StartMonitoringCell(CellModel model)
-        {
-            model.CellTriggered += CellTriggered;
-        }
-
-        public static void StopMonitoringCell(CellModel model)
-        {
-            model.CellTriggered -= CellTriggered;
-        }
-
         public static void CellTriggered(CellModel cell, EditContext editContext)
         {
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
@@ -30,6 +19,16 @@ namespace Cell.Plugin
                 cell.ErrorText = result.Result ?? "error message is null";
             }
             _cellsBeingEdited.Remove(cell.ID);
+        }
+
+        public static void StartMonitoringCell(CellModel model)
+        {
+            model.CellTriggered += CellTriggered;
+        }
+
+        public static void StopMonitoringCell(CellModel model)
+        {
+            model.CellTriggered -= CellTriggered;
         }
     }
 }

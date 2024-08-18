@@ -8,40 +8,27 @@ namespace Cell.ViewModel.ToolWindow
     public class FunctionManagerWindowViewModel : PropertyChangedBase
     {
         private readonly ObservableCollection<PluginFunctionViewModel> _functions;
-
-        public double UserSetHeight
-        {
-            get => userSetHeight; set
-            {
-                if (userSetHeight == value) return;
-                userSetHeight = value;
-                NotifyPropertyChanged(nameof(UserSetHeight));
-            }
-        }
-        private double userSetHeight;
-
-        public double UserSetWidth
-        {
-            get => userSetWidth; set
-            {
-                if (userSetWidth == value) return;
-                userSetWidth = value;
-                NotifyPropertyChanged(nameof(UserSetWidth));
-            }
-        }
-        private double userSetWidth;
-
-        public string FilterString
-        {
-            get => filterString; set
-            {
-                if (filterString == value) return;
-                filterString = value;
-                NotifyPropertyChanged(nameof(FilterString));
-                FilterVisibleFunctions();
-            }
-        }
+        private string filterSheet = "All";
         private string filterString = string.Empty;
+        private bool includePopulateFunctions = true;
+        private bool includeTriggerFunctions = true;
+        private PluginFunctionViewModel? selectedFunction;
+        private double userSetHeight;
+        private double userSetWidth;
+        public FunctionManagerWindowViewModel(ObservableCollection<PluginFunctionViewModel> pluginFunctions)
+        {
+            _functions = pluginFunctions;
+            _functions.CollectionChanged += FunctionsCollectionChanged;
+            foreach (var function in _functions)
+            {
+                Functions.Add(function);
+            }
+            SheetNameOptions.Add("All");
+            foreach (var sheet in Cells.Instance.SheetNames)
+            {
+                SheetNameOptions.Add(sheet);
+            }
+        }
 
         public string FilterSheet
         {
@@ -53,21 +40,19 @@ namespace Cell.ViewModel.ToolWindow
                 FilterVisibleFunctions();
             }
         }
-        private string filterSheet = "All";
 
-
-        public bool IncludeTriggerFunctions
+        public string FilterString
         {
-            get => includeTriggerFunctions; set
+            get => filterString; set
             {
-                if (includeTriggerFunctions == value) return;
-                includeTriggerFunctions = value;
-                if (!includeTriggerFunctions && !includePopulateFunctions) IncludePopulateFunctions = true;
-                NotifyPropertyChanged(nameof(IncludeTriggerFunctions));
+                if (filterString == value) return;
+                filterString = value;
+                NotifyPropertyChanged(nameof(FilterString));
                 FilterVisibleFunctions();
             }
         }
-        private bool includeTriggerFunctions = true;
+
+        public ObservableCollection<PluginFunctionViewModel> Functions { get; set; } = [];
 
         public bool IncludePopulateFunctions
         {
@@ -80,38 +65,18 @@ namespace Cell.ViewModel.ToolWindow
                 FilterVisibleFunctions();
             }
         }
-        private bool includePopulateFunctions = true;
 
-        private void FilterVisibleFunctions()
+        public bool IncludeTriggerFunctions
         {
-            for (int i = Functions.Count - 1; i >= 0; i--)
+            get => includeTriggerFunctions; set
             {
-                if (IsFunctionIncludedInFilter(Functions[i])) continue;
-                Functions.RemoveAt(i);
-            }
-
-            foreach (var function in _functions)
-            {
-                if (Functions.Contains(function)) continue;
-                if (!IsFunctionIncludedInFilter(function)) continue;
-                Functions.Add(function);
+                if (includeTriggerFunctions == value) return;
+                includeTriggerFunctions = value;
+                if (!includeTriggerFunctions && !includePopulateFunctions) IncludePopulateFunctions = true;
+                NotifyPropertyChanged(nameof(IncludeTriggerFunctions));
+                FilterVisibleFunctions();
             }
         }
-
-        private bool IsFunctionIncludedInFilter(PluginFunctionViewModel function)
-        {
-            if (!function.Model.Name.Contains(filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
-            if (filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == filterSheet)) return false;
-            if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
-            if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
-            return true;
-        }
-
-        public ObservableCollection<PluginFunctionViewModel> Functions { get; set; } = [];
-
-        public ObservableCollection<string> SheetNameOptions { get; set; } = [];
-
-        public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
 
         public ObservableCollection<string> ReferencedCollectionsByTheSelectedFunction { get; set; } = [];
 
@@ -136,20 +101,44 @@ namespace Cell.ViewModel.ToolWindow
                 }
             }
         }
-        private PluginFunctionViewModel? selectedFunction;
 
-        public FunctionManagerWindowViewModel(ObservableCollection<PluginFunctionViewModel> pluginFunctions)
+        public ObservableCollection<string> SheetNameOptions { get; set; } = [];
+
+        public double UserSetHeight
         {
-            _functions = pluginFunctions;
-            _functions.CollectionChanged += FunctionsCollectionChanged;
+            get => userSetHeight; set
+            {
+                if (userSetHeight == value) return;
+                userSetHeight = value;
+                NotifyPropertyChanged(nameof(UserSetHeight));
+            }
+        }
+
+        public double UserSetWidth
+        {
+            get => userSetWidth; set
+            {
+                if (userSetWidth == value) return;
+                userSetWidth = value;
+                NotifyPropertyChanged(nameof(UserSetWidth));
+            }
+        }
+
+        public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
+
+        private void FilterVisibleFunctions()
+        {
+            for (int i = Functions.Count - 1; i >= 0; i--)
+            {
+                if (IsFunctionIncludedInFilter(Functions[i])) continue;
+                Functions.RemoveAt(i);
+            }
+
             foreach (var function in _functions)
             {
+                if (Functions.Contains(function)) continue;
+                if (!IsFunctionIncludedInFilter(function)) continue;
                 Functions.Add(function);
-            }
-            SheetNameOptions.Add("All");
-            foreach (var sheet in Cells.Instance.SheetNames)
-            {
-                SheetNameOptions.Add(sheet);
             }
         }
 
@@ -157,6 +146,15 @@ namespace Cell.ViewModel.ToolWindow
         {
             Functions.Clear();
             FilterVisibleFunctions();
+        }
+
+        private bool IsFunctionIncludedInFilter(PluginFunctionViewModel function)
+        {
+            if (!function.Model.Name.Contains(filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
+            if (filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == filterSheet)) return false;
+            if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
+            if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
+            return true;
         }
     }
 }

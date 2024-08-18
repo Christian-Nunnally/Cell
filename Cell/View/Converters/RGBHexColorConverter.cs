@@ -6,12 +6,6 @@ namespace Cell.View.Converters
 {
     public class RGBHexColorConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is not string hex) return Colors.Green;
-            return ConvertHexStringToColor(hex);
-        }
-
         public static Color ConvertHexStringToColor(string hex)
         {
             if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
@@ -25,6 +19,12 @@ namespace Cell.View.Converters
             catch (FormatException) { }
             catch (ArgumentException) { }
             return Colors.Green;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not string hex) return Colors.Green;
+            return ConvertHexStringToColor(hex);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

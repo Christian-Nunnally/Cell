@@ -12,6 +12,17 @@ namespace Cell.View.Cells
             InitializeComponent();
         }
 
+        private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (textBox.DataContext is TextboxCellViewModel cell)
+                {
+                    cell.SetTextBox(textBox);
+                }
+            }
+        }
+
         private void TextBoxKeyDownForCell(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox textbox) return;
@@ -28,17 +39,6 @@ namespace Cell.View.Cells
                 if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionLeft();
                 else ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionRight();
                 e.Handled = true;
-            }
-        }
-
-        private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                if (textBox.DataContext is TextboxCellViewModel cell)
-                {
-                    cell.SetTextBox(textBox);
-                }
             }
         }
     }

@@ -66,8 +66,10 @@ namespace Cell.Plugin
 
     public class UserList
     {
-        public static List<string> AllUserListNames { get; } = [];
+        private UserList()
+        {
+        }
 
-        private UserList() { }
+        public static List<string> AllUserListNames { get; } = [];
     }
 }

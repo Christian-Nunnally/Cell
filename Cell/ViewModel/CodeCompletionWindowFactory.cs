@@ -1,14 +1,14 @@
-﻿using Cell.Model.Plugin;
-using Cell.Model;
-using Cell.Plugin.SyntaxWalkers;
+﻿using Cell.Model;
+using Cell.Model.Plugin;
+using Cell.Persistence;
 using Cell.Plugin;
+using Cell.Plugin.SyntaxWalkers;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Text;
 using System.Reflection;
-using Cell.Persistence;
+using System.Text;
 
 namespace Cell.ViewModel
 {
@@ -16,37 +16,6 @@ namespace Cell.ViewModel
     {
         private readonly static Dictionary<string, List<string>> _cachedTypes = [];
         private readonly static Dictionary<string, string> _typeNameToFullyQualifiedTypeNameMap = [];
-
-        public static void RegisterTypesInAssembly(Assembly assembly)
-        {
-            foreach (var type in assembly.GetTypes())
-            {
-                if (type.IsPublic)
-                {
-                    if (_typeNameToFullyQualifiedTypeNameMap.ContainsKey(type.Name))
-                    {
-                        throw new InvalidOperationException($"Type name {type.Name} is already registered. Semmantic analysis doesn't currently know the fqn of the type, so type names must be globally unique.");
-                    }
-                    if (type.FullName is not null) _typeNameToFullyQualifiedTypeNameMap[type.Name] = type.FullName;
-                }
-            }
-        }
-
-        public static List<string> GetMembersOfType(string typeName)
-        {
-            if (_cachedTypes.TryGetValue(typeName, out var members)) return members;
-            if (_typeNameToFullyQualifiedTypeNameMap.TryGetValue(typeName, out var fullQualifiedName))
-            {
-                var type = Type.GetType(fullQualifiedName);
-                if (type is not null)
-                {
-                    _cachedTypes[typeName] = type.GetMembers().Select(x => x.Name).ToList();
-                    return _cachedTypes[typeName];
-                }
-            }
-            return ["No members found"];
-        }
-
         public static CompletionWindow? Create(TextArea textArea, string type, bool doesFunctionReturnValue)
         {
             var model = new PluginFunctionModel("testtesttest", textArea.Document.Text, doesFunctionReturnValue ? "object" : "void");
@@ -131,6 +100,36 @@ namespace Cell.ViewModel
             }
 
             return sb.ToString();
+        }
+
+        public static List<string> GetMembersOfType(string typeName)
+        {
+            if (_cachedTypes.TryGetValue(typeName, out var members)) return members;
+            if (_typeNameToFullyQualifiedTypeNameMap.TryGetValue(typeName, out var fullQualifiedName))
+            {
+                var type = Type.GetType(fullQualifiedName);
+                if (type is not null)
+                {
+                    _cachedTypes[typeName] = type.GetMembers().Select(x => x.Name).ToList();
+                    return _cachedTypes[typeName];
+                }
+            }
+            return ["No members found"];
+        }
+
+        public static void RegisterTypesInAssembly(Assembly assembly)
+        {
+            foreach (var type in assembly.GetTypes())
+            {
+                if (type.IsPublic)
+                {
+                    if (_typeNameToFullyQualifiedTypeNameMap.ContainsKey(type.Name))
+                    {
+                        throw new InvalidOperationException($"Type name {type.Name} is already registered. Semmantic analysis doesn't currently know the fqn of the type, so type names must be globally unique.");
+                    }
+                    if (type.FullName is not null) _typeNameToFullyQualifiedTypeNameMap[type.Name] = type.FullName;
+                }
+            }
         }
 
         private static bool IsRootNamespace(ISymbol symbol)

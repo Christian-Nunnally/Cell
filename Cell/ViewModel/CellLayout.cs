@@ -4,11 +4,10 @@ namespace Cell.ViewModel
 {
     public class CellLayout
     {
+        private readonly IEnumerable<CellViewModel> _cells;
+        private readonly List<CellViewModel> _columns;
         private readonly CellViewModel _corner;
         private readonly List<CellViewModel> _rows;
-        private readonly List<CellViewModel> _columns;
-        private readonly IEnumerable<CellViewModel> _cells;
-
         public CellLayout(IEnumerable<CellViewModel> cells)
         {
             _cells = cells;
@@ -26,47 +25,20 @@ namespace Cell.ViewModel
             LayoutOtherCells();
         }
 
-        private void LayoutRowCells()
+        private static double ComputeMergedCellsHeight(CellViewModel cell)
         {
-            var lastCell = _corner;
-            foreach (var cellViewModel in _rows.Skip(1))
+            bool isHiddenByMerge = cell.Model.MergedWith != cell.ID;
+            if (isHiddenByMerge) return 0;
+
+            var result = 0.0;
+            var currentRow = cell.Row;
+            var currentCell = Cells.Instance.GetCell(cell.Model.SheetName, currentRow, cell.Column);
+            while (currentCell?.MergedWith == cell.ID)
             {
-                RowCellViewModel rowCellViewModel = (RowCellViewModel)cellViewModel;
-                rowCellViewModel.X = 0;
-                rowCellViewModel.Y = lastCell.Y + lastCell.Height;
-                lastCell = rowCellViewModel;
+                result += Cells.Instance.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
+                currentCell = Cells.Instance.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
             }
-        }
-
-        private void LayoutColumnCells()
-        {
-            var lastCell = _corner;
-            foreach (var columnCellViewModel in _columns.Skip(1))
-            {
-                columnCellViewModel.X = lastCell.X + lastCell.Width;
-                columnCellViewModel.Y = 0;
-                lastCell = columnCellViewModel;
-            }
-        }
-
-        private void LayoutOtherCells()
-        {
-            foreach (var cell in _cells)
-            {
-                if (IsRowOrColumn(cell)) continue;
-                if (IsMergedCell(cell)) LayoutMergedCell(cell);
-                else LayoutCell(cell);
-            }
-
-            static bool IsRowOrColumn(CellViewModel cell) => cell.Row == 0 || cell.Column == 0;
-            static bool IsMergedCell(CellViewModel cell) => !string.IsNullOrEmpty(cell.Model.MergedWith);
-        }
-
-        private void LayoutMergedCell(CellViewModel cellModel)
-        {
-            var height = ComputeMergedCellsHeight(cellModel);
-            var width = ComputeMergedCellsWidth(cellModel);
-            LayoutCell(cellModel, width, height);
+            return result;
         }
 
         private static double ComputeMergedCellsWidth(CellViewModel cell)
@@ -81,22 +53,6 @@ namespace Cell.ViewModel
             {
                 result += Cells.Instance.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
                 currentCell = Cells.Instance.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
-            }
-            return result;
-        }
-
-        private static double ComputeMergedCellsHeight(CellViewModel cell)
-        {
-            bool isHiddenByMerge = cell.Model.MergedWith != cell.ID;
-            if (isHiddenByMerge) return 0;
-
-            var result = 0.0;
-            var currentRow = cell.Row;
-            var currentCell = Cells.Instance.GetCell(cell.Model.SheetName, currentRow, cell.Column);
-            while (currentCell?.MergedWith == cell.ID)
-            {
-                result += Cells.Instance.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
-                currentCell = Cells.Instance.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
             }
             return result;
         }
@@ -119,6 +75,49 @@ namespace Cell.ViewModel
             cell.Height = totalHeight;
             cell.X = columnCell?.X ?? cell.X;
             cell.Y = rowCell?.Y ?? cell.Y;
+        }
+
+        private void LayoutColumnCells()
+        {
+            var lastCell = _corner;
+            foreach (var columnCellViewModel in _columns.Skip(1))
+            {
+                columnCellViewModel.X = lastCell.X + lastCell.Width;
+                columnCellViewModel.Y = 0;
+                lastCell = columnCellViewModel;
+            }
+        }
+
+        private void LayoutMergedCell(CellViewModel cellModel)
+        {
+            var height = ComputeMergedCellsHeight(cellModel);
+            var width = ComputeMergedCellsWidth(cellModel);
+            LayoutCell(cellModel, width, height);
+        }
+
+        private void LayoutOtherCells()
+        {
+            foreach (var cell in _cells)
+            {
+                if (IsRowOrColumn(cell)) continue;
+                if (IsMergedCell(cell)) LayoutMergedCell(cell);
+                else LayoutCell(cell);
+            }
+
+            static bool IsRowOrColumn(CellViewModel cell) => cell.Row == 0 || cell.Column == 0;
+            static bool IsMergedCell(CellViewModel cell) => !string.IsNullOrEmpty(cell.Model.MergedWith);
+        }
+
+        private void LayoutRowCells()
+        {
+            var lastCell = _corner;
+            foreach (var cellViewModel in _rows.Skip(1))
+            {
+                RowCellViewModel rowCellViewModel = (RowCellViewModel)cellViewModel;
+                rowCellViewModel.X = 0;
+                rowCellViewModel.Y = lastCell.Y + lastCell.Height;
+                lastCell = rowCellViewModel;
+            }
         }
     }
 }

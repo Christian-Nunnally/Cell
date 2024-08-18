@@ -1,6 +1,5 @@
-﻿
+﻿using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit;
 using System.Windows.Media;
 
 namespace Cell.View.Skin

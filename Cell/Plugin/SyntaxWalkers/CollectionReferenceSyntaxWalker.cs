@@ -8,16 +8,6 @@ namespace Cell.Plugin.SyntaxWalkers
     public partial class CollectionReferenceSyntaxWalker : CSharpSyntaxWalker
     {
         public readonly List<string> CollectionReferences = [];
-
-        public override void Visit(SyntaxNode? node)
-        {
-            base.Visit(node);
-            if (TryGetCollectionReferenceFromNode(node, out var collectionReference))
-            {
-                CollectionReferences.Add(collectionReference);
-            }
-        }
-
         public static bool TryGetCollectionReferenceFromNode(SyntaxNode? node, [MaybeNullWhen(false)] out string collectionReference)
         {
             collectionReference = "";
@@ -32,6 +22,14 @@ namespace Cell.Plugin.SyntaxWalkers
             collectionReference = literalExpressionSyntax.Token.ValueText;
             return true;
         }
+
+        public override void Visit(SyntaxNode? node)
+        {
+            base.Visit(node);
+            if (TryGetCollectionReferenceFromNode(node, out var collectionReference))
+            {
+                CollectionReferences.Add(collectionReference);
+            }
+        }
     }
 }
-

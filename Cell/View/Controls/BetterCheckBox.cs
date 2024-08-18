@@ -7,23 +7,18 @@ namespace Cell.View.Controls
 {
     internal class BetterCheckBox : Control
     {
-        public bool IsChecked
-        {
-            get { return (bool)GetValue(IsCheckedProperty); }
-            set { SetValue(IsCheckedProperty, value); }
-        }
-
+        public static readonly DependencyProperty BackgroundWhenMouseOverProperty =
+            DependencyProperty.Register("BackgroundWhenMouseOver", typeof(Brush), typeof(BetterCheckBox), new PropertyMetadata(default(Brush)));
+        public static readonly DependencyProperty CommandProperty =
+            DependencyProperty.Register("Command", typeof(ICommand), typeof(BetterCheckBox), new PropertyMetadata(default(ICommand)));
         public static readonly DependencyProperty IsCheckedProperty =
             DependencyProperty.Register("IsChecked", typeof(bool), typeof(BetterCheckBox), new PropertyMetadata(default(bool)));
-
+        private Border? _checkboxBorder;
         public Brush BackgroundWhenMouseOver
         {
             get { return (Brush)GetValue(BackgroundWhenMouseOverProperty); }
             set { SetValue(BackgroundWhenMouseOverProperty, value); }
         }
-
-        public static readonly DependencyProperty BackgroundWhenMouseOverProperty =
-            DependencyProperty.Register("BackgroundWhenMouseOver", typeof(Brush), typeof(BetterCheckBox), new PropertyMetadata(default(Brush)));
 
         public ICommand Command
         {
@@ -31,10 +26,22 @@ namespace Cell.View.Controls
             set { SetValue(CommandProperty, value); }
         }
 
-        public static readonly DependencyProperty CommandProperty =
-            DependencyProperty.Register("Command", typeof(ICommand), typeof(BetterCheckBox), new PropertyMetadata(default(ICommand)));
+        public bool IsChecked
+        {
+            get { return (bool)GetValue(IsCheckedProperty); }
+            set { SetValue(IsCheckedProperty, value); }
+        }
 
-        private Border? _checkboxBorder;
+        public override void OnApplyTemplate()
+        {
+            SetCheckBoxBorder(GetTemplateChild("CheckBoxBorder") as Border ?? throw new Exception("Expected element named CheckBoxBorder in control template."));
+        }
+
+        private void CheckBoxBorderMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Command?.Execute(null);
+            IsChecked = !IsChecked;
+        }
 
         private void SetCheckBoxBorder(Border value)
         {
@@ -48,17 +55,6 @@ namespace Cell.View.Controls
             {
                 _checkboxBorder.MouseDown += new MouseButtonEventHandler(CheckBoxBorderMouseDown);
             }
-        }
-
-        public override void OnApplyTemplate()
-        {
-            SetCheckBoxBorder(GetTemplateChild("CheckBoxBorder") as Border ?? throw new Exception("Expected element named CheckBoxBorder in control template."));
-        }
-
-        private void CheckBoxBorderMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            Command?.Execute(null);
-            IsChecked = !IsChecked;
         }
     }
 }

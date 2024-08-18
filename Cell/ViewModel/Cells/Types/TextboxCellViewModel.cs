@@ -6,7 +6,6 @@ namespace Cell.ViewModel
     public class TextboxCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
     {
         private TextBox? _textBox;
-
         public override bool IsSelected
         {
             get => base.IsSelected;

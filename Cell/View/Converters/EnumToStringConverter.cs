@@ -18,7 +18,7 @@ namespace Cell.View.Converters
             }
         }
 
-        // No need to implement converting back on a one-way binding 
+        // No need to implement converting back on a one-way binding
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();

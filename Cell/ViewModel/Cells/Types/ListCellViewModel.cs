@@ -8,13 +8,6 @@ namespace Cell.ViewModel
 {
     public class ListCellViewModel : CellViewModel
     {
-        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used in binding")]
-        public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
-
-        public ObservableCollection<object> ListItems { get; set; } = [];
-
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             if (CollectionName == string.Empty) return;
@@ -36,7 +29,12 @@ namespace Cell.ViewModel
                 }
                 NotifyPropertyChanged(nameof(CollectionName));
             }
-        }   
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used in binding")]
+        public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
+
+        public ObservableCollection<object> ListItems { get; set; } = [];
 
         public string MaxItemsString
         {
@@ -61,8 +59,9 @@ namespace Cell.ViewModel
             }
         }
 
-        public string SelectedItem
+        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
 
+        public string SelectedItem
         {
             get => Model.GetStringProperty(nameof(SelectedItem));
             set

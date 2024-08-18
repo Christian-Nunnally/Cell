@@ -9,10 +9,16 @@ namespace Cell.ViewModel
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public double ProgressBarHeight => Height;
+
+        public double ProgressBarWidth => ValueAsDouble * Width;
+
+        public override string Text
         {
-            if (e.PropertyName == nameof(CellModel.Text))
+            get => base.Text;
+            set
             {
+                base.Text = value;
                 NotifyPropertyChanged(nameof(ProgressBarWidth));
                 NotifyPropertyChanged(nameof(ProgressBarHeight));
             }
@@ -20,17 +26,12 @@ namespace Cell.ViewModel
 
         public double ValueAsDouble => double.TryParse(Text, out var doubleValue) ? doubleValue : 0;
 
-        public double ProgressBarWidth => ValueAsDouble * Width;
-        public double ProgressBarHeight => Height;
-
-        public override string Text 
-        { 
-            get => base.Text; 
-            set 
-            { 
-                base.Text = value; 
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.Text))
+            {
                 NotifyPropertyChanged(nameof(ProgressBarWidth));
-                NotifyPropertyChanged(nameof(ProgressBarHeight)); 
+                NotifyPropertyChanged(nameof(ProgressBarHeight));
             }
         }
     }

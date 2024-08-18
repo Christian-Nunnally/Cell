@@ -1,6 +1,4 @@
 ﻿using Cell.Model;
-using Cell.Persistence;
-using System.Collections;
 using System.Windows;
 using System.Windows.Media;
 
@@ -8,9 +6,8 @@ namespace Cell.ViewModel
 {
     public class GraphCellViewModel : CellViewModel
     {
-        private bool _addingPoint = false;
         private readonly List<Point> _rawDataPoints = [];
-
+        private bool _addingPoint = false;
         public GraphCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += (sender, args) =>
@@ -45,16 +42,14 @@ namespace Cell.ViewModel
                 new Point(35, 3),
             ], 10, 10);
 
-        public override string Text
+        public int MaxPoints
         {
-            get => base.Text;
+            get => (int)Model.GetNumericProperty(nameof(MaxPoints));
             set
             {
-                if (_addingPoint) return;
-                _addingPoint = true;
-                base.Text = value;
-                UpdatePointsFromCellText();
-                _addingPoint = false;
+                Model.SetNumericProperty(nameof(MaxPoints), value);
+                NotifyPropertyChanged(nameof(MaxPoints));
+                NotifyPropertyChanged(nameof(MaxPointsString));
             }
         }
 
@@ -71,41 +66,22 @@ namespace Cell.ViewModel
             }
         }
 
-        public int MaxPoints
+        public override string Text
         {
-            get => (int)Model.GetNumericProperty(nameof(MaxPoints));
+            get => base.Text;
             set
             {
-                Model.SetNumericProperty(nameof(MaxPoints), value);
-                NotifyPropertyChanged(nameof(MaxPoints));
-                NotifyPropertyChanged(nameof(MaxPointsString));
+                if (_addingPoint) return;
+                _addingPoint = true;
+                base.Text = value;
+                UpdatePointsFromCellText();
+                _addingPoint = false;
             }
-        }
-
-        private void UpdatePointsFromCellText()
-        {
-            if (!Text.Contains(',') && double.TryParse(Text, out double result))
-            {
-                _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
-            }
-            else
-            {
-                var split = Text.Split(',');
-                _rawDataPoints.Clear();
-                foreach (var s in split)
-                {
-                    if (double.TryParse(s, out double r))
-                    {
-                        _rawDataPoints.Add(new Point(_rawDataPoints.Count, -r));
-                    }
-                }
-            }
-            UpdatePointsScaling();
         }
 
         public void UpdatePointsScaling()
         {
-            while(_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
+            while (_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
 
             for (int i = 0; i < _rawDataPoints.Count; i++)
             {
@@ -115,7 +91,7 @@ namespace Cell.ViewModel
             NotifyPropertyChanged(nameof(DataPoints));
         }
 
-        static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
+        internal static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
         {
             if (points.Count == 0) return [];
 
@@ -139,6 +115,27 @@ namespace Cell.ViewModel
             }
 
             return [.. scaledAndCenteredPoints];
+        }
+
+        private void UpdatePointsFromCellText()
+        {
+            if (!Text.Contains(',') && double.TryParse(Text, out double result))
+            {
+                _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
+            }
+            else
+            {
+                var split = Text.Split(',');
+                _rawDataPoints.Clear();
+                foreach (var s in split)
+                {
+                    if (double.TryParse(s, out double r))
+                    {
+                        _rawDataPoints.Add(new Point(_rawDataPoints.Count, -r));
+                    }
+                }
+            }
+            UpdatePointsScaling();
         }
     }
 }

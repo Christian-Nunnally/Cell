@@ -5,13 +5,12 @@ namespace Cell.ViewModel
 {
     public static class UndoRedoManager
     {
-        private static Stack<List<CellModel>> _undoStack = new();
         private static Stack<List<CellModel>> _redoStack = new();
-
-        public static void Undo()
+        private static Stack<List<CellModel>> _undoStack = new();
+        public static void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
         {
-            ApplyStateFromStack(_undoStack, _redoStack);
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+            _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
+            _redoStack.Clear();
         }
 
         public static void Redo()
@@ -20,10 +19,10 @@ namespace Cell.ViewModel
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
 
-        public static void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
+        public static void Undo()
         {
-            _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
-            _redoStack.Clear();
+            ApplyStateFromStack(_undoStack, _redoStack);
+            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
 
         private static void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)

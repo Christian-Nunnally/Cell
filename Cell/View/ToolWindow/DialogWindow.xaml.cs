@@ -10,11 +10,6 @@ namespace Cell.View.ToolWindow
     public partial class DialogWindow : UserControl, IToolWindow
     {
         private readonly string _title;
-
-        public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
-
-        public Action? RequestClose { get; set; }
-
         public DialogWindow(string title, string message, List<CommandViewModel> actions)
         {
             DataContext = this;
@@ -26,6 +21,10 @@ namespace Cell.View.ToolWindow
                 DialogOptions.Add(action);
             }
         }
+
+        public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
+
+        public Action? RequestClose { get; set; }
 
         public static void ShowDialog(string title, string message)
         {
@@ -48,13 +47,13 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
         }
 
-        public void HandleBeingClosed()
-        {
-        }
-
         public string GetTitle() => _title;
 
         public List<CommandViewModel> GetToolBarCommands() => [];
+
+        public void HandleBeingClosed()
+        {
+        }
 
         private void ButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {

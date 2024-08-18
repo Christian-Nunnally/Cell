@@ -9,7 +9,6 @@ namespace Cell.ViewModel
         private CellModel? _centerOfCopy;
         private IEnumerable<CellModel> _clipboard = [];
         private bool _copyTextOnly = false;
-
         public void CopySelectedCells(SheetViewModel activeSheet, bool copyTextOnly)
         {
             _copyTextOnly = copyTextOnly;
@@ -34,7 +33,7 @@ namespace Cell.ViewModel
                     else PasteSingleCell(activeSheet, cellToPaste, cell.Model);
                 }
             }
-            else 
+            else
             {
                 foreach (var cellToPaste in _clipboard)
                 {
@@ -45,10 +44,28 @@ namespace Cell.ViewModel
             activeSheet.UpdateLayout();
         }
 
+        private static CellModel CopyCellWithUpdatedLocationProperties(CellModel cellToReplace, CellModel cellToPaste)
+        {
+            var pastedCell = cellToPaste.CopyAndTrackNewCell();
+            pastedCell.SheetName = cellToReplace.SheetName;
+            pastedCell.Width = cellToReplace.Width;
+            pastedCell.Height = cellToReplace.Height;
+            pastedCell.Row = cellToReplace.Row;
+            pastedCell.Column = cellToReplace.Column;
+            pastedCell.MergedWith = string.Empty;
+            return pastedCell;
+        }
+
         private static void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
             PasteSingleCell(activeSheet, cellToPaste, cellToReplace);
+        }
+
+        private static void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        {
+            if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
+            cellToReplace.Text = cellToPaste.Text;
         }
 
         private static void PasteSingleCell(SheetViewModel activeSheet, CellModel cellToPaste, CellModel cellToReplace)
@@ -62,12 +79,6 @@ namespace Cell.ViewModel
             pastedCell.PopulateFunctionName = populateName;
         }
 
-        private static void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
-        {
-            if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
-            cellToReplace.Text = cellToPaste.Text;
-        }
-
         private static bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
@@ -76,18 +87,6 @@ namespace Cell.ViewModel
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;
-        }
-
-        private static CellModel CopyCellWithUpdatedLocationProperties(CellModel cellToReplace, CellModel cellToPaste)
-        {
-            var pastedCell = cellToPaste.CopyAndTrackNewCell();
-            pastedCell.SheetName = cellToReplace.SheetName;
-            pastedCell.Width = cellToReplace.Width;
-            pastedCell.Height = cellToReplace.Height;
-            pastedCell.Row = cellToReplace.Row;
-            pastedCell.Column = cellToReplace.Column;
-            pastedCell.MergedWith = string.Empty;
-            return pastedCell;
         }
     }
 }

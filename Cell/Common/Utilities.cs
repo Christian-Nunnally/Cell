@@ -8,8 +8,31 @@ namespace Cell.Common
 {
     public static partial class Utilities
     {
-        [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
-        public static partial Regex IsHexidecimalColorCode();
+        public static void CopyProperties(this object source, object destination, string[] blacklist)
+        {
+            if (source == null || destination == null)
+                throw new Exception("Source or/and Destination Objects are null");
+            Type typeDest = destination.GetType();
+            Type typeSrc = source.GetType();
+
+            PropertyInfo[] srcProps = typeSrc.GetProperties();
+            foreach (PropertyInfo srcProp in srcProps)
+            {
+                if (!srcProp.CanRead) continue;
+                var targetProperty = typeDest.GetProperty(srcProp.Name);
+                if (targetProperty == null) continue;
+                if (!targetProperty.CanWrite) continue;
+                var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
+                if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) continue;
+                var setMethod = targetProperty.GetSetMethod();
+                if (setMethod == null) continue;
+                if ((setMethod.Attributes & MethodAttributes.Static) != 0) continue;
+                if (!targetProperty.PropertyType.IsAssignableFrom(srcProp.PropertyType)) continue;
+
+                if (blacklist.Contains(srcProp.Name)) continue;
+                targetProperty.SetValue(destination, srcProp.GetValue(source, null), null);
+            }
+        }
 
         public static string GenerateUnqiueId(int length)
         {
@@ -26,9 +49,31 @@ namespace Cell.Common
             return new string(stringChars);
         }
 
+        public static ulong GetHashFromString(this string read)
+        {
+            var hashedValue = 3074457345618258791ul;
+            for (int i = 0; i < read.Length; i++)
+            {
+                hashedValue += read[i];
+                hashedValue *= 3074457345618258799ul;
+            }
+            return hashedValue;
+        }
+
+        public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace)
+        {
+            return
+              assembly.GetTypes()
+                      .Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal))
+                      .ToArray();
+        }
+
         public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
 
         public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.SheetName, model.Row, model.Column);
+
+        [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
+        public static partial Regex IsHexidecimalColorCode();
 
         public static bool TryParseStringIntoThickness(string stringThickness, [MaybeNullWhen(false)] out Thickness thickness)
         {
@@ -56,51 +101,6 @@ namespace Cell.Common
                 return true;
             }
             return false;
-        }
-
-        public static ulong GetHashFromString(this string read)
-        {
-            var hashedValue = 3074457345618258791ul;
-            for (int i = 0; i < read.Length; i++)
-            {
-                hashedValue += read[i];
-                hashedValue *= 3074457345618258799ul;
-            }
-            return hashedValue;
-        }
-
-        public static void CopyProperties(this object source, object destination, string[] blacklist)
-        {
-            if (source == null || destination == null)
-                throw new Exception("Source or/and Destination Objects are null");
-            Type typeDest = destination.GetType();
-            Type typeSrc = source.GetType();
-
-            PropertyInfo[] srcProps = typeSrc.GetProperties();
-            foreach (PropertyInfo srcProp in srcProps)
-            {
-                if (!srcProp.CanRead) continue;
-                var targetProperty = typeDest.GetProperty(srcProp.Name);
-                if (targetProperty == null) continue;
-                if (!targetProperty.CanWrite) continue;
-                var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
-                if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) continue;
-                var setMethod = targetProperty.GetSetMethod();
-                if (setMethod == null) continue;
-                if ((setMethod.Attributes & MethodAttributes.Static) != 0) continue;
-                if (!targetProperty.PropertyType.IsAssignableFrom(srcProp.PropertyType)) continue;
-
-                if (blacklist.Contains(srcProp.Name)) continue;
-                targetProperty.SetValue(destination, srcProp.GetValue(source, null), null);
-            }
-        }
-
-        public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace)
-        {
-            return
-              assembly.GetTypes()
-                      .Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal))
-                      .ToArray();
         }
     }
 }

@@ -13,9 +13,8 @@ namespace Cell.Plugin.SyntaxWalkers
             {
                 return SyntaxFactory.ParseExpression(collectionReference);
             }
-            
+
             return node;
         }
     }
 }
-

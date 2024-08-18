@@ -11,10 +11,7 @@ namespace Cell.ViewModel
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
-        }
+        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
 
         public override double Height
         {
@@ -29,10 +26,18 @@ namespace Cell.ViewModel
             }
         }
 
-        public override string Text 
+        public override string Text { get => Row.ToString(); set => base.Text = value; }
+
+        public void AddRowAbove()
         {
-            get => Row.ToString();
-            set => base.Text = value; 
+            var rowToInsertAt = Row;
+            AddRowAt(rowToInsertAt);
+        }
+
+        public void AddRowBelow()
+        {
+            var rowToInsertAt = Row + 1;
+            AddRowAt(rowToInsertAt);
         }
 
         public void DeleteRow()
@@ -47,22 +52,18 @@ namespace Cell.ViewModel
             _sheetViewModel.UpdateLayout();
         }
 
-        public void AddRowBelow()
-        {
-            var rowToInsertAt = Row + 1;
-            AddRowAt(rowToInsertAt);
-        }
-
-        public void AddRowAbove()
-        {
-            var rowToInsertAt = Row;
-            AddRowAt(rowToInsertAt);
-        }
-
         private void AddRowAt(int index)
         {
             InsertRowAtIndex(index);
             _sheetViewModel.UpdateLayout();
+        }
+
+        private List<CellModel> GetAllCellsAtOrBelow(int row) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
+
+        private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
+        {
+            var cells = GetAllCellsAtOrBelow(row);
+            foreach (var cell in cells) cell.Row += amount;
         }
 
         private void InsertRowAtIndex(int index)
@@ -89,14 +90,9 @@ namespace Cell.ViewModel
             }
         }
 
-        private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var cells = GetAllCellsAtOrBelow(row);
-            foreach (var cell in cells) cell.Row += amount;
+            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
         }
-
-        private List<CellModel> GetAllCellsAtOrBelow(int row) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
-
-        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using Cell.Common;
+﻿using Cell.Common;
 using Cell.Data;
 using System.IO;
 using System.IO.Compression;
@@ -9,23 +8,30 @@ namespace Cell.Persistence
     internal class PersistenceManager
     {
         public const string Version = "0.0.0";
-        public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
+        public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
-
-        public static void SaveAll()
+        public static void CreateBackup()
         {
-            PluginFunctionLoader.SavePlugins();
-            UserCollectionLoader.SaveCollections();
-            new CellLoader(SaveLocation).SaveCells();
-            SaveVersion();
+            // Make sure cells instance is created with the correct save location
+            var _ = Cells.Instance;
+            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
+            var oldSaveLocation = SaveLocation;
+            SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();
+            SaveAll();
+            ZipFolder(SaveLocation);
+            _lastBackupDate = DateTime.Now;
+            SaveLocation = oldSaveLocation;
         }
 
-        private static void SaveVersion()
+        public static void ExportSheet(string sheetName)
         {
-            var versionPath = Path.Combine(SaveLocation, "version");
-            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
-            File.WriteAllText(versionPath, Version);
+            new CellLoader(SaveLocation).ExportSheetTemplate(sheetName);
+        }
+
+        public static void ImportSheet(string templateName, string sheetName)
+        {
+            new CellLoader(SaveLocation).ImportSheetTemplate(templateName, sheetName);
         }
 
         public static void LoadAll()
@@ -41,23 +47,12 @@ namespace Cell.Persistence
             CreateBackup();
         }
 
-        private static string LoadVersion()
+        public static void SaveAll()
         {
-            var versionPath = Path.Combine(SaveLocation, "version");
-            if (!File.Exists(versionPath)) return Version;
-            return File.ReadAllText(versionPath);}
-
-        public static void CreateBackup()
-        {
-            // Make sure cells instance is created with the correct save location
-            var _ = Cells.Instance;
-            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
-            var oldSaveLocation = SaveLocation;
-            SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();
-            SaveAll();
-            ZipFolder(SaveLocation);
-            _lastBackupDate = DateTime.Now;
-            SaveLocation = oldSaveLocation;
+            PluginFunctionLoader.SavePlugins();
+            UserCollectionLoader.SaveCollections();
+            new CellLoader(SaveLocation).SaveCells();
+            SaveVersion();
         }
 
         private static string CreateFileFriendlyCurrentDateTime()
@@ -65,21 +60,25 @@ namespace Cell.Persistence
             return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         }
 
+        private static string LoadVersion()
+        {
+            var versionPath = Path.Combine(SaveLocation, "version");
+            if (!File.Exists(versionPath)) return Version;
+            return File.ReadAllText(versionPath);
+        }
+
+        private static void SaveVersion()
+        {
+            var versionPath = Path.Combine(SaveLocation, "version");
+            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
+            File.WriteAllText(versionPath, Version);
+        }
+
         private static void ZipFolder(string folderPath)
         {
             var zipPath = folderPath + ".zip";
             ZipFile.CreateFromDirectory(folderPath, zipPath);
             Directory.Delete(folderPath, true);
-        }
-
-        public static void ExportSheet(string sheetName)
-        {
-            new CellLoader(SaveLocation).ExportSheetTemplate(sheetName);
-        }
-
-        public static void ImportSheet(string templateName, string sheetName)
-        {
-            new CellLoader(SaveLocation).ImportSheetTemplate(templateName, sheetName);
         }
     }
 }

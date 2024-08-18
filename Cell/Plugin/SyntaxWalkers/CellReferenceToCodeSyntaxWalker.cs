@@ -9,6 +9,10 @@ namespace Cell.Plugin.SyntaxWalkers
     public partial class CellReferenceToCodeSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
     {
         private readonly CellModel cell = cell;
+        public static bool IsCellLocation(string input)
+        {
+            return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
+        }
 
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
@@ -56,19 +60,26 @@ namespace Cell.Plugin.SyntaxWalkers
             return node;
         }
 
-        private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
-
-        /// <param name="cellReference">Looks like (A1, B_A1, R_A1, C_A1)</param>
-        private string GetArgumentStringFromCellReference(string[] cellReference)
+        private static int ColumnToIndex(string column)
         {
-            var (rangeRelativitySymbol, rangeCellLocationName) = GetRelativitySymbolAndCellLocationNameFromCellReference(cellReference);
-            if (IsCellLocation(rangeCellLocationName))
+            column = column.ToUpper();
+            int index = 0;
+            foreach (char c in column)
             {
-                return CalculateArgumentStringFromCellLocation(rangeCellLocationName, rangeRelativitySymbol);
+                index = index * 26 + (c - 'A' + 1);
             }
-
-            return string.Empty;
+            return index;
         }
+
+        private static (int Row, int Column) GetCellLocationFromVariable(string variableName)
+        {
+            string columnPart = GetColumnFromCellLocationString().Match(variableName).Value;
+            string rowPart = GetRowFromCellLocationString().Match(variableName).Value;
+            return (int.Parse(rowPart), ColumnToIndex(columnPart));
+        }
+
+        [GeneratedRegex(@"^[A-Za-z]+")]
+        private static partial Regex GetColumnFromCellLocationString();
 
         private static (string RelativitySymbol, string CellReferenceName) GetRelativitySymbolAndCellLocationNameFromCellReference(string[] cellReference)
         {
@@ -81,6 +92,14 @@ namespace Cell.Plugin.SyntaxWalkers
             }
             return (relativitySymbol, cellLocationName);
         }
+
+        [GeneratedRegex(@"\d+$")]
+        private static partial Regex GetRowFromCellLocationString();
+
+        [GeneratedRegex(@"^[A-Za-z]+[0-9]+$")]
+        private static partial Regex IsCellLocationString();
+
+        private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
 
         private string CalculateArgumentStringFromCellLocation(string cellLocationName, string relativitySymbol)
         {
@@ -95,37 +114,16 @@ namespace Cell.Plugin.SyntaxWalkers
             };
         }
 
-        public static bool IsCellLocation(string input)
+        /// <param name="cellReference">Looks like (A1, B_A1, R_A1, C_A1)</param>
+        private string GetArgumentStringFromCellReference(string[] cellReference)
         {
-            return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
-        }
-
-        private static (int Row, int Column) GetCellLocationFromVariable(string variableName)
-        {
-            string columnPart = GetColumnFromCellLocationString().Match(variableName).Value;
-            string rowPart = GetRowFromCellLocationString().Match(variableName).Value;
-            return (int.Parse(rowPart), ColumnToIndex(columnPart));
-        }
-
-        private static int ColumnToIndex(string column)
-        {
-            column = column.ToUpper();
-            int index = 0;
-            foreach (char c in column)
+            var (rangeRelativitySymbol, rangeCellLocationName) = GetRelativitySymbolAndCellLocationNameFromCellReference(cellReference);
+            if (IsCellLocation(rangeCellLocationName))
             {
-                index = index * 26 + (c - 'A' + 1);
+                return CalculateArgumentStringFromCellLocation(rangeCellLocationName, rangeRelativitySymbol);
             }
-            return index;
+
+            return string.Empty;
         }
-
-        [GeneratedRegex(@"^[A-Za-z]+[0-9]+$")]
-        private static partial Regex IsCellLocationString();
-
-        [GeneratedRegex(@"^[A-Za-z]+")]
-        private static partial Regex GetColumnFromCellLocationString();
-
-        [GeneratedRegex(@"\d+$")]
-        private static partial Regex GetRowFromCellLocationString();
     }
 }
-

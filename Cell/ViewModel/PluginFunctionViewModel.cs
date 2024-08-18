@@ -1,38 +1,39 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using Cell.Plugin;
-using System.Reflection;
-using Cell.Plugin.SyntaxWalkers;
-using Cell.Common;
-using Cell.Persistence;
-using Cell.View.ToolWindow;
+﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model;
+using Cell.Persistence;
+using Cell.Plugin;
+using Cell.Plugin.SyntaxWalkers;
+using Cell.View.ToolWindow;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Reflection;
 
 namespace Cell.ViewModel
 {
     public partial class PluginFunctionViewModel : PropertyChangedBase
     {
         private readonly List<CellModel> _cellsToNotify = [];
-
-        private ulong _fingerprintOfProcessedDependencies;
         private MethodInfo? _compiledMethod;
+        private ulong _fingerprintOfProcessedDependencies;
+        public PluginFunctionViewModel(PluginFunctionModel model)
+        {
+            Model = model;
+            Model.PropertyChanged += ModelPropertyChanged;
+            AttemptToRecompileMethod();
+        }
 
-        public int UsageCount => _cellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
-
-        public List<CellReference> LocationDependencies { get; set; } = [];
+        public IEnumerable<CellModel> CellsThatUseFunction => _cellsToNotify;
 
         public List<string> CollectionDependencies { get; set; } = [];
-
-        public PluginFunctionModel Model { get; set; }
 
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
 
         public CompileResult CompileResult { get; private set; }
 
-        public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
+        public List<CellReference> LocationDependencies { get; set; } = [];
 
-        public IEnumerable<CellModel> CellsThatUseFunction => _cellsToNotify;
+        public PluginFunctionModel Model { get; set; }
 
         public string Name
         {
@@ -47,55 +48,25 @@ namespace Cell.ViewModel
             }
         }
 
-        private static void RefactorCellsFunctionUseage(string oldName, string newName)
+        public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
+
+        public int UsageCount => _cellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
+
+        public MethodInfo? Compile()
         {
-            foreach (var cells in Cells.Instance.AllCells)
+            try
             {
-                if (cells.PopulateFunctionName == oldName) cells.PopulateFunctionName = newName;
-                if (cells.TriggerFunctionName == oldName) cells.TriggerFunctionName = newName;
+                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console), typeof(Enumerable) };
+                var compiler = new RoslynCompiler(SyntaxTree, typesToAddAssemblyReferencesFor);
+                var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
+                _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
+                CompileResult = new CompileResult { Success = true, Result = "" };
             }
-        }
-
-        public PluginFunctionViewModel(PluginFunctionModel model)
-        {
-            Model = model;
-            Model.PropertyChanged += ModelPropertyChanged;
-            AttemptToRecompileMethod();
-        }
-
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            catch (Exception e)
             {
-                AttemptToRecompileMethod();
+                CompileResult = new CompileResult { Success = false, Result = e.Message };
             }
-        }
-
-        private void AttemptToRecompileMethod()
-        {
-            _compiledMethod = null;
-            ExtractDependencies();
-            if (_fingerprintOfProcessedDependencies == Model.Fingerprint) Compile();
-        }
-
-        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell)
-        {
-            var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
-            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
-            Model.Code = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
-
-            // Populate cells that use this function as populate:
-            foreach (var cellModel in _cellsToNotify)
-            {
-                cellModel.PopulateText();
-            }
-        }
-
-        public string GetUserFriendlyCode(CellModel? cell)
-        {
-            var intermediateCode = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformTo(Model.Code);
-            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
-            return intermediateCode.Replace("_Range_", "..");
+            return _compiledMethod;
         }
 
         public void ExtractDependencies()
@@ -128,6 +99,46 @@ namespace Cell.ViewModel
             return compilation.GetSemanticModel(SyntaxTree);
         }
 
+        public string GetUserFriendlyCode(CellModel? cell)
+        {
+            var intermediateCode = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformTo(Model.Code);
+            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
+            return intermediateCode.Replace("_Range_", "..");
+        }
+
+        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell)
+        {
+            var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
+            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
+            Model.Code = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
+
+            // Populate cells that use this function as populate:
+            foreach (var cellModel in _cellsToNotify)
+            {
+                cellModel.PopulateText();
+            }
+        }
+
+        internal void StartListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Add(cell);
+
+        internal void StopListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Remove(cell);
+
+        private static void RefactorCellsFunctionUseage(string oldName, string newName)
+        {
+            foreach (var cells in Cells.Instance.AllCells)
+            {
+                if (cells.PopulateFunctionName == oldName) cells.PopulateFunctionName = newName;
+                if (cells.TriggerFunctionName == oldName) cells.TriggerFunctionName = newName;
+            }
+        }
+
+        private void AttemptToRecompileMethod()
+        {
+            _compiledMethod = null;
+            ExtractDependencies();
+            if (_fingerprintOfProcessedDependencies == Model.Fingerprint) Compile();
+        }
+
         private void ExtractAndTransformCollectionReferences(SyntaxNode? root)
         {
             CollectionDependencies.Clear();
@@ -146,27 +157,14 @@ namespace Cell.ViewModel
             LocationDependencies.AddRange(foundDependencies);
         }
 
-        public MethodInfo? Compile()
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            try
+            if (e.PropertyName == nameof(PluginFunctionModel.Code))
             {
-                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console), typeof(Enumerable) };
-                var compiler = new RoslynCompiler(SyntaxTree, typesToAddAssemblyReferencesFor);
-                var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
-                _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
-                CompileResult = new CompileResult { Success = true, Result = "" };
+                AttemptToRecompileMethod();
             }
-            catch (Exception e)
-            {
-                CompileResult = new CompileResult { Success = false, Result = e.Message };
-            }
-            return _compiledMethod;
         }
 
         private void NotifyDependenciesHaveChanged() => _cellsToNotify.ForEach(cell => cell.UpdateDependencySubscriptions(this));
-
-        internal void StopListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Remove(cell);
-
-        internal void StartListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Add(cell);
     }
 }

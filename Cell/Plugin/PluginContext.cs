@@ -5,15 +5,18 @@ using Cell.ViewModel;
 
 #pragma warning disable CA1822 // Mark members as static. Justification: Making methods static causes the user to have to type the entire PluginContext type name to call methods, which is not user-friendly.
 
+#pragma warning disable CA1822 // Mark members as static. Justification: Making methods static causes the user to have to type the entire PluginContext type name to call methods, which is not user-friendly.
+
 namespace Cell.Plugin
 {
     public class PluginContext(ApplicationViewModel application, int index)
     {
         private readonly ApplicationViewModel _application = application;
-
         public EditContext E { get; set; } = new EditContext("");
 
         public int Index { get; set; } = index;
+
+        public string[] SheetNames => [.. Cells.Instance.SheetNames];
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 
@@ -35,9 +38,9 @@ namespace Cell.Plugin
             return new CellRange(cells);
         }
 
-        public void GoToSheet(string sheetName)
+        public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
-            _application.GoToSheet(sheetName);
+            return UserList<T>.GetOrCreate(collection);
         }
 
         public void GoToCell(CellModel cell)
@@ -46,13 +49,10 @@ namespace Cell.Plugin
             _application.GoToCell(cell);
         }
 
-        public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
+        public void GoToSheet(string sheetName)
         {
-            return UserList<T>.GetOrCreate(collection);
+            _application.GoToSheet(sheetName);
         }
-
-        public string[] SheetNames => [.. Cells.Instance.SheetNames];
     }
 }
-
 #pragma warning restore CA1822 // Mark members as static

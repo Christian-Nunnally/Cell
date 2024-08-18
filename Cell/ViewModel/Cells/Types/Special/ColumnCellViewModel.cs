@@ -11,9 +11,15 @@ namespace Cell.ViewModel
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
+
+        public override string Text
         {
-            if (e.PropertyName == nameof(CellModel.Column)) NotifyPropertyChanged(nameof(Text));
+            get
+            {
+                return GetColumnName(Column);
+            }
+            set => base.Text = value;
         }
 
         public override double Width
@@ -29,15 +35,6 @@ namespace Cell.ViewModel
             }
         }
 
-        public override string Text
-        {
-            get
-            {
-                return GetColumnName(Column);
-            }
-            set => base.Text = value;
-        }
-
         public static string GetColumnName(int columnNumber)
         {
             if (columnNumber < 1) return "=";
@@ -50,6 +47,19 @@ namespace Cell.ViewModel
             }
             return columnName;
         }
+
+        public void AddColumnToTheLeft()
+        {
+            var columnToInsertAt = Column;
+            AddColumnAt(columnToInsertAt);
+        }
+
+        public void AddColumnToTheRight()
+        {
+            var columnToInsertAt = Column + 1;
+            AddColumnAt(columnToInsertAt);
+        }
+
         public void DeleteColumn()
         {
             if (_sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Count() == 1) return;
@@ -62,23 +72,18 @@ namespace Cell.ViewModel
             _sheetViewModel.UpdateLayout();
         }
 
-        public void AddColumnToTheRight()
-        {
-            var columnToInsertAt = Column + 1;
-            AddColumnAt(columnToInsertAt);
-        }
-
-
-        public void AddColumnToTheLeft()
-        {
-            var columnToInsertAt = Column;
-            AddColumnAt(columnToInsertAt);
-        }
-
         private void AddColumnAt(int index)
         {
             InsertColumnAtIndex(index);
             _sheetViewModel.UpdateLayout();
+        }
+
+        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
+
+        private void IncrementColumnOfAllAtOrToTheRightOf(int column, int amount = 1)
+        {
+            var cells = GetAllCellsAtOrToTheRightOf(column);
+            foreach (var cell in cells) cell.Column += amount;
         }
 
         private void InsertColumnAtIndex(int index)
@@ -95,7 +100,7 @@ namespace Cell.ViewModel
                 var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName);
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.AddCell(cell);
-                
+
                 var cellAboveMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
                 var cellBelowMergedId = Cells.Instance.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(cellAboveMergedId) && cellAboveMergedId == cellBelowMergedId)
@@ -105,14 +110,9 @@ namespace Cell.ViewModel
             }
         }
 
-        private void IncrementColumnOfAllAtOrToTheRightOf(int column, int amount = 1)
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var cells = GetAllCellsAtOrToTheRightOf(column);
-            foreach (var cell in cells) cell.Column += amount;
+            if (e.PropertyName == nameof(CellModel.Column)) NotifyPropertyChanged(nameof(Text));
         }
-
-        private List<CellModel> GetAllCellsAtOrToTheRightOf(int column) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column >= column).ToList();
-
-        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
     }
 }

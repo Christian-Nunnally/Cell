@@ -1,5 +1,4 @@
-﻿
-namespace Cell.Model
+﻿namespace Cell.Model
 {
     public enum ColorFor
     {

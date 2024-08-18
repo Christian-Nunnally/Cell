@@ -1,5 +1,4 @@
-﻿using Cell.Persistence;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -10,8 +9,12 @@ namespace Cell.Plugin.SyntaxWalkers
         public readonly List<string> CollectionReferences = [];
         private readonly Func<string, string> _getDataTypeFromCollectionNameFunction = getDataTypeFromCollectionNameFunction;
         private readonly Predicate<string> _isCollectionPredicate = isCollectionPredicate;
-
         public CompileResult Result { get; private set; } = new CompileResult { Success = true };
+
+        public bool IsCollectionName(string input)
+        {
+            return !string.IsNullOrWhiteSpace(input) && _isCollectionPredicate.Invoke(input);
+        }
 
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
@@ -31,11 +34,5 @@ namespace Cell.Plugin.SyntaxWalkers
             }
             return node;
         }
-
-        public bool IsCollectionName(string input)
-        {
-            return !string.IsNullOrWhiteSpace(input) && _isCollectionPredicate.Invoke(input);
-        }
     }
 }
-
