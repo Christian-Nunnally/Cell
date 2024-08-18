@@ -1,0 +1,86 @@
+﻿<UserControl
+    x:Class="Cell.View.Cells.SheetView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cell="clr-namespace:Cell.ViewModel.Cells"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewApplication="clr-namespace:Cell.View.Application"
+    d:DataContext="{d:DesignInstance Type={x:Type cell:SheetViewModel}}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <ListBox
+        Grid.RowSpan="3"
+        Grid.ColumnSpan="3"
+        Margin="0"
+        Padding="0"
+        Background="{StaticResource CellBackground}"
+        BorderThickness="0"
+        ItemsSource="{Binding Path=CellViewModels}">
+        <ListBox.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary Source="ButtonCellView.xaml" />
+                    <ResourceDictionary Source="CheckboxCellView.xaml" />
+                    <ResourceDictionary Source="Special/ColumnCellView.xaml" />
+                    <ResourceDictionary Source="Special/CornerCellView.xaml" />
+                    <ResourceDictionary Source="DateCellView.xaml" />
+                    <ResourceDictionary Source="DropdownCellView.xaml" />
+                    <ResourceDictionary Source="GraphCellView.xaml" />
+                    <ResourceDictionary Source="LabelCellView.xaml" />
+                    <ResourceDictionary Source="ListCellView.xaml" />
+                    <ResourceDictionary Source="ProgressCellView.xaml" />
+                    <ResourceDictionary Source="Special/RowCellView.xaml" />
+                    <ResourceDictionary Source="TextboxCellView.xaml" />
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </ListBox.Resources>
+        <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+                <viewApplication:PanAndZoomCanvas
+                    x:Name="canvas"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Loaded="PanZoomCanvasLoaded" />
+            </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+                <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
+                <Setter Property="SnapsToDevicePixels" Value="True" />
+                <Setter Property="Control.Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Grid
+                                Width="{Binding Width}"
+                                Height="{Binding Height}"
+                                Background="{Binding BackgroundColor}"
+                                PreviewMouseDown="CellPreviewMouseDown"
+                                PreviewMouseMove="CellPreviewMouseMove"
+                                PreviewMouseUp="CellPreviewMouseUp"
+                                SnapsToDevicePixels="True">
+                                <Border BorderBrush="{Binding BorderColor}" BorderThickness="{Binding BorderThickness}">
+                                    <ContentPresenter
+                                        Margin="3"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Content="{TemplateBinding Content}"
+                                        SnapsToDevicePixels="True" />
+                                </Border>
+                                <Border
+                                    Background="{Binding SelectionColor}"
+                                    BorderBrush="{Binding SelectionBorderColor}"
+                                    BorderThickness="2"
+                                    IsHitTestVisible="False"
+                                    SnapsToDevicePixels="True"
+                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource btv}}" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ListBox.ItemContainerStyle>
+    </ListBox>
+</UserControl>
