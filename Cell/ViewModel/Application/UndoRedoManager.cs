@@ -7,6 +7,30 @@ namespace Cell.ViewModel.Application
     {
         private static readonly Stack<List<CellModel>> _redoStack = new();
         private static readonly Stack<List<CellModel>> _undoStack = new();
+        private static readonly Stack<CellModel> _recordingStateList = new();
+
+        private static bool _isRecordingUndoState;
+
+        public static void StartRecordingUndoState()
+        {
+            _recordingStateList.Clear();
+            _isRecordingUndoState = true;
+        }
+
+        public static void RecordCellStateForUndo(CellModel cell)
+        {
+            if (_isRecordingUndoState)
+            {
+                _recordingStateList.Push(cell.Copy());
+            }
+        }
+
+        public static void FinishRecordingUndoState() 
+        {
+            RecordCellStatesOntoUndoStack(_recordingStateList);
+            _isRecordingUndoState = false;
+        }
+
         public static void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
         {
             _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());

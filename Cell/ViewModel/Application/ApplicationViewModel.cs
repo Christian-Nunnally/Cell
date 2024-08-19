@@ -200,7 +200,9 @@ namespace Cell.ViewModel.Application
 
         internal void PasteCopiedCells()
         {
+            UndoRedoManager.StartRecordingUndoState();
             _cellClipboard.PasteCopiedCells(SheetViewModel);
+            UndoRedoManager.FinishRecordingUndoState();
         }
 
         internal static void RenameSheet(string oldSheetName, string newSheetName)

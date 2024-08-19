@@ -51,11 +51,6 @@ namespace Cell.Data
             _userCollection.Remove(model);
         }
 
-        public void Sort(Comparison<T> comparison)
-        {
-            _userCollection?.Sort((a, b) => comparison((T)a, (T)b));
-        }
-
         public T? this[int key]
         {
             get => key >= 0 && key < _userCollection.Items.Count ? (T)_userCollection.Items[key] : new T();

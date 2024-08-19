@@ -60,7 +60,29 @@ namespace Cell.Persistence
                 PluginFunctionLoader.SavePluginFunction(directory, function.Model.ReturnType, function.Model);
                 usedCollections.AddRange(function.CollectionDependencies);
             }
+
             usedCollections = usedCollections.Distinct().ToList();
+
+            for (int i =0; i < usedCollections.Count; i++)
+            {
+                var collection = usedCollections[i];
+                var baseCollectionName = UserCollectionLoader.GetCollection(collection)?.Model.BasedOnCollectionName;
+                if (!string.IsNullOrWhiteSpace(baseCollectionName) && !usedCollections.Contains(baseCollectionName))
+                {
+                    usedCollections.Add(baseCollectionName);
+                }
+            }
+
+            usedCollections = usedCollections.Distinct().ToList();
+
+            foreach (var collection in usedCollections)
+            {
+                if (PluginFunctionLoader.TryGetFunction("object", UserCollectionLoader.GetCollection(collection)?.Model.SortAndFilterFunctionName ?? "", out var function))
+                {
+                    PluginFunctionLoader.SavePluginFunction(directory, function.Model.ReturnType, function.Model);
+                }
+            }
+
             foreach (var collection in usedCollections)
             {
                 var collectionDirectory = Path.Combine(directory, "Collections", collection);

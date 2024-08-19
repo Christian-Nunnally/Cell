@@ -112,6 +112,7 @@ namespace Cell.View.ToolWindow
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
                 ApplicationViewModel.Instance.GoToCell(cell);
+                ApplicationViewModel.Instance.GoToCell(cell);
             }
         }
 
@@ -124,16 +125,16 @@ namespace Cell.View.ToolWindow
             _itemJsonEditor.Text = _viewModel.SelectedItemSerialized;
         }
 
-        private void RemoveItemFromCollectionClick(object sender, System.Windows.RoutedEventArgs e)
+        private void RemoveItemFromCollectionClick(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is PluginModel item)
             {
                 var selectedCollection = _viewModel.SelectedCollection;
-                selectedCollection?.Remove(item);
+                selectedCollection?.RemoveAll(item);
             }
         }
 
-        private void SaveSelectedItemJsonButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void SaveSelectedItemJsonButtonClick(object sender, RoutedEventArgs e)
         {
             _viewModel.SelectedItemSerialized = _itemJsonEditor.Text;
         }

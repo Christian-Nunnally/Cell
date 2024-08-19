@@ -1,5 +1,4 @@
 ﻿using Cell.Persistence;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types.Special;

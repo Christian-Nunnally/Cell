@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Cell.View.ToolWindow;
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Windows;
 
 namespace Cell.View

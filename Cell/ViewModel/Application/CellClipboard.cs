@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Cells;
 using System.Diagnostics.CodeAnalysis;
@@ -31,7 +32,7 @@ namespace Cell.ViewModel.Application
                 foreach (var cell in activeSheet.SelectedCellViewModels.ToList())
                 {
                     if (_copyTextOnly) cell.Text = cellToPaste.Text;
-                    else PasteSingleCell(activeSheet, cellToPaste, cell.Model);
+                    else PasteSingleCell(cellToPaste, cell.Model);
                 }
             }
             else
@@ -39,45 +40,29 @@ namespace Cell.ViewModel.Application
                 foreach (var cellToPaste in _clipboard)
                 {
                     if (_copyTextOnly) PasteCopiedCellTextOnly(pasteIntoCell, cellToPaste, _centerOfCopy);
-                    else PasteCopiedCell(activeSheet, pasteIntoCell, cellToPaste, _centerOfCopy);
+                    else PasteCopiedCell(pasteIntoCell, cellToPaste, _centerOfCopy);
                 }
             }
             activeSheet.UpdateLayout();
         }
 
-        private static CellModel CopyCellWithUpdatedLocationProperties(CellModel cellToReplace, CellModel cellToPaste)
-        {
-            var pastedCell = cellToPaste.CopyAndTrackNewCell();
-            pastedCell.SheetName = cellToReplace.SheetName;
-            pastedCell.Width = cellToReplace.Width;
-            pastedCell.Height = cellToReplace.Height;
-            pastedCell.Row = cellToReplace.Row;
-            pastedCell.Column = cellToReplace.Column;
-            pastedCell.MergedWith = string.Empty;
-            return pastedCell;
-        }
-
-        private static void PasteCopiedCell(SheetViewModel activeSheet, CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private static void PasteCopiedCell(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
-            PasteSingleCell(activeSheet, cellToPaste, cellToReplace);
+            PasteSingleCell(cellToPaste, cellToReplace);
         }
 
         private static void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
+            UndoRedoManager.RecordCellStateForUndo(cellToReplace);
             cellToReplace.Text = cellToPaste.Text;
         }
 
-        private static void PasteSingleCell(SheetViewModel activeSheet, CellModel cellToPaste, CellModel cellToReplace)
+        private static void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
-            var pastedCell = CopyCellWithUpdatedLocationProperties(cellToReplace, cellToPaste);
-            // TODO: just change the properties on the existing cell. do not delete and add; this will cause issues with undo/redo. Or make undo/redo work with this.
-            activeSheet.DeleteCell(cellToReplace);
-            activeSheet.AddCell(pastedCell);
-            var populateName = pastedCell.PopulateFunctionName;
-            pastedCell.PopulateFunctionName = string.Empty;
-            pastedCell.PopulateFunctionName = populateName;
+            UndoRedoManager.RecordCellStateForUndo(cellToReplace);
+            cellToPaste.CopyProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
         }
 
         private static bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)

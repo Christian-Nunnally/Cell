@@ -6,12 +6,14 @@ using Cell.Persistence;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using System.ComponentModel;
+using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Cell.Data
 {
     public class UserCollection(UserCollectionModel model) : PropertyChangedBase
     {
         private readonly Dictionary<string, PluginModel> _items = [];
+        private readonly Dictionary<string, int> _cachedSortFilterResult = [];
         private readonly List<PluginModel> _sortedItems = [];
         private UserCollection? _baseCollection;
         public event Action<UserCollection, PluginModel>? ItemAdded;
@@ -69,15 +71,23 @@ namespace Cell.Data
             if (!_items.TryGetValue(id, out var item)) return;
             _items.Remove(item.ID);
             _sortedItems.Remove(item);
+            _cachedSortFilterResult.Remove(item.ID);
             item.PropertyChanged -= PropertyChangedOnItemInCollection;
             ItemRemoved?.Invoke(this, item);
+            
+            if (_baseCollection is not null)
+            {
+                _baseCollection.Remove(item);
+            }
         }
 
-        public void Sort(Comparison<PluginModel> comparison)
+        public void RemoveAll(PluginModel item) => RemoveAll(item.ID);
+
+        public void RemoveAll(string id)
         {
-            _sortedItems.Sort((a, b) => comparison(a, b));
-            // TODO: Move all of these calls into here.
-            CellPopulateManager.NotifyCollectionUpdated(Model.Name);
+            if (!_items.TryGetValue(id, out var item)) return;
+            Remove(id);
+            _baseCollection?.RemoveAll(item);
         }
 
         internal void BecomeViewIntoCollection(UserCollection baseCollection)
@@ -85,7 +95,19 @@ namespace Cell.Data
             _baseCollection = baseCollection;
             baseCollection.ItemAdded += BaseCollectionItemAdded;
             baseCollection.ItemRemoved += BaseCollectionItemRemoved;
+            baseCollection.ItemPropertyChanged += PropertyChangedOnItemInBaseCollection;
             baseCollection.Items.ForEach(InsertItemWithSortAndFilter);
+        }
+
+        private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)
+        {
+            if (Model.SortAndFilterFunctionName is not null)
+            {
+                bool willBeHandledByBase = _items.ContainsKey(model.ID);
+                if (willBeHandledByBase) return;
+
+                InsertItemWithSortAndFilter(model);
+            }
         }
 
         internal void RefreshSortAndFilter()
@@ -133,9 +155,11 @@ namespace Cell.Data
             }
             else
             {
+                if (sortFilterResult == null) return;
                 _sortedItems.RemoveAt(_sortedItems.Count - 1);
                 var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
                 inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
+                _cachedSortFilterResult.Add(model.ID, (int)sortFilterResult!);
                 _items.Add(model.ID, model);
                 model.PropertyChanged += PropertyChangedOnItemInCollection;
                 ItemAdded?.Invoke(this, model);
@@ -149,14 +173,18 @@ namespace Cell.Data
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
                 var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, currentIndex), Model.SortAndFilterFunctionName);
-                if (currentIndex == sortFilterResult) return;
-                if (sortFilterResult == null)
+
+                var cachedResult = _cachedSortFilterResult[model.ID];
+                if (cachedResult == sortFilterResult) return;
+                else if (sortFilterResult == null)
                 {
                     Remove(model.ID);
+                    return;
                 }
-                else if (sortFilterResult != currentIndex)
+                else
                 {
-                    _sortedItems.Remove(model);
+                    _cachedSortFilterResult[model.ID] = (int)sortFilterResult;
+                    _sortedItems.RemoveAt(currentIndex);
                     var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
                     inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                     OrderChanged?.Invoke(this);

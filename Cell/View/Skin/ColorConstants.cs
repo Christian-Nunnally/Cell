@@ -13,7 +13,7 @@ namespace Cell.View.Skin
         public static readonly string SelectedBorderColorConstantHex = "#707070";
         public static readonly string SelectedColorConstantHex = "#383838";
         public static readonly string AccentColorConstantHex = "#007acc";
-        public static readonly string ToolWindowHeaderColorConstantHex = "#2f322f";
+        public static readonly string ToolWindowHeaderColorConstantHex = "#353535";
         public static readonly string ErrorForegroundColorConstantHex = "#ff6666";
 
         public static readonly Color BackgroundColorConstant = RGBHexColorConverter.ConvertHexStringToColor(BackgroundColorConstantHex);
