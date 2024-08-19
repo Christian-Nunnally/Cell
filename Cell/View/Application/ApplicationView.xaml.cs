@@ -167,6 +167,12 @@ namespace Cell.View.Application
             ShowToolWindow(helpWindow);
         }
 
+        private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
+        {
+            var logWindowViewModel = new LogWindowViewModel();
+            var logWindow = new LogWindow(logWindowViewModel);
+            ShowToolWindow(logWindow);
+        }
         private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)

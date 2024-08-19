@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.Persistence;
 using System.Collections;
 
@@ -6,12 +7,10 @@ namespace Cell.Execution
 {
     internal static class DynamicCellPluginExecutor
     {
-        public static List<string> Logs { get; } = [];
-
         public static void Log(string functionName, string sheet, int row, int column, CompileResult compileResult, bool isTrigger)
         {
             var logStart = isTrigger ? $"Trigger: {functionName}" : $"Populate: {functionName}";
-            Logs.Add($"{logStart} - {sheet} - {row} - {column} - {compileResult.Success} - {compileResult.Result}");
+            Logger.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.Success} - {compileResult.Result}");
         }
 
         public static CompileResult RunPopulate(PluginContext pluginContext, CellModel cell)

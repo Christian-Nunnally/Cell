@@ -92,11 +92,10 @@
                                 Style="{StaticResource TitleButtonToggleButtonStyle}"
                                 ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
                             <Button
-                                Click="ShowHelpButtonClick"
-                                Content="?"
+                                Click="ShowLogWindowButtonClick"
+                                Content="/&gt;"
                                 DockPanel.Dock="Left"
-                                Style="{StaticResource TitleButtonStyle}"
-                                ToolTip="Shows a window with helpful information about what you have highlighted." />
+                                Style="{StaticResource TitleButtonStyle}" />
                         </StackPanel>
                     </Border>
                 </Popup>

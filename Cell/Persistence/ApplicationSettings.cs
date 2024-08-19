@@ -15,6 +15,8 @@ namespace Cell.Persistence
         private double codeEditorWidth = 400;
         private double functionManagerWindowHeight = 400;
         private double functionManagerWindowWidth = 400;
+        private double logWindowHeight = 400;
+        private double logWindowWidth = 400;
         private bool highlightPopulateCellDependencies = true;
         private bool highlightPopulateCollectionDependencies = true;
         private bool highlightTriggerCellDependencies = true;
@@ -54,6 +56,18 @@ namespace Cell.Persistence
         {
             get { return functionManagerWindowWidth; }
             set { if (functionManagerWindowWidth != value) { functionManagerWindowWidth = value; NotifyPropertyChanged(nameof(FunctionManagerWindowWidth)); } }
+        }
+
+        public double LogWindowHeight
+        {
+            get { return logWindowHeight; }
+            set { if (logWindowHeight != value) { logWindowHeight = value; NotifyPropertyChanged(nameof(LogWindowHeight)); } }
+        }
+
+        public double LogWindowWidth
+        {
+            get { return logWindowWidth; }
+            set { if (logWindowWidth != value) { logWindowWidth = value; NotifyPropertyChanged(nameof(LogWindowWidth)); } }
         }
 
         public bool HighlightPopulateCellDependencies

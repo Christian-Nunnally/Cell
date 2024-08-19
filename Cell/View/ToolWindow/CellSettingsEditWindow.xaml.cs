@@ -46,7 +46,7 @@ namespace Cell.View.ToolWindow
         private void ImportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             if (DataContext is not CornerCellViewModel cell) return;
-            if (cell.ImportingTemplateName == string.Empty)
+            if (string.IsNullOrWhiteSpace(cell.ImportingTemplateName))
             {
                 DialogWindow.ShowDialog("No template selected", "Please select a template to import.");
                 return;
