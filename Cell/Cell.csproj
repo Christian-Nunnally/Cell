@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <StartupObject>Cell.App</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
-    <Page Remove="View\Skin\Dark.xaml" />
-    <Page Remove="View\Skin\Light.xaml" />
+    <Page Remove="View\Skin\Colors.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,23 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="View\Skin\Dark.xaml" />
-    <Resource Include="View\Skin\Light.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="View\ToolWindow\FloatingCodeEditor.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\ToolWindow\TypeSpecificEditCellPanel.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Page Update="View\Converters\Converters.xaml">
-      <SubType>Designer</SubType>
-    </Page>
+    <Resource Include="View\Skin\Colors.xaml" />
   </ItemGroup>
 
 </Project>

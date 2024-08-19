@@ -1,5 +1,8 @@
 ﻿using Cell.Data;
 using Cell.Model;
+using Cell.ViewModel.Cells;
+using Cell.ViewModel.Cells.Types;
+using Cell.ViewModel.Cells.Types.Special;
 
 namespace Cell.ViewModel
 {
@@ -20,13 +23,14 @@ namespace Cell.ViewModel
                 CellType.Progress => new ProgressCellViewModel(model, sheetViewModel),
                 CellType.List => new ListCellViewModel(model, sheetViewModel),
                 CellType.Graph => new GraphCellViewModel(model, sheetViewModel),
+                CellType.Date => new DateCellViewModel(model, sheetViewModel),
                 _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
             };
         }
 
         public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
         {
-            return Cells.Instance.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
+            return CellTracker.Instance.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

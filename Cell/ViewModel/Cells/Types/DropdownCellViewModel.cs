@@ -2,24 +2,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class DropdownCellViewModel : CellViewModel
     {
-        public ObservableCollection<string> DropdownOptions { get; set; } = [];
-
         public DropdownCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             UpdateDropdownItems(CommaSeperatedItems);
             model.PropertyChanged += ModelPropertyChanged;
-        }
-
-        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CommaSeperatedItems))
-            {
-                UpdateDropdownItems(CommaSeperatedItems);
-            }
         }
 
         public string CommaSeperatedItems
@@ -28,6 +18,16 @@ namespace Cell.ViewModel
             set
             {
                 Model.SetStringProperty(nameof(CommaSeperatedItems), value);
+            }
+        }
+
+        public ObservableCollection<string> DropdownOptions { get; set; } = [];
+
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CommaSeperatedItems))
+            {
+                UpdateDropdownItems(CommaSeperatedItems);
             }
         }
 

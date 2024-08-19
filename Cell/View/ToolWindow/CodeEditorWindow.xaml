@@ -1,0 +1,56 @@
+﻿<UserControl
+    x:Class="Cell.View.ToolWindow.CodeEditorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cell.View.ToolWindow"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:CodeEditorWindow}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid
+        Width="{Binding UserSetWidth}"
+        Height="{Binding UserSetHeight}"
+        Background="{StaticResource CellBackground}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="{Binding ResultColumnWidth}" />
+        </Grid.ColumnDefinitions>
+        <avalonEdit:TextEditor
+            Name="textEditor"
+            Grid.Row="0"
+            Padding="4"
+            Background="{StaticResource CellBackground}"
+            FontFamily="Consolas"
+            FontSize="10pt"
+            Foreground="{StaticResource ForegroundColor}"
+            HorizontalScrollBarVisibility="Auto"
+            SyntaxHighlighting="C#"
+            VerticalScrollBarVisibility="Auto" />
+        <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}">
+            <avalonEdit:TextEditor
+                Name="syntaxTreePreviewViewer"
+                Grid.Row="1"
+                Padding="4"
+                Background="{StaticResource CellBackground}"
+                FontFamily="Consolas"
+                FontSize="10pt"
+                Foreground="{StaticResource ForegroundColor}"
+                HorizontalScrollBarVisibility="Auto"
+                SyntaxHighlighting="C#"
+                VerticalScrollBarVisibility="Auto" />
+        </Border>
+        <TextBox
+            Grid.Column="1"
+            Padding="4"
+            VerticalContentAlignment="Top"
+            Background="{StaticResource CellBackground}"
+            FontFamily="Consolas"
+            Foreground="{Binding ResultStringColor}"
+            IsReadOnly="True"
+            Text="{Binding Path=ResultString}"
+            TextWrapping="Wrap" />
+    </Grid>
+</UserControl>

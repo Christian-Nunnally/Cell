@@ -1,0 +1,71 @@
+﻿<UserControl
+    x:Class="Cell.View.ToolWindow.CellSettingsEditWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cell="clr-namespace:Cell.ViewModel.Cells"
+    xmlns:cellTypes="clr-namespace:Cell.ViewModel.Cells.Types"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cell.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:special="clr-namespace:Cell.ViewModel.Cells.Types.Special"
+    MinWidth="200"
+    d:DataContext="{d:DesignInstance Type=cell:CellViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <ContentControl Content="{Binding}">
+        <ContentControl.Resources>
+            <DataTemplate DataType="{x:Type cellTypes:ListCellViewModel}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Collection" />
+                        <controls:BetterComboBox
+                            Width="100"
+                            ItemsSource="{Binding CollectionNames}"
+                            SelectedItem="{Binding CollectionName}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Max Items" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding MaxItemsString, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type cellTypes:DropdownCellViewModel}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="50" Content="Items" />
+                        <TextBox
+                            Width="150"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type cellTypes:GraphCellViewModel}">
+                <StackPanel Orientation="Horizontal">
+                    <Label Width="100" Content="Max Points" />
+                    <TextBox
+                        Width="100"
+                        KeyDown="TextBoxKeyDown"
+                        Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
+                <StackPanel>
+                    <Button Click="ExportSheetButtonClicked" Content="Export" />
+                    <controls:BetterComboBox ItemsSource="{Binding PossibleTemplates}" SelectedItem="{Binding ImportingTemplateName}" />
+                    <Label Content="New sheet name" />
+                    <TextBox Text="{Binding NewSheetNameForImportedTemplates}" />
+                    <Button Click="ImportSheetButtonClicked" Content="Import" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type cell:CellViewModel}">
+                <StackPanel />
+            </DataTemplate>
+        </ContentControl.Resources>
+    </ContentControl>
+</UserControl>

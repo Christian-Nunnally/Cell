@@ -1,12 +1,11 @@
 ﻿using Cell.Model;
 using System.Windows.Controls;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
     public class TextboxCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
     {
         private TextBox? _textBox;
-
         public override bool IsSelected
         {
             get => base.IsSelected;

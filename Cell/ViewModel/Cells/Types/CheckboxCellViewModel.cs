@@ -1,11 +1,45 @@
-﻿using Cell.Model;
-using Cell.Plugin;
+﻿using Cell.Common;
+using Cell.Execution;
+using Cell.Model;
 using System.Windows.Input;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types
 {
+    public static class CheckboxCellModelExtensions
+    {
+        public static void Check(this CellModel model)
+        {
+            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), true);
+        }
+
+        public static void Check(this CellModel model, bool check)
+        {
+            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
+        }
+
+        public static bool IsChecked(this CellModel model)
+        {
+            return model.GetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked));
+        }
+
+        public static void Uncheck(this CellModel model)
+        {
+            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), false);
+        }
+    }
+
     public class CheckboxCellViewModel : CellViewModel
     {
+        private ICommand? _checkboxCheckedCommand;
+        public CheckboxCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
+        {
+            model.PropertyChanged += ModelPropertyChanged;
+        }
+
+        public static bool CanExecute => true;
+
+        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CanExecute, x => CheckboxChecked());
+
         public bool IsChecked
         {
             get => Model.GetBooleanProperty(nameof(IsChecked));
@@ -19,11 +53,8 @@ namespace Cell.ViewModel
             }
         }
 
-        private ICommand? _checkboxCheckedCommand;
-
-        public CheckboxCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
+        public static void CheckboxChecked()
         {
-            model.PropertyChanged += ModelPropertyChanged;
         }
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -32,37 +63,6 @@ namespace Cell.ViewModel
             {
                 NotifyPropertyChanged(nameof(IsChecked));
             }
-        }
-
-        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CanExecute, x => CheckboxChecked());
-
-        public static bool CanExecute => true;
-
-        public static void CheckboxChecked()
-        {
-        }
-    }
-
-    public static class CheckboxCellModelExtensions
-    {
-        public static bool IsChecked(this CellModel model)
-        {
-            return model.GetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked));
-        }
-
-        public static void Check(this CellModel model)
-        {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), true);
-        }
-
-        public static void Check(this CellModel model, bool check)
-        {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
-        }
-
-        public static void Uncheck(this CellModel model)
-        {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), false);
         }
     }
 }

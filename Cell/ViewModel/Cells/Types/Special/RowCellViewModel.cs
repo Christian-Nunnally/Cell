@@ -1,7 +1,8 @@
 ﻿using Cell.Data;
 using Cell.Model;
+using Cell.View.Skin;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types.Special
 {
     public class RowCellViewModel : SpecialCellViewModel
     {
@@ -11,10 +12,7 @@ namespace Cell.ViewModel
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
-        }
+        public override string BackgroundColorHex { get => ColorConstants.ToolWindowHeaderColorConstantHex; set => base.BackgroundColorHex = value; }
 
         public override double Height
         {
@@ -29,22 +27,12 @@ namespace Cell.ViewModel
             }
         }
 
-        public override string Text 
-        {
-            get => Row.ToString();
-            set => base.Text = value; 
-        }
+        public override string Text { get => Row.ToString(); set => base.Text = value; }
 
-        public void DeleteRow()
+        public void AddRowAbove()
         {
-            if (_sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Count() == 1) return;
-            var cellsToDelete = Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
-            foreach (var cell in cellsToDelete)
-            {
-                _sheetViewModel.DeleteCell(cell);
-            }
-            IncrementRowOfAllAtOrBelow(Row, -1);
-            _sheetViewModel.UpdateLayout();
+            var rowToInsertAt = Row;
+            AddRowAt(rowToInsertAt);
         }
 
         public void AddRowBelow()
@@ -53,16 +41,30 @@ namespace Cell.ViewModel
             AddRowAt(rowToInsertAt);
         }
 
-        public void AddRowAbove()
+        public void DeleteRow()
         {
-            var rowToInsertAt = Row;
-            AddRowAt(rowToInsertAt);
+            if (_sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Count() == 1) return;
+            var cellsToDelete = CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
+            foreach (var cell in cellsToDelete)
+            {
+                _sheetViewModel.DeleteCell(cell);
+            }
+            IncrementRowOfAllAtOrBelow(Row, -1);
+            _sheetViewModel.UpdateLayout();
         }
 
         private void AddRowAt(int index)
         {
             InsertRowAtIndex(index);
             _sheetViewModel.UpdateLayout();
+        }
+
+        private List<CellModel> GetAllCellsAtOrBelow(int row) => CellTracker.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
+
+        private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
+        {
+            var cells = GetAllCellsAtOrBelow(row);
+            foreach (var cell in cells) cell.Row += amount;
         }
 
         private void InsertRowAtIndex(int index)
@@ -80,8 +82,8 @@ namespace Cell.ViewModel
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.AddCell(cell);
 
-                var firstSideMergeId = Cells.Instance.GetCell(Model.SheetName, index - 1, columnIndex)?.MergedWith ?? string.Empty;
-                var secondSideMergeId = Cells.Instance.GetCell(Model.SheetName, index + 1, columnIndex)?.MergedWith ?? string.Empty;
+                var firstSideMergeId = CellTracker.Instance.GetCell(Model.SheetName, index - 1, columnIndex)?.MergedWith ?? string.Empty;
+                var secondSideMergeId = CellTracker.Instance.GetCell(Model.SheetName, index + 1, columnIndex)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(firstSideMergeId) && firstSideMergeId == secondSideMergeId)
                 {
                     cellModel.MergedWith = firstSideMergeId;
@@ -89,14 +91,9 @@ namespace Cell.ViewModel
             }
         }
 
-        private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
+        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var cells = GetAllCellsAtOrBelow(row);
-            foreach (var cell in cells) cell.Row += amount;
+            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
         }
-
-        private List<CellModel> GetAllCellsAtOrBelow(int row) => Cells.Instance.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
-
-        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
     }
 }

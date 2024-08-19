@@ -2,14 +2,14 @@
     x:Class="Cell.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Cell"
-    StartupUri="View/ApplicationView.xaml">
+    StartupUri="View/Application/ApplicationView.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="View/Skin/Dark.xaml" />
-                <ResourceDictionary Source="View/Skin/Controls.xaml" />
-                <ResourceDictionary Source="View/Controls/generic.xaml" />
+                <ResourceDictionary Source="View/Skin/Colors.xaml" />
+                <ResourceDictionary Source="View/Controls/BetterComboBoxStyle.xaml" />
+                <ResourceDictionary Source="View/Controls/BetterCheckBoxStyle.xaml" />
+                <ResourceDictionary Source="View/Skin/ScrollViewer.xaml" />
                 <ResourceDictionary Source="View/Skin/Styles.xaml" />
                 <ResourceDictionary Source="View/Converters/Converters.xaml" />
                 <ResourceDictionary Source="View/Skin/ColorPicker.xaml" />

@@ -1,5 +1,4 @@
-﻿
-using Cell.Common;
+﻿using Cell.Common;
 using Cell.Data;
 using System.IO;
 using System.IO.Compression;
@@ -9,59 +8,83 @@ namespace Cell.Persistence
     internal class PersistenceManager
     {
         public const string Version = "0.0.0";
-        public static string SaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
+        public static string CurrentRootPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
         private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
 
-        public static void SaveAll()
+        public static string CurrentTemplatePath => Path.Combine(CurrentRootPath, "Templates");
+        public static string CurrentFunctionsPath => Path.Combine(CurrentRootPath, "Functions");
+        public static string CurrentCollectionsPath => Path.Combine(CurrentRootPath, "Collections");
+        public static string CurrentApplicationSettingsPath => Path.Combine(CurrentRootPath, "Application");
+        public static string CurrentSheetsPath => Path.Combine(CurrentRootPath, "Sheets");
+
+        public static void CreateBackup()
         {
-            PluginFunctionLoader.SavePlugins();
-            UserCollectionLoader.SaveCollections();
-            new CellLoader(SaveLocation).SaveCells();
-            SaveVersion();
+            // Make sure cells instance is created with the correct save location
+            var _ = CellTracker.Instance;
+            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
+            var oldSaveLocation = CurrentRootPath;
+            CurrentRootPath = CurrentRootPath + "_backup_" + CreateFileFriendlyCurrentDateTime();
+            SaveAll();
+            ZipFolder(CurrentRootPath);
+            _lastBackupDate = DateTime.Now;
+            CurrentRootPath = oldSaveLocation;
         }
 
-        private static void SaveVersion()
+        public static void ExportSheet(string sheetName)
         {
-            var versionPath = Path.Combine(SaveLocation, "version");
-            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
-            File.WriteAllText(versionPath, Version);
+            new CellLoader(CurrentRootPath).ExportSheetTemplate(sheetName);
+        }
+
+        public static void ImportSheet(string templateName, string sheetName)
+        {
+            new CellLoader(CurrentRootPath).ImportSheetTemplate(templateName, sheetName);
         }
 
         public static void LoadAll()
         {
             var versionSchema = LoadVersion();
             if (Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
-            if (!Directory.Exists(SaveLocation)) Directory.CreateDirectory(SaveLocation);
+            if (!Directory.Exists(CurrentRootPath)) Directory.CreateDirectory(CurrentRootPath);
             SaveVersion();
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
-            new CellLoader(SaveLocation).LoadCells();
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            new CellLoader(CurrentRootPath).LoadAndAddCells();
             CreateBackup();
         }
 
-        private static string LoadVersion()
+        public static void SaveAll()
         {
-            var versionPath = Path.Combine(SaveLocation, "version");
-            if (!File.Exists(versionPath)) return Version;
-            return File.ReadAllText(versionPath);}
+            PluginFunctionLoader.SavePlugins();
+            UserCollectionLoader.SaveCollections();
+            new CellLoader(CurrentRootPath).SaveCells();
+            SaveVersion();
+        }
 
-        public static void CreateBackup()
+        internal static IEnumerable<string> GetTemplateNames()
         {
-            // Make sure cells instance is created with the correct save location
-            var _ = Cells.Instance;
-            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
-            var oldSaveLocation = SaveLocation;
-            SaveLocation = SaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();
-            SaveAll();
-            ZipFolder(SaveLocation);
-            _lastBackupDate = DateTime.Now;
-            SaveLocation = oldSaveLocation;
+            if (!Directory.Exists(CurrentTemplatePath)) return new List<string>();
+            return Directory.GetDirectories(CurrentTemplatePath).Select(Path.GetFileName);
         }
 
         private static string CreateFileFriendlyCurrentDateTime()
         {
             return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        }
+
+        private static string LoadVersion()
+        {
+            var versionPath = Path.Combine(CurrentRootPath, "version");
+            if (!File.Exists(versionPath)) return Version;
+            return File.ReadAllText(versionPath);
+        }
+
+        private static void SaveVersion()
+        {
+            var versionPath = Path.Combine(CurrentRootPath, "version");
+            if (!Directory.Exists(CurrentRootPath)) Directory.CreateDirectory(CurrentRootPath);
+            File.WriteAllText(versionPath, Version);
         }
 
         private static void ZipFolder(string folderPath)

@@ -1,20 +1,17 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.Persistence;
-using System.Collections.ObjectModel;
+using Cell.View.Skin;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells.Types.Special
 {
     public class CornerCellViewModel(CellModel model, SheetViewModel sheetViewModel) : SpecialCellViewModel(model, sheetViewModel)
     {
-        public ObservableCollection<string> SheetNames => Cells.Instance.SheetNames;
+        public override string BackgroundColorHex { get => ColorConstants.ToolWindowHeaderColorConstantHex; set => base.BackgroundColorHex = value; }
 
-        public List<string> PopulateFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Populate", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
+        public string ImportingTemplateName { get; set; }
 
-        public List<string> TriggerFunctionNames => PluginFunctionLoader.Namespaces.TryGetValue("Trigger", out var result) ? result.Values.Select(x => x.Name).ToList() : [];
+        public string NewSheetNameForImportedTemplates { get; set; }
 
-        public List<string> CollectionNames => UserCollectionLoader.CollectionNames.ToList();
-
-        public override string BackgroundColorHex { get => "#2d2d30"; set => base.BackgroundColorHex = value; }
+        public IEnumerable<string> PossibleTemplates => PersistenceManager.GetTemplateNames();
     }
 }

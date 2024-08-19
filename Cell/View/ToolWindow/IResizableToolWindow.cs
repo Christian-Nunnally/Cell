@@ -1,14 +1,13 @@
-﻿
-namespace Cell.View.ToolWindow
+﻿namespace Cell.View.ToolWindow
 {
     internal interface IResizableToolWindow : IToolWindow
     {
-        public double GetWidth();
-
         public double GetHeight();
 
-        public void SetWidth(double width);
+        public double GetWidth();
 
         public void SetHeight(double height);
+
+        public void SetWidth(double width);
     }
 }

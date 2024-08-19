@@ -1,8 +1,12 @@
 ﻿using Cell.Common;
 using Cell.Data;
+using Cell.Execution;
+using Cell.Execution.SyntaxWalkers;
+using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Plugin;
-using Cell.ViewModel;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
@@ -11,62 +15,22 @@ namespace Cell.Persistence
     internal static class UserCollectionLoader
     {
         private static readonly Dictionary<string, UserCollection> _collections = [];
-
         public static IEnumerable<string> CollectionNames => _collections.Keys;
 
-        public static UserCollection GetOrCreateCollection(string name)
+        public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
+
+        public static UserCollection? GetCollection(string name)
         {
+            if (name == string.Empty) throw new CellError("Collection name cannot be empty");
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
-            var userCollection = new UserCollection(name);
-            StartTrackingCollection(userCollection);
-            return userCollection;
+            return null;
         }
 
-        private static void StartTrackingCollection(UserCollection userCollection)
-        {
-            userCollection.ItemAdded += UserCollectionItemAdded;
-            userCollection.ItemRemoved += UserCollectionItemRemoved;
-            userCollection.ItemPropertyChanged += UserCollectionItemChanged;
-            userCollection.ItemOrderChanged += UserCollectionOrderChanged;
-            _collections.Add(userCollection.Name, userCollection);
-        }
-
-        private static void UserCollectionItemChanged(UserCollection collection, PluginModel model)
-        {
-            SaveItem(collection.Name, model.ID, model);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
-        }
-
-        private static void UserCollectionItemAdded(UserCollection collection, PluginModel model)
-        {
-            SaveItem(collection.Name, model.ID, model);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
-        }
-
-        private static void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
-        {
-            DeleteItem(collection.Name, model.ID);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
-        }
-
-        private static void UserCollectionOrderChanged(UserCollection collection)
-        {
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
-        }
-
-        public static void SaveCollections()
-        {
-            foreach (var collection in _collections) SaveCollection(collection.Key, collection.Value);
-        }
-
-        private static void SaveCollection(string collectionName, UserCollection collection)
-        {
-            foreach (var model in collection.Items) SaveItem(collectionName, model.ID, model);
-        }
+        public static string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
 
         public static void LoadCollections()
         {
-            var collectionsDirectory = Path.Combine(PersistenceManager.SaveLocation, "Collections");
+            var collectionsDirectory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
             if (!Directory.Exists(collectionsDirectory)) return;
             foreach (var directory in Directory.GetDirectories(collectionsDirectory))
             {
@@ -74,21 +38,100 @@ namespace Cell.Persistence
             }
         }
 
-        private static void LoadCollection(string directory)
+        public static void ProcessCollectionRename(string oldName, string newName)
         {
-            var collection = new UserCollection(Path.GetFileName(directory));
-            Directory.GetFiles(directory).Where(x => Path.GetFileName(x) != "type").Select(LoadItem).ToList().ForEach(collection.Add);
-            collection.Type = LoadCollectionType(collection.Name);
-            StartTrackingCollection(collection);
+            if (!_collections.TryGetValue(oldName, out var collection)) return;
+            if (_collections.ContainsKey(newName)) return;
+            _collections.Remove(oldName);
+            _collections.Add(newName, collection);
+            var oldDirectory = Path.Combine(GetSaveDirectory(), oldName);
+            var newDirectory = Path.Combine(GetSaveDirectory(), newName);
+            Directory.Move(oldDirectory, newDirectory);
+
+            var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
+            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            {
+                if (function.CollectionDependencies.Contains(oldName))
+                {
+                    function.Model.Code = collectionRenamer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
+                }
+            }
         }
 
-        private static void SaveItem(string collectionName, string id, PluginModel model)
+        public static void SaveCollections()
+        {
+            foreach (var collection in _collections) SaveCollection(collection.Value);
+        }
+
+        internal static UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
+        {
+            var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
+            model.PropertyChanged += UserCollectionModelPropertyChanged;
+            var collection = new UserCollection(model);
+            StartTrackingCollection(collection);
+            SaveCollection(collection);
+            EnsureLinkedToBaseCollection(collection);
+            return collection;
+        }
+
+        internal static void DeleteCollection(UserCollection collection)
+        {
+            UnlinkFromBaseCollection(collection);
+            StopTrackingCollection(collection);
+            var directory = Path.Combine(GetSaveDirectory(), collection.Name);
+            Directory.Delete(directory, true);
+        }
+
+        internal static void LinkUpBaseCollectionsAfterLoad()
+        {
+            var loadedCollections = new List<string>();
+            while (loadedCollections.Count != ObservableCollections.Count)
+            {
+                foreach (var collection in ObservableCollections)
+                {
+                    if (loadedCollections.Contains(collection.Name)) continue;
+                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
+                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
+                    {
+                        loadedCollections.Add(collection.Name);
+                        EnsureLinkedToBaseCollection(collection);
+                    }
+                }
+            }
+        }
+
+        private static void DeleteItem(string collectionName, string idToRemove)
         {
             var directory = Path.Combine(GetSaveDirectory(), collectionName);
+            var path = Path.Combine(directory, idToRemove);
+            if (File.Exists(path)) File.Delete(path);
+        }
+
+        private static void EnsureLinkedToBaseCollection(UserCollection collection)
+        {
+            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
+            {
+                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
+                collection.BecomeViewIntoCollection(baseCollection);
+            }
+        }
+
+        private static string GetSaveDirectory()
+        {
+            var directory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
             Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, id);
-            var serializedModel = JsonSerializer.Serialize(model);
-            File.WriteAllText(path, serializedModel);
+            return directory;
+        }
+
+        private static void LoadCollection(string directory)
+        {
+            var path = Path.Combine(directory, "collection");
+            var text = File.ReadAllText(path);
+            var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
+            var collection = new UserCollection(model);
+            var itemsDirectory = Path.Combine(directory, "Items");
+            Directory.GetFiles(itemsDirectory).Select(LoadItem).ToList().ForEach(collection.Add);
+            StartTrackingCollection(collection);
         }
 
         private static PluginModel LoadItem(string path)
@@ -97,37 +140,109 @@ namespace Cell.Persistence
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
-        private static void DeleteItem(string collectionName, string idToRemove)
-        { 
-            var directory = Path.Combine(GetSaveDirectory(), collectionName);
-            var path = Path.Combine(directory, idToRemove);
-            if (File.Exists(path)) File.Delete(path);
+        public static void ExportCollection(string collectionName, string toDirectory)
+        {
+            var fromDirectory = Path.Combine(GetSaveDirectory(), collectionName);
+            CopyFilesRecursively(fromDirectory, toDirectory);
         }
 
-        private static string GetSaveDirectory()
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
         {
-            var directory = Path.Combine(PersistenceManager.SaveLocation, "Collections");
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
+        private static void SaveCollection(UserCollection collection)
+        {
+            SaveCollectionSettings(collection.Model);
+            var itemsDirectory = Path.Combine(GetSaveDirectory(), collection.Name, "Items");
+            Directory.CreateDirectory(itemsDirectory);
+            foreach (var item in collection.Items) SaveItem(collection.Name, item.ID, item);
+        }
+
+        private static void SaveCollectionSettings(UserCollectionModel model)
+        {
+            var collectionDirectory = Path.Combine(GetSaveDirectory(), model.Name);
+            Directory.CreateDirectory(collectionDirectory);
+            var collectionPath = Path.Combine(collectionDirectory, "collection");
+            File.WriteAllText(collectionPath, JsonSerializer.Serialize(model));
+        }
+
+        private static void SaveItem(string collectionName, string id, PluginModel model)
+        {
+            var directory = Path.Combine(GetSaveDirectory(), collectionName, "Items");
             Directory.CreateDirectory(directory);
-            return directory;
+            var path = Path.Combine(directory, id);
+            var serializedModel = JsonSerializer.Serialize(model);
+            File.WriteAllText(path, serializedModel);
         }
 
-        public static string GetDataTypeStringForCollection(string collection) => Cells.Instance.AllCells
-            .Where(x => x.IsCollection(collection) && !string.IsNullOrWhiteSpace(x.GetCollectionType()))
-            .Select(x => x.GetCollectionType())
-            .FirstOrDefault() ?? GetOrCreateCollection(collection).Type;
-
-        internal static void SaveCollectionType(string collectionName, string value)
+        private static void StartTrackingCollection(UserCollection userCollection)
         {
-            var directory = Path.Combine(GetSaveDirectory(), collectionName);
-            Directory.CreateDirectory(directory);
-            var path  = Path.Combine(directory, "type");
-            File.WriteAllText(path, value);
+            userCollection.ItemAdded += UserCollectionItemAdded;
+            userCollection.ItemRemoved += UserCollectionItemRemoved;
+            userCollection.ItemPropertyChanged += UserCollectionItemChanged;
+            userCollection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
+            _collections.Add(userCollection.Name, userCollection);
+            ObservableCollections.Add(userCollection);
         }
 
-        internal static string LoadCollectionType(string collectionName)
+        private static void StopTrackingCollection(UserCollection userCollection)
         {
-            var path = Path.Combine(GetSaveDirectory(), collectionName, "type");
-            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
+            userCollection.ItemAdded -= UserCollectionItemAdded;
+            userCollection.ItemRemoved -= UserCollectionItemRemoved;
+            userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
+            userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
+            _collections.Remove(userCollection.Name);
+            ObservableCollections.Remove(userCollection);
+        }
+
+        private static void UnlinkFromBaseCollection(UserCollection collection)
+        {
+            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
+            {
+                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
+                collection.StopBeingViewIntoCollection(baseCollection);
+            }
+        }
+
+        private static void UserCollectionItemAdded(UserCollection collection, PluginModel model)
+        {
+            if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
+            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+        }
+
+        private static void UserCollectionItemChanged(UserCollection collection, PluginModel model)
+        {
+            if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
+            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+        }
+
+        private static void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
+        {
+            if (!collection.IsFilteredView) DeleteItem(collection.Name, model.ID);
+            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+        }
+
+        private static void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not UserCollectionModel model) return;
+            SaveCollectionSettings(model);
+        }
+
+        internal static void ImportCollection(string collectionDirectory, string collectionName)
+        {
+            var toDirectory = Path.Combine(GetSaveDirectory(), collectionName);
+            CopyFilesRecursively(collectionDirectory, toDirectory);
         }
     }
 }

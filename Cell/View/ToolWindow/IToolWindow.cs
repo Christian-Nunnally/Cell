@@ -1,13 +1,15 @@
-﻿using Cell.ViewModel;
+﻿using Cell.ViewModel.Application;
 
 namespace Cell.View.ToolWindow
 {
     internal interface IToolWindow
     {
-        void Close();
+        public Action? RequestClose { get; set; }
 
         string GetTitle();
 
         List<CommandViewModel> GetToolBarCommands();
+
+        void HandleBeingClosed();
     }
 }
