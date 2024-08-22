@@ -61,8 +61,8 @@ namespace Cell.View.ToolWindow
 
         private void RequestClose()
         {
-            _canvas.Children.Remove(this);
-            _content?.HandleBeingClosed();
+            var isAllowingClose = _content?.HandleBeingClosed() ?? true;
+            if (isAllowingClose) _canvas.Children.Remove(this);
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)

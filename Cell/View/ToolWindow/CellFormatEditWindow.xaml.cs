@@ -44,8 +44,9 @@ namespace Cell.View.ToolWindow
             //new CommandViewModel("void", new RelayCommand(x => true, x => {})),
             ];
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
+            return true;
         }
 
         private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName)

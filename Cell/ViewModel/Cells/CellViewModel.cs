@@ -16,10 +16,10 @@ namespace Cell.ViewModel.Cells
         protected SheetViewModel _sheetViewModel;
         private double _x;
         private double _y;
-        private bool isHighlighted;
-        private bool isSelected;
-        private SolidColorBrush selectionBorderColor = new((Color)ColorConverter.ConvertFromString("#66666666"));
-        private SolidColorBrush selectionColor = new((Color)ColorConverter.ConvertFromString("#66666666"));
+        private bool _isHighlighted;
+        private bool _isSelected;
+        private SolidColorBrush _selectionBorderColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
+        private SolidColorBrush _selectionColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
         public CellViewModel(CellModel model, SheetViewModel sheet)
         {
             _sheetViewModel = sheet;
@@ -31,6 +31,8 @@ namespace Cell.ViewModel.Cells
             BorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BorderColorHex));
             ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
             ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
+            SelectionColor = new((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
+            SelectionBorderColor = new((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
             UpdateBorderThickness(BorderThicknessString);
             UpdateContentBorderThickness(ContentBorderThicknessString);
             _model.PropertyChanged += ModelPropertyChanged;
@@ -43,10 +45,14 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Background];
             set
             {
+                if (value == BorderColorHex) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.ColorHexes[(int)ColorFor.Background] = value;
-                BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
+                _model.SetBackground(value);
+                var color = (Color)ColorConverter.ConvertFromString(value);
+                BackgroundColor = new SolidColorBrush(color);
                 NotifyPropertyChanged(nameof(BackgroundColor), nameof(BackgroundColorHex));
+                SelectionColor = new(ColorAdjuster.GetHighlightColor(color, 100));
+                SelectionBorderColor = new(ColorAdjuster.GetHighlightColor(color, 175));
             }
         }
 
@@ -57,9 +63,11 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Border];
             set
             {
+                if (value == BorderColorHex) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.ColorHexes[(int)ColorFor.Border] = value;
-                BorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BorderColorHex));
+                _model.SetBorder(value);
+                var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
+                BorderColor = new SolidColorBrush(color);
                 NotifyPropertyChanged(nameof(BorderColor), nameof(BorderColorHex));
             }
         }
@@ -71,6 +79,7 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
+                if (value == BorderThicknessBottom) return;
                 BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{BorderThickness.Right},{value}";
                 NotifyBorderThicknessChanged();
             }
@@ -81,6 +90,7 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
+                if (value == BorderThicknessLeft) return;
                 BorderThicknessString = $"{value},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
                 NotifyBorderThicknessChanged();
             }
@@ -91,6 +101,7 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
+                if (value == BorderThicknessRight) return;
                 BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
                 NotifyBorderThicknessChanged();
             }
@@ -153,7 +164,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.ColorHexes[(int)ColorFor.ContentBorder] = value;
+                _model.SetContentBorder(value);
                 ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
                 NotifyPropertyChanged(nameof(ContentBorderColor), nameof(ContentBorderColorHex));
             }
@@ -221,8 +232,9 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.ContentHighlight];
             set
             {
+                if (ContentHighlightColorHex == value) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.ColorHexes[(int)ColorFor.ContentHighlight] = value;
+                _model.SetContentHighlight(value);
                 ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
                 NotifyPropertyChanged(nameof(ContentHighlightColor), nameof(ContentHighlightColorHex));
             }
@@ -251,8 +263,9 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Foreground];
             set
             {
+                if (ForegroundColorHex == value) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.ColorHexes[(int)ColorFor.Foreground] = value;
+                _model.SetForeground(value);
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
                 NotifyPropertyChanged(nameof(ForegroundColor), nameof(ForegroundColorHex));
             }
@@ -267,7 +280,12 @@ namespace Cell.ViewModel.Cells
         public virtual HorizontalAlignment HorizontalAlignmentForView
         {
             get => _model.HorizontalAlignment;
-            set { _model.HorizontalAlignment = value; NotifyPropertyChanged(nameof(HorizontalAlignmentForView)); NotifyPropertyChanged(nameof(HorizontalAlignmentForViewCenter)); }
+            set 
+            { 
+                if (HorizontalAlignmentForView == value) return;
+                _model.HorizontalAlignment = value; 
+                NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter)); 
+            }
         }
 
         public virtual HorizontalAlignment HorizontalAlignmentForViewCenter => HorizontalAlignmentForView == HorizontalAlignment.Stretch ? HorizontalAlignment.Center : HorizontalAlignmentForView;
@@ -300,14 +318,14 @@ namespace Cell.ViewModel.Cells
 
         public virtual bool IsHighlighted
         {
-            get => isHighlighted;
-            set { if (isHighlighted == value) return; isHighlighted = value; NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder)); }
+            get => _isHighlighted;
+            set { if (_isHighlighted == value) return; _isHighlighted = value; NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); }
         }
 
         public virtual bool IsSelected
         {
-            get => isSelected;
-            set { if (isSelected == value) return; isSelected = value; NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder)); }
+            get => _isSelected;
+            set { if (_isSelected == value) return; _isSelected = value; NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); }
         }
 
         public virtual Thickness Margin { get; private set; }
@@ -400,17 +418,19 @@ namespace Cell.ViewModel.Cells
 
         public virtual SolidColorBrush SelectionBorderColor
         {
-            get => selectionBorderColor;
-            set { if (selectionBorderColor == value) return; selectionBorderColor = value; NotifyPropertyChanged(nameof(SelectionBorderColor)); }
+            get => _selectionBorderColor;
+            set { if (_selectionBorderColor == value) return; _selectionBorderColor = value; NotifyPropertyChanged(nameof(SelectionBorderColor)); }
         }
 
         public virtual SolidColorBrush SelectionColor
         {
-            get => selectionColor;
-            set { if (selectionColor == value) return; selectionColor = value; NotifyPropertyChanged(nameof(SelectionColor)); }
+            get => _selectionColor;
+            set { if (_selectionColor == value) return; _selectionColor = value; NotifyPropertyChanged(nameof(SelectionColor)); }
         }
 
         public virtual bool ShouldShowSelectionBorder => IsSelected || IsHighlighted;
+
+        public virtual bool ShouldShowSelectionFill => IsSelected || IsHighlighted;
 
         public virtual string Text
         {
@@ -472,6 +492,7 @@ namespace Cell.ViewModel.Cells
         public void HighlightCell(string color)
         {
             SelectionColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+            SelectionBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
             IsHighlighted = true;
             NotifyPropertyChanged(nameof(BackgroundColor));
         }
@@ -511,9 +532,9 @@ namespace Cell.ViewModel.Cells
 
         public void UnhighlightCell()
         {
-            SelectionColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"));
+            SelectionColor = new(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(BackgroundColorHex), 100));
+            SelectionBorderColor = new(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(BackgroundColorHex), 175));
             IsHighlighted = false;
-            NotifyPropertyChanged(nameof(BackgroundColor));
         }
 
         public bool UpdateBorderThickness(string stringBorderThickness)

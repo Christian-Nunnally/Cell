@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.ViewModel;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
@@ -38,12 +37,14 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
         }
 
-        public static void ShowYesNoConfirmationDialog(string title, string message, Action action)
+        public static void ShowYesNoConfirmationDialog(string title, string message, Action yesAction) => ShowYesNoConfirmationDialog(title, message, yesAction, () => { });
+
+        public static void ShowYesNoConfirmationDialog(string title, string message, Action yesAction, Action noAction)
         {
             var actions = new List<CommandViewModel>
             {
-                new("Yes", new RelayCommand(x => action())),
-                new("No", new RelayCommand(x => { }))
+                new("Yes", new RelayCommand(x => yesAction())),
+                new("No", new RelayCommand(x => noAction()))
             };
             var dialogWindow = new DialogWindow(title, message, actions);
             ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
@@ -53,8 +54,9 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
+            return true;
         }
 
         private void ButtonClick(object sender, System.Windows.RoutedEventArgs e)

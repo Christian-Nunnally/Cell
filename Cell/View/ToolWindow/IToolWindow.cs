@@ -10,6 +10,6 @@ namespace Cell.View.ToolWindow
 
         List<CommandViewModel> GetToolBarCommands();
 
-        void HandleBeingClosed();
+        bool HandleBeingClosed();
     }
 }

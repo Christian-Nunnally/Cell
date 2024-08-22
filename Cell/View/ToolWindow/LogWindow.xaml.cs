@@ -29,10 +29,10 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands()
         {
-            return new List<CommandViewModel>()
-            {
-                new CommandViewModel("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
-            };
+            return
+            [
+                new("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
+            ];
         }
 
         public double GetWidth()
@@ -40,8 +40,9 @@ namespace Cell.View.ToolWindow
             return ApplicationSettings.Instance.FunctionManagerWindowWidth;
         }
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
+            return true;
         }
 
         public void SetHeight(double height)

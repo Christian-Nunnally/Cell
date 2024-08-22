@@ -28,7 +28,10 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public void HandleBeingClosed() { }
+        public bool HandleBeingClosed() 
+        {
+            return true;
+        }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)
         {

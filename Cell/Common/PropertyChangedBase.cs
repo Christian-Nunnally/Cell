@@ -16,5 +16,12 @@ namespace Cell.Common
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName2));
         }
+
+        public void NotifyPropertyChanged(string propertyName, string propertyName2, string propertyName3)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName2));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName3));
+        }
     }
 }

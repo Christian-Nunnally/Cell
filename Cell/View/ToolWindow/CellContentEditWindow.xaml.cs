@@ -32,8 +32,9 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Auto-Index", new RelayCommand(x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
             ];
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
+            return true;
         }
 
         private static void IndexSelectedCells()

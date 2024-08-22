@@ -305,30 +305,40 @@ namespace Cell.Model
 
         public void SetBorder(string color)
         {
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.Border] == color) return;
             ColorHexes[(int)ColorFor.Border] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetContentBackground(string color)
         {
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.ContentBackground] == color) return;
             ColorHexes[(int)ColorFor.ContentBackground] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetContentBorder(string color)
         {
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.ContentBorder] == color) return;
             ColorHexes[(int)ColorFor.ContentBorder] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetContentHighlight(string color)
         {
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.ContentHighlight] == color) return;
             ColorHexes[(int)ColorFor.ContentHighlight] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetForeground(string color)
         {
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.Foreground] == color) return;
             ColorHexes[(int)ColorFor.Foreground] = color;
             NotifyPropertyChanged(nameof(ColorHexes));
         }

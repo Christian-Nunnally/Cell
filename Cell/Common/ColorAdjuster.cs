@@ -1,4 +1,6 @@
-﻿namespace Cell.Common
+﻿using System.Windows.Media;
+
+namespace Cell.Common
 {
     public class ColorAdjuster
     {
@@ -7,6 +9,31 @@
             HexColorToHSL(hexColor, out float hue, out float saturation, out float lightness);
             lightness = AdjustLightness(brightnessFactor, lightness);
             return HSLToHexColor(hue, saturation, lightness);
+        }
+
+        /// <summary>
+        /// Gets a highlight color that contrasts well with the given background color.
+        /// </summary>
+        /// <param name="backgroundColor">The background color.</param>
+        /// <returns>A highlight color with good contrast against the background color.</returns>
+        public static Color GetHighlightColor(Color backgroundColor, byte alpha)
+        {
+            // Calculate the luminance of the background color
+            double luminance = 0.2126 * backgroundColor.R / 255.0 +
+                               0.7152 * backgroundColor.G / 255.0 +
+                               0.0722 * backgroundColor.B / 255.0;
+
+            // Determine whether to use a light or dark highlight color based on luminance
+            if (luminance > 0.5)
+            {
+                // Background is light, use a darker highlight color
+                return Color.FromArgb(alpha, 0, 0, 0); // Black
+            }
+            else
+            {
+                // Background is dark, use a lighter highlight color
+                return Color.FromArgb(alpha, 255, 255, 255); // White
+            }
         }
 
         private static string HSLToHexColor(float hue, float saturation, float lightness)

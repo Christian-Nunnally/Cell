@@ -39,8 +39,9 @@ namespace Cell.View.ToolWindow
             return ApplicationSettings.Instance.FunctionManagerWindowWidth;
         }
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
+            return true;
         }
 
         public void SetHeight(double height)

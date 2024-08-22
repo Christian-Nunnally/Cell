@@ -41,15 +41,15 @@ namespace Cell.ViewModel.Cells
                 if (selectedCellViewModel is not null)
                 {
                     selectedCellViewModel.PropertyChanged -= PropertyChangedOnSelectedCell;
-                    selectedCellViewModel.SelectionColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"));
+                    selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 100));
+                    selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 175));
                 }
                 selectedCellViewModel = value;
                 if (selectedCellViewModel is not null)
                 {
                     selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
-                    selectedCellViewModel.SelectionColor = SelectedCellViewModels.Count > 1
-                        ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#66666666"))
-                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00000000"));
+                    selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 100));
+                    selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 175));
                 }
                 NotifyPropertyChanged(nameof(SelectedCellViewModel));
                 _enableMultiEditSelectedCells = true;

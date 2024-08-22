@@ -14,7 +14,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 
 namespace Cell.View.ToolWindow
 {
@@ -28,10 +27,12 @@ namespace Cell.View.ToolWindow
         private readonly CellModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
         private readonly FunctionViewModel _function;
-        private readonly Action<string> onCloseCallback = x => { };
+        private readonly Action<string> saveCodeCallback = x => { };
         private static bool _haveAssembliesBeenRegistered;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
+        private bool _isDirty;
+        private bool _isAllowingCloseWhileDirty = false;
         public CodeEditorWindow(FunctionViewModel function, Action<string> callback, CellModel? currentCell)
         {
             DataContext = this;
@@ -44,11 +45,12 @@ namespace Cell.View.ToolWindow
             UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
             textEditor.Text = function.GetUserFriendlyCode(currentCell); ;
-            onCloseCallback = callback;
+            saveCodeCallback = callback;
             Visibility = Visibility.Visible;
             NotifyDockPropertiesChanged();
             DisplayResult(_function.CompileResult);
@@ -59,6 +61,8 @@ namespace Cell.View.ToolWindow
                 _haveAssembliesBeenRegistered = true;
             }
         }
+
+        private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -83,22 +87,46 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle()
         {
-            return _currentCell == null ? $"Code Editor - {_function.Model.Name}" : $"Code Editor - {_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
+            var dirtyDot = _isDirty ? "*" : string.Empty;
+            return _currentCell == null ? $"Code Editor - {_function.Model.Name}{dirtyDot}" : $"Code Editor - {_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
             new CommandViewModel("Test Code", new RelayCommand(x => TestCode())),
-            new CommandViewModel("Syntax", new RelayCommand(x => ToggleSyntaxTreePreview()))
+            new CommandViewModel("Syntax", new RelayCommand(x => ToggleSyntaxTreePreview())),
+            new CommandViewModel("Save and Close", new RelayCommand(x => SaveAndClose()))
             ];
+
+        private void SaveAndClose()
+        {
+            SaveCode();
+            RequestClose?.Invoke();
+        }
 
         public double GetWidth()
         {
             return ApplicationSettings.Instance.CodeEditorWidth;
         }
 
-        public void HandleBeingClosed()
+        public bool HandleBeingClosed()
         {
-            onCloseCallback?.Invoke(textEditor.Text);
+            if (!_isDirty || _isAllowingCloseWhileDirty) return true;
+            DialogWindow.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", () =>
+            {
+                SaveCode();
+                RequestClose?.Invoke();
+            }, () =>
+            {
+                _isAllowingCloseWhileDirty = true;
+                RequestClose?.Invoke();
+            });
+            return false;
+        }
+
+        private void SaveCode()
+        {
+            saveCodeCallback?.Invoke(textEditor.Text);
+            _isDirty = false;
         }
 
         public void SetHeight(double height)
@@ -141,6 +169,7 @@ namespace Cell.View.ToolWindow
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
+            _isDirty = true;
             if (e.Text == ".")
             {
                 TextArea textArea = textEditor.TextArea;
