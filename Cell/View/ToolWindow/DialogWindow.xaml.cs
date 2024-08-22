@@ -32,7 +32,7 @@ namespace Cell.View.ToolWindow
         {
             var actions = new List<CommandViewModel>
             {
-                new("Ok", new RelayCommand(x => true, x => { }))
+                new("Ok", new RelayCommand(x => { }))
             };
             var dialogWindow = new DialogWindow(title, message, actions);
             ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
@@ -42,8 +42,8 @@ namespace Cell.View.ToolWindow
         {
             var actions = new List<CommandViewModel>
             {
-                new("Yes", new RelayCommand(x => true, x => action())),
-                new("No", new RelayCommand(x => true, x => { }))
+                new("Yes", new RelayCommand(x => action())),
+                new("No", new RelayCommand(x => { }))
             };
             var dialogWindow = new DialogWindow(title, message, actions);
             ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);

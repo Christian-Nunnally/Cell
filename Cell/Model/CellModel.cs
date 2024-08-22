@@ -300,8 +300,7 @@ namespace Cell.Model
                 BooleanProperties[key] = value;
             }
             else BooleanProperties.Add(key, value);
-            NotifyPropertyChanged(nameof(BooleanProperties));
-            NotifyPropertyChanged(key);
+            NotifyPropertyChanged(nameof(BooleanProperties), key);
         }
 
         public void SetBorder(string color)

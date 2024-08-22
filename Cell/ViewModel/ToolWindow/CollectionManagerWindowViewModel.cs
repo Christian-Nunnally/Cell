@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CollectionManagerWindowViewModel : PropertyChangedBase
+    public class CollectionManagerWindowViewModel : ResizeableToolWindowViewModel
     {
         private readonly JsonSerializerOptions _jsonDeserializerOptions = new()
         {
@@ -19,8 +19,6 @@ namespace Cell.ViewModel.ToolWindow
         private UserCollection? selectedCollection;
         private PluginModel? selectedItem;
         private string selectedItemSerialized = string.Empty;
-        private double userSetHeight;
-        private double userSetWidth;
         public CollectionManagerWindowViewModel(ObservableCollection<UserCollection> _collections)
         {
             Collections = _collections;
@@ -117,7 +115,7 @@ namespace Cell.ViewModel.ToolWindow
                     var item = JsonSerializer.Deserialize<PluginModel>(value);
                     if (item != null && selectedItem != null)
                     {
-                        item.CopyProperties(selectedItem, ["ID"]);
+                        item.CopyPublicProperties(selectedItem, ["ID"]);
                         selectedItemSerialized = value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));
                     }
@@ -130,26 +128,6 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         public string SelectedItemType { get; set; }
-
-        public double UserSetHeight
-        {
-            get => userSetHeight; set
-            {
-                if (userSetHeight == value) return;
-                userSetHeight = value;
-                NotifyPropertyChanged(nameof(UserSetHeight));
-            }
-        }
-
-        public double UserSetWidth
-        {
-            get => userSetWidth; set
-            {
-                if (userSetWidth == value) return;
-                userSetWidth = value;
-                NotifyPropertyChanged(nameof(UserSetWidth));
-            }
-        }
 
         internal void AddCurrentCollection()
         {

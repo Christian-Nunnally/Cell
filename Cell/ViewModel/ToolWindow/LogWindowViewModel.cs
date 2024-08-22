@@ -1,20 +1,17 @@
 ﻿using Cell.Common;
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class LogWindowViewModel : PropertyChangedBase
+    public class LogWindowViewModel : ResizeableToolWindowViewModel
     {
-        private double userSetHeight;
-        private double userSetWidth;
-        private StringBuilder _logBufferBuilder = new StringBuilder();
+        private readonly StringBuilder _logBufferBuilder = new();
         public string LogBuffer => _logBufferBuilder.ToString();
 
         public LogWindowViewModel()
         {
             Logger.LogAdded += AddLog;
-            foreach (var log in Logger.Logs)
+            foreach (var log in Logger.Logs.Take(100))
             {
                 AddLog(log);
             }
@@ -34,26 +31,6 @@ namespace Cell.ViewModel.ToolWindow
         {
             _logBufferBuilder.Clear();
             NotifyPropertyChanged(nameof(LogBuffer));
-        }
-
-        public double UserSetHeight
-        {
-            get => userSetHeight; set
-            {
-                if (userSetHeight == value) return;
-                userSetHeight = value;
-                NotifyPropertyChanged(nameof(UserSetHeight));
-            }
-        }
-
-        public double UserSetWidth
-        {
-            get => userSetWidth; set
-            {
-                if (userSetWidth == value) return;
-                userSetWidth = value;
-                NotifyPropertyChanged(nameof(UserSetWidth));
-            }
         }
     }
 }

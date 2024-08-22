@@ -7,6 +7,10 @@ namespace Cell.Common
         private readonly Predicate<object?> _canExecute = canExecute;
         private readonly Action<object?> _execute = execute;
 
+        public RelayCommand(Action<object?> execute) : this(_ => true, execute)
+        {
+        }
+
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;

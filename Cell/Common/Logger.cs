@@ -9,7 +9,7 @@ namespace Cell.Common
 
         public static IEnumerable<string> Logs { get; } = _logsQueue.ToArray();
 
-        public static event Action<string> LogAdded;
+        public static event Action<string>? LogAdded;
 
         public static void Log(string message)
         {

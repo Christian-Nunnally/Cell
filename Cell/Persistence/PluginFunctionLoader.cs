@@ -61,7 +61,7 @@ namespace Cell.Persistence
 
         public static void SavePluginFunction(string directory, string space, PluginFunctionModel function)
         {
-            if (string.IsNullOrEmpty(function.Name)) return;
+            if (string.IsNullOrWhiteSpace(function.Name)) return;
             directory = Path.Combine(directory, FunctionsDirectoryName, space);
             Directory.CreateDirectory(directory);
             var path = Path.Combine(directory, function.Name);

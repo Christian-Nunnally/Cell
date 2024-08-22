@@ -6,7 +6,6 @@ using Cell.Persistence;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using System.ComponentModel;
-using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Cell.Data
 {

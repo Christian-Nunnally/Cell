@@ -103,7 +103,7 @@ namespace Cell.Persistence
         private static void DeleteItem(string collectionName, string idToRemove)
         {
             var directory = Path.Combine(GetSaveDirectory(), collectionName);
-            var path = Path.Combine(directory, idToRemove);
+            var path = Path.Combine(directory, "Items", idToRemove);
             if (File.Exists(path)) File.Delete(path);
         }
 

@@ -8,30 +8,42 @@ namespace Cell.Common
 {
     public static partial class Utilities
     {
-        public static void CopyProperties(this object source, object destination, string[] blacklist)
+        public static void CopyPublicProperties(this object source, object target, string[] blacklist)
         {
-            if (source == null || destination == null)
-                throw new Exception("Source or/and Destination Objects are null");
-            Type typeDest = destination.GetType();
-            Type typeSrc = source.GetType();
+            var targetType = target?.GetType() ?? throw new CellError("source objects is null");
+            var sourceType = source?.GetType() ?? throw new CellError("source objects is null");
+            var sourceProperties = sourceType.GetProperties();
 
-            PropertyInfo[] srcProps = typeSrc.GetProperties();
-            foreach (PropertyInfo srcProp in srcProps)
+            foreach (PropertyInfo sourceProperty in sourceProperties)
             {
-                if (!srcProp.CanRead) continue;
-                var targetProperty = typeDest.GetProperty(srcProp.Name);
-                if (targetProperty == null) continue;
-                if (!targetProperty.CanWrite) continue;
-                var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
-                if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) continue;
-                var setMethod = targetProperty.GetSetMethod();
-                if (setMethod == null) continue;
-                if ((setMethod.Attributes & MethodAttributes.Static) != 0) continue;
-                if (!targetProperty.PropertyType.IsAssignableFrom(srcProp.PropertyType)) continue;
-
-                if (blacklist.Contains(srcProp.Name)) continue;
-                targetProperty.SetValue(destination, srcProp.GetValue(source, null), null);
+                CopyProperty(source, target, blacklist, targetType, sourceProperty);
             }
+        }
+
+        private static void CopyProperty(object source, object target, string[] blacklist, Type targetType, PropertyInfo sourceProperty)
+        {
+            // Can read source property
+            if (!sourceProperty.CanRead) return;
+
+            // Target property exists
+            var targetProperty = targetType.GetProperty(sourceProperty.Name);
+            if (targetProperty == null) return;
+
+            // Property is not blacklisted
+            if (blacklist.Contains(sourceProperty.Name)) return;
+
+            // Can write target property
+            if (!targetProperty.CanWrite) return;
+            var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
+            if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) return;
+            var setMethod = targetProperty.GetSetMethod();
+            if (setMethod == null) return;
+            if ((setMethod.Attributes & MethodAttributes.Static) != 0) return;
+
+            // Target property type is assignable from source property type
+            if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) return;
+
+            targetProperty.SetValue(target, sourceProperty.GetValue(source, null), null);
         }
 
         public static string GenerateUnqiueId(int length)
@@ -64,7 +76,7 @@ namespace Cell.Common
         {
             return
               assembly.GetTypes()
-                      .Where(t => String.Equals(t.Namespace, nameSpace, StringComparison.Ordinal))
+                      .Where(t => string.Equals(t.Namespace, nameSpace, StringComparison.Ordinal))
                       .ToArray();
         }
 

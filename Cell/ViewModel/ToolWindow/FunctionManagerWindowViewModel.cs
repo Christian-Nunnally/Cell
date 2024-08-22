@@ -1,12 +1,11 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class FunctionManagerWindowViewModel : PropertyChangedBase
+    public class FunctionManagerWindowViewModel : ResizeableToolWindowViewModel
     {
         private readonly ObservableCollection<FunctionViewModel> _functions;
         private string filterSheet = "All";
@@ -14,8 +13,6 @@ namespace Cell.ViewModel.ToolWindow
         private bool includePopulateFunctions = true;
         private bool includeTriggerFunctions = true;
         private FunctionViewModel? selectedFunction;
-        private double userSetHeight;
-        private double userSetWidth;
         public FunctionManagerWindowViewModel(ObservableCollection<FunctionViewModel> pluginFunctions)
         {
             _functions = pluginFunctions;
@@ -104,26 +101,6 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         public ObservableCollection<string> SheetNameOptions { get; set; } = [];
-
-        public double UserSetHeight
-        {
-            get => userSetHeight; set
-            {
-                if (userSetHeight == value) return;
-                userSetHeight = value;
-                NotifyPropertyChanged(nameof(UserSetHeight));
-            }
-        }
-
-        public double UserSetWidth
-        {
-            get => userSetWidth; set
-            {
-                if (userSetWidth == value) return;
-                userSetWidth = value;
-                NotifyPropertyChanged(nameof(UserSetWidth));
-            }
-        }
 
         public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
 

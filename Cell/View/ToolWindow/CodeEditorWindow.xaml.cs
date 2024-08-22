@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 
 namespace Cell.View.ToolWindow
 {
@@ -86,8 +87,8 @@ namespace Cell.View.ToolWindow
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Test Code", new RelayCommand(x => true, x => TestCode())),
-            new CommandViewModel("Syntax", new RelayCommand(x => true, x => ToggleSyntaxTreePreview()))
+            new CommandViewModel("Test Code", new RelayCommand(x => TestCode())),
+            new CommandViewModel("Syntax", new RelayCommand(x => ToggleSyntaxTreePreview()))
             ];
 
         public double GetWidth()
@@ -171,27 +172,34 @@ namespace Cell.View.ToolWindow
 
         private void TestCode()
         {
-            if (_currentCell is null) return;
-            var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
-            var function = new FunctionViewModel(model);
-            function.SetUserFriendlyCode(textEditor.Text, _currentCell);
-            var compiled = function.CompiledMethod;
-            var result = function.CompileResult;
-            if (result.Success)
+            try
             {
-                if (_doesFunctionReturnValue)
+                if (_currentCell is null) return;
+                var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
+                var function = new FunctionViewModel(model);
+                function.SetUserFriendlyCode(textEditor.Text, _currentCell);
+                var compiled = function.CompiledMethod;
+                var result = function.CompileResult;
+                if (result.Success)
                 {
-                    var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
-                    result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
+                    if (_doesFunctionReturnValue)
+                    {
+                        var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
+                        result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
+                    }
+                    else
+                    {
+                        compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
+                        result = new CompileResult { Success = true, Result = "Success" };
+                    }
                 }
-                else
-                {
-                    compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
-                    result = new CompileResult { Success = true, Result = "Success" };
-                }
+                DisplayResult(result);
             }
-
-            DisplayResult(result);
+            catch (Exception ex) 
+            {
+                var result = new CompileResult { Success = false, Result = ex.Message };
+                DisplayResult(result);
+            }
         }
 
         private void ToggleSyntaxTreePreview()

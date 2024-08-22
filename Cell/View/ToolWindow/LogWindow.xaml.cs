@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
         {
             return new List<CommandViewModel>()
             {
-                new CommandViewModel("Clear", new RelayCommand(x => true, x => _viewModel.ClearBuffer()))
+                new CommandViewModel("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
             };
         }
 

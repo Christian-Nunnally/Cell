@@ -36,9 +36,7 @@ namespace Cell.ViewModel.Cells.Types
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public static bool CanExecute => true;
-
-        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CanExecute, x => CheckboxChecked());
+        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CheckboxChecked());
 
         public bool IsChecked
         {

@@ -62,7 +62,7 @@ namespace Cell.ViewModel.Application
         private static void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
             UndoRedoManager.RecordCellStateForUndo(cellToReplace);
-            cellToPaste.CopyProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
+            cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
         }
 
         private static bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)

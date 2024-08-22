@@ -24,21 +24,12 @@
 
                 int comparison = newItemValue.CompareTo(midValue);
 
-                if (comparison == 0)
-                {
-                    return mid; // This is an exact match
-                }
-                else if (comparison < 0)
-                {
-                    high = mid - 1;
-                }
-                else
-                {
-                    low = mid + 1;
-                }
+                if (comparison == 0) return mid;
+                else if (comparison < 0) high = mid - 1;
+                else low = mid + 1;
             }
 
-            return low; // The position where newItem should be inserted
+            return low;
         }
     }
 }

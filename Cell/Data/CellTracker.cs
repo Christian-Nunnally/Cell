@@ -25,17 +25,7 @@ namespace Cell.Data
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
-            if (_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary))
-            {
-                if (cellDictionary.ContainsKey(cellModel.ID)) throw new InvalidOperationException("Cell already added");
-                cellDictionary.Add(cellModel.ID, cellModel);
-            }
-            else
-            {
-                _cellsBySheetMap.Add(cellModel.SheetName, new Dictionary<string, CellModel> { { cellModel.ID, cellModel } });
-                _sheetNames.Add(cellModel.SheetName);
-            }
-
+            AddToCellsInSheetMap(cellModel);
             AddCellToCellByLocationMap(cellModel);
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
@@ -58,20 +48,19 @@ namespace Cell.Data
 
         public void RemoveCell(CellModel cellModel)
         {
-            if (!_cellsBySheetMap.TryGetValue(cellModel.SheetName, out var cellDictionary)) return;
-            cellDictionary.Remove(cellModel.ID);
+            RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
             _cellLoader.DeleteCell(cellModel);
             CellTriggerManager.StopMonitoringCell(cellModel);
             CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(cellModel);
             CellPopulateManager.UnsubscribeFromAllCollectionUpdates(cellModel);
             _cellsToLocation.Remove(cellModel.ID);
-            _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
-            if (cellDictionary.Count == 0)
-            {
-                _cellsBySheetMap.Remove(cellModel.SheetName);
-                _sheetNames.Remove(cellModel.SheetName);
-            }
+            RemoveFromCellsByLocationMap(cellModel);
+        }
+
+        private bool RemoveFromCellsByLocationMap(CellModel cellModel)
+        {
+            return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
         }
 
         public void RenameSheet(string oldSheetName, string newSheetName)
@@ -103,29 +92,38 @@ namespace Cell.Data
                 {
                     // Remove
                     var previousSheetName = previousLocation.Split('_')[0];
-                    if (_cellsBySheetMap.TryGetValue(previousSheetName, out var cellsInOldSheet))
-                    {
-                        cellsInOldSheet.Remove(model.ID);
-                        if (cellsInOldSheet.Count == 0)
-                        {
-                            _cellsBySheetMap.Remove(previousSheetName);
-                            _sheetNames.Remove(previousSheetName);
-                        }
-                    }
+                    RemoveFromCellsInSheetMap(model, previousSheetName);
 
                     // Add
-                    if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellsInNewSheet))
-                    {
-                        cellsInNewSheet.Add(model.ID, model);
-                    }
-                    else
-                    {
-                        _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                        _sheetNames.Add(model.SheetName);
-                    }
+                    AddToCellsInSheetMap(model);
                 }
             }
             _cellLoader.SaveCell(model);
+        }
+
+        private void AddToCellsInSheetMap(CellModel model)
+        {
+            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellsInNewSheet))
+            {
+                cellsInNewSheet.Add(model.ID, model);
+            }
+            else
+            {
+                _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
+                _sheetNames.Add(model.SheetName);
+            }
+        }
+
+        private bool RemoveFromCellsInSheetMap(CellModel model, string sheet)
+        {
+            if (!_cellsBySheetMap.TryGetValue(sheet, out var cellsInOldSheet)) return false;
+            var result = cellsInOldSheet.Remove(model.ID);
+            if (cellsInOldSheet.Count == 0)
+            {
+                _cellsBySheetMap.Remove(sheet);
+                _sheetNames.Remove(sheet);
+            }
+            return result;
         }
     }
 }
