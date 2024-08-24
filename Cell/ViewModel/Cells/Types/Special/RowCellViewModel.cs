@@ -1,6 +1,9 @@
 ﻿using Cell.Data;
+using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
+using Cell.Persistence;
 using Cell.View.Skin;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Cell.ViewModel.Cells.Types.Special
 {
@@ -88,6 +91,18 @@ namespace Cell.ViewModel.Cells.Types.Special
                 {
                     cellModel.MergedWith = firstSideMergeId;
                 }
+            }
+
+            // Increment the row index of all cells with a B or R cell reference that is greater than or equal to the row index
+            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            {
+                // Consider filtering here as well to only update functions that reference the sheet/row range.
+                var refactorer = new CellReferenceRefactorRewriter(x =>
+                {
+                    return x;
+                });
+
+                function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
             }
         }
 

@@ -104,12 +104,17 @@ namespace Cell.Plugin.SyntaxWalkers
         private string CalculateArgumentStringFromCellLocation(string cellLocationName, string relativitySymbol)
         {
             (var row, var column) = GetCellLocationFromVariable(cellLocationName);
+            return CalculateArgumentsFromLocation(relativitySymbol, row, column);
+        }
+
+        private string CalculateArgumentsFromLocation(string relativitySymbol, int rowOffset, int columnOffset)
+        {
             return relativitySymbol switch
             {
-                "" => $", cell.Row + {row - cell.Row}, cell.Column + {column - cell.Column}",
-                "C" => $", cell.Row + {row - cell.Row}, {column}",
-                "R" => $", {row}, cell.Column + {column - cell.Column}",
-                "B" => $", {row}, {column}",
+                "" => $", cell.Row + {rowOffset - cell.Row}, cell.Column + {columnOffset - cell.Column}",
+                "C" => $", cell.Row + {rowOffset - cell.Row}, {columnOffset}",
+                "R" => $", {rowOffset}, cell.Column + {columnOffset - cell.Column}",
+                "B" => $", {rowOffset}, {columnOffset}",
                 _ => throw new InvalidOperationException("Only 'B', 'C', 'R' and '' are valid relativity types for a cell reference"),
             };
         }

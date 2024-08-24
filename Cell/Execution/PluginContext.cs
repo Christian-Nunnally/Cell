@@ -9,6 +9,8 @@ namespace Cell.Execution
 {
     public class PluginContext(ApplicationViewModel application, int index)
     {
+        public const string PluginContextArgumentName = "c";
+
         private readonly ApplicationViewModel _application = application;
         public EditContext E { get; set; } = new EditContext("");
 

@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.ViewModel.Execution;
 
 namespace Cell.Execution.SyntaxWalkers
 {
@@ -31,5 +32,30 @@ namespace Cell.Execution.SyntaxWalkers
         public int ResolveRow(CellModel cell) => IsRowRelative ? Row + cell.Row : Row;
 
         public int ResolveRowRangeEnd(CellModel cell) => IsRowRelativeRangeEnd ? RowRangeEnd + cell.Row : RowRangeEnd;
+
+        public string GetCodeForReference()
+        {
+            var sheetArgument = string.IsNullOrWhiteSpace(SheetName)
+                ? "cell"
+                : $"\"{SheetName}\"";
+            var cellLocationArguments = IsRowRelative
+                ? $", cell.Row + {Row}"
+                : $", {Row}";
+            cellLocationArguments += IsColumnRelative
+                ? $", cell.Column + {Column}"
+                : $", {Column}";
+
+            if (IsRange)
+            {
+                cellLocationArguments += IsRowRelativeRangeEnd
+                    ? $", cell.Row + {RowRangeEnd}"
+                    : $", {RowRangeEnd}";
+
+                cellLocationArguments += IsColumnRelativeRangeEnd
+                    ? $", cell.Column + {ColumnRangeEnd}"
+                    : $", {ColumnRangeEnd}";
+            }
+            return $"{PluginContext.PluginContextArgumentName}.{nameof(PluginContext.GetCell)}({sheetArgument}{cellLocationArguments})";
+        }
     }
 }
