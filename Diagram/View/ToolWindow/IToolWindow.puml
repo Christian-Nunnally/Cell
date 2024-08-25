@@ -1,0 +1,8 @@
+@startuml
+interface IToolWindow {
+    GetTitle() : string
+    GetToolBarCommands() : List<CommandViewModel>
+    HandleBeingClosed() : bool
+}
+IToolWindow --> "RequestClose" Action
+@enduml

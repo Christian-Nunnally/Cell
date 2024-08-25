@@ -1,0 +1,23 @@
+@startuml
+class PersistenceManager {
+    + <<const>> Version : string = "0.0.0"
+    + {static} CurrentRootPath : string
+    + {static} CurrentTemplatePath : string <<get>>
+    + {static} CurrentFunctionsPath : string <<get>>
+    + {static} CurrentCollectionsPath : string <<get>>
+    + {static} CurrentApplicationSettingsPath : string <<get>>
+    + {static} CurrentSheetsPath : string <<get>>
+    + {static} CreateBackup() : void
+    + {static} ExportSheet(sheetName:string) : void
+    + {static} ImportSheet(templateName:string, sheetName:string) : void
+    + {static} LoadAll() : void
+    + {static} SaveAll() : void
+    <<internal>> {static} GetTemplateNames() : IEnumerable<string>
+    - {static} CreateFileFriendlyCurrentDateTime() : string
+    - {static} LoadVersion() : string
+    - {static} SaveVersion() : void
+    - {static} ZipFolder(folderPath:string) : void
+}
+PersistenceManager o-> "MinimumBackupInterval" TimeSpan
+PersistenceManager o-> "_lastBackupDate" DateTime
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+class TodoItem {
+    - _category : string
+    - _isComplete : bool = false
+    - _notes : string
+    - _priority : int = 0
+    - _status : int = 0
+    - _title : string
+    + Category : string <<get>> <<set>>
+    + IsComplete : bool <<get>> <<set>>
+    + Notes : string <<get>> <<set>>
+    + Priority : int <<get>> <<set>>
+    + Status : int <<get>> <<set>>
+    + Title : string <<get>> <<set>>
+    <<override>> + ToString() : string
+}
+PluginModel <|-- TodoItem
+TodoItem --> "_completionDate" DateTime
+TodoItem o-> "_creationDate" DateTime
+TodoItem o-> "_dueDate" DateTime
+TodoItem --> "CompletionDate" DateTime
+TodoItem --> "CreationDate" DateTime
+TodoItem --> "DueDate" DateTime
+@enduml

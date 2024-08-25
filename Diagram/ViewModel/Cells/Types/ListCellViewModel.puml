@@ -1,0 +1,18 @@
+@startuml
+class ListCellViewModel {
+    + ListCellViewModel(model:CellModel, sheetViewModel:SheetViewModel)
+    + CollectionName : string <<get>> <<set>>
+    + MaxItemsString : string <<get>> <<set>>
+    + MaxNumberOfItems : int <<get>> <<set>>
+    + SelectedItem : string <<get>> <<set>>
+    <<internal>> UpdateList() : void
+}
+class "IEnumerable`1"<T> {
+}
+class "ObservableCollection`1"<T> {
+}
+CellViewModel <|-- ListCellViewModel
+ListCellViewModel --> "CollectionNames<string>" "IEnumerable`1"
+ListCellViewModel o-> "ListItems<object>" "ObservableCollection`1"
+ListCellViewModel o-> "PluginTypeNames<string>" "ObservableCollection`1"
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class CellModelFactory <<static>> {
+    + <<const>> DefaultCellHeight : int = 25
+    + <<const>> DefaultCellWidth : int = 125
+    + {static} Copy(modelToCopy:CellModel) : CellModel
+    + {static} CopyAndTrackNewCell(modelToCopy:CellModel) : CellModel
+    <<internal>> {static} Create(row:int, column:int, type:CellType, sheet:string) : CellModel
+}
+@enduml

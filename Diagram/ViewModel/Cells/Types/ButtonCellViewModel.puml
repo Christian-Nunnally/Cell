@@ -1,0 +1,8 @@
+@startuml
+class ButtonCellViewModel {
+    - _buttonClickedCommand : ICommand?
+    + ButtonClicked() : void
+}
+CellViewModel <|-- ButtonCellViewModel
+ButtonCellViewModel --> "ButtonClickedCommand" ICommand
+@enduml

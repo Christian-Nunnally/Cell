@@ -1,0 +1,7 @@
+@startuml
+class EnumToStringConverter {
+    + Convert(value:object, targetType:Type, parameter:object, culture:System.Globalization.CultureInfo) : object
+    + ConvertBack(value:object, targetType:Type, parameter:object, culture:System.Globalization.CultureInfo) : object
+}
+IValueConverter <|-- EnumToStringConverter
+@enduml

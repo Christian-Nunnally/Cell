@@ -1,0 +1,17 @@
+@startuml
+class CheckboxCellModelExtensions <<static>> {
+    + {static} Check(model:CellModel) : void
+    + {static} Check(model:CellModel, check:bool) : void
+    + {static} IsChecked(model:CellModel) : bool
+    + {static} Uncheck(model:CellModel) : void
+}
+class CheckboxCellViewModel {
+    - _checkboxCheckedCommand : ICommand?
+    + CheckboxCellViewModel(model:CellModel, sheet:SheetViewModel)
+    + IsChecked : bool <<get>> <<set>>
+    + {static} CheckboxChecked() : void
+    - ModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
+}
+CellViewModel <|-- CheckboxCellViewModel
+CheckboxCellViewModel --> "CheckboxCheckedCommand" ICommand
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+class CollectionReferenceSyntaxTransformer {
+}
+class "Func`2"<T1,T2> {
+}
+class "Predicate`1"<T> {
+}
+SyntaxTransformer <|-- CollectionReferenceSyntaxTransformer
+@enduml

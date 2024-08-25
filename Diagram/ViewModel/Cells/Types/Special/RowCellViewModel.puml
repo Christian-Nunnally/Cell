@@ -1,0 +1,17 @@
+@startuml
+class RowCellViewModel {
+    + RowCellViewModel(model:CellModel, sheetViewModel:SheetViewModel)
+    + <<override>> BackgroundColorHex : string <<get>> <<set>>
+    + <<override>> Height : double <<get>> <<set>>
+    + <<override>> Text : string <<get>> <<set>>
+    + AddRowAbove() : void
+    + AddRowBelow() : void
+    + DeleteRow() : void
+    - AddRowAt(index:int) : void
+    - GetAllCellsAtOrBelow(row:int) : List<CellModel>
+    - IncrementRowOfAllAtOrBelow(row:int, amount:int) : void
+    - InsertRowAtIndex(index:int) : void
+    - ModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
+}
+SpecialCellViewModel <|-- RowCellViewModel
+@enduml

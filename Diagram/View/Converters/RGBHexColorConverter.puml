@@ -1,0 +1,8 @@
+@startuml
+class RGBHexColorConverter {
+    + {static} ConvertHexStringToColor(hex:string) : Color
+    + Convert(value:object, targetType:Type, parameter:object, culture:CultureInfo) : object
+    + ConvertBack(value:object, targetType:Type, parameter:object, culture:CultureInfo) : object
+}
+IValueConverter <|-- RGBHexColorConverter
+@enduml

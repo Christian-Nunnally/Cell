@@ -1,0 +1,14 @@
+@startuml
+class CellSettingsEditWindow <<partial>> {
+    + CellSettingsEditWindow()
+    + GetTitle() : string
+    + GetToolBarCommands() : List<CommandViewModel>
+    + HandleBeingClosed() : bool
+    - TextBoxKeyDown(sender:object, e:KeyEventArgs) : void
+    - ExportSheetButtonClicked(sender:object, e:System.Windows.RoutedEventArgs) : void
+    - ImportSheetButtonClicked(sender:object, e:System.Windows.RoutedEventArgs) : void
+}
+UserControl <|-- CellSettingsEditWindow
+IToolWindow <|-- CellSettingsEditWindow
+CellSettingsEditWindow --> "RequestClose" Action
+@enduml

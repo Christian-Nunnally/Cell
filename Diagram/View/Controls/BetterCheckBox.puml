@@ -1,0 +1,15 @@
+@startuml
+class BetterCheckBox {
+    - _checkboxBorder : Border?
+    + IsChecked : bool <<get>> <<set>>
+    + <<override>> OnApplyTemplate() : void
+    - CheckBoxBorderMouseDown(sender:object, e:MouseButtonEventArgs) : void
+    - SetCheckBoxBorder(value:Border) : void
+}
+Control <|-- BetterCheckBox
+BetterCheckBox o-> "BackgroundWhenMouseOverProperty" DependencyProperty
+BetterCheckBox o-> "CommandProperty" DependencyProperty
+BetterCheckBox o-> "IsCheckedProperty" DependencyProperty
+BetterCheckBox --> "BackgroundWhenMouseOver" Brush
+BetterCheckBox --> "Command" ICommand
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+class BetterComboBox {
+}
+ComboBox <|-- BetterComboBox
+BetterComboBox o-> "HighlightBrushProperty" DependencyProperty
+BetterComboBox --> "HighlightBrush" Brush
+@enduml

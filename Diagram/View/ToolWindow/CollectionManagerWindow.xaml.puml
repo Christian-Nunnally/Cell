@@ -1,0 +1,24 @@
+@startuml
+class CollectionManagerWindow <<partial>> {
+    + CollectionManagerWindow(viewModel:CollectionManagerWindowViewModel)
+    + GetHeight() : double
+    + GetTitle() : string
+    + GetToolBarCommands() : List<CommandViewModel>
+    + GetWidth() : double
+    + HandleBeingClosed() : bool
+    + SetHeight(height:double) : void
+    + SetWidth(width:double) : void
+    - AddCollectionButtonClick(sender:object, e:System.Windows.RoutedEventArgs) : void
+    - DeleteCollectionButtonClicked(sender:object, e:System.Windows.RoutedEventArgs) : void
+    - EditSortAndFilterFunctionButtonClick(sender:object, e:RoutedEventArgs) : void
+    - GoToCellButtonClick(sender:object, e:System.Windows.RoutedEventArgs) : void
+    - ItemJsonEditorTextChanged(sender:object, e:EventArgs) : void
+    - ItemsInSelectedCollectionListBoxSelectionChanged(sender:object, e:SelectionChangedEventArgs) : void
+    - RemoveItemFromCollectionClick(sender:object, e:RoutedEventArgs) : void
+    - SaveSelectedItemJsonButtonClick(sender:object, e:RoutedEventArgs) : void
+}
+UserControl <|-- CollectionManagerWindow
+IResizableToolWindow <|-- CollectionManagerWindow
+CollectionManagerWindow --> "_viewModel" CollectionManagerWindowViewModel
+CollectionManagerWindow --> "RequestClose" Action
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+class CellReference {
+    + Column : int <<get>> <<set>>
+    + ColumnRangeEnd : int <<get>> <<set>>
+    + IsColumnRelative : bool <<get>> <<set>>
+    + IsColumnRelativeRangeEnd : bool <<get>> <<set>>
+    + IsRange : bool <<get>> <<set>>
+    + IsRowRelative : bool <<get>> <<set>>
+    + IsRowRelativeRangeEnd : bool <<get>> <<set>>
+    + Row : int <<get>> <<set>>
+    + RowRangeEnd : int <<get>> <<set>>
+    + SheetName : string <<get>> <<set>> = ""
+    + ResolveColumn(cell:CellModel) : int
+    + ResolveColumnRangeEnd(cell:CellModel) : int
+    + ResolveRow(cell:CellModel) : int
+    + ResolveRowRangeEnd(cell:CellModel) : int
+    + GetCodeForReference() : string
+}
+@enduml

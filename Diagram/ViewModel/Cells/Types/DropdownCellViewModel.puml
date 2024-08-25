@@ -1,0 +1,12 @@
+@startuml
+class DropdownCellViewModel {
+    + DropdownCellViewModel(model:CellModel, sheetViewModel:SheetViewModel)
+    + CommaSeperatedItems : string <<get>> <<set>>
+    - ModelPropertyChanged(sender:object?, e:PropertyChangedEventArgs) : void
+    - UpdateDropdownItems(value:string) : void
+}
+class "ObservableCollection`1"<T> {
+}
+CellViewModel <|-- DropdownCellViewModel
+DropdownCellViewModel o-> "DropdownOptions<string>" "ObservableCollection`1"
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+class UserCollection {
+    - _baseCollection : UserCollection?
+    +  <<event>> ItemAdded : Action<UserCollection, PluginModel>? 
+    +  <<event>> ItemPropertyChanged : Action<UserCollection, PluginModel>? 
+    +  <<event>> ItemRemoved : Action<UserCollection, PluginModel>? 
+    +  <<event>> OrderChanged : Action<UserCollection>? 
+    + IsFilteredView : bool <<get>>
+    + Name : string <<set>> <<get>>
+    + Type : string <<get>> <<internal set>>
+    + UsageCount : int <<get>>
+    + Add(item:PluginModel) : void
+    + Remove(item:PluginModel) : void
+    + Remove(id:string) : void
+    + RemoveAll(item:PluginModel) : void
+    + RemoveAll(id:string) : void
+    <<internal>> BecomeViewIntoCollection(baseCollection:UserCollection) : void
+    - PropertyChangedOnItemInBaseCollection(collection:UserCollection, model:PluginModel) : void
+    <<internal>> RefreshSortAndFilter() : void
+    <<internal>> StopBeingViewIntoCollection(baseCollection:UserCollection) : void
+    - BaseCollectionItemAdded(collection:UserCollection, model:PluginModel) : void
+    - BaseCollectionItemRemoved(collection:UserCollection, model:PluginModel) : void
+    - InsertItemWithSortAndFilter(model:PluginModel) : void
+    - PropertyChangedOnItemInCollection(sender:object?, e:PropertyChangedEventArgs) : void
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "List`1"<T> {
+}
+PropertyChangedBase <|-- UserCollection
+UserCollection o-> "_items<string,PluginModel>" "Dictionary`2"
+UserCollection o-> "_cachedSortFilterResult<string,int>" "Dictionary`2"
+UserCollection o-> "_sortedItems<PluginModel>" "List`1"
+UserCollection --> "Items<PluginModel>" "List`1"
+UserCollection o-> "Model" UserCollectionModel
+@enduml

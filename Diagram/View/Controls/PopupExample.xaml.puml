@@ -1,0 +1,6 @@
+@startuml
+class PopupExample <<partial>> {
+    + PopupExample()
+}
+UserControl <|-- PopupExample
+@enduml

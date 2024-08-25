@@ -1,0 +1,8 @@
+@startuml
+class SheetViewModelFactory <<static>> {
+    + {static} GetOrCreate(sheetName:string) : SheetViewModel
+}
+class "Dictionary`2"<T1,T2> {
+}
+SheetViewModelFactory o-> "Sheets<string,SheetViewModel>" "Dictionary`2"
+@enduml

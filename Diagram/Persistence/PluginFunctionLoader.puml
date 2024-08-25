@@ -1,0 +1,21 @@
+@startuml
+class PluginFunctionLoader <<static>> {
+    + <<const>> FunctionsDirectoryName : string = "Functions"
+    + {static} AddPluginFunctionToNamespace(space:string, function:FunctionViewModel) : void
+    + {static} CreateFunction(space:string, name:string, code:string) : FunctionViewModel
+    + {static} LoadFunction(file:string) : PluginFunctionModel
+    + {static} LoadPlugins() : void
+    + {static} SavePluginFunction(directory:string, space:string, function:PluginFunctionModel) : void
+    + {static} SavePlugins() : void
+    <<internal>> {static} DeleteFunction(function:FunctionViewModel) : void
+    <<internal>> {static} GetOrCreateFunction(space:string, name:string) : FunctionViewModel
+    <<internal>> {static} TryGetFunction(space:string, name:string, function:FunctionViewModel) : bool
+    - {static} OnPluginFunctionPropertyChanged(sender:object?, e:PropertyChangedEventArgs) : void
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "ObservableCollection`1"<T> {
+}
+PluginFunctionLoader o-> "Namespaces<string,Dictionary<string, FunctionViewModel>>" "Dictionary`2"
+PluginFunctionLoader o-> "ObservableFunctions<FunctionViewModel>" "ObservableCollection`1"
+@enduml

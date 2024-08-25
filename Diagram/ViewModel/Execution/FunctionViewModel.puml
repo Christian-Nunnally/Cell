@@ -1,0 +1,37 @@
+@startuml
+class FunctionViewModel <<partial>> {
+    - _compiledMethod : MethodInfo?
+    - _fingerprintOfProcessedDependencies : ulong
+    - wasCompileSuccessful : bool
+    + FunctionViewModel(model:PluginFunctionModel)
+    + WasCompileSuccessful : bool <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + UsageCount : int <<get>>
+    + Compile() : MethodInfo?
+    + ExtractDependencies() : void
+    + GetSemanticModel() : SemanticModel
+    + GetUserFriendlyCode(cell:CellModel?) : string
+    + SetUserFriendlyCode(userFriendlyCode:string, cell:CellModel?) : void
+    <<internal>> StartListeningForDependencyChanges(cell:CellModel) : void
+    <<internal>> StopListeningForDependencyChanges(cell:CellModel) : void
+    - {static} RefactorCellsFunctionUseage(oldName:string, newName:string) : void
+    - AttemptToRecompileMethod() : void
+    - ExtractAndTransformCollectionReferences(root:SyntaxNode?) : void
+    - ExtractCellLocationReferences(root:SyntaxNode?) : void
+    - ModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
+    - NotifyDependenciesHaveChanged() : void
+}
+class "List`1"<T> {
+}
+class "IEnumerable`1"<T> {
+}
+PropertyChangedBase <|-- FunctionViewModel
+FunctionViewModel o-> "_cellsToNotify<CellModel>" "List`1"
+FunctionViewModel --> "CellsThatUseFunction<CellModel>" "IEnumerable`1"
+FunctionViewModel o-> "CollectionDependencies<string>" "List`1"
+FunctionViewModel --> "CompiledMethod" MethodInfo
+FunctionViewModel --> "CompileResult" CompileResult
+FunctionViewModel o-> "LocationDependencies<CellReference>" "List`1"
+FunctionViewModel --> "Model" PluginFunctionModel
+FunctionViewModel o-> "SyntaxTree" SyntaxTree
+@enduml

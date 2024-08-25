@@ -1,0 +1,10 @@
+@startuml
+class PluginContextCompletionData {
+    + Content : object <<get>>
+    + Description : object <<get>>
+    + Priority : double <<get>>
+    + Text : string <<get>>
+    + Complete(textArea:TextArea, completionSegment:ISegment, insertionRequestEventArgs:EventArgs) : void
+}
+ICompletionData <|-- PluginContextCompletionData
+@enduml

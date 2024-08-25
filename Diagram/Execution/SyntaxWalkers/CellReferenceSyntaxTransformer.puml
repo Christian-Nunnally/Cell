@@ -1,0 +1,5 @@
+@startuml
+class CellReferenceSyntaxTransformer {
+}
+SyntaxTransformer <|-- CellReferenceSyntaxTransformer
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+class Logger <<static>> {
+    - {static} LogNumber : int = 0
+    - <<const>> MaxRetainedLogs : int = 2000
+    + {static}  <<event>> LogAdded : Action<string>? 
+    + {static} Log(message:string) : void
+}
+class "Queue`1"<T> {
+}
+class "IEnumerable`1"<T> {
+}
+Logger o-> "_logsQueue<string>" "Queue`1"
+Logger o-> "Logs<string>" "IEnumerable`1"
+@enduml

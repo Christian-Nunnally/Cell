@@ -1,0 +1,22 @@
+@startuml
+class CellLayout {
+    + CellLayout(cells:IEnumerable<CellViewModel>)
+    + UpdateLayout() : void
+    - {static} ComputeMergedCellsHeight(cell:CellViewModel) : double
+    - {static} ComputeMergedCellsWidth(cell:CellViewModel) : double
+    - LayoutCell(cell:CellViewModel) : void
+    - LayoutCell(cell:CellViewModel, totalWidth:double, totalHeight:double) : void
+    - LayoutColumnCells() : void
+    - LayoutMergedCell(cellModel:CellViewModel) : void
+    - LayoutOtherCells() : void
+    - LayoutRowCells() : void
+}
+class "IEnumerable`1"<T> {
+}
+class "List`1"<T> {
+}
+CellLayout --> "_cells<CellViewModel>" "IEnumerable`1"
+CellLayout --> "_columns<CellViewModel>" "List`1"
+CellLayout --> "_corner" CellViewModel
+CellLayout --> "_rows<CellViewModel>" "List`1"
+@enduml

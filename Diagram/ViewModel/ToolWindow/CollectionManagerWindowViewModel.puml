@@ -1,0 +1,30 @@
+@startuml
+class CollectionManagerWindowViewModel {
+    - isBaseOnCheckBoxChecked : bool
+    - selectedCollection : UserCollection?
+    - selectedItem : PluginModel?
+    - selectedItemSerialized : string
+    + CollectionManagerWindowViewModel(_collections:ObservableCollection<UserCollection>)
+    + IsBaseOnCheckBoxChecked : bool <<get>> <<set>>
+    + NewCollectionBaseName : string <<get>> <<set>>
+    + NewCollectionName : string <<get>> <<set>>
+    + SelectedItemSerialized : string <<get>> <<set>>
+    + SelectedItemType : string <<get>> <<set>>
+    <<internal>> AddCurrentCollection() : void
+    - RefreshItemsForSelectedCollection() : void
+    - SelectedCollectionChanged(collection:UserCollection, model:PluginModel) : void
+    - SelectedCollectionOrderChanged(collection:UserCollection) : void
+}
+class "ObservableCollection`1"<T> {
+}
+ResizeableToolWindowViewModel <|-- CollectionManagerWindowViewModel
+CollectionManagerWindowViewModel o-> "_jsonDeserializerOptions" JsonSerializerOptions
+CollectionManagerWindowViewModel --> "CollectionBaseOptions<string>" "ObservableCollection`1"
+CollectionManagerWindowViewModel o-> "CollectionBaseSettingVisibility" Visibility
+CollectionManagerWindowViewModel --> "Collections<UserCollection>" "ObservableCollection`1"
+CollectionManagerWindowViewModel o-> "CollectionTypeSettingVisibility" Visibility
+CollectionManagerWindowViewModel o-> "ItemsInSelectedCollection<PluginModel>" "ObservableCollection`1"
+CollectionManagerWindowViewModel o-> "PluginTypeNames<string>" "ObservableCollection`1"
+CollectionManagerWindowViewModel --> "SelectedCollection" UserCollection
+CollectionManagerWindowViewModel --> "SelectedItem" PluginModel
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+class CellReferenceToCodeSyntaxRewriter <<partial>> {
+    + {static} IsCellLocation(input:string) : bool
+    + <<override>> Visit(node:SyntaxNode?) : SyntaxNode?
+    - {static} ColumnToIndex(column:string) : int
+    - {static} GetCellLocationFromVariable(variableName:string) : (int Row, int Column)
+    - {static} <<partial>> GetColumnFromCellLocationString() : Regex
+    - {static} GetRelativitySymbolAndCellLocationNameFromCellReference(cellReference:string[]) : (string RelativitySymbol, string CellReferenceName)
+    - {static} <<partial>> GetRowFromCellLocationString() : Regex
+    - {static} <<partial>> IsCellLocationString() : Regex
+    - {static} IsRelativitySymbol(symbol:string) : bool
+    - CalculateArgumentStringFromCellLocation(cellLocationName:string, relativitySymbol:string) : string
+    - CalculateArgumentsFromLocation(relativitySymbol:string, rowOffset:int, columnOffset:int) : string
+    - GetArgumentStringFromCellReference(cellReference:string[]) : string
+}
+CSharpSyntaxRewriter <|-- CellReferenceToCodeSyntaxRewriter
+CellReferenceToCodeSyntaxRewriter o-> "cell" CellModel
+@enduml

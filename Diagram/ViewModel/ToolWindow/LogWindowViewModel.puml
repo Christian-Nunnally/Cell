@@ -1,0 +1,10 @@
+@startuml
+class LogWindowViewModel {
+    + LogBuffer : string <<get>>
+    + LogWindowViewModel()
+    - AddLog(log:string) : void
+    <<internal>> ClearBuffer() : void
+}
+ResizeableToolWindowViewModel <|-- LogWindowViewModel
+LogWindowViewModel o-> "_logBufferBuilder" StringBuilder
+@enduml

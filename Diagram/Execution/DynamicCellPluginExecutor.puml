@@ -1,0 +1,10 @@
+@startuml
+class DynamicCellPluginExecutor <<static>> {
+    + {static} Log(functionName:string, sheet:string, row:int, column:int, compileResult:CompileResult, isTrigger:bool) : void
+    + {static} RunPopulate(pluginContext:PluginContext, cell:CellModel) : CompileResult
+    + {static} RunTrigger(pluginContext:PluginContext, cell:CellModel) : CompileResult
+    <<internal>> {static} RunSortFilter(pluginContext:PluginContext, functionName:string) : int?
+    - {static} ConvertReturnedObjectToSortFilterResult(resultObject:object?) : int?
+    - {static} ConvertReturnedObjectToString(resultObject:object?) : string?
+}
+@enduml

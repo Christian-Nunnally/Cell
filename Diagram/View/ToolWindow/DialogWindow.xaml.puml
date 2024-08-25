@@ -1,0 +1,19 @@
+@startuml
+class DialogWindow <<partial>> {
+    - <<readonly>> _title : string
+    + DialogWindow(title:string, message:string, actions:List<CommandViewModel>)
+    + {static} ShowDialog(title:string, message:string) : void
+    + {static} ShowYesNoConfirmationDialog(title:string, message:string, yesAction:Action) : void
+    + {static} ShowYesNoConfirmationDialog(title:string, message:string, yesAction:Action, noAction:Action) : void
+    + GetTitle() : string
+    + GetToolBarCommands() : List<CommandViewModel>
+    + HandleBeingClosed() : bool
+    - ButtonClick(sender:object, e:System.Windows.RoutedEventArgs) : void
+}
+class "ObservableCollection`1"<T> {
+}
+UserControl <|-- DialogWindow
+IToolWindow <|-- DialogWindow
+DialogWindow o-> "DialogOptions<CommandViewModel>" "ObservableCollection`1"
+DialogWindow --> "RequestClose" Action
+@enduml

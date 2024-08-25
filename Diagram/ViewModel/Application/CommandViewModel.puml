@@ -1,0 +1,7 @@
+@startuml
+class CommandViewModel {
+    + Name : string <<get>> <<set>>
+    + ToolTip : string <<get>> <<set>>
+}
+CommandViewModel o-> "Command" ICommand
+@enduml

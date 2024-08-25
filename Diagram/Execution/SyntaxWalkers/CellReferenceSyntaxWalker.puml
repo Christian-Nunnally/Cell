@@ -1,0 +1,12 @@
+@startuml
+class CellReferenceSyntaxWalker <<partial>> {
+    + {static} TryGetCellReferenceFromNode(node:SyntaxNode?, cellReference:CellReference) : bool
+    + <<override>> Visit(node:SyntaxNode?) : void
+    - {static} DoesNodeMatchCellReferenceSyntax(node:SyntaxNode?, arguments:SeparatedSyntaxList<ArgumentSyntax>) : bool
+    - {static} TryParsePositionFromArgument(argumentSyntax:ArgumentSyntax, position:int, isRelative:bool) : bool
+}
+class "List`1"<T> {
+}
+CSharpSyntaxWalker <|-- CellReferenceSyntaxWalker
+CellReferenceSyntaxWalker o-> "LocationReferences<CellReference>" "List`1"
+@enduml

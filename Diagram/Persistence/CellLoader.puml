@@ -1,0 +1,23 @@
+@startuml
+class CellLoader {
+    - <<const>> SheetsSaveDirectory : string = "Sheets"
+    - <<const>> TemplatesSaveDirectory : string = "Templates"
+    - <<readonly>> _saveDirectory : string
+    + {static} LoadCell(file:string) : CellModel
+    + {static} LoadSheet(directory:string) : IEnumerable<CellModel>
+    + DeleteCell(cellModel:CellModel) : void
+    + ExportSheetTemplate(sheetName:string) : void
+    + ImportSheetTemplate(templateName:string, sheetName:string) : void
+    + LoadAndAddCells() : void
+    + RenameSheet(oldName:string, newName:string) : void
+    + SaveCell(cell:CellModel) : void
+    + SaveCells() : void
+    - {static} CanFunctionsBeMerged(functionsBeingImported:List<PluginFunctionModel>, reason:string) : bool
+    - {static} FixMergedCellsWithNewIdentities(cells:IEnumerable<CellModel>, oldIdToNewIdMap:Dictionary<string, string>) : void
+    - {static} GetFunctionsFromTemplate(templatesDirectory:string) : List<PluginFunctionModel>
+    - {static} GiveCellsNewUniqueIndentities(sheetName:string, cells:IEnumerable<CellModel>) : Dictionary<string, string>
+    - {static} LoadAndAddCell(file:string) : CellModel
+    - {static} LoadAndAddSheet(directory:string) : void
+    - SaveSheet(sheet:string) : void
+}
+@enduml

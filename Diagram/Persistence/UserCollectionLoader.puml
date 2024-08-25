@@ -1,0 +1,39 @@
+@startuml
+class UserCollectionLoader <<static>> {
+    + {static} GetCollection(name:string) : UserCollection?
+    + {static} GetDataTypeStringForCollection(collection:string) : string
+    + {static} LoadCollections() : void
+    + {static} ProcessCollectionRename(oldName:string, newName:string) : void
+    + {static} SaveCollections() : void
+    <<internal>> {static} CreateCollection(collectionName:string, itemTypeName:string, baseCollectionName:string) : UserCollection
+    <<internal>> {static} DeleteCollection(collection:UserCollection) : void
+    <<internal>> {static} LinkUpBaseCollectionsAfterLoad() : void
+    - {static} DeleteItem(collectionName:string, idToRemove:string) : void
+    - {static} EnsureLinkedToBaseCollection(collection:UserCollection) : void
+    - {static} GetSaveDirectory() : string
+    - {static} LoadCollection(directory:string) : void
+    - {static} LoadItem(path:string) : PluginModel
+    + {static} ExportCollection(collectionName:string, toDirectory:string) : void
+    - {static} CopyFilesRecursively(sourcePath:string, targetPath:string) : void
+    - {static} SaveCollection(collection:UserCollection) : void
+    - {static} SaveCollectionSettings(model:UserCollectionModel) : void
+    - {static} SaveItem(collectionName:string, id:string, model:PluginModel) : void
+    - {static} StartTrackingCollection(userCollection:UserCollection) : void
+    - {static} StopTrackingCollection(userCollection:UserCollection) : void
+    - {static} UnlinkFromBaseCollection(collection:UserCollection) : void
+    - {static} UserCollectionItemAdded(collection:UserCollection, model:PluginModel) : void
+    - {static} UserCollectionItemChanged(collection:UserCollection, model:PluginModel) : void
+    - {static} UserCollectionItemRemoved(collection:UserCollection, model:PluginModel) : void
+    - {static} UserCollectionModelPropertyChanged(sender:object?, e:PropertyChangedEventArgs) : void
+    <<internal>> {static} ImportCollection(collectionDirectory:string, collectionName:string) : void
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "IEnumerable`1"<T> {
+}
+class "ObservableCollection`1"<T> {
+}
+UserCollectionLoader o-> "_collections<string,UserCollection>" "Dictionary`2"
+UserCollectionLoader --> "CollectionNames<string>" "IEnumerable`1"
+UserCollectionLoader o-> "ObservableCollections<UserCollection>" "ObservableCollection`1"
+@enduml

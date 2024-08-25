@@ -1,0 +1,13 @@
+@startuml
+class CodeCompletionWindowFactory <<static>> {
+    + {static} Create(textArea:TextArea, type:string, doesFunctionReturnValue:bool) : CompletionWindow?
+    + {static} GetFullMetadataName(s:ISymbol) : string
+    + {static} GetMembersOfType(typeName:string) : List<string>
+    + {static} RegisterTypesInAssembly(assembly:Assembly) : void
+    - {static} IsRootNamespace(symbol:ISymbol) : bool
+}
+class "Dictionary`2"<T1,T2> {
+}
+CodeCompletionWindowFactory o-> "_cachedTypes<string,List<string>>" "Dictionary`2"
+CodeCompletionWindowFactory o-> "_typeNameToFullyQualifiedTypeNameMap<string,string>" "Dictionary`2"
+@enduml

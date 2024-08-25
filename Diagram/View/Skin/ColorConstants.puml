@@ -1,0 +1,22 @@
+@startuml
+class ColorConstants {
+    + {static} <<readonly>> BackgroundColorConstantHex : string = "#1e1e1e"
+    + {static} <<readonly>> ForegroundColorConstantHex : string = "#ffffff"
+    + {static} <<readonly>> BorderColorConstantHex : string = "#3D3D3D"
+    + {static} <<readonly>> ControlBackgroundColorConstantHex : string = "#252525"
+    + {static} <<readonly>> SelectedBorderColorConstantHex : string = "#707070"
+    + {static} <<readonly>> SelectedColorConstantHex : string = "#383838"
+    + {static} <<readonly>> AccentColorConstantHex : string = "#007acc"
+    + {static} <<readonly>> ToolWindowHeaderColorConstantHex : string = "#353535"
+    + {static} <<readonly>> ErrorForegroundColorConstantHex : string = "#ff6666"
+}
+ColorConstants o-> "BackgroundColorConstant" Color
+ColorConstants o-> "ForegroundColorConstant" Color
+ColorConstants o-> "BorderColorConstant" Color
+ColorConstants o-> "ControlBackgroundColorConstant" Color
+ColorConstants o-> "SelectedBorderColorConstant" Color
+ColorConstants o-> "SelectedColorConstant" Color
+ColorConstants o-> "AccentColorConstant" Color
+ColorConstants o-> "ToolWindowHeaderColorConstant" Color
+ColorConstants o-> "ErrorForegroundColorConstant" Color
+@enduml

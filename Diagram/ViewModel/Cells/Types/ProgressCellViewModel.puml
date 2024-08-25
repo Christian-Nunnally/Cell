@@ -1,0 +1,11 @@
+@startuml
+class ProgressCellViewModel {
+    + ProgressCellViewModel(model:CellModel, sheetViewModel:SheetViewModel)
+    + ProgressBarHeight : double <<get>>
+    + ProgressBarWidth : double <<get>>
+    + <<override>> Text : string <<get>> <<set>>
+    + ValueAsDouble : double <<get>>
+    - ModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
+}
+CellViewModel <|-- ProgressCellViewModel
+@enduml

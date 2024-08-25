@@ -1,0 +1,6 @@
+@startuml
+class HelpWindow <<partial>> {
+    + HelpWindow()
+}
+UserControl <|-- HelpWindow
+@enduml

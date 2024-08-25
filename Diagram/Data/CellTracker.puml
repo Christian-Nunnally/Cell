@@ -1,0 +1,29 @@
+@startuml
+class CellTracker {
+    - {static} _instance : CellTracker?
+    + AddCell(cellModel:CellModel, saveAfterAdding:bool) : void
+    + GetCell(sheet:string, row:int, column:int) : CellModel?
+    + GetCellModelsForSheet(sheetName:string) : List<CellModel>
+    + RemoveCell(cellModel:CellModel) : void
+    - RemoveFromCellsByLocationMap(cellModel:CellModel) : bool
+    + RenameSheet(oldSheetName:string, newSheetName:string) : void
+    - AddCellToCellByLocationMap(cellModel:CellModel) : void
+    - CellModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
+    - AddToCellsInSheetMap(model:CellModel) : void
+    - RemoveFromCellsInSheetMap(model:CellModel, sheet:string) : bool
+}
+class "Dictionary`2"<T1,T2> {
+}
+class "ObservableCollection`1"<T> {
+}
+class "IEnumerable`1"<T> {
+}
+CellTracker o-> "_cellLoader" CellLoader
+CellTracker o-> "_cellsByLocation<string,List<CellModel>>" "Dictionary`2"
+CellTracker o-> "_cellsBySheetMap<string,Dictionary<string, CellModel>>" "Dictionary`2"
+CellTracker o-> "_cellsToLocation<string,string>" "Dictionary`2"
+CellTracker o-> "_sheetNames<string>" "ObservableCollection`1"
+CellTracker --> "Instance" CellTracker
+CellTracker --> "AllCells<CellModel>" "IEnumerable`1"
+CellTracker --> "SheetNames<string>" "ObservableCollection`1"
+@enduml

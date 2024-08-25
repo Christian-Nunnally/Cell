@@ -1,0 +1,44 @@
+@startuml
+class SheetViewModel {
+    - _enableMultiEditSelectedCells : bool = true
+    - lastKeyPressed : string
+    - selectedCellViewModel : CellViewModel?
+    + LastKeyPressed : string <<get>> <<set>>
+    + SheetName : string <<get>>
+    + AddCell(newModel:CellModel) : void
+    + AddCell(cell:CellViewModel) : void
+    + DeleteCell(cell:CellModel) : void
+    + DeleteCell(cell:CellViewModel) : void
+    + HighlightCell(cellToHighlight:CellViewModel, color:string) : void
+    + InitializeSheet() : void
+    + LoadCellViewModels() : void
+    + MoveSelection(columnOffset:int, rowOffset:int) : void
+    + MoveSelectionDown() : void
+    + MoveSelectionLeft() : void
+    + MoveSelectionRight() : void
+    + MoveSelectionUp() : void
+    + ReinstantiateCellsViewModel(cellViewModel:CellViewModel?) : void
+    + SelectCell(cell:CellModel) : void
+    + SelectCell(cell:CellViewModel) : void
+    + UnhighlightAllCells() : void
+    + UnmergeCell(mergedCell:CellViewModel) : void
+    + UnselectAllCells() : void
+    <<internal>> UnselectCell(cell:CellViewModel) : void
+    <<internal>> UpdateLayout() : void
+    - AddDefaultCells() : void
+    - CellModelPropertyChanged(sender:object?, e:PropertyChangedEventArgs) : void
+    - HighlightCellDependenciesOfFunction(function:FunctionViewModel) : void
+    - HighlightCollectionDependenciesForFunction(function:FunctionViewModel) : void
+    - PropertyChangedOnSelectedCell(sender:object?, e:PropertyChangedEventArgs) : void
+}
+class "ObservableCollection`1"<T> {
+}
+class "List`1"<T> {
+}
+PropertyChangedBase <|-- SheetViewModel
+SheetViewModel o-> "NullSheet" SheetViewModel
+SheetViewModel o-> "CellViewModels<CellViewModel>" "ObservableCollection`1"
+SheetViewModel o-> "HighlightedCellViewModels<CellViewModel>" "List`1"
+SheetViewModel --> "SelectedCellViewModel" CellViewModel
+SheetViewModel o-> "SelectedCellViewModels<CellViewModel>" "List`1"
+@enduml
