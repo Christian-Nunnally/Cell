@@ -66,7 +66,7 @@ namespace Cell.View.ToolWindow
                     function.SetUserFriendlyCode(x, cell.Model);
                     (cell as ListCellViewModel)?.UpdateList();
                 }, cell.Model);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Cell.View.ToolWindow
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
                 }, cell.Model);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
             }
         }
 

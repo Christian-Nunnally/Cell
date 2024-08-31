@@ -10,10 +10,10 @@ namespace Cell.Execution.SyntaxWalkers
         {
             node = base.Visit(node);
             if (node == null) return node;
-            if (CellReferenceSyntaxWalker.TryGetCellReferenceFromNode(node, out var cellReference))
+            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 var refactoredReference = _refactorFunction(cellReference);
-                var codeForReference = refactoredReference.GetCodeForReference();
+                var codeForReference = refactoredReference.CreateCodeForReference();
                 return SyntaxFactory.ParseExpression(codeForReference);
             }
             return node;

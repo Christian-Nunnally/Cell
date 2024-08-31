@@ -6,8 +6,8 @@
     xmlns:local="clr-namespace:Cell.View.Application"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
-    Width="{Binding ApplicationWindowWidth}"
-    Height="{Binding ApplicationWindowWidth}"
+    Width="{Binding ApplicationWindowWidth, Mode=TwoWay}"
+    Height="{Binding ApplicationWindowWidth, Mode=TwoWay}"
     d:Height="500"
     d:Width="500"
     AllowsTransparency="True"
@@ -130,10 +130,13 @@
                 DockPanel.Dock="Left"
                 Style="{StaticResource TitleButtonStyle}"
                 ToolTip="Manage collections" />
-            <local:TitleBarSheetNavigation
-                DataContext="{Binding}"
-                DockPanel.Dock="Bottom"
-                WindowChrome.IsHitTestVisibleInChrome="True" />
+            <Button
+                Click="ShowSheetManagerButtonClick"
+                Content="📄"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Manage sheets" />
+            <local:TitleBarSheetNavigation DockPanel.Dock="Bottom" WindowChrome.IsHitTestVisibleInChrome="True" />
         </DockPanel>
         <Grid>
             <ContentControl x:Name="_sheetViewContentControl" />

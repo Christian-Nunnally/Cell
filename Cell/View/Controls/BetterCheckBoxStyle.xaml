@@ -4,7 +4,7 @@
     xmlns:converters="clr-namespace:Cell.View.Converters"
     xmlns:local="clr-namespace:Cell.View.Controls">
     <converters:BrushToColorConverter x:Key="BrushToColor" />
-    <BooleanToVisibilityConverter x:Key="btv" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <Style TargetType="{x:Type local:BetterCheckBox}">
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Template">
@@ -21,7 +21,7 @@
                         CornerRadius="1">
                         <Grid>
                             <Rectangle Fill="{TemplateBinding Background}" />
-                            <Rectangle Fill="{TemplateBinding Foreground}" Visibility="{Binding IsChecked, Converter={StaticResource btv}}" />
+                            <Rectangle Fill="{TemplateBinding Foreground}" Visibility="{Binding IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             <Path
                                 x:Name="CheckMark"
                                 Width="9"

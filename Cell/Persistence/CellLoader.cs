@@ -35,35 +35,55 @@ namespace Cell.Persistence
             File.Delete(path);
         }
 
+        // TODO: Clean
         public void ExportSheetTemplate(string sheetName)
         {
-            var copiedCells = CellTracker.Instance.GetCellModelsForSheet(sheetName).Select(c => c.Copy());
+            var copiedCells = CreateUntrackedCopiesOfCellsInSheet(sheetName);
+
+            var templateDirectory = Path.Combine(_saveDirectory, TemplatesSaveDirectory, sheetName);
+            var cellDirectory = Path.Combine(templateDirectory, "Cells");
+            Directory.CreateDirectory(cellDirectory);
+
+            foreach (var copiedCell in copiedCells)
+            {
+                SaveCell(cellDirectory, copiedCell);
+            }
+
+            var populateFunctions = copiedCells.Select(c => c.PopulateFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => PluginFunctionLoader.GetOrCreateFunction("object", x));
+            var triggerFunctions = copiedCells.Select(c => c.TriggerFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => PluginFunctionLoader.GetOrCreateFunction("void", x));
+            var populateAndTriggerFunctions = populateFunctions.Concat(triggerFunctions).ToList();
+
+            var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
+            AddBaseCollectionsToUsedCollectionList(usedCollections);
+
+            var collectionSortFunctions = usedCollections.Select(x => PluginFunctionLoader.GetOrCreateFunction("object", x));
+            var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
+            foreach (var function in allFunctions)
+            {
+                PluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
+            }
+
+            foreach (var collection in usedCollections)
+            {
+                var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
+                UserCollectionLoader.ExportCollection(collection, collectionDirectory);
+            }
+        }
+
+        private static List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
+        {
+            var copiedCells = CellTracker.Instance.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
             foreach (var copiedCell in copiedCells)
             {
                 copiedCell.SheetName = "";
             }
-            var directory = Path.Combine(_saveDirectory, TemplatesSaveDirectory, sheetName);
-            if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
-            var cellDirectory = Path.Combine(directory, "Cells");
-            Directory.CreateDirectory(cellDirectory);
-            foreach (var copiedCell in copiedCells)
-            {
-                var serialized = JsonSerializer.Serialize(copiedCell);
-                var cellPath = Path.Combine(cellDirectory, copiedCell.ID);
-                File.WriteAllText(cellPath, serialized);
-            }
+            return copiedCells;
+        }
 
-            var usedCollections = new List<string>();
-            foreach (var function in PluginFunctionLoader.ObservableFunctions.Where(x => x.CellsThatUseFunction.Any(c => c.SheetName == sheetName)))
-            {
-                PluginFunctionLoader.SavePluginFunction(directory, function.Model.ReturnType, function.Model);
-                usedCollections.AddRange(function.CollectionDependencies);
-            }
-
-            usedCollections = usedCollections.Distinct().ToList();
-
-            for (int i =0; i < usedCollections.Count; i++)
+        private static void AddBaseCollectionsToUsedCollectionList(List<string> usedCollections)
+        {
+            for (int i = 0; i < usedCollections.Count; i++)
             {
                 var collection = usedCollections[i];
                 var baseCollectionName = UserCollectionLoader.GetCollection(collection)?.Model.BasedOnCollectionName;
@@ -71,22 +91,6 @@ namespace Cell.Persistence
                 {
                     usedCollections.Add(baseCollectionName);
                 }
-            }
-
-            usedCollections = usedCollections.Distinct().ToList();
-
-            foreach (var collection in usedCollections)
-            {
-                if (PluginFunctionLoader.TryGetFunction("object", UserCollectionLoader.GetCollection(collection)?.Model.SortAndFilterFunctionName ?? "", out var function))
-                {
-                    PluginFunctionLoader.SavePluginFunction(directory, function.Model.ReturnType, function.Model);
-                }
-            }
-
-            foreach (var collection in usedCollections)
-            {
-                var collectionDirectory = Path.Combine(directory, "Collections", collection);
-                UserCollectionLoader.ExportCollection(collection, collectionDirectory);
             }
         }
 
@@ -99,8 +103,7 @@ namespace Cell.Persistence
             if (!Directory.Exists(cellsPath)) return;
 
             var cellsToAdd = LoadSheet(cellsPath);
-            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
-            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
+            UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
 
             var functionsBeingImported = GetFunctionsFromTemplate(templatesDirectory);
             if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
@@ -126,10 +129,7 @@ namespace Cell.Persistence
                 return;
             }
 
-            foreach (var cell in cellsToAdd)
-            {
-                CellTracker.Instance.AddCell(cell, saveAfterAdding: true);
-            }
+            AddAndTrackCells(cellsToAdd);
 
             foreach (var functionModel in functionsBeingImported)
             {
@@ -143,6 +143,30 @@ namespace Cell.Persistence
                 var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
                 UserCollectionLoader.ImportCollection(collectionDirectory, collectionName);
             }
+        }
+
+        private static void AddAndTrackCells(IEnumerable<CellModel> cellsToAdd)
+        {
+            foreach (var cell in cellsToAdd)
+            {
+                CellTracker.Instance.AddCell(cell, saveAfterAdding: true);
+            }
+        }
+
+        private static void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
+        {
+            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
+            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
+        }
+
+        public void CopySheet(string sheetName)
+        {
+            var copiedSheetName = sheetName + "Copy";
+            while (SheetTracker.Instance.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
+
+            var copiedCells = CreateUntrackedCopiesOfCellsInSheet(sheetName);
+            UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
+            AddAndTrackCells(copiedCells);
         }
 
         public void LoadAndAddCells()
@@ -162,6 +186,11 @@ namespace Cell.Persistence
         public void SaveCell(CellModel cell)
         {
             var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
+            SaveCell(directory, cell);
+        }
+
+        public void SaveCell(string directory, CellModel cell)
+        {
             Directory.CreateDirectory(directory);
             var serialized = JsonSerializer.Serialize(cell);
             var path = Path.Combine(directory, cell.ID);
@@ -170,7 +199,7 @@ namespace Cell.Persistence
 
         public void SaveCells()
         {
-            foreach (var sheet in CellTracker.Instance.SheetNames) SaveSheet(sheet);
+            foreach (var sheet in SheetTracker.Instance.Sheets) SaveSheet(sheet);
         }
 
         private static bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
@@ -239,9 +268,10 @@ namespace Cell.Persistence
             foreach (var file in Directory.GetFiles(directory)) LoadAndAddCell(file);
         }
 
-        private void SaveSheet(string sheet)
+        private void SaveSheet(SheetModel sheet)
         {
-            foreach (var cell in CellTracker.Instance.GetCellModelsForSheet(sheet)) SaveCell(cell);
+            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, sheet.Name);
+            foreach (var cell in CellTracker.Instance.GetCellModelsForSheet(sheet.Name)) SaveCell(directory, cell);
         }
     }
 }

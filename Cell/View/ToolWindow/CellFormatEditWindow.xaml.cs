@@ -78,7 +78,11 @@ namespace Cell.View.ToolWindow
 
             var sheetName = topLeftCell.Model.SheetName;
             var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName);
-            if (cellsToMerge.Any(cell => cell.IsMerged())) return;
+            if (cellsToMerge.Count(cell => cell.IsMerged()) <= 1)
+            {
+                UnmergeSelectedCells();
+            }
+            else return;
             SetMergedWithToCellsId(cellsToMerge, topLeftCell);
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
@@ -107,10 +111,6 @@ namespace Cell.View.ToolWindow
             AddColorsToColorPicker(colorPicker, colors, 1.0f);
             AddColorsToColorPicker(colorPicker, colors, .1f);
             AddColorsToColorPicker(colorPicker, colors, 1.9f);
-        }
-
-        private void ComboBox_DropDownClosed(object sender, EventArgs e)
-        {
         }
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
@@ -275,6 +275,11 @@ namespace Cell.View.ToolWindow
         }
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
+        {
+            UnmergeSelectedCells();
+        }
+
+        private static void UnmergeSelectedCells()
         {
             foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
             {

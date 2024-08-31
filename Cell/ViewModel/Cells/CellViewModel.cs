@@ -139,7 +139,7 @@ namespace Cell.ViewModel.Cells
         public virtual int Column
         {
             get => _model.Column;
-            set { _model.Column = value; NotifyPropertyChanged(nameof(Column)); }
+            set { _model.Column = value; }
         }
 
         public virtual SolidColorBrush ContentBackgroundColor { get; private set; }
@@ -274,7 +274,7 @@ namespace Cell.ViewModel.Cells
         public virtual double Height
         {
             get => _model.Height;
-            set { _model.Height = value; NotifyPropertyChanged(nameof(Height)); }
+            set { _model.Height = value; }
         }
 
         public virtual HorizontalAlignment HorizontalAlignmentForView
@@ -413,7 +413,7 @@ namespace Cell.ViewModel.Cells
         public virtual int Row
         {
             get => _model.Row;
-            set { _model.Row = value; NotifyPropertyChanged(nameof(Row)); }
+            set { _model.Row = value; }
         }
 
         public virtual SolidColorBrush SelectionBorderColor
@@ -437,8 +437,8 @@ namespace Cell.ViewModel.Cells
             get => _model.Text;
             set
             {
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.Text = value?.Replace("\\n", "\n") ?? string.Empty;
-                NotifyPropertyChanged(nameof(Text));
             }
         }
 
@@ -474,7 +474,7 @@ namespace Cell.ViewModel.Cells
         public virtual double Width
         {
             get => _model.Width;
-            set { _model.Width = value; NotifyPropertyChanged(nameof(Width)); }
+            set { _model.Width = value; }
         }
 
         public virtual double X

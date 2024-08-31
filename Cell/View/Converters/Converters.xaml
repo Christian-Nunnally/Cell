@@ -3,7 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:Cell.View.Converters"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
-    <BooleanToVisibilityConverter x:Key="btv" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <xctk:InverseBoolConverter x:Key="InverseBoolConverter" />
     <xctk:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />

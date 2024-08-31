@@ -41,6 +41,11 @@ namespace Cell.Persistence
             new CellLoader(CurrentRootPath).ImportSheetTemplate(templateName, sheetName);
         }
 
+        public static void CopySheet(string sheetName)
+        {
+            new CellLoader(CurrentRootPath).CopySheet(sheetName);
+        }
+
         public static void LoadAll()
         {
             var versionSchema = LoadVersion();

@@ -82,7 +82,7 @@ namespace Cell.View.ToolWindow
                 {
                     capturedFunction.SetUserFriendlyCode(x, cell);
                 }, cell);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
             }
         }
 

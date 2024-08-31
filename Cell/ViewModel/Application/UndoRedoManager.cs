@@ -10,15 +10,19 @@ namespace Cell.ViewModel.Application
         private static readonly Stack<CellModel> _recordingStateList = new();
 
         private static bool _isRecordingUndoState;
+        private static bool _isUndoingOrRedoing;
 
         public static void StartRecordingUndoState()
         {
+            if (_isRecordingUndoState) return;
+            if (_isUndoingOrRedoing) return;
             _recordingStateList.Clear();
             _isRecordingUndoState = true;
         }
 
-        public static void RecordCellStateForUndo(CellModel cell)
+        public static void RecordStateIfRecording(CellModel cell)
         {
+            if (_isUndoingOrRedoing) return;
             if (_isRecordingUndoState)
             {
                 _recordingStateList.Push(cell.Copy());
@@ -27,6 +31,8 @@ namespace Cell.ViewModel.Application
 
         public static void FinishRecordingUndoState() 
         {
+            if (!_isRecordingUndoState) return;
+            if (_isUndoingOrRedoing) return;
             RecordCellStatesOntoUndoStack(_recordingStateList);
             _isRecordingUndoState = false;
         }
@@ -39,14 +45,18 @@ namespace Cell.ViewModel.Application
 
         public static void Redo()
         {
+            _isUndoingOrRedoing = true;
             ApplyStateFromStack(_redoStack, _undoStack);
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+            _isUndoingOrRedoing = false;
         }
 
         public static void Undo()
         {
+            _isUndoingOrRedoing = true;
             ApplyStateFromStack(_undoStack, _redoStack);
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+            _isUndoingOrRedoing = false;
         }
 
         private static void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)

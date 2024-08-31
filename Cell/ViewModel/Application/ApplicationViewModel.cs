@@ -4,32 +4,20 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
 using Cell.ViewModel.Cells;
-using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.Application
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
-        private const int BottomPanelHeight = 0;
-        private const int LeftPanelHeight = 215;
-        private const int RightPanelHeight = 0;
-        private const int TopPanelHeight = 35;
-        public readonly ApplicationView MainWindow;
+        public readonly ApplicationView ApplicationView;
         private readonly CellClipboard _cellClipboard = new();
-        public bool AreEditingPanelsOpen;
         private static ApplicationViewModel? instance;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private bool _isAddingSheet;
-        private string _newSheetName = string.Empty;
-        private int editingSpaceBottom;
-        private int editingSpaceLeft;
-        private int editingSpaceRight;
-        private int editingSpaceTop;
         private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
-        private ApplicationViewModel(ApplicationView mainWindow)
+        private ApplicationViewModel(ApplicationView view)
         {
-            MainWindow = mainWindow;
+            ApplicationView = view;
         }
 
         public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
@@ -56,69 +44,6 @@ namespace Cell.ViewModel.Application
                 NotifyPropertyChanged(nameof(ApplicationWindowWidth));
             }
         }
-
-        public int EditingSpaceBottom
-        {
-            get => editingSpaceBottom;
-            set
-            {
-                editingSpaceBottom = value;
-                NotifyPropertyChanged(nameof(EditingSpaceBottom));
-            }
-        }
-
-        public int EditingSpaceLeft
-        {
-            get => editingSpaceLeft;
-            set
-            {
-                editingSpaceLeft = value;
-                NotifyPropertyChanged(nameof(EditingSpaceLeft));
-            }
-        }
-
-        public int EditingSpaceRight
-        {
-            get => editingSpaceRight;
-            set
-            {
-                editingSpaceRight = value;
-                NotifyPropertyChanged(nameof(EditingSpaceRight));
-            }
-        }
-
-        public int EditingSpaceTop
-        {
-            get => editingSpaceTop;
-            set
-            {
-                editingSpaceTop = value;
-                NotifyPropertyChanged(nameof(EditingSpaceTop));
-            }
-        }
-
-        public bool IsAddingSheet
-        {
-            get => _isAddingSheet;
-            set
-            {
-                _isAddingSheet = value;
-                NotifyPropertyChanged(nameof(IsAddingSheet));
-            }
-        }
-
-        public string NewSheetName
-        {
-            get => _newSheetName;
-            set
-            {
-                _newSheetName = value;
-                NotifyPropertyChanged(nameof(NewSheetName));
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Binding")]
-        public ObservableCollection<string> SheetNames => CellTracker.Instance.SheetNames;
 
         public SheetViewModel SheetViewModel
         {
@@ -148,35 +73,6 @@ namespace Cell.ViewModel.Application
             SheetViewModel.UpdateLayout();
         }
 
-        public void CloseEditingPanels()
-        {
-            AreEditingPanelsOpen = false;
-            EditingSpaceTop = 0;
-            EditingSpaceBottom = 0;
-            EditingSpaceLeft = 0;
-            EditingSpaceRight = 0;
-        }
-
-        public void OpenEditingPanels()
-        {
-            AreEditingPanelsOpen = true;
-            EditingSpaceTop = TopPanelHeight;
-            EditingSpaceBottom = BottomPanelHeight;
-            EditingSpaceLeft = LeftPanelHeight;
-            EditingSpaceRight = RightPanelHeight;
-        }
-
-        public bool ToggleEditingPanels()
-        {
-            if (AreEditingPanelsOpen)
-            {
-                CloseEditingPanels();
-                return false;
-            }
-            OpenEditingPanels();
-            return true;
-        }
-
         internal void CopySelectedCells(bool copyTextOnly)
         {
             _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
@@ -186,7 +82,7 @@ namespace Cell.ViewModel.Application
         {
             GoToSheet(cellModel.SheetName);
             var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
-            if (cell is not null) MainWindow.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
+            if (cell is not null) ApplicationView.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
         }
 
         internal void GoToSheet(string sheetName)
@@ -194,7 +90,7 @@ namespace Cell.ViewModel.Application
             if (SheetViewModel.SheetName == sheetName) return;
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
-            MainWindow.ShowSheetView(sheetViewModel);
+            ApplicationView.ShowSheetView(sheetViewModel);
             ApplicationSettings.Instance.LastLoadedSheet = sheetName;
         }
 
@@ -203,12 +99,6 @@ namespace Cell.ViewModel.Application
             UndoRedoManager.StartRecordingUndoState();
             _cellClipboard.PasteCopiedCells(SheetViewModel);
             UndoRedoManager.FinishRecordingUndoState();
-        }
-
-        internal static void RenameSheet(string oldSheetName, string newSheetName)
-        {
-            if (oldSheetName == newSheetName) return;
-            CellTracker.Instance.RenameSheet(oldSheetName, newSheetName);
         }
     }
 }

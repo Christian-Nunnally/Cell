@@ -11,7 +11,7 @@ namespace Cell.Execution.SyntaxWalkers
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
-            if (CellReferenceSyntaxWalker.TryGetCellReferenceFromNode(node, out var cellReference))
+            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 var sheetPrefix = string.IsNullOrEmpty(cellReference.SheetName) ? string.Empty : $"{cellReference.SheetName}_";
 

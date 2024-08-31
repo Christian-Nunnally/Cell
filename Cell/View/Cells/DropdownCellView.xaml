@@ -12,6 +12,7 @@
             VerticalContentAlignment="{Binding VerticalAlignmentForViewCenter}"
             Background="{Binding ContentBackgroundColor}"
             BorderBrush="{Binding ContentBorderColor}"
+            BorderThickness="{Binding ContentBorderThickness}"
             FontFamily="{Binding FontFamily}"
             FontSize="{Binding FontSize}"
             Foreground="{Binding ForegroundColor}"

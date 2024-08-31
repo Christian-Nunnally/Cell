@@ -22,9 +22,9 @@ namespace Cell.ViewModel.ToolWindow
                 Functions.Add(function);
             }
             SheetNameOptions.Add("All");
-            foreach (var sheet in CellTracker.Instance.SheetNames)
+            foreach (var sheet in SheetTracker.Instance.Sheets)
             {
-                SheetNameOptions.Add(sheet);
+                SheetNameOptions.Add(sheet.Name);
             }
         }
 

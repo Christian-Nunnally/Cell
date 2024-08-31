@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
-using System.Collections.ObjectModel;
 
 namespace Cell.Data
 {
@@ -15,13 +14,10 @@ namespace Cell.Data
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
-        private readonly ObservableCollection<string> _sheetNames = [];
         private static CellTracker? _instance;
         public static CellTracker Instance => _instance ??= new CellTracker();
 
         public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
-
-        public ObservableCollection<string> SheetNames => _sheetNames;
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
@@ -63,12 +59,6 @@ namespace Cell.Data
             return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
         }
 
-        public void RenameSheet(string oldSheetName, string newSheetName)
-        {
-            _cellLoader.RenameSheet(oldSheetName, newSheetName);
-            GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
-        }
-
         private void AddCellToCellByLocationMap(CellModel cellModel)
         {
             if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
@@ -103,25 +93,33 @@ namespace Cell.Data
 
         private void AddToCellsInSheetMap(CellModel model)
         {
-            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellsInNewSheet))
+            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellMap))
             {
-                cellsInNewSheet.Add(model.ID, model);
+                cellMap.Add(model.ID, model);
             }
             else
             {
                 _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                _sheetNames.Add(model.SheetName);
+                var sheet = SheetTracker.Instance.Sheets.FirstOrDefault(x => x.Name == model.SheetName) ?? new SheetModel(model.SheetName);
+                SheetTracker.Instance.Sheets.Add(sheet);
+            }
+
+            if (model.CellType == CellType.Corner)
+            {
+                SheetTracker.Instance.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
             }
         }
 
-        private bool RemoveFromCellsInSheetMap(CellModel model, string sheet)
+        private bool RemoveFromCellsInSheetMap(CellModel model, string sheetName)
         {
-            if (!_cellsBySheetMap.TryGetValue(sheet, out var cellsInOldSheet)) return false;
+            if (!_cellsBySheetMap.TryGetValue(sheetName, out var cellsInOldSheet)) return false;
             var result = cellsInOldSheet.Remove(model.ID);
             if (cellsInOldSheet.Count == 0)
             {
-                _cellsBySheetMap.Remove(sheet);
-                _sheetNames.Remove(sheet);
+                _cellsBySheetMap.Remove(sheetName);
+                var sheet = SheetTracker.Instance.Sheets.First(x => x.OldName == sheetName);
+                SheetTracker.Instance.Sheets.Remove(sheet);
+                // TODO: Delete sheet from disk, and handle closing the sheet if it is open. Actually mabye just don't allow deleting the open sheet
             }
             return result;
         }

@@ -29,7 +29,7 @@
             HorizontalScrollBarVisibility="Auto"
             SyntaxHighlighting="C#"
             VerticalScrollBarVisibility="Auto" />
-        <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource btv}}">
+        <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <avalonEdit:TextEditor
                 Name="syntaxTreePreviewViewer"
                 Grid.Row="1"

@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
         private static bool _haveAssembliesBeenRegistered;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-        private bool _isDirty;
+        private bool _isDirty = false;
         private bool _isAllowingCloseWhileDirty = false;
         public CodeEditorWindow(FunctionViewModel function, Action<string> callback, CellModel? currentCell)
         {
@@ -43,13 +43,13 @@ namespace Cell.View.ToolWindow
             Visibility = Visibility.Collapsed;
             UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
             UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
-            textEditor.TextArea.TextEntering += OnTextEntering;
-            textEditor.TextArea.TextEntered += OnTextEntered;
-            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
             textEditor.Text = function.GetUserFriendlyCode(currentCell); ;
+            textEditor.TextArea.TextEntering += OnTextEntering;
+            textEditor.TextArea.TextEntered += OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             saveCodeCallback = callback;
             Visibility = Visibility.Visible;
             NotifyDockPropertiesChanged();

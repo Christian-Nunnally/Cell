@@ -68,8 +68,7 @@ namespace Cell.ViewModel.Execution
         {
             try
             {
-                var typesToAddAssemblyReferencesFor = new Type[] { typeof(Console), typeof(Enumerable) };
-                var compiler = new RoslynCompiler(SyntaxTree, typesToAddAssemblyReferencesFor);
+                var compiler = new RoslynCompiler(SyntaxTree);
                 var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
                 _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
                 CompileResult = new CompileResult { Success = true, Result = "" };
@@ -127,7 +126,7 @@ namespace Cell.ViewModel.Execution
             Model.Code = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
 
             // Populate cells that use this function as populate:
-            foreach (var cellModel in _cellsToNotify)
+            foreach (var cellModel in _cellsToNotify.ToList())
             {
                 cellModel.PopulateText();
             }

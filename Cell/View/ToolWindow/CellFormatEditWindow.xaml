@@ -16,7 +16,7 @@
     <ContentControl Content="{Binding}">
         <ContentControl.Resources>
             <DataTemplate DataType="{x:Type special:RowCellViewModel}">
-                <StackPanel>
+                <StackPanel Height="150">
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Height" />
                         <TextBox
@@ -30,7 +30,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type special:ColumnCellViewModel}">
-                <StackPanel>
+                <StackPanel Height="150">
                     <StackPanel Orientation="Horizontal">
                         <Label Width="100" Content="Width" />
                         <TextBox
@@ -581,9 +581,6 @@
                         </Grid>
                     </Grid>
                 </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
-                <Label />
             </DataTemplate>
         </ContentControl.Resources>
     </ContentControl>

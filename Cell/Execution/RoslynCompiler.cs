@@ -10,20 +10,21 @@ namespace Cell.Execution
     {
         private readonly CSharpCompilation _compilation;
         private readonly string _typeName = "Plugin.Program";
-        public RoslynCompiler(SyntaxTree syntax, Type[] typesToReference)
+        private static List<PortableExecutableReference>? _portableExecutableReferences;
+        private static readonly CSharpCompilationOptions _compilationOptions = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
+
+        private static List<PortableExecutableReference> PortableExecutableReferences => _portableExecutableReferences ??=
+        [
+            GetRuntimeMetadataReference(),
+            GetMetadataReferenceForType(typeof(object)),
+            GetMetadataReferenceForType(typeof(PluginContext)),
+            GetMetadataReferenceForType(typeof(Console)),
+            GetMetadataReferenceForType(typeof(Enumerable))
+        ];
+
+        public RoslynCompiler(SyntaxTree syntax)
         {
-            var refs = typesToReference.Select(GetMetadataReferenceForType).ToList();
-
-            var reference = GetRuntimeMetadataReference();
-            refs.Add(reference);
-            reference = GetMetadataReferenceForType(typeof(object));
-            refs.Add(reference);
-            reference = GetMetadataReferenceForType(typeof(PluginContext));
-            refs.Add(reference);
-
-            var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
-
-            _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], refs, options);
+            _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], PortableExecutableReferences, _compilationOptions);
         }
 
         public Type Compile()
@@ -64,7 +65,7 @@ namespace Cell.Execution
             return MetadataReference.CreateFromFile(systemRuntimeDllPath);
         }
 
-        private PortableExecutableReference GetMetadataReferenceForType(Type type)
+        private static PortableExecutableReference GetMetadataReferenceForType(Type type)
         {
             var assembly = type.Assembly;
             var location = assembly.Location;

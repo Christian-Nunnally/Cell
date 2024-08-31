@@ -55,13 +55,13 @@ namespace Cell.ViewModel.Application
         private static void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
-            UndoRedoManager.RecordCellStateForUndo(cellToReplace);
+            UndoRedoManager.RecordStateIfRecording(cellToReplace);
             cellToReplace.Text = cellToPaste.Text;
         }
 
         private static void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
-            UndoRedoManager.RecordCellStateForUndo(cellToReplace);
+            UndoRedoManager.RecordStateIfRecording(cellToReplace);
             cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
         }
 

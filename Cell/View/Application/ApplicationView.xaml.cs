@@ -16,6 +16,7 @@ namespace Cell.View.Application
     public partial class ApplicationView : Window
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
+
         public ApplicationView()
         {
             InitializeComponent();
@@ -52,9 +53,9 @@ namespace Cell.View.Application
         {
             if (!allowDuplicates)
             {
-                foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
+                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
                 {
-                    if (child is FloatingToolWindow floatingToolWindow && floatingToolWindow.ContentHost.Content.GetType() == content.GetType())
+                    if (floatingToolWindow.ContentHost.Content.GetType() == content.GetType())
                     {
                         return;
                     }
@@ -64,15 +65,8 @@ namespace Cell.View.Application
             var toolbox = new FloatingToolWindow(_toolWindowCanvas);
             toolbox.SetContent(content);
 
-            Canvas.SetLeft(toolbox, 100);
-            Canvas.SetTop(toolbox, 100 + _toolWindowCanvas.Children.Cast<UIElement>().Count() * 200);
-
-            //foreach (var child in _toolWindowCanvas.Children.Cast<UIElement>())
-            //{
-            //    var currentSize = child.DesiredSize;
-            //    var x = Canvas.GetLeft(child);
-            //    var y = Canvas.GetTop(child);
-            //}
+            Canvas.SetLeft(toolbox, (_toolWindowCanvas.ActualWidth / 2) - (toolbox.ContentWidth / 2));
+            Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
 
             _toolWindowCanvas.Children.Add(toolbox);
         }
@@ -83,23 +77,22 @@ namespace Cell.View.Application
             base.OnInitialized(e);
             PersistenceManager.LoadAll();
             ApplicationViewModel.Instance.SheetViewModel.LoadCellViewModels();
+            ApplicationViewModel.Instance.PropertyChanged += ApplicationViewModelPropertyChanged;
         }
 
-        private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
+        private void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (ApplicationViewModel.Instance.IsAddingSheet)
+            if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
             {
-                if (!string.IsNullOrEmpty(ApplicationViewModel.Instance.NewSheetName))
-                {
-                    ApplicationViewModel.Instance.GoToSheet(ApplicationViewModel.Instance.NewSheetName);
-                }
-                ApplicationViewModel.Instance.NewSheetName = string.Empty;
-                ApplicationViewModel.Instance.IsAddingSheet = false;
+                UpdateToolWindowLocation();
             }
-            else
+        }
+
+        private void UpdateToolWindowLocation()
+        {
+            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
             {
-                ApplicationViewModel.Instance.IsAddingSheet = true;
-                ApplicationViewModel.Instance.NewSheetName = "Untitled";
+                toolWindow.UpdateSizeAndPositionRespectingBounds();
             }
         }
 
@@ -107,14 +100,6 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) WindowState = WindowState.Normal;
             else WindowState = WindowState.Maximized;
-        }
-
-        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button button) return;
-            if (button.Content is not Label label) return;
-            if (label.Content is not string sheetName) return;
-            ApplicationViewModel.Instance.GoToSheet(sheetName);
         }
 
         private void MaximizeButtonClick(object sender, RoutedEventArgs e)
@@ -160,6 +145,13 @@ namespace Cell.View.Application
             ShowToolWindow(functionManager);
         }
 
+        private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
+        {
+            var sheetManagerViewModel = new SheetManagerWindowViewModel();
+            var sheetManager = new SheetManagerWindow(sheetManagerViewModel);
+            ShowToolWindow(sheetManager);
+        }
+
         private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
         {
             var helpWindow = new HelpWindow();
@@ -184,7 +176,6 @@ namespace Cell.View.Application
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.ToggleEditingPanels();
             var editPanel = new CellFormatEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
@@ -297,11 +288,6 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(8);
             else BorderThickness = new Thickness(0);
-        }
-
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-
         }
     }
 }

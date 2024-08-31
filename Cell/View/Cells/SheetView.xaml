@@ -74,12 +74,12 @@
                                     BorderThickness="2"
                                     IsHitTestVisible="False"
                                     SnapsToDevicePixels="True"
-                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource btv}}">
+                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Rectangle
                                         Fill="{Binding SelectionColor}"
                                         IsHitTestVisible="False"
                                         SnapsToDevicePixels="True"
-                                        Visibility="{Binding ShouldShowSelectionFill, Converter={StaticResource btv}}" />
+                                        Visibility="{Binding ShouldShowSelectionFill, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 </Border>
                             </Grid>
                         </ControlTemplate>

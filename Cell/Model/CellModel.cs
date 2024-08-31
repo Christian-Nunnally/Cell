@@ -272,6 +272,11 @@ namespace Cell.Model
         }
 
         public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
+        public bool GetBooleanProperty(string key, bool defaultValue)
+        {
+            if (BooleanProperties.TryGetValue(key, out var value)) return value;
+            return defaultValue;
+        }
 
         public double GetNumericProperty(string key, double defaultValue = 0) => NumericProperties.TryGetValue(key, out var value) ? value : defaultValue;
 

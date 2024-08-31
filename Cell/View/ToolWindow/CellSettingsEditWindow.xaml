@@ -55,13 +55,7 @@
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
-                <StackPanel>
-                    <Button Click="ExportSheetButtonClicked" Content="Export" />
-                    <controls:BetterComboBox ItemsSource="{Binding PossibleTemplates}" SelectedItem="{Binding ImportingTemplateName}" />
-                    <Label Content="New sheet name" />
-                    <TextBox Text="{Binding NewSheetNameForImportedTemplates}" />
-                    <Button Click="ImportSheetButtonClicked" Content="Import" />
-                </StackPanel>
+                <StackPanel />
             </DataTemplate>
             <DataTemplate DataType="{x:Type cell:CellViewModel}">
                 <StackPanel />

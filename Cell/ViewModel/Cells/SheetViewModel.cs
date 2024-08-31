@@ -2,6 +2,7 @@
 using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
 using Cell.ViewModel.Execution;
@@ -14,6 +15,7 @@ namespace Cell.ViewModel.Cells
 {
     public class SheetViewModel(string sheetName) : PropertyChangedBase
     {
+        private CellModel? oldSelectedCellState;
         public static readonly SheetViewModel NullSheet = new("null");
         private bool _enableMultiEditSelectedCells = true;
         private string lastKeyPressed = string.Empty;
@@ -45,6 +47,7 @@ namespace Cell.ViewModel.Cells
                     selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 175));
                 }
                 selectedCellViewModel = value;
+                oldSelectedCellState = selectedCellViewModel?.Model.Copy();
                 if (selectedCellViewModel is not null)
                 {
                     selectedCellViewModel.PropertyChanged += PropertyChangedOnSelectedCell;
@@ -321,6 +324,16 @@ namespace Cell.ViewModel.Cells
             if (!_enableMultiEditSelectedCells) return;
             if (sender is null) return;
             if (string.IsNullOrEmpty(e.PropertyName)) return;
+            if (oldSelectedCellState == null) return;
+            if (e.PropertyName == nameof(CellViewModel.IsSelected)) return;
+            if (e.PropertyName == nameof(CellViewModel.IsHighlighted)) return;
+            if (e.PropertyName == nameof(CellViewModel.ShouldShowSelectionBorder)) return;
+            if (e.PropertyName == nameof(CellViewModel.ShouldShowSelectionFill)) return;
+            if (e.PropertyName == nameof(CellViewModel.SelectionColor)) return;
+            if (e.PropertyName == nameof(CellViewModel.SelectionBorderColor)) return;
+
+            UndoRedoManager.StartRecordingUndoState();
+            UndoRedoManager.RecordStateIfRecording(oldSelectedCellState);
             foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
             {
                 if (cell == sender) continue;
@@ -333,6 +346,7 @@ namespace Cell.ViewModel.Cells
                     cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
                 }
             }
+            UndoRedoManager.FinishRecordingUndoState();
         }
     }
 }

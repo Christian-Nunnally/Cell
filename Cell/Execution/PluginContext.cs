@@ -16,7 +16,9 @@ namespace Cell.Execution
 
         public int Index { get; set; } = index;
 
-        public string[] SheetNames => [.. CellTracker.Instance.SheetNames];
+        public SheetModel[] Sheets => [.. SheetTracker.Instance.Sheets];
+
+        public string[] SheetNames => [.. SheetTracker.Instance.Sheets.Select(x => x.Name)];
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 

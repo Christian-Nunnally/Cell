@@ -135,9 +135,11 @@ namespace Cell.View.Application
 
         private void PanAndZoomCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (sender is not PanAndZoomCanvas canvas) return;
             if (e.ChangedButton == MouseButton.Right)
             {
                 _initialMousePosition = _transform.Inverse.Transform(e.GetPosition(this));
+                Mouse.Capture(canvas);
             }
         }
 
@@ -157,6 +159,10 @@ namespace Cell.View.Application
 
         private void PanAndZoomCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                Mouse.Capture(null);
+            }
         }
 
         private void PanAndZoomCanvas_MouseWheel(object sender, MouseWheelEventArgs e)

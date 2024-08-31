@@ -11,10 +11,10 @@ namespace Cell.View
         {
             if (sender is FrameworkElement element)
             {
-                if (element.DataContext is T cellViewModel)
+                if (element.DataContext is T dataContextObject)
                 {
 
-                    dataContext = cellViewModel;
+                    dataContext = dataContextObject;
                     return true;
                 }
             }

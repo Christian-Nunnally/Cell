@@ -34,7 +34,7 @@ namespace Cell.View.ToolWindow
                 new("Ok", new RelayCommand(x => { }))
             };
             var dialogWindow = new DialogWindow(title, message, actions);
-            ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(dialogWindow);
         }
 
         public static void ShowYesNoConfirmationDialog(string title, string message, Action yesAction) => ShowYesNoConfirmationDialog(title, message, yesAction, () => { });
@@ -47,7 +47,7 @@ namespace Cell.View.ToolWindow
                 new("No", new RelayCommand(x => noAction()))
             };
             var dialogWindow = new DialogWindow(title, message, actions);
-            ApplicationViewModel.Instance.MainWindow.ShowToolWindow(dialogWindow);
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(dialogWindow);
         }
 
         public string GetTitle() => _title;
