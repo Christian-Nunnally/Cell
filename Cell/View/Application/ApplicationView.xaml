@@ -43,63 +43,12 @@
                 Content="-"
                 DockPanel.Dock="Right"
                 Style="{StaticResource TitleButtonStyle}" />
-            <Grid>
-                <ToggleButton x:Name="SettingTitleButtonPopupButton" Content="⚙️">
-                    <ToggleButton.Style>
-                        <Style BasedOn="{StaticResource TitleButtonToggleButtonStyle}" TargetType="{x:Type ToggleButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=SettingTitleButtonPopup, Path=IsOpen}" Value="True">
-                                    <Setter Property="IsHitTestVisible" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
-                <Popup
-                    x:Name="SettingTitleButtonPopup"
-                    IsOpen="{Binding IsChecked, ElementName=SettingTitleButtonPopupButton, Mode=TwoWay}"
-                    PlacementTarget="{Binding ElementName=SettingTitleButtonPopupButton}">
-                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4,0,4,4">
-                        <StackPanel>
-                            <Button
-                                Click="TogglePanLockButtonClick"
-                                Content="🔒"
-                                DockPanel.Dock="Left"
-                                Style="{StaticResource TitleButtonStyle}"
-                                ToolTip="Toggles the ability to pan and zoom. Useful for creating a nice UI." />
-                            <ToggleButton
-                                Content="⬜←"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightPopulateCellDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause cells used by the populate function to highlight." />
-                            <ToggleButton
-                                Content="⬜→"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightTriggerCellDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause cells used by the trigger function to highlight." />
-                            <ToggleButton
-                                Content="≡←"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightPopulateCollectionDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause collections used by the populate function to highlight." />
-                            <ToggleButton
-                                Content="≡→"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightTriggerCollectionDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
-                            <Button
-                                Click="ShowLogWindowButtonClick"
-                                Content="/&gt;"
-                                DockPanel.Dock="Left"
-                                Style="{StaticResource TitleButtonStyle}" />
-                        </StackPanel>
-                    </Border>
-                </Popup>
-            </Grid>
+            <Button
+                Click="ShowSettingsWindowButtonClick"
+                Content="⚙️"
+                DockPanel.Dock="Left"
+                Style="{StaticResource TitleButtonStyle}"
+                ToolTip="Opens settings window" />
             <Button
                 Click="ToggleEditPanelButtonClick"
                 Content="🛠️"

@@ -14,12 +14,12 @@ namespace Cell.ViewModel.Cells
     {
         private readonly CellModel _model;
         protected SheetViewModel _sheetViewModel;
-        private double _x;
-        private double _y;
         private bool _isHighlighted;
         private bool _isSelected;
         private SolidColorBrush _selectionBorderColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
         private SolidColorBrush _selectionColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
+        private double _x;
+        private double _y;
         public CellViewModel(CellModel model, SheetViewModel sheet)
         {
             _sheetViewModel = sheet;
@@ -45,7 +45,6 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Background];
             set
             {
-                if (value == BorderColorHex) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.SetBackground(value);
                 var color = (Color)ColorConverter.ConvertFromString(value);
@@ -63,7 +62,6 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Border];
             set
             {
-                if (value == BorderColorHex) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.SetBorder(value);
                 var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
@@ -79,7 +77,6 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
-                if (value == BorderThicknessBottom) return;
                 BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{BorderThickness.Right},{value}";
                 NotifyBorderThicknessChanged();
             }
@@ -90,7 +87,6 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
-                if (value == BorderThicknessLeft) return;
                 BorderThicknessString = $"{value},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
                 NotifyBorderThicknessChanged();
             }
@@ -101,7 +97,6 @@ namespace Cell.ViewModel.Cells
             get => BorderThickness.Top.ToString();
             set
             {
-                if (value == BorderThicknessRight) return;
                 BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
                 NotifyBorderThicknessChanged();
             }
@@ -232,7 +227,6 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.ContentHighlight];
             set
             {
-                if (ContentHighlightColorHex == value) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.SetContentHighlight(value);
                 ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
@@ -263,7 +257,6 @@ namespace Cell.ViewModel.Cells
             get => _model.ColorHexes[(int)ColorFor.Foreground];
             set
             {
-                if (ForegroundColorHex == value) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _model.SetForeground(value);
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
@@ -280,11 +273,10 @@ namespace Cell.ViewModel.Cells
         public virtual HorizontalAlignment HorizontalAlignmentForView
         {
             get => _model.HorizontalAlignment;
-            set 
-            { 
-                if (HorizontalAlignmentForView == value) return;
-                _model.HorizontalAlignment = value; 
-                NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter)); 
+            set
+            {
+                _model.HorizontalAlignment = value;
+                NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter));
             }
         }
 

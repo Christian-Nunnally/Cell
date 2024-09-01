@@ -12,6 +12,10 @@ namespace Cell.ViewModel.Application
         private static bool _isRecordingUndoState;
         private static bool _isUndoingOrRedoing;
 
+        public static IEnumerable<string> UndoStack => _undoStack.Select(x => x.Count.ToString());
+
+        public static event Action? UndoStackChanged;
+
         public static void StartRecordingUndoState()
         {
             if (_isRecordingUndoState) return;
@@ -41,6 +45,7 @@ namespace Cell.ViewModel.Application
         {
             _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
             _redoStack.Clear();
+            UndoStackChanged?.Invoke();
         }
 
         public static void Redo()
@@ -49,6 +54,7 @@ namespace Cell.ViewModel.Application
             ApplyStateFromStack(_redoStack, _undoStack);
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
             _isUndoingOrRedoing = false;
+            UndoStackChanged?.Invoke();
         }
 
         public static void Undo()
@@ -57,6 +63,7 @@ namespace Cell.ViewModel.Application
             ApplyStateFromStack(_undoStack, _redoStack);
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
             _isUndoingOrRedoing = false;
+            UndoStackChanged?.Invoke();
         }
 
         private static void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)

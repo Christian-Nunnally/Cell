@@ -37,6 +37,7 @@ namespace Cell.View.ToolWindow
         {
             var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
             if (currentlySelectedCell is null) return "Select a cell to edit";
+            if (currentlySelectedCell is CornerCellViewModel) return "Edit default sheet format";
             return $"Format editor - {currentlySelectedCell.GetName()}";
         }
 

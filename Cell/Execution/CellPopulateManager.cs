@@ -34,9 +34,9 @@ namespace Cell.Execution
             var key = cell.GetUnqiueLocationString();
             if (_cellsToNotifyOnLocationUpdates.TryGetValue(key, out var subscribers))
             {
-                foreach (var subscriber in subscribers.Keys)
+                foreach (var subscriber in subscribers.Keys.ToList())
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
+                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index, subscriber), subscriber);
                     if (result.Success)
                     {
                         if (result.Result != null) subscriber.Text = result.Result;
@@ -58,7 +58,7 @@ namespace Cell.Execution
             _collectionsBeingUpdated.Add(userCollectionName);
             if (_cellsToNotifyOnCollectionUpdates.TryGetValue(userCollectionName, out var subscribers))
             {
-                foreach (var subscriber in subscribers.Keys)
+                foreach (var subscriber in subscribers.Keys.ToList())
                 {
                     var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
                     if (result.Success)

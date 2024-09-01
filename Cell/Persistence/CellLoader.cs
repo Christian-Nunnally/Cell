@@ -23,7 +23,7 @@ namespace Cell.Persistence
         public static IEnumerable<CellModel> LoadSheet(string directory)
         {
             var result = new List<CellModel>();
-            foreach (var file in Directory.GetFiles(directory)) result.Add(LoadAndAddCell(file));
+            foreach (var file in Directory.GetFiles(directory)) result.Add(LoadCell(file));
             return result;
         }
 
@@ -105,7 +105,7 @@ namespace Cell.Persistence
             var cellsToAdd = LoadSheet(cellsPath);
             UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
 
-            var functionsBeingImported = GetFunctionsFromTemplate(templatesDirectory);
+            var functionsBeingImported = GetFunctionsFromTemplate(templatePath);
             if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
             {
                 DialogWindow.ShowDialog("Import canceled", reason);

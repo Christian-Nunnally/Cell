@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
@@ -87,6 +86,7 @@ namespace Cell.ViewModel.Application
 
         internal void GoToSheet(string sheetName)
         {
+            if (!SheetModel.IsValidSheetName(sheetName)) return;
             if (SheetViewModel.SheetName == sheetName) return;
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();

@@ -29,7 +29,7 @@ namespace Cell.View.Application
 
         public double YPan { get; private set; }
 
-        public double Zoomfactor { get; set; } = 1.1;
+        public double Zoomfactor { get; set; } = 1.15;
 
         public void PanCanvasTo(double x, double y)
         {

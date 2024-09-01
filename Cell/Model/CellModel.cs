@@ -308,6 +308,24 @@ namespace Cell.Model
             NotifyPropertyChanged(nameof(BooleanProperties), key);
         }
 
+        public void SetBackgrounds(string color)
+        {
+            SetBackground(color);
+            SetContentBackground(color);
+        }
+
+        public void SetBorders(string color)
+        {
+            SetBorder(color);
+            SetContentBorder(color);
+        }
+
+        public void SetColor(string color)
+        {
+            SetBackgrounds(color);
+            SetBorders(color);
+        }
+
         public void SetBorder(string color)
         {
             if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;

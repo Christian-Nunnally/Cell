@@ -100,8 +100,12 @@ namespace Cell.Data
             else
             {
                 _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                var sheet = SheetTracker.Instance.Sheets.FirstOrDefault(x => x.Name == model.SheetName) ?? new SheetModel(model.SheetName);
-                SheetTracker.Instance.Sheets.Add(sheet);
+                var sheet = SheetTracker.Instance.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
+                if (sheet == null)
+                { 
+                    sheet = new SheetModel(model.SheetName);
+                    SheetTracker.Instance.Sheets.Add(sheet);
+                }
             }
 
             if (model.CellType == CellType.Corner)

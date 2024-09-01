@@ -1,5 +1,4 @@
-﻿using Cell.Model;
-using Cell.Persistence;
+﻿using Cell.Persistence;
 using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
@@ -152,19 +151,13 @@ namespace Cell.View.Application
             ShowToolWindow(sheetManager);
         }
 
-        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
+        private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
-            var helpWindow = new HelpWindow();
-            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
-            ShowToolWindow(helpWindow);
+            var settingsWindowViewModel = new SettingsWindowViewModel();
+            var settingsWindow = new SettingsWindow(settingsWindowViewModel);
+            ShowToolWindow(settingsWindow);
         }
 
-        private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
-        {
-            var logWindowViewModel = new LogWindowViewModel();
-            var logWindow = new LogWindow(logWindowViewModel);
-            ShowToolWindow(logWindow);
-        }
         private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
@@ -179,37 +172,6 @@ namespace Cell.View.Application
             var editPanel = new CellFormatEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
-        }
-
-        private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button button) return;
-            if (ActiveSheetView is null) return;
-            if (ActiveSheetView.PanAndZoomCanvas is null) return;
-            ActiveSheetView.PanAndZoomCanvas.PanCanvasTo(CellModelFactory.DefaultCellWidth, CellModelFactory.DefaultCellHeight);
-            ActiveSheetView.PanAndZoomCanvas.ZoomCanvasTo(new Point(0, 0), 1);
-            ActiveSheetView.PanAndZoomCanvas.IsPanningEnabled = !ActiveSheetView.PanAndZoomCanvas.IsPanningEnabled;
-            button.Content = ActiveSheetView.PanAndZoomCanvas.IsPanningEnabled ? "🔓" : "🔒";
-        }
-
-        private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.HighlightPopulateCellDependencies = !ApplicationSettings.Instance.HighlightPopulateCellDependencies;
-        }
-
-        private void TogglePopulateCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.HighlightPopulateCollectionDependencies = !ApplicationSettings.Instance.HighlightPopulateCollectionDependencies;
-        }
-
-        private void ToggleTriggerCellDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.HighlightTriggerCellDependencies = !ApplicationSettings.Instance.HighlightTriggerCellDependencies;
-        }
-
-        private void ToggleTriggerCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationSettings.Instance.HighlightTriggerCollectionDependencies = !ApplicationSettings.Instance.HighlightTriggerCollectionDependencies;
         }
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)

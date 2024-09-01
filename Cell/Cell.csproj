@@ -28,4 +28,10 @@
     <Resource Include="View\Skin\Colors.xaml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Update="View\ToolWindow\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>

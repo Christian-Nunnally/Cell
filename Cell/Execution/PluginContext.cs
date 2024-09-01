@@ -1,14 +1,16 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Model.Plugin;
+using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 
 #pragma warning disable CA1822 // Mark members as static. Justification: Making methods static causes the user to have to type the entire PluginContext type name to call methods, which is not user-friendly.
 
 namespace Cell.Execution
 {
-    public class PluginContext(ApplicationViewModel application, int index)
+    public class PluginContext(ApplicationViewModel application, int index, CellModel? cell = null)
     {
+        private CellModel? _cell = cell;
         public const string PluginContextArgumentName = "c";
 
         private readonly ApplicationViewModel _application = application;
@@ -54,6 +56,12 @@ namespace Cell.Execution
         public void GoToSheet(string sheetName)
         {
             _application.GoToSheet(sheetName);
+        }
+
+        public void ShowDialog(string text)
+        {
+            var title = _cell?.UserFriendlyCellName ?? "Function";
+            DialogWindow.ShowDialog(title, text);
         }
     }
 }

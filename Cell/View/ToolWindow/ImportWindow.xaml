@@ -1,0 +1,25 @@
+﻿<UserControl
+    x:Class="Cell.View.ToolWindow.ImportWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Cell.View.ToolWindow"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:plugin="clr-namespace:Cell.Data"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:ImportWindowViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid Width="{Binding UserSetWidth}" Height="{Binding UserSetHeight}">
+        <StackPanel>
+            <Label Content="Template to import" />
+            <controls:BetterComboBox ItemsSource="{Binding PossibleTemplates}" SelectedItem="{Binding ImportingTemplateName}" />
+            <Label Content="New sheet name" />
+            <TextBox Text="{Binding NewSheetNameForImportedTemplates}" />
+            <Button Click="ImportSheetButtonClicked" Content="Import" />
+        </StackPanel>
+    </Grid>
+</UserControl>
