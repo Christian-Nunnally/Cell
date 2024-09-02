@@ -3,6 +3,7 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
 using Cell.ViewModel.Cells;
+using System.IO;
 
 namespace Cell.ViewModel.Application
 {
@@ -16,13 +17,17 @@ namespace Cell.ViewModel.Application
         private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
         private ApplicationViewModel(ApplicationView view)
         {
+            PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
+            CellLoader = new(PersistenceManager);
             ApplicationView = view;
         }
 
         public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Binding")]
         public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
+
+        public readonly PersistenceManager PersistenceManager;
+        public readonly CellLoader CellLoader;
 
         public double ApplicationWindowHeight
         {

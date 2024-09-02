@@ -1,22 +1,39 @@
 ﻿using Cell.Common;
 using Cell.Data;
+using Cell.ViewModel.Application;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 
 namespace Cell.Persistence
 {
-    internal class PersistenceManager
+    public class PersistenceManager
     {
         public const string Version = "0.0.0";
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
-        public static string CurrentRootPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\LGF\\Cell";
+        public static string CurrentRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell");
         private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
+        private readonly IFileIO _fileIO;
+        private string _rootPath;
 
         public static string CurrentTemplatePath => Path.Combine(CurrentRootPath, "Templates");
         public static string CurrentFunctionsPath => Path.Combine(CurrentRootPath, "Functions");
         public static string CurrentCollectionsPath => Path.Combine(CurrentRootPath, "Collections");
         public static string CurrentApplicationSettingsPath => Path.Combine(CurrentRootPath, "Application");
         public static string CurrentSheetsPath => Path.Combine(CurrentRootPath, "Sheets");
+
+        public PersistenceManager(string rootPath, IFileIO fileIO)
+        {
+            _rootPath = rootPath;
+            _fileIO = fileIO;
+        }
+
+        public void DeleteFile(string path)
+        {
+            var file = Path.Combine(_rootPath, path);
+            if (!File.Exists(file)) return;
+            _fileIO.DeleteFile(path);
+        }
 
         public static void CreateBackup()
         {
@@ -33,17 +50,17 @@ namespace Cell.Persistence
 
         public static void ExportSheet(string sheetName)
         {
-            new CellLoader(CurrentRootPath).ExportSheetTemplate(sheetName);
+            ApplicationViewModel.Instance.CellLoader.ExportSheetTemplate(sheetName);
         }
 
         public static void ImportSheet(string templateName, string sheetName)
         {
-            new CellLoader(CurrentRootPath).ImportSheetTemplate(templateName, sheetName);
+            ApplicationViewModel.Instance.CellLoader.ImportSheetTemplate(templateName, sheetName);
         }
 
         public static void CopySheet(string sheetName)
         {
-            new CellLoader(CurrentRootPath).CopySheet(sheetName);
+            ApplicationViewModel.Instance.CellLoader.CopySheet(sheetName);
         }
 
         public static void LoadAll()
@@ -55,7 +72,7 @@ namespace Cell.Persistence
             UserCollectionLoader.LoadCollections();
             PluginFunctionLoader.LoadPlugins();
             UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
-            new CellLoader(CurrentRootPath).LoadAndAddCells();
+            ApplicationViewModel.Instance.CellLoader.LoadAndAddCells();
             CreateBackup();
         }
 
@@ -63,7 +80,7 @@ namespace Cell.Persistence
         {
             PluginFunctionLoader.SavePlugins();
             UserCollectionLoader.SaveCollections();
-            new CellLoader(CurrentRootPath).SaveCells();
+            ApplicationViewModel.Instance.CellLoader.SaveCells();
             SaveVersion();
         }
 
@@ -97,6 +114,38 @@ namespace Cell.Persistence
             var zipPath = folderPath + ".zip";
             ZipFile.CreateFromDirectory(folderPath, zipPath);
             Directory.Delete(folderPath, true);
+        }
+
+        public void OpenRootDirectoryInExplorer()
+        {
+            Process.Start("explorer.exe", _rootPath);
+        }
+
+        internal void SaveFile(string path, string serialized)
+        {
+            var fullPath = Path.Combine(_rootPath, path);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (directory == null) return;
+            Directory.CreateDirectory(directory);
+            File.WriteAllText(fullPath, serialized);
+        }
+
+        public void MoveDirectory(string oldPath, string newPath)
+        {
+            var oldFullPath = Path.Combine(_rootPath, oldPath);
+            var newFullPath = Path.Combine(_rootPath, newPath);
+            Directory.Move(oldFullPath, newFullPath);
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(Path.Combine(_rootPath, path));
+        }
+
+        public string[] GetDirectories(string path)
+        {
+            if (!DirectoryExists(path)) return [];
+            return Directory.GetDirectories(Path.Combine(_rootPath, path));
         }
     }
 }

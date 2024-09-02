@@ -8,6 +8,7 @@ namespace Cell.ViewModel.Application
         private static readonly Stack<List<CellModel>> _redoStack = new();
         private static readonly Stack<List<CellModel>> _undoStack = new();
         private static readonly Stack<CellModel> _recordingStateList = new();
+        private static readonly List<string> _recordingStateIdList = new();
 
         private static bool _isRecordingUndoState;
         private static bool _isUndoingOrRedoing;
@@ -21,6 +22,7 @@ namespace Cell.ViewModel.Application
             if (_isRecordingUndoState) return;
             if (_isUndoingOrRedoing) return;
             _recordingStateList.Clear();
+            _recordingStateIdList.Clear();
             _isRecordingUndoState = true;
         }
 
@@ -29,7 +31,9 @@ namespace Cell.ViewModel.Application
             if (_isUndoingOrRedoing) return;
             if (_isRecordingUndoState)
             {
+                if (_recordingStateIdList.Contains(cell.ID)) return;
                 _recordingStateList.Push(cell.Copy());
+                _recordingStateIdList.Add(cell.ID);
             }
         }
 

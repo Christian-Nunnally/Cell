@@ -46,6 +46,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.SetBackground(value);
                 var color = (Color)ColorConverter.ConvertFromString(value);
                 BackgroundColor = new SolidColorBrush(color);
@@ -63,6 +64,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.SetBorder(value);
                 var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
                 BorderColor = new SolidColorBrush(color);
@@ -104,12 +106,13 @@ namespace Cell.ViewModel.Cells
 
         public virtual string BorderThicknessString
         {
-            get => Model.BorderThicknessString;
+            get => _model.BorderThicknessString;
             set
             {
                 if (UpdateBorderThickness(value))
                 {
-                    Model.BorderThicknessString = value;
+                    UndoRedoManager.RecordStateIfRecording(_model);
+                    _model.BorderThicknessString = value;
                     NotifyPropertyChanged(nameof(BorderThicknessString));
                 }
             }
@@ -128,7 +131,12 @@ namespace Cell.ViewModel.Cells
         public virtual CellType CellType
         {
             get => _model.CellType;
-            set { _model.CellType = value; NotifyPropertyChanged(nameof(CellType)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.CellType = value; 
+                NotifyPropertyChanged(nameof(CellType)); 
+            }
         }
 
         public virtual int Column
@@ -145,6 +153,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.ColorHexes[(int)ColorFor.ContentBackground] = value;
                 ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
                 NotifyPropertyChanged(nameof(ContentBackgroundColor), nameof(ContentBackgroundColorHex));
@@ -159,6 +168,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.SetContentBorder(value);
                 ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
                 NotifyPropertyChanged(nameof(ContentBorderColor), nameof(ContentBorderColorHex));
@@ -204,7 +214,8 @@ namespace Cell.ViewModel.Cells
             {
                 if (UpdateContentBorderThickness(value))
                 {
-                    Model.ContentBorderThicknessString = value;
+                    UndoRedoManager.RecordStateIfRecording(_model);
+                    _model.ContentBorderThicknessString = value;
                     NotifyPropertyChanged(nameof(ContentBorderThicknessString));
                 }
             }
@@ -237,13 +248,23 @@ namespace Cell.ViewModel.Cells
         public virtual string FontFamily
         {
             get => _model.FontFamily;
-            set { _model.FontFamily = value; NotifyPropertyChanged(nameof(FontFamily)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.FontFamily = value; 
+                NotifyPropertyChanged(nameof(FontFamily)); 
+            }
         }
 
         public virtual double FontSize
         {
             get => _model.FontSize;
-            set { _model.FontSize = value; NotifyPropertyChanged(nameof(FontSize)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.FontSize = value; 
+                NotifyPropertyChanged(nameof(FontSize)); 
+            }
         }
 
         public FontStyle FontStyleForView => IsFontItalic ? FontStyles.Italic : FontStyles.Normal;
@@ -258,6 +279,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.SetForeground(value);
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
                 NotifyPropertyChanged(nameof(ForegroundColor), nameof(ForegroundColorHex));
@@ -267,7 +289,10 @@ namespace Cell.ViewModel.Cells
         public virtual double Height
         {
             get => _model.Height;
-            set { _model.Height = value; }
+            set 
+            { 
+                _model.Height = value; 
+            }
         }
 
         public virtual HorizontalAlignment HorizontalAlignmentForView
@@ -275,6 +300,7 @@ namespace Cell.ViewModel.Cells
             get => _model.HorizontalAlignment;
             set
             {
+                UndoRedoManager.RecordStateIfRecording(_model);
                 _model.HorizontalAlignment = value;
                 NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter));
             }
@@ -287,37 +313,70 @@ namespace Cell.ViewModel.Cells
         public virtual int Index
         {
             get => _model.Index;
-            set { _model.Index = value; NotifyPropertyChanged(nameof(Index)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.Index = value; 
+                NotifyPropertyChanged(nameof(Index)); 
+            }
         }
 
         public virtual bool IsFontBold
         {
             get => _model.IsFontBold;
-            set { _model.IsFontBold = value; NotifyPropertyChanged(nameof(IsFontBold)); NotifyPropertyChanged(nameof(FontWeightForView)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.IsFontBold = value; 
+                NotifyPropertyChanged(nameof(IsFontBold)); 
+                NotifyPropertyChanged(nameof(FontWeightForView)); 
+            }
         }
 
         public virtual bool IsFontItalic
         {
             get => _model.IsFontItalic;
-            set { _model.IsFontItalic = value; NotifyPropertyChanged(nameof(IsFontItalic)); NotifyPropertyChanged(nameof(FontStyleForView)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.IsFontItalic = value; 
+                NotifyPropertyChanged(nameof(IsFontItalic)); 
+                NotifyPropertyChanged(nameof(FontStyleForView)); 
+            }
         }
 
         public virtual bool IsFontStrikethrough
         {
             get => _model.IsFontStrikethrough;
-            set { _model.IsFontStrikethrough = value; NotifyPropertyChanged(nameof(IsFontStrikethrough)); NotifyPropertyChanged(nameof(TextDecorationsForView)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.IsFontStrikethrough = value; 
+                NotifyPropertyChanged(nameof(IsFontStrikethrough)); 
+                NotifyPropertyChanged(nameof(TextDecorationsForView)); 
+            }
         }
 
         public virtual bool IsHighlighted
         {
             get => _isHighlighted;
-            set { if (_isHighlighted == value) return; _isHighlighted = value; NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); }
+            set 
+            { 
+                if (_isHighlighted == value) return; 
+                _isHighlighted = value; 
+                NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); 
+            }
         }
 
         public virtual bool IsSelected
         {
             get => _isSelected;
-            set { if (_isSelected == value) return; _isSelected = value; NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); }
+            set 
+            { 
+                if (_isSelected == value) return; 
+                _isSelected = value; 
+                NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); 
+            }
         }
 
         public virtual Thickness Margin { get; private set; }
@@ -359,6 +418,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (UpdateMargin(value))
                 {
+                    UndoRedoManager.RecordStateIfRecording(_model);
                     Model.MarginString = value;
                     NotifyPropertyChanged(nameof(MarginString));
                 }
@@ -384,6 +444,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
                 {
+                    UndoRedoManager.RecordStateIfRecording(_model);
                     _model.PopulateFunctionName = value;
                     NotifyPropertyChanged(nameof(PopulateFunctionName));
                     PopulateText();
@@ -437,7 +498,12 @@ namespace Cell.ViewModel.Cells
         public virtual TextAlignment TextAlignmentForView
         {
             get => _model.TextAlignmentForView;
-            set { _model.TextAlignmentForView = value; NotifyPropertyChanged(nameof(TextAlignmentForView)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.TextAlignmentForView = value; 
+                NotifyPropertyChanged(nameof(TextAlignmentForView)); 
+            }
         }
 
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
@@ -449,6 +515,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
                 {
+                    UndoRedoManager.RecordStateIfRecording(_model);
                     _model.TriggerFunctionName = value;
                     NotifyPropertyChanged(nameof(TriggerFunctionName));
                 };
@@ -458,7 +525,13 @@ namespace Cell.ViewModel.Cells
         public virtual VerticalAlignment VerticalAlignmentForView
         {
             get => _model.VerticalAlignment;
-            set { _model.VerticalAlignment = value; NotifyPropertyChanged(nameof(VerticalAlignmentForView)); NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter)); }
+            set 
+            {
+                UndoRedoManager.RecordStateIfRecording(_model);
+                _model.VerticalAlignment = value; 
+                NotifyPropertyChanged(nameof(VerticalAlignmentForView)); 
+                NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter)); 
+            }
         }
 
         public virtual VerticalAlignment VerticalAlignmentForViewCenter => VerticalAlignmentForView == VerticalAlignment.Stretch ? VerticalAlignment.Center : VerticalAlignmentForView;

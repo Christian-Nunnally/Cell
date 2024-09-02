@@ -1,26 +1,18 @@
 
 using Cell.Model;
+using Cell.Persistence;
 using Microsoft.CodeAnalysis.CSharp;
 using Cell.Execution.SyntaxWalkers;
+using Cell.ViewModel.Application;
 
 namespace CellTest
 {
-    public class UnitTest1
+    public class CellTest
     {
         [Fact]
-        public void RelativeColumnAndRow()
+        public void BasicLaunchTest()
         {
-            //var cell = new CellModel
-            //{
-            //    Row = 1,
-            //    Column = 1
-            //};
-            //var given = "c.GetUserList<testType>(\"list\")";
-            //var expected = "c.GetUserList<testType>(\"newList\")";
-            //var t = new CollectionReferenceRenameRewriter("list", "newList").Visit(SyntaxFactory.ParseExpression(given));
-            //Assert.Equal(expected, t.ToFullString());
-            ///var SyntaxTransformer = new SyntaxTransformer(new CollectionReferenceToCodeSyntaxRewriter(x => "testType", x => true), new CodeToCollectionReferenceSyntaxRewriter());
-            //AssertRoundTrip(given, expected, SyntaxTransformer);
+            var persistenceManager = new PersistenceManager();
         }
 
         //[Fact]

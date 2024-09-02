@@ -1,7 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.ViewModel.Application;
 
 namespace Cell.Data
 {
@@ -10,7 +10,6 @@ namespace Cell.Data
     /// </summary>
     internal class CellTracker
     {
-        private readonly CellLoader _cellLoader = new(PersistenceManager.CurrentRootPath);
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
@@ -28,7 +27,7 @@ namespace Cell.Data
             cellModel.PropertyChanged += CellModelPropertyChanged;
             CellTriggerManager.StartMonitoringCell(cellModel);
             CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
-            if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
+            if (saveAfterAdding) ApplicationViewModel.Instance.CellLoader.SaveCell(cellModel);
         }
 
         public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
@@ -45,7 +44,7 @@ namespace Cell.Data
         public void RemoveCell(CellModel cellModel)
         {
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
-            _cellLoader.DeleteCell(cellModel);
+            ApplicationViewModel.Instance.CellLoader.DeleteCell(cellModel);
             CellTriggerManager.StopMonitoringCell(cellModel);
             CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
             CellPopulateManager.UnsubscribeFromAllLocationUpdates(cellModel);
@@ -88,7 +87,7 @@ namespace Cell.Data
                     AddToCellsInSheetMap(model);
                 }
             }
-            _cellLoader.SaveCell(model);
+            ApplicationViewModel.Instance.CellLoader.SaveCell(model);
         }
 
         private void AddToCellsInSheetMap(CellModel model)

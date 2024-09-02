@@ -8,11 +8,17 @@ using System.Text.Json;
 
 namespace Cell.Persistence
 {
-    public class CellLoader(string saveDirectory)
+    public class CellLoader
     {
         private const string SheetsSaveDirectory = "Sheets";
         private const string TemplatesSaveDirectory = "Templates";
-        private readonly string _saveDirectory = saveDirectory;
+        private PersistenceManager _persistenceManager;
+
+        public CellLoader(PersistenceManager persistenceManager)
+        {
+            _persistenceManager = persistenceManager;
+        }
+
         public static CellModel LoadCell(string file)
         {
             var text = File.ReadAllText(file) ?? throw new CellError($"Loading file failed at {file}"); ;
@@ -29,10 +35,8 @@ namespace Cell.Persistence
 
         public void DeleteCell(CellModel cellModel)
         {
-            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cellModel.SheetName);
-            if (!Directory.Exists(directory)) return;
-            var path = Path.Combine(directory, cellModel.ID);
-            File.Delete(path);
+            var cellPath = Path.Combine(SheetsSaveDirectory, cellModel.SheetName, cellModel.ID);
+            _persistenceManager.DeleteFile(cellPath);
         }
 
         // TODO: Clean
@@ -40,9 +44,8 @@ namespace Cell.Persistence
         {
             var copiedCells = CreateUntrackedCopiesOfCellsInSheet(sheetName);
 
-            var templateDirectory = Path.Combine(_saveDirectory, TemplatesSaveDirectory, sheetName);
+            var templateDirectory = Path.Combine(TemplatesSaveDirectory, sheetName);
             var cellDirectory = Path.Combine(templateDirectory, "Cells");
-            Directory.CreateDirectory(cellDirectory);
 
             foreach (var copiedCell in copiedCells)
             {
@@ -96,11 +99,11 @@ namespace Cell.Persistence
 
         public void ImportSheetTemplate(string templateName, string sheetName)
         {
-            var templatesDirectory = Path.Combine(_saveDirectory, TemplatesSaveDirectory);
-            if (!Directory.Exists(templatesDirectory)) return;
+            var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
+            if (!_persistenceManager.DirectoryExists(templatesDirectory)) return;
             var templatePath = Path.Combine(templatesDirectory, templateName);
             var cellsPath = Path.Combine(templatePath, "Cells");
-            if (!Directory.Exists(cellsPath)) return;
+            if (!_persistenceManager.DirectoryExists(cellsPath)) return;
 
             var cellsToAdd = LoadSheet(cellsPath);
             UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
@@ -114,13 +117,10 @@ namespace Cell.Persistence
 
             var collectionsBeingImported = new List<string>();
             var collectionsDirectory = Path.Combine(templatePath, "Collections");
-            if (Directory.Exists(collectionsDirectory))
+            foreach (var collectionDirectory in _persistenceManager.GetDirectories(collectionsDirectory))
             {
-                foreach (var collectionDirectory in Directory.GetDirectories(collectionsDirectory))
-                {
-                    var collectionName = Path.GetFileName(collectionDirectory);
-                    collectionsBeingImported.Add(collectionName);
-                }
+                var collectionName = Path.GetFileName(collectionDirectory);
+                collectionsBeingImported.Add(collectionName);
             }
             var conflictingCollection = collectionsBeingImported.FirstOrDefault(UserCollectionLoader.CollectionNames.Contains);
             if (conflictingCollection is not null)
@@ -135,7 +135,7 @@ namespace Cell.Persistence
             {
                 var function = new FunctionViewModel(functionModel);
                 PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
-                PluginFunctionLoader.SavePluginFunction(_saveDirectory, functionModel.ReturnType, functionModel);
+                PluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
             }
 
             foreach (var collectionName in collectionsBeingImported)
@@ -171,30 +171,28 @@ namespace Cell.Persistence
 
         public void LoadAndAddCells()
         {
-            var sheetsPath = Path.Combine(_saveDirectory, SheetsSaveDirectory);
-            if (!Directory.Exists(sheetsPath)) return;
-            foreach (var directory in Directory.GetDirectories(sheetsPath)) LoadAndAddSheet(directory);
+            if (!_persistenceManager.DirectoryExists(SheetsSaveDirectory)) return;
+            foreach (var directory in _persistenceManager.GetDirectories(SheetsSaveDirectory)) LoadAndAddSheet(directory);
         }
 
         public void RenameSheet(string oldName, string newName)
         {
-            var oldDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, oldName);
-            var newDirectory = Path.Combine(_saveDirectory, SheetsSaveDirectory, newName);
-            Directory.Move(oldDirectory, newDirectory);
+            var oldDirectory = Path.Combine(SheetsSaveDirectory, oldName);
+            var newDirectory = Path.Combine(SheetsSaveDirectory, newName);
+            _persistenceManager.MoveDirectory(oldDirectory, newDirectory);
         }
 
         public void SaveCell(CellModel cell)
         {
-            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, cell.SheetName);
+            var directory = Path.Combine(SheetsSaveDirectory, cell.SheetName);
             SaveCell(directory, cell);
         }
 
         public void SaveCell(string directory, CellModel cell)
         {
-            Directory.CreateDirectory(directory);
             var serialized = JsonSerializer.Serialize(cell);
             var path = Path.Combine(directory, cell.ID);
-            File.WriteAllText(path, serialized);
+            _persistenceManager.SaveFile(path, serialized);
         }
 
         public void SaveCells()
@@ -270,7 +268,7 @@ namespace Cell.Persistence
 
         private void SaveSheet(SheetModel sheet)
         {
-            var directory = Path.Combine(_saveDirectory, SheetsSaveDirectory, sheet.Name);
+            var directory = Path.Combine(SheetsSaveDirectory, sheet.Name);
             foreach (var cell in CellTracker.Instance.GetCellModelsForSheet(sheet.Name)) SaveCell(directory, cell);
         }
     }

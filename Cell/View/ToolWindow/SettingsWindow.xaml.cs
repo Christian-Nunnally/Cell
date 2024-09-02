@@ -109,7 +109,7 @@ namespace Cell.View.ToolWindow
 
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            Process.Start("explorer.exe", PersistenceManager.CurrentRootPath);
+            ApplicationViewModel.Instance.PersistenceManager.OpenRootDirectoryInExplorer();
         }
     }
 }

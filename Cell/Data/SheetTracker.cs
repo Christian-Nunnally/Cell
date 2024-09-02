@@ -1,6 +1,6 @@
 ﻿
 using Cell.Model;
-using Cell.Persistence;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
@@ -8,7 +8,6 @@ namespace Cell.Data
 {
     internal class SheetTracker
     {
-        private readonly CellLoader _cellLoader = new(PersistenceManager.CurrentRootPath);
         private static SheetTracker? _instance;
         public static SheetTracker Instance => _instance ??= new SheetTracker();
 
@@ -55,7 +54,7 @@ namespace Cell.Data
 
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
-            _cellLoader.RenameSheet(oldSheetName, newSheetName);
+            ApplicationViewModel.Instance.CellLoader.RenameSheet(oldSheetName, newSheetName);
             CellTracker.Instance.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
         }
 
