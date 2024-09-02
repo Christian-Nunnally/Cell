@@ -1,8 +1,6 @@
 ﻿using Cell.Model;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -57,7 +55,7 @@ namespace Cell.View.ToolWindow
 
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button) return;
+            if (sender is not Button) return;
             var activeSheetView = ApplicationViewModel.Instance.ApplicationView.ActiveSheetView;
             if (activeSheetView is null) return;
             if (activeSheetView.PanAndZoomCanvas is null) return;
@@ -68,22 +66,22 @@ namespace Cell.View.ToolWindow
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)
         {
-            ApplicationSettings.Instance.HighlightPopulateCellDependencies = !ApplicationSettings.Instance.HighlightPopulateCellDependencies;
+            ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies;
         }
 
         private void TogglePopulateCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
         {
-            ApplicationSettings.Instance.HighlightPopulateCollectionDependencies = !ApplicationSettings.Instance.HighlightPopulateCollectionDependencies;
+            ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies;
         }
 
         private void ToggleTriggerCellDependencyButtonClick(object sender, RoutedEventArgs e)
         {
-            ApplicationSettings.Instance.HighlightTriggerCellDependencies = !ApplicationSettings.Instance.HighlightTriggerCellDependencies;
+            ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies;
         }
 
         private void ToggleTriggerCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
         {
-            ApplicationSettings.Instance.HighlightTriggerCollectionDependencies = !ApplicationSettings.Instance.HighlightTriggerCollectionDependencies;
+            ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies;
         }
 
         private void ShowHelpButtonClick(object sender, RoutedEventArgs e)

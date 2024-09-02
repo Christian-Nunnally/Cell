@@ -1,8 +1,8 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Windows;
@@ -143,14 +143,14 @@ namespace Cell.ViewModel.ToolWindow
                 var baseCollection = Collections.FirstOrDefault(x => x.Name == basedOnCollection);
                 if (baseCollection == null) return;
 
-                UserCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Name);
+                ApplicationViewModel.Instance.UserCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Name);
             }
             else
             {
                 var collectionType = SelectedItemType;
                 if (string.IsNullOrEmpty(collectionType)) return;
 
-                UserCollectionLoader.CreateCollection(collectionName, collectionType, string.Empty);
+                ApplicationViewModel.Instance.UserCollectionLoader.CreateCollection(collectionName, collectionType, string.Empty);
             }
         }
 

@@ -4,6 +4,7 @@ using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.Model.Plugin;
+using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,12 +13,19 @@ using System.Text.Json;
 
 namespace Cell.Persistence
 {
-    internal static class UserCollectionLoader
+    public class UserCollectionLoader
     {
         private static readonly Dictionary<string, UserCollection> _collections = [];
+        private readonly PersistenceManager _persistanceManager;
+
         public static IEnumerable<string> CollectionNames => _collections.Keys;
 
         public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
+
+        public UserCollectionLoader(PersistenceManager persistenceManager)
+        {
+            _persistanceManager = persistenceManager;
+        }
 
         public static UserCollection? GetCollection(string name)
         {
@@ -26,30 +34,30 @@ namespace Cell.Persistence
             return null;
         }
 
-        public static string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
+        public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
 
-        public static void LoadCollections()
+        public void LoadCollections()
         {
-            var collectionsDirectory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
-            if (!Directory.Exists(collectionsDirectory)) return;
-            foreach (var directory in Directory.GetDirectories(collectionsDirectory))
+            var collectionsDirectory = Path.Combine("Collections");
+            if (!_persistanceManager.DirectoryExists(collectionsDirectory)) return;
+            foreach (var directory in _persistanceManager.GetDirectories(collectionsDirectory))
             {
                 LoadCollection(directory);
             }
         }
 
-        public static void ProcessCollectionRename(string oldName, string newName)
+        public void ProcessCollectionRename(string oldName, string newName)
         {
             if (!_collections.TryGetValue(oldName, out var collection)) return;
             if (_collections.ContainsKey(newName)) return;
             _collections.Remove(oldName);
             _collections.Add(newName, collection);
-            var oldDirectory = Path.Combine(GetSaveDirectory(), oldName);
-            var newDirectory = Path.Combine(GetSaveDirectory(), newName);
-            Directory.Move(oldDirectory, newDirectory);
+            var oldDirectory = Path.Combine("Collections", oldName);
+            var newDirectory = Path.Combine("Collections", newName);
+            _persistanceManager.MoveDirectory(oldDirectory, newDirectory);
 
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
             {
                 if (function.CollectionDependencies.Contains(oldName))
                 {
@@ -58,12 +66,12 @@ namespace Cell.Persistence
             }
         }
 
-        public static void SaveCollections()
+        public void SaveCollections()
         {
             foreach (var collection in _collections) SaveCollection(collection.Value);
         }
 
-        internal static UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
+        internal UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
         {
             var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
             model.PropertyChanged += UserCollectionModelPropertyChanged;
@@ -74,15 +82,15 @@ namespace Cell.Persistence
             return collection;
         }
 
-        internal static void DeleteCollection(UserCollection collection)
+        internal void DeleteCollection(UserCollection collection)
         {
             UnlinkFromBaseCollection(collection);
             StopTrackingCollection(collection);
-            var directory = Path.Combine(GetSaveDirectory(), collection.Name);
-            Directory.Delete(directory, true);
+            var directory = Path.Combine("Collections", collection.Name);
+            _persistanceManager.DeleteDirectory(directory);
         }
 
-        internal static void LinkUpBaseCollectionsAfterLoad()
+        internal void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
             while (loadedCollections.Count != ObservableCollections.Count)
@@ -100,11 +108,10 @@ namespace Cell.Persistence
             }
         }
 
-        private static void DeleteItem(string collectionName, string idToRemove)
+        private void DeleteItem(string collectionName, string idToRemove)
         {
-            var directory = Path.Combine(GetSaveDirectory(), collectionName);
-            var path = Path.Combine(directory, "Items", idToRemove);
-            if (File.Exists(path)) File.Delete(path);
+            var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
+            _persistanceManager.DeleteFile(path);
         }
 
         private static void EnsureLinkedToBaseCollection(UserCollection collection)
@@ -116,14 +123,7 @@ namespace Cell.Persistence
             }
         }
 
-        private static string GetSaveDirectory()
-        {
-            var directory = Path.Combine(PersistenceManager.CurrentRootPath, "Collections");
-            Directory.CreateDirectory(directory);
-            return directory;
-        }
-
-        private static void LoadCollection(string directory)
+        private void LoadCollection(string directory)
         {
             var path = Path.Combine(directory, "collection");
             var text = File.ReadAllText(path);
@@ -140,10 +140,10 @@ namespace Cell.Persistence
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
-        public static void ExportCollection(string collectionName, string toDirectory)
+        public void ExportCollection(string collectionName, string toDirectory)
         {
-            var fromDirectory = Path.Combine(GetSaveDirectory(), collectionName);
-            CopyFilesRecursively(fromDirectory, toDirectory);
+            var fromDirectory = Path.Combine("Collections", collectionName);
+            _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
         }
 
         private static void CopyFilesRecursively(string sourcePath, string targetPath)
@@ -161,32 +161,27 @@ namespace Cell.Persistence
             }
         }
 
-        private static void SaveCollection(UserCollection collection)
+        private void SaveCollection(UserCollection collection)
         {
             SaveCollectionSettings(collection.Model);
-            var itemsDirectory = Path.Combine(GetSaveDirectory(), collection.Name, "Items");
-            Directory.CreateDirectory(itemsDirectory);
             foreach (var item in collection.Items) SaveItem(collection.Name, item.ID, item);
         }
 
-        private static void SaveCollectionSettings(UserCollectionModel model)
+        private void SaveCollectionSettings(UserCollectionModel model)
         {
-            var collectionDirectory = Path.Combine(GetSaveDirectory(), model.Name);
-            Directory.CreateDirectory(collectionDirectory);
-            var collectionPath = Path.Combine(collectionDirectory, "collection");
-            File.WriteAllText(collectionPath, JsonSerializer.Serialize(model));
-        }
-
-        private static void SaveItem(string collectionName, string id, PluginModel model)
-        {
-            var directory = Path.Combine(GetSaveDirectory(), collectionName, "Items");
-            Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, id);
+            var path = Path.Combine("Collections", model.Name, "collection");
             var serializedModel = JsonSerializer.Serialize(model);
-            File.WriteAllText(path, serializedModel);
+            _persistanceManager.SaveFile(path, serializedModel);
         }
 
-        private static void StartTrackingCollection(UserCollection userCollection)
+        private void SaveItem(string collectionName, string id, PluginModel model)
+        {
+            var path = Path.Combine("Collections", collectionName, "Items", id);
+            var serializedModel = JsonSerializer.Serialize(model);
+            _persistanceManager.SaveFile(path, serializedModel);
+        }
+
+        private void StartTrackingCollection(UserCollection userCollection)
         {
             userCollection.ItemAdded += UserCollectionItemAdded;
             userCollection.ItemRemoved += UserCollectionItemRemoved;
@@ -196,7 +191,7 @@ namespace Cell.Persistence
             ObservableCollections.Add(userCollection);
         }
 
-        private static void StopTrackingCollection(UserCollection userCollection)
+        private void StopTrackingCollection(UserCollection userCollection)
         {
             userCollection.ItemAdded -= UserCollectionItemAdded;
             userCollection.ItemRemoved -= UserCollectionItemRemoved;
@@ -206,7 +201,7 @@ namespace Cell.Persistence
             ObservableCollections.Remove(userCollection);
         }
 
-        private static void UnlinkFromBaseCollection(UserCollection collection)
+        private void UnlinkFromBaseCollection(UserCollection collection)
         {
             if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
             {
@@ -215,34 +210,34 @@ namespace Cell.Persistence
             }
         }
 
-        private static void UserCollectionItemAdded(UserCollection collection, PluginModel model)
+        private void UserCollectionItemAdded(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
             CellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
-        private static void UserCollectionItemChanged(UserCollection collection, PluginModel model)
+        private void UserCollectionItemChanged(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
             CellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
-        private static void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
+        private void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) DeleteItem(collection.Name, model.ID);
             CellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
-        private static void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
         }
 
-        internal static void ImportCollection(string collectionDirectory, string collectionName)
+        internal void ImportCollection(string collectionDirectory, string collectionName)
         {
-            var toDirectory = Path.Combine(GetSaveDirectory(), collectionName);
-            CopyFilesRecursively(collectionDirectory, toDirectory);
+            var toDirectory = Path.Combine("Collections", collectionName);
+            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
         }
     }
 }

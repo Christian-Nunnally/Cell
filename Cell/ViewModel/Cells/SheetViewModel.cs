@@ -159,24 +159,24 @@ namespace Cell.ViewModel.Cells
             {
                 if (PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
                 {
-                    if (ApplicationSettings.Instance.HighlightPopulateCellDependencies)
+                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies)
                     {
                         HighlightCellDependenciesOfFunction(populate);
                     }
 
-                    if (ApplicationSettings.Instance.HighlightPopulateCollectionDependencies)
+                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies)
                     {
                         HighlightCollectionDependenciesForFunction(populate);
                     }
                 }
                 if (PluginFunctionLoader.TryGetFunction("void", SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
                 {
-                    if (ApplicationSettings.Instance.HighlightTriggerCellDependencies)
+                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies)
                     {
                         HighlightCellDependenciesOfFunction(trigger);
                     }
 
-                    if (ApplicationSettings.Instance.HighlightTriggerCollectionDependencies)
+                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies)
                     {
                         HighlightCollectionDependenciesForFunction(trigger);
                     }

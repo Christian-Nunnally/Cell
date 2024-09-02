@@ -54,7 +54,7 @@ namespace Cell.View.ToolWindow
         private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             PersistenceManager.ExportSheet(_viewModel.SheetNameToExport);
-            DialogWindow.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({PersistenceManager.CurrentTemplatePath})");
+            DialogWindow.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({ApplicationViewModel.Instance.PersistenceManager.CurrentTemplatePath})");
         }
     }
 }

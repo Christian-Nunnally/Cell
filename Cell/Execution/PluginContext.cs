@@ -10,7 +10,7 @@ namespace Cell.Execution
 {
     public class PluginContext(ApplicationViewModel application, int index, CellModel? cell = null)
     {
-        private CellModel? _cell = cell;
+        private readonly CellModel? _cell = cell;
         public const string PluginContextArgumentName = "c";
 
         private readonly ApplicationViewModel _application = application;

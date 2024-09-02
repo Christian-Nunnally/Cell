@@ -3,8 +3,8 @@ using Cell.Data;
 using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
-using Cell.Persistence;
 using Cell.View.Skin;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -78,7 +78,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementColumnOfAllAtOrToTheRightOf(Column, -1);
             _sheetViewModel.UpdateLayout();
 
-            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(Column, function, -1);
             }
@@ -127,7 +127,7 @@ namespace Cell.ViewModel.Cells.Types.Special
                 }
             }
 
-            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(index, function, 1);
             }

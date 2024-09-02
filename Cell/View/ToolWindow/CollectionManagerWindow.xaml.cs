@@ -1,7 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
@@ -27,7 +26,7 @@ namespace Cell.View.ToolWindow
 
         public double GetHeight()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowHeight;
+            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
         }
 
         public string GetTitle() => "Collection Manager";
@@ -36,7 +35,7 @@ namespace Cell.View.ToolWindow
 
         public double GetWidth()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowWidth;
+            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
         }
 
         public bool HandleBeingClosed()
@@ -46,13 +45,13 @@ namespace Cell.View.ToolWindow
 
         public void SetHeight(double height)
         {
-            ApplicationSettings.Instance.FunctionManagerWindowHeight = height;
+            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight = height;
             _viewModel.UserSetHeight = height;
         }
 
         public void SetWidth(double width)
         {
-            ApplicationSettings.Instance.FunctionManagerWindowWidth = width;
+            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth = width;
             _viewModel.UserSetWidth = width;
         }
 
@@ -84,12 +83,12 @@ namespace Cell.View.ToolWindow
                     {
                         DialogWindow.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () =>
                         {
-                            UserCollectionLoader.DeleteCollection(collection);
+                            ApplicationViewModel.Instance.UserCollectionLoader.DeleteCollection(collection);
                         });
                     }
                     else
                     {
-                        UserCollectionLoader.DeleteCollection(collection);
+                        ApplicationViewModel.Instance.UserCollectionLoader.DeleteCollection(collection);
                     }
                 });
             }
@@ -99,7 +98,7 @@ namespace Cell.View.ToolWindow
         {
             var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
-            var function = PluginFunctionLoader.GetOrCreateFunction("object", functionName);
+            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
             var editor = new CodeEditorWindow(function, x =>
             {
                 function.SetUserFriendlyCode(x, null);

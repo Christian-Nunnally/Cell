@@ -5,6 +5,7 @@ using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
@@ -114,7 +115,7 @@ namespace Cell.ViewModel.Execution
 
         public string GetUserFriendlyCode(CellModel? cell)
         {
-            var intermediateCode = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformTo(Model.Code);
+            var intermediateCode = new CollectionReferenceSyntaxTransformer(ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformTo(Model.Code);
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
             return intermediateCode.Replace("_Range_", "..");
         }
@@ -123,7 +124,7 @@ namespace Cell.ViewModel.Execution
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
-            Model.Code = new CollectionReferenceSyntaxTransformer(UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
+            Model.Code = new CollectionReferenceSyntaxTransformer(ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
 
             // Populate cells that use this function as populate:
             foreach (var cellModel in _cellsToNotify.ToList())

@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
@@ -60,7 +59,7 @@ namespace Cell.View.ToolWindow
             if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
                 if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
+                var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
                 var editor = new CodeEditorWindow(function, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);
@@ -75,7 +74,7 @@ namespace Cell.View.ToolWindow
             if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
             {
                 if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
+                var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
                 var editor = new CodeEditorWindow(function, x =>
                 {
                     function.SetUserFriendlyCode(x, cell.Model);

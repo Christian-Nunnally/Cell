@@ -2,6 +2,7 @@
 using Cell.Data;
 using Cell.Model;
 using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.IO;
 using System.Text.Json;
@@ -12,7 +13,7 @@ namespace Cell.Persistence
     {
         private const string SheetsSaveDirectory = "Sheets";
         private const string TemplatesSaveDirectory = "Templates";
-        private PersistenceManager _persistenceManager;
+        private readonly PersistenceManager _persistenceManager;
 
         public CellLoader(PersistenceManager persistenceManager)
         {
@@ -52,14 +53,14 @@ namespace Cell.Persistence
                 SaveCell(cellDirectory, copiedCell);
             }
 
-            var populateFunctions = copiedCells.Select(c => c.PopulateFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => PluginFunctionLoader.GetOrCreateFunction("object", x));
-            var triggerFunctions = copiedCells.Select(c => c.TriggerFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => PluginFunctionLoader.GetOrCreateFunction("void", x));
+            var populateFunctions = copiedCells.Select(c => c.PopulateFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", x));
+            var triggerFunctions = copiedCells.Select(c => c.TriggerFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", x));
             var populateAndTriggerFunctions = populateFunctions.Concat(triggerFunctions).ToList();
 
             var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
             AddBaseCollectionsToUsedCollectionList(usedCollections);
 
-            var collectionSortFunctions = usedCollections.Select(x => PluginFunctionLoader.GetOrCreateFunction("object", x));
+            var collectionSortFunctions = usedCollections.Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", x));
             var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
             foreach (var function in allFunctions)
             {
@@ -69,7 +70,7 @@ namespace Cell.Persistence
             foreach (var collection in usedCollections)
             {
                 var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
-                UserCollectionLoader.ExportCollection(collection, collectionDirectory);
+                ApplicationViewModel.Instance.UserCollectionLoader.ExportCollection(collection, collectionDirectory);
             }
         }
 
@@ -134,14 +135,14 @@ namespace Cell.Persistence
             foreach (var functionModel in functionsBeingImported)
             {
                 var function = new FunctionViewModel(functionModel);
-                PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
+                ApplicationViewModel.Instance.PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
                 PluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
             }
 
             foreach (var collectionName in collectionsBeingImported)
             {
                 var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
-                UserCollectionLoader.ImportCollection(collectionDirectory, collectionName);
+                ApplicationViewModel.Instance.UserCollectionLoader.ImportCollection(collectionDirectory, collectionName);
             }
         }
 
@@ -215,7 +216,8 @@ namespace Cell.Persistence
 
             static FunctionViewModel? GetExistingFunction(PluginFunctionModel function)
             {
-                return PluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
+                var functionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
+                return functionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }
         }
 

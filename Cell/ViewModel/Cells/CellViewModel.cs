@@ -1,7 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Model;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types.Special;
 using System.Text.Json.Serialization;
@@ -442,7 +441,7 @@ namespace Cell.ViewModel.Cells
             get => _model.PopulateFunctionName;
             set
             {
-                if (PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
+                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
                 {
                     UndoRedoManager.RecordStateIfRecording(_model);
                     _model.PopulateFunctionName = value;
@@ -513,7 +512,7 @@ namespace Cell.ViewModel.Cells
             get => _model.TriggerFunctionName;
             set
             {
-                if (PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
+                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
                 {
                     UndoRedoManager.RecordStateIfRecording(_model);
                     _model.TriggerFunctionName = value;

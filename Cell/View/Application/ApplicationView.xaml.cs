@@ -1,4 +1,5 @@
-﻿using Cell.Persistence;
+﻿using Cell.Common;
+using Cell.Persistence;
 using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
@@ -26,7 +27,7 @@ namespace Cell.View.Application
         public SheetView? ActiveSheetView { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Binding")]
-        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
+        public ApplicationSettings ApplicationSettings => ApplicationViewModel.Instance.ApplicationSettings;
 
         public void ShowSheetView(SheetViewModel sheetViewModel)
         {
@@ -74,7 +75,19 @@ namespace Cell.View.Application
         {
             DataContext = ApplicationViewModel.GetOrCreateInstance(this);
             base.OnInitialized(e);
-            PersistenceManager.LoadAll();
+            LoadAll();
+        }
+
+        private void LoadAll()
+        {
+            var versionSchema = ApplicationViewModel.Instance.PersistenceManager.LoadVersion();
+            if (PersistenceManager.Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {PersistenceManager.Version}.");
+            ApplicationViewModel.Instance.PersistenceManager.SaveVersion();
+            ApplicationViewModel.Instance.UserCollectionLoader.LoadCollections();
+            ApplicationViewModel.Instance.PluginFunctionLoader.LoadPlugins();
+            ApplicationViewModel.Instance.UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            ApplicationViewModel.Instance.CellLoader.LoadAndAddCells();
+            ApplicationViewModel.Instance.PersistenceManager.CreateBackup();
             ApplicationViewModel.Instance.SheetViewModel.LoadCellViewModels();
             ApplicationViewModel.Instance.PropertyChanged += ApplicationViewModelPropertyChanged;
         }
@@ -139,7 +152,8 @@ namespace Cell.View.Application
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            var functionManagerViewModel = new FunctionManagerWindowViewModel(PluginFunctionLoader.ObservableFunctions);
+            var functionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
+            var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
             var functionManager = new FunctionManagerWindow(functionManagerViewModel);
             ShowToolWindow(functionManager);
         }

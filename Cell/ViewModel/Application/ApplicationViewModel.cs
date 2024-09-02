@@ -14,20 +14,26 @@ namespace Cell.ViewModel.Application
         private static ApplicationViewModel? instance;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
+        private SheetViewModel sheetViewModel;
         private ApplicationViewModel(ApplicationView view)
         {
             PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
+            ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
+            sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
             CellLoader = new(PersistenceManager);
+            PluginFunctionLoader = new (PersistenceManager);
+            UserCollectionLoader = new(PersistenceManager);
             ApplicationView = view;
         }
 
         public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
-        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
+        public ApplicationSettings ApplicationSettings { get; private set; }
 
-        public readonly PersistenceManager PersistenceManager;
-        public readonly CellLoader CellLoader;
+        public PersistenceManager PersistenceManager { get; private set; }
+
+        public CellLoader CellLoader { get; private set; }
+        public UserCollectionLoader UserCollectionLoader { get; private set; }
 
         public double ApplicationWindowHeight
         {
@@ -58,6 +64,8 @@ namespace Cell.ViewModel.Application
                 NotifyPropertyChanged(nameof(SheetViewModel));
             }
         }
+
+        public PluginFunctionLoader PluginFunctionLoader { get; private set; }
 
         public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
         {
@@ -96,7 +104,7 @@ namespace Cell.ViewModel.Application
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
             ApplicationView.ShowSheetView(sheetViewModel);
-            ApplicationSettings.Instance.LastLoadedSheet = sheetName;
+            ApplicationViewModel.Instance.ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
         internal void PasteCopiedCells()

@@ -3,8 +3,8 @@ using Cell.Data;
 using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
-using Cell.Persistence;
 using Cell.View.Skin;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -58,7 +58,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementRowOfAllAtOrBelow(Row, -1);
             _sheetViewModel.UpdateLayout();
 
-            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(Row, function, -1);
             }
@@ -93,7 +93,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, Model.SheetName);
-                sheet?.CornerCell.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
+                sheet?.CornerCell?.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
                 _sheetViewModel.AddCell(cell);
                 CellPopulateManager.NotifyCellValueUpdated(cellModel);
@@ -106,7 +106,7 @@ namespace Cell.ViewModel.Cells.Types.Special
                 }
             }
 
-            foreach (var function in PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(newRowIndex, function, 1);
             }

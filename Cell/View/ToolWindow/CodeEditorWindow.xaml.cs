@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types.Special;
@@ -41,8 +40,8 @@ namespace Cell.View.ToolWindow
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
 
             Visibility = Visibility.Collapsed;
-            UserSetWidth = ApplicationSettings.Instance.CodeEditorWidth;
-            UserSetHeight = ApplicationSettings.Instance.CodeEditorHeight;
+            UserSetWidth = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
+            UserSetHeight = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
             _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
@@ -82,7 +81,7 @@ namespace Cell.View.ToolWindow
 
         public double GetHeight()
         {
-            return ApplicationSettings.Instance.CodeEditorHeight;
+            return ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
         }
 
         public string GetTitle()
@@ -105,7 +104,7 @@ namespace Cell.View.ToolWindow
 
         public double GetWidth()
         {
-            return ApplicationSettings.Instance.CodeEditorWidth;
+            return ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
         }
 
         public bool HandleBeingClosed()
@@ -131,14 +130,14 @@ namespace Cell.View.ToolWindow
 
         public void SetHeight(double height)
         {
-            ApplicationSettings.Instance.CodeEditorHeight = height;
+            ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight = height;
             UserSetHeight = height;
             NotifyDockPropertiesChanged();
         }
 
         public void SetWidth(double width)
         {
-            ApplicationSettings.Instance.CodeEditorWidth = width;
+            ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth = width;
             UserSetWidth = width;
             NotifyDockPropertiesChanged();
         }

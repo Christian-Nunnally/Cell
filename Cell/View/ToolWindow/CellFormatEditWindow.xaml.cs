@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.Persistence;
 using Cell.View.Converters;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Application;
@@ -116,7 +115,7 @@ namespace Cell.View.ToolWindow
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
-            PersistenceManager.CreateBackup();
+            ApplicationViewModel.Instance.PersistenceManager.CreateBackup();
         }
 
         private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)

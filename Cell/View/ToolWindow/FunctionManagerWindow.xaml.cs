@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
@@ -26,7 +25,7 @@ namespace Cell.View.ToolWindow
 
         public double GetHeight()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowHeight;
+            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
         }
 
         public string GetTitle() => "Function Manager";
@@ -35,7 +34,7 @@ namespace Cell.View.ToolWindow
 
         public double GetWidth()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowWidth;
+            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
         }
 
         public bool HandleBeingClosed()
@@ -45,13 +44,13 @@ namespace Cell.View.ToolWindow
 
         public void SetHeight(double height)
         {
-            ApplicationSettings.Instance.FunctionManagerWindowHeight = height;
+            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight = height;
             _viewModel.UserSetHeight = height;
         }
 
         public void SetWidth(double width)
         {
-            ApplicationSettings.Instance.FunctionManagerWindowWidth = width;
+            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth = width;
             _viewModel.UserSetWidth = width;
         }
 
@@ -67,7 +66,7 @@ namespace Cell.View.ToolWindow
 
                 DialogWindow.ShowYesNoConfirmationDialog($"Delete '{function.Model.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
-                    PluginFunctionLoader.DeleteFunction(function);
+                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteFunction(function);
                 });
             }
         }

@@ -6,7 +6,7 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class UndoRedoStackWindowViewModel : ResizeableToolWindowViewModel
     {
-        public ObservableCollection<string> UndoStack { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> UndoStack { get; set; } = [];
 
         public UndoRedoStackWindowViewModel()
         {

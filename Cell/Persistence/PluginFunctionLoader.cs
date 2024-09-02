@@ -10,14 +10,21 @@ using System.Text.Json;
 
 namespace Cell.Persistence
 {
-    public static class PluginFunctionLoader
+    public class PluginFunctionLoader
     {
         public const string FunctionsDirectoryName = "Functions";
+        private readonly PersistenceManager _persistanceManager;
+
         public static Dictionary<string, Dictionary<string, FunctionViewModel>> Namespaces { get; set; } = [];
 
-        public static ObservableCollection<FunctionViewModel> ObservableFunctions { get; private set; } = [];
+        public PluginFunctionLoader(PersistenceManager persistenceManager)
+        {
+            _persistanceManager = persistenceManager;
+        }
 
-        public static void AddPluginFunctionToNamespace(string space, FunctionViewModel function)
+        public ObservableCollection<FunctionViewModel> ObservableFunctions { get; private set; } = [];
+
+        public void AddPluginFunctionToNamespace(string space, FunctionViewModel function)
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Model.Name, function);
             else Namespaces.Add(space, new Dictionary<string, FunctionViewModel> { { function.Model.Name, function } });
@@ -25,7 +32,7 @@ namespace Cell.Persistence
             function.Model.PropertyChanged += OnPluginFunctionPropertyChanged;
         }
 
-        public static FunctionViewModel CreateFunction(string space, string name, string code)
+        public FunctionViewModel CreateFunction(string space, string name, string code)
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
@@ -41,12 +48,11 @@ namespace Cell.Persistence
             return JsonSerializer.Deserialize<PluginFunctionModel>(File.ReadAllText(file)) ?? throw new CellError($"Unable to load function from {file}");
         }
 
-        public static void LoadPlugins()
+        public void LoadPlugins()
         {
-            var functionsPath = Path.Combine(PersistenceManager.CurrentRootPath, FunctionsDirectoryName);
-            if (Directory.Exists(functionsPath))
+            if (_persistanceManager.DirectoryExists(FunctionsDirectoryName))
             {
-                foreach (var namespacePath in Directory.GetDirectories(functionsPath))
+                foreach (var namespacePath in _persistanceManager.GetDirectories(FunctionsDirectoryName))
                 {
                     foreach (var file in Directory.GetFiles(namespacePath))
                     {
@@ -81,7 +87,7 @@ namespace Cell.Persistence
             }
         }
 
-        internal static void DeleteFunction(FunctionViewModel function)
+        internal void DeleteFunction(FunctionViewModel function)
         {
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {
@@ -90,14 +96,12 @@ namespace Cell.Persistence
                 ObservableFunctions.Remove(function);
 
                 if (string.IsNullOrEmpty(function.Model.Name)) return;
-                var directory = Path.Combine(PersistenceManager.CurrentRootPath, FunctionsDirectoryName, function.Model.ReturnType);
-                Directory.CreateDirectory(directory);
-                var path = Path.Combine(directory, function.Model.Name);
-                File.Delete(path);
+                var path = Path.Combine(FunctionsDirectoryName, function.Model.ReturnType, function.Model.Name);
+                _persistanceManager.DeleteFile(path);
             }
         }
 
-        internal static FunctionViewModel GetOrCreateFunction(string space, string name)
+        internal FunctionViewModel GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
             return CreateFunction(space, name, string.Empty);

@@ -38,7 +38,7 @@ namespace Cell.Data
                 var newName = value;
                 DialogWindow.ShowYesNoConfirmationDialog("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
                 {
-                    UserCollectionLoader.ProcessCollectionRename(oldName, newName);
+                    ApplicationViewModel.Instance.UserCollectionLoader.ProcessCollectionRename(oldName, newName);
                     Model.Name = newName;
                     NotifyPropertyChanged(nameof(Name));
                 });
@@ -52,7 +52,7 @@ namespace Cell.Data
 
         public string Type { get; internal set; } = string.Empty;
 
-        public int UsageCount => PluginFunctionLoader.ObservableFunctions.SelectMany(x => x.CollectionDependencies).Count(x => x == Name) + UserCollectionLoader.ObservableCollections.Count(x => x.Model.BasedOnCollectionName == Name);
+        public int UsageCount => ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions.SelectMany(x => x.CollectionDependencies).Count(x => x == Name) + UserCollectionLoader.ObservableCollections.Count(x => x.Model.BasedOnCollectionName == Name);
 
         public void Add(PluginModel item)
         {
@@ -73,11 +73,7 @@ namespace Cell.Data
             _cachedSortFilterResult.Remove(item.ID);
             item.PropertyChanged -= PropertyChangedOnItemInCollection;
             ItemRemoved?.Invoke(this, item);
-            
-            if (_baseCollection is not null)
-            {
-                _baseCollection.Remove(item);
-            }
+            _baseCollection?.Remove(item);
         }
 
         public void RemoveAll(PluginModel item) => RemoveAll(item.ID);

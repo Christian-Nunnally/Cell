@@ -1,5 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Model;
+using Cell.Persistence;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 
@@ -7,15 +8,17 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class FunctionManagerWindowViewModel : ResizeableToolWindowViewModel
     {
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly ObservableCollection<FunctionViewModel> _functions;
         private string filterSheet = "All";
         private string filterString = string.Empty;
         private bool includePopulateFunctions = true;
         private bool includeTriggerFunctions = true;
         private FunctionViewModel? selectedFunction;
-        public FunctionManagerWindowViewModel(ObservableCollection<FunctionViewModel> pluginFunctions)
+        public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
         {
-            _functions = pluginFunctions;
+            _pluginFunctionLoader = pluginFunctionLoader;
+            _functions = _pluginFunctionLoader.ObservableFunctions;
             _functions.CollectionChanged += FunctionsCollectionChanged;
             foreach (var function in _functions)
             {

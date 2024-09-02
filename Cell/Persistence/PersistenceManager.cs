@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.ViewModel.Application;
 using System.Diagnostics;
 using System.IO;
@@ -11,16 +10,11 @@ namespace Cell.Persistence
     {
         public const string Version = "0.0.0";
         private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
-        public static string CurrentRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell");
         private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
         private readonly IFileIO _fileIO;
         private string _rootPath;
 
-        public static string CurrentTemplatePath => Path.Combine(CurrentRootPath, "Templates");
-        public static string CurrentFunctionsPath => Path.Combine(CurrentRootPath, "Functions");
-        public static string CurrentCollectionsPath => Path.Combine(CurrentRootPath, "Collections");
-        public static string CurrentApplicationSettingsPath => Path.Combine(CurrentRootPath, "Application");
-        public static string CurrentSheetsPath => Path.Combine(CurrentRootPath, "Sheets");
+        public string CurrentTemplatePath => Path.Combine(_rootPath, "Templates");
 
         public PersistenceManager(string rootPath, IFileIO fileIO)
         {
@@ -35,17 +29,17 @@ namespace Cell.Persistence
             _fileIO.DeleteFile(path);
         }
 
-        public static void CreateBackup()
+        public void CreateBackup()
         {
             // Make sure cells instance is created with the correct save location
             var _ = CellTracker.Instance;
             if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
-            var oldSaveLocation = CurrentRootPath;
-            CurrentRootPath = CurrentRootPath + "_backup_" + CreateFileFriendlyCurrentDateTime();
+            var oldSaveLocation = _rootPath;
+            _rootPath = _rootPath + "_backup_" + CreateFileFriendlyCurrentDateTime();
             SaveAll();
-            ZipFolder(CurrentRootPath);
+            ZipFolder(_rootPath);
             _lastBackupDate = DateTime.Now;
-            CurrentRootPath = oldSaveLocation;
+            _rootPath = oldSaveLocation;
         }
 
         public static void ExportSheet(string sheetName)
@@ -63,31 +57,18 @@ namespace Cell.Persistence
             ApplicationViewModel.Instance.CellLoader.CopySheet(sheetName);
         }
 
-        public static void LoadAll()
-        {
-            var versionSchema = LoadVersion();
-            if (Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {Version}.");
-            if (!Directory.Exists(CurrentRootPath)) Directory.CreateDirectory(CurrentRootPath);
-            SaveVersion();
-            UserCollectionLoader.LoadCollections();
-            PluginFunctionLoader.LoadPlugins();
-            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
-            ApplicationViewModel.Instance.CellLoader.LoadAndAddCells();
-            CreateBackup();
-        }
-
-        public static void SaveAll()
+        public void SaveAll()
         {
             PluginFunctionLoader.SavePlugins();
-            UserCollectionLoader.SaveCollections();
+            ApplicationViewModel.Instance.UserCollectionLoader.SaveCollections();
             ApplicationViewModel.Instance.CellLoader.SaveCells();
             SaveVersion();
         }
 
-        internal static IEnumerable<string> GetTemplateNames()
+        internal IEnumerable<string> GetTemplateNames()
         {
-            if (!Directory.Exists(CurrentTemplatePath)) return new List<string>();
-            return Directory.GetDirectories(CurrentTemplatePath).Select(Path.GetFileName);
+            if (!Directory.Exists(CurrentTemplatePath)) return [];
+            return Directory.GetDirectories(CurrentTemplatePath).Select(Path.GetFileName).OfType<string>();
         }
 
         private static string CreateFileFriendlyCurrentDateTime()
@@ -95,21 +76,20 @@ namespace Cell.Persistence
             return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         }
 
-        private static string LoadVersion()
+        public string LoadVersion()
         {
-            var versionPath = Path.Combine(CurrentRootPath, "version");
-            if (!File.Exists(versionPath)) return Version;
-            return File.ReadAllText(versionPath);
+            var versionPath = Path.Combine(_rootPath, "version");
+            if (!_fileIO.Exists(versionPath)) return Version;
+            return _fileIO.ReadFile(versionPath);
         }
 
-        private static void SaveVersion()
+        public void SaveVersion()
         {
-            var versionPath = Path.Combine(CurrentRootPath, "version");
-            if (!Directory.Exists(CurrentRootPath)) Directory.CreateDirectory(CurrentRootPath);
-            File.WriteAllText(versionPath, Version);
+            var versionPath = Path.Combine(_rootPath, "version");
+            _fileIO.WriteFile(versionPath, Version);
         }
 
-        private static void ZipFolder(string folderPath)
+        private void ZipFolder(string folderPath)
         {
             var zipPath = folderPath + ".zip";
             ZipFile.CreateFromDirectory(folderPath, zipPath);
@@ -134,7 +114,7 @@ namespace Cell.Persistence
         {
             var oldFullPath = Path.Combine(_rootPath, oldPath);
             var newFullPath = Path.Combine(_rootPath, newPath);
-            Directory.Move(oldFullPath, newFullPath);
+            _fileIO.MoveDirectory(oldFullPath, newFullPath);
         }
 
         public bool DirectoryExists(string path)
@@ -146,6 +126,31 @@ namespace Cell.Persistence
         {
             if (!DirectoryExists(path)) return [];
             return Directory.GetDirectories(Path.Combine(_rootPath, path));
+        }
+
+        internal bool FileExists(string path)
+        {
+            return File.Exists(Path.Combine(_rootPath, path));
+        }
+
+        internal string? LoadFile(string path)
+        {
+            path = Path.Combine(_rootPath, path);
+            if (!File.Exists(path)) return null;
+            return File.ReadAllText(path);
+        }
+
+        internal void DeleteDirectory(string path)
+        {
+            path = Path.Combine(_rootPath, path);
+            _fileIO.DeleteDirectory(path);
+        }
+
+        internal void CopyDirectory(string fromDirectory, string toDirectory)
+        {
+            var oldFullPath = Path.Combine(_rootPath, fromDirectory);
+            var newFullPath = Path.Combine(_rootPath, toDirectory);
+            _fileIO.CopyDirectory(oldFullPath, newFullPath);
         }
     }
 }

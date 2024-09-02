@@ -9,7 +9,6 @@ namespace Cell.Persistence
     {
         private const string ApplicationSettingsSaveDirectory = "Application";
         private const string ApplicationSettingsSaveFile = "Settings.json";
-        private static ApplicationSettings? _instance;
         private Dock codeEditorDockPosition = Dock.Left;
         private double codeEditorHeight = 400;
         private double codeEditorWidth = 400;
@@ -22,11 +21,10 @@ namespace Cell.Persistence
         private bool highlightTriggerCellDependencies = true;
         private bool highlightTriggerCollectionDependencies = true;
         private string lastLoadedSheet = "Default";
+
         public ApplicationSettings()
         {
         }
-
-        public static ApplicationSettings Instance => _instance ??= CreateInstance();
 
         public Dock CodeEditorDockPosition
         {
@@ -100,28 +98,26 @@ namespace Cell.Persistence
             set { if (lastLoadedSheet != value) { lastLoadedSheet = value; NotifyPropertyChanged(nameof(LastLoadedSheet)); } }
         }
 
-        public static ApplicationSettings CreateInstance()
+        public static ApplicationSettings CreateInstance(PersistenceManager persistenceManager)
         {
-            _instance = Load() ?? new ApplicationSettings();
-            _instance.PropertyChanged += (s, e) => _instance.Save();
-            return _instance;
+            var instance = Load(persistenceManager) ?? new ApplicationSettings();
+            instance.PropertyChanged += (s, e) => instance.Save(persistenceManager);
+            return instance;
         }
 
-        private static ApplicationSettings? Load()
+        private static ApplicationSettings? Load(PersistenceManager persistenceManager)
         {
-            var path = Path.Combine(PersistenceManager.CurrentRootPath, ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
-            if (!File.Exists(path)) return null;
-            var text = File.ReadAllText(path);
+            var path = Path.Combine(ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
+            var text = persistenceManager.LoadFile(path);
+            if (text == null) return null;
             return JsonSerializer.Deserialize<ApplicationSettings>(text);
         }
 
-        private void Save()
+        private void Save(PersistenceManager persistenceManager)
         {
-            var directory = Path.Combine(PersistenceManager.CurrentRootPath, ApplicationSettingsSaveDirectory);
-            Directory.CreateDirectory(directory);
-            var path = Path.Combine(directory, ApplicationSettingsSaveFile);
+            var path = Path.Combine(ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
             var serialized = JsonSerializer.Serialize(this);
-            File.WriteAllText(path, serialized);
+            persistenceManager.SaveFile(path, serialized);
         }
     }
 }
