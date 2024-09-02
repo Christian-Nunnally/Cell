@@ -69,7 +69,7 @@ namespace Cell.ViewModel.Application
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
             var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            cellToReplace = CellTracker.Instance.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
+            cellToReplace = ApplicationViewModel.Instance.CellTracker.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;

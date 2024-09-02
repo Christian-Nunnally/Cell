@@ -55,7 +55,7 @@ namespace Cell.Data
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
             ApplicationViewModel.Instance.CellLoader.RenameSheet(oldSheetName, newSheetName);
-            CellTracker.Instance.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
+            ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
         }
 
         public ObservableCollection<SheetModel> Sheets { get; } = [];

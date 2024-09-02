@@ -17,14 +17,16 @@ namespace Cell.Persistence
     {
         private static readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistenceManager _persistanceManager;
+        private readonly CellPopulateManager _cellPopulateManager;
 
         public static IEnumerable<string> CollectionNames => _collections.Keys;
 
         public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
 
-        public UserCollectionLoader(PersistenceManager persistenceManager)
+        public UserCollectionLoader(PersistenceManager persistenceManager, CellPopulateManager cellPopulateManager)
         {
             _persistanceManager = persistenceManager;
+            _cellPopulateManager = cellPopulateManager;
         }
 
         public static UserCollection? GetCollection(string name)
@@ -213,19 +215,19 @@ namespace Cell.Persistence
         private void UserCollectionItemAdded(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
         private void UserCollectionItemChanged(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
         private void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
         {
             if (!collection.IsFilteredView) DeleteItem(collection.Name, model.ID);
-            CellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

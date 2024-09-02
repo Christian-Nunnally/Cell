@@ -5,9 +5,9 @@ namespace Cell.Common
     {
         private static int LogNumber = 0;
         private const int MaxRetainedLogs = 2000;
-        private static readonly Queue<string> _logsQueue = new Queue<string>();
+        private static readonly Queue<string> _logsQueue = new();
 
-        public static IEnumerable<string> Logs { get; } = _logsQueue.ToArray();
+        public static IEnumerable<string> Logs { get; } = [.. _logsQueue];
 
         public static event Action<string>? LogAdded;
 

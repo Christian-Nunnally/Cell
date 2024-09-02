@@ -74,7 +74,7 @@ namespace Cell.View.ToolWindow
             {
                 DialogWindow.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
                 {
-                    CellTracker.Instance.GetCellModelsForSheet(sheetModel.Name).ForEach(x => CellTracker.Instance.RemoveCell(x));    
+                    ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));    
                 });
             }
         }

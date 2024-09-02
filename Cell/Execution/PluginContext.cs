@@ -26,7 +26,7 @@ namespace Cell.Execution
 
         public CellRange GetCell(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCell(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
 
-        public CellModel GetCell(string sheet, int row, int column) => CellTracker.Instance.GetCell(sheet, row, column) ?? CellModel.Empty;
+        public CellModel GetCell(string sheet, int row, int column) => ApplicationViewModel.Instance.CellTracker.GetCell(sheet, row, column) ?? CellModel.Empty;
 
         public CellRange GetCell(string sheet, int row, int column, int rowRangeEnd, int columnRangeEnd)
         {

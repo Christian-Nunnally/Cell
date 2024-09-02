@@ -8,15 +8,21 @@ namespace Cell.Data
     /// <summary>
     /// Contains all cells in the entire application.
     /// </summary>
-    internal class CellTracker
+    public class CellTracker
     {
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
-        private static CellTracker? _instance;
-        public static CellTracker Instance => _instance ??= new CellTracker();
+        private readonly CellTriggerManager _trigerManager;
+        private readonly CellPopulateManager _populateManager;
 
         public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
+
+        public CellTracker(CellTriggerManager trigerManager, CellPopulateManager populateManager)
+        {
+            _trigerManager = trigerManager;
+            _populateManager = populateManager;
+        }
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
@@ -25,8 +31,8 @@ namespace Cell.Data
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            CellTriggerManager.StartMonitoringCell(cellModel);
-            CellPopulateManager.StartMonitoringCellForUpdates(cellModel);
+            _trigerManager.StartMonitoringCell(cellModel);
+            _populateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) ApplicationViewModel.Instance.CellLoader.SaveCell(cellModel);
         }
 
@@ -45,10 +51,10 @@ namespace Cell.Data
         {
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
             ApplicationViewModel.Instance.CellLoader.DeleteCell(cellModel);
-            CellTriggerManager.StopMonitoringCell(cellModel);
-            CellPopulateManager.StopMonitoringCellForUpdates(cellModel);
-            CellPopulateManager.UnsubscribeFromAllLocationUpdates(cellModel);
-            CellPopulateManager.UnsubscribeFromAllCollectionUpdates(cellModel);
+            _trigerManager.StopMonitoringCell(cellModel);
+            _populateManager.StopMonitoringCellForUpdates(cellModel);
+            _populateManager.UnsubscribeFromAllLocationUpdates(cellModel);
+            _populateManager.UnsubscribeFromAllCollectionUpdates(cellModel);
             _cellsToLocation.Remove(cellModel.ID);
             RemoveFromCellsByLocationMap(cellModel);
         }

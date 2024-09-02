@@ -20,14 +20,14 @@ namespace Cell.Persistence
             _persistenceManager = persistenceManager;
         }
 
-        public static CellModel LoadCell(string file)
+        public CellModel LoadCell(string file)
         {
-            var text = File.ReadAllText(file) ?? throw new CellError($"Loading file failed at {file}"); ;
-            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {File.ReadAllText(file)} at {file}");
+            var text = _persistenceManager.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
+            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
             return cell;
         }
 
-        public static IEnumerable<CellModel> LoadSheet(string directory)
+        public IEnumerable<CellModel> LoadSheet(string directory)
         {
             var result = new List<CellModel>();
             foreach (var file in Directory.GetFiles(directory)) result.Add(LoadCell(file));
@@ -76,7 +76,7 @@ namespace Cell.Persistence
 
         private static List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
         {
-            var copiedCells = CellTracker.Instance.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
+            var copiedCells = ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
             foreach (var copiedCell in copiedCells)
             {
                 copiedCell.SheetName = "";
@@ -150,7 +150,7 @@ namespace Cell.Persistence
         {
             foreach (var cell in cellsToAdd)
             {
-                CellTracker.Instance.AddCell(cell, saveAfterAdding: true);
+                ApplicationViewModel.Instance.CellTracker.AddCell(cell, saveAfterAdding: true);
             }
         }
 
@@ -256,14 +256,14 @@ namespace Cell.Persistence
             return oldIdToNewIdMap;
         }
 
-        private static CellModel LoadAndAddCell(string file)
+        private CellModel LoadAndAddCell(string file)
         {
             var cell = LoadCell(file);
-            CellTracker.Instance.AddCell(cell, saveAfterAdding: false);
+            ApplicationViewModel.Instance.CellTracker.AddCell(cell, saveAfterAdding: false);
             return cell;
         }
 
-        private static void LoadAndAddSheet(string directory)
+        private void LoadAndAddSheet(string directory)
         {
             foreach (var file in Directory.GetFiles(directory)) LoadAndAddCell(file);
         }
@@ -271,7 +271,7 @@ namespace Cell.Persistence
         private void SaveSheet(SheetModel sheet)
         {
             var directory = Path.Combine(SheetsSaveDirectory, sheet.Name);
-            foreach (var cell in CellTracker.Instance.GetCellModelsForSheet(sheet.Name)) SaveCell(directory, cell);
+            foreach (var cell in ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheet.Name)) SaveCell(directory, cell);
         }
     }
 }

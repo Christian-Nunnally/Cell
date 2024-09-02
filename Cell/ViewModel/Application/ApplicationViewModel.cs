@@ -1,4 +1,6 @@
 ﻿using Cell.Common;
+using Cell.Data;
+using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
@@ -18,11 +20,14 @@ namespace Cell.ViewModel.Application
         private ApplicationViewModel(ApplicationView view)
         {
             PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
+            CellTriggerManager = new();
+            PluginFunctionLoader = new (PersistenceManager);
+            CellPopulateManager = new(PluginFunctionLoader);
+            CellTracker = new CellTracker(CellTriggerManager, CellPopulateManager);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
             CellLoader = new(PersistenceManager);
-            PluginFunctionLoader = new (PersistenceManager);
-            UserCollectionLoader = new(PersistenceManager);
+            UserCollectionLoader = new(PersistenceManager, CellPopulateManager);
             ApplicationView = view;
         }
 
@@ -32,7 +37,14 @@ namespace Cell.ViewModel.Application
 
         public PersistenceManager PersistenceManager { get; private set; }
 
+        public CellTracker CellTracker { get; private set; }
+
         public CellLoader CellLoader { get; private set; }
+
+        public CellTriggerManager CellTriggerManager { get; private set; }
+
+        public CellPopulateManager CellPopulateManager { get; private set; }
+
         public UserCollectionLoader UserCollectionLoader { get; private set; }
 
         public double ApplicationWindowHeight
@@ -104,7 +116,7 @@ namespace Cell.ViewModel.Application
             SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
             if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
             ApplicationView.ShowSheetView(sheetViewModel);
-            ApplicationViewModel.Instance.ApplicationSettings.LastLoadedSheet = sheetName;
+            ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
         internal void PasteCopiedCells()

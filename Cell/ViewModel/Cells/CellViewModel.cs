@@ -452,7 +452,7 @@ namespace Cell.ViewModel.Cells
         }
 
         [JsonIgnore]
-        public IEnumerable<string> PrettyCellLocationDependencyNames => CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
+        public IEnumerable<string> PrettyCellLocationDependencyNames => ApplicationViewModel.Instance.CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
             {
                 var split = x.Replace($"{Model.SheetName}_", "").Split('_');
                 if (split.Length == 2) return $"{ColumnCellViewModel.GetColumnName(int.Parse(split[1]))}{split[0]}";
@@ -460,7 +460,7 @@ namespace Cell.ViewModel.Cells
             });
 
         [JsonIgnore]
-        public List<string> PrettyDependencyNames => [.. CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
+        public List<string> PrettyDependencyNames => [.. ApplicationViewModel.Instance.CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
 
         public virtual int Row
         {

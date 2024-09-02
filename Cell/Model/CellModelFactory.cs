@@ -1,5 +1,5 @@
 ﻿using Cell.Common;
-using Cell.Data;
+using Cell.ViewModel.Application;
 using System.Text.Json;
 
 namespace Cell.Model
@@ -18,7 +18,7 @@ namespace Cell.Model
         {
             var model = modelToCopy.Copy();
             model.ID = Utilities.GenerateUnqiueId(12);
-            CellTracker.Instance.AddCell(model);
+            ApplicationViewModel.Instance.CellTracker.AddCell(model);
             return model;
         }
 
@@ -33,7 +33,7 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            CellTracker.Instance.AddCell(model);
+            ApplicationViewModel.Instance.CellTracker.AddCell(model);
             return model;
         }
     }

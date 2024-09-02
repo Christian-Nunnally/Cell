@@ -77,7 +77,7 @@ namespace Cell.ViewModel.Application
             var cellsToRestore = stackToRestoreStateFrom.Pop();
             foreach (var cellToCopyFrom in cellsToRestore)
             {
-                var cellToRestoreInto = CellTracker.Instance.GetCell(cellToCopyFrom.SheetName, cellToCopyFrom.Row, cellToCopyFrom.Column);
+                var cellToRestoreInto = ApplicationViewModel.Instance.CellTracker.GetCell(cellToCopyFrom.SheetName, cellToCopyFrom.Row, cellToCopyFrom.Column);
                 if (cellToRestoreInto == null) continue;
                 redoItems.Add(cellToRestoreInto.Copy());
                 RestoreCell(cellToRestoreInto, cellToCopyFrom);

@@ -1,4 +1,4 @@
-﻿using Cell.Data;
+﻿using Cell.ViewModel.Application;
 
 namespace Cell.Model
 {
@@ -7,14 +7,14 @@ namespace Cell.Model
         public static int CellsMergedBelow(this CellModel model)
         {
             var count = 0;
-            while (model.IsMerged() && (CellTracker.Instance.GetCell(model.SheetName, model.Row + 1 + count, model.Column)?.IsMergedWith(model) ?? false)) count++;
+            while (model.IsMerged() && (ApplicationViewModel.Instance.CellTracker.GetCell(model.SheetName, model.Row + 1 + count, model.Column)?.IsMergedWith(model) ?? false)) count++;
             return count;
         }
 
         public static int CellsMergedToRight(this CellModel model)
         {
             var count = 0;
-            while (model.IsMerged() && (CellTracker.Instance.GetCell(model.SheetName, model.Row, model.Column + 1 + count)?.IsMergedWith(model) ?? false)) count++;
+            while (model.IsMerged() && (ApplicationViewModel.Instance.CellTracker.GetCell(model.SheetName, model.Row, model.Column + 1 + count)?.IsMergedWith(model) ?? false)) count++;
             return count;
         }
 

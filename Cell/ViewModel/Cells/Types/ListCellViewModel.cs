@@ -12,7 +12,7 @@ namespace Cell.ViewModel.Cells.Types
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             if (CollectionName == string.Empty) return;
-            CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+            ApplicationViewModel.Instance.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
             UpdateList();
         }
 
@@ -21,11 +21,11 @@ namespace Cell.ViewModel.Cells.Types
             get => Model.GetStringProperty(nameof(CollectionName));
             set
             {
-                CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
+                ApplicationViewModel.Instance.CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                    ApplicationViewModel.Instance.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
                     UpdateList();
                 }
                 NotifyPropertyChanged(nameof(CollectionName));

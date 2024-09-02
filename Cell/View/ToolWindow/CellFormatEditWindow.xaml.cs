@@ -56,7 +56,7 @@ namespace Cell.View.ToolWindow
             {
                 for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = Data.CellTracker.Instance.GetCell(sheetName, row, column);
+                    var cell = ApplicationViewModel.Instance.CellTracker.GetCell(sheetName, row, column);
                     if (cell is not null) cells.Add(cell);
                 }
             }

@@ -1,38 +1,59 @@
 ﻿using Cell.Common;
 using Cell.Model;
+using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
+using Cell.ViewModel.Execution;
 
 namespace Cell.Execution
 {
     /// <summary>
     /// Responsible for running other cells GetText functions when cells or collections they reference are updated.
     /// </summary>
-    internal class CellPopulateManager
+    public class CellPopulateManager
     {
-        private readonly static Dictionary<string, CellModel> _cellsBeingUpdated = [];
-        private readonly static Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnCollectionUpdates = [];
-        private readonly static Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnLocationUpdates = [];
-        private readonly static List<string> _collectionsBeingUpdated = [];
-        private readonly static Dictionary<CellModel, Dictionary<string, int>> _collectionSubcriptionsMadeByCells = [];
-        private readonly static Dictionary<string, List<ListCellViewModel>> _listCellsToUpdateWhenCollectionsChange = [];
-        private readonly static Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
-        public static List<string> GetAllCollectionSubscriptions(CellModel subscriber)
+        private readonly Dictionary<string, CellModel> _cellsBeingUpdated = [];
+        private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnCollectionUpdates = [];
+        private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnValueUpdatesAtLocation = [];
+        private readonly List<string> _collectionsBeingUpdated = [];
+        private readonly Dictionary<CellModel, Dictionary<string, int>> _collectionSubcriptionsMadeByCells = [];
+        private readonly Dictionary<string, List<ListCellViewModel>> _listCellsToUpdateWhenCollectionsChange = [];
+        private readonly Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
+        private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+
+        public CellPopulateManager(PluginFunctionLoader pluginFunctionLoader)
+        {
+            _pluginFunctionLoader = pluginFunctionLoader;
+            _pluginFunctionLoader.ObservableFunctions.CollectionChanged += (sender, args) =>
+            {
+                if (args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                {
+                    if (args.NewItems?[0] is FunctionViewModel function) function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
+                }
+                else if (args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                {
+                    if (args.OldItems?[0] is FunctionViewModel function) function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
+                }
+            };
+        }
+
+        public List<string> GetAllCollectionSubscriptions(CellModel subscriber)
         {
             return GetAllSubscriptions(subscriber, _collectionSubcriptionsMadeByCells);
         }
 
-        public static List<string> GetAllLocationSubscriptions(CellModel subscriber)
+        public List<string> GetAllLocationSubscriptions(CellModel subscriber)
         {
             return GetAllSubscriptions(subscriber, _locationSubcriptionsMadeByCells);
         }
 
-        public static void NotifyCellValueUpdated(CellModel cell)
+        public void NotifyCellValueUpdated(CellModel cell)
         {
             if (_cellsBeingUpdated.ContainsKey(cell.ID)) return;
             _cellsBeingUpdated.Add(cell.ID, cell);
             var key = cell.GetUnqiueLocationString();
-            if (_cellsToNotifyOnLocationUpdates.TryGetValue(key, out var subscribers))
+            if (_cellsToNotifyOnValueUpdatesAtLocation.TryGetValue(key, out var subscribers))
             {
                 foreach (var subscriber in subscribers.Keys.ToList())
                 {
@@ -52,7 +73,7 @@ namespace Cell.Execution
             _cellsBeingUpdated.Remove(cell.ID);
         }
 
-        public static void NotifyCollectionUpdated(string userCollectionName)
+        public void NotifyCollectionUpdated(string userCollectionName)
         {
             if (_collectionsBeingUpdated.Contains(userCollectionName)) return;
             _collectionsBeingUpdated.Add(userCollectionName);
@@ -84,22 +105,50 @@ namespace Cell.Execution
             }
         }
 
-        public static void StartMonitoringCellForUpdates(CellModel model)
+        public void StartMonitoringCellForUpdates(CellModel model)
         {
             model.AfterCellEdited += NotifyCellValueUpdated;
+            model.PropertyChanged += CellPropertyChanged;
         }
 
-        public static void StopMonitoringCellForUpdates(CellModel model)
+        private void CellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.PopulateFunctionName) || e.PropertyName == nameof(CellModel.SheetName))
+            {
+                if (sender is not CellModel model) return;
+                if (_cellToPopulateFunctionNameMap.TryGetValue(model, out var oldFunctionName))
+                {
+                    if (PluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
+                    {
+                        oldFunction.StopListeningForDependencyChanges(model);
+                    }
+                    _cellToPopulateFunctionNameMap.Remove(model);
+                }
+
+                if (PluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                {
+                    // TODO: split into add and remove.
+                    UpdateDependencySubscriptions(model, function);
+                    function.StartListeningForDependencyChanges(model);
+                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
+                }
+            }
+        }
+
+        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsToNotify.ForEach(cell => UpdateDependencySubscriptions(cell, function));
+
+        public void StopMonitoringCellForUpdates(CellModel model)
         {
             model.AfterCellEdited -= NotifyCellValueUpdated;
+            model.PropertyChanged -= CellPropertyChanged;
         }
 
-        public static void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
+        public void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
         {
             SubscribeToReference(subscriber, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
         }
 
-        public static void SubscribeToCollectionUpdates(ListCellViewModel subscriber, string collectionName)
+        public void SubscribeToCollectionUpdates(ListCellViewModel subscriber, string collectionName)
         {
             if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
             {
@@ -111,28 +160,28 @@ namespace Cell.Execution
             }
         }
 
-        public static void SubscribeToUpdatesAtLocation(CellModel subscriber, string sheet, int row, int column)
+        public void SubscribeToUpdatesAtLocation(CellModel subscriber, string sheet, int row, int column)
         {
             var key = Utilities.GetUnqiueLocationString(sheet, row, column);
-            SubscribeToReference(subscriber, key, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+            SubscribeToReference(subscriber, key, _cellsToNotifyOnValueUpdatesAtLocation, _locationSubcriptionsMadeByCells);
         }
 
-        public static void UnsubscribeFromAllCollectionUpdates(CellModel model)
+        public void UnsubscribeFromAllCollectionUpdates(CellModel model)
         {
             UnsubscribeFromAllReferences(model, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
         }
 
-        public static void UnsubscribeFromAllLocationUpdates(CellModel model)
+        public void UnsubscribeFromAllLocationUpdates(CellModel model)
         {
-            UnsubscribeFromAllReferences(model, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+            UnsubscribeFromAllReferences(model, _cellsToNotifyOnValueUpdatesAtLocation, _locationSubcriptionsMadeByCells);
         }
 
-        public static void UnsubscribeFromCollectionUpdates(CellModel model, string collectionName)
+        public void UnsubscribeFromCollectionUpdates(CellModel model, string collectionName)
         {
             UnsubscribeFromReference(model, collectionName, _cellsToNotifyOnCollectionUpdates, _collectionSubcriptionsMadeByCells);
         }
 
-        public static void UnsubscribeFromCollectionUpdates(ListCellViewModel subscriber, string collectionName)
+        public void UnsubscribeFromCollectionUpdates(ListCellViewModel subscriber, string collectionName)
         {
             if (_listCellsToUpdateWhenCollectionsChange.TryGetValue(collectionName, out var subscribers))
             {
@@ -141,9 +190,50 @@ namespace Cell.Execution
             }
         }
 
-        public static void UnsubscribeFromUpdatesAtLocation(CellModel model, string locationString)
+        public void UnsubscribeFromUpdatesAtLocation(CellModel model, string locationString)
         {
-            UnsubscribeFromReference(model, locationString, _cellsToNotifyOnLocationUpdates, _locationSubcriptionsMadeByCells);
+            UnsubscribeFromReference(model, locationString, _cellsToNotifyOnValueUpdatesAtLocation, _locationSubcriptionsMadeByCells);
+        }
+
+        public void UpdateDependencySubscriptions(CellModel cell, FunctionViewModel function)
+        {
+            if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
+            var _ = function.CompiledMethod;
+
+            UnsubscribeFromAllLocationUpdates(cell);
+            UnsubscribeFromAllCollectionUpdates(cell);
+            if (!string.IsNullOrWhiteSpace(function.Model.Code))
+            {
+                foreach (var locationDependency in function.LocationDependencies)
+                {
+                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? cell.SheetName : locationDependency.SheetName;
+
+                    var row = locationDependency.ResolveRow(cell);
+                    var column = locationDependency.ResolveColumn(cell);
+                    if (row == cell.Row && column == cell.Column) continue;
+                    if (locationDependency.IsRange)
+                    {
+                        var rowRangeEnd = locationDependency.ResolveRowRangeEnd(cell);
+                        var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(cell);
+                        for (var r = row; r <= rowRangeEnd; r++)
+                        {
+                            for (var c = column; c <= columnRangeEnd; c++)
+                            {
+                                SubscribeToUpdatesAtLocation(cell, sheetName, r, c);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        SubscribeToUpdatesAtLocation(cell, sheetName, row, column);
+                    }
+                }
+                SubscribeToUpdatesAtLocation(cell, cell.SheetName, cell.Row, cell.Column);
+                foreach (var collectionName in function.CollectionDependencies)
+                {
+                    SubscribeToCollectionUpdates(cell, collectionName);
+                }
+            }
         }
 
         private static List<string> GetAllSubscriptions(

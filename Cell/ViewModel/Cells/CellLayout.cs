@@ -1,4 +1,4 @@
-﻿using Cell.Data;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types.Special;
 
@@ -34,11 +34,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentRow = cell.Row;
-            var currentCell = CellTracker.Instance.GetCell(cell.Model.SheetName, currentRow, cell.Column);
+            var currentCell = ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, currentRow, cell.Column);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += CellTracker.Instance.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
-                currentCell = CellTracker.Instance.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
+                result += ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
+                currentCell = ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
             }
             return result;
         }
@@ -50,11 +50,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentColumn = cell.Column;
-            var currentCell = CellTracker.Instance.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
+            var currentCell = ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += CellTracker.Instance.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
-                currentCell = CellTracker.Instance.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
+                result += ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
+                currentCell = ApplicationViewModel.Instance.CellTracker.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
             }
             return result;
         }

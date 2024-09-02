@@ -5,7 +5,6 @@ using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
-using Cell.ViewModel.Execution;
 using System.Text.Json.Serialization;
 using System.Windows;
 
@@ -14,6 +13,7 @@ namespace Cell.Model
     public class CellModel : PropertyChangedBase
     {
         public static readonly CellModel Empty = new();
+
         private string borderThickness = "1";
         private CellType cellType = CellType.None;
         private string[] colorHexes = [
@@ -173,8 +173,6 @@ namespace Cell.Model
                 if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function2))
                 {
                     function2.StartListeningForDependencyChanges(this);
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
                 }
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
             }
@@ -196,18 +194,6 @@ namespace Cell.Model
                 if (sheetName == value) return;
                 sheetName = value; 
                 NotifyPropertyChanged(nameof(SheetName));
-
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function1))
-                {
-                    var _ = function1.CompiledMethod;
-                    UpdateDependencySubscriptions(function1);
-                }
-
-                if (PluginFunctionLoader.TryGetFunction("object", triggerFunctionName, out var function2))
-                {
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
-                }
             }
         }
 
@@ -247,8 +233,6 @@ namespace Cell.Model
                 if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function2))
                 {
                     function2.StartListeningForDependencyChanges(this);
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
                 }
                 NotifyPropertyChanged(nameof(TriggerFunctionName));
             }
@@ -405,45 +389,45 @@ namespace Cell.Model
 
         public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
 
-        public void UpdateDependencySubscriptions(FunctionViewModel function)
-        {
-            if (function.Model.ReturnType == "void") return;
-            if (string.IsNullOrWhiteSpace(SheetName)) return;
+        //public void UpdateDependencySubscriptions(FunctionViewModel function)
+        //{
+        //    if (function.Model.ReturnType == "void") return;
+        //    if (string.IsNullOrWhiteSpace(SheetName)) return;
 
-            CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
-            CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
-            if (!string.IsNullOrWhiteSpace(function.Model.Code))
-            {
-                foreach (var locationDependency in function.LocationDependencies)
-                {
-                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
+        //    _populateManager.UnsubscribeFromAllLocationUpdates(this);
+        //    _populateManager.UnsubscribeFromAllCollectionUpdates(this);
+        //    if (!string.IsNullOrWhiteSpace(function.Model.Code))
+        //    {
+        //        foreach (var locationDependency in function.LocationDependencies)
+        //        {
+        //            var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
 
-                    var row = locationDependency.ResolveRow(this);
-                    var column = locationDependency.ResolveColumn(this);
-                    if (row == Row && column == Column) continue;
-                    if (locationDependency.IsRange)
-                    {
-                        var rowRangeEnd = locationDependency.ResolveRowRangeEnd(this);
-                        var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(this);
-                        for (var r = row; r <= rowRangeEnd; r++)
-                        {
-                            for (var c = column; c <= columnRangeEnd; c++)
-                            {
-                                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, r, c);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
-                    }
-                }
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
-                foreach (var collectionName in function.CollectionDependencies)
-                {
-                    CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
-                }
-            }
-        }
+        //            var row = locationDependency.ResolveRow(this);
+        //            var column = locationDependency.ResolveColumn(this);
+        //            if (row == Row && column == Column) continue;
+        //            if (locationDependency.IsRange)
+        //            {
+        //                var rowRangeEnd = locationDependency.ResolveRowRangeEnd(this);
+        //                var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(this);
+        //                for (var r = row; r <= rowRangeEnd; r++)
+        //                {
+        //                    for (var c = column; c <= columnRangeEnd; c++)
+        //                    {
+        //                        _populateManager.SubscribeToUpdatesAtLocation(this, sheetName, r, c);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                _populateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
+        //            }
+        //        }
+        //        _populateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
+        //        foreach (var collectionName in function.CollectionDependencies)
+        //        {
+        //            _populateManager.SubscribeToCollectionUpdates(this, collectionName);
+        //        }
+        //    }
+        //}
     }
 }

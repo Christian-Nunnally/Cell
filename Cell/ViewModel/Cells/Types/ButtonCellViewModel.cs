@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
@@ -19,7 +20,7 @@ namespace Cell.ViewModel.Cells.Types
 
         public void ButtonClicked()
         {
-            CellTriggerManager.CellTriggered(Model, new EditContext("Button"));
+            ApplicationViewModel.Instance.CellTriggerManager.CellTriggered(Model, new EditContext("Button"));
         }
     }
 }

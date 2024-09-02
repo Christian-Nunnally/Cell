@@ -1,5 +1,5 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
@@ -30,7 +30,7 @@ namespace Cell.ViewModel
 
         public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
         {
-            return CellTracker.Instance.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
+            return ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

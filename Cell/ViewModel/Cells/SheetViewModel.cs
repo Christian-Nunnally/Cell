@@ -87,7 +87,7 @@ namespace Cell.ViewModel.Cells
             cell.Model.PropertyChanged -= CellModelPropertyChanged;
             CellViewModels.Remove(cell);
             SelectedCellViewModels.Remove(cell);
-            CellTracker.Instance.RemoveCell(cell.Model);
+            ApplicationViewModel.Instance.CellTracker.RemoveCell(cell.Model);
         }
 
         public void HighlightCell(CellViewModel cellToHighlight, string color)

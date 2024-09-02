@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
@@ -14,7 +13,7 @@ namespace Cell.ViewModel.Execution
 {
     public partial class FunctionViewModel : PropertyChangedBase
     {
-        private readonly List<CellModel> _cellsToNotify = [];
+        public readonly List<CellModel> CellsToNotify = [];
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool wasCompileSuccessful;
@@ -26,7 +25,9 @@ namespace Cell.ViewModel.Execution
             AttemptToRecompileMethod();
         }
 
-        public IEnumerable<CellModel> CellsThatUseFunction => _cellsToNotify;
+        public event Action<FunctionViewModel>? DependenciesChanged;
+
+        public IEnumerable<CellModel> CellsThatUseFunction => CellsToNotify;
 
         public List<string> CollectionDependencies { get; set; } = [];
 
@@ -63,7 +64,7 @@ namespace Cell.ViewModel.Execution
 
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
-        public int UsageCount => _cellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
+        public int UsageCount => CellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
 
         public MethodInfo? Compile()
         {
@@ -102,7 +103,7 @@ namespace Cell.ViewModel.Execution
             }
             SyntaxTree = root.SyntaxTree;
             _fingerprintOfProcessedDependencies = Model.Fingerprint;
-            NotifyDependenciesHaveChanged();
+            DependenciesChanged?.Invoke(this);
         }
 
         public SemanticModel GetSemanticModel()
@@ -127,19 +128,19 @@ namespace Cell.ViewModel.Execution
             Model.Code = new CollectionReferenceSyntaxTransformer(ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
 
             // Populate cells that use this function as populate:
-            foreach (var cellModel in _cellsToNotify.ToList())
+            foreach (var cellModel in CellsToNotify.ToList())
             {
                 cellModel.PopulateText();
             }
         }
 
-        internal void StartListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Add(cell);
+        internal void StartListeningForDependencyChanges(CellModel cell) => CellsToNotify.Add(cell);
 
-        internal void StopListeningForDependencyChanges(CellModel cell) => _cellsToNotify.Remove(cell);
+        internal void StopListeningForDependencyChanges(CellModel cell) => CellsToNotify.Remove(cell);
 
         private static void RefactorCellsFunctionUseage(string oldName, string newName)
         {
-            foreach (var cells in CellTracker.Instance.AllCells)
+            foreach (var cells in ApplicationViewModel.Instance.CellTracker.AllCells)
             {
                 if (cells.PopulateFunctionName == oldName) cells.PopulateFunctionName = newName;
                 if (cells.TriggerFunctionName == oldName) cells.TriggerFunctionName = newName;
@@ -178,7 +179,5 @@ namespace Cell.ViewModel.Execution
                 AttemptToRecompileMethod();
             }
         }
-
-        private void NotifyDependenciesHaveChanged() => _cellsToNotify.ForEach(cell => cell.UpdateDependencySubscriptions(this));
     }
 }
