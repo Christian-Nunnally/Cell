@@ -15,13 +15,15 @@ namespace Cell.Data
         private readonly Dictionary<string, string> _cellsToLocation = [];
         private readonly CellTriggerManager _trigerManager;
         private readonly CellPopulateManager _populateManager;
+        private readonly SheetTracker _sheetTracker;
 
         public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
 
-        public CellTracker(CellTriggerManager trigerManager, CellPopulateManager populateManager)
+        public CellTracker(SheetTracker sheetTracker, CellTriggerManager trigerManager, CellPopulateManager populateManager)
         {
             _trigerManager = trigerManager;
             _populateManager = populateManager;
+            _sheetTracker = sheetTracker;
         }
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
@@ -105,17 +107,17 @@ namespace Cell.Data
             else
             {
                 _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                var sheet = SheetTracker.Instance.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
+                var sheet = _sheetTracker.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
                 if (sheet == null)
                 { 
                     sheet = new SheetModel(model.SheetName);
-                    SheetTracker.Instance.Sheets.Add(sheet);
+                    _sheetTracker.Sheets.Add(sheet);
                 }
             }
 
             if (model.CellType == CellType.Corner)
             {
-                SheetTracker.Instance.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
+                _sheetTracker.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
             }
         }
 
@@ -126,8 +128,8 @@ namespace Cell.Data
             if (cellsInOldSheet.Count == 0)
             {
                 _cellsBySheetMap.Remove(sheetName);
-                var sheet = SheetTracker.Instance.Sheets.First(x => x.OldName == sheetName);
-                SheetTracker.Instance.Sheets.Remove(sheet);
+                var sheet = _sheetTracker.Sheets.First(x => x.OldName == sheetName);
+                _sheetTracker.Sheets.Remove(sheet);
                 // TODO: Delete sheet from disk, and handle closing the sheet if it is open. Actually mabye just don't allow deleting the open sheet
             }
             return result;

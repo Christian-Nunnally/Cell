@@ -6,12 +6,9 @@ using System.Collections.Specialized;
 
 namespace Cell.Data
 {
-    internal class SheetTracker
+    public class SheetTracker
     {
-        private static SheetTracker? _instance;
-        public static SheetTracker Instance => _instance ??= new SheetTracker();
-
-        private SheetTracker()
+        public SheetTracker()
         {
             Sheets.CollectionChanged += SheetsCollectionChanged;
         }

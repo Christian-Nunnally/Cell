@@ -1,6 +1,6 @@
 ﻿
-using Cell.Data;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
@@ -9,7 +9,7 @@ namespace Cell.ViewModel.ToolWindow
     {
         public string SelectedSheetName { get; set; } = string.Empty;
 
-        public ObservableCollection<SheetModel> Sheets => SheetTracker.Instance.OrderedSheets;
+        public ObservableCollection<SheetModel> Sheets => ApplicationViewModel.Instance.SheetTracker.OrderedSheets;
 
         public SheetManagerWindowViewModel()
         {

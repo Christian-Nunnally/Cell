@@ -85,7 +85,10 @@
                 DockPanel.Dock="Left"
                 Style="{StaticResource TitleButtonStyle}"
                 ToolTip="Manage sheets" />
-            <local:TitleBarSheetNavigation DockPanel.Dock="Bottom" WindowChrome.IsHitTestVisibleInChrome="True" />
+            <local:TitleBarSheetNavigation
+                DataContext="{Binding TitleBarSheetNavigationViewModel}"
+                DockPanel.Dock="Bottom"
+                WindowChrome.IsHitTestVisibleInChrome="True" />
         </DockPanel>
         <Grid>
             <ContentControl x:Name="_sheetViewContentControl" />

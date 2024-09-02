@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.View.Skin;
@@ -103,7 +102,7 @@ namespace Cell.ViewModel.Cells.Types.Special
 
             var columnModel = CellModelFactory.Create(0, index, CellType.Column, Model.SheetName);
 
-            var sheet = SheetTracker.Instance.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
+            var sheet = ApplicationViewModel.Instance.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
 
             var column = CellViewModelFactory.Create(columnModel, _sheetViewModel);
             _sheetViewModel.AddCell(column);

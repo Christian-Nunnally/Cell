@@ -1,6 +1,6 @@
 ﻿
 using Cell.Common;
-using Cell.Data;
+using Cell.ViewModel.Application;
 
 namespace Cell.Model
 {
@@ -79,7 +79,7 @@ namespace Cell.Model
         internal static bool IsValidNewSheetName(string sheetName)
         {
             if (!IsValidSheetName(sheetName)) return false;
-            if (SheetTracker.Instance.Sheets.Any(x => x.Name == sheetName)) return false;
+            if (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == sheetName)) return false;
             return true;
         }
     }

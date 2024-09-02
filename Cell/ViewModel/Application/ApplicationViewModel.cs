@@ -23,10 +23,11 @@ namespace Cell.ViewModel.Application
             CellTriggerManager = new();
             PluginFunctionLoader = new (PersistenceManager);
             CellPopulateManager = new(PluginFunctionLoader);
-            CellTracker = new CellTracker(CellTriggerManager, CellPopulateManager);
+            SheetTracker = new();
+            CellTracker = new CellTracker(SheetTracker, CellTriggerManager, CellPopulateManager);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
-            CellLoader = new(PersistenceManager);
+            CellLoader = new(PersistenceManager, SheetTracker);
             UserCollectionLoader = new(PersistenceManager, CellPopulateManager);
             ApplicationView = view;
         }
@@ -39,6 +40,8 @@ namespace Cell.ViewModel.Application
 
         public CellTracker CellTracker { get; private set; }
 
+        public SheetTracker SheetTracker { get; private set; }
+
         public CellLoader CellLoader { get; private set; }
 
         public CellTriggerManager CellTriggerManager { get; private set; }
@@ -46,6 +49,8 @@ namespace Cell.ViewModel.Application
         public CellPopulateManager CellPopulateManager { get; private set; }
 
         public UserCollectionLoader UserCollectionLoader { get; private set; }
+
+        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
 
         public double ApplicationWindowHeight
         {

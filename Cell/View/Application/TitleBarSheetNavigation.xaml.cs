@@ -9,29 +9,29 @@ namespace Cell.View.Application
     /// </summary>
     public partial class TitleBarSheetNavigation : UserControl
     {
-        private readonly TitleBarSheetNavigationViewModel _viewModel = new();
+        private TitleBarSheetNavigationViewModel? ViewModel => DataContext as TitleBarSheetNavigationViewModel;
 
         public TitleBarSheetNavigation()
         {
-            DataContext = _viewModel;
             InitializeComponent();
         }
 
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel.IsAddingSheet)
+            if (ViewModel == null) return;
+            if (ViewModel.IsAddingSheet)
             {
-                if (!string.IsNullOrEmpty(_viewModel.NewSheetName))
+                if (!string.IsNullOrEmpty(ViewModel.NewSheetName))
                 {
-                    ApplicationViewModel.Instance.GoToSheet(_viewModel.NewSheetName);
+                    ApplicationViewModel.Instance.GoToSheet(ViewModel.NewSheetName);
                 }
-                _viewModel.NewSheetName = string.Empty;
-                _viewModel.IsAddingSheet = false;
+                ViewModel.NewSheetName = string.Empty;
+                ViewModel.IsAddingSheet = false;
             }
             else
             {
-                _viewModel.IsAddingSheet = true;
-                _viewModel.NewSheetName = "Untitled";
+                ViewModel.IsAddingSheet = true;
+                ViewModel.NewSheetName = "Untitled";
             }
         }
 

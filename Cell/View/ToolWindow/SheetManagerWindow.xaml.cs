@@ -3,7 +3,6 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using Cell.Persistence;
-using Cell.Data;
 using Cell.Common;
 
 namespace Cell.View.ToolWindow
@@ -109,7 +108,7 @@ namespace Cell.View.ToolWindow
         private static void MakeSureSheetOrderingIsConsecutive()
         {
             var i = 0;
-            foreach (var sheet in SheetTracker.Instance.OrderedSheets.ToList())
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.OrderedSheets.ToList())
             {
                 sheet.Order = i;
                 i += 2;
@@ -131,7 +130,7 @@ namespace Cell.View.ToolWindow
         {
             var newSheetName = "NewSheet";
             var newSheetNameNumber = 1;
-            while (SheetTracker.Instance.Sheets.Any(x => x.Name == $"{newSheetName}{newSheetNameNumber}"))
+            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == $"{newSheetName}{newSheetNameNumber}"))
             {
                 newSheetNameNumber += 1;
             }

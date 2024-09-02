@@ -14,10 +14,12 @@ namespace Cell.Persistence
         private const string SheetsSaveDirectory = "Sheets";
         private const string TemplatesSaveDirectory = "Templates";
         private readonly PersistenceManager _persistenceManager;
+        private readonly SheetTracker _sheetTracker;
 
-        public CellLoader(PersistenceManager persistenceManager)
+        public CellLoader(PersistenceManager persistenceManager, SheetTracker sheetTracker)
         {
             _persistenceManager = persistenceManager;
+            _sheetTracker = sheetTracker;
         }
 
         public CellModel LoadCell(string file)
@@ -163,7 +165,7 @@ namespace Cell.Persistence
         public void CopySheet(string sheetName)
         {
             var copiedSheetName = sheetName + "Copy";
-            while (SheetTracker.Instance.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
+            while (_sheetTracker.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
 
             var copiedCells = CreateUntrackedCopiesOfCellsInSheet(sheetName);
             UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
@@ -198,7 +200,7 @@ namespace Cell.Persistence
 
         public void SaveCells()
         {
-            foreach (var sheet in SheetTracker.Instance.Sheets) SaveSheet(sheet);
+            foreach (var sheet in _sheetTracker.Sheets) SaveSheet(sheet);
         }
 
         private static bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)

@@ -1,6 +1,6 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.Persistence;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 
@@ -25,7 +25,7 @@ namespace Cell.ViewModel.ToolWindow
                 Functions.Add(function);
             }
             SheetNameOptions.Add("All");
-            foreach (var sheet in SheetTracker.Instance.Sheets)
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
             {
                 SheetNameOptions.Add(sheet.Name);
             }

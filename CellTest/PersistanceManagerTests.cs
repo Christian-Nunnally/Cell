@@ -1,6 +1,8 @@
 
 
 using Cell.Data;
+using Cell.Execution;
+using Cell.Persistence;
 
 namespace CellTest
 {
@@ -9,7 +11,13 @@ namespace CellTest
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = new CellTracker();
+            var testFileIO = new TestFileIO();
+            var persistenceManager = new PersistenceManager("", testFileIO);
+            var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
+            var sheetTracker = new SheetTracker();
+            var triggerManager = new CellTriggerManager();
+            var populateManager = new CellPopulateManager(pluginFunctionLoader);
+            var _ = new CellTracker(sheetTracker, triggerManager, populateManager);
         }
     }
 }

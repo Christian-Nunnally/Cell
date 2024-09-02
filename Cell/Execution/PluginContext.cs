@@ -18,10 +18,6 @@ namespace Cell.Execution
 
         public int Index { get; set; } = index;
 
-        public SheetModel[] Sheets => [.. SheetTracker.Instance.Sheets];
-
-        public string[] SheetNames => [.. SheetTracker.Instance.Sheets.Select(x => x.Name)];
-
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 
         public CellRange GetCell(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCell(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
