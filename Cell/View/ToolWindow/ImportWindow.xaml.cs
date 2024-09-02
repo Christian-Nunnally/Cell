@@ -63,7 +63,9 @@ namespace Cell.View.ToolWindow
                 DialogWindow.ShowDialog("No sheet name", "Please enter a name for the new sheet.");
                 return;
             }
-            PersistenceManager.ImportSheet(_viewModel.ImportingTemplateName, _viewModel.NewSheetNameForImportedTemplates);
+            var templateName = _viewModel.ImportingTemplateName;
+            var sheetName = _viewModel.NewSheetNameForImportedTemplates;
+            ApplicationViewModel.Instance.CellLoader.ImportSheetTemplate(templateName, sheetName);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Globalization;
+using System.Windows.Media;
 
 namespace Cell.Common
 {
@@ -34,6 +35,26 @@ namespace Cell.Common
                 // Background is dark, use a lighter highlight color
                 return Color.FromArgb(alpha, 255, 255, 255); // White
             }
+        }
+
+        public static Color ConvertHexStringToColor(string hex)
+        {
+            if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
+            try
+            {
+                byte r = byte.Parse(hex.Substring(1, 2), NumberStyles.HexNumber);
+                byte g = byte.Parse(hex.Substring(3, 2), NumberStyles.HexNumber);
+                byte b = byte.Parse(hex.Substring(5, 2), NumberStyles.HexNumber);
+                return Color.FromRgb(r, g, b);
+            }
+            catch (FormatException) { }
+            catch (ArgumentException) { }
+            return Colors.Green;
+        }
+
+        public static string ConvertColorToHexString(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
         }
 
         private static string HSLToHexColor(float hue, float saturation, float lightness)

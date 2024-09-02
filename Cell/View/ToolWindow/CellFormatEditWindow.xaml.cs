@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.View.Converters;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Application;
 using System.Windows;
@@ -28,7 +27,7 @@ namespace Cell.View.ToolWindow
             foreach (var color in colors)
             {
                 var adjustedColor = ColorAdjuster.AdjustBrightness(color, brightnessFactor);
-                colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor(adjustedColor), ""));
+                colorPicker.AvailableColors.Add(new ColorItem(ColorAdjuster.ConvertHexStringToColor(adjustedColor), ""));
             }
         }
 

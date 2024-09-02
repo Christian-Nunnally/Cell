@@ -82,7 +82,8 @@ namespace Cell.View.ToolWindow
         {
             if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
             {
-                PersistenceManager.CopySheet(sheetModel.Name);
+                var sheetName = sheetModel.Name;
+                ApplicationViewModel.Instance.CellLoader.CopySheet(sheetName);
             }
         }
 

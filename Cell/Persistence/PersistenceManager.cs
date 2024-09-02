@@ -1,8 +1,7 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
 using Cell.ViewModel.Application;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 
 namespace Cell.Persistence
 {
@@ -24,11 +23,11 @@ namespace Cell.Persistence
 
         public void DeleteFile(string path)
         {
-            var file = Path.Combine(_rootPath, path);
-            if (!File.Exists(file)) return;
-            _fileIO.DeleteFile(path);
+            var fullPath = Path.Combine(_rootPath, path);
+            _fileIO.DeleteFile(fullPath);
         }
 
+        // TODO: Move somewhere else
         public void CreateBackup()
         {
             // Make sure cells instance is created with the correct save location
@@ -42,21 +41,7 @@ namespace Cell.Persistence
             _rootPath = oldSaveLocation;
         }
 
-        public static void ExportSheet(string sheetName)
-        {
-            ApplicationViewModel.Instance.CellLoader.ExportSheetTemplate(sheetName);
-        }
-
-        public static void ImportSheet(string templateName, string sheetName)
-        {
-            ApplicationViewModel.Instance.CellLoader.ImportSheetTemplate(templateName, sheetName);
-        }
-
-        public static void CopySheet(string sheetName)
-        {
-            ApplicationViewModel.Instance.CellLoader.CopySheet(sheetName);
-        }
-
+        // TODO: Move somewhere else
         public void SaveAll()
         {
             PluginFunctionLoader.SavePlugins();
@@ -67,8 +52,8 @@ namespace Cell.Persistence
 
         internal IEnumerable<string> GetTemplateNames()
         {
-            if (!Directory.Exists(CurrentTemplatePath)) return [];
-            return Directory.GetDirectories(CurrentTemplatePath).Select(Path.GetFileName).OfType<string>();
+            if (!DirectoryExists(CurrentTemplatePath)) return [];
+            return GetDirectories(CurrentTemplatePath).Select(Path.GetFileName).OfType<string>();
         }
 
         private static string CreateFileFriendlyCurrentDateTime()
@@ -89,11 +74,11 @@ namespace Cell.Persistence
             _fileIO.WriteFile(versionPath, Version);
         }
 
-        private void ZipFolder(string folderPath)
+        private void ZipFolder(string path)
         {
-            var zipPath = folderPath + ".zip";
-            ZipFile.CreateFromDirectory(folderPath, zipPath);
-            Directory.Delete(folderPath, true);
+            var zipPath = path + ".zip";
+            _fileIO.ZipDirectory(path, zipPath);
+            _fileIO.DeleteDirectory(path);
         }
 
         public void OpenRootDirectoryInExplorer()
@@ -101,56 +86,59 @@ namespace Cell.Persistence
             Process.Start("explorer.exe", _rootPath);
         }
 
-        internal void SaveFile(string path, string serialized)
+        internal void SaveFile(string path, string content)
         {
             var fullPath = Path.Combine(_rootPath, path);
-            var directory = Path.GetDirectoryName(fullPath);
-            if (directory == null) return;
-            Directory.CreateDirectory(directory);
-            File.WriteAllText(fullPath, serialized);
+            _fileIO.WriteFile(fullPath, content);
         }
 
-        public void MoveDirectory(string oldPath, string newPath)
+        public void MoveDirectory(string from, string to)
         {
-            var oldFullPath = Path.Combine(_rootPath, oldPath);
-            var newFullPath = Path.Combine(_rootPath, newPath);
-            _fileIO.MoveDirectory(oldFullPath, newFullPath);
+            var fullFrom = Path.Combine(_rootPath, from);
+            var fullTo = Path.Combine(_rootPath, to);
+            _fileIO.MoveDirectory(fullFrom, fullTo);
         }
 
         public bool DirectoryExists(string path)
         {
-            return Directory.Exists(Path.Combine(_rootPath, path));
+            var fullPath = Path.Combine(_rootPath, path);
+            return _fileIO.DirectoryExists(fullPath);
         }
 
-        public string[] GetDirectories(string path)
+        public IEnumerable<string> GetDirectories(string path)
         {
             if (!DirectoryExists(path)) return [];
-            return Directory.GetDirectories(Path.Combine(_rootPath, path));
-        }
-
-        internal bool FileExists(string path)
-        {
-            return File.Exists(Path.Combine(_rootPath, path));
+            var fullPath = Path.Combine(_rootPath, path);
+            var directories = _fileIO.GetDirectories(fullPath);
+            return directories.Select(x => x[(_rootPath.Length + 1)..]);
         }
 
         internal string? LoadFile(string path)
         {
-            path = Path.Combine(_rootPath, path);
-            if (!File.Exists(path)) return null;
-            return File.ReadAllText(path);
+            if (path.StartsWith("//") || path.StartsWith("\\")) throw new CellError("Invalid path");
+            var fullPath = Path.Combine(_rootPath, path);
+            if (!_fileIO.Exists(fullPath)) return null;
+            return _fileIO.ReadFile(fullPath);
         }
 
         internal void DeleteDirectory(string path)
         {
-            path = Path.Combine(_rootPath, path);
-            _fileIO.DeleteDirectory(path);
+            var fullPath = Path.Combine(_rootPath, path);
+            _fileIO.DeleteDirectory(fullPath);
         }
 
-        internal void CopyDirectory(string fromDirectory, string toDirectory)
+        internal void CopyDirectory(string from, string to)
         {
-            var oldFullPath = Path.Combine(_rootPath, fromDirectory);
-            var newFullPath = Path.Combine(_rootPath, toDirectory);
-            _fileIO.CopyDirectory(oldFullPath, newFullPath);
+            var fullFrom = Path.Combine(_rootPath, from);
+            var fullTo = Path.Combine(_rootPath, to);
+            _fileIO.CopyDirectory(fullFrom, fullTo);
+        }
+
+        internal IEnumerable<string> GetFiles(string path)
+        {
+            var fullPath = Path.Combine(_rootPath, path);
+            var fullPaths = _fileIO.GetFiles(fullPath);
+            return fullPaths.Select(x => x[(_rootPath.Length + 1)..]);
         }
     }
 }

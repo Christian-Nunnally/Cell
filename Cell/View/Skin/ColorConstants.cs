@@ -1,5 +1,5 @@
 ﻿
-using Cell.View.Converters;
+using Cell.Common;
 using System.Windows.Media;
 
 namespace Cell.View.Skin
@@ -16,14 +16,14 @@ namespace Cell.View.Skin
         public static readonly string ToolWindowHeaderColorConstantHex = "#353535";
         public static readonly string ErrorForegroundColorConstantHex = "#ff6666";
 
-        public static readonly Color BackgroundColorConstant = RGBHexColorConverter.ConvertHexStringToColor(BackgroundColorConstantHex);
-        public static readonly Color ForegroundColorConstant = RGBHexColorConverter.ConvertHexStringToColor(ForegroundColorConstantHex);
-        public static readonly Color BorderColorConstant = RGBHexColorConverter.ConvertHexStringToColor(BorderColorConstantHex);
-        public static readonly Color ControlBackgroundColorConstant = RGBHexColorConverter.ConvertHexStringToColor(ControlBackgroundColorConstantHex);
-        public static readonly Color SelectedBorderColorConstant = RGBHexColorConverter.ConvertHexStringToColor(SelectedBorderColorConstantHex);
-        public static readonly Color SelectedColorConstant = RGBHexColorConverter.ConvertHexStringToColor(SelectedColorConstantHex);
-        public static readonly Color AccentColorConstant = RGBHexColorConverter.ConvertHexStringToColor(AccentColorConstantHex);
-        public static readonly Color ToolWindowHeaderColorConstant = RGBHexColorConverter.ConvertHexStringToColor(ToolWindowHeaderColorConstantHex);
-        public static readonly Color ErrorForegroundColorConstant = RGBHexColorConverter.ConvertHexStringToColor(ErrorForegroundColorConstantHex);
+        public static readonly Color BackgroundColorConstant = ColorAdjuster.ConvertHexStringToColor(BackgroundColorConstantHex);
+        public static readonly Color ForegroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ForegroundColorConstantHex);
+        public static readonly Color BorderColorConstant = ColorAdjuster.ConvertHexStringToColor(BorderColorConstantHex);
+        public static readonly Color ControlBackgroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ControlBackgroundColorConstantHex);
+        public static readonly Color SelectedBorderColorConstant = ColorAdjuster.ConvertHexStringToColor(SelectedBorderColorConstantHex);
+        public static readonly Color SelectedColorConstant = ColorAdjuster.ConvertHexStringToColor(SelectedColorConstantHex);
+        public static readonly Color AccentColorConstant = ColorAdjuster.ConvertHexStringToColor(AccentColorConstantHex);
+        public static readonly Color ToolWindowHeaderColorConstant = ColorAdjuster.ConvertHexStringToColor(ToolWindowHeaderColorConstantHex);
+        public static readonly Color ErrorForegroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ErrorForegroundColorConstantHex);
     }
 }

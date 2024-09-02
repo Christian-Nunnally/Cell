@@ -128,17 +128,18 @@ namespace Cell.Persistence
         private void LoadCollection(string directory)
         {
             var path = Path.Combine(directory, "collection");
-            var text = File.ReadAllText(path);
+            var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
             var collection = new UserCollection(model);
             var itemsDirectory = Path.Combine(directory, "Items");
-            Directory.GetFiles(itemsDirectory).Select(LoadItem).ToList().ForEach(collection.Add);
+            var paths = _persistanceManager.GetFiles(itemsDirectory);
+            paths.Select(LoadItem).ToList().ForEach(collection.Add);
             StartTrackingCollection(collection);
         }
 
-        private static PluginModel LoadItem(string path)
+        private PluginModel LoadItem(string path)
         {
-            var text = File.ReadAllText(path);
+            var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}");
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
@@ -146,21 +147,6 @@ namespace Cell.Persistence
         {
             var fromDirectory = Path.Combine("Collections", collectionName);
             _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
-        }
-
-        private static void CopyFilesRecursively(string sourcePath, string targetPath)
-        {
-            //Now Create all of the directories
-            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-            {
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-            }
-
-            //Copy all the files & Replaces any files with the same name
-            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
-            {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-            }
         }
 
         private void SaveCollection(UserCollection collection)

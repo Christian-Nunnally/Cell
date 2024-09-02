@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Compression;
 
 namespace Cell.Persistence
 {
@@ -38,6 +39,7 @@ namespace Cell.Persistence
 
         public void DeleteFile(string path)
         {
+            if (!File.Exists(path)) return;
             File.Delete(path);
         }
 
@@ -64,6 +66,26 @@ namespace Cell.Persistence
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(path, version);
+        }
+
+        public void ZipDirectory(string folderPath, string zipPath)
+        {
+            ZipFile.CreateFromDirectory(folderPath, zipPath);
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
+        }
+
+        public IEnumerable<string> GetDirectories(string path)
+        {
+            return Directory.GetDirectories(path);
+        }
+
+        public IEnumerable<string> GetFiles(string path)
+        {
+            return Directory.GetFiles(path);
         }
     }
 }

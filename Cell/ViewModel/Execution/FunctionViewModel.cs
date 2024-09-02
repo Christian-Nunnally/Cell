@@ -134,6 +134,7 @@ namespace Cell.ViewModel.Execution
             }
         }
 
+        // TODO REMOVE
         internal void StartListeningForDependencyChanges(CellModel cell) => CellsToNotify.Add(cell);
 
         internal void StopListeningForDependencyChanges(CellModel cell) => CellsToNotify.Remove(cell);

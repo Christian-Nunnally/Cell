@@ -43,9 +43,10 @@ namespace Cell.Persistence
             return function;
         }
 
-        public static PluginFunctionModel LoadFunction(string file)
+        public PluginFunctionModel LoadFunction(string file)
         {
-            return JsonSerializer.Deserialize<PluginFunctionModel>(File.ReadAllText(file)) ?? throw new CellError($"Unable to load function from {file}");
+            var text = _persistanceManager.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
+            return JsonSerializer.Deserialize<PluginFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
         }
 
         public void LoadPlugins()
@@ -54,7 +55,7 @@ namespace Cell.Persistence
             {
                 foreach (var namespacePath in _persistanceManager.GetDirectories(FunctionsDirectoryName))
                 {
-                    foreach (var file in Directory.GetFiles(namespacePath))
+                    foreach (var file in _persistanceManager.GetFiles(namespacePath))
                     {
                         PluginFunctionModel? model = LoadFunction(file);
                         if (model == null) continue;

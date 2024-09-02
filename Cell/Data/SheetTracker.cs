@@ -1,5 +1,6 @@
 ﻿
 using Cell.Model;
+using Cell.Persistence;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;

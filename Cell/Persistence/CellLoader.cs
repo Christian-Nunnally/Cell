@@ -15,11 +15,13 @@ namespace Cell.Persistence
         private const string TemplatesSaveDirectory = "Templates";
         private readonly PersistenceManager _persistenceManager;
         private readonly SheetTracker _sheetTracker;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
 
-        public CellLoader(PersistenceManager persistenceManager, SheetTracker sheetTracker)
+        public CellLoader(PersistenceManager persistenceManager, SheetTracker sheetTracker, PluginFunctionLoader pluginFunctionLoader)
         {
             _persistenceManager = persistenceManager;
             _sheetTracker = sheetTracker;
+            _pluginFunctionLoader = pluginFunctionLoader;
         }
 
         public CellModel LoadCell(string file)
@@ -32,7 +34,7 @@ namespace Cell.Persistence
         public IEnumerable<CellModel> LoadSheet(string directory)
         {
             var result = new List<CellModel>();
-            foreach (var file in Directory.GetFiles(directory)) result.Add(LoadCell(file));
+            foreach (var file in _persistenceManager.GetFiles(directory)) result.Add(LoadCell(file));
             return result;
         }
 
@@ -231,15 +233,16 @@ namespace Cell.Persistence
             }
         }
 
-        private static List<PluginFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
+        private List<PluginFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
         {
             var functionsBeingImported = new List<PluginFunctionModel>();
             var functionsTemplatePath = Path.Combine(templatesDirectory, "Functions");
-            foreach (var spaceDirectory in Directory.GetDirectories(functionsTemplatePath))
+            foreach (var spaceDirectory in _persistenceManager.GetDirectories(functionsTemplatePath))
             {
-                foreach (var file in Directory.GetFiles(spaceDirectory))
+                var paths = _persistenceManager.GetFiles(spaceDirectory);
+                foreach (var path in paths)
                 {
-                    functionsBeingImported.Add(PluginFunctionLoader.LoadFunction(file));
+                    functionsBeingImported.Add(_pluginFunctionLoader.LoadFunction(path));
                 }
             }
             return functionsBeingImported;
@@ -267,7 +270,7 @@ namespace Cell.Persistence
 
         private void LoadAndAddSheet(string directory)
         {
-            foreach (var file in Directory.GetFiles(directory)) LoadAndAddCell(file);
+            foreach (var file in _persistenceManager.GetFiles(directory)) LoadAndAddCell(file);
         }
 
         private void SaveSheet(SheetModel sheet)

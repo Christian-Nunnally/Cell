@@ -25,10 +25,10 @@ namespace Cell.ViewModel.Application
             CellPopulateManager = new(PluginFunctionLoader);
             SheetTracker = new();
             TitleBarSheetNavigationViewModel = new(SheetTracker);
-            CellTracker = new CellTracker(SheetTracker, CellTriggerManager, CellPopulateManager);
+            CellLoader = new(PersistenceManager, SheetTracker, PluginFunctionLoader);
+            CellTracker = new CellTracker(SheetTracker, CellTriggerManager, CellPopulateManager, CellLoader);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
-            CellLoader = new(PersistenceManager, SheetTracker);
             UserCollectionLoader = new(PersistenceManager, CellPopulateManager);
             ApplicationView = view;
         }
@@ -130,6 +130,20 @@ namespace Cell.ViewModel.Application
             UndoRedoManager.StartRecordingUndoState();
             _cellClipboard.PasteCopiedCells(SheetViewModel);
             UndoRedoManager.FinishRecordingUndoState();
+        }
+
+        public void Load()
+        {
+            var versionSchema = PersistenceManager.LoadVersion();
+            if (PersistenceManager.Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {PersistenceManager.Version}.");
+            PersistenceManager.SaveVersion();
+            UserCollectionLoader.LoadCollections();
+            PluginFunctionLoader.LoadPlugins();
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            CellLoader.LoadAndAddCells();
+            PersistenceManager.CreateBackup();
+            SheetViewModel.LoadCellViewModels();
+            PropertyChanged += ApplicationView.ApplicationViewModelPropertyChanged;
         }
     }
 }

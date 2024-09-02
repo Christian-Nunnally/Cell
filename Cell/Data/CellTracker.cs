@@ -1,7 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Model;
-using Cell.ViewModel.Application;
+using Cell.Persistence;
 
 namespace Cell.Data
 {
@@ -16,14 +16,16 @@ namespace Cell.Data
         private readonly CellTriggerManager _trigerManager;
         private readonly CellPopulateManager _populateManager;
         private readonly SheetTracker _sheetTracker;
+        private readonly CellLoader _cellLoader;
 
         public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
 
-        public CellTracker(SheetTracker sheetTracker, CellTriggerManager trigerManager, CellPopulateManager populateManager)
+        public CellTracker(SheetTracker sheetTracker, CellTriggerManager trigerManager, CellPopulateManager populateManager, CellLoader cellLoader)
         {
             _trigerManager = trigerManager;
             _populateManager = populateManager;
             _sheetTracker = sheetTracker;
+            _cellLoader = cellLoader;
         }
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
@@ -35,7 +37,7 @@ namespace Cell.Data
             cellModel.PropertyChanged += CellModelPropertyChanged;
             _trigerManager.StartMonitoringCell(cellModel);
             _populateManager.StartMonitoringCellForUpdates(cellModel);
-            if (saveAfterAdding) ApplicationViewModel.Instance.CellLoader.SaveCell(cellModel);
+            if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
 
         public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
@@ -52,7 +54,7 @@ namespace Cell.Data
         public void RemoveCell(CellModel cellModel)
         {
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
-            ApplicationViewModel.Instance.CellLoader.DeleteCell(cellModel);
+            _cellLoader.DeleteCell(cellModel);
             _trigerManager.StopMonitoringCell(cellModel);
             _populateManager.StopMonitoringCellForUpdates(cellModel);
             _populateManager.UnsubscribeFromAllLocationUpdates(cellModel);
@@ -95,7 +97,7 @@ namespace Cell.Data
                     AddToCellsInSheetMap(model);
                 }
             }
-            ApplicationViewModel.Instance.CellLoader.SaveCell(model);
+            _cellLoader.SaveCell(model);
         }
 
         private void AddToCellsInSheetMap(CellModel model)

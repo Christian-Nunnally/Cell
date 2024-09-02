@@ -32,7 +32,6 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used in binding")]
         public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
 
         public ObservableCollection<object> ListItems { get; set; } = [];

@@ -65,7 +65,7 @@ namespace Cell.Model
 
         public string[] ColorHexes
         {
-            get { return colorHexes; }
+            get => colorHexes;
             set { if (colorHexes == value) return; colorHexes = value; NotifyPropertyChanged(nameof(ColorHexes)); }
         }
 
@@ -77,7 +77,7 @@ namespace Cell.Model
 
         public string ContentBorderThicknessString
         {
-            get { return contentBorderThickness; }
+            get => contentBorderThickness;
             set { if (contentBorderThickness == value) return; contentBorderThickness = value; NotifyPropertyChanged(nameof(ContentBorderThicknessString)); }
         }
 
@@ -87,19 +87,19 @@ namespace Cell.Model
         [JsonIgnore]
         public string ErrorText
         {
-            get { return errorText; }
+            get => errorText;
             set { if (errorText != value) { errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
         }
 
         public string FontFamily
         {
-            get { return font; }
+            get => font;
             set { if (font == value) return; font = value; NotifyPropertyChanged(nameof(FontFamily)); }
         }
 
         public double FontSize
         {
-            get { return fontSize; }
+            get => fontSize;
             set { if (fontSize == value) return; fontSize = value; NotifyPropertyChanged(nameof(FontSize)); }
         }
 
@@ -111,7 +111,7 @@ namespace Cell.Model
 
         public HorizontalAlignment HorizontalAlignment
         {
-            get { return horizontalAlignment; }
+            get => horizontalAlignment;
             set { if (horizontalAlignment == value) return; horizontalAlignment = value; NotifyPropertyChanged(nameof(HorizontalAlignment)); }
         }
 
@@ -123,31 +123,31 @@ namespace Cell.Model
 
         public int Index
         {
-            get { return index; }
+            get => index;
             set { if (index != value) { index = value; NotifyPropertyChanged(nameof(Index)); } }
         }
 
         public bool IsFontBold
         {
-            get { return isFontBold; }
+            get => isFontBold;
             set { if (isFontBold == value) return; isFontBold = value; NotifyPropertyChanged(nameof(IsFontBold)); }
         }
 
         public bool IsFontItalic
         {
-            get { return isFontItalic; }
+            get => isFontItalic;
             set { if (isFontItalic == value) return; isFontItalic = value; NotifyPropertyChanged(nameof(IsFontItalic)); }
         }
 
         public bool IsFontStrikethrough
         {
-            get { return isFontStrikethrough; }
+            get => isFontStrikethrough;
             set { if (isFontStrikethrough == value) return; isFontStrikethrough = value; NotifyPropertyChanged(nameof(IsFontStrikethrough)); }
         }
 
         public string MarginString
         {
-            get { return margin; }
+            get => margin;
             set { if (margin == value) return; margin = value; NotifyPropertyChanged(nameof(MarginString)); }
         }
 
@@ -161,19 +161,11 @@ namespace Cell.Model
 
         public string PopulateFunctionName
         {
-            get { return populateFunctionName; }
+            get => populateFunctionName;
             set
             {
                 if (populateFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function))
-                {
-                    function.StopListeningForDependencyChanges(this);
-                }
                 populateFunctionName = value;
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function2))
-                {
-                    function2.StartListeningForDependencyChanges(this);
-                }
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
             }
         }
@@ -201,7 +193,7 @@ namespace Cell.Model
 
         public string Text
         {
-            get { return text; }
+            get => text;
             set
             {
                 if (text == value) return;
@@ -215,25 +207,17 @@ namespace Cell.Model
 
         public TextAlignment TextAlignmentForView
         {
-            get { return textAlignment; }
+            get => textAlignment;
             set { if (textAlignment == value) return; textAlignment = value; NotifyPropertyChanged(nameof(TextAlignment)); }
         }
 
         public string TriggerFunctionName
         {
-            get { return triggerFunctionName; }
+            get => triggerFunctionName;
             set
             {
                 if (triggerFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function))
-                {
-                    function.StopListeningForDependencyChanges(this);
-                }
                 triggerFunctionName = value;
-                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function2))
-                {
-                    function2.StartListeningForDependencyChanges(this);
-                }
                 NotifyPropertyChanged(nameof(TriggerFunctionName));
             }
         }
@@ -245,7 +229,7 @@ namespace Cell.Model
 
         public VerticalAlignment VerticalAlignment
         {
-            get { return verticalAlignment; }
+            get => verticalAlignment;
             set { if (verticalAlignment == value) return; verticalAlignment = value; NotifyPropertyChanged(nameof(VerticalAlignment)); }
         }
 
@@ -258,8 +242,7 @@ namespace Cell.Model
         public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
         public bool GetBooleanProperty(string key, bool defaultValue)
         {
-            if (BooleanProperties.TryGetValue(key, out var value)) return value;
-            return defaultValue;
+            return BooleanProperties.TryGetValue(key, out var value) ? value : defaultValue;
         }
 
         public double GetNumericProperty(string key, double defaultValue = 0) => NumericProperties.TryGetValue(key, out var value) ? value : defaultValue;
@@ -388,46 +371,5 @@ namespace Cell.Model
         public override string ToString() => Text;
 
         public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
-
-        //public void UpdateDependencySubscriptions(FunctionViewModel function)
-        //{
-        //    if (function.Model.ReturnType == "void") return;
-        //    if (string.IsNullOrWhiteSpace(SheetName)) return;
-
-        //    _populateManager.UnsubscribeFromAllLocationUpdates(this);
-        //    _populateManager.UnsubscribeFromAllCollectionUpdates(this);
-        //    if (!string.IsNullOrWhiteSpace(function.Model.Code))
-        //    {
-        //        foreach (var locationDependency in function.LocationDependencies)
-        //        {
-        //            var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
-
-        //            var row = locationDependency.ResolveRow(this);
-        //            var column = locationDependency.ResolveColumn(this);
-        //            if (row == Row && column == Column) continue;
-        //            if (locationDependency.IsRange)
-        //            {
-        //                var rowRangeEnd = locationDependency.ResolveRowRangeEnd(this);
-        //                var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(this);
-        //                for (var r = row; r <= rowRangeEnd; r++)
-        //                {
-        //                    for (var c = column; c <= columnRangeEnd; c++)
-        //                    {
-        //                        _populateManager.SubscribeToUpdatesAtLocation(this, sheetName, r, c);
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                _populateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
-        //            }
-        //        }
-        //        _populateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
-        //        foreach (var collectionName in function.CollectionDependencies)
-        //        {
-        //            _populateManager.SubscribeToCollectionUpdates(this, collectionName);
-        //        }
-        //    }
-        //}
     }
 }
