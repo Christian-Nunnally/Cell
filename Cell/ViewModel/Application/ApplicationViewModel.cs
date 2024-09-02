@@ -24,6 +24,7 @@ namespace Cell.ViewModel.Application
             PluginFunctionLoader = new (PersistenceManager);
             CellPopulateManager = new(PluginFunctionLoader);
             SheetTracker = new();
+            TitleBarSheetNavigationViewModel = new(SheetTracker);
             CellTracker = new CellTracker(SheetTracker, CellTriggerManager, CellPopulateManager);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
