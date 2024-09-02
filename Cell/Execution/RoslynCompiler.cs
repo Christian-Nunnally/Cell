@@ -8,10 +8,14 @@ namespace Cell.Execution
 {
     public class RoslynCompiler
     {
+        private static readonly CSharpCompilationOptions _compilationOptions = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
         private readonly CSharpCompilation _compilation;
         private readonly string _typeName = "Plugin.Program";
         private static List<PortableExecutableReference>? _portableExecutableReferences;
-        private static readonly CSharpCompilationOptions _compilationOptions = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
+        public RoslynCompiler(SyntaxTree syntax)
+        {
+            _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], PortableExecutableReferences, _compilationOptions);
+        }
 
         private static List<PortableExecutableReference> PortableExecutableReferences => _portableExecutableReferences ??=
         [
@@ -21,11 +25,6 @@ namespace Cell.Execution
             GetMetadataReferenceForType(typeof(Console)),
             GetMetadataReferenceForType(typeof(Enumerable))
         ];
-
-        public RoslynCompiler(SyntaxTree syntax)
-        {
-            _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], PortableExecutableReferences, _compilationOptions);
-        }
 
         public Type Compile()
         {
@@ -54,6 +53,13 @@ namespace Cell.Execution
             return generatedAssembly.GetType(_typeName) ?? throw new Exception($"Unable to get type '{_typeName}' from assembly");
         }
 
+        private static PortableExecutableReference GetMetadataReferenceForType(Type type)
+        {
+            var assembly = type.Assembly;
+            var location = assembly.Location;
+            return MetadataReference.CreateFromFile(location);
+        }
+
         private static PortableExecutableReference GetRuntimeMetadataReference()
         {
             var garbageCollectorType = typeof(System.Runtime.GCSettings);
@@ -63,13 +69,6 @@ namespace Cell.Execution
             var directory = Path.GetDirectoryName(assemblyLocation) ?? throw new Exception($"Could not get directory name from {assemblyLocation}");
             var systemRuntimeDllPath = Path.Combine(directory, "System.Runtime.dll");
             return MetadataReference.CreateFromFile(systemRuntimeDllPath);
-        }
-
-        private static PortableExecutableReference GetMetadataReferenceForType(Type type)
-        {
-            var assembly = type.Assembly;
-            var location = assembly.Location;
-            return MetadataReference.CreateFromFile(location);
         }
     }
 }

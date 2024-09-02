@@ -3,7 +3,6 @@
     public class SortedListInserter<T>(Func<int, int> getSortValue)
     {
         private readonly Func<int, int> _getSortValue = getSortValue ?? throw new ArgumentNullException(nameof(getSortValue));
-
         public void InsertSorted(List<T> list, T newItem, int newItemCompareValue)
         {
             int index = BinarySearchIndex(list, newItemCompareValue);

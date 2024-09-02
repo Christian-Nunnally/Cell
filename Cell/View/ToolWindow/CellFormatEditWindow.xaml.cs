@@ -1,12 +1,12 @@
-﻿using Cell.Model;
-using Cell.ViewModel.Cells;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells;
+using Cell.ViewModel.Cells.Types.Special;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Xceed.Wpf.Toolkit;
-using Cell.ViewModel.Cells.Types.Special;
-using Cell.Common;
 
 namespace Cell.View.ToolWindow
 {
@@ -89,6 +89,15 @@ namespace Cell.View.ToolWindow
         private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellViewModel topLeftCell)
         {
             foreach (var cell in cellsToMerge) cell.MergedWith = topLeftCell.ID;
+        }
+
+        private static void UnmergeSelectedCells()
+        {
+            foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
+            {
+                ApplicationViewModel.Instance.SheetViewModel.UnmergeCell(selectedCell);
+            }
+            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
@@ -276,15 +285,6 @@ namespace Cell.View.ToolWindow
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
             UnmergeSelectedCells();
-        }
-
-        private static void UnmergeSelectedCells()
-        {
-            foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnmergeCell(selectedCell);
-            }
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
     }
 }

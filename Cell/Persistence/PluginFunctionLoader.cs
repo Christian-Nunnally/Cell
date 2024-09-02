@@ -14,15 +14,35 @@ namespace Cell.Persistence
     {
         public const string FunctionsDirectoryName = "Functions";
         private readonly PersistenceManager _persistanceManager;
-
-        public static Dictionary<string, Dictionary<string, FunctionViewModel>> Namespaces { get; set; } = [];
-
         public PluginFunctionLoader(PersistenceManager persistenceManager)
         {
             _persistanceManager = persistenceManager;
         }
 
+        public static Dictionary<string, Dictionary<string, FunctionViewModel>> Namespaces { get; set; } = [];
+
         public ObservableCollection<FunctionViewModel> ObservableFunctions { get; private set; } = [];
+
+        public static void SavePluginFunction(string directory, string space, PluginFunctionModel function)
+        {
+            if (string.IsNullOrWhiteSpace(function.Name)) return;
+            directory = string.IsNullOrEmpty(directory) ? Path.Combine(FunctionsDirectoryName, space) : Path.Combine(directory, FunctionsDirectoryName, space);
+            var path = Path.Combine(directory, function.Name);
+            var serializedContent = JsonSerializer.Serialize(function);
+            ApplicationViewModel.Instance.PersistenceManager.SaveFile(path, serializedContent);
+        }
+
+        public static void SavePlugins()
+        {
+            foreach (var namespaceFunctions in Namespaces)
+            {
+                foreach (var function in namespaceFunctions.Value.Values)
+                {
+                    var space = namespaceFunctions.Key;
+                    SavePluginFunction("", space, function.Model);
+                }
+            }
+        }
 
         public void AddPluginFunctionToNamespace(string space, FunctionViewModel function)
         {
@@ -67,25 +87,18 @@ namespace Cell.Persistence
             }
         }
 
-        public static void SavePluginFunction(string directory, string space, PluginFunctionModel function)
+        internal static bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out FunctionViewModel function)
         {
-            if (string.IsNullOrWhiteSpace(function.Name)) return;
-            directory = string.IsNullOrEmpty(directory) ? Path.Combine(FunctionsDirectoryName, space): Path.Combine(directory, FunctionsDirectoryName, space);
-            var path = Path.Combine(directory, function.Name);
-            var serializedContent = JsonSerializer.Serialize(function);
-            ApplicationViewModel.Instance.PersistenceManager.SaveFile(path, serializedContent);
-        }
-
-        public static void SavePlugins()
-        {
-            foreach (var namespaceFunctions in Namespaces)
+            if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {
-                foreach (var function in namespaceFunctions.Value.Values)
+                if (namespaceFunctions.TryGetValue(name, out var value))
                 {
-                    var space = namespaceFunctions.Key;
-                    SavePluginFunction("", space, function.Model);
+                    function = value;
+                    return true;
                 }
             }
+            function = null;
+            return false;
         }
 
         internal void DeleteFunction(FunctionViewModel function)
@@ -106,20 +119,6 @@ namespace Cell.Persistence
         {
             if (TryGetFunction(space, name, out var function)) return function;
             return CreateFunction(space, name, string.Empty);
-        }
-
-        internal static bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out FunctionViewModel function)
-        {
-            if (Namespaces.TryGetValue(space, out var namespaceFunctions))
-            {
-                if (namespaceFunctions.TryGetValue(name, out var value))
-                {
-                    function = value;
-                    return true;
-                }
-            }
-            function = null;
-            return false;
         }
 
         private static void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)

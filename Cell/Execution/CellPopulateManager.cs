@@ -15,13 +15,12 @@ namespace Cell.Execution
         private readonly Dictionary<string, CellModel> _cellsBeingUpdated = [];
         private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnCollectionUpdates = [];
         private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnValueUpdatesAtLocation = [];
+        private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
         private readonly List<string> _collectionsBeingUpdated = [];
         private readonly Dictionary<CellModel, Dictionary<string, int>> _collectionSubcriptionsMadeByCells = [];
         private readonly Dictionary<string, List<ListCellViewModel>> _listCellsToUpdateWhenCollectionsChange = [];
         private readonly Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
-        private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-
         public CellPopulateManager(PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
@@ -110,32 +109,6 @@ namespace Cell.Execution
             model.AfterCellEdited += NotifyCellValueUpdated;
             model.PropertyChanged += CellPropertyChanged;
         }
-
-        private void CellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CellModel.PopulateFunctionName) || e.PropertyName == nameof(CellModel.SheetName))
-            {
-                if (sender is not CellModel model) return;
-                if (_cellToPopulateFunctionNameMap.TryGetValue(model, out var oldFunctionName))
-                {
-                    if (PluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
-                    {
-                        oldFunction.StopListeningForDependencyChanges(model);
-                    }
-                    _cellToPopulateFunctionNameMap.Remove(model);
-                }
-
-                if (PluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
-                {
-                    // TODO: split into add and remove.
-                    UpdateDependencySubscriptions(model, function);
-                    function.StartListeningForDependencyChanges(model);
-                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
-                }
-            }
-        }
-
-        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsToNotify.ForEach(cell => UpdateDependencySubscriptions(cell, function));
 
         public void StopMonitoringCellForUpdates(CellModel model)
         {
@@ -303,5 +276,31 @@ namespace Cell.Execution
             else subscribers[model] = --value;
             if (subscribers.Count == 0) referenceToSubscriberMap.Remove(locationString);
         }
+
+        private void CellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.PopulateFunctionName) || e.PropertyName == nameof(CellModel.SheetName))
+            {
+                if (sender is not CellModel model) return;
+                if (_cellToPopulateFunctionNameMap.TryGetValue(model, out var oldFunctionName))
+                {
+                    if (PluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
+                    {
+                        oldFunction.StopListeningForDependencyChanges(model);
+                    }
+                    _cellToPopulateFunctionNameMap.Remove(model);
+                }
+
+                if (PluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                {
+                    // TODO: split into add and remove.
+                    UpdateDependencySubscriptions(model, function);
+                    function.StartListeningForDependencyChanges(model);
+                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
+                }
+            }
+        }
+
+        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsToNotify.ForEach(cell => UpdateDependencySubscriptions(cell, function));
     }
 }

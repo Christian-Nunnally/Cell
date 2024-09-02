@@ -96,6 +96,19 @@ namespace Cell.ViewModel.Cells.Types.Special
             foreach (var cell in cells) cell.Column += amount;
         }
 
+        private void IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(int newColumnIndex, FunctionViewModel function, int incrementAmount)
+        {
+            var refactorer = new CellReferenceRefactorRewriter(x =>
+            {
+                if (x.SheetName != Model.SheetName) return x;
+                if (!x.IsColumnRelative) return x;
+                if (x.Column >= newColumnIndex) x.Column += 1;
+                if (x.IsRange && x.ColumnRangeEnd >= newColumnIndex) x.ColumnRangeEnd += incrementAmount;
+                return x;
+            });
+            function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
+        }
+
         private void InsertColumnAtIndex(int index)
         {
             IncrementColumnOfAllAtOrToTheRightOf(index);
@@ -129,19 +142,6 @@ namespace Cell.ViewModel.Cells.Types.Special
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(index, function, 1);
             }
-        }
-
-        private void IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(int newColumnIndex, FunctionViewModel function, int incrementAmount)
-        {
-            var refactorer = new CellReferenceRefactorRewriter(x =>
-            {
-                if (x.SheetName != Model.SheetName) return x;
-                if (!x.IsColumnRelative) return x;
-                if (x.Column >= newColumnIndex) x.Column += 1;
-                if (x.IsRange && x.ColumnRangeEnd >= newColumnIndex) x.ColumnRangeEnd += incrementAmount;
-                return x;
-            });
-            function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
         }
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

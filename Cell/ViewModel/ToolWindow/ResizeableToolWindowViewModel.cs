@@ -6,7 +6,6 @@ namespace Cell.ViewModel.ToolWindow
     {
         private double userSetHeight;
         private double userSetWidth;
-
         public double UserSetHeight
         {
             get => userSetHeight; set

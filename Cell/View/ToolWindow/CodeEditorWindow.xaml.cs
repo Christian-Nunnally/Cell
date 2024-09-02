@@ -28,10 +28,10 @@ namespace Cell.View.ToolWindow
         private readonly FunctionViewModel _function;
         private readonly Action<string> saveCodeCallback = x => { };
         private static bool _haveAssembliesBeenRegistered;
+        private bool _isAllowingCloseWhileDirty = false;
+        private bool _isDirty = false;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-        private bool _isDirty = false;
-        private bool _isAllowingCloseWhileDirty = false;
         public CodeEditorWindow(FunctionViewModel function, Action<string> callback, CellModel? currentCell)
         {
             DataContext = this;
@@ -61,15 +61,13 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;
-
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        public double ResultColumnWidth => ResultString == string.Empty ? 0 : 200;
 
         public bool IsTransformedSyntaxTreeViewerVisible { get; set; }
 
         public Action? RequestClose { get; set; }
+
+        public double ResultColumnWidth => ResultString == string.Empty ? 0 : 200;
 
         public string? ResultString { get; set; } = string.Empty;
 
@@ -96,12 +94,6 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Save and Close", new RelayCommand(x => SaveAndClose()))
             ];
 
-        private void SaveAndClose()
-        {
-            SaveCode();
-            RequestClose?.Invoke();
-        }
-
         public double GetWidth()
         {
             return ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
@@ -120,12 +112,6 @@ namespace Cell.View.ToolWindow
                 RequestClose?.Invoke();
             });
             return false;
-        }
-
-        private void SaveCode()
-        {
-            saveCodeCallback?.Invoke(textEditor.Text);
-            _isDirty = false;
         }
 
         public void SetHeight(double height)
@@ -166,6 +152,8 @@ namespace Cell.View.ToolWindow
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
         }
 
+        private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;
+
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             _isDirty = true;
@@ -198,6 +186,18 @@ namespace Cell.View.ToolWindow
             }
         }
 
+        private void SaveAndClose()
+        {
+            SaveCode();
+            RequestClose?.Invoke();
+        }
+
+        private void SaveCode()
+        {
+            saveCodeCallback?.Invoke(textEditor.Text);
+            _isDirty = false;
+        }
+
         private void TestCode()
         {
             try
@@ -223,7 +223,7 @@ namespace Cell.View.ToolWindow
                 }
                 DisplayResult(result);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 var result = new CompileResult { Success = false, Result = ex.Message };
                 DisplayResult(result);

@@ -9,9 +9,9 @@ namespace Cell.View.ToolWindow
 {
     public partial class SettingsWindow : UserControl, IResizableToolWindow
     {
-        private double _width = 300;
-        private double _height = 300;
         private readonly SettingsWindowViewModel _viewModel;
+        private double _height = 300;
+        private double _width = 300;
         public SettingsWindow(SettingsWindowViewModel viewModel)
         {
             _viewModel = viewModel;
@@ -53,6 +53,32 @@ namespace Cell.View.ToolWindow
             _viewModel.UserSetWidth = width;
         }
 
+        private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
+        {
+            ApplicationViewModel.Instance.PersistenceManager.OpenRootDirectoryInExplorer();
+        }
+
+        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
+        {
+            var helpWindow = new HelpWindow();
+            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(helpWindow);
+        }
+
+        private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
+        {
+            var logWindowViewModel = new LogWindowViewModel();
+            var logWindow = new LogWindow(logWindowViewModel);
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(logWindow);
+        }
+
+        private void ShowUndoRedoStackWindowButtonClick(object sender, RoutedEventArgs e)
+        {
+            var undoRedoStackWindowViewModel = new UndoRedoStackWindowViewModel();
+            var undoRedoStackWindow = new UndoRedoStackWindow(undoRedoStackWindowViewModel);
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(undoRedoStackWindow);
+        }
+
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
@@ -82,32 +108,6 @@ namespace Cell.View.ToolWindow
         private void ToggleTriggerCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies;
-        }
-
-        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
-        {
-            var helpWindow = new HelpWindow();
-            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(helpWindow);
-        }
-
-        private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
-        {
-            var logWindowViewModel = new LogWindowViewModel();
-            var logWindow = new LogWindow(logWindowViewModel);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(logWindow);
-        }
-
-        private void ShowUndoRedoStackWindowButtonClick(object sender, RoutedEventArgs e)
-        {
-            var undoRedoStackWindowViewModel = new UndoRedoStackWindowViewModel();
-            var undoRedoStackWindow = new UndoRedoStackWindow(undoRedoStackWindowViewModel);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(undoRedoStackWindow);
-        }
-
-        private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.PersistenceManager.OpenRootDirectoryInExplorer();
         }
     }
 }

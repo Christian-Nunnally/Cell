@@ -16,24 +16,29 @@ namespace Cell.Persistence
     public class UserCollectionLoader
     {
         private static readonly Dictionary<string, UserCollection> _collections = [];
-        private readonly PersistenceManager _persistanceManager;
         private readonly CellPopulateManager _cellPopulateManager;
-
-        public static IEnumerable<string> CollectionNames => _collections.Keys;
-
-        public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
-
+        private readonly PersistenceManager _persistanceManager;
         public UserCollectionLoader(PersistenceManager persistenceManager, CellPopulateManager cellPopulateManager)
         {
             _persistanceManager = persistenceManager;
             _cellPopulateManager = cellPopulateManager;
         }
 
+        public static IEnumerable<string> CollectionNames => _collections.Keys;
+
+        public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
+
         public static UserCollection? GetCollection(string name)
         {
             if (name == string.Empty) throw new CellError("Collection name cannot be empty");
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
             return null;
+        }
+
+        public void ExportCollection(string collectionName, string toDirectory)
+        {
+            var fromDirectory = Path.Combine("Collections", collectionName);
+            _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
         }
 
         public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
@@ -92,6 +97,12 @@ namespace Cell.Persistence
             _persistanceManager.DeleteDirectory(directory);
         }
 
+        internal void ImportCollection(string collectionDirectory, string collectionName)
+        {
+            var toDirectory = Path.Combine("Collections", collectionName);
+            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
+        }
+
         internal void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
@@ -110,12 +121,6 @@ namespace Cell.Persistence
             }
         }
 
-        private void DeleteItem(string collectionName, string idToRemove)
-        {
-            var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
-            _persistanceManager.DeleteFile(path);
-        }
-
         private static void EnsureLinkedToBaseCollection(UserCollection collection)
         {
             if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
@@ -123,6 +128,12 @@ namespace Cell.Persistence
                 var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
                 collection.BecomeViewIntoCollection(baseCollection);
             }
+        }
+
+        private void DeleteItem(string collectionName, string idToRemove)
+        {
+            var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
+            _persistanceManager.DeleteFile(path);
         }
 
         private void LoadCollection(string directory)
@@ -141,12 +152,6 @@ namespace Cell.Persistence
         {
             var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}");
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
-        }
-
-        public void ExportCollection(string collectionName, string toDirectory)
-        {
-            var fromDirectory = Path.Combine("Collections", collectionName);
-            _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
         }
 
         private void SaveCollection(UserCollection collection)
@@ -220,12 +225,6 @@ namespace Cell.Persistence
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
-        }
-
-        internal void ImportCollection(string collectionDirectory, string collectionName)
-        {
-            var toDirectory = Path.Combine("Collections", collectionName);
-            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
         }
     }
 }

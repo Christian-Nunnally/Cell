@@ -1,43 +1,20 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
 
 namespace Cell.ViewModel.Application
 {
     public static class UndoRedoManager
     {
+        private static readonly List<string> _recordingStateIdList = new();
+        private static readonly Stack<CellModel> _recordingStateList = new();
         private static readonly Stack<List<CellModel>> _redoStack = new();
         private static readonly Stack<List<CellModel>> _undoStack = new();
-        private static readonly Stack<CellModel> _recordingStateList = new();
-        private static readonly List<string> _recordingStateIdList = new();
-
         private static bool _isRecordingUndoState;
         private static bool _isUndoingOrRedoing;
+        public static event Action? UndoStackChanged;
 
         public static IEnumerable<string> UndoStack => _undoStack.Select(x => x.Count.ToString());
 
-        public static event Action? UndoStackChanged;
-
-        public static void StartRecordingUndoState()
-        {
-            if (_isRecordingUndoState) return;
-            if (_isUndoingOrRedoing) return;
-            _recordingStateList.Clear();
-            _recordingStateIdList.Clear();
-            _isRecordingUndoState = true;
-        }
-
-        public static void RecordStateIfRecording(CellModel cell)
-        {
-            if (_isUndoingOrRedoing) return;
-            if (_isRecordingUndoState)
-            {
-                if (_recordingStateIdList.Contains(cell.ID)) return;
-                _recordingStateList.Push(cell.Copy());
-                _recordingStateIdList.Add(cell.ID);
-            }
-        }
-
-        public static void FinishRecordingUndoState() 
+        public static void FinishRecordingUndoState()
         {
             if (!_isRecordingUndoState) return;
             if (_isUndoingOrRedoing) return;
@@ -52,6 +29,17 @@ namespace Cell.ViewModel.Application
             UndoStackChanged?.Invoke();
         }
 
+        public static void RecordStateIfRecording(CellModel cell)
+        {
+            if (_isUndoingOrRedoing) return;
+            if (_isRecordingUndoState)
+            {
+                if (_recordingStateIdList.Contains(cell.ID)) return;
+                _recordingStateList.Push(cell.Copy());
+                _recordingStateIdList.Add(cell.ID);
+            }
+        }
+
         public static void Redo()
         {
             _isUndoingOrRedoing = true;
@@ -59,6 +47,15 @@ namespace Cell.ViewModel.Application
             ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
             _isUndoingOrRedoing = false;
             UndoStackChanged?.Invoke();
+        }
+
+        public static void StartRecordingUndoState()
+        {
+            if (_isRecordingUndoState) return;
+            if (_isUndoingOrRedoing) return;
+            _recordingStateList.Clear();
+            _recordingStateIdList.Clear();
+            _isRecordingUndoState = true;
         }
 
         public static void Undo()

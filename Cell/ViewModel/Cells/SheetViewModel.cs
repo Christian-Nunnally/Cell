@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
@@ -15,10 +14,10 @@ namespace Cell.ViewModel.Cells
 {
     public class SheetViewModel(string sheetName) : PropertyChangedBase
     {
-        private CellModel? oldSelectedCellState;
         public static readonly SheetViewModel NullSheet = new("null");
         private bool _enableMultiEditSelectedCells = true;
         private string lastKeyPressed = string.Empty;
+        private CellModel? oldSelectedCellState;
         private CellViewModel? selectedCellViewModel;
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 

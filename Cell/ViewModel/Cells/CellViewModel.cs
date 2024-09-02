@@ -130,11 +130,11 @@ namespace Cell.ViewModel.Cells
         public virtual CellType CellType
         {
             get => _model.CellType;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.CellType = value; 
-                NotifyPropertyChanged(nameof(CellType)); 
+                _model.CellType = value;
+                NotifyPropertyChanged(nameof(CellType));
             }
         }
 
@@ -247,22 +247,22 @@ namespace Cell.ViewModel.Cells
         public virtual string FontFamily
         {
             get => _model.FontFamily;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.FontFamily = value; 
-                NotifyPropertyChanged(nameof(FontFamily)); 
+                _model.FontFamily = value;
+                NotifyPropertyChanged(nameof(FontFamily));
             }
         }
 
         public virtual double FontSize
         {
             get => _model.FontSize;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.FontSize = value; 
-                NotifyPropertyChanged(nameof(FontSize)); 
+                _model.FontSize = value;
+                NotifyPropertyChanged(nameof(FontSize));
             }
         }
 
@@ -288,9 +288,9 @@ namespace Cell.ViewModel.Cells
         public virtual double Height
         {
             get => _model.Height;
-            set 
-            { 
-                _model.Height = value; 
+            set
+            {
+                _model.Height = value;
             }
         }
 
@@ -312,69 +312,69 @@ namespace Cell.ViewModel.Cells
         public virtual int Index
         {
             get => _model.Index;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.Index = value; 
-                NotifyPropertyChanged(nameof(Index)); 
+                _model.Index = value;
+                NotifyPropertyChanged(nameof(Index));
             }
         }
 
         public virtual bool IsFontBold
         {
             get => _model.IsFontBold;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.IsFontBold = value; 
-                NotifyPropertyChanged(nameof(IsFontBold)); 
-                NotifyPropertyChanged(nameof(FontWeightForView)); 
+                _model.IsFontBold = value;
+                NotifyPropertyChanged(nameof(IsFontBold));
+                NotifyPropertyChanged(nameof(FontWeightForView));
             }
         }
 
         public virtual bool IsFontItalic
         {
             get => _model.IsFontItalic;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.IsFontItalic = value; 
-                NotifyPropertyChanged(nameof(IsFontItalic)); 
-                NotifyPropertyChanged(nameof(FontStyleForView)); 
+                _model.IsFontItalic = value;
+                NotifyPropertyChanged(nameof(IsFontItalic));
+                NotifyPropertyChanged(nameof(FontStyleForView));
             }
         }
 
         public virtual bool IsFontStrikethrough
         {
             get => _model.IsFontStrikethrough;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.IsFontStrikethrough = value; 
-                NotifyPropertyChanged(nameof(IsFontStrikethrough)); 
-                NotifyPropertyChanged(nameof(TextDecorationsForView)); 
+                _model.IsFontStrikethrough = value;
+                NotifyPropertyChanged(nameof(IsFontStrikethrough));
+                NotifyPropertyChanged(nameof(TextDecorationsForView));
             }
         }
 
         public virtual bool IsHighlighted
         {
             get => _isHighlighted;
-            set 
-            { 
-                if (_isHighlighted == value) return; 
-                _isHighlighted = value; 
-                NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); 
+            set
+            {
+                if (_isHighlighted == value) return;
+                _isHighlighted = value;
+                NotifyPropertyChanged(nameof(IsHighlighted), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill));
             }
         }
 
         public virtual bool IsSelected
         {
             get => _isSelected;
-            set 
-            { 
-                if (_isSelected == value) return; 
-                _isSelected = value; 
-                NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill)); 
+            set
+            {
+                if (_isSelected == value) return;
+                _isSelected = value;
+                NotifyPropertyChanged(nameof(IsSelected), nameof(ShouldShowSelectionBorder), nameof(ShouldShowSelectionFill));
             }
         }
 
@@ -497,11 +497,11 @@ namespace Cell.ViewModel.Cells
         public virtual TextAlignment TextAlignmentForView
         {
             get => _model.TextAlignmentForView;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.TextAlignmentForView = value; 
-                NotifyPropertyChanged(nameof(TextAlignmentForView)); 
+                _model.TextAlignmentForView = value;
+                NotifyPropertyChanged(nameof(TextAlignmentForView));
             }
         }
 
@@ -524,12 +524,12 @@ namespace Cell.ViewModel.Cells
         public virtual VerticalAlignment VerticalAlignmentForView
         {
             get => _model.VerticalAlignment;
-            set 
+            set
             {
                 UndoRedoManager.RecordStateIfRecording(_model);
-                _model.VerticalAlignment = value; 
-                NotifyPropertyChanged(nameof(VerticalAlignmentForView)); 
-                NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter)); 
+                _model.VerticalAlignment = value;
+                NotifyPropertyChanged(nameof(VerticalAlignmentForView));
+                NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter));
             }
         }
 

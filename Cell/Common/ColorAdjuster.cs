@@ -12,6 +12,26 @@ namespace Cell.Common
             return HSLToHexColor(hue, saturation, lightness);
         }
 
+        public static string ConvertColorToHexString(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
+
+        public static Color ConvertHexStringToColor(string hex)
+        {
+            if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
+            try
+            {
+                byte r = byte.Parse(hex.Substring(1, 2), NumberStyles.HexNumber);
+                byte g = byte.Parse(hex.Substring(3, 2), NumberStyles.HexNumber);
+                byte b = byte.Parse(hex.Substring(5, 2), NumberStyles.HexNumber);
+                return Color.FromRgb(r, g, b);
+            }
+            catch (FormatException) { }
+            catch (ArgumentException) { }
+            return Colors.Green;
+        }
+
         /// <summary>
         /// Gets a highlight color that contrasts well with the given background color.
         /// </summary>
@@ -37,54 +57,11 @@ namespace Cell.Common
             }
         }
 
-        public static Color ConvertHexStringToColor(string hex)
-        {
-            if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
-            try
-            {
-                byte r = byte.Parse(hex.Substring(1, 2), NumberStyles.HexNumber);
-                byte g = byte.Parse(hex.Substring(3, 2), NumberStyles.HexNumber);
-                byte b = byte.Parse(hex.Substring(5, 2), NumberStyles.HexNumber);
-                return Color.FromRgb(r, g, b);
-            }
-            catch (FormatException) { }
-            catch (ArgumentException) { }
-            return Colors.Green;
-        }
-
-        public static string ConvertColorToHexString(Color color)
-        {
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-        }
-
-        private static string HSLToHexColor(float hue, float saturation, float lightness)
-        {
-            HSLToRGBColor(hue, saturation, lightness, out int newR, out int newG, out int newB);
-            return $"#{newR:X2}{newG:X2}{newB:X2}";
-        }
-
-        private static void HexColorToHSL(string hexColor, out float hue, out float saturation, out float lightness)
-        {
-            if (hexColor.StartsWith('#')) hexColor = hexColor[1..];
-            int red = Convert.ToInt32(hexColor[..2], 16);
-            int green = Convert.ToInt32(hexColor.Substring(2, 2), 16);
-            int blue = Convert.ToInt32(hexColor.Substring(4, 2), 16);
-            ColorToHSL(red, green, blue, out hue, out saturation, out lightness);
-        }
-
         private static float AdjustLightness(float brightnessFactor, float lightness)
         {
             brightnessFactor = Math.Max(0f, brightnessFactor);
             var adjustedBrightness = lightness * brightnessFactor;
             return Math.Max(0f, Math.Min(1f, adjustedBrightness));
-        }
-
-        private static void ColorToHSL(int red, int green, int blue, out float hue, out float saturation, out float lightness)
-        {
-            var redPercent = red / 255f;
-            var greenPercent = green / 255f;
-            var bluePercent = blue / 255f;
-            ColorToHSL(redPercent, greenPercent, bluePercent, out hue, out saturation, out lightness);
         }
 
         private static void ColorToHSL(float red, float green, float blue, out float hue, out float saturation, out float lightness)
@@ -97,14 +74,12 @@ namespace Cell.Common
             hue = GetHue(red, green, blue, max, delta);
         }
 
-        private static float GetLightness(float max, float min) => (max + min) / 2f;
-
-        private static float GetSaturation(float lightness, float max, float min, float delta)
+        private static void ColorToHSL(int red, int green, int blue, out float hue, out float saturation, out float lightness)
         {
-            if (delta == 0) return 0;
-            return (lightness > 0.5f) 
-                ? delta / (2f - max - min) 
-                : delta / (max + min);
+            var redPercent = red / 255f;
+            var greenPercent = green / 255f;
+            var bluePercent = blue / 255f;
+            ColorToHSL(redPercent, greenPercent, bluePercent, out hue, out saturation, out lightness);
         }
 
         private static float GetHue(float redPercent, float greenPercent, float bluePercent, float max, float delta)
@@ -116,6 +91,31 @@ namespace Cell.Common
             else hue = (redPercent - greenPercent) / delta + 4f;
             hue /= 6f;
             return hue;
+        }
+
+        private static float GetLightness(float max, float min) => (max + min) / 2f;
+
+        private static float GetSaturation(float lightness, float max, float min, float delta)
+        {
+            if (delta == 0) return 0;
+            return (lightness > 0.5f)
+                ? delta / (2f - max - min)
+                : delta / (max + min);
+        }
+
+        private static void HexColorToHSL(string hexColor, out float hue, out float saturation, out float lightness)
+        {
+            if (hexColor.StartsWith('#')) hexColor = hexColor[1..];
+            int red = Convert.ToInt32(hexColor[..2], 16);
+            int green = Convert.ToInt32(hexColor.Substring(2, 2), 16);
+            int blue = Convert.ToInt32(hexColor.Substring(4, 2), 16);
+            ColorToHSL(red, green, blue, out hue, out saturation, out lightness);
+        }
+
+        private static string HSLToHexColor(float hue, float saturation, float lightness)
+        {
+            HSLToRGBColor(hue, saturation, lightness, out int newR, out int newG, out int newB);
+            return $"#{newR:X2}{newG:X2}{newB:X2}";
         }
 
         private static void HSLToRGBColor(float hue, float saturation, float lightness, out int red, out int green, out int blue)

@@ -25,7 +25,7 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public bool HandleBeingClosed() 
+        public bool HandleBeingClosed()
         {
             return true;
         }

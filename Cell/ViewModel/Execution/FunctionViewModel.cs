@@ -17,7 +17,6 @@ namespace Cell.ViewModel.Execution
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool wasCompileSuccessful;
-
         public FunctionViewModel(PluginFunctionModel model)
         {
             Model = model;
@@ -34,16 +33,6 @@ namespace Cell.ViewModel.Execution
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
 
         public CompileResult CompileResult { get; private set; }
-
-        public bool WasCompileSuccessful
-        {
-            get => wasCompileSuccessful; set
-            {
-                if (wasCompileSuccessful == value) return;
-                wasCompileSuccessful = value;
-                NotifyPropertyChanged(nameof(WasCompileSuccessful));
-            }
-        }
 
         public List<CellReference> LocationDependencies { get; set; } = [];
 
@@ -65,6 +54,16 @@ namespace Cell.ViewModel.Execution
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
         public int UsageCount => CellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
+
+        public bool WasCompileSuccessful
+        {
+            get => wasCompileSuccessful; set
+            {
+                if (wasCompileSuccessful == value) return;
+                wasCompileSuccessful = value;
+                NotifyPropertyChanged(nameof(WasCompileSuccessful));
+            }
+        }
 
         public MethodInfo? Compile()
         {

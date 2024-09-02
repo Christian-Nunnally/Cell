@@ -1,18 +1,17 @@
-﻿
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
     public class UndoRedoStackWindowViewModel : ResizeableToolWindowViewModel
     {
-        public ObservableCollection<string> UndoStack { get; set; } = [];
-
         public UndoRedoStackWindowViewModel()
         {
             UndoRedoManager.UndoStackChanged += UpdateUndoStackForViewModel;
             UpdateUndoStackForViewModel();
         }
+
+        public ObservableCollection<string> UndoStack { get; set; } = [];
 
         private void UpdateUndoStackForViewModel()
         {

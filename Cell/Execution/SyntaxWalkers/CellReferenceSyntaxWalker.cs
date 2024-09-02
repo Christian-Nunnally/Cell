@@ -6,7 +6,6 @@ namespace Cell.Execution.SyntaxWalkers
     public partial class CellReferenceSyntaxWalker : CSharpSyntaxWalker
     {
         public readonly List<CellReference> LocationReferences = [];
-
         public override void Visit(SyntaxNode? node)
         {
             base.Visit(node);

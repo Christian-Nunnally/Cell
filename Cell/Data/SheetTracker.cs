@@ -1,6 +1,4 @@
-﻿
-using Cell.Model;
-using Cell.Persistence;
+﻿using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -14,22 +12,14 @@ namespace Cell.Data
             Sheets.CollectionChanged += SheetsCollectionChanged;
         }
 
-        private void SheetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        public ObservableCollection<SheetModel> OrderedSheets { get; } = [];
+
+        public ObservableCollection<SheetModel> Sheets { get; } = [];
+
+        public void RenameSheet(string oldSheetName, string newSheetName)
         {
-            if (e.NewItems != null)
-            {
-                foreach (var sheet in e.NewItems.OfType<SheetModel>())
-                {
-                    sheet.PropertyChanged += SheetPropertyChanged;
-                }
-            }
-            if (e.OldItems != null)
-            {
-                foreach (var sheet in e.OldItems.OfType<SheetModel>())
-                {
-                    sheet.PropertyChanged -= SheetPropertyChanged;
-                }
-            }
+            ApplicationViewModel.Instance.CellLoader.RenameSheet(oldSheetName, newSheetName);
+            ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
         }
 
         private void SheetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -50,14 +40,22 @@ namespace Cell.Data
             }
         }
 
-        public void RenameSheet(string oldSheetName, string newSheetName)
+        private void SheetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            ApplicationViewModel.Instance.CellLoader.RenameSheet(oldSheetName, newSheetName);
-            ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
+            if (e.NewItems != null)
+            {
+                foreach (var sheet in e.NewItems.OfType<SheetModel>())
+                {
+                    sheet.PropertyChanged += SheetPropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (var sheet in e.OldItems.OfType<SheetModel>())
+                {
+                    sheet.PropertyChanged -= SheetPropertyChanged;
+                }
+            }
         }
-
-        public ObservableCollection<SheetModel> Sheets { get; } = [];
-
-        public ObservableCollection<SheetModel> OrderedSheets { get; } = [];
     }
 }

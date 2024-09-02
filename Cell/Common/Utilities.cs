@@ -20,32 +20,6 @@ namespace Cell.Common
             }
         }
 
-        private static void CopyProperty(object source, object target, string[] blacklist, Type targetType, PropertyInfo sourceProperty)
-        {
-            // Can read source property
-            if (!sourceProperty.CanRead) return;
-
-            // Target property exists
-            var targetProperty = targetType.GetProperty(sourceProperty.Name);
-            if (targetProperty == null) return;
-
-            // Property is not blacklisted
-            if (blacklist.Contains(sourceProperty.Name)) return;
-
-            // Can write target property
-            if (!targetProperty.CanWrite) return;
-            var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
-            if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) return;
-            var setMethod = targetProperty.GetSetMethod();
-            if (setMethod == null) return;
-            if ((setMethod.Attributes & MethodAttributes.Static) != 0) return;
-
-            // Target property type is assignable from source property type
-            if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) return;
-
-            targetProperty.SetValue(target, sourceProperty.GetValue(source, null), null);
-        }
-
         public static string GenerateUnqiueId(int length)
         {
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -113,6 +87,32 @@ namespace Cell.Common
                 return true;
             }
             return false;
+        }
+
+        private static void CopyProperty(object source, object target, string[] blacklist, Type targetType, PropertyInfo sourceProperty)
+        {
+            // Can read source property
+            if (!sourceProperty.CanRead) return;
+
+            // Target property exists
+            var targetProperty = targetType.GetProperty(sourceProperty.Name);
+            if (targetProperty == null) return;
+
+            // Property is not blacklisted
+            if (blacklist.Contains(sourceProperty.Name)) return;
+
+            // Can write target property
+            if (!targetProperty.CanWrite) return;
+            var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
+            if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) return;
+            var setMethod = targetProperty.GetSetMethod();
+            if (setMethod == null) return;
+            if ((setMethod.Attributes & MethodAttributes.Static) != 0) return;
+
+            // Target property type is assignable from source property type
+            if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) return;
+
+            targetProperty.SetValue(target, sourceProperty.GetValue(source, null), null);
         }
     }
 }

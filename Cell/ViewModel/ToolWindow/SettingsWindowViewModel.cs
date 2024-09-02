@@ -1,6 +1,4 @@
-﻿
-
-namespace Cell.ViewModel.ToolWindow
+﻿namespace Cell.ViewModel.ToolWindow
 {
     public class SettingsWindowViewModel : ResizeableToolWindowViewModel
     {

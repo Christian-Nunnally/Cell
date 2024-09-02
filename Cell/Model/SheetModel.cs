@@ -1,15 +1,13 @@
-﻿
-using Cell.Common;
+﻿using Cell.Common;
 using Cell.ViewModel.Application;
 
 namespace Cell.Model
 {
     public class SheetModel : PropertyChangedBase
     {
+        public string OldName;
         private CellModel? cornerCell;
         private string name = string.Empty;
-        public string OldName;
-
         public SheetModel(string sheetName)
         {
             Name = sheetName;
@@ -17,30 +15,13 @@ namespace Cell.Model
             OldName = sheetName;
         }
 
-        public string Name
+        public CellModel? CornerCell
         {
-            get => name;
+            get => cornerCell;
             set
             {
-                if (value == name) return;
-                if (!IsValidNewSheetName(value)) return;
-                OldName = name;
-                name = value;
-                NotifyPropertyChanged(nameof(Name));
-            }
-        }
-
-        public int Order
-        {
-            get => (int) (CornerCell?.GetNumericProperty("SheetOrder") ?? 0);
-            set
-            {
-                if (CornerCell is not null)
-                {
-                    if (value == Order) return;
-                    CornerCell.SetNumericProperty("SheetOrder", value);
-                    NotifyPropertyChanged(nameof(Order));
-                }
+                cornerCell = value;
+                NotifyPropertyChanged(nameof(Order));
             }
         }
 
@@ -58,14 +39,38 @@ namespace Cell.Model
             }
         }
 
-        public CellModel? CornerCell
+        public string Name
         {
-            get => cornerCell;
+            get => name;
             set
             {
-                cornerCell = value;
-                NotifyPropertyChanged(nameof(Order));
+                if (value == name) return;
+                if (!IsValidNewSheetName(value)) return;
+                OldName = name;
+                name = value;
+                NotifyPropertyChanged(nameof(Name));
             }
+        }
+
+        public int Order
+        {
+            get => (int)(CornerCell?.GetNumericProperty("SheetOrder") ?? 0);
+            set
+            {
+                if (CornerCell is not null)
+                {
+                    if (value == Order) return;
+                    CornerCell.SetNumericProperty("SheetOrder", value);
+                    NotifyPropertyChanged(nameof(Order));
+                }
+            }
+        }
+
+        internal static bool IsValidNewSheetName(string sheetName)
+        {
+            if (!IsValidSheetName(sheetName)) return false;
+            if (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == sheetName)) return false;
+            return true;
         }
 
         internal static bool IsValidSheetName(string sheetName)
@@ -73,13 +78,6 @@ namespace Cell.Model
             if (string.IsNullOrWhiteSpace(sheetName)) return false;
             if (sheetName.Length > 60) return false;
             if (!sheetName.All("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789".Contains)) return false;
-            return true;
-        }
-
-        internal static bool IsValidNewSheetName(string sheetName)
-        {
-            if (!IsValidSheetName(sheetName)) return false;
-            if (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == sheetName)) return false;
             return true;
         }
     }

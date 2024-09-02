@@ -11,8 +11,8 @@ namespace Cell.Data
 {
     public class UserCollection(UserCollectionModel model) : PropertyChangedBase
     {
-        private readonly Dictionary<string, PluginModel> _items = [];
         private readonly Dictionary<string, int> _cachedSortFilterResult = [];
+        private readonly Dictionary<string, PluginModel> _items = [];
         private readonly List<PluginModel> _sortedItems = [];
         private UserCollection? _baseCollection;
         public event Action<UserCollection, PluginModel>? ItemAdded;
@@ -94,17 +94,6 @@ namespace Cell.Data
             baseCollection.Items.ForEach(InsertItemWithSortAndFilter);
         }
 
-        private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)
-        {
-            if (Model.SortAndFilterFunctionName is not null)
-            {
-                bool willBeHandledByBase = _items.ContainsKey(model.ID);
-                if (willBeHandledByBase) return;
-
-                InsertItemWithSortAndFilter(model);
-            }
-        }
-
         internal void RefreshSortAndFilter()
         {
             // TODO make this clear and notify once.
@@ -158,6 +147,17 @@ namespace Cell.Data
                 _items.Add(model.ID, model);
                 model.PropertyChanged += PropertyChangedOnItemInCollection;
                 ItemAdded?.Invoke(this, model);
+            }
+        }
+
+        private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)
+        {
+            if (Model.SortAndFilterFunctionName is not null)
+            {
+                bool willBeHandledByBase = _items.ContainsKey(model.ID);
+                if (willBeHandledByBase) return;
+
+                InsertItemWithSortAndFilter(model);
             }
         }
 

@@ -7,16 +7,13 @@ namespace Cell.ViewModel.Application
 {
     public class TitleBarSheetNavigationViewModel : PropertyChangedBase
     {
+        private readonly SheetTracker _sheetTracker;
         private bool _isAddingSheet;
         private string _newSheetName = string.Empty;
-        private readonly SheetTracker _sheetTracker;
-
         public TitleBarSheetNavigationViewModel(SheetTracker sheetTracker)
         {
             _sheetTracker = sheetTracker;
         }
-
-        public ObservableCollection<SheetModel> OrderedSheets => _sheetTracker.OrderedSheets;
 
         public bool IsAddingSheet
         {
@@ -37,5 +34,7 @@ namespace Cell.ViewModel.Application
                 NotifyPropertyChanged(nameof(NewSheetName));
             }
         }
+
+        public ObservableCollection<SheetModel> OrderedSheets => _sheetTracker.OrderedSheets;
     }
 }

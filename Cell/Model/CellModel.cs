@@ -1,6 +1,5 @@
 ﻿using Cell.Common;
 using Cell.Execution;
-using Cell.Persistence;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
@@ -13,7 +12,6 @@ namespace Cell.Model
     public class CellModel : PropertyChangedBase
     {
         public static readonly CellModel Empty = new();
-
         private string borderThickness = "1";
         private CellType cellType = CellType.None;
         private string[] colorHexes = [
@@ -181,10 +179,10 @@ namespace Cell.Model
         public string SheetName
         {
             get => sheetName;
-            set 
+            set
             {
                 if (sheetName == value) return;
-                sheetName = value; 
+                sheetName = value;
                 NotifyPropertyChanged(nameof(SheetName));
             }
         }
@@ -240,6 +238,7 @@ namespace Cell.Model
         }
 
         public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
+
         public bool GetBooleanProperty(string key, bool defaultValue)
         {
             return BooleanProperties.TryGetValue(key, out var value) ? value : defaultValue;
@@ -264,6 +263,12 @@ namespace Cell.Model
             NotifyPropertyChanged(nameof(ColorHexes));
         }
 
+        public void SetBackgrounds(string color)
+        {
+            SetBackground(color);
+            SetContentBackground(color);
+        }
+
         public void SetBooleanProperty(string key, bool value)
         {
             if (BooleanProperties.TryGetValue(key, out var currentValue))
@@ -275,10 +280,12 @@ namespace Cell.Model
             NotifyPropertyChanged(nameof(BooleanProperties), key);
         }
 
-        public void SetBackgrounds(string color)
+        public void SetBorder(string color)
         {
-            SetBackground(color);
-            SetContentBackground(color);
+            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
+            if (ColorHexes[(int)ColorFor.Border] == color) return;
+            ColorHexes[(int)ColorFor.Border] = color;
+            NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetBorders(string color)
@@ -291,14 +298,6 @@ namespace Cell.Model
         {
             SetBackgrounds(color);
             SetBorders(color);
-        }
-
-        public void SetBorder(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.Border] == color) return;
-            ColorHexes[(int)ColorFor.Border] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetContentBackground(string color)

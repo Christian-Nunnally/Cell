@@ -1,5 +1,4 @@
-﻿using Cell.Persistence;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 
@@ -7,9 +6,9 @@ namespace Cell.View.ToolWindow
 {
     public partial class ExportWindow : UserControl, IResizableToolWindow
     {
-        private double _width = 200;
-        private double _height = 200;
         private readonly ExportWindowViewModel _viewModel;
+        private double _height = 200;
+        private double _width = 200;
         public ExportWindow(ExportWindowViewModel viewModel)
         {
             _viewModel = viewModel;

@@ -6,8 +6,6 @@ namespace Cell.ViewModel.ToolWindow
     public class LogWindowViewModel : ResizeableToolWindowViewModel
     {
         private readonly StringBuilder _logBufferBuilder = new();
-        public string LogBuffer => _logBufferBuilder.ToString();
-
         public LogWindowViewModel()
         {
             Logger.LogAdded += AddLog;
@@ -17,6 +15,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public string LogBuffer => _logBufferBuilder.ToString();
+
+        internal void ClearBuffer()
+        {
+            _logBufferBuilder.Clear();
+            NotifyPropertyChanged(nameof(LogBuffer));
+        }
+
         private void AddLog(string log)
         {
             _logBufferBuilder.Insert(0, log + "\n");
@@ -24,12 +30,6 @@ namespace Cell.ViewModel.ToolWindow
             {
                 _logBufferBuilder.Remove(_logBufferBuilder.Length - 1000, 1000);
             }
-            NotifyPropertyChanged(nameof(LogBuffer));
-        }
-
-        internal void ClearBuffer()
-        {
-            _logBufferBuilder.Clear();
             NotifyPropertyChanged(nameof(LogBuffer));
         }
     }

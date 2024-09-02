@@ -36,13 +36,13 @@ namespace Cell.Model
 
         public string SortAndFilterFunctionName
         {
-            get 
+            get
             {
                 if (string.IsNullOrEmpty(BasedOnCollectionName))
                 {
                     return "Not used by base collections";
                 }
-                return _sortAndFilterFunctionName; 
+                return _sortAndFilterFunctionName;
             }
             set
             {

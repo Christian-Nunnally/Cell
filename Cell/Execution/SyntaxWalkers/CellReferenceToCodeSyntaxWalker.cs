@@ -101,12 +101,6 @@ namespace Cell.Plugin.SyntaxWalkers
 
         private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
 
-        private string CalculateArgumentStringFromCellLocation(string cellLocationName, string relativitySymbol)
-        {
-            (var row, var column) = GetCellLocationFromVariable(cellLocationName);
-            return CalculateArgumentsFromLocation(relativitySymbol, row, column);
-        }
-
         private string CalculateArgumentsFromLocation(string relativitySymbol, int rowOffset, int columnOffset)
         {
             return relativitySymbol switch
@@ -117,6 +111,12 @@ namespace Cell.Plugin.SyntaxWalkers
                 "B" => $", {rowOffset}, {columnOffset}",
                 _ => throw new InvalidOperationException("Only 'B', 'C', 'R' and '' are valid relativity types for a cell reference"),
             };
+        }
+
+        private string CalculateArgumentStringFromCellLocation(string cellLocationName, string relativitySymbol)
+        {
+            (var row, var column) = GetCellLocationFromVariable(cellLocationName);
+            return CalculateArgumentsFromLocation(relativitySymbol, row, column);
         }
 
         /// <param name="cellReference">Looks like (A1, B_A1, R_A1, C_A1)</param>

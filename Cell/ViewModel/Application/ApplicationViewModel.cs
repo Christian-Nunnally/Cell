@@ -21,7 +21,7 @@ namespace Cell.ViewModel.Application
         {
             PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
             CellTriggerManager = new();
-            PluginFunctionLoader = new (PersistenceManager);
+            PluginFunctionLoader = new(PersistenceManager);
             CellPopulateManager = new(PluginFunctionLoader);
             SheetTracker = new();
             TitleBarSheetNavigationViewModel = new(SheetTracker);
@@ -36,22 +36,6 @@ namespace Cell.ViewModel.Application
         public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
         public ApplicationSettings ApplicationSettings { get; private set; }
-
-        public PersistenceManager PersistenceManager { get; private set; }
-
-        public CellTracker CellTracker { get; private set; }
-
-        public SheetTracker SheetTracker { get; private set; }
-
-        public CellLoader CellLoader { get; private set; }
-
-        public CellTriggerManager CellTriggerManager { get; private set; }
-
-        public CellPopulateManager CellPopulateManager { get; private set; }
-
-        public UserCollectionLoader UserCollectionLoader { get; private set; }
-
-        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
 
         public double ApplicationWindowHeight
         {
@@ -73,6 +57,20 @@ namespace Cell.ViewModel.Application
             }
         }
 
+        public CellLoader CellLoader { get; private set; }
+
+        public CellPopulateManager CellPopulateManager { get; private set; }
+
+        public CellTracker CellTracker { get; private set; }
+
+        public CellTriggerManager CellTriggerManager { get; private set; }
+
+        public PersistenceManager PersistenceManager { get; private set; }
+
+        public PluginFunctionLoader PluginFunctionLoader { get; private set; }
+
+        public SheetTracker SheetTracker { get; private set; }
+
         public SheetViewModel SheetViewModel
         {
             get { return sheetViewModel; }
@@ -83,7 +81,9 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public PluginFunctionLoader PluginFunctionLoader { get; private set; }
+        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
+
+        public UserCollectionLoader UserCollectionLoader { get; private set; }
 
         public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
         {
@@ -101,6 +101,20 @@ namespace Cell.ViewModel.Application
             }
             selectedCells.ForEach(x => SheetViewModel.SelectCell(x.Model));
             SheetViewModel.UpdateLayout();
+        }
+
+        public void Load()
+        {
+            var versionSchema = PersistenceManager.LoadVersion();
+            if (PersistenceManager.Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {PersistenceManager.Version}.");
+            PersistenceManager.SaveVersion();
+            UserCollectionLoader.LoadCollections();
+            PluginFunctionLoader.LoadPlugins();
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            CellLoader.LoadAndAddCells();
+            PersistenceManager.CreateBackup();
+            SheetViewModel.LoadCellViewModels();
+            PropertyChanged += ApplicationView.ApplicationViewModelPropertyChanged;
         }
 
         internal void CopySelectedCells(bool copyTextOnly)
@@ -130,20 +144,6 @@ namespace Cell.ViewModel.Application
             UndoRedoManager.StartRecordingUndoState();
             _cellClipboard.PasteCopiedCells(SheetViewModel);
             UndoRedoManager.FinishRecordingUndoState();
-        }
-
-        public void Load()
-        {
-            var versionSchema = PersistenceManager.LoadVersion();
-            if (PersistenceManager.Version != versionSchema) throw new CellError($"Error: The project you are trying to load need to be migrated from version {versionSchema} to version {PersistenceManager.Version}.");
-            PersistenceManager.SaveVersion();
-            UserCollectionLoader.LoadCollections();
-            PluginFunctionLoader.LoadPlugins();
-            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
-            CellLoader.LoadAndAddCells();
-            PersistenceManager.CreateBackup();
-            SheetViewModel.LoadCellViewModels();
-            PropertyChanged += ApplicationView.ApplicationViewModelPropertyChanged;
         }
     }
 }

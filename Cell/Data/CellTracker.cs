@@ -10,16 +10,13 @@ namespace Cell.Data
     /// </summary>
     public class CellTracker
     {
+        private readonly CellLoader _cellLoader;
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
-        private readonly CellTriggerManager _trigerManager;
         private readonly CellPopulateManager _populateManager;
         private readonly SheetTracker _sheetTracker;
-        private readonly CellLoader _cellLoader;
-
-        public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
-
+        private readonly CellTriggerManager _trigerManager;
         public CellTracker(SheetTracker sheetTracker, CellTriggerManager trigerManager, CellPopulateManager populateManager, CellLoader cellLoader)
         {
             _trigerManager = trigerManager;
@@ -27,6 +24,8 @@ namespace Cell.Data
             _sheetTracker = sheetTracker;
             _cellLoader = cellLoader;
         }
+
+        public IEnumerable<CellModel> AllCells => _cellsBySheetMap.Values.SelectMany(x => x.Values);
 
         public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
         {
@@ -63,11 +62,6 @@ namespace Cell.Data
             RemoveFromCellsByLocationMap(cellModel);
         }
 
-        private bool RemoveFromCellsByLocationMap(CellModel cellModel)
-        {
-            return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
-        }
-
         private void AddCellToCellByLocationMap(CellModel cellModel)
         {
             if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
@@ -75,6 +69,29 @@ namespace Cell.Data
                 cellsAtLocation.Add(cellModel);
             }
             else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
+        }
+
+        private void AddToCellsInSheetMap(CellModel model)
+        {
+            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellMap))
+            {
+                cellMap.Add(model.ID, model);
+            }
+            else
+            {
+                _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
+                var sheet = _sheetTracker.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
+                if (sheet == null)
+                {
+                    sheet = new SheetModel(model.SheetName);
+                    _sheetTracker.Sheets.Add(sheet);
+                }
+            }
+
+            if (model.CellType == CellType.Corner)
+            {
+                _sheetTracker.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
+            }
         }
 
         private void CellModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -100,27 +117,9 @@ namespace Cell.Data
             _cellLoader.SaveCell(model);
         }
 
-        private void AddToCellsInSheetMap(CellModel model)
+        private bool RemoveFromCellsByLocationMap(CellModel cellModel)
         {
-            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellMap))
-            {
-                cellMap.Add(model.ID, model);
-            }
-            else
-            {
-                _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                var sheet = _sheetTracker.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
-                if (sheet == null)
-                { 
-                    sheet = new SheetModel(model.SheetName);
-                    _sheetTracker.Sheets.Add(sheet);
-                }
-            }
-
-            if (model.CellType == CellType.Corner)
-            {
-                _sheetTracker.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
-            }
+            return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
         }
 
         private bool RemoveFromCellsInSheetMap(CellModel model, string sheetName)

@@ -17,10 +17,10 @@ namespace Cell.View.ToolWindow
         private const int MinimumToolWindowSize = 120;
         private readonly Canvas _canvas;
         private IToolWindow? _content;
+        private bool _isDocked;
         private IResizableToolWindow? _resizableContent;
         private bool _resizing;
         private Point _resizingStartPosition;
-        private bool _isDocked;
         public FloatingToolWindow(Canvas canvas)
         {
             InitializeComponent();
@@ -31,17 +31,17 @@ namespace Cell.View.ToolWindow
 
         public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
 
+        public double ContentHeight => _resizableContent?.GetHeight() ?? MinimumToolWindowSize;
+
+        public double ContentWidth => _resizableContent?.GetWidth() ?? MinimumToolWindowSize;
+
+        public bool IsDocked => _isDocked;
+
         public bool IsToolWindowResizeable => _resizableContent != null;
 
         public bool IsUndocked => !_isDocked;
 
-        public bool IsDocked => _isDocked;
-
         public string ToolWindowTitle => _content?.GetTitle() ?? "";
-
-        public double ContentWidth => _resizableContent?.GetWidth() ?? MinimumToolWindowSize;
-
-        public double ContentHeight => _resizableContent?.GetHeight() ?? MinimumToolWindowSize;
 
         public void SetContent(UserControl content)
         {
@@ -93,23 +93,16 @@ namespace Cell.View.ToolWindow
             RequestClose();
         }
 
+        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
+        }
+
         private void DockButtonClicked(object sender, RoutedEventArgs e)
         {
             _isDocked = true;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
-        }
-
-        private void UndockButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _isDocked = false;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
-        }
-
-        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
         }
 
         private void RequestClose()
@@ -195,6 +188,13 @@ namespace Cell.View.ToolWindow
                 var desiredY = position.Y - offset.Y;
                 SetPositionRespectingBounds(desiredX, desiredY);
             }
+        }
+
+        private void UndockButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _isDocked = false;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
     }
 }

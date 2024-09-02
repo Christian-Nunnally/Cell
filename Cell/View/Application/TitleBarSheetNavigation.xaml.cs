@@ -9,12 +9,12 @@ namespace Cell.View.Application
     /// </summary>
     public partial class TitleBarSheetNavigation : UserControl
     {
-        private TitleBarSheetNavigationViewModel? ViewModel => DataContext as TitleBarSheetNavigationViewModel;
-
         public TitleBarSheetNavigation()
         {
             InitializeComponent();
         }
+
+        private TitleBarSheetNavigationViewModel? ViewModel => DataContext as TitleBarSheetNavigationViewModel;
 
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {

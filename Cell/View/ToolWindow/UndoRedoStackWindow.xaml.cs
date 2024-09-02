@@ -7,9 +7,9 @@ namespace Cell.View.ToolWindow
 {
     public partial class UndoRedoStackWindow : UserControl, IResizableToolWindow
     {
-        private double _width = 200;
-        private double _height = 200;
         private readonly UndoRedoStackWindowViewModel _viewModel;
+        private double _height = 200;
+        private double _width = 200;
         public UndoRedoStackWindow(UndoRedoStackWindowViewModel viewModel)
         {
             _viewModel = viewModel;

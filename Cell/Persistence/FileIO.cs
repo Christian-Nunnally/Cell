@@ -10,28 +10,6 @@ namespace Cell.Persistence
             CopyFilesRecursively(fromPath, toPath);
         }
 
-        private static void CopyFilesRecursively(string from, string to)
-        {
-            CreateAllDirectories(from, to);
-            CopyAllFiles(from, to);
-        }
-
-        private static void CopyAllFiles(string from, string to)
-        {
-            foreach (string newPath in Directory.GetFiles(from, "*.*", SearchOption.AllDirectories))
-            {
-                File.Copy(newPath, newPath.Replace(from, to), true);
-            }
-        }
-
-        private static void CreateAllDirectories(string from, string to)
-        {
-            foreach (string directory in Directory.GetDirectories(from, "*", SearchOption.AllDirectories))
-            {
-                Directory.CreateDirectory(directory.Replace(from, to));
-            }
-        }
-
         public void DeleteDirectory(string path)
         {
             Directory.Delete(path, true);
@@ -43,9 +21,24 @@ namespace Cell.Persistence
             File.Delete(path);
         }
 
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
+        }
+
         public bool Exists(string path)
         {
             return File.Exists(path);
+        }
+
+        public IEnumerable<string> GetDirectories(string path)
+        {
+            return Directory.GetDirectories(path);
+        }
+
+        public IEnumerable<string> GetFiles(string path)
+        {
+            return Directory.GetFiles(path);
         }
 
         public void MoveDirectory(string oldFullPath, string newFullPath)
@@ -73,19 +66,26 @@ namespace Cell.Persistence
             ZipFile.CreateFromDirectory(folderPath, zipPath);
         }
 
-        public bool DirectoryExists(string path)
+        private static void CopyAllFiles(string from, string to)
         {
-            return Directory.Exists(path);
+            foreach (string newPath in Directory.GetFiles(from, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(from, to), true);
+            }
         }
 
-        public IEnumerable<string> GetDirectories(string path)
+        private static void CopyFilesRecursively(string from, string to)
         {
-            return Directory.GetDirectories(path);
+            CreateAllDirectories(from, to);
+            CopyAllFiles(from, to);
         }
 
-        public IEnumerable<string> GetFiles(string path)
+        private static void CreateAllDirectories(string from, string to)
         {
-            return Directory.GetFiles(path);
+            foreach (string directory in Directory.GetDirectories(from, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(directory.Replace(from, to));
+            }
         }
     }
 }

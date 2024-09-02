@@ -7,9 +7,9 @@ namespace Cell.View.ToolWindow
 {
     public partial class ExampleWindow : UserControl, IResizableToolWindow
     {
-        private double _width = 200;
-        private double _height = 200;
         private readonly ExampleWindowViewModel _viewModel;
+        private double _height = 200;
+        private double _width = 200;
         public ExampleWindow(ExampleWindowViewModel viewModel)
         {
             _viewModel = viewModel;

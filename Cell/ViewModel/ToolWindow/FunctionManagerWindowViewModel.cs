@@ -8,8 +8,8 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class FunctionManagerWindowViewModel : ResizeableToolWindowViewModel
     {
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly ObservableCollection<FunctionViewModel> _functions;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private string filterSheet = "All";
         private string filterString = string.Empty;
         private bool includePopulateFunctions = true;

@@ -9,7 +9,6 @@ namespace Cell.ViewModel.Cells.Types
     public class ButtonCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
     {
         private ICommand? _buttonClickedCommand;
-
         public ICommand ButtonClickedCommand
         {
             get

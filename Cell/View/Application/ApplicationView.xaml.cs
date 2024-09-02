@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Persistence;
+﻿using Cell.Persistence;
 using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
@@ -17,7 +16,6 @@ namespace Cell.View.Application
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
         private ApplicationViewModel _viewModel;
-
         public ApplicationView()
         {
             InitializeComponent();
@@ -28,6 +26,14 @@ namespace Cell.View.Application
         public SheetView? ActiveSheetView { get; set; }
 
         public ApplicationSettings ApplicationSettings => ApplicationViewModel.Instance.ApplicationSettings;
+
+        public void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
+            {
+                UpdateToolWindowLocation();
+            }
+        }
 
         public void ShowSheetView(SheetViewModel sheetViewModel)
         {
@@ -77,22 +83,6 @@ namespace Cell.View.Application
             DataContext = _viewModel;
             base.OnInitialized(e);
             _viewModel.Load();
-        }
-
-        public void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
-            {
-                UpdateToolWindowLocation();
-            }
-        }
-
-        private void UpdateToolWindowLocation()
-        {
-            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
-            {
-                toolWindow.UpdateSizeAndPositionRespectingBounds();
-            }
         }
 
         private void AdjustWindowSize()
@@ -145,18 +135,18 @@ namespace Cell.View.Application
             ShowToolWindow(functionManager);
         }
 
-        private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
-        {
-            var sheetManagerViewModel = new SheetManagerWindowViewModel();
-            var sheetManager = new SheetManagerWindow(sheetManagerViewModel);
-            ShowToolWindow(sheetManager);
-        }
-
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var settingsWindowViewModel = new SettingsWindowViewModel();
             var settingsWindow = new SettingsWindow(settingsWindowViewModel);
             ShowToolWindow(settingsWindow);
+        }
+
+        private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
+        {
+            var sheetManagerViewModel = new SheetManagerWindowViewModel();
+            var sheetManager = new SheetManagerWindow(sheetManagerViewModel);
+            ShowToolWindow(sheetManager);
         }
 
         private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
@@ -173,6 +163,14 @@ namespace Cell.View.Application
             var editPanel = new CellFormatEditWindow();
             editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
             ShowToolWindow(editPanel);
+        }
+
+        private void UpdateToolWindowLocation()
+        {
+            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
+            {
+                toolWindow.UpdateSizeAndPositionRespectingBounds();
+            }
         }
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)

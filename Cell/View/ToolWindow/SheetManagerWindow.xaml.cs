@@ -1,17 +1,16 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
-using Cell.Persistence;
-using Cell.Common;
 
 namespace Cell.View.ToolWindow
 {
     public partial class SheetManagerWindow : UserControl, IResizableToolWindow
     {
-        private double _width = 400;
-        private double _height = 400;
         private readonly SheetManagerWindowViewModel _viewModel;
+        private double _height = 400;
+        private double _width = 400;
         public SheetManagerWindow(SheetManagerWindowViewModel viewModel)
         {
             _viewModel = viewModel;
@@ -55,27 +54,25 @@ namespace Cell.View.ToolWindow
             _viewModel.UserSetWidth = width;
         }
 
-        private void OpenExportWindow()
+        private static void MakeSureSheetOrderingIsConsecutive()
         {
-            var exportWindow = new ExportWindow(new ExportWindowViewModel());
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(exportWindow);
-        }
-
-        private void OpenImportWindow()
-        {
-            var importWindow = new ImportWindow(new ImportWindowViewModel());
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(importWindow);
-        }
-
-        private void DeleteSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
+            var i = 0;
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.OrderedSheets.ToList())
             {
-                DialogWindow.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
-                {
-                    ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));    
-                });
+                sheet.Order = i;
+                i += 2;
             }
+        }
+
+        private void AddNewSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var newSheetName = "NewSheet";
+            var newSheetNameNumber = 1;
+            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == $"{newSheetName}{newSheetNameNumber}"))
+            {
+                newSheetNameNumber += 1;
+            }
+            ApplicationViewModel.Instance.GoToSheet($"{newSheetName}{newSheetNameNumber}");
         }
 
         private void CopySheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
@@ -87,12 +84,35 @@ namespace Cell.View.ToolWindow
             }
         }
 
+        private void DeleteSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
+            {
+                DialogWindow.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
+                {
+                    ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));
+                });
+            }
+        }
+
         private void GoToSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
             {
                 ApplicationViewModel.Instance.GoToSheet(sheetModel.Name);
             }
+        }
+
+        private void OpenExportWindow()
+        {
+            var exportWindow = new ExportWindow(new ExportWindowViewModel());
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(exportWindow);
+        }
+
+        private void OpenImportWindow()
+        {
+            var importWindow = new ImportWindow(new ImportWindowViewModel());
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(importWindow);
         }
 
         private void OrderSheetDownButtonClicked(object sender, System.Windows.RoutedEventArgs e)
@@ -106,16 +126,6 @@ namespace Cell.View.ToolWindow
             MakeSureSheetOrderingIsConsecutive();
         }
 
-        private static void MakeSureSheetOrderingIsConsecutive()
-        {
-            var i = 0;
-            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.OrderedSheets.ToList())
-            {
-                sheet.Order = i;
-                i += 2;
-            }
-        }
-
         private void OrderSheetUpButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             MakeSureSheetOrderingIsConsecutive();
@@ -125,17 +135,6 @@ namespace Cell.View.ToolWindow
                 _viewModel.RefreshSheetsList();
             }
             MakeSureSheetOrderingIsConsecutive();
-        }
-
-        private void AddNewSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            var newSheetName = "NewSheet";
-            var newSheetNameNumber = 1;
-            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == $"{newSheetName}{newSheetNameNumber}"))
-            {
-                newSheetNameNumber += 1;
-            }
-            ApplicationViewModel.Instance.GoToSheet($"{newSheetName}{newSheetNameNumber}");
         }
     }
 }

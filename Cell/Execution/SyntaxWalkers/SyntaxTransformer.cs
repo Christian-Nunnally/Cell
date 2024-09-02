@@ -6,7 +6,6 @@ namespace Cell.Execution.SyntaxWalkers
     {
         private readonly CSharpSyntaxRewriter _rewriterFrom = rewriteFrom;
         private readonly CSharpSyntaxRewriter _rewriterTo = rewriteTo;
-
         public string TransformFrom(string code) => Transform(code, _rewriterFrom);
 
         public string TransformTo(string code) => Transform(code, _rewriterTo);

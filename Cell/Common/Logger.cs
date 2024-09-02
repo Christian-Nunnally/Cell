@@ -1,15 +1,13 @@
-﻿
-namespace Cell.Common
+﻿namespace Cell.Common
 {
     internal static class Logger
     {
-        private static int LogNumber = 0;
         private const int MaxRetainedLogs = 2000;
         private static readonly Queue<string> _logsQueue = new();
+        private static int LogNumber = 0;
+        public static event Action<string>? LogAdded;
 
         public static IEnumerable<string> Logs { get; } = [.. _logsQueue];
-
-        public static event Action<string>? LogAdded;
 
         public static void Log(string message)
         {

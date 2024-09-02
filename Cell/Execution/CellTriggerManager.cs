@@ -9,7 +9,6 @@ namespace Cell.Execution
     public class CellTriggerManager
     {
         private readonly Dictionary<string, CellModel> _cellsBeingEdited = [];
-
         public void CellTriggered(CellModel cell, EditContext editContext)
         {
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
