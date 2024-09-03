@@ -131,7 +131,8 @@ namespace Cell.Data
 
             // Not sorted yet, so just add it to the end.
             _sortedItems.Add(model);
-            var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, _sortedItems.Count - 1), Model.SortAndFilterFunctionName);
+            var pluginFunctionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
+            var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(pluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, _sortedItems.Count - 1), Model.SortAndFilterFunctionName);
             if (sortFilterResult == null || string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
                 // Exlude item.
@@ -141,7 +142,7 @@ namespace Cell.Data
             {
                 if (sortFilterResult == null) return;
                 _sortedItems.RemoveAt(_sortedItems.Count - 1);
-                var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
+                var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(pluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
                 inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                 _cachedSortFilterResult.Add(model.ID, (int)sortFilterResult!);
                 _items.Add(model.ID, model);
@@ -165,9 +166,10 @@ namespace Cell.Data
         {
             if (sender is PluginModel model && Model.SortAndFilterFunctionName is not null)
             {
+                var pluginFunctionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
-                var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, currentIndex), Model.SortAndFilterFunctionName);
+                var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(pluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, currentIndex), Model.SortAndFilterFunctionName);
 
                 var cachedResult = _cachedSortFilterResult[model.ID];
                 if (cachedResult == sortFilterResult) return;
@@ -180,7 +182,7 @@ namespace Cell.Data
                 {
                     _cachedSortFilterResult[model.ID] = (int)sortFilterResult;
                     _sortedItems.RemoveAt(currentIndex);
-                    var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
+                    var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(pluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, i), Model.SortAndFilterFunctionName) ?? 0);
                     inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                     OrderChanged?.Invoke(this);
                 }

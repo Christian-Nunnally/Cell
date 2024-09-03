@@ -76,7 +76,7 @@ namespace Cell.Persistence
         // TODO: Move somewhere else
         public void SaveAll()
         {
-            PluginFunctionLoader.SavePlugins();
+            ApplicationViewModel.Instance.PluginFunctionLoader.SavePlugins();
             ApplicationViewModel.Instance.UserCollectionLoader.SaveCollections();
             ApplicationViewModel.Instance.CellLoader.SaveCells();
             SaveVersion();
@@ -116,7 +116,7 @@ namespace Cell.Persistence
 
         internal string? LoadFile(string path)
         {
-            if (path.StartsWith("//") || path.StartsWith("\\")) throw new CellError("Invalid path");
+            if (path.StartsWith("//") || path.StartsWith('\\')) throw new CellError("Invalid path");
             var fullPath = Path.Combine(_rootPath, path);
             if (!_fileIO.Exists(fullPath)) return null;
             return _fileIO.ReadFile(fullPath);

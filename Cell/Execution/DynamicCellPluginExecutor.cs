@@ -13,9 +13,9 @@ namespace Cell.Execution
             Logger.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.Success} - {compileResult.Result}");
         }
 
-        public static CompileResult RunPopulate(PluginContext pluginContext, CellModel cell)
+        public static CompileResult RunPopulate(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
         {
-            if (!PluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { Success = false, Result = "Populate function not found" };
+            if (!pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { Success = false, Result = "Populate function not found" };
             var method = populateFunction.CompiledMethod;
             if (populateFunction.CompileResult.Success)
             {
@@ -29,9 +29,9 @@ namespace Cell.Execution
             return populateFunction.CompileResult;
         }
 
-        public static CompileResult RunTrigger(PluginContext pluginContext, CellModel cell)
+        public static CompileResult RunTrigger(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
         {
-            if (!PluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { Success = false, Result = "Trigger function not found" };
+            if (!pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { Success = false, Result = "Trigger function not found" };
             var method = triggerFunction.CompiledMethod;
             if (triggerFunction.CompileResult.Success)
             {
@@ -44,9 +44,9 @@ namespace Cell.Execution
             return triggerFunction.CompileResult;
         }
 
-        internal static int? RunSortFilter(PluginContext pluginContext, string functionName)
+        internal static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, string functionName)
         {
-            if (!PluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
+            if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
             var method = populateFunction.CompiledMethod;
             if (populateFunction.CompileResult.Success)
             {

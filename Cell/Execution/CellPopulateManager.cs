@@ -54,20 +54,7 @@ namespace Cell.Execution
             var key = cell.GetUnqiueLocationString();
             if (_cellsToNotifyOnValueUpdatesAtLocation.TryGetValue(key, out var subscribers))
             {
-                foreach (var subscriber in subscribers.Keys.ToList())
-                {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index, subscriber), subscriber);
-                    if (result.Success)
-                    {
-                        if (result.Result != null) subscriber.Text = result.Result;
-                        subscriber.ErrorText = string.Empty;
-                    }
-                    else
-                    {
-                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
-                        if (result.Result != null) subscriber.ErrorText = result.Result;
-                    }
-                }
+                RunPopulateForSubscribers(subscribers);
             }
             _cellsBeingUpdated.Remove(cell.ID);
         }
@@ -78,20 +65,7 @@ namespace Cell.Execution
             _collectionsBeingUpdated.Add(userCollectionName);
             if (_cellsToNotifyOnCollectionUpdates.TryGetValue(userCollectionName, out var subscribers))
             {
-                foreach (var subscriber in subscribers.Keys.ToList())
-                {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, subscriber.Index), subscriber);
-                    if (result.Success)
-                    {
-                        if (result.Result != null) subscriber.Text = result.Result;
-                        subscriber.ErrorText = string.Empty;
-                    }
-                    else
-                    {
-                        if (result.Result != null) subscriber.Text = result.Result;// "Error";
-                        if (result.Result != null) subscriber.ErrorText = result.Result;
-                    }
-                }
+                RunPopulateForSubscribers(subscribers);
             }
             _collectionsBeingUpdated.Remove(userCollectionName);
 
@@ -108,12 +82,20 @@ namespace Cell.Execution
         {
             model.AfterCellEdited += NotifyCellValueUpdated;
             model.PropertyChanged += CellPropertyChanged;
+            if (!string.IsNullOrWhiteSpace(model.PopulateFunctionName))
+            {
+                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                {
+                    UpdateDependencySubscriptions(model, function);
+                }
+            }
         }
 
         public void StopMonitoringCellForUpdates(CellModel model)
         {
             model.AfterCellEdited -= NotifyCellValueUpdated;
             model.PropertyChanged -= CellPropertyChanged;
+            StopMonitoringCellForUpdates(model);
         }
 
         public void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
@@ -284,14 +266,14 @@ namespace Cell.Execution
                 if (sender is not CellModel model) return;
                 if (_cellToPopulateFunctionNameMap.TryGetValue(model, out var oldFunctionName))
                 {
-                    if (PluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
+                    if (_pluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
                     {
                         oldFunction.StopListeningForDependencyChanges(model);
                     }
                     _cellToPopulateFunctionNameMap.Remove(model);
                 }
 
-                if (PluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
                 {
                     // TODO: split into add and remove.
                     UpdateDependencySubscriptions(model, function);
@@ -302,5 +284,29 @@ namespace Cell.Execution
         }
 
         private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsToNotify.ForEach(cell => UpdateDependencySubscriptions(cell, function));
+
+        private void RunPopulateForSubscriber(CellModel subscriber)
+        {
+            var pluginContext = new PluginContext(ApplicationViewModel.SafeInstance!, subscriber.Index, subscriber);
+            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, pluginContext, subscriber);
+            if (result.Success)
+            {
+                if (result.Result != null) subscriber.Text = result.Result;
+                subscriber.ErrorText = string.Empty;
+            }
+            else
+            {
+                if (result.Result != null) subscriber.Text = result.Result;// "Error";
+                if (result.Result != null) subscriber.ErrorText = result.Result;
+            }
+        }
+
+        private void RunPopulateForSubscribers(Dictionary<CellModel, int> subscribers)
+        {
+            foreach (var subscriber in subscribers.Keys.ToList())
+            {
+                RunPopulateForSubscriber(subscriber);
+            }
+        }
     }
 }

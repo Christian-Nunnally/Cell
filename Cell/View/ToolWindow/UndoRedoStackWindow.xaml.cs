@@ -29,8 +29,8 @@ namespace Cell.View.ToolWindow
         {
             return
             [
-                new("Undo", new RelayCommand(x => UndoRedoManager.Undo())),
-                new("Redo", new RelayCommand(x => UndoRedoManager.Redo()))
+                new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
+                new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
             ];
         }
 

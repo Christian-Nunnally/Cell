@@ -16,10 +16,10 @@ namespace Cell.Data
         private readonly Dictionary<string, string> _cellsToLocation = [];
         private readonly CellPopulateManager _populateManager;
         private readonly SheetTracker _sheetTracker;
-        private readonly CellTriggerManager _trigerManager;
-        public CellTracker(SheetTracker sheetTracker, CellTriggerManager trigerManager, CellPopulateManager populateManager, CellLoader cellLoader)
+        private readonly CellTriggerManager _triggerManager;
+        public CellTracker(SheetTracker sheetTracker, CellTriggerManager triggerManager, CellPopulateManager populateManager, CellLoader cellLoader)
         {
-            _trigerManager = trigerManager;
+            _triggerManager = triggerManager;
             _populateManager = populateManager;
             _sheetTracker = sheetTracker;
             _cellLoader = cellLoader;
@@ -34,7 +34,7 @@ namespace Cell.Data
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            _trigerManager.StartMonitoringCell(cellModel);
+            _triggerManager.StartMonitoringCell(cellModel);
             _populateManager.StartMonitoringCellForUpdates(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
@@ -54,7 +54,7 @@ namespace Cell.Data
         {
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
             _cellLoader.DeleteCell(cellModel);
-            _trigerManager.StopMonitoringCell(cellModel);
+            _triggerManager.StopMonitoringCell(cellModel);
             _populateManager.StopMonitoringCellForUpdates(cellModel);
             _populateManager.UnsubscribeFromAllLocationUpdates(cellModel);
             _populateManager.UnsubscribeFromAllCollectionUpdates(cellModel);

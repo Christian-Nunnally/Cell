@@ -6,14 +6,21 @@ using Cell.ViewModel.Application;
 
 namespace Cell.Execution
 {
-    public class PluginContext(ApplicationViewModel application, int index, CellModel? cell = null)
+    public class PluginContext
     {
         public const string PluginContextArgumentName = "c";
-        private readonly ApplicationViewModel _application = application;
-        private readonly CellModel? _cell = cell;
+        private readonly ApplicationViewModel _application;
+        private readonly CellModel? _cell;
+        public PluginContext(ApplicationViewModel application, int index, CellModel? cell = null)
+        {
+            _application = application;
+            _cell = cell;
+            Index = index;
+        }
+
         public EditContext E { get; set; } = new EditContext("");
 
-        public int Index { get; set; } = index;
+        public int Index { get; set; }
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 

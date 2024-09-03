@@ -15,17 +15,14 @@ namespace Cell.View.Application
     public partial class ApplicationView : Window
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
-        private ApplicationViewModel _viewModel;
+        private ApplicationViewModel? _viewModel;
         public ApplicationView()
         {
             InitializeComponent();
-
             ShowSheetView(ApplicationViewModel.Instance.SheetViewModel);
         }
 
         public SheetView? ActiveSheetView { get; set; }
-
-        public ApplicationSettings ApplicationSettings => ApplicationViewModel.Instance.ApplicationSettings;
 
         public void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -191,12 +188,12 @@ namespace Cell.View.Application
                 }
                 else if (e.Key == Key.Z)
                 {
-                    UndoRedoManager.Undo();
+                    _viewModel?.UndoRedoManager.Undo();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Y)
                 {
-                    UndoRedoManager.Redo();
+                    _viewModel?.UndoRedoManager.Redo();
                     e.Handled = true;
                 }
             }

@@ -251,7 +251,7 @@ namespace Cell.Model
         public void PopulateText()
         {
             if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, Index), this);
+            var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, Index), this);
             if (result.Result == null) return;
             if (result.Success) Text = result.Result;
             else ErrorText = result.Result;

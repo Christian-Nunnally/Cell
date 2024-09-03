@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Execution;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types.Special;
@@ -45,7 +44,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.SetBackground(value);
                 var color = (Color)ColorConverter.ConvertFromString(value);
                 BackgroundColor = new SolidColorBrush(color);
@@ -63,7 +62,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.SetBorder(value);
                 var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
                 BorderColor = new SolidColorBrush(color);
@@ -110,7 +109,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (UpdateBorderThickness(value))
                 {
-                    UndoRedoManager.RecordStateIfRecording(_model);
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     _model.BorderThicknessString = value;
                     NotifyPropertyChanged(nameof(BorderThicknessString));
                 }
@@ -132,7 +131,7 @@ namespace Cell.ViewModel.Cells
             get => _model.CellType;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.CellType = value;
                 NotifyPropertyChanged(nameof(CellType));
             }
@@ -152,7 +151,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.ColorHexes[(int)ColorFor.ContentBackground] = value;
                 ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
                 NotifyPropertyChanged(nameof(ContentBackgroundColor), nameof(ContentBackgroundColorHex));
@@ -167,7 +166,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.SetContentBorder(value);
                 ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
                 NotifyPropertyChanged(nameof(ContentBorderColor), nameof(ContentBorderColorHex));
@@ -213,7 +212,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (UpdateContentBorderThickness(value))
                 {
-                    UndoRedoManager.RecordStateIfRecording(_model);
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     _model.ContentBorderThicknessString = value;
                     NotifyPropertyChanged(nameof(ContentBorderThicknessString));
                 }
@@ -249,7 +248,7 @@ namespace Cell.ViewModel.Cells
             get => _model.FontFamily;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.Instance.UndoRedoManager.RecordStateIfRecording(_model);
                 _model.FontFamily = value;
                 NotifyPropertyChanged(nameof(FontFamily));
             }
@@ -260,7 +259,7 @@ namespace Cell.ViewModel.Cells
             get => _model.FontSize;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.FontSize = value;
                 NotifyPropertyChanged(nameof(FontSize));
             }
@@ -278,7 +277,7 @@ namespace Cell.ViewModel.Cells
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.SetForeground(value);
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
                 NotifyPropertyChanged(nameof(ForegroundColor), nameof(ForegroundColorHex));
@@ -299,7 +298,7 @@ namespace Cell.ViewModel.Cells
             get => _model.HorizontalAlignment;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.HorizontalAlignment = value;
                 NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter));
             }
@@ -314,7 +313,7 @@ namespace Cell.ViewModel.Cells
             get => _model.Index;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Index = value;
                 NotifyPropertyChanged(nameof(Index));
             }
@@ -325,7 +324,7 @@ namespace Cell.ViewModel.Cells
             get => _model.IsFontBold;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.IsFontBold = value;
                 NotifyPropertyChanged(nameof(IsFontBold));
                 NotifyPropertyChanged(nameof(FontWeightForView));
@@ -337,7 +336,7 @@ namespace Cell.ViewModel.Cells
             get => _model.IsFontItalic;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.IsFontItalic = value;
                 NotifyPropertyChanged(nameof(IsFontItalic));
                 NotifyPropertyChanged(nameof(FontStyleForView));
@@ -349,7 +348,7 @@ namespace Cell.ViewModel.Cells
             get => _model.IsFontStrikethrough;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.IsFontStrikethrough = value;
                 NotifyPropertyChanged(nameof(IsFontStrikethrough));
                 NotifyPropertyChanged(nameof(TextDecorationsForView));
@@ -417,7 +416,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (UpdateMargin(value))
                 {
-                    UndoRedoManager.RecordStateIfRecording(_model);
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     Model.MarginString = value;
                     NotifyPropertyChanged(nameof(MarginString));
                 }
@@ -443,7 +442,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
                 {
-                    UndoRedoManager.RecordStateIfRecording(_model);
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     _model.PopulateFunctionName = value;
                     NotifyPropertyChanged(nameof(PopulateFunctionName));
                     PopulateText();
@@ -489,7 +488,7 @@ namespace Cell.ViewModel.Cells
             get => _model.Text;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Text = value?.Replace("\\n", "\n") ?? string.Empty;
             }
         }
@@ -499,7 +498,7 @@ namespace Cell.ViewModel.Cells
             get => _model.TextAlignmentForView;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.TextAlignmentForView = value;
                 NotifyPropertyChanged(nameof(TextAlignmentForView));
             }
@@ -514,7 +513,7 @@ namespace Cell.ViewModel.Cells
             {
                 if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
                 {
-                    UndoRedoManager.RecordStateIfRecording(_model);
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     _model.TriggerFunctionName = value;
                     NotifyPropertyChanged(nameof(TriggerFunctionName));
                 };
@@ -526,7 +525,7 @@ namespace Cell.ViewModel.Cells
             get => _model.VerticalAlignment;
             set
             {
-                UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.VerticalAlignment = value;
                 NotifyPropertyChanged(nameof(VerticalAlignmentForView));
                 NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter));
@@ -587,11 +586,7 @@ namespace Cell.ViewModel.Cells
 
         public void PopulateText()
         {
-            if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, _model.Index), _model);
-            if (result.Result == null) return;
-            if (result.Success) Text = result.Result;
-            else Model.ErrorText = result.Result;
+            Model.PopulateText();
         }
 
         public void UnhighlightCell()

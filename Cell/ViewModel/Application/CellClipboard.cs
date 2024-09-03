@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Cells;
 using System.Diagnostics.CodeAnalysis;
@@ -7,9 +8,17 @@ namespace Cell.ViewModel.Application
 {
     public class CellClipboard
     {
+        private readonly CellTracker _cellTracker;
+        private readonly UndoRedoManager _undoRedoManager;
         private CellModel? _centerOfCopy;
         private IEnumerable<CellModel> _clipboard = [];
         private bool _copyTextOnly = false;
+        public CellClipboard(UndoRedoManager undoRedoManager, CellTracker cellTracker)
+        {
+            _undoRedoManager = undoRedoManager;
+            _cellTracker = cellTracker;
+        }
+
         public void CopySelectedCells(SheetViewModel activeSheet, bool copyTextOnly)
         {
             _copyTextOnly = copyTextOnly;
@@ -45,30 +54,30 @@ namespace Cell.ViewModel.Application
             activeSheet.UpdateLayout();
         }
 
-        private static void PasteCopiedCell(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private void PasteCopiedCell(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
             PasteSingleCell(cellToPaste, cellToReplace);
         }
 
-        private static void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
-            UndoRedoManager.RecordStateIfRecording(cellToReplace);
+            _undoRedoManager.RecordStateIfRecording(cellToReplace);
             cellToReplace.Text = cellToPaste.Text;
         }
 
-        private static void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
+        private void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
-            UndoRedoManager.RecordStateIfRecording(cellToReplace);
+            _undoRedoManager.RecordStateIfRecording(cellToReplace);
             cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
         }
 
-        private static bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
+        private bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
             var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            cellToReplace = ApplicationViewModel.Instance.CellTracker.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
+            cellToReplace = _cellTracker.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;

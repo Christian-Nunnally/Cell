@@ -1,6 +1,5 @@
 ﻿using Cell.Common;
 using Cell.Model;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
@@ -156,7 +155,7 @@ namespace Cell.ViewModel.Cells
             SelectedCellViewModels.Add(cell);
             if (SelectedCellViewModels.Count == 1)
             {
-                if (PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
+                if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
                 {
                     if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies)
                     {
@@ -168,7 +167,7 @@ namespace Cell.ViewModel.Cells
                         HighlightCollectionDependenciesForFunction(populate);
                     }
                 }
-                if (PluginFunctionLoader.TryGetFunction("void", SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
+                if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("void", SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
                 {
                     if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies)
                     {
@@ -331,8 +330,8 @@ namespace Cell.ViewModel.Cells
             if (e.PropertyName == nameof(CellViewModel.SelectionColor)) return;
             if (e.PropertyName == nameof(CellViewModel.SelectionBorderColor)) return;
 
-            UndoRedoManager.StartRecordingUndoState();
-            UndoRedoManager.RecordStateIfRecording(oldSelectedCellState);
+            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(oldSelectedCellState);
             foreach (var cell in CellViewModels.Where(x => x.IsSelected).ToList())
             {
                 if (cell == sender) continue;
@@ -345,7 +344,7 @@ namespace Cell.ViewModel.Cells
                     cellProperty.SetValue(cell, selectedProperty.GetValue(sender), null);
                 }
             }
-            UndoRedoManager.FinishRecordingUndoState();
+            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
     }
 }

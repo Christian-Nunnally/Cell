@@ -16,11 +16,13 @@ namespace Cell.Persistence
         private readonly PersistenceManager _persistenceManager;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly SheetTracker _sheetTracker;
-        public CellLoader(PersistenceManager persistenceManager, SheetTracker sheetTracker, PluginFunctionLoader pluginFunctionLoader)
+        private readonly UserCollectionLoader _userCollectionLoader;
+        public CellLoader(PersistenceManager persistenceManager, SheetTracker sheetTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _persistenceManager = persistenceManager;
             _sheetTracker = sheetTracker;
             _pluginFunctionLoader = pluginFunctionLoader;
+            _userCollectionLoader = userCollectionLoader;
         }
 
         public void CopySheet(string sheetName)
@@ -52,24 +54,24 @@ namespace Cell.Persistence
                 SaveCell(cellDirectory, copiedCell);
             }
 
-            var populateFunctions = copiedCells.Select(c => c.PopulateFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", x));
-            var triggerFunctions = copiedCells.Select(c => c.TriggerFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", x));
+            var populateFunctions = copiedCells.Select(c => c.PopulateFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => _pluginFunctionLoader.GetOrCreateFunction("object", x));
+            var triggerFunctions = copiedCells.Select(c => c.TriggerFunctionName).Where(x => !string.IsNullOrEmpty(x)).Distinct().Select(x => _pluginFunctionLoader.GetOrCreateFunction("void", x));
             var populateAndTriggerFunctions = populateFunctions.Concat(triggerFunctions).ToList();
 
             var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
             AddBaseCollectionsToUsedCollectionList(usedCollections);
 
-            var collectionSortFunctions = usedCollections.Select(x => ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", x));
+            var collectionSortFunctions = usedCollections.Select(x => _pluginFunctionLoader.GetOrCreateFunction("object", x));
             var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
             foreach (var function in allFunctions)
             {
-                PluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
+                _pluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
             }
 
             foreach (var collection in usedCollections)
             {
                 var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
-                ApplicationViewModel.Instance.UserCollectionLoader.ExportCollection(collection, collectionDirectory);
+                _userCollectionLoader.ExportCollection(collection, collectionDirectory);
             }
         }
 
@@ -110,14 +112,14 @@ namespace Cell.Persistence
             foreach (var functionModel in functionsBeingImported)
             {
                 var function = new FunctionViewModel(functionModel);
-                ApplicationViewModel.Instance.PluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
-                PluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
+                _pluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
+                _pluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
             }
 
             foreach (var collectionName in collectionsBeingImported)
             {
                 var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
-                ApplicationViewModel.Instance.UserCollectionLoader.ImportCollection(collectionDirectory, collectionName);
+                _userCollectionLoader.ImportCollection(collectionDirectory, collectionName);
             }
         }
 
@@ -187,7 +189,7 @@ namespace Cell.Persistence
             }
         }
 
-        private static bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
+        private bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
         {
             reason = string.Empty;
             foreach (var function in functionsBeingImported)
@@ -200,14 +202,13 @@ namespace Cell.Persistence
             }
             return true;
 
-            static FunctionViewModel? GetExistingFunction(PluginFunctionModel function)
+            FunctionViewModel? GetExistingFunction(PluginFunctionModel function)
             {
-                var functionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
-                return functionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
+                return _pluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }
         }
 
-        private static List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
+        private List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
         {
             var copiedCells = ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
             foreach (var copiedCell in copiedCells)
@@ -218,31 +219,12 @@ namespace Cell.Persistence
             return copiedCells;
         }
 
-        private static void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
+        private void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
         {
             foreach (var cell in cells.Where(cell => cell.MergedWith != string.Empty))
             {
                 cell.MergedWith = oldIdToNewIdMap[cell.MergedWith];
             }
-        }
-
-        private static Dictionary<string, string> GiveCellsNewUniqueIndentities(string sheetName, IEnumerable<CellModel> cells)
-        {
-            var oldIdToNewIdMap = new Dictionary<string, string>();
-            foreach (var cell in cells)
-            {
-                var newId = Guid.NewGuid().ToString();
-                oldIdToNewIdMap[cell.ID] = newId;
-                cell.ID = newId;
-                cell.SheetName = sheetName;
-            }
-            return oldIdToNewIdMap;
-        }
-
-        private static void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
-        {
-            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
-            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
         }
 
         private List<PluginFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
@@ -258,6 +240,19 @@ namespace Cell.Persistence
                 }
             }
             return functionsBeingImported;
+        }
+
+        private Dictionary<string, string> GiveCellsNewUniqueIndentities(string sheetName, IEnumerable<CellModel> cells)
+        {
+            var oldIdToNewIdMap = new Dictionary<string, string>();
+            foreach (var cell in cells)
+            {
+                var newId = Guid.NewGuid().ToString();
+                oldIdToNewIdMap[cell.ID] = newId;
+                cell.ID = newId;
+                cell.SheetName = sheetName;
+            }
+            return oldIdToNewIdMap;
         }
 
         private CellModel LoadAndAddCell(string file)
@@ -276,6 +271,12 @@ namespace Cell.Persistence
         {
             var directory = Path.Combine(SheetsSaveDirectory, sheet.Name);
             foreach (var cell in ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheet.Name)) SaveCell(directory, cell);
+        }
+
+        private void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
+        {
+            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
+            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
         }
     }
 }

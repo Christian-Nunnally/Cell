@@ -7,16 +7,20 @@ namespace Cell.ViewModel.ToolWindow
     {
         public UndoRedoStackWindowViewModel()
         {
-            UndoRedoManager.UndoStackChanged += UpdateUndoStackForViewModel;
-            UpdateUndoStackForViewModel();
+            var undoRedoManager = ApplicationViewModel.GetUndoRedoManager();
+            if (undoRedoManager != null)
+            {
+                undoRedoManager.UndoStackChanged += () => UpdateUndoStackForViewModel(undoRedoManager);
+                UpdateUndoStackForViewModel(undoRedoManager);
+            }
         }
 
         public ObservableCollection<string> UndoStack { get; set; } = [];
 
-        private void UpdateUndoStackForViewModel()
+        private void UpdateUndoStackForViewModel(UndoRedoManager undoRedoManager)
         {
             UndoStack.Clear();
-            foreach (var item in UndoRedoManager.UndoStack)
+            foreach (var item in undoRedoManager.UndoStack)
             {
                 UndoStack.Add(item);
             }

@@ -1,5 +1,5 @@
 ﻿using Cell.Common;
-using Cell.Persistence;
+using Cell.ViewModel.Application;
 
 namespace Cell.Model
 {
@@ -49,7 +49,7 @@ namespace Cell.Model
                 if (value == null) return;
                 if (_sortAndFilterFunctionName == value) return;
                 _sortAndFilterFunctionName = value;
-                if (!string.IsNullOrEmpty(_sortAndFilterFunctionName) && PluginFunctionLoader.TryGetFunction("object", _sortAndFilterFunctionName, out var function))
+                if (!string.IsNullOrEmpty(_sortAndFilterFunctionName) && ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("object", _sortAndFilterFunctionName, out var function))
                 {
                     var _ = function.CompiledMethod;
                 }

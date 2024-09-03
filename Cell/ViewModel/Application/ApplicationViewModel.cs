@@ -12,7 +12,7 @@ namespace Cell.ViewModel.Application
     public class ApplicationViewModel : PropertyChangedBase
     {
         public readonly ApplicationView ApplicationView;
-        private readonly CellClipboard _cellClipboard = new();
+        private readonly CellClipboard _cellClipboard;
         private static ApplicationViewModel? instance;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
@@ -20,20 +20,24 @@ namespace Cell.ViewModel.Application
         private ApplicationViewModel(ApplicationView view)
         {
             PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
-            CellTriggerManager = new();
             PluginFunctionLoader = new(PersistenceManager);
+            CellTriggerManager = new(PluginFunctionLoader);
             CellPopulateManager = new(PluginFunctionLoader);
             SheetTracker = new();
             TitleBarSheetNavigationViewModel = new(SheetTracker);
-            CellLoader = new(PersistenceManager, SheetTracker, PluginFunctionLoader);
+            UserCollectionLoader = new(PersistenceManager, CellPopulateManager);
+            CellLoader = new(PersistenceManager, SheetTracker, PluginFunctionLoader, UserCollectionLoader);
             CellTracker = new CellTracker(SheetTracker, CellTriggerManager, CellPopulateManager, CellLoader);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.LastLoadedSheet);
-            UserCollectionLoader = new(PersistenceManager, CellPopulateManager);
+            UndoRedoManager = new(CellTracker);
+            _cellClipboard = new(UndoRedoManager, CellTracker);
             ApplicationView = view;
         }
 
         public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
+
+        public static ApplicationViewModel? SafeInstance => instance;
 
         public ApplicationSettings ApplicationSettings { get; private set; }
 
@@ -83,6 +87,8 @@ namespace Cell.ViewModel.Application
 
         public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
 
+        public UndoRedoManager UndoRedoManager { get; private set; }
+
         public UserCollectionLoader UserCollectionLoader { get; private set; }
 
         public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
@@ -91,9 +97,20 @@ namespace Cell.ViewModel.Application
             return instance;
         }
 
+        public static UndoRedoManager? GetUndoRedoManager()
+        {
+            if (instance == null)
+            {
+                return null;
+            }
+            return Instance.UndoRedoManager;
+        }
+
         public void ChangeSelectedCellsType(CellType newType)
         {
-            UndoRedoManager.RecordCellStatesOntoUndoStack(SheetViewModel.SelectedCellViewModels.Select(x => x.Model));
+            UndoRedoManager.StartRecordingUndoState();
+            SheetViewModel.SelectedCellViewModels.Select(x => x.Model).ToList().ForEach(UndoRedoManager.RecordStateIfRecording);
+            UndoRedoManager.FinishRecordingUndoState();
             var selectedCells = SheetViewModel.SelectedCellViewModels.ToList();
             foreach (var selectedCell in selectedCells)
             {

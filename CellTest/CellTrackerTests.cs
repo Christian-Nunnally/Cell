@@ -13,10 +13,11 @@ namespace CellTest
             var persistenceManager = new PersistenceManager("", testFileIO);
             var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
             var sheetTracker = new SheetTracker();
-            var triggerManager = new CellTriggerManager();
-            var populateManager = new CellPopulateManager(pluginFunctionLoader);
-            var cellLoader = new CellLoader(persistenceManager, sheetTracker, pluginFunctionLoader);
-            var _ = new CellTracker(sheetTracker, triggerManager, populateManager, cellLoader);
+            var cellTriggerManager = new CellTriggerManager(pluginFunctionLoader);
+            var cellPopulateManager = new CellPopulateManager(pluginFunctionLoader);
+            var userCollectionLoader = new UserCollectionLoader(persistenceManager, cellPopulateManager);
+            var cellLoader = new CellLoader(persistenceManager, sheetTracker, pluginFunctionLoader, userCollectionLoader);
+            var _ = new CellTracker(sheetTracker, cellTriggerManager, cellPopulateManager, cellLoader);
         }
     }
 }
