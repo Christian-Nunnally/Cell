@@ -1,7 +1,6 @@
 ﻿using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
@@ -12,7 +11,7 @@ namespace Cell.ViewModel.Cells.Types
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             if (CollectionName == string.Empty) return;
-            ApplicationViewModel.Instance.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+            _sheetViewModel.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
             UpdateList();
         }
 
@@ -21,18 +20,18 @@ namespace Cell.ViewModel.Cells.Types
             get => Model.GetStringProperty(nameof(CollectionName));
             set
             {
-                ApplicationViewModel.Instance.CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
+                _sheetViewModel.CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
                 if (!string.IsNullOrEmpty(value))
                 {
-                    ApplicationViewModel.Instance.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                    _sheetViewModel.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
                     UpdateList();
                 }
                 NotifyPropertyChanged(nameof(CollectionName));
             }
         }
 
-        public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
+        public IEnumerable<string> CollectionNames => ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames;
 
         public ObservableCollection<object> ListItems { get; set; } = [];
 
@@ -74,14 +73,14 @@ namespace Cell.ViewModel.Cells.Types
         internal void UpdateList()
         {
             ListItems.Clear();
-            var collection = UserCollectionLoader.GetCollection(CollectionName);
+            var collection = _sheetViewModel.UserCollectionLoader.GetCollection(CollectionName);
             if (collection == null) return;
             if (!string.IsNullOrEmpty(PopulateFunctionName))
             {
                 int i = 0;
                 foreach (var item in collection.Items)
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, i++), Model);
+                    var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(_sheetViewModel.CellTracker, _sheetViewModel.UserCollectionLoader, i++), Model);
                     if (result.Result == null) continue;
                     ListItems.Add(result.Result);
                     if (ListItems.Count >= MaxNumberOfItems) break;

@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.ViewModel.Application;
 using System.Diagnostics;
 using System.IO;
 
@@ -8,10 +7,11 @@ namespace Cell.Persistence
     public class PersistenceManager
     {
         public const string Version = "0.0.0";
-        private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
         private readonly IFileIO _fileIO;
-        private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
         private string _rootPath;
+
+        public string RootPath { get =>_rootPath; set => _rootPath = value; }
+
         public PersistenceManager(string rootPath, IFileIO fileIO)
         {
             _rootPath = rootPath;
@@ -19,20 +19,6 @@ namespace Cell.Persistence
         }
 
         public string CurrentTemplatePath => Path.Combine(_rootPath, "Templates");
-
-        // TODO: Move somewhere else
-        public void CreateBackup()
-        {
-            // Make sure cells instance is created with the correct save location
-            var _ = ApplicationViewModel.Instance.CellTracker;
-            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
-            var oldSaveLocation = _rootPath;
-            _rootPath = _rootPath + "_backup_" + CreateFileFriendlyCurrentDateTime();
-            SaveAll();
-            ZipFolder(_rootPath);
-            _lastBackupDate = DateTime.Now;
-            _rootPath = oldSaveLocation;
-        }
 
         public void DeleteFile(string path)
         {
@@ -71,15 +57,6 @@ namespace Cell.Persistence
         public void OpenRootDirectoryInExplorer()
         {
             Process.Start("explorer.exe", _rootPath);
-        }
-
-        // TODO: Move somewhere else
-        public void SaveAll()
-        {
-            ApplicationViewModel.Instance.PluginFunctionLoader.SavePlugins();
-            ApplicationViewModel.Instance.UserCollectionLoader.SaveCollections();
-            ApplicationViewModel.Instance.CellLoader.SaveCells();
-            SaveVersion();
         }
 
         public void SaveVersion()
@@ -128,9 +105,9 @@ namespace Cell.Persistence
             _fileIO.WriteFile(fullPath, content);
         }
 
-        private static string CreateFileFriendlyCurrentDateTime()
+        public void ZipFolder()
         {
-            return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            ZipFolder(_rootPath);
         }
 
         private void ZipFolder(string path)

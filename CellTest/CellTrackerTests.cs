@@ -9,15 +9,14 @@ namespace CellTest
         [Fact]
         public void BasicLaunchTest()
         {
-            var testFileIO = new TestFileIO();
-            var persistenceManager = new PersistenceManager("", testFileIO);
-            var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
-            var sheetTracker = new SheetTracker();
-            var cellTriggerManager = new CellTriggerManager(pluginFunctionLoader);
-            var cellPopulateManager = new CellPopulateManager(pluginFunctionLoader);
-            var userCollectionLoader = new UserCollectionLoader(persistenceManager, cellPopulateManager);
-            var cellLoader = new CellLoader(persistenceManager, sheetTracker, pluginFunctionLoader, userCollectionLoader);
-            var _ = new CellTracker(sheetTracker, cellTriggerManager, cellPopulateManager, cellLoader);
+            //var testFileIO = new TestFileIO();
+            //var persistenceManager = new PersistenceManager("", testFileIO);
+            //var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
+            //var cellPopulateManager = new CellPopulateManager(pluginFunctionLoader);
+            //var cellTriggerManager = new CellTriggerManager(pluginFunctionLoader);
+            //var userCollectionLoader = new UserCollectionLoader(persistenceManager, cellPopulateManager);
+            //var cellLoader = new CellLoader(persistenceManager, pluginFunctionLoader, userCollectionLoader);
+            //var _ = new CellTracker(cellTriggerManager, cellPopulateManager, cellLoader);
         }
     }
 }

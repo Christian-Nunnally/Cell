@@ -45,7 +45,7 @@ namespace Cell.View.ToolWindow
             _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
-            textEditor.Text = function.GetUserFriendlyCode(currentCell); ;
+            textEditor.Text = function.GetUserFriendlyCode(currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames); ;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
@@ -205,19 +205,19 @@ namespace Cell.View.ToolWindow
                 if (_currentCell is null) return;
                 var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
                 var function = new FunctionViewModel(model);
-                function.SetUserFriendlyCode(textEditor.Text, _currentCell);
+                function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 var compiled = function.CompiledMethod;
                 var result = function.CompileResult;
                 if (result.Success)
                 {
                     if (_doesFunctionReturnValue)
                     {
-                        var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
+                        var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
                         result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
                     }
                     else
                     {
-                        compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance, _currentCell.Index), _currentCell]);
+                        compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
                         result = new CompileResult { Success = true, Result = "Success" };
                     }
                 }
@@ -241,7 +241,7 @@ namespace Cell.View.ToolWindow
             var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
             var function = new FunctionViewModel(model);
             if (_currentCell is null) return;
-            function.SetUserFriendlyCode(textEditor.Text, _currentCell);
+            function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
             var syntaxTree = function.SyntaxTree;
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;

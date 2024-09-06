@@ -1,9 +1,11 @@
 ﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
+using System.Collections.Specialized;
 
 namespace Cell.Execution
 {
@@ -21,16 +23,25 @@ namespace Cell.Execution
         private readonly Dictionary<string, List<ListCellViewModel>> _listCellsToUpdateWhenCollectionsChange = [];
         private readonly Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        public CellPopulateManager(PluginFunctionLoader pluginFunctionLoader)
+        private readonly CellTracker _cellTracker;
+
+        public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
         {
+            _cellTracker = cellTracker;
+            _cellTracker.CellAdded += StartMonitoringCellForUpdates;
+            _cellTracker.CellRemoved += StopMonitoringCellForUpdates;
+            foreach (var cell in _cellTracker.AllCells)
+            {
+                StartMonitoringCellForUpdates(cell);
+            }
             _pluginFunctionLoader = pluginFunctionLoader;
             _pluginFunctionLoader.ObservableFunctions.CollectionChanged += (sender, args) =>
             {
-                if (args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                if (args.Action == NotifyCollectionChangedAction.Add)
                 {
                     if (args.NewItems?[0] is FunctionViewModel function) function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
                 }
-                else if (args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                else if (args.Action == NotifyCollectionChangedAction.Remove)
                 {
                     if (args.OldItems?[0] is FunctionViewModel function) function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
                 }
@@ -87,6 +98,8 @@ namespace Cell.Execution
                 if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
                 {
                     UpdateDependencySubscriptions(model, function);
+                    function.StartListeningForDependencyChanges(model);
+                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
                 }
             }
         }
@@ -95,7 +108,17 @@ namespace Cell.Execution
         {
             model.AfterCellEdited -= NotifyCellValueUpdated;
             model.PropertyChanged -= CellPropertyChanged;
-            StopMonitoringCellForUpdates(model);
+            if (!string.IsNullOrWhiteSpace(model.PopulateFunctionName))
+            {
+                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                {
+                    UpdateDependencySubscriptions(model, function);
+                    function.StopListeningForDependencyChanges(model);
+                    _cellToPopulateFunctionNameMap.Remove(model);
+                }
+            }
+            UnsubscribeFromAllCollectionUpdates(model);
+            UnsubscribeFromAllLocationUpdates(model);
         }
 
         public void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
@@ -283,11 +306,11 @@ namespace Cell.Execution
             }
         }
 
-        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsToNotify.ForEach(cell => UpdateDependencySubscriptions(cell, function));
+        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsThatUseFunction.ForEach(cell => UpdateDependencySubscriptions(cell, function));
 
         private void RunPopulateForSubscriber(CellModel subscriber)
         {
-            var pluginContext = new PluginContext(ApplicationViewModel.SafeInstance!, subscriber.Index, subscriber);
+            var pluginContext = new PluginContext(_cellTracker, ApplicationViewModel.Instance.UserCollectionLoader,  subscriber.Index, subscriber);
             var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, pluginContext, subscriber);
             if (result.Success)
             {

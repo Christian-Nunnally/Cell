@@ -1,36 +1,49 @@
 ﻿using Cell.Common;
+using Cell.Data;
+using Cell.Execution;
 using Cell.Model;
+using Cell.Persistence;
+using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Cells.Types.Special;
-using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Media;
 
 namespace Cell.ViewModel.Cells
 {
-    public class SheetViewModel(string sheetName) : PropertyChangedBase
+    public class SheetViewModel : PropertyChangedBase
     {
-        public static readonly SheetViewModel NullSheet = new("null");
+        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!);
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly SheetTracker _sheetTracker;
+        private readonly CellTracker _cellTracker;
+        private readonly CellPopulateManager _cellPopulateManager;
+        private readonly SheetModel _model;
         private bool _enableMultiEditSelectedCells = true;
-        private string lastKeyPressed = string.Empty;
         private CellModel? oldSelectedCellState;
         private CellViewModel? selectedCellViewModel;
+
+        public CellPopulateManager CellPopulateManager => _cellPopulateManager;
+
+        public SheetViewModel(SheetModel model, CellPopulateManager cellPopulateManager, CellTracker cellTracker, SheetTracker sheetTracker, UserCollectionLoader userCollectionLoader)
+        {
+            _userCollectionLoader = userCollectionLoader;
+            _sheetTracker = sheetTracker;
+            _cellTracker = cellTracker;
+            _cellPopulateManager = cellPopulateManager;
+            _model = model;
+            _model.Cells.CollectionChanged += CellsCollectionChanged;
+            foreach (var cell in _model.Cells)
+            {
+                AddCellViewModel(cell);
+            }
+        }
+
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
         public List<CellViewModel> HighlightedCellViewModels { get; } = [];
-
-        public string LastKeyPressed
-        {
-            get => lastKeyPressed;
-            set
-            {
-                lastKeyPressed = value;
-                NotifyPropertyChanged(nameof(LastKeyPressed));
-            }
-        }
 
         public CellViewModel? SelectedCellViewModel
         {
@@ -59,34 +72,13 @@ namespace Cell.ViewModel.Cells
 
         public List<CellViewModel> SelectedCellViewModels { get; } = [];
 
-        public string SheetName { get; private set; } = sheetName;
+        public string SheetName => _model.Name;
 
-        public void AddCell(CellModel newModel)
-        {
-            var newViewModel = CellViewModelFactory.Create(newModel, this);
-            AddCell(newViewModel);
-        }
+        public CellTracker CellTracker => _cellTracker;
 
-        public void AddCell(CellViewModel cell)
-        {
-            CellViewModels.Add(cell);
-            cell.Model.PropertyChanged += CellModelPropertyChanged;
-        }
+        public SheetTracker SheetTracker => _sheetTracker;
 
-        public void DeleteCell(CellModel cell)
-        {
-            var viewModel = CellViewModels.First(x => x.Model == cell);
-            if (viewModel.Model.MergedWith == viewModel.Model.ID) UnmergeCell(viewModel);
-            DeleteCell(viewModel);
-        }
-
-        public void DeleteCell(CellViewModel cell)
-        {
-            cell.Model.PropertyChanged -= CellModelPropertyChanged;
-            CellViewModels.Remove(cell);
-            SelectedCellViewModels.Remove(cell);
-            ApplicationViewModel.Instance.CellTracker.RemoveCell(cell.Model);
-        }
+        public UserCollectionLoader UserCollectionLoader => _userCollectionLoader;
 
         public void HighlightCell(CellViewModel cellToHighlight, string color)
         {
@@ -94,21 +86,6 @@ namespace Cell.ViewModel.Cells
             cellToHighlight.HighlightCell(color);
             HighlightedCellViewModels.Add(cellToHighlight);
             _enableMultiEditSelectedCells = true;
-        }
-
-        public void InitializeSheet()
-        {
-            if (CellViewModels.Count == 0) AddDefaultCells();
-            UpdateLayout();
-        }
-
-        public void LoadCellViewModels()
-        {
-            foreach (var cell in CellViewModelFactory.CreateCellViewModelsForSheet(this))
-            {
-                AddCell(cell);
-            }
-            InitializeSheet();
         }
 
         public void MoveSelection(int columnOffset, int rowOffset)
@@ -153,168 +130,86 @@ namespace Cell.ViewModel.Cells
             if (cell.IsSelected) return;
             cell.IsSelected = true;
             SelectedCellViewModels.Add(cell);
-            if (SelectedCellViewModels.Count == 1)
-            {
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("object", SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
-                {
-                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies)
-                    {
-                        HighlightCellDependenciesOfFunction(populate);
-                    }
-
-                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies)
-                    {
-                        HighlightCollectionDependenciesForFunction(populate);
-                    }
-                }
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("void", SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
-                {
-                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies)
-                    {
-                        HighlightCellDependenciesOfFunction(trigger);
-                    }
-
-                    if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies)
-                    {
-                        HighlightCollectionDependenciesForFunction(trigger);
-                    }
-                }
-            }
         }
 
         public void UnhighlightAllCells()
         {
-            foreach (var cellToUnHighlight in HighlightedCellViewModels)
-            {
-                cellToUnHighlight.UnhighlightCell();
-            }
+            foreach (var cellToUnHighlight in HighlightedCellViewModels) cellToUnHighlight.UnhighlightCell();
             HighlightedCellViewModels.Clear();
         }
 
-        public void UnmergeCell(CellViewModel mergedCell)
+        public void UnmergeCell(CellModel mergedCell)
         {
-            var cells = CellViewModels.Where(x => x.Model.MergedWith == mergedCell.ID);
+            var cells = CellViewModels.Select(x => x.Model).Where(x => x.IsMergedWith(mergedCell));
             foreach (var cell in cells)
             {
                 if (mergedCell == cell) continue;
-                cell.Model.MergedWith = string.Empty;
+                cell.MergedWith = string.Empty;
             }
-            mergedCell.Model.MergedWith = string.Empty;
+            mergedCell.MergedWith = string.Empty;
         }
 
         public void UnselectAllCells()
         {
-            foreach (var cell in SelectedCellViewModels.ToList())
-            {
-                UnselectCell(cell);
-            }
+            foreach (var cell in SelectedCellViewModels.ToList()) UnselectCell(cell);
         }
 
-        internal void UnselectCell(CellViewModel cell)
+        public void UnselectCell(CellViewModel cell)
         {
             SelectedCellViewModels.Remove(cell);
             cell.IsSelected = false;
-            if (SelectedCellViewModel == cell)
-            {
-                SelectedCellViewModel = null;
-            }
+            if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
         }
 
-        internal void UpdateLayout()
+        public void UpdateLayout()
         {
             _enableMultiEditSelectedCells = false;
-            var layout = new CellLayout(CellViewModels);
+            var layout = new CellLayout(CellViewModels, _cellTracker);
             layout.UpdateLayout();
             _enableMultiEditSelectedCells = true;
         }
 
-        private void AddDefaultCells()
+        private void AddCellViewModel(CellModel newModel)
         {
-            var corner = CellModelFactory.Create(0, 0, CellType.Corner, SheetName);
-            AddCell(corner);
-            var row = CellModelFactory.Create(1, 0, CellType.Row, SheetName);
-            AddCell(row);
-            var column = CellModelFactory.Create(0, 1, CellType.Column, SheetName);
-            AddCell(column);
-            var cell = CellModelFactory.Create(1, 1, CellType.Label, SheetName);
-            AddCell(cell);
-
-            var columnViewModel = CellViewModels.OfType<ColumnCellViewModel>().First();
-            columnViewModel.AddColumnToTheRight();
-            columnViewModel.AddColumnToTheRight();
-
-            var rowViewModel = CellViewModels.OfType<RowCellViewModel>().First();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
-            rowViewModel.AddRowBelow();
+            var newViewModel = CellViewModelFactory.Create(newModel, this);
+            CellViewModels.Add(newViewModel);
+            newViewModel.Model.PropertyChanged += CheckForCellTypePropertyChanged;
+            UpdateLayout();
         }
 
-        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void CheckForCellTypePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var model = sender as CellModel ?? throw new NullReferenceException("This handler is only for use with non null CellModel objects.");
+            if (e.PropertyName != nameof(CellModel.CellType)) return;
+            var model = (CellModel)sender!;
             var viewModel = CellViewModels.FirstOrDefault(x => x.Model == model);
             if (viewModel == null) return;
-            if (e.PropertyName == nameof(CellModel.CellType))
+            ReinstantiateCellsViewModel(viewModel);
+        }
+
+        private void CellsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                var newType = model.CellType;
-                ReinstantiateCellsViewModel(viewModel);
+                foreach (CellModel cell in e.NewItems!) AddCellViewModel(cell);
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (CellModel cell in e.OldItems!)RemoveCellViewModel(cell);
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                CellViewModels.Clear();
+                foreach (var cell in _model.Cells) AddCellViewModel(cell);
             }
         }
 
-        private void HighlightCellDependenciesOfFunction(FunctionViewModel function)
+        private void RemoveCellViewModel(CellModel cell)
         {
-            foreach (var locationDependencies in function.LocationDependencies)
-            {
-                if (SelectedCellViewModel == null) return;
-                if (locationDependencies.IsRange)
-                {
-                    var sheet = locationDependencies.SheetName;
-                    if (sheet != SheetName) continue;
-                    var row = locationDependencies.Row;
-                    var column = locationDependencies.Column;
-                    if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
-                    if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
-
-                    var rowRangeEnd = locationDependencies.RowRangeEnd;
-                    var columnRangeEnd = locationDependencies.ColumnRangeEnd;
-                    if (locationDependencies.IsColumnRelativeRangeEnd) columnRangeEnd += SelectedCellViewModel.Column;
-                    if (locationDependencies.IsRowRelativeRangeEnd) rowRangeEnd += SelectedCellViewModel.Row;
-
-                    for (var r = row; r <= rowRangeEnd; r++)
-                    {
-                        for (var c = column; c <= columnRangeEnd; c++)
-                        {
-                            var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == r && x.Column == c);
-                            if (cellToHighlight == null) continue;
-                            HighlightCell(cellToHighlight, "#0438ff44");
-                        }
-                    }
-                }
-                else
-                {
-                    var sheet = locationDependencies.SheetName;
-                    if (sheet != SheetName) continue;
-                    var row = locationDependencies.Row;
-                    var column = locationDependencies.Column;
-                    if (locationDependencies.IsColumnRelative) column += SelectedCellViewModel.Column;
-                    if (locationDependencies.IsRowRelative) row += SelectedCellViewModel.Row;
-                    var cellToHighlight = CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
-                    if (cellToHighlight == null) continue;
-                    HighlightCell(cellToHighlight, "#0438ff44");
-                }
-            }
-        }
-
-        private void HighlightCollectionDependenciesForFunction(FunctionViewModel function)
-        {
-            foreach (var collectionReference in function.CollectionDependencies)
-            {
-                var cellsToHighlight = CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
-                foreach (var cellToHighlight in cellsToHighlight)
-                {
-                    HighlightCell(cellToHighlight, "#0438ff44");
-                }
-            }
+            if (cell.IsMergedParent()) CellFormatEditWindow.UnmergeCell(cell, _cellTracker);
+            cell.PropertyChanged -= CheckForCellTypePropertyChanged;
+            var viewModel = CellViewModels.First(x => x.Model == cell);
+            CellViewModels.Remove(viewModel);
+            SelectedCellViewModels.Remove(viewModel);
         }
 
         private void PropertyChangedOnSelectedCell(object? sender, PropertyChangedEventArgs e)

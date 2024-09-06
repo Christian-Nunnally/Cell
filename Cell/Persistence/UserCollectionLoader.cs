@@ -4,7 +4,6 @@ using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,20 +14,24 @@ namespace Cell.Persistence
 {
     public class UserCollectionLoader
     {
-        private static readonly Dictionary<string, UserCollection> _collections = [];
+        private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly CellPopulateManager _cellPopulateManager;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly CellTracker _cellTracker;
         private readonly PersistenceManager _persistanceManager;
-        public UserCollectionLoader(PersistenceManager persistenceManager, CellPopulateManager cellPopulateManager)
+        public UserCollectionLoader(PersistenceManager persistenceManager, CellPopulateManager cellPopulateManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             _persistanceManager = persistenceManager;
             _cellPopulateManager = cellPopulateManager;
+            _pluginFunctionLoader = pluginFunctionLoader;
+            _cellTracker = cellTracker;
         }
 
-        public static IEnumerable<string> CollectionNames => _collections.Keys;
+        public IEnumerable<string> CollectionNames => _collections.Keys;
 
-        public static ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
+        public ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
 
-        public static UserCollection? GetCollection(string name)
+        public UserCollection? GetCollection(string name)
         {
             if (name == string.Empty) throw new CellError("Collection name cannot be empty");
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
@@ -64,7 +67,7 @@ namespace Cell.Persistence
             _persistanceManager.MoveDirectory(oldDirectory, newDirectory);
 
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
                 if (function.CollectionDependencies.Contains(oldName))
                 {
@@ -78,11 +81,11 @@ namespace Cell.Persistence
             foreach (var collection in _collections) SaveCollection(collection.Value);
         }
 
-        internal UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
+        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
         {
             var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
             model.PropertyChanged += UserCollectionModelPropertyChanged;
-            var collection = new UserCollection(model);
+            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             StartTrackingCollection(collection);
             SaveCollection(collection);
             EnsureLinkedToBaseCollection(collection);
@@ -106,6 +109,10 @@ namespace Cell.Persistence
         internal void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
+            foreach (var collection in ObservableCollections)
+            {
+                collection.RefreshSortAndFilter();
+            }
             while (loadedCollections.Count != ObservableCollections.Count)
             {
                 foreach (var collection in ObservableCollections)
@@ -121,7 +128,7 @@ namespace Cell.Persistence
             }
         }
 
-        private static void EnsureLinkedToBaseCollection(UserCollection collection)
+        private void EnsureLinkedToBaseCollection(UserCollection collection)
         {
             if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
             {
@@ -141,7 +148,7 @@ namespace Cell.Persistence
             var path = Path.Combine(directory, "collection");
             var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
-            var collection = new UserCollection(model);
+            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             var itemsDirectory = Path.Combine(directory, "Items");
             var paths = _persistanceManager.GetFiles(itemsDirectory);
             paths.Select(LoadItem).ToList().ForEach(collection.Add);

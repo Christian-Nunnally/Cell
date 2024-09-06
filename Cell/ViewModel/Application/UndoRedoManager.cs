@@ -50,7 +50,7 @@ namespace Cell.ViewModel.Application
             _isUndoingOrRedoing = true;
             ApplyStateFromStack(_redoStack, _undoStack);
             // TODO: Make this not required.
-            ApplicationViewModel.SafeInstance?.SheetViewModel.UpdateLayout();
+            ApplicationViewModel.SafeInstance?.SheetViewModel?.UpdateLayout();
             _isUndoingOrRedoing = false;
             UndoStackChanged?.Invoke();
         }
@@ -69,7 +69,7 @@ namespace Cell.ViewModel.Application
             _isUndoingOrRedoing = true;
             ApplyStateFromStack(_undoStack, _redoStack);
             // TODO: Make this not required.
-            ApplicationViewModel.SafeInstance?.SheetViewModel.UpdateLayout();
+            ApplicationViewModel.SafeInstance?.SheetViewModel?.UpdateLayout();
             _isUndoingOrRedoing = false;
             UndoStackChanged?.Invoke();
         }

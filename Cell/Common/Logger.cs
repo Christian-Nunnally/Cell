@@ -1,5 +1,6 @@
 ﻿namespace Cell.Common
 {
+    // TODO: Make not static.
     internal static class Logger
     {
         private const int MaxRetainedLogs = 2000;

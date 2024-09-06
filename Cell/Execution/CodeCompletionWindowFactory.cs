@@ -1,8 +1,8 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.Plugin.SyntaxWalkers;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
@@ -58,7 +58,7 @@ namespace Cell.Execution
                 }
                 return completionWindow;
             }
-            else if (UserCollectionLoader.CollectionNames.Contains(type))
+            else if (ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames.Contains(type))
             {
                 var completionWindow = new CompletionWindow(textArea);
                 IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;

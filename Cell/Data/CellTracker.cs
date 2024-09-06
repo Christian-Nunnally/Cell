@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
 
@@ -14,14 +13,12 @@ namespace Cell.Data
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
-        private readonly CellPopulateManager _populateManager;
-        private readonly SheetTracker _sheetTracker;
-        private readonly CellTriggerManager _triggerManager;
-        public CellTracker(SheetTracker sheetTracker, CellTriggerManager triggerManager, CellPopulateManager populateManager, CellLoader cellLoader)
+
+        public Action<CellModel>? CellAdded;
+        public Action<CellModel>? CellRemoved;
+
+        public CellTracker(CellLoader cellLoader)
         {
-            _triggerManager = triggerManager;
-            _populateManager = populateManager;
-            _sheetTracker = sheetTracker;
             _cellLoader = cellLoader;
         }
 
@@ -34,8 +31,7 @@ namespace Cell.Data
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            _triggerManager.StartMonitoringCell(cellModel);
-            _populateManager.StartMonitoringCellForUpdates(cellModel);
+            CellAdded?.Invoke(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
 
@@ -54,12 +50,14 @@ namespace Cell.Data
         {
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
             _cellLoader.DeleteCell(cellModel);
-            _triggerManager.StopMonitoringCell(cellModel);
-            _populateManager.StopMonitoringCellForUpdates(cellModel);
-            _populateManager.UnsubscribeFromAllLocationUpdates(cellModel);
-            _populateManager.UnsubscribeFromAllCollectionUpdates(cellModel);
             _cellsToLocation.Remove(cellModel.ID);
             RemoveFromCellsByLocationMap(cellModel);
+            CellRemoved?.Invoke(cellModel);
+        }
+
+        internal void RenameSheet(string oldSheetName, string newSheetName)
+        {
+            _cellLoader.RenameSheet(oldSheetName, newSheetName);
         }
 
         private void AddCellToCellByLocationMap(CellModel cellModel)
@@ -80,17 +78,6 @@ namespace Cell.Data
             else
             {
                 _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
-                var sheet = _sheetTracker.Sheets.FirstOrDefault(x => x.Name == model.SheetName);
-                if (sheet == null)
-                {
-                    sheet = new SheetModel(model.SheetName);
-                    _sheetTracker.Sheets.Add(sheet);
-                }
-            }
-
-            if (model.CellType == CellType.Corner)
-            {
-                _sheetTracker.Sheets.First(x => x.Name == model.SheetName).CornerCell = model;
             }
         }
 
@@ -129,11 +116,14 @@ namespace Cell.Data
             if (cellsInOldSheet.Count == 0)
             {
                 _cellsBySheetMap.Remove(sheetName);
-                var sheet = _sheetTracker.Sheets.First(x => x.OldName == sheetName);
-                _sheetTracker.Sheets.Remove(sheet);
                 // TODO: Delete sheet from disk, and handle closing the sheet if it is open. Actually mabye just don't allow deleting the open sheet
             }
             return result;
+        }
+
+        public void SaveSheet(string sheetName)
+        {
+            GetCellModelsForSheet(sheetName).ForEach(_cellLoader.SaveCell);
         }
     }
 }

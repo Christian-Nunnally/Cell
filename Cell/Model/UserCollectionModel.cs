@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.ViewModel.Application;
 
 namespace Cell.Model
 {
@@ -38,21 +37,12 @@ namespace Cell.Model
         {
             get
             {
-                if (string.IsNullOrEmpty(BasedOnCollectionName))
-                {
-                    return "Not used by base collections";
-                }
                 return _sortAndFilterFunctionName;
             }
             set
             {
-                if (value == null) return;
                 if (_sortAndFilterFunctionName == value) return;
                 _sortAndFilterFunctionName = value;
-                if (!string.IsNullOrEmpty(_sortAndFilterFunctionName) && ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("object", _sortAndFilterFunctionName, out var function))
-                {
-                    var _ = function.CompiledMethod;
-                }
                 NotifyPropertyChanged(nameof(SortAndFilterFunctionName));
             }
         }

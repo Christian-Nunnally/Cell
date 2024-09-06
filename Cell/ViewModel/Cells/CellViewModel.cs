@@ -445,13 +445,12 @@ namespace Cell.ViewModel.Cells
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                     _model.PopulateFunctionName = value;
                     NotifyPropertyChanged(nameof(PopulateFunctionName));
-                    PopulateText();
                 }
             }
         }
 
         [JsonIgnore]
-        public IEnumerable<string> PrettyCellLocationDependencyNames => ApplicationViewModel.Instance.CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
+        public IEnumerable<string> PrettyCellLocationDependencyNames => _sheetViewModel.CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
             {
                 var split = x.Replace($"{Model.SheetName}_", "").Split('_');
                 if (split.Length == 2) return $"{ColumnCellViewModel.GetColumnName(int.Parse(split[1]))}{split[0]}";
@@ -459,7 +458,7 @@ namespace Cell.ViewModel.Cells
             });
 
         [JsonIgnore]
-        public List<string> PrettyDependencyNames => [.. ApplicationViewModel.Instance.CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
+        public List<string> PrettyDependencyNames => [.. _sheetViewModel.CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
 
         public virtual int Row
         {
@@ -637,7 +636,8 @@ namespace Cell.ViewModel.Cells
                 e.PropertyName == nameof(CellModel.Height) ||
                 e.PropertyName == nameof(CellModel.Text) ||
                 e.PropertyName == nameof(CellModel.Row) ||
-                e.PropertyName == nameof(CellModel.Column))
+                e.PropertyName == nameof(CellModel.Column) ||
+                e.PropertyName == nameof(CellModel.CellType))
             {
                 NotifyPropertyChanged(e.PropertyName);
                 return;

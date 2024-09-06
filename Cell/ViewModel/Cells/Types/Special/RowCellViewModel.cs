@@ -48,10 +48,10 @@ namespace Cell.ViewModel.Cells.Types.Special
         public void DeleteRow()
         {
             if (_sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Count() == 1) return;
-            var cellsToDelete = ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
+            var cellsToDelete = _sheetViewModel.CellTracker.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row == Model.Row).ToList();
             foreach (var cell in cellsToDelete)
             {
-                _sheetViewModel.DeleteCell(cell);
+                _sheetViewModel.CellTracker.RemoveCell(cell);
             }
             IncrementRowOfAllAtOrBelow(Row, -1);
             _sheetViewModel.UpdateLayout();
@@ -68,7 +68,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             _sheetViewModel.UpdateLayout();
         }
 
-        private List<CellModel> GetAllCellsAtOrBelow(int row) => ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
+        private List<CellModel> GetAllCellsAtOrBelow(int row) => _sheetViewModel.CellTracker.GetCellModelsForSheet(Model.SheetName).Where(x => x.Row >= row).ToList();
 
         private void IncrementRowOfAllAtOrBelow(int row, int amount = 1)
         {
@@ -94,23 +94,20 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementRowOfAllAtOrBelow(newRowIndex);
 
             var rowModel = CellModelFactory.Create(newRowIndex, 0, CellType.Row, Model.SheetName);
+            _sheetViewModel.CellTracker.AddCell(rowModel);
 
-            var sheet = ApplicationViewModel.Instance.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
-
-            var row = CellViewModelFactory.Create(rowModel, _sheetViewModel);
-            _sheetViewModel.AddCell(row);
+            var sheet = _sheetViewModel.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
 
             var columnIndexs = _sheetViewModel.CellViewModels.OfType<ColumnCellViewModel>().Select(x => x.Column).ToList();
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, Model.SheetName);
+                _sheetViewModel.CellTracker.AddCell(cellModel);
                 sheet?.CornerCell?.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
-                var cell = CellViewModelFactory.Create(cellModel, _sheetViewModel);
-                _sheetViewModel.AddCell(cell);
-                ApplicationViewModel.Instance.CellPopulateManager.NotifyCellValueUpdated(cellModel);
+                _sheetViewModel.CellPopulateManager.NotifyCellValueUpdated(cellModel);
 
-                var firstSideMergeId = ApplicationViewModel.Instance.CellTracker.GetCell(Model.SheetName, newRowIndex - 1, columnIndex)?.MergedWith ?? string.Empty;
-                var secondSideMergeId = ApplicationViewModel.Instance.CellTracker.GetCell(Model.SheetName, newRowIndex + 1, columnIndex)?.MergedWith ?? string.Empty;
+                var firstSideMergeId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, newRowIndex - 1, columnIndex)?.MergedWith ?? string.Empty;
+                var secondSideMergeId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, newRowIndex + 1, columnIndex)?.MergedWith ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(firstSideMergeId) && firstSideMergeId == secondSideMergeId)
                 {
                     cellModel.MergedWith = firstSideMergeId;

@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
@@ -15,8 +16,11 @@ namespace Cell.View.ToolWindow
     /// </summary>
     public partial class CellFormatEditWindow : UserControl, IToolWindow
     {
-        public CellFormatEditWindow()
+        private readonly CellTracker _cellTracker;
+
+        public CellFormatEditWindow(CellTracker cellTracker)
         {
+            _cellTracker = cellTracker;
             InitializeComponent();
         }
 
@@ -33,7 +37,7 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle()
         {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
+            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
             if (currentlySelectedCell is null) return "Select a cell to edit";
             if (currentlySelectedCell is CornerCellViewModel) return "Edit default sheet format";
             return $"Format editor - {currentlySelectedCell.GetName()}";
@@ -48,21 +52,21 @@ namespace Cell.View.ToolWindow
             return true;
         }
 
-        private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName)
+        private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName, CellTracker cellTracker)
         {
             var cells = new List<CellModel>();
             for (var row = startRow; row <= endRow; row++)
             {
                 for (var column = startColumn; column <= endColumn; column++)
                 {
-                    var cell = ApplicationViewModel.Instance.CellTracker.GetCell(sheetName, row, column);
+                    var cell = cellTracker.GetCell(sheetName, row, column);
                     if (cell is not null) cells.Add(cell);
                 }
             }
             return cells;
         }
 
-        private static void MergeCells(List<CellViewModel> cells)
+        private static void MergeCells(List<CellModel> cells, CellTracker cellTracker)
         {
             if (cells.Count < 2) return;
             var leftmost = cells.Select(x => x.Column).Min();
@@ -75,29 +79,38 @@ namespace Cell.View.ToolWindow
             var bottomRightCell = cells.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
             if (bottomRightCell is null) return;
 
-            var sheetName = topLeftCell.Model.SheetName;
-            var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName);
+            var sheetName = topLeftCell.SheetName;
+            var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName, cellTracker);
             if (cellsToMerge.Count(cell => cell.IsMerged()) <= 1)
             {
-                UnmergeSelectedCells();
+                UnmergeCells(cellsToMerge, cellTracker);
             }
             else return;
             SetMergedWithToCellsId(cellsToMerge, topLeftCell);
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
         }
 
-        private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellViewModel topLeftCell)
+        private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellModel topLeftCell)
         {
             foreach (var cell in cellsToMerge) cell.MergedWith = topLeftCell.ID;
         }
 
-        private static void UnmergeSelectedCells()
+        private static void UnmergeCells(IEnumerable<CellModel> cells, CellTracker cellTracker)
         {
-            foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
+            foreach (var cell in cells.Where(x => x.IsMergedParent()))
             {
-                ApplicationViewModel.Instance.SheetViewModel.UnmergeCell(selectedCell);
+                UnmergeCell(cell, cellTracker);
             }
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+        }
+
+        public static void UnmergeCell(CellModel mergeParent, CellTracker cellTracker)
+        {
+            var mergedCells = cellTracker.GetCellModelsForSheet(mergeParent.SheetName).Where(x => x.IsMergedWith(mergeParent));
+            foreach (var cell in mergedCells)
+            {
+                if (mergeParent == cell) continue;
+                cell.MergedWith = string.Empty;
+            }
+            mergeParent.MergedWith = string.Empty;
         }
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
@@ -121,78 +134,45 @@ namespace Cell.View.ToolWindow
             AddColorsToColorPicker(colorPicker, colors, 1.9f);
         }
 
+        // TODO: Move to application settings manager window
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.PersistenceManager.CreateBackup();
-        }
-
-        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheLeft();
-        }
-
-        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheRight();
-        }
-
-        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowAbove();
-        }
-
-        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowBelow();
-        }
-
-        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
-        {
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<ColumnCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
-                cell.DeleteColumn();
-            }
-        }
-
-        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<RowCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
-                cell.DeleteRow();
-            }
+            ApplicationViewModel.Instance.BackupManager.CreateBackup();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var rows = selectedCells.Select(x => x.Row).Distinct().ToList();
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
+            var rows = selectedCells?.Select(x => x.Row).Distinct().ToList() ?? [];
             foreach (var row in rows)
             {
-                var cellsToMerge = selectedCells.Where(x => x.Row == row).ToList();
-                MergeCells(cellsToMerge);
+                var cellsToMerge = selectedCells?.Where(x => x.Row == row).ToList() ?? [];
+                MergeCells(cellsToMerge, _cellTracker);
             }
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            MergeCells(selectedCells);
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
+            MergeCells(selectedCells ?? [], _cellTracker);
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var columns = selectedCells.Select(x => x.Column).Distinct().ToList();
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
+            MergeCellsDown(selectedCells, _cellTracker);
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
+        }
+
+        public static void MergeCellsDown(List<CellModel>? selectedCells, CellTracker cellTracker)
+        {
+            var columns = selectedCells?.Select(x => x.Column).Distinct().ToList() ?? [];
             foreach (var column in columns)
             {
-                var cellsToMerge = selectedCells.Where(x => x.Column == column).ToList();
-                MergeCells(cellsToMerge);
+                var cellsToMerge = selectedCells?.Where(x => x.Column == column).ToList();
+                MergeCells(cellsToMerge ?? [], cellTracker);
             }
         }
 
@@ -284,7 +264,8 @@ namespace Cell.View.ToolWindow
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            UnmergeSelectedCells();
+            UnmergeCells(ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model) ?? [], _cellTracker);
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
     }
 }

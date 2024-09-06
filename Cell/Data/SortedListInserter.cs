@@ -1,8 +1,8 @@
 ﻿namespace Cell.Data
 {
-    public class SortedListInserter<T>(Func<int, int> getSortValue)
+    public class SortedListInserter<T>(Func<int, int?> getSortValue)
     {
-        private readonly Func<int, int> _getSortValue = getSortValue ?? throw new ArgumentNullException(nameof(getSortValue));
+        private readonly Func<int, int?> _getSortValue = getSortValue ?? throw new ArgumentNullException(nameof(getSortValue));
         public void InsertSorted(List<T> list, T newItem, int newItemCompareValue)
         {
             int index = BinarySearchIndex(list, newItemCompareValue);
@@ -19,7 +19,8 @@
             while (low <= high)
             {
                 int mid = low + (high - low) / 2;
-                IComparable midValue = _getSortValue(mid);
+                var midValue = _getSortValue(mid);
+                if (midValue is null) midValue = 0;
 
                 int comparison = newItemValue.CompareTo(midValue);
 

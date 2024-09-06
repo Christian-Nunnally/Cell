@@ -80,8 +80,18 @@ namespace Cell.View.ToolWindow
             if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
             {
                 var sheetName = sheetModel.Name;
-                ApplicationViewModel.Instance.CellLoader.CopySheet(sheetName);
+                CopySheet(sheetName);
             }
+        }
+
+        public void CopySheet(string sheetName)
+        {
+            var copiedSheetName = sheetName + "Copy";
+            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
+
+            var copiedCells = ApplicationViewModel.Instance.SheetTracker.CreateUntrackedCopiesOfCellsInSheet(sheetName);
+            ApplicationViewModel.Instance.CellLoader.UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
+            ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
         }
 
         private void DeleteSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)

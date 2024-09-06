@@ -4,22 +4,29 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
 namespace CellTest
 {
     public class UndoRedoManagerTests
     {
-        private CellTracker? _cellTracker;
+        private CellTracker _cellTracker;
+        private PersistenceManager _persistanceManager;
+        private PluginFunctionLoader _pluginFunctionLoader;
+        private CellPopulateManager _populateManager;
+        private UserCollectionLoader _userCollectionLoader;
+        private CellLoader _cellLoader;
+        private CellTriggerManager _triggerManager;
 
         private UndoRedoManager GetInstance()
         {
-            var persistanceManager = new PersistenceManager("", new TestFileIO());
-            var pluginFunctionLoader = new PluginFunctionLoader(persistanceManager);
-            var sheetTracker = new SheetTracker();
-            var populateManager = new CellPopulateManager(pluginFunctionLoader);
-            var userCollectionLoader = new UserCollectionLoader(persistanceManager, populateManager);
-            var cellLoader = new CellLoader(persistanceManager, sheetTracker, pluginFunctionLoader, userCollectionLoader);
-            var triggerManager = new CellTriggerManager(pluginFunctionLoader);
-            _cellTracker = new CellTracker(sheetTracker, triggerManager, populateManager, cellLoader);
+            _persistanceManager = new PersistenceManager("", new TestFileIO());
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistanceManager);
+            _cellLoader = new CellLoader(_persistanceManager);
+            _cellTracker = new CellTracker(_cellLoader);
+            _populateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader);
+            _userCollectionLoader = new UserCollectionLoader(_persistanceManager, _populateManager, _pluginFunctionLoader, _cellTracker);
+            _triggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             return new UndoRedoManager(_cellTracker);
         }
 
@@ -47,7 +54,7 @@ namespace CellTest
         public void RecordStateIfRecording_Runs()
         {
             var testing = GetInstance();
-            testing.RecordStateIfRecording(CellModel.Empty);
+            testing.RecordStateIfRecording(CellModel.Null);
         }
 
         [Fact]
@@ -97,3 +104,5 @@ namespace CellTest
         }
     }
 }
+
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

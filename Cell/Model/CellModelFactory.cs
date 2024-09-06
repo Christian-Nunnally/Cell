@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.ViewModel.Application;
 using System.Text.Json;
 
 namespace Cell.Model
@@ -14,17 +13,9 @@ namespace Cell.Model
             return JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new CellError("Unable to copy model");
         }
 
-        public static CellModel CopyAndTrackNewCell(this CellModel modelToCopy)
-        {
-            var model = modelToCopy.Copy();
-            model.ID = Utilities.GenerateUnqiueId(12);
-            ApplicationViewModel.Instance.CellTracker.AddCell(model);
-            return model;
-        }
-
         internal static CellModel Create(int row, int column, CellType type, string sheet)
         {
-            var model = new CellModel
+            return new CellModel
             {
                 Width = DefaultCellWidth,
                 Height = DefaultCellHeight,
@@ -33,8 +24,6 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            ApplicationViewModel.Instance.CellTracker.AddCell(model);
-            return model;
         }
     }
 }

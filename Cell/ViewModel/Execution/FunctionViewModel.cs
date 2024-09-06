@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
-using Cell.Persistence;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis;
@@ -13,7 +12,7 @@ namespace Cell.ViewModel.Execution
 {
     public partial class FunctionViewModel : PropertyChangedBase
     {
-        public readonly List<CellModel> CellsToNotify = [];
+        public readonly List<CellModel> CellsThatUseFunction = [];
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool wasCompileSuccessful;
@@ -25,8 +24,6 @@ namespace Cell.ViewModel.Execution
         }
 
         public event Action<FunctionViewModel>? DependenciesChanged;
-
-        public IEnumerable<CellModel> CellsThatUseFunction => CellsToNotify;
 
         public List<string> CollectionDependencies { get; set; } = [];
 
@@ -53,7 +50,7 @@ namespace Cell.ViewModel.Execution
 
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
-        public int UsageCount => CellsToNotify.Count + UserCollectionLoader.ObservableCollections.Count(x => x.Model.SortAndFilterFunctionName == Name);
+        public int UsageCount => CellsThatUseFunction.Count;
 
         public bool WasCompileSuccessful
         {
@@ -113,30 +110,30 @@ namespace Cell.ViewModel.Execution
             return compilation.GetSemanticModel(SyntaxTree);
         }
 
-        public string GetUserFriendlyCode(CellModel? cell)
+        public string GetUserFriendlyCode(CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
         {
-            var intermediateCode = new CollectionReferenceSyntaxTransformer(ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformTo(Model.Code);
+            var intermediateCode = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformTo(Model.Code);
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
             return intermediateCode.Replace("_Range_", "..");
         }
 
-        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell)
+        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
-            Model.Code = new CollectionReferenceSyntaxTransformer(ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, UserCollectionLoader.CollectionNames.Contains).TransformFrom(intermediateCode);
+            Model.Code = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformFrom(intermediateCode);
 
             // Populate cells that use this function as populate:
-            foreach (var cellModel in CellsToNotify.ToList())
+            foreach (var cellModel in CellsThatUseFunction.ToList())
             {
                 cellModel.PopulateText();
             }
         }
 
         // TODO REMOVE
-        internal void StartListeningForDependencyChanges(CellModel cell) => CellsToNotify.Add(cell);
+        internal void StartListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Add(cell);
 
-        internal void StopListeningForDependencyChanges(CellModel cell) => CellsToNotify.Remove(cell);
+        internal void StopListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Remove(cell);
 
         private static void RefactorCellsFunctionUseage(string oldName, string newName)
         {

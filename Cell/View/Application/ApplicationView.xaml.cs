@@ -1,5 +1,4 @@
-﻿using Cell.Persistence;
-using Cell.View.Cells;
+﻿using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
@@ -19,7 +18,6 @@ namespace Cell.View.Application
         public ApplicationView()
         {
             InitializeComponent();
-            ShowSheetView(ApplicationViewModel.Instance.SheetViewModel);
         }
 
         public SheetView? ActiveSheetView { get; set; }
@@ -106,27 +104,29 @@ namespace Cell.View.Application
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             var editPanel = new CellSettingsEditWindow();
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
             ShowToolWindow(editPanel);
         }
 
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             var editPanel = new CellContentEditWindow();
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
             ShowToolWindow(editPanel);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            var collectionManagerViewModel = new CollectionManagerWindowViewModel(UserCollectionLoader.ObservableCollections);
+            if (_viewModel == null) return;
+            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader.ObservableCollections);
             var collectionManager = new CollectionManagerWindow(collectionManagerViewModel);
             ShowToolWindow(collectionManager);
         }
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            var functionLoader = ApplicationViewModel.Instance.PluginFunctionLoader;
+            if (_viewModel == null) return;
+            var functionLoader = _viewModel.PluginFunctionLoader;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
             var functionManager = new FunctionManagerWindow(functionManagerViewModel);
             ShowToolWindow(functionManager);
@@ -157,8 +157,9 @@ namespace Cell.View.Application
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            var editPanel = new CellFormatEditWindow();
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
+            if (_viewModel == null) return;
+            var editPanel = new CellFormatEditWindow(_viewModel.CellTracker);
+            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
             ShowToolWindow(editPanel);
         }
 
@@ -172,18 +173,17 @@ namespace Cell.View.Application
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            ApplicationViewModel.Instance.SheetViewModel.LastKeyPressed = e.Key.ToString();
             if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
             if (e.IsDown && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
                 if (e.Key == Key.C)
                 {
-                    ApplicationViewModel.Instance.CopySelectedCells((Keyboard.Modifiers & ModifierKeys.Shift) == 0);
+                    _viewModel?.CopySelectedCells((Keyboard.Modifiers & ModifierKeys.Shift) == 0);
                     e.Handled = true;
                 }
                 else if (e.Key == Key.V)
                 {
-                    ApplicationViewModel.Instance.PasteCopiedCells();
+                    _viewModel?.PasteCopiedCells();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Z)
@@ -199,45 +199,45 @@ namespace Cell.View.Application
             }
             else if (e.Key == Key.Tab)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel.MoveSelectionLeft();
-                else ApplicationViewModel.Instance.SheetViewModel.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.SheetViewModel?.MoveSelectionLeft();
+                else _viewModel?.SheetViewModel?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel.MoveSelectionUp();
-                else ApplicationViewModel.Instance.SheetViewModel.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.SheetViewModel?.MoveSelectionUp();
+                else _viewModel?.SheetViewModel?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionUp();
+                _viewModel?.SheetViewModel?.MoveSelectionUp();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionDown();
+                _viewModel?.SheetViewModel?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionLeft();
+                _viewModel?.SheetViewModel?.MoveSelectionLeft();
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                ApplicationViewModel.Instance.SheetViewModel.MoveSelectionRight();
+                _viewModel?.SheetViewModel?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)
             {
-                if (ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel == null) return;
-                ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel.Text = "";
+                if (_viewModel?.SheetViewModel?.SelectedCellViewModel == null) return;
+                _viewModel.SheetViewModel.SelectedCellViewModel.Text = "";
                 e.Handled = true;
             }
             else if (e.Key == Key.Escape)
             {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
+                _viewModel?.SheetViewModel?.UnselectAllCells();
                 e.Handled = true;
             }
         }

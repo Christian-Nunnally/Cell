@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
@@ -26,11 +25,6 @@ namespace Cell.ViewModel
                 CellType.Date => new DateCellViewModel(model, sheetViewModel),
                 _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
             };
-        }
-
-        public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
-        {
-            return ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

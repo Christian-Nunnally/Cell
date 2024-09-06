@@ -79,7 +79,7 @@ namespace Cell.View.ToolWindow
                 var capturedFunction = _viewModel.SelectedFunction;
                 var editor = new CodeEditorWindow(_viewModel.SelectedFunction, x =>
                 {
-                    capturedFunction.SetUserFriendlyCode(x, cell);
+                    capturedFunction.SetUserFriendlyCode(x, cell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 }, cell);
                 ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
             }

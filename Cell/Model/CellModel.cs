@@ -11,7 +11,7 @@ namespace Cell.Model
 {
     public class CellModel : PropertyChangedBase
     {
-        public static readonly CellModel Empty = new();
+        public static readonly CellModel Null = new();
         private string borderThickness = "1";
         private CellType cellType = CellType.None;
         private string[] colorHexes = [
@@ -251,7 +251,7 @@ namespace Cell.Model
         public void PopulateText()
         {
             if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance, Index), this);
+            var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, Index), this);
             if (result.Result == null) return;
             if (result.Success) Text = result.Result;
             else ErrorText = result.Result;

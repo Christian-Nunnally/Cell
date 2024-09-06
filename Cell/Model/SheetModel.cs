@@ -1,13 +1,17 @@
 ﻿using Cell.Common;
-using Cell.ViewModel.Application;
+using System.Collections.ObjectModel;
 
 namespace Cell.Model
 {
     public class SheetModel : PropertyChangedBase
     {
+        public static readonly SheetModel Null = new("");
         public string OldName;
         private CellModel? cornerCell;
         private string name = string.Empty;
+
+        public ObservableCollection<CellModel> Cells { get; set; } = [];
+
         public SheetModel(string sheetName)
         {
             Name = sheetName;
@@ -45,7 +49,7 @@ namespace Cell.Model
             set
             {
                 if (value == name) return;
-                if (!IsValidNewSheetName(value)) return;
+                if (!IsValidSheetName(value)) return;
                 OldName = name;
                 name = value;
                 NotifyPropertyChanged(nameof(Name));
@@ -64,13 +68,6 @@ namespace Cell.Model
                     NotifyPropertyChanged(nameof(Order));
                 }
             }
-        }
-
-        internal static bool IsValidNewSheetName(string sheetName)
-        {
-            if (!IsValidSheetName(sheetName)) return false;
-            if (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == sheetName)) return false;
-            return true;
         }
 
         internal static bool IsValidSheetName(string sheetName)

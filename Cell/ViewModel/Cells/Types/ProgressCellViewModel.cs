@@ -9,9 +9,19 @@ namespace Cell.ViewModel.Cells.Types
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public double ProgressBarHeight => Height;
+        public bool IsVerticalOrientation
+        {
+            get => Model.GetBooleanProperty(nameof(IsVerticalOrientation));
+            set
+            {
+                Model.SetBooleanProperty(nameof(IsVerticalOrientation), value);
+                NotifyPropertyChanged(nameof(IsVerticalOrientation), nameof(ProgressBarWidth), nameof(ProgressBarHeight));
+            }
+        }
 
-        public double ProgressBarWidth => ValueAsDouble * Width;
+        public double ProgressBarHeight => !IsVerticalOrientation ? Height : Model.Value * (Height - Margin.Top - Margin.Bottom - 6);
+
+        public double ProgressBarWidth => IsVerticalOrientation ? Width : Model.Value * (Width - Margin.Left - Margin.Right - 6);
 
         public override string Text
         {
@@ -24,7 +34,6 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        public double ValueAsDouble => double.TryParse(Text, out var doubleValue) ? doubleValue : 0;
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

@@ -9,6 +9,7 @@
             Height="{Binding ProgressBarHeight}"
             Margin="{Binding Margin}"
             HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
             Fill="{Binding ForegroundColor}" />
     </DataTemplate>
 </ResourceDictionary>

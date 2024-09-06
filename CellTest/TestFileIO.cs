@@ -18,17 +18,17 @@ namespace CellTest
 
         public void DeleteFile(string path)
         {
-            throw new NotImplementedException();
+            _files.Remove(path);
         }
 
         public bool DirectoryExists(string path)
         {
-            throw new NotImplementedException();
+            return _files.ContainsKey(path);
         }
 
-        public bool Exists(string versionPath)
+        public bool Exists(string path)
         {
-            throw new NotImplementedException();
+            return _files.ContainsKey(path);
         }
 
         public IEnumerable<string> GetDirectories(string path)

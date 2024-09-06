@@ -22,7 +22,7 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle()
         {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
+            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
             if (currentlySelectedCell is null) return "Select a cell to edit";
             return $"Content editor - {currentlySelectedCell.GetName()}";
         }
@@ -38,6 +38,7 @@ namespace Cell.View.ToolWindow
 
         private static void IndexSelectedCells()
         {
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
             var leftmost = selectedCells.Select(x => x.Column).Min();
             var topmost = selectedCells.Select(x => x.Row).Min();
@@ -62,7 +63,7 @@ namespace Cell.View.ToolWindow
                 var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
                 var editor = new CodeEditorWindow(function, x =>
                 {
-                    function.SetUserFriendlyCode(x, cell.Model);
+                    function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                     (cell as ListCellViewModel)?.UpdateList();
                 }, cell.Model);
                 ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
@@ -77,7 +78,7 @@ namespace Cell.View.ToolWindow
                 var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
                 var editor = new CodeEditorWindow(function, x =>
                 {
-                    function.SetUserFriendlyCode(x, cell.Model);
+                    function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 }, cell.Model);
                 ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
             }

@@ -16,6 +16,34 @@
     mc:Ignorable="d">
     <ContentControl Content="{Binding}">
         <ContentControl.Resources>
+            <DataTemplate DataType="{x:Type special:RowCellViewModel}">
+                <StackPanel Height="150">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Height" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <Button Click="CreateNewRowAboveButtonClicked" Content="Insert Row Above" />
+                    <Button Click="CreateNewRowBelowButtonClicked" Content="Insert Row Below" />
+                    <Button Click="DeleteRowButtonClicked" Content="Delete Row" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type special:ColumnCellViewModel}">
+                <StackPanel Height="150">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Width="100" Content="Width" />
+                        <TextBox
+                            Width="100"
+                            KeyDown="TextBoxKeyDown"
+                            Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" />
+                    </StackPanel>
+                    <Button Click="CreateNewColumnToTheLeftButtonClicked" Content="Insert Column to Left" />
+                    <Button Click="CreateNewColumnToTheRightButtonClicked" Content="Insert Column to Right" />
+                    <Button Click="DeleteColumnButtonClicked" Content="Delete Column" />
+                </StackPanel>
+            </DataTemplate>
             <DataTemplate DataType="{x:Type cellTypes:ListCellViewModel}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -52,6 +80,11 @@
                         Width="100"
                         KeyDown="TextBoxKeyDown"
                         Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
+                </StackPanel>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type cellTypes:ProgressCellViewModel}">
+                <StackPanel>
+                    <CheckBox Content="Vertical Orientation" IsChecked="{Binding IsVerticalOrientation}" />
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type special:CornerCellViewModel}">

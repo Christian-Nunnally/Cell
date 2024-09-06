@@ -1,6 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Model.Plugin;
+using Cell.Persistence;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 
@@ -9,11 +10,13 @@ namespace Cell.Execution
     public class PluginContext
     {
         public const string PluginContextArgumentName = "c";
-        private readonly ApplicationViewModel _application;
+        private readonly CellTracker _cellTracker;
+        private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellModel? _cell;
-        public PluginContext(ApplicationViewModel application, int index, CellModel? cell = null)
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index, CellModel? cell = null)
         {
-            _application = application;
+            _cellTracker = cellTracker;
+            _userCollectionLoader = userCollectionLoader;
             _cell = cell;
             Index = index;
         }
@@ -26,7 +29,7 @@ namespace Cell.Execution
 
         public CellRange GetCell(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCell(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
 
-        public CellModel GetCell(string sheet, int row, int column) => ApplicationViewModel.Instance.CellTracker.GetCell(sheet, row, column) ?? CellModel.Empty;
+        public CellModel GetCell(string sheet, int row, int column) => _cellTracker.GetCell(sheet, row, column) ?? CellModel.Null;
 
         public CellRange GetCell(string sheet, int row, int column, int rowRangeEnd, int columnRangeEnd)
         {
@@ -44,18 +47,18 @@ namespace Cell.Execution
 
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
-            return UserList<T>.GetOrCreate(collection);
+            return UserList<T>.GetOrCreate(collection, _userCollectionLoader);
         }
 
         public void GoToCell(CellModel cell)
         {
-            _application.GoToSheet(cell.SheetName);
-            _application.GoToCell(cell);
+            ApplicationViewModel.Instance.GoToSheet(cell.SheetName);
+            ApplicationViewModel.Instance.GoToCell(cell);
         }
 
         public void GoToSheet(string sheetName)
         {
-            _application.GoToSheet(sheetName);
+            ApplicationViewModel.Instance.GoToSheet(sheetName);
         }
 
         public void ShowDialog(string text)

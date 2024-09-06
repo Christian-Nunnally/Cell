@@ -53,7 +53,7 @@ namespace Cell.View.ToolWindow
         private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             var sheetName = _viewModel.SheetNameToExport;
-            ApplicationViewModel.Instance.CellLoader.ExportSheetTemplate(sheetName);
+            ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);
             DialogWindow.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({ApplicationViewModel.Instance.PersistenceManager.CurrentTemplatePath})");
         }
     }

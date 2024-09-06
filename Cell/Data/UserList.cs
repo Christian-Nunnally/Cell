@@ -7,64 +7,51 @@ namespace Cell.Data
 {
     public class UserList<T> : IEnumerable<T> where T : PluginModel, new()
     {
-        public static Dictionary<string, UserList<T>> UserListsOfT { get; } = [];
+        private readonly string _collectionName;
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private UserCollection? _internalUserCollection;
 
-        private readonly UserCollection _userCollection;
+        private UserCollection UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName) ?? throw new CellError($"Collection {_collectionName} does not exist");
 
-        private UserList(string collectionName)
+        private UserList(string collectionName, UserCollectionLoader userCollectionLoader)
         {
-            if (string.IsNullOrWhiteSpace(collectionName)) throw new ArgumentException("Value cannot be null or whitespace.", nameof(collectionName));
-            _userCollection = UserCollectionLoader.GetCollection(collectionName) ?? throw new CellError($"Collection {collectionName} does not exist");
+            _collectionName = collectionName;
+            _userCollectionLoader = userCollectionLoader;
         }
 
-        public static UserList<T> GetOrCreate(string collectionName)
+        public static UserList<T> GetOrCreate(string collectionName, UserCollectionLoader userCollectionLoader)
         {
-            if (UserList.AllUserListNames.Contains(collectionName))
-            {
-                return UserListsOfT[collectionName];
-            }
-            var newUserList = new UserList<T>(collectionName);
-            UserList.AllUserListNames.Add(collectionName);
-            UserListsOfT.Add(collectionName, newUserList);
-            return UserListsOfT[collectionName];
+            // TODO, cache these.
+            return new UserList<T>(collectionName, userCollectionLoader);
         }
 
-        public IEnumerator<T> GetEnumerator() => _userCollection?.Items.OfType<T>().GetEnumerator() ?? new List<T>().GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => UserCollection?.Items.OfType<T>().GetEnumerator() ?? new List<T>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void Add(T item)
         {
-            _userCollection.Add(item);
+            UserCollection.Add(item);
         }
 
         public void Remove(T item)
         {
-            _userCollection.Remove(item);
+            UserCollection.Remove(item);
         }
 
         public void RemoveAt(int index)
         {
-            if (_userCollection == null) return;
-            if (index < 0 || index >= _userCollection.Items.Count) return;
-            var model = _userCollection.Items[index];
-            _userCollection.Remove(model);
+            if (UserCollection == null) return;
+            if (index < 0 || index >= UserCollection.Items.Count) return;
+            var model = UserCollection.Items[index];
+            UserCollection.Remove(model);
         }
 
         public T? this[int key]
         {
-            get => key >= 0 && key < _userCollection.Items.Count ? (T)_userCollection.Items[key] : new T();
+            get => key >= 0 && key < UserCollection.Items.Count ? (T)UserCollection.Items[key] : new T();
         }
 
-        public int Count => _userCollection?.Items.Count ?? 0;
-    }
-
-    public class UserList
-    {
-        private UserList()
-        {
-        }
-
-        public static List<string> AllUserListNames { get; } = [];
+        public int Count => UserCollection?.Items.Count ?? 0;
     }
 }

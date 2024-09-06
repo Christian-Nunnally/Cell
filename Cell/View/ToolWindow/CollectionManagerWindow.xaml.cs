@@ -101,7 +101,7 @@ namespace Cell.View.ToolWindow
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
             var editor = new CodeEditorWindow(function, x =>
             {
-                function.SetUserFriendlyCode(x, null);
+                function.SetUserFriendlyCode(x, null, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 _viewModel.SelectedCollection?.RefreshSortAndFilter();
             }, null);
             ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
@@ -130,7 +130,7 @@ namespace Cell.View.ToolWindow
             if (sender is Button btn && btn.DataContext is PluginModel item)
             {
                 var selectedCollection = _viewModel.SelectedCollection;
-                selectedCollection?.RemoveAll(item);
+                selectedCollection?.Remove(item);
             }
         }
 

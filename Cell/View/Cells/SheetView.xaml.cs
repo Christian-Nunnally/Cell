@@ -54,7 +54,7 @@ namespace Cell.View.Cells
                     {
                         if (cell.Model.CellType == CellType.Row)
                         {
-                            foreach (var rowCell in ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
+                            foreach (var rowCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
                             {
                                 if (rowCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(rowCell);
@@ -63,7 +63,7 @@ namespace Cell.View.Cells
                         }
                         else if (cell.Model.CellType == CellType.Column)
                         {
-                            foreach (var columnCell in ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
+                            foreach (var columnCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
                             {
                                 if (columnCell == cell.Model) continue;
                                 SheetViewModel.SelectCell(columnCell);
@@ -102,11 +102,11 @@ namespace Cell.View.Cells
                             {
                                 for (var column = startColumn; column <= endColumn; column++)
                                 {
-                                    var cellToSelect = ApplicationViewModel.Instance.CellTracker.GetCell(SheetViewModel.SheetName, row, column);
+                                    var cellToSelect = SheetViewModel.CellTracker.GetCell(SheetViewModel.SheetName, row, column);
                                     if (CanSelectCell(cellToSelect)) SheetViewModel.SelectCell(cellToSelect!);
                                 }
                             }
-                            var topLeftCell = ApplicationViewModel.Instance.CellTracker.GetCell(SheetViewModel.SheetName, startRow, startColumn);
+                            var topLeftCell = SheetViewModel.CellTracker.GetCell(SheetViewModel.SheetName, startRow, startColumn);
                             if (topLeftCell is not null) SheetViewModel.SelectCell(topLeftCell);
                         }
                     }
