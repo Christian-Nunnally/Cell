@@ -23,14 +23,14 @@ namespace Cell.ViewModel.Application
             PluginFunctionLoader = new(PersistenceManager);
             CellLoader = new(PersistenceManager);
             CellTracker = new CellTracker(CellLoader);
-            CellPopulateManager = new(CellTracker, PluginFunctionLoader);
-            UserCollectionLoader = new(PersistenceManager, CellPopulateManager, PluginFunctionLoader, CellTracker);
+            UserCollectionLoader = new(PersistenceManager, PluginFunctionLoader, CellTracker);
+            CellPopulateManager = new(CellTracker, PluginFunctionLoader, UserCollectionLoader);
             CellTriggerManager = new(CellTracker, PluginFunctionLoader, UserCollectionLoader);
             SheetTracker = new(PersistenceManager, CellLoader, CellTracker, PluginFunctionLoader, UserCollectionLoader);
             TitleBarSheetNavigationViewModel = new(SheetTracker);
             ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
             UndoRedoManager = new(CellTracker);
-            _cellClipboard = new(UndoRedoManager, CellTracker);
+            _cellClipboard = new(UndoRedoManager, CellTracker, new TextClipboard());
             BackupManager = new(PersistenceManager, CellTracker, SheetTracker, UserCollectionLoader, PluginFunctionLoader);
             ApplicationView = view;
         }
@@ -145,7 +145,7 @@ namespace Cell.ViewModel.Application
         internal void CopySelectedCells(bool copyTextOnly)
         {
             if (SheetViewModel == null) return;
-            _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
+            _cellClipboard.CopyCells(SheetViewModel.SelectedCellViewModels.Select(x => x.Model), copyTextOnly);
         }
 
         internal void GoToCell(CellModel cellModel)
@@ -178,7 +178,7 @@ namespace Cell.ViewModel.Application
         {
             if (SheetViewModel == null) return;
             UndoRedoManager.StartRecordingUndoState();
-            if (SheetViewModel.SelectedCellViewModel != null) _cellClipboard.PasteIntoCells(SheetViewModel.SelectedCellViewModel, SheetViewModel.SelectedCellViewModels);
+            if (SheetViewModel.SelectedCellViewModel != null) _cellClipboard.PasteIntoCells(SheetViewModel.SelectedCellViewModel.Model, SheetViewModel.SelectedCellViewModels.Select(x => x.Model));
             SheetViewModel.UpdateLayout();
             UndoRedoManager.FinishRecordingUndoState();
         }

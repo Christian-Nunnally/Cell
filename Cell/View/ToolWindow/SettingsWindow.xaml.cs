@@ -109,5 +109,11 @@ namespace Cell.View.ToolWindow
         {
             ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies;
         }
+
+        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
+        {
+            ApplicationViewModel.Instance.BackupManager.CreateBackup();
+            DialogWindow.ShowDialog("Backup created", "Backup created successfully.");
+        }
     }
 }

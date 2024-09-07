@@ -118,7 +118,7 @@ namespace Cell.View.Application
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader.ObservableCollections);
+            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader);
             var collectionManager = new CollectionManagerWindow(collectionManagerViewModel);
             ShowToolWindow(collectionManager);
         }

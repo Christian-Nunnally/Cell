@@ -1,8 +1,8 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 using System.Collections.Specialized;
@@ -24,9 +24,18 @@ namespace Cell.Execution
         private readonly Dictionary<CellModel, Dictionary<string, int>> _locationSubcriptionsMadeByCells = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly CellTracker _cellTracker;
+        private readonly UserCollectionLoader _userCollectionLoader;
 
-        public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
+        public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
+            _userCollectionLoader = userCollectionLoader;
+            foreach (var userCollection in _userCollectionLoader.ObservableCollections)
+            {
+                userCollection.ItemAdded += ItemAddedToUserCollection;
+                userCollection.ItemRemoved += ItemRemovedFromUserCollection;
+                userCollection.ItemPropertyChanged += ItemPropertyChangedInUserCollection;
+            }
+            _userCollectionLoader.ObservableCollections.CollectionChanged += UserCollectionsCollectionChanged;
             _cellTracker = cellTracker;
             _cellTracker.CellAdded += StartMonitoringCellForUpdates;
             _cellTracker.CellRemoved += StopMonitoringCellForUpdates;
@@ -46,6 +55,43 @@ namespace Cell.Execution
                     if (args.OldItems?[0] is FunctionViewModel function) function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
                 }
             };
+        }
+
+        private void ItemPropertyChangedInUserCollection(UserCollection collection, PluginModel model)
+        {
+            NotifyCollectionUpdated(collection.Name);
+        }
+
+        private void ItemRemovedFromUserCollection(UserCollection collection, PluginModel model)
+        {
+            NotifyCollectionUpdated(collection.Name);
+        }
+
+        private void ItemAddedToUserCollection(UserCollection collection, PluginModel model)
+        {
+            NotifyCollectionUpdated(collection.Name);
+        }
+
+        private void UserCollectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (e.NewItems?[0] is UserCollection userCollection)
+                {
+                    userCollection.ItemAdded += ItemAddedToUserCollection;
+                    userCollection.ItemRemoved += ItemRemovedFromUserCollection;
+                    userCollection.ItemPropertyChanged += ItemPropertyChangedInUserCollection;
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                if (e.OldItems?[0] is UserCollection userCollection)
+                {
+                    userCollection.ItemAdded -= ItemAddedToUserCollection;
+                    userCollection.ItemRemoved -= ItemRemovedFromUserCollection;
+                    userCollection.ItemPropertyChanged -= ItemPropertyChangedInUserCollection;
+                }
+            }
         }
 
         public List<string> GetAllCollectionSubscriptions(CellModel subscriber)
@@ -310,7 +356,7 @@ namespace Cell.Execution
 
         private void RunPopulateForSubscriber(CellModel subscriber)
         {
-            var pluginContext = new PluginContext(_cellTracker, ApplicationViewModel.Instance.UserCollectionLoader,  subscriber.Index, subscriber);
+            var pluginContext = new PluginContext(_cellTracker, _userCollectionLoader,  subscriber.Index, subscriber);
             var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, pluginContext, subscriber);
             if (result.Success)
             {

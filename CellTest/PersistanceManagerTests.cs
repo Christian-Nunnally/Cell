@@ -1,4 +1,5 @@
 using Cell.Persistence;
+using CellTest.TestUtilities;
 
 namespace CellTest
 {

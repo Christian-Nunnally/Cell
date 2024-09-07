@@ -21,7 +21,6 @@ namespace Cell.Data
 
         public static UserList<T> GetOrCreate(string collectionName, UserCollectionLoader userCollectionLoader)
         {
-            // TODO, cache these.
             return new UserList<T>(collectionName, userCollectionLoader);
         }
 

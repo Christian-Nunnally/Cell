@@ -1,83 +1,79 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model;
-using Cell.ViewModel.Cells;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Windows;
 
 namespace Cell.ViewModel.Application
 {
     public class CellClipboard
     {
         private readonly CellTracker _cellTracker;
+        private readonly ITextClipboard _textClipboard;
         private readonly UndoRedoManager _undoRedoManager;
-        private CellModel? _centerOfCopy;
-        private IEnumerable<CellModel> _clipboard = [];
         private bool _copyTextOnly = false;
-        public CellClipboard(UndoRedoManager undoRedoManager, CellTracker cellTracker)
+        public CellClipboard(UndoRedoManager undoRedoManager, CellTracker cellTracker, ITextClipboard textClipboard)
         {
+            _textClipboard = textClipboard;
             _undoRedoManager = undoRedoManager;
             _cellTracker = cellTracker;
         }
 
-        public void CopySelectedCells(SheetViewModel activeSheet, bool copyTextOnly)
+        public void CopyCells(IEnumerable<CellModel> cells, bool copyTextOnly)
         {
             _copyTextOnly = copyTextOnly;
-            _clipboard = activeSheet.SelectedCellViewModels.Select(c => c.Model).ToList();
-            Clipboard.Clear();
-            Clipboard.SetText(JsonSerializer.Serialize(_clipboard));
+            _textClipboard.Clear();
+            _textClipboard.SetText(JsonSerializer.Serialize(cells));
         }
 
-        public void PasteIntoCells(CellViewModel pasteIntoCellStart, IEnumerable<CellViewModel> selectedCellViewModels)
+        public void PasteIntoCells(CellModel pasteIntoCellStart, IEnumerable<CellModel> selectedCells)
         {
-            if (Clipboard.ContainsText())
+            IEnumerable<CellModel>? clipboard = null;
+            if (_textClipboard.ContainsText())
             {
                 try
                 {
-                    if (JsonSerializer.Deserialize(Clipboard.GetText(), typeof(List<CellModel>)) is List<CellModel> cellsFromClipboard)
+                    if (JsonSerializer.Deserialize(_textClipboard.GetText(), typeof(List<CellModel>)) is List<CellModel> cellsFromClipboard)
                     {
-                        _centerOfCopy = cellsFromClipboard.FirstOrDefault();
-                        _clipboard = cellsFromClipboard;
+                        clipboard = cellsFromClipboard;
                     }
                 }
                 catch
                 {
                     _copyTextOnly = true;
-                    _clipboard = [new CellModel { Text = Clipboard.GetText() }];
+                    clipboard = [new CellModel { Text = _textClipboard.GetText() }];
                 }
             }
+            if (clipboard is null) return;
+            if (!clipboard.Any()) return;
+            var centerOfCopy = clipboard.First();
 
-            if (_clipboard is null) return;
-            if (_centerOfCopy is null) return;
-            if (!_clipboard.Any()) return;
-
-            if (_clipboard.Count() == 1)
+            if (clipboard.Count() == 1)
             {
-                var cellToPaste = _clipboard.First();
-                foreach (var cell in selectedCellViewModels.ToList())
+                var cellToPaste = clipboard.First();
+                foreach (var cell in selectedCells.ToList())
                 {
                     if (_copyTextOnly) cell.Text = cellToPaste.Text;
-                    else PasteSingleCell(cellToPaste, cell.Model);
+                    else PasteSingleCell(cellToPaste, cell);
                 }
             }
             else
             {
-                foreach (var cellToPaste in _clipboard)
+                foreach (var cellToPaste in clipboard)
                 {
-                    if (_copyTextOnly) PasteCopiedCellTextOnly(pasteIntoCellStart, cellToPaste, _centerOfCopy);
-                    else PasteCopiedCell(pasteIntoCellStart, cellToPaste, _centerOfCopy);
+                    if (_copyTextOnly) PasteCopiedCellTextOnly(pasteIntoCellStart, cellToPaste, centerOfCopy);
+                    else PasteCopiedCell(pasteIntoCellStart, cellToPaste, centerOfCopy);
                 }
             }
         }
 
-        private void PasteCopiedCell(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private void PasteCopiedCell(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
             PasteSingleCell(cellToPaste, cellToReplace);
         }
 
-        private void PasteCopiedCellTextOnly(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
+        private void PasteCopiedCellTextOnly(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
             _undoRedoManager.RecordStateIfRecording(cellToReplace);
@@ -90,11 +86,11 @@ namespace Cell.ViewModel.Application
             cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
         }
 
-        private bool TryGetCellToReplace(CellViewModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
+        private bool TryGetCellToReplace(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
         {
             var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
             var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            cellToReplace = _cellTracker.GetCell(pasteIntoCell.Model.SheetName, newRow, newColumn);
+            cellToReplace = _cellTracker.GetCell(pasteIntoCell.SheetName, newRow, newColumn);
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;

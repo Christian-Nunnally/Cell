@@ -130,7 +130,6 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        // TODO REMOVE
         internal void StartListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Add(cell);
 
         internal void StopListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Remove(cell);

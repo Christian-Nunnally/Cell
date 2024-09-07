@@ -1,7 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
-using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,8 +14,6 @@ namespace Cell.ViewModel.Cells.Types.Special
             NotifyPropertyChanged(nameof(Text));
             model.PropertyChanged += ModelPropertyChanged;
         }
-
-        public override string BackgroundColorHex { get => ColorConstants.ToolWindowHeaderColorConstantHex; set => base.BackgroundColorHex = value; }
 
         public override double Height
         {

@@ -1,6 +1,5 @@
 ﻿using Cell.Common;
 using Cell.Data;
-using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
 using Cell.Model.Plugin;
@@ -15,14 +14,12 @@ namespace Cell.Persistence
     public class UserCollectionLoader
     {
         private readonly Dictionary<string, UserCollection> _collections = [];
-        private readonly CellPopulateManager _cellPopulateManager;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly CellTracker _cellTracker;
         private readonly PersistenceManager _persistanceManager;
-        public UserCollectionLoader(PersistenceManager persistenceManager, CellPopulateManager cellPopulateManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
+        public UserCollectionLoader(PersistenceManager persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             _persistanceManager = persistenceManager;
-            _cellPopulateManager = cellPopulateManager;
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
         }
@@ -84,7 +81,6 @@ namespace Cell.Persistence
         public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
         {
             var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
-            model.PropertyChanged += UserCollectionModelPropertyChanged;
             var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             StartTrackingCollection(collection);
             SaveCollection(collection);
@@ -212,20 +208,20 @@ namespace Cell.Persistence
 
         private void UserCollectionItemAdded(UserCollection collection, PluginModel model)
         {
-            if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
-            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            if (collection.IsFilteredView) return;
+            SaveItem(collection.Name, model.ID, model);
         }
 
         private void UserCollectionItemChanged(UserCollection collection, PluginModel model)
         {
-            if (!collection.IsFilteredView) SaveItem(collection.Name, model.ID, model);
-            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            if (collection.IsFilteredView) return;
+            SaveItem(collection.Name, model.ID, model);
         }
 
         private void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
         {
-            if (!collection.IsFilteredView) DeleteItem(collection.Name, model.ID);
-            _cellPopulateManager.NotifyCollectionUpdated(collection.Name);
+            if (collection.IsFilteredView) return;
+            DeleteItem(collection.Name, model.ID);
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

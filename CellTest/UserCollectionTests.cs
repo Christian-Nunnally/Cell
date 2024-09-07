@@ -3,6 +3,7 @@ using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
+using CellTest.TestUtilities;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -28,8 +29,8 @@ namespace CellTest
             _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader);
-            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _cellPopulateManager, _pluginFunctionLoader, _cellTracker);
+            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             return _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
@@ -138,6 +139,30 @@ namespace CellTest
 
             Assert.Equal(testItem1, testing.Items[0]);
             Assert.Equal(testItem2, testing.Items[1]);
+        }
+
+        [Fact]
+        public void CollectionWithSortFunctionAndTwoItems_SortFunctionChanged_ItemOrderChanged()
+        {
+            var testing = CreateTestInstance();
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction2 = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName + "2", "");
+            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode2 = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
+            sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, x => nameof(TodoItem), _userCollectionLoader.CollectionNames);
+            sortFunction2.SetUserFriendlyCode(sortCode2, CellModel.Null, x => nameof(TodoItem), _userCollectionLoader.CollectionNames);
+            testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
+            var testItem1 = new TodoItem() { Title = "1" };
+            var testItem2 = new TodoItem() { Title = "2" };
+            testing.Add(testItem1);
+            testing.Add(testItem2);
+            Assert.Equal(testItem1, testing.Items[0]);
+            Assert.Equal(testItem2, testing.Items[1]);
+
+            testing.Model.SortAndFilterFunctionName = TestSortFunctionName + "2";
+
+            Assert.Equal(testItem2, testing.Items[0]);
+            Assert.Equal(testItem1, testing.Items[1]);
         }
 
         [Fact]

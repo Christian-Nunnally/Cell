@@ -134,12 +134,6 @@ namespace Cell.View.ToolWindow
             AddColorsToColorPicker(colorPicker, colors, 1.9f);
         }
 
-        // TODO: Move to application settings manager window
-        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.BackupManager.CreateBackup();
-        }
-
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
             var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();

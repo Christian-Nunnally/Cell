@@ -9,7 +9,6 @@ using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -39,7 +38,6 @@ namespace Cell.View.ToolWindow
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
 
-            Visibility = Visibility.Collapsed;
             UserSetWidth = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
             UserSetHeight = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
             _function = function;
@@ -50,7 +48,6 @@ namespace Cell.View.ToolWindow
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             saveCodeCallback = callback;
-            Visibility = Visibility.Visible;
             NotifyDockPropertiesChanged();
             DisplayResult(_function.CompileResult);
 

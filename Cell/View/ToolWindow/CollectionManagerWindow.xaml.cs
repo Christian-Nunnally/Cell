@@ -55,12 +55,12 @@ namespace Cell.View.ToolWindow
             _viewModel.UserSetWidth = width;
         }
 
-        private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void OpenCreateCollectionWindowButtonClick(object sender, RoutedEventArgs e)
         {
-            _viewModel.AddCurrentCollection();
+            _viewModel.OpenCreateCollectionWindow();
         }
 
-        private void DeleteCollectionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void DeleteCollectionButtonClicked(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is UserCollection collection)
             {

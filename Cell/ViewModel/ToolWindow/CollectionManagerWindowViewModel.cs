@@ -1,11 +1,11 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model.Plugin;
+using Cell.Persistence;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -15,47 +15,23 @@ namespace Cell.ViewModel.ToolWindow
         {
             WriteIndented = true
         };
-        private bool isBaseOnCheckBoxChecked;
         private UserCollection? selectedCollection;
         private PluginModel? selectedItem;
         private string selectedItemSerialized = string.Empty;
-        public CollectionManagerWindowViewModel(ObservableCollection<UserCollection> _collections)
+        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
-            Collections = _collections;
-            CollectionBaseOptions = new ObservableCollection<string>(Collections.Select(x => x.Name))
-            {
-                "---"
-            };
-            SelectedItemType = PluginTypeNames.FirstOrDefault(string.Empty);
+            _userCollectionLoader = userCollectionLoader;
         }
 
-        public ObservableCollection<string> CollectionBaseOptions { get; set; }
+        private readonly UserCollectionLoader _userCollectionLoader;
 
-        public Visibility CollectionBaseSettingVisibility { get; private set; } = Visibility.Collapsed;
-
-        public ObservableCollection<UserCollection> Collections { get; set; }
-
-        public Visibility CollectionTypeSettingVisibility { get; private set; } = Visibility.Visible;
-
-        public bool IsBaseOnCheckBoxChecked
-        {
-            get => isBaseOnCheckBoxChecked; set
-            {
-                isBaseOnCheckBoxChecked = value;
-                CollectionBaseSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Visible : Visibility.Collapsed;
-                CollectionTypeSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Collapsed : Visibility.Visible;
-                NotifyPropertyChanged(nameof(CollectionBaseSettingVisibility));
-                NotifyPropertyChanged(nameof(CollectionTypeSettingVisibility));
-            }
-        }
+        public ObservableCollection<UserCollection> Collections => _userCollectionLoader.ObservableCollections;
 
         public ObservableCollection<PluginModel> ItemsInSelectedCollection { get; set; } = [];
 
         public string NewCollectionBaseName { get; set; } = string.Empty;
 
         public string NewCollectionName { get; set; } = string.Empty;
-
-        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
 
         public UserCollection? SelectedCollection
         {
@@ -127,33 +103,6 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public string SelectedItemType { get; set; }
-
-        internal void AddCurrentCollection()
-        {
-            var collectionName = NewCollectionName;
-            if (string.IsNullOrEmpty(collectionName)) return;
-            if (Collections.Any(x => x.Name == collectionName)) return;
-
-            if (IsBaseOnCheckBoxChecked)
-            {
-                var basedOnCollection = NewCollectionBaseName;
-                if (string.IsNullOrEmpty(basedOnCollection)) return;
-
-                var baseCollection = Collections.FirstOrDefault(x => x.Name == basedOnCollection);
-                if (baseCollection == null) return;
-
-                ApplicationViewModel.Instance.UserCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Name);
-            }
-            else
-            {
-                var collectionType = SelectedItemType;
-                if (string.IsNullOrEmpty(collectionType)) return;
-
-                ApplicationViewModel.Instance.UserCollectionLoader.CreateCollection(collectionName, collectionType, string.Empty);
-            }
-        }
-
         private void RefreshItemsForSelectedCollection()
         {
             ItemsInSelectedCollection.Clear();
@@ -172,6 +121,13 @@ namespace Cell.ViewModel.ToolWindow
         private void SelectedCollectionOrderChanged(UserCollection collection)
         {
             RefreshItemsForSelectedCollection();
+        }
+
+        internal void OpenCreateCollectionWindow()
+        {
+            var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionLoader);
+            var createCollectionWindow = new CreateCollectionWindow(createCollectionViewModel);
+            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(createCollectionWindow);
         }
     }
 }

@@ -116,7 +116,6 @@ namespace Cell.Data
             if (cellsInOldSheet.Count == 0)
             {
                 _cellsBySheetMap.Remove(sheetName);
-                // TODO: Delete sheet from disk, and handle closing the sheet if it is open. Actually mabye just don't allow deleting the open sheet
             }
             return result;
         }

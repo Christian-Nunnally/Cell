@@ -18,9 +18,18 @@ namespace Cell.Data
         public UserCollection(UserCollectionModel model, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             Model = model;
+            Model.PropertyChanged += UserCollectionModelPropertyChanged;
             _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
+        }
+
+        private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(UserCollectionModel.SortAndFilterFunctionName))
+            {
+                RefreshSortAndFilter();
+            }
         }
 
         public event Action<UserCollection, PluginModel>? ItemAdded;
@@ -116,7 +125,6 @@ namespace Cell.Data
             }
             else
             {
-                // TODO make this clear and notify once.
                 for (int i = Items.Count - 1; i >= 0; i--)
                 {
                     Remove(Items[i]);

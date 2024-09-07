@@ -1,8 +1,5 @@
 ﻿using Cell.Common;
 using Cell.Model;
-using Cell.View.ToolWindow;
-using Cell.ViewModel.Application;
-using Cell.ViewModel.Execution;
 using System.IO;
 using System.Text.Json;
 
@@ -19,8 +16,10 @@ namespace Cell.Persistence
 
         public void DeleteCell(CellModel cellModel)
         {
-            var cellPath = Path.Combine(SheetsSaveDirectory, cellModel.SheetName, cellModel.ID);
+            var cellDirectory = Path.Combine(SheetsSaveDirectory, cellModel.SheetName);
+            var cellPath = Path.Combine(cellDirectory, cellModel.ID);
             _persistenceManager.DeleteFile(cellPath);
+            if (!_persistenceManager.GetFiles(cellDirectory).Any()) _persistenceManager.DeleteDirectory(cellDirectory);
         }
 
         public IEnumerable<CellModel> LoadCells()

@@ -52,6 +52,10 @@
                 Click="OpenSaveLocationButtonClicked"
                 Content="Open save location"
                 DockPanel.Dock="Left" />
+            <Button
+                Click="CreateBackupButtonClicked"
+                Content="Create backup (Also created every time application opens)"
+                DockPanel.Dock="Left" />
         </StackPanel>
     </Grid>
 </UserControl>

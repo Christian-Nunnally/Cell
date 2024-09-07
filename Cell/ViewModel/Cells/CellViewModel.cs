@@ -583,11 +583,6 @@ namespace Cell.ViewModel.Cells
             NotifyPropertyChanged(nameof(MarginRight));
         }
 
-        public void PopulateText()
-        {
-            Model.PopulateText();
-        }
-
         public void UnhighlightCell()
         {
             SelectionColor = new(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(BackgroundColorHex), 100));
