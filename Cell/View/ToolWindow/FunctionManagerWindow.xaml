@@ -23,6 +23,8 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="44" />
                 <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="65" />
+                <ColumnDefinition Width="120" />
                 <ColumnDefinition Width="60" />
                 <ColumnDefinition Width="60" />
             </Grid.ColumnDefinitions>
@@ -41,15 +43,24 @@
             <controls:BetterComboBox
                 Grid.Column="3"
                 Height="25"
-                ItemsSource="{Binding SheetNameOptions}"
+                ItemsSource="{Binding FilterSheetOptions}"
                 SelectedItem="{Binding FilterSheet}" />
-            <ToggleButton
+            <Label
                 Grid.Column="4"
+                VerticalAlignment="Center"
+                Content="Collection" />
+            <controls:BetterComboBox
+                Grid.Column="5"
+                Height="25"
+                ItemsSource="{Binding FilterCollectionOptions}"
+                SelectedItem="{Binding FilterCollection}" />
+            <ToggleButton
+                Grid.Column="6"
                 Margin="5,0,0,0"
                 Content="trigger"
                 IsChecked="{Binding IncludeTriggerFunctions}" />
             <ToggleButton
-                Grid.Column="5"
+                Grid.Column="7"
                 Margin="5,0,0,0"
                 Content="populate"
                 IsChecked="{Binding IncludePopulateFunctions}" />
@@ -100,7 +111,6 @@
                                 <ColumnDefinition Width="20" />
                                 <ColumnDefinition Width="70" />
                                 <ColumnDefinition Width="1*" />
-                                <ColumnDefinition Width="50" />
                             </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="_removeButton"
@@ -173,13 +183,6 @@
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
                             </StackPanel>
-                            <TextBlock
-                                Grid.Column="3"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                Text="{Binding UsageCount}" />
                         </Grid>
                         <DataTemplate.Triggers>
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">

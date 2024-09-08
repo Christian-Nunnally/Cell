@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Model;
 using System.IO;
 using System.Text.Json;
 using System.Windows.Controls;
@@ -21,80 +22,107 @@ namespace Cell.Persistence
         private string lastLoadedSheet = "Default";
         private double logWindowHeight = 400;
         private double logWindowWidth = 400;
+        private CellModel _defaultCellStyleCellModel = new();
+        private CellModel _defaultSpecialCellStyleCellModel = new();
+
         public ApplicationSettings()
         {
         }
 
         public Dock CodeEditorDockPosition
         {
-            get { return codeEditorDockPosition; }
+            get => codeEditorDockPosition;
             set { if (codeEditorDockPosition != value) { codeEditorDockPosition = value; NotifyPropertyChanged(nameof(CodeEditorDockPosition)); } }
         }
 
         public double CodeEditorHeight
         {
-            get { return codeEditorHeight; }
+            get => codeEditorHeight;
             set { if (codeEditorHeight != value) { codeEditorHeight = value; NotifyPropertyChanged(nameof(CodeEditorHeight)); } }
         }
 
         public double CodeEditorWidth
         {
-            get { return codeEditorWidth; }
+            get => codeEditorWidth; 
             set { if (codeEditorWidth != value) { codeEditorWidth = value; NotifyPropertyChanged(nameof(CodeEditorWidth)); } }
         }
 
         public double FunctionManagerWindowHeight
         {
-            get { return functionManagerWindowHeight; }
+            get => functionManagerWindowHeight;
             set { if (functionManagerWindowHeight != value) { functionManagerWindowHeight = value; NotifyPropertyChanged(nameof(FunctionManagerWindowHeight)); } }
         }
 
         public double FunctionManagerWindowWidth
         {
-            get { return functionManagerWindowWidth; }
+            get => functionManagerWindowWidth;      
             set { if (functionManagerWindowWidth != value) { functionManagerWindowWidth = value; NotifyPropertyChanged(nameof(FunctionManagerWindowWidth)); } }
         }
 
         public bool HighlightPopulateCellDependencies
         {
-            get { return highlightPopulateCellDependencies; }
+            get => highlightPopulateCellDependencies;
             set { if (highlightPopulateCellDependencies != value) { highlightPopulateCellDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCellDependencies)); } }
         }
 
         public bool HighlightPopulateCollectionDependencies
         {
-            get { return highlightPopulateCollectionDependencies; }
+            get => highlightPopulateCollectionDependencies;
             set { if (highlightPopulateCollectionDependencies != value) { highlightPopulateCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCollectionDependencies)); } }
         }
 
         public bool HighlightTriggerCellDependencies
         {
-            get { return highlightTriggerCellDependencies; }
+            get => highlightTriggerCellDependencies;
             set { if (highlightTriggerCellDependencies != value) { highlightTriggerCellDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCellDependencies)); } }
         }
 
         public bool HighlightTriggerCollectionDependencies
         {
-            get { return highlightTriggerCollectionDependencies; }
+            get => highlightTriggerCollectionDependencies;  
             set { if (highlightTriggerCollectionDependencies != value) { highlightTriggerCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCollectionDependencies)); } }
         }
 
         public string LastLoadedSheet
         {
-            get { return lastLoadedSheet; }
+            get => lastLoadedSheet;
             set { if (lastLoadedSheet != value) { lastLoadedSheet = value; NotifyPropertyChanged(nameof(LastLoadedSheet)); } }
         }
 
         public double LogWindowHeight
         {
-            get { return logWindowHeight; }
+            get => logWindowHeight;
             set { if (logWindowHeight != value) { logWindowHeight = value; NotifyPropertyChanged(nameof(LogWindowHeight)); } }
         }
 
         public double LogWindowWidth
         {
-            get { return logWindowWidth; }
+            get => logWindowWidth;
             set { if (logWindowWidth != value) { logWindowWidth = value; NotifyPropertyChanged(nameof(LogWindowWidth)); } }
+        }
+
+        public CellModel DefaultCellStyleCellModel
+        {
+            get => _defaultCellStyleCellModel;
+            set
+            {
+                if (_defaultCellStyleCellModel == value) return;
+                _defaultCellStyleCellModel = value;
+                _defaultCellStyleCellModel.PropertyChanged += (x, e) => NotifyPropertyChanged(nameof(DefaultCellStyleCellModel));
+                NotifyPropertyChanged(nameof(DefaultCellStyleCellModel));
+            }
+        }
+
+        public CellModel DefaultSpecialCellStyleCellModel
+        {
+            get => _defaultSpecialCellStyleCellModel;
+            set
+            {
+                if (_defaultSpecialCellStyleCellModel == value) return;
+                _defaultSpecialCellStyleCellModel = value;
+                _defaultSpecialCellStyleCellModel.PropertyChanged += (x, e) => NotifyPropertyChanged(nameof(DefaultSpecialCellStyleCellModel));
+                NotifyPropertyChanged(nameof(DefaultSpecialCellStyleCellModel));
+            }
         }
 
         public static ApplicationSettings CreateInstance(PersistenceManager persistenceManager)

@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types.Special;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
@@ -625,19 +626,9 @@ namespace Cell.ViewModel.Cells
 
         internal string GetName() => $"{ColumnCellViewModel.GetColumnName(Column)}{Row}";
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.Width) ||
-                e.PropertyName == nameof(CellModel.Height) ||
-                e.PropertyName == nameof(CellModel.Text) ||
-                e.PropertyName == nameof(CellModel.Row) ||
-                e.PropertyName == nameof(CellModel.Column) ||
-                e.PropertyName == nameof(CellModel.CellType))
-            {
-                NotifyPropertyChanged(e.PropertyName);
-                return;
-            }
-            else if (e.PropertyName == nameof(CellModel.ColorHexes))
+            if (e.PropertyName == nameof(CellModel.ColorHexes))
             {
                 BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
                 ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
@@ -651,6 +642,10 @@ namespace Cell.ViewModel.Cells
                 NotifyPropertyChanged(nameof(BorderColor));
                 NotifyPropertyChanged(nameof(ContentBorderColor));
                 NotifyPropertyChanged(nameof(ContentHighlightColor));
+            }
+            else if (e.PropertyName != null)
+            {
+                NotifyPropertyChanged(e.PropertyName);
             }
         }
     }

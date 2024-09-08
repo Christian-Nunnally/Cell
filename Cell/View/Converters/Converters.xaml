@@ -4,6 +4,7 @@
     xmlns:converters="clr-namespace:Cell.View.Converters"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
     <xctk:InverseBoolConverter x:Key="InverseBoolConverter" />
     <xctk:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />
     <xctk:AdditionConverter x:Key="AdditionConverter" />

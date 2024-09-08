@@ -5,6 +5,7 @@ using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 
 namespace Cell.Data
 {
@@ -38,6 +39,7 @@ namespace Cell.Data
                 if (sheet != null)
                 {
                     Sheets.Remove(sheet);
+                    RefreshOrderedSheetsList();
                 }
             }
         }
@@ -74,16 +76,21 @@ namespace Cell.Data
             if (sender is not SheetModel sheetModel) return;
             if (e.PropertyName == nameof(SheetModel.Order))
             {
-                OrderedSheets.Clear();
-                foreach (var sheet in Sheets.OrderBy(x => x.Order))
-                {
-                    OrderedSheets.Add(sheet);
-                }
+                RefreshOrderedSheetsList();
             }
             if (e.PropertyName == nameof(SheetModel.Name))
             {
                 RenameSheet(sheetModel.OldName, sheetModel.Name);
                 sheetModel.OldName = sheetModel.Name;
+            }
+        }
+
+        private void RefreshOrderedSheetsList()
+        {
+            OrderedSheets.Clear();
+            foreach (var sheet in Sheets.OrderBy(x => x.Order))
+            {
+                OrderedSheets.Add(sheet);
             }
         }
 
@@ -138,7 +145,7 @@ namespace Cell.Data
             }
         }
 
-        public void ImportSheetTemplate(string templateName, string sheetName)
+        public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)
         {
             var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
             if (!_persistenceManager.DirectoryExists(templatesDirectory)) return;
@@ -163,11 +170,19 @@ namespace Cell.Data
                 var collectionName = Path.GetFileName(collectionDirectory);
                 collectionsBeingImported.Add(collectionName);
             }
-            var conflictingCollection = collectionsBeingImported.FirstOrDefault(_userCollectionLoader.CollectionNames.Contains);
-            if (conflictingCollection is not null)
+
+            var collectionsBeingImportedWithoutConflicts = new List<string>();
+            foreach (var collectionBeingImported in collectionsBeingImported)
             {
-                DialogWindow.ShowDialog("Import canceled", $"A collection with the name '{conflictingCollection}' already exists. Please rename that collection before importing.");
-                return;
+                if (!_userCollectionLoader.CollectionNames.Contains(collectionBeingImported))
+                {
+                    collectionsBeingImportedWithoutConflicts.Add(collectionBeingImported);
+                }
+                else if (!skipExistingCollectionsDuringImport)
+                {
+                    DialogWindow.ShowDialog("Import canceled", $"A collection with the name '{collectionBeingImported}' already exists. Please rename that collection before importing or enable 'Skip Existing Collections'.");
+                    return;
+                }
             }
 
             AddAndSaveCells(cellsToAdd);
@@ -179,7 +194,7 @@ namespace Cell.Data
                 _pluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
             }
 
-            foreach (var collectionName in collectionsBeingImported)
+            foreach (var collectionName in collectionsBeingImportedWithoutConflicts)
             {
                 var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
                 _userCollectionLoader.ImportCollection(collectionDirectory, collectionName);

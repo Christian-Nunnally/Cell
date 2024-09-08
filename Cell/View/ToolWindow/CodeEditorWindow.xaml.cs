@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Cell.View.ToolWindow
 {
@@ -40,22 +41,39 @@ namespace Cell.View.ToolWindow
 
             UserSetWidth = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
             UserSetHeight = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
-            _function = function;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
-            textEditor.Text = function.GetUserFriendlyCode(currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames); ;
+            _function = function;
+
+            _function.Model.PropertyChanged += FunctionPropertyChanged;
+            ReloadFunctionCode();
+
+            saveCodeCallback = callback;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
+            DisplayResult(_function.CompileResult);
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
-            saveCodeCallback = callback;
-            NotifyDockPropertiesChanged();
-            DisplayResult(_function.CompileResult);
 
             if (!_haveAssembliesBeenRegistered)
             {
                 CodeCompletionWindowFactory.RegisterTypesInAssembly(typeof(TodoItem).Assembly);
                 _haveAssembliesBeenRegistered = true;
             }
+        }
+
+        private void FunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            {
+                ReloadFunctionCode();
+            }
+        }
+
+        private void ReloadFunctionCode()
+        {
+            textEditor.Text = _function.GetUserFriendlyCode(_currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -103,10 +121,12 @@ namespace Cell.View.ToolWindow
             {
                 SaveCode();
                 RequestClose?.Invoke();
+                _function.Model.PropertyChanged -= FunctionPropertyChanged;
             }, () =>
             {
                 _isAllowingCloseWhileDirty = true;
                 RequestClose?.Invoke();
+                _function.Model.PropertyChanged -= FunctionPropertyChanged;
             });
             return false;
         }
@@ -115,14 +135,14 @@ namespace Cell.View.ToolWindow
         {
             ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight = height;
             UserSetHeight = height;
-            NotifyDockPropertiesChanged();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
         }
 
         public void SetWidth(double width)
         {
             ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth = width;
             UserSetWidth = width;
-            NotifyDockPropertiesChanged();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
         }
 
         private static string GetVariableTypePriorToCarot(TextArea textArea)

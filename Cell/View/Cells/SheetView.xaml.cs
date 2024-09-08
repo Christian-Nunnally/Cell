@@ -14,7 +14,7 @@ namespace Cell.View.Cells
     /// </summary>
     public partial class SheetView : UserControl
     {
-        public PanAndZoomCanvas? PanAndZoomCanvas;
+        private PanAndZoomCanvas? _panAndZoomCanvas;
         private CellViewModel? _currentCellMouseIsOver;
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
@@ -24,6 +24,15 @@ namespace Cell.View.Cells
         }
 
         public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
+
+        public bool IsPanningEnabled 
+        { 
+            get => _panAndZoomCanvas?.IsPanningEnabled ?? false;
+            set 
+            {
+                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsPanningEnabled = value;
+            } 
+        }
 
         private bool CanSelectCell(CellModel? cell)
         {
@@ -127,8 +136,8 @@ namespace Cell.View.Cells
 
         private void PanZoomCanvasLoaded(object sender, RoutedEventArgs e)
         {
-            PanAndZoomCanvas = sender as PanAndZoomCanvas;
-            if (PanAndZoomCanvas == null) return;
+            _panAndZoomCanvas = sender as PanAndZoomCanvas;
+            if (_panAndZoomCanvas == null) return;
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)
@@ -137,6 +146,16 @@ namespace Cell.View.Cells
             {
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
+        }
+
+        public void PanCanvasTo(double x, double y)
+        {
+            _panAndZoomCanvas?.PanCanvasTo(x, y);
+        }
+
+        internal void ZoomCanvasTo(Point point, double zoom)
+        {
+            _panAndZoomCanvas?.ZoomCanvasTo(point, zoom);
         }
     }
 }

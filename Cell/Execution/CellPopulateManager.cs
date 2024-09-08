@@ -6,6 +6,7 @@ using Cell.Persistence;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace Cell.Execution
 {
@@ -17,6 +18,7 @@ namespace Cell.Execution
         private readonly Dictionary<string, CellModel> _cellsBeingUpdated = [];
         private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnCollectionUpdates = [];
         private readonly Dictionary<string, Dictionary<CellModel, int>> _cellsToNotifyOnValueUpdatesAtLocation = [];
+        private readonly Dictionary<PluginFunctionModel, List<CellModel>> _cellsToUpdateWhenFunctionChanges = [];
         private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
         private readonly List<string> _collectionsBeingUpdated = [];
         private readonly Dictionary<CellModel, Dictionary<string, int>> _collectionSubcriptionsMadeByCells = [];
@@ -41,20 +43,10 @@ namespace Cell.Execution
             _cellTracker.CellRemoved += StopMonitoringCellForUpdates;
             foreach (var cell in _cellTracker.AllCells)
             {
+                // TODO: Only monitor cells that a populate function depends on.
                 StartMonitoringCellForUpdates(cell);
             }
             _pluginFunctionLoader = pluginFunctionLoader;
-            _pluginFunctionLoader.ObservableFunctions.CollectionChanged += (sender, args) =>
-            {
-                if (args.Action == NotifyCollectionChangedAction.Add)
-                {
-                    if (args.NewItems?[0] is FunctionViewModel function) function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
-                }
-                else if (args.Action == NotifyCollectionChangedAction.Remove)
-                {
-                    if (args.OldItems?[0] is FunctionViewModel function) function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
-                }
-            };
         }
 
         private void ItemPropertyChangedInUserCollection(UserCollection collection, PluginModel model)
@@ -135,36 +127,72 @@ namespace Cell.Execution
             }
         }
 
-        public void StartMonitoringCellForUpdates(CellModel model)
+        public void StartMonitoringCellForUpdates(CellModel cell)
         {
-            model.AfterCellEdited += NotifyCellValueUpdated;
-            model.PropertyChanged += CellPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(model.PopulateFunctionName))
+            cell.AfterCellEdited += NotifyCellValueUpdated;
+            cell.PropertyChanged += CellPropertyChanged;
+            if (!string.IsNullOrWhiteSpace(cell.PopulateFunctionName))
             {
-                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                if (_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function))
                 {
-                    UpdateDependencySubscriptions(model, function);
-                    function.StartListeningForDependencyChanges(model);
-                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
+                    UpdateDependencySubscriptions(cell, function);
+                    _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
+                    AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
                 }
             }
         }
 
-        public void StopMonitoringCellForUpdates(CellModel model)
+        private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, FunctionViewModel function)
         {
-            model.AfterCellEdited -= NotifyCellValueUpdated;
-            model.PropertyChanged -= CellPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(model.PopulateFunctionName))
+            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
             {
-                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                if (!cellList.Contains(cell)) cellList.Add(cell);
+            }
+            else
+            {
+                _cellsToUpdateWhenFunctionChanges.Add(function.Model, [cell]);
+                function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
+                function.Model.PropertyChanged += PopulateFunctionPropertyChanged;
+            }
+        }
+
+        public void StopMonitoringCellForUpdates(CellModel cell)
+        {
+            cell.AfterCellEdited -= NotifyCellValueUpdated;
+            cell.PropertyChanged -= CellPropertyChanged;
+            if (!string.IsNullOrWhiteSpace(cell.PopulateFunctionName))
+            {
+                if (_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function))
                 {
-                    UpdateDependencySubscriptions(model, function);
-                    function.StopListeningForDependencyChanges(model);
-                    _cellToPopulateFunctionNameMap.Remove(model);
+                    UpdateDependencySubscriptions(cell, function);
+                    _cellToPopulateFunctionNameMap.Remove(cell);
+                    RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
                 }
             }
-            UnsubscribeFromAllCollectionUpdates(model);
-            UnsubscribeFromAllLocationUpdates(model);
+            UnsubscribeFromAllCollectionUpdates(cell);
+            UnsubscribeFromAllLocationUpdates(cell);
+        }
+
+        private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, FunctionViewModel function)
+        {
+            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
+            {
+                cellList.Remove(cell);
+                if (cellList.Count == 0)
+                {
+                    _cellsToUpdateWhenFunctionChanges.Remove(function.Model);
+                    function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
+                    function.Model.PropertyChanged -= PopulateFunctionPropertyChanged;
+                }
+            }
+        }
+
+        private void PopulateFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            {
+                _cellsToUpdateWhenFunctionChanges[sender as PluginFunctionModel].ForEach(cell => cell.PopulateText());
+            }
         }
 
         public void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)
@@ -332,27 +360,27 @@ namespace Cell.Execution
         {
             if (e.PropertyName == nameof(CellModel.PopulateFunctionName) || e.PropertyName == nameof(CellModel.SheetName))
             {
-                if (sender is not CellModel model) return;
-                if (_cellToPopulateFunctionNameMap.TryGetValue(model, out var oldFunctionName))
+                if (sender is not CellModel cell) return;
+                if (_cellToPopulateFunctionNameMap.TryGetValue(cell, out var oldFunctionName))
                 {
                     if (_pluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction))
                     {
-                        oldFunction.StopListeningForDependencyChanges(model);
+                        RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, oldFunction);
                     }
-                    _cellToPopulateFunctionNameMap.Remove(model);
+                    _cellToPopulateFunctionNameMap.Remove(cell);
                 }
 
-                if (_pluginFunctionLoader.TryGetFunction("object", model.PopulateFunctionName, out var function))
+                if (_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function))
                 {
                     // TODO: split into add and remove.
-                    UpdateDependencySubscriptions(model, function);
-                    function.StartListeningForDependencyChanges(model);
-                    _cellToPopulateFunctionNameMap[model] = model.PopulateFunctionName;
+                    UpdateDependencySubscriptions(cell, function);
+                    AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
+                    _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
                 }
             }
         }
 
-        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => function.CellsThatUseFunction.ForEach(cell => UpdateDependencySubscriptions(cell, function));
+        private void NotifyCellsAboutFunctionDependencyChanges(FunctionViewModel function) => _cellsToUpdateWhenFunctionChanges[function.Model].ForEach(cell => UpdateDependencySubscriptions(cell, function));
 
         private void RunPopulateForSubscriber(CellModel subscriber)
         {
@@ -376,6 +404,11 @@ namespace Cell.Execution
             {
                 RunPopulateForSubscriber(subscriber);
             }
+        }
+
+        public List<CellModel> GetCellsThatUsePopulateFunction(FunctionViewModel function)
+        {
+            return _cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cells) ? cells : [];
         }
     }
 }

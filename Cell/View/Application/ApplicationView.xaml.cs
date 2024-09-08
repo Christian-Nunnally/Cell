@@ -4,10 +4,13 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.Editing;
+using Microsoft.VisualBasic.Logging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Cell.View.Application
 {
@@ -18,6 +21,14 @@ namespace Cell.View.Application
         public ApplicationView()
         {
             InitializeComponent();
+            if (DataContext is ApplicationViewModel viewModel) viewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
+            DataContextChanged += ApplicationViewDataContextChanged;
+        }
+
+        private void ApplicationViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ApplicationViewModel oldViewModel) oldViewModel.PropertyChanged -= ApplicationViewModelPropertyChanged;
+            if (e.NewValue is ApplicationViewModel newViewModel) newViewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
         }
 
         public SheetView? ActiveSheetView { get; set; }
@@ -74,10 +85,10 @@ namespace Cell.View.Application
 
         protected override void OnInitialized(EventArgs e)
         {
-            _viewModel = ApplicationViewModel.GetOrCreateInstance(this);
-            DataContext = _viewModel;
+            _viewModel = ApplicationViewModel.GetOrCreateInstance();
+            _viewModel.AttachToView(this);
             base.OnInitialized(e);
-            _viewModel.Load();
+            //_viewModel.Load();
         }
 
         private void AdjustWindowSize()
@@ -246,6 +257,20 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(8);
             else BorderThickness = new Thickness(0);
+        }
+
+        private void LoadProjectButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button loadButton) return;
+            loadButton.Content = "Loading...";
+            var loadProgress = ApplicationViewModel.Instance.LoadWithProgress();
+            while (!loadProgress.IsComplete)
+            {
+                loadButton.Content = loadProgress.Message;
+                App.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+                loadProgress = loadProgress.Continue();
+            }
+            loadButton.Content = loadProgress.Message;
         }
     }
 }

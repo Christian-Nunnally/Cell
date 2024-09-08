@@ -111,6 +111,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementColumnOfAllAtOrToTheRightOf(index);
 
             var columnModel = CellModelFactory.Create(0, index, CellType.Column, Model.SheetName);
+            ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel.CopyPublicProperties(columnModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
             _sheetViewModel.CellTracker.AddCell(columnModel);
 
             var sheet = _sheetViewModel.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
@@ -119,8 +120,8 @@ namespace Cell.ViewModel.Cells.Types.Special
             foreach (var rowIndex in rowIndexs)
             {
                 var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName);
+                ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 _sheetViewModel.CellTracker.AddCell(cellModel);
-                sheet?.CornerCell?.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 _sheetViewModel.CellPopulateManager.NotifyCellValueUpdated(cellModel);
 
                 var cellAboveMergedId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;

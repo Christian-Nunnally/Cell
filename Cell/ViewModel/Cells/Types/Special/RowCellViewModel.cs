@@ -91,6 +91,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementRowOfAllAtOrBelow(newRowIndex);
 
             var rowModel = CellModelFactory.Create(newRowIndex, 0, CellType.Row, Model.SheetName);
+            ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel.CopyPublicProperties(rowModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
             _sheetViewModel.CellTracker.AddCell(rowModel);
 
             var sheet = _sheetViewModel.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
@@ -99,8 +100,8 @@ namespace Cell.ViewModel.Cells.Types.Special
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, Model.SheetName);
+                ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 _sheetViewModel.CellTracker.AddCell(cellModel);
-                sheet?.CornerCell?.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 _sheetViewModel.CellPopulateManager.NotifyCellValueUpdated(cellModel);
 
                 var firstSideMergeId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, newRowIndex - 1, columnIndex)?.MergedWith ?? string.Empty;

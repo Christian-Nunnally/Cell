@@ -127,7 +127,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionLoader);
             var createCollectionWindow = new CreateCollectionWindow(createCollectionViewModel);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(createCollectionWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(createCollectionWindow);
         }
     }
 }

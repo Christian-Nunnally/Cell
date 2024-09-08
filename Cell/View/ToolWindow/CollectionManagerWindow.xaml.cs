@@ -104,7 +104,7 @@ namespace Cell.View.ToolWindow
                 function.SetUserFriendlyCode(x, null, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 _viewModel.SelectedCollection?.RefreshSortAndFilter();
             }, null);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
+            ApplicationViewModel.Instance.ShowToolWindow(editor, true);
         }
 
         private void GoToCellButtonClick(object sender, System.Windows.RoutedEventArgs e)

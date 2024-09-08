@@ -12,7 +12,7 @@ namespace Cell.ViewModel.Execution
 {
     public partial class FunctionViewModel : PropertyChangedBase
     {
-        public readonly List<CellModel> CellsThatUseFunction = [];
+        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(this);
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool wasCompileSuccessful;
@@ -122,17 +122,7 @@ namespace Cell.ViewModel.Execution
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
             Model.Code = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformFrom(intermediateCode);
-
-            // Populate cells that use this function as populate:
-            foreach (var cellModel in CellsThatUseFunction.ToList())
-            {
-                cellModel.PopulateText();
-            }
         }
-
-        internal void StartListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Add(cell);
-
-        internal void StopListeningForDependencyChanges(CellModel cell) => CellsThatUseFunction.Remove(cell);
 
         private static void RefactorCellsFunctionUseage(string oldName, string newName)
         {

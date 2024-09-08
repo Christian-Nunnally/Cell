@@ -1,5 +1,6 @@
 ﻿using Cell.Model;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells.Types.Special;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,8 +11,8 @@ namespace Cell.View.ToolWindow
     public partial class SettingsWindow : UserControl, IResizableToolWindow
     {
         private readonly SettingsWindowViewModel _viewModel;
-        private double _height = 300;
-        private double _width = 300;
+        private double _height = 350;
+        private double _width = 350;
         public SettingsWindow(SettingsWindowViewModel viewModel)
         {
             _viewModel = viewModel;
@@ -62,32 +63,31 @@ namespace Cell.View.ToolWindow
         {
             var helpWindow = new HelpWindow();
             helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(helpWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(helpWindow);
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var logWindowViewModel = new LogWindowViewModel();
             var logWindow = new LogWindow(logWindowViewModel);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(logWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(logWindow);
         }
 
         private void ShowUndoRedoStackWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var undoRedoStackWindowViewModel = new UndoRedoStackWindowViewModel();
             var undoRedoStackWindow = new UndoRedoStackWindow(undoRedoStackWindowViewModel);
-            ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(undoRedoStackWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindow);
         }
 
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            var activeSheetView = ApplicationViewModel.Instance.ApplicationView.ActiveSheetView;
+            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
             if (activeSheetView is null) return;
-            if (activeSheetView.PanAndZoomCanvas is null) return;
-            activeSheetView.PanAndZoomCanvas.PanCanvasTo(CellModelFactory.DefaultCellWidth, CellModelFactory.DefaultCellHeight);
-            activeSheetView.PanAndZoomCanvas.ZoomCanvasTo(new Point(0, 0), 1);
-            activeSheetView.PanAndZoomCanvas.IsPanningEnabled = !activeSheetView.PanAndZoomCanvas.IsPanningEnabled;
+            activeSheetView.PanCanvasTo(CellModelFactory.DefaultCellWidth, CellModelFactory.DefaultCellHeight);
+            activeSheetView.ZoomCanvasTo(new Point(0, 0), 1);
+            activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)
@@ -114,6 +114,40 @@ namespace Cell.View.ToolWindow
         {
             ApplicationViewModel.Instance.BackupManager.CreateBackup();
             DialogWindow.ShowDialog("Backup created", "Backup created successfully.");
+        }
+
+        private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
+        {
+            var printDialog = new PrintDialog();
+
+            DialogWindow.ShowDialog("Under construction", "Not quite ready :)");
+            // TODO print cells without black background
+            //printDialog.PrintVisual(ApplicationViewModel.Instance.ActiveSheetView, $"Print {ApplicationViewModel.Instance.SheetViewModel?.SheetName}");
+            //printDialog.ShowDialog();
+        }
+
+        private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var editPanel = new CellFormatEditWindow(ApplicationViewModel.Instance.CellTracker)
+            {
+                // This could be a "Style cell view model" that will promt to set the entire sheet.
+                DataContext = new CornerCellViewModel(ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel, ApplicationViewModel.Instance.SheetViewModel)
+            };
+            ApplicationViewModel.Instance.ShowToolWindow(editPanel);
+        }
+
+        private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var editPanel = new CellFormatEditWindow(ApplicationViewModel.Instance.CellTracker)
+            {
+                // This could be a "Style cell view model" that will promt to set the entire sheet.
+                DataContext = new CornerCellViewModel(ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel, ApplicationViewModel.Instance.SheetViewModel)
+            };
+            ApplicationViewModel.Instance.ShowToolWindow(editPanel);
         }
     }
 }

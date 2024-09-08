@@ -81,7 +81,7 @@ namespace Cell.View.ToolWindow
                 {
                     capturedFunction.SetUserFriendlyCode(x, cell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 }, cell);
-                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
             }
         }
 

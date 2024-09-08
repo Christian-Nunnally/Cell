@@ -66,7 +66,7 @@ namespace Cell.View.ToolWindow
                     function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                     (cell as ListCellViewModel)?.UpdateList();
                 }, cell.Model);
-                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Cell.View.ToolWindow
                 {
                     function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 }, cell.Model);
-                ApplicationViewModel.Instance.ApplicationView.ShowToolWindow(editor, true);
+                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
             }
         }
 

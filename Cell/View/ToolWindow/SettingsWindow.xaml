@@ -17,45 +17,59 @@
         <StackPanel>
             <Button
                 Click="TogglePanLockButtonClick"
-                Content="Lock pan and zoom for current sheet"
+                Content="Lock Pan and Zoom for Current Sheet"
                 DockPanel.Dock="Left"
                 ToolTip="Toggles the ability to pan and zoom. Useful for creating a nice UI." />
             <ToggleButton
-                Content="Highlight populate cell dependencies of selected cell"
+                Content="Highlight Populate Cell Dependencies of Selected Cell"
                 DockPanel.Dock="Left"
                 IsChecked="{Binding ApplicationSettings.HighlightPopulateCellDependencies}"
                 ToolTip="When enabled, selecting a single cell will cause cells used by the populate function to highlight." />
             <ToggleButton
-                Content="Highlight trigger cell dependencies of selected cell"
+                Content="Highlight Trigger Cell Dependencies of Selected Cell"
                 DockPanel.Dock="Left"
                 IsChecked="{Binding ApplicationSettings.HighlightTriggerCellDependencies}"
                 ToolTip="When enabled, selecting a single cell will cause cells used by the trigger function to highlight." />
             <ToggleButton
-                Content="Highlight populate collection dependencies of selected cell"
+                Content="Highlight Populate Collection Dependencies of Selected Cell"
                 DockPanel.Dock="Left"
                 IsChecked="{Binding ApplicationSettings.HighlightPopulateCollectionDependencies}"
                 ToolTip="When enabled, selecting a single cell will cause collections used by the populate function to highlight." />
             <ToggleButton
-                Content="HighlightTriggerCollectionDependencies"
+                Content="Highlight Trigger Collection Dependencies of Selected Cell"
                 DockPanel.Dock="Left"
                 IsChecked="{Binding ApplicationSettings.HighlightTriggerCollectionDependencies}"
                 ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
             <Button
                 Click="ShowLogWindowButtonClick"
-                Content="Open logs window"
+                Content="Open Application Logs Window"
                 DockPanel.Dock="Left" />
             <Button
                 Click="ShowUndoRedoStackWindowButtonClick"
-                Content="Open undo/redo window"
+                Content="Open Undo/Redo Window"
                 DockPanel.Dock="Left" />
             <Button
                 Click="OpenSaveLocationButtonClicked"
-                Content="Open save location"
+                Content="Open Save Directory in Explorer"
                 DockPanel.Dock="Left" />
             <Button
                 Click="CreateBackupButtonClicked"
-                Content="Create backup (Also created every time application opens)"
+                Content="Create Backup (Also created every time application opens)"
                 DockPanel.Dock="Left" />
+            <Button
+                Click="PrintCurrentSheetButtonClicked"
+                Content="Print Active Sheet"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="DefaultCellFormatEditorButtonClicked"
+                Content="Default Cell Format Editor"
+                DockPanel.Dock="Left"
+                ToolTip="Edit the deault format of newly created cells" />
+            <Button
+                Click="DefaultRowColumnCellFormatEditorButtonClicked"
+                Content="Default Row/Column Cell Format Editor"
+                DockPanel.Dock="Left"
+                ToolTip="Edit the deault format of newly created cells" />
         </StackPanel>
     </Grid>
 </UserControl>

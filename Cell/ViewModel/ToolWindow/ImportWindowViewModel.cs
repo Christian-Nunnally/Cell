@@ -8,6 +8,8 @@ namespace Cell.ViewModel.ToolWindow
         {
         }
 
+        public bool SkipExistingCollectionsDuringImport { get; set; } = false;
+
         public string ImportingTemplateName { get; set; } = string.Empty;
 
         public string NewSheetNameForImportedTemplates { get; set; } = string.Empty;

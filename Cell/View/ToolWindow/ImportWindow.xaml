@@ -14,12 +14,30 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid Width="{Binding UserSetWidth}" Height="{Binding UserSetHeight}">
-        <StackPanel>
+        <StackPanel
+            MinWidth="200"
+            MaxWidth="400"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
             <Label Content="Template to import" />
-            <controls:BetterComboBox ItemsSource="{Binding PossibleTemplates}" SelectedItem="{Binding ImportingTemplateName}" />
+            <controls:BetterComboBox
+                Height="25"
+                Margin="4"
+                ItemsSource="{Binding PossibleTemplates}"
+                SelectedItem="{Binding ImportingTemplateName}" />
+            <CheckBox
+                Margin="4"
+                Content="Skip Existing Collections"
+                IsChecked="{Binding SkipExistingCollectionsDuringImport}" />
             <Label Content="New sheet name" />
-            <TextBox Text="{Binding NewSheetNameForImportedTemplates}" />
-            <Button Click="ImportSheetButtonClicked" Content="Import" />
+            <TextBox
+                Height="25"
+                Margin="4"
+                Text="{Binding NewSheetNameForImportedTemplates}" />
+            <Button
+                Margin="4"
+                Click="ImportSheetButtonClicked"
+                Content="Import" />
         </StackPanel>
     </Grid>
 </UserControl>

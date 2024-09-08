@@ -1,4 +1,4 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Persistence;
 
 namespace CellTest.TestUtilities
 {

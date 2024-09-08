@@ -35,18 +35,11 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <TextBox
-            MinWidth="100"
-            Margin="0,3,0,1"
-            Text="{Binding NewSheetName}"
-            ToolTip="Enter the sheets name"
-            Visibility="{Binding IsAddingSheet, Converter={StaticResource BooleanToVisibilityConverter}}"
-            WindowChrome.IsHitTestVisibleInChrome="True" />
         <Button
             Width="28"
             Click="AddNewSheetButtonClicked"
             Style="{StaticResource TitleButtonStyle}"
-            ToolTip="Click once to add a sheet, click again once you've given the new sheet a name. Also used to finish renaming a sheet. Ctrl+click a sheet name to start renaming it.">
+            ToolTip="Opens the 'Create sheet' window.">
             <Label Padding="5" Content="+" />
         </Button>
     </StackPanel>

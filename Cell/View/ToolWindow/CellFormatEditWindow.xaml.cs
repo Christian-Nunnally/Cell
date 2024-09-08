@@ -3,7 +3,6 @@ using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
-using Cell.ViewModel.Cells.Types.Special;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -37,9 +36,9 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle()
         {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
-            if (currentlySelectedCell is null) return "Select a cell to edit";
-            if (currentlySelectedCell is CornerCellViewModel) return "Edit default sheet format";
+            if (DataContext is not CellViewModel currentlySelectedCell) return "Select a cell to edit";
+            if (currentlySelectedCell.Model == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
+            if (currentlySelectedCell.Model == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
             return $"Format editor - {currentlySelectedCell.GetName()}";
         }
 
