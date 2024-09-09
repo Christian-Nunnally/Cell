@@ -54,7 +54,7 @@ namespace Cell.View.ToolWindow
         {
             var sheetName = _viewModel.SheetNameToExport;
             ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);
-            DialogWindow.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({ApplicationViewModel.Instance.PersistenceManager.CurrentTemplatePath})");
+            DialogFactory.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({ApplicationViewModel.Instance.PersistenceManager.CurrentTemplatePath})");
         }
     }
 }

@@ -2,7 +2,6 @@
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 
 namespace Cell.Execution
@@ -64,7 +63,7 @@ namespace Cell.Execution
         public void ShowDialog(string text)
         {
             var title = _cell?.UserFriendlyCellName ?? "Function";
-            DialogWindow.ShowDialog(title, text);
+            DialogFactory.ShowDialog(title, text);
         }
     }
 }

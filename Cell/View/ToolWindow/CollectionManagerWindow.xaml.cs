@@ -66,22 +66,22 @@ namespace Cell.View.ToolWindow
             {
                 if (collection.UsageCount != 0)
                 {
-                    DialogWindow.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it is being used by {collection.UsageCount} functions.");
+                    DialogFactory.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it is being used by {collection.UsageCount} functions.");
                     return;
                 }
 
                 var conflictingBase = _viewModel.Collections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
                 if (conflictingBase != null)
                 {
-                    DialogWindow.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.");
+                    DialogFactory.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.");
                     return;
                 }
 
-                DialogWindow.ShowYesNoConfirmationDialog($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
+                DialogFactory.ShowYesNoConfirmationDialog($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
                 {
                     if (collection.Items.Count > 0)
                     {
-                        DialogWindow.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () =>
+                        DialogFactory.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () =>
                         {
                             ApplicationViewModel.Instance.UserCollectionLoader.DeleteCollection(collection);
                         });

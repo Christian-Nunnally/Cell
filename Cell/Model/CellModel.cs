@@ -1,58 +1,43 @@
 ﻿using Cell.Common;
 using Cell.Execution;
-using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
 using System.Text.Json.Serialization;
-using System.Windows;
 
 namespace Cell.Model
 {
     public class CellModel : PropertyChangedBase
     {
         public static readonly CellModel Null = new();
-        private string borderThickness = "1";
         private CellType cellType = CellType.None;
-        private string[] colorHexes = [
-            ColorConstants.BackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ControlBackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ForegroundColorConstantHex,
-            ColorConstants.AccentColorConstantHex];
         private int column;
-        private string contentBorderThickness = "1";
         private string errorText = string.Empty;
-        private string font = "Consolas";
-        private double fontSize = 10;
         private double height;
-        private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center;
         private string id = Utilities.GenerateUnqiueId(12);
         private int index = 0;
-        private bool isFontBold = false;
-        private bool isFontItalic = false;
-        private bool isFontStrikethrough = false;
-        private string margin = "0";
         private string mergedWith = string.Empty;
         private string populateFunctionName = string.Empty;
         private int row;
         private string sheetName = string.Empty;
         private string text = string.Empty;
-        private TextAlignment textAlignment = TextAlignment.Center;
         private string triggerFunctionName = string.Empty;
-        private VerticalAlignment verticalAlignment = VerticalAlignment.Center;
         private double width;
+        private CellStyleModel _cellStyle = new ();
         public event Action<CellModel>? AfterCellEdited;
 
         public event Action<CellModel, EditContext>? CellTriggered;
 
         public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
-        public string BorderThicknessString
+        public CellStyleModel Style
         {
-            get { return borderThickness; }
-            set { if (borderThickness == value) return; borderThickness = value; NotifyPropertyChanged(nameof(BorderThicknessString)); }
+            get => _cellStyle;
+            set 
+            { 
+                if (_cellStyle == value) return; 
+                _cellStyle = value; 
+                NotifyPropertyChanged(nameof(_cellStyle)); }
         }
 
         public CellType CellType
@@ -61,22 +46,10 @@ namespace Cell.Model
             set { if (cellType != value) { cellType = value; NotifyPropertyChanged(nameof(CellType)); } }
         }
 
-        public string[] ColorHexes
-        {
-            get => colorHexes;
-            set { if (colorHexes == value) return; colorHexes = value; NotifyPropertyChanged(nameof(ColorHexes)); }
-        }
-
         public int Column
         {
             get => column;
             set { if (column != value) { column = value; NotifyPropertyChanged(nameof(Column)); } }
-        }
-
-        public string ContentBorderThicknessString
-        {
-            get => contentBorderThickness;
-            set { if (contentBorderThickness == value) return; contentBorderThickness = value; NotifyPropertyChanged(nameof(ContentBorderThicknessString)); }
         }
 
         [JsonIgnore]
@@ -89,28 +62,10 @@ namespace Cell.Model
             set { if (errorText != value) { errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
         }
 
-        public string FontFamily
-        {
-            get => font;
-            set { if (font == value) return; font = value; NotifyPropertyChanged(nameof(FontFamily)); }
-        }
-
-        public double FontSize
-        {
-            get => fontSize;
-            set { if (fontSize == value) return; fontSize = value; NotifyPropertyChanged(nameof(FontSize)); }
-        }
-
         public double Height
         {
             get => height;
             set { if (height != value) { height = value; NotifyPropertyChanged(nameof(Height)); } }
-        }
-
-        public HorizontalAlignment HorizontalAlignment
-        {
-            get => horizontalAlignment;
-            set { if (horizontalAlignment == value) return; horizontalAlignment = value; NotifyPropertyChanged(nameof(HorizontalAlignment)); }
         }
 
         public string ID
@@ -123,30 +78,6 @@ namespace Cell.Model
         {
             get => index;
             set { if (index != value) { index = value; NotifyPropertyChanged(nameof(Index)); } }
-        }
-
-        public bool IsFontBold
-        {
-            get => isFontBold;
-            set { if (isFontBold == value) return; isFontBold = value; NotifyPropertyChanged(nameof(IsFontBold)); }
-        }
-
-        public bool IsFontItalic
-        {
-            get => isFontItalic;
-            set { if (isFontItalic == value) return; isFontItalic = value; NotifyPropertyChanged(nameof(IsFontItalic)); }
-        }
-
-        public bool IsFontStrikethrough
-        {
-            get => isFontStrikethrough;
-            set { if (isFontStrikethrough == value) return; isFontStrikethrough = value; NotifyPropertyChanged(nameof(IsFontStrikethrough)); }
-        }
-
-        public string MarginString
-        {
-            get => margin;
-            set { if (margin == value) return; margin = value; NotifyPropertyChanged(nameof(MarginString)); }
         }
 
         public string MergedWith
@@ -203,12 +134,6 @@ namespace Cell.Model
             }
         }
 
-        public TextAlignment TextAlignmentForView
-        {
-            get => textAlignment;
-            set { if (textAlignment == value) return; textAlignment = value; NotifyPropertyChanged(nameof(TextAlignment)); }
-        }
-
         public string TriggerFunctionName
         {
             get => triggerFunctionName;
@@ -225,11 +150,8 @@ namespace Cell.Model
         [JsonIgnore]
         public double Value { get => double.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
 
-        public VerticalAlignment VerticalAlignment
-        {
-            get => verticalAlignment;
-            set { if (verticalAlignment == value) return; verticalAlignment = value; NotifyPropertyChanged(nameof(VerticalAlignment)); }
-        }
+        [JsonIgnore]
+        public int Int { get => int.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
 
         public double Width
         {
@@ -257,16 +179,10 @@ namespace Cell.Model
             else ErrorText = result.Result;
         }
 
-        public void SetBackground(string color)
-        {
-            ColorHexes[(int)ColorFor.Background] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
         public void SetBackgrounds(string color)
         {
-            SetBackground(color);
-            SetContentBackground(color);
+            Style.BackgroundColor = color;
+            Style.ContentBackgroundColor = color;
         }
 
         public void SetBooleanProperty(string key, bool value)
@@ -280,56 +196,16 @@ namespace Cell.Model
             NotifyPropertyChanged(nameof(BooleanProperties), key);
         }
 
-        public void SetBorder(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.Border] == color) return;
-            ColorHexes[(int)ColorFor.Border] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
         public void SetBorders(string color)
         {
-            SetBorder(color);
-            SetContentBorder(color);
+            Style.BorderColor = color;
+            Style.ContentBorderColor = color;
         }
 
         public void SetColor(string color)
         {
             SetBackgrounds(color);
             SetBorders(color);
-        }
-
-        public void SetContentBackground(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentBackground] == color) return;
-            ColorHexes[(int)ColorFor.ContentBackground] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetContentBorder(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentBorder] == color) return;
-            ColorHexes[(int)ColorFor.ContentBorder] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetContentHighlight(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentHighlight] == color) return;
-            ColorHexes[(int)ColorFor.ContentHighlight] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetForeground(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.Foreground] == color) return;
-            ColorHexes[(int)ColorFor.Foreground] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
         }
 
         public void SetItems(IEnumerable<object> objects)

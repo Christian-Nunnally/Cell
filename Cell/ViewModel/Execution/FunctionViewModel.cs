@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Execution.SyntaxWalkers;
 using Cell.Model;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,7 +43,7 @@ namespace Cell.ViewModel.Execution
                 var oldName = Model.Name;
                 Model.Name = value;
                 NotifyPropertyChanged(nameof(Name));
-                DialogWindow.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{Model.Name}' instead?", () => RefactorCellsFunctionUseage(oldName, Model.Name));
+                DialogFactory.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{Model.Name}' instead?", () => RefactorCellsFunctionUseage(oldName, Model.Name));
             }
         }
 

@@ -17,6 +17,12 @@ namespace Cell.Common
             return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
         }
 
+        public static SolidColorBrush ConvertHexStringToBrush(string hex)
+        {
+            var color = ConvertHexStringToColor(hex);
+            return new SolidColorBrush(color);
+        }
+
         public static Color ConvertHexStringToColor(string hex)
         {
             if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;

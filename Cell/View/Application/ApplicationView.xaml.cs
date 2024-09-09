@@ -1,14 +1,17 @@
-﻿using Cell.View.Cells;
+﻿using Cell.Data;
+using Cell.Execution;
+using Cell.Persistence;
+using Cell.Persistence.Migration;
+using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.Editing;
-using Microsoft.VisualBasic.Logging;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -85,10 +88,33 @@ namespace Cell.View.Application
 
         protected override void OnInitialized(EventArgs e)
         {
-            _viewModel = ApplicationViewModel.GetOrCreateInstance();
+            var appDataPath = Environment.SpecialFolder.ApplicationData;
+            var appDataRoot = Environment.GetFolderPath(appDataPath);
+            var savePath = Path.Combine(appDataRoot, "LGF", "Cell");
+            var fileIo = new FileIO();
+            var persistenceManager = new PersistenceManager(savePath, fileIo);
+
+            var v0ToV1Migration = new V1ToV2Migrator();
+            persistenceManager.RegisterMigrator("0.0.0", "1", v0ToV1Migration);
+
+            var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
+            var cellLoader = new CellLoader(persistenceManager);
+            var cellTracker = new CellTracker(cellLoader);
+            var userCollectionLoader = new UserCollectionLoader(persistenceManager, pluginFunctionLoader, cellTracker);
+            var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var sheetTracker = new SheetTracker(persistenceManager, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
+            var applicationSettings = ApplicationSettings.CreateInstance(persistenceManager);
+            var undoRedoManager = new UndoRedoManager(cellTracker);
+            var textClipboard = new TextClipboard();
+            var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
+            var backupManager = new BackupManager(persistenceManager, cellTracker, sheetTracker, userCollectionLoader, pluginFunctionLoader);
+
+            _viewModel = new ApplicationViewModel(persistenceManager, pluginFunctionLoader, cellLoader, cellTracker, userCollectionLoader, cellPopulateManager, cellTriggerManager, sheetTracker, titleBarSheetNavigationViewModel, applicationSettings, undoRedoManager, cellClipboard, backupManager);
+            ApplicationViewModel.Instance = _viewModel;
             _viewModel.AttachToView(this);
             base.OnInitialized(e);
-            //_viewModel.Load();
         }
 
         private void AdjustWindowSize()

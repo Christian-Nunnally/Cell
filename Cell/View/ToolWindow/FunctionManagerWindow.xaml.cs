@@ -60,11 +60,11 @@ namespace Cell.View.ToolWindow
             {
                 if (function.UsageCount != 0)
                 {
-                    DialogWindow.ShowDialog("Function in use", $"Cannot delete '{function.Model.Name}' because it is being used by {function.UsageCount} cells.");
+                    DialogFactory.ShowDialog("Function in use", $"Cannot delete '{function.Model.Name}' because it is being used by {function.UsageCount} cells.");
                     return;
                 }
 
-                DialogWindow.ShowYesNoConfirmationDialog($"Delete '{function.Model.Name}'?", "Are you sure you want to delete this function?", () =>
+                DialogFactory.ShowYesNoConfirmationDialog($"Delete '{function.Model.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
                     ApplicationViewModel.Instance.PluginFunctionLoader.DeleteFunction(function);
                 });

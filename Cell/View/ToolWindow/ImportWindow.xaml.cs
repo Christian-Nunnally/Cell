@@ -54,12 +54,12 @@ namespace Cell.View.ToolWindow
         {
             if (string.IsNullOrWhiteSpace(_viewModel.ImportingTemplateName))
             {
-                DialogWindow.ShowDialog("No template selected", "Please select a template to import.");
+                DialogFactory.ShowDialog("No template selected", "Please select a template to import.");
                 return;
             }
             if (string.IsNullOrWhiteSpace(_viewModel.NewSheetNameForImportedTemplates))
             {
-                DialogWindow.ShowDialog("No sheet name", "Please enter a name for the new sheet.");
+                DialogFactory.ShowDialog("No sheet name", "Please enter a name for the new sheet.");
                 return;
             }
             var templateName = _viewModel.ImportingTemplateName;

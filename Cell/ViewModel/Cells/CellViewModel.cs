@@ -13,119 +13,120 @@ namespace Cell.ViewModel.Cells
     {
         private readonly CellModel _model;
         protected SheetViewModel _sheetViewModel;
+        private SolidColorBrush _backgroundColor = new();
+        private SolidColorBrush _borderColor = new();
+        private SolidColorBrush _contentBackgroundColor = new();
+        private SolidColorBrush _contentHighlightColor = new();
+        private SolidColorBrush _foregroundColor = new();
         private bool _isHighlighted;
         private bool _isSelected;
-        private SolidColorBrush _selectionBorderColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
-        private SolidColorBrush _selectionColor = new((Color)ColorConverter.ConvertFromString("#ffff0000"));
+        private SolidColorBrush _selectionBorderColor = ColorAdjuster.ConvertHexStringToBrush("#ffff0000");
+        private SolidColorBrush _selectionColor = ColorAdjuster.ConvertHexStringToBrush("#ffff0000");
         private double _x;
         private double _y;
+        private Thickness borderThickness;
+        private Thickness contentBorderThickness;
+        private Thickness margin;
         public CellViewModel(CellModel model, SheetViewModel sheet)
         {
             _sheetViewModel = sheet;
             _model = model;
 
-            BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
-            ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
-            ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
-            BorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BorderColorHex));
-            ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
-            ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
-            SelectionColor = new((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
-            SelectionBorderColor = new((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
+            BackgroundColor = ColorAdjuster.ConvertHexStringToBrush(BackgroundColorHex);
+            ContentBackgroundColor = ColorAdjuster.ConvertHexStringToBrush(ContentBackgroundColorHex);
+            ForegroundColor = ColorAdjuster.ConvertHexStringToBrush(ForegroundColorHex);
+            BorderColor = ColorAdjuster.ConvertHexStringToBrush(BorderColorHex);
+            ContentBorderColor = ColorAdjuster.ConvertHexStringToBrush(ContentBorderColorHex);
+            ContentHighlightColor = ColorAdjuster.ConvertHexStringToBrush(ContentHighlightColorHex);
+            SelectionColor = ColorAdjuster.ConvertHexStringToBrush(BackgroundColorHex);
+            SelectionBorderColor = ColorAdjuster.ConvertHexStringToBrush(BackgroundColorHex);
             UpdateBorderThickness(BorderThicknessString);
             UpdateContentBorderThickness(ContentBorderThicknessString);
             _model.PropertyChanged += ModelPropertyChanged;
+            _model.Style.PropertyChanged += ModelStylePropertyChanged;
         }
 
-        public virtual Brush BackgroundColor { get; private set; }
+        public virtual SolidColorBrush BackgroundColor
+        {
+            get => _backgroundColor;
+            private set
+            {
+                _backgroundColor = value;
+                NotifyPropertyChanged(nameof(BackgroundColor));
+            }
+        }
 
         public virtual string BackgroundColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.Background];
+            get => _model.Style.BackgroundColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.SetBackground(value);
+                _model.Style.BorderColor = value;
                 var color = (Color)ColorConverter.ConvertFromString(value);
                 BackgroundColor = new SolidColorBrush(color);
-                NotifyPropertyChanged(nameof(BackgroundColor), nameof(BackgroundColorHex));
                 SelectionColor = new(ColorAdjuster.GetHighlightColor(color, 100));
                 SelectionBorderColor = new(ColorAdjuster.GetHighlightColor(color, 175));
             }
         }
 
-        public virtual SolidColorBrush BorderColor { get; private set; }
+        public virtual SolidColorBrush BorderColor
+        {
+            get => _borderColor;
+            private set
+            {
+                _borderColor = value;
+                NotifyPropertyChanged(nameof(BorderColor));
+            }
+        }
 
         public virtual string BorderColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.Border];
+            get => _model.Style.BorderColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.SetBorder(value);
+                _model.Style.BorderColor = value;
                 var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
                 BorderColor = new SolidColorBrush(color);
-                NotifyPropertyChanged(nameof(BorderColor), nameof(BorderColorHex));
             }
         }
 
-        public virtual Thickness BorderThickness { get; private set; }
-
-        public string BorderThicknessBottom
+        public virtual Thickness BorderThickness
         {
-            get => BorderThickness.Top.ToString();
-            set
+            get => borderThickness;
+            private set
             {
-                BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{BorderThickness.Right},{value}";
-                NotifyBorderThicknessChanged();
+                borderThickness = value;
+                NotifyPropertyChanged(nameof(BorderThickness));
+                NotifyPropertyChanged(nameof(BorderThicknessTop));
+                NotifyPropertyChanged(nameof(BorderThicknessLeft));
+                NotifyPropertyChanged(nameof(BorderThicknessBottom));
+                NotifyPropertyChanged(nameof(BorderThicknessRight));
             }
         }
 
-        public string BorderThicknessLeft
-        {
-            get => BorderThickness.Top.ToString();
-            set
-            {
-                BorderThicknessString = $"{value},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
-                NotifyBorderThicknessChanged();
-            }
-        }
+        public string BorderThicknessBottom { get => BorderThickness.Top.ToString(); set => BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{BorderThickness.Right},{value}"; }
 
-        public string BorderThicknessRight
-        {
-            get => BorderThickness.Top.ToString();
-            set
-            {
-                BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{value},{BorderThickness.Bottom}";
-                NotifyBorderThicknessChanged();
-            }
-        }
+        public string BorderThicknessLeft { get => BorderThickness.Top.ToString(); set => BorderThicknessString = $"{value},{BorderThickness.Top},{value},{BorderThickness.Bottom}"; }
+
+        public string BorderThicknessRight { get => BorderThickness.Top.ToString(); set => BorderThicknessString = $"{BorderThickness.Left},{BorderThickness.Top},{value},{BorderThickness.Bottom}"; }
 
         public virtual string BorderThicknessString
         {
-            get => _model.BorderThicknessString;
+            get => _model.Style.Border;
             set
             {
-                if (UpdateBorderThickness(value))
-                {
-                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                    _model.BorderThicknessString = value;
-                    NotifyPropertyChanged(nameof(BorderThicknessString));
-                }
+                if (!UpdateBorderThickness(value)) return;
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
+                _model.Style.Border = value;
+                NotifyPropertyChanged(nameof(BorderThicknessString));
             }
         }
 
-        public string BorderThicknessTop
-        {
-            get => BorderThickness.Top.ToString();
-            set
-            {
-                BorderThicknessString = $"{value},{value},{value},{value}";
-                NotifyBorderThicknessChanged();
-            }
-        }
+        public string BorderThicknessTop { get => BorderThickness.Top.ToString(); set => BorderThicknessString = $"{value},{value},{value},{value}"; }
 
         public virtual CellType CellType
         {
@@ -144,18 +145,26 @@ namespace Cell.ViewModel.Cells
             set { _model.Column = value; }
         }
 
-        public virtual SolidColorBrush ContentBackgroundColor { get; private set; }
+        public virtual SolidColorBrush ContentBackgroundColor
+        {
+            get => _contentBackgroundColor;
+            private set
+            {
+                _contentBackgroundColor = value;
+                NotifyPropertyChanged(nameof(ContentBackgroundColor));
+            }
+        }
 
         public virtual string ContentBackgroundColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.ContentBackground];
+            get => _model.Style.ContentBackgroundColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.ColorHexes[(int)ColorFor.ContentBackground] = value;
+                _model.Style.ContentBackgroundColor = value;
                 ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
-                NotifyPropertyChanged(nameof(ContentBackgroundColor), nameof(ContentBackgroundColorHex));
+                NotifyPropertyChanged(nameof(ContentBackgroundColor));
             }
         }
 
@@ -163,105 +172,91 @@ namespace Cell.ViewModel.Cells
 
         public virtual string ContentBorderColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.ContentBorder];
+            get => _model.Style.ContentBorderColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.SetContentBorder(value);
+                _model.Style.ContentBorderColor = value;
                 ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
-                NotifyPropertyChanged(nameof(ContentBorderColor), nameof(ContentBorderColorHex));
+                NotifyPropertyChanged(nameof(ContentBorderColor));
             }
         }
 
-        public virtual Thickness ContentBorderThickness { get; private set; }
-
-        public string ContentBorderThicknessBottom
+        public virtual Thickness ContentBorderThickness
         {
-            get => ContentBorderThickness.Top.ToString();
-            set
+            get => contentBorderThickness; private set
             {
-                ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{ContentBorderThickness.Right},{value}";
-                NotifyContentBorderThicknessChanged();
+                contentBorderThickness = value;
+                NotifyPropertyChanged(nameof(ContentBorderThickness));
+                NotifyPropertyChanged(nameof(ContentBorderThicknessTop));
+                NotifyPropertyChanged(nameof(ContentBorderThicknessLeft));
+                NotifyPropertyChanged(nameof(ContentBorderThicknessBottom));
+                NotifyPropertyChanged(nameof(ContentBorderThicknessRight));
             }
         }
 
-        public string ContentBorderThicknessLeft
-        {
-            get => ContentBorderThickness.Top.ToString();
-            set
-            {
-                ContentBorderThicknessString = $"{value},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}";
-                NotifyContentBorderThicknessChanged();
-            }
-        }
+        public string ContentBorderThicknessBottom { get => ContentBorderThickness.Top.ToString(); set => ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{ContentBorderThickness.Right},{value}"; }
 
-        public string ContentBorderThicknessRight
-        {
-            get => ContentBorderThickness.Top.ToString();
-            set
-            {
-                ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}";
-                NotifyContentBorderThicknessChanged();
-            }
-        }
+        public string ContentBorderThicknessLeft { get => ContentBorderThickness.Top.ToString(); set => ContentBorderThicknessString = $"{value},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}"; }
+
+        public string ContentBorderThicknessRight { get => ContentBorderThickness.Top.ToString(); set => ContentBorderThicknessString = $"{ContentBorderThickness.Left},{ContentBorderThickness.Top},{value},{ContentBorderThickness.Bottom}"; }
 
         public virtual string ContentBorderThicknessString
         {
-            get => Model.ContentBorderThicknessString;
+            get => Model.Style.ContentBorder;
             set
             {
                 if (UpdateContentBorderThickness(value))
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                    _model.ContentBorderThicknessString = value;
+                    _model.Style.ContentBorder = value;
                     NotifyPropertyChanged(nameof(ContentBorderThicknessString));
                 }
             }
         }
 
-        public string ContentBorderThicknessTop
+        public string ContentBorderThicknessTop { get => ContentBorderThickness.Top.ToString(); set => ContentBorderThicknessString = $"{value},{value},{value},{value}"; }
+
+        public virtual SolidColorBrush ContentHighlightColor
         {
-            get => ContentBorderThickness.Top.ToString();
-            set
+            get => _contentHighlightColor;
+            private set
             {
-                ContentBorderThicknessString = $"{value},{value},{value},{value}";
-                NotifyContentBorderThicknessChanged();
+                _contentHighlightColor = value;
+                NotifyPropertyChanged(nameof(ContentHighlightColor));
             }
         }
 
-        public virtual SolidColorBrush ContentHighlightColor { get; private set; }
-
         public virtual string ContentHighlightColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.ContentHighlight];
+            get => _model.Style.HighlightColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
-                _model.SetContentHighlight(value);
+                _model.Style.HighlightColor = value;
                 ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
-                NotifyPropertyChanged(nameof(ContentHighlightColor), nameof(ContentHighlightColorHex));
             }
         }
 
         public virtual string FontFamily
         {
-            get => _model.FontFamily;
+            get => _model.Style.Font;
             set
             {
                 ApplicationViewModel.Instance.UndoRedoManager.RecordStateIfRecording(_model);
-                _model.FontFamily = value;
+                _model.Style.Font = value;
                 NotifyPropertyChanged(nameof(FontFamily));
             }
         }
 
         public virtual double FontSize
         {
-            get => _model.FontSize;
+            get => _model.Style.FontSize;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.FontSize = value;
+                _model.Style.FontSize = value;
                 NotifyPropertyChanged(nameof(FontSize));
             }
         }
@@ -270,18 +265,25 @@ namespace Cell.ViewModel.Cells
 
         public FontWeight FontWeightForView => IsFontBold ? FontWeights.Bold : FontWeights.Normal;
 
-        public virtual SolidColorBrush ForegroundColor { get; private set; }
+        public virtual SolidColorBrush ForegroundColor
+        {
+            get => _foregroundColor;
+            private set
+            {
+                _foregroundColor = value;
+                NotifyPropertyChanged(nameof(ForegroundColor));
+            }
+        }
 
         public virtual string ForegroundColorHex
         {
-            get => _model.ColorHexes[(int)ColorFor.Foreground];
+            get => _model.Style.ForegroundColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.SetForeground(value);
+                _model.Style.ForegroundColor = value;
                 ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
-                NotifyPropertyChanged(nameof(ForegroundColor), nameof(ForegroundColorHex));
             }
         }
 
@@ -296,11 +298,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual HorizontalAlignment HorizontalAlignmentForView
         {
-            get => _model.HorizontalAlignment;
+            get => _model.Style.HorizontalAlignment;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.HorizontalAlignment = value;
+                _model.Style.HorizontalAlignment = value;
                 NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter));
             }
         }
@@ -322,11 +324,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual bool IsFontBold
         {
-            get => _model.IsFontBold;
+            get => _model.Style.Bold;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.IsFontBold = value;
+                _model.Style.Bold = value;
                 NotifyPropertyChanged(nameof(IsFontBold));
                 NotifyPropertyChanged(nameof(FontWeightForView));
             }
@@ -334,11 +336,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual bool IsFontItalic
         {
-            get => _model.IsFontItalic;
+            get => _model.Style.Italic;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.IsFontItalic = value;
+                _model.Style.Italic = value;
                 NotifyPropertyChanged(nameof(IsFontItalic));
                 NotifyPropertyChanged(nameof(FontStyleForView));
             }
@@ -346,11 +348,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual bool IsFontStrikethrough
         {
-            get => _model.IsFontStrikethrough;
+            get => _model.Style.Strikethrough;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.IsFontStrikethrough = value;
+                _model.Style.Strikethrough = value;
                 NotifyPropertyChanged(nameof(IsFontStrikethrough));
                 NotifyPropertyChanged(nameof(TextDecorationsForView));
             }
@@ -378,61 +380,40 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public virtual Thickness Margin { get; private set; }
-
-        public string MarginBottom
+        public virtual Thickness Margin
         {
-            get => Margin.Top.ToString();
-            set
+            get => margin; private set
             {
-                MarginString = $"{Margin.Left},{Margin.Top},{Margin.Right},{value}";
-                NotifyMarginChanged();
+                margin = value;
+                NotifyPropertyChanged(nameof(Margin));
+                NotifyPropertyChanged(nameof(MarginTop));
+                NotifyPropertyChanged(nameof(MarginLeft));
+                NotifyPropertyChanged(nameof(MarginBottom));
+                NotifyPropertyChanged(nameof(MarginRight));
             }
         }
 
-        public string MarginLeft
-        {
-            get => Margin.Top.ToString();
-            set
-            {
-                MarginString = $"{value},{Margin.Top},{value},{Margin.Bottom}";
-                NotifyMarginChanged();
-            }
-        }
+        public string MarginBottom { get => Margin.Top.ToString(); set => MarginString = $"{Margin.Left},{Margin.Top},{Margin.Right},{value}"; }
 
-        public string MarginRight
-        {
-            get => Margin.Top.ToString();
-            set
-            {
-                MarginString = $"{Margin.Left},{Margin.Top},{value},{Margin.Bottom}";
-                NotifyMarginChanged();
-            }
-        }
+        public string MarginLeft { get => Margin.Top.ToString(); set => MarginString = $"{value},{Margin.Top},{value},{Margin.Bottom}"; }
+
+        public string MarginRight { get => Margin.Top.ToString(); set => MarginString = $"{Margin.Left},{Margin.Top},{value},{Margin.Bottom}"; }
 
         public virtual string MarginString
         {
-            get => Model.MarginString;
+            get => Model.Style.ContentMargin;
             set
             {
                 if (UpdateMargin(value))
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                    Model.MarginString = value;
+                    Model.Style.ContentMargin = value;
                     NotifyPropertyChanged(nameof(MarginString));
                 }
             }
         }
 
-        public string MarginTop
-        {
-            get => Margin.Top.ToString();
-            set
-            {
-                MarginString = $"{value},{value},{value},{value}";
-                NotifyMarginChanged();
-            }
-        }
+        public string MarginTop { get => Margin.Top.ToString(); set => MarginString = $"{value},{value},{value},{value}"; }
 
         public CellModel Model => _model;
 
@@ -470,13 +451,23 @@ namespace Cell.ViewModel.Cells
         public virtual SolidColorBrush SelectionBorderColor
         {
             get => _selectionBorderColor;
-            set { if (_selectionBorderColor == value) return; _selectionBorderColor = value; NotifyPropertyChanged(nameof(SelectionBorderColor)); }
+            set
+            {
+                if (_selectionBorderColor == value) return;
+                _selectionBorderColor = value;
+                NotifyPropertyChanged(nameof(SelectionBorderColor));
+            }
         }
 
         public virtual SolidColorBrush SelectionColor
         {
             get => _selectionColor;
-            set { if (_selectionColor == value) return; _selectionColor = value; NotifyPropertyChanged(nameof(SelectionColor)); }
+            set
+            {
+                if (_selectionColor == value) return;
+                _selectionColor = value;
+                NotifyPropertyChanged(nameof(SelectionColor));
+            }
         }
 
         public virtual bool ShouldShowSelectionBorder => IsSelected || IsHighlighted;
@@ -495,11 +486,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual TextAlignment TextAlignmentForView
         {
-            get => _model.TextAlignmentForView;
+            get => _model.Style.TextAlignment;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.TextAlignmentForView = value;
+                _model.Style.TextAlignment = value;
                 NotifyPropertyChanged(nameof(TextAlignmentForView));
             }
         }
@@ -522,11 +513,11 @@ namespace Cell.ViewModel.Cells
 
         public virtual VerticalAlignment VerticalAlignmentForView
         {
-            get => _model.VerticalAlignment;
+            get => _model.Style.VerticalAlignment;
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.VerticalAlignment = value;
+                _model.Style.VerticalAlignment = value;
                 NotifyPropertyChanged(nameof(VerticalAlignmentForView));
                 NotifyPropertyChanged(nameof(VerticalAlignmentForViewCenter));
             }
@@ -560,30 +551,6 @@ namespace Cell.ViewModel.Cells
             NotifyPropertyChanged(nameof(BackgroundColor));
         }
 
-        public void NotifyBorderThicknessChanged()
-        {
-            NotifyPropertyChanged(nameof(BorderThicknessTop));
-            NotifyPropertyChanged(nameof(BorderThicknessLeft));
-            NotifyPropertyChanged(nameof(BorderThicknessBottom));
-            NotifyPropertyChanged(nameof(BorderThicknessRight));
-        }
-
-        public void NotifyContentBorderThicknessChanged()
-        {
-            NotifyPropertyChanged(nameof(ContentBorderThicknessTop));
-            NotifyPropertyChanged(nameof(ContentBorderThicknessLeft));
-            NotifyPropertyChanged(nameof(ContentBorderThicknessBottom));
-            NotifyPropertyChanged(nameof(ContentBorderThicknessRight));
-        }
-
-        public void NotifyMarginChanged()
-        {
-            NotifyPropertyChanged(nameof(MarginTop));
-            NotifyPropertyChanged(nameof(MarginLeft));
-            NotifyPropertyChanged(nameof(MarginBottom));
-            NotifyPropertyChanged(nameof(MarginRight));
-        }
-
         public void UnhighlightCell()
         {
             SelectionColor = new(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(BackgroundColorHex), 100));
@@ -596,7 +563,6 @@ namespace Cell.ViewModel.Cells
             if (Utilities.TryParseStringIntoThickness(stringBorderThickness, out var thickness))
             {
                 BorderThickness = thickness;
-                NotifyPropertyChanged(nameof(BorderThickness));
                 return true;
             }
             return false;
@@ -628,25 +594,18 @@ namespace Cell.ViewModel.Cells
 
         private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.ColorHexes))
-            {
-                BackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BackgroundColorHex));
-                ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
-                ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
-                BorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(BorderColorHex));
-                ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
-                ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
-                NotifyPropertyChanged(nameof(BackgroundColor));
-                NotifyPropertyChanged(nameof(ContentBackgroundColor));
-                NotifyPropertyChanged(nameof(ForegroundColor));
-                NotifyPropertyChanged(nameof(BorderColor));
-                NotifyPropertyChanged(nameof(ContentBorderColor));
-                NotifyPropertyChanged(nameof(ContentHighlightColor));
-            }
-            else if (e.PropertyName != null)
-            {
-                NotifyPropertyChanged(e.PropertyName);
-            }
+            NotifyPropertyChanged(e.PropertyName!);
+        }
+
+        private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellStyleModel.BackgroundColor)) BackgroundColor = ColorAdjuster.ConvertHexStringToBrush(BackgroundColorHex);
+            else if (e.PropertyName == nameof(CellStyleModel.ContentBackgroundColor)) ContentBackgroundColor = ColorAdjuster.ConvertHexStringToBrush(ContentBackgroundColorHex);
+            else if (e.PropertyName == nameof(CellStyleModel.ForegroundColor)) ForegroundColor = ColorAdjuster.ConvertHexStringToBrush(ForegroundColorHex);
+            else if (e.PropertyName == nameof(CellStyleModel.BorderColor)) BorderColor = ColorAdjuster.ConvertHexStringToBrush(BorderColorHex);
+            else if (e.PropertyName == nameof(CellStyleModel.ContentBorderColor)) ContentBorderColor = ColorAdjuster.ConvertHexStringToBrush(ContentBorderColorHex);
+            else if (e.PropertyName == nameof(CellStyleModel.HighlightColor)) ContentHighlightColor = ColorAdjuster.ConvertHexStringToBrush(ContentHighlightColorHex);
+            else if (e.PropertyName != null) NotifyPropertyChanged(e.PropertyName);
         }
     }
 }

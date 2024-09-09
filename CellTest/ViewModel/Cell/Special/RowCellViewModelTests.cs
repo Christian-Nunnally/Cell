@@ -3,7 +3,9 @@ using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Cells;
+using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -21,6 +23,7 @@ namespace CellTest
         private CellPopulateManager _cellPopulateManager;
         private SheetModel _sheetModel;
         private SheetTracker _sheetTracker;
+        private ApplicationSettings _applicationSettings;
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
 
@@ -35,7 +38,8 @@ namespace CellTest
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _userCollectionLoader);
+            _applicationSettings = new ApplicationSettings();
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new RowCellViewModel(_cellModel, _sheetViewModel);
         }
@@ -64,20 +68,26 @@ namespace CellTest
             var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
-            _cellModel.FontSize = 20;
+            _cellModel.Style.FontSize = 20;
 
             propertyChangedTester.AssertPropertyChanged(nameof(testing.FontSize));
         }
 
         [Fact]
-        public void SimpleTest_AddRowAbove_ViewModelFontSizeChangedNotified()
+        public void A1PopulateFunctionReferencingSheetNameA1_AddRowAbove_FunctionNowReferencesA2()
         {
-            var testing = CreateInstance();
-            var propertyChangedTester = new PropertyChangedTester(testing);
+            var _ = CreateInstance();
+            var function = _pluginFunctionLoader.CreateFunction("object", "testFunction", "");
+            SheetFactory.CreateSheet("SheetName", 1, 1, _cellTracker);
+            var sheet = _sheetTracker.Sheets.Single();
+            _sheetViewModel = new SheetViewModel(sheet, _cellPopulateManager, _cellTracker, _sheetTracker, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
+            var testing = _sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Single();
+            var labelCell = _sheetViewModel.CellViewModels.OfType<LabelCellViewModel>().Single();
+            function.SetUserFriendlyCode("return SheetName_B_A1;", labelCell.Model, x => x, []);
 
             testing.AddRowAbove();
 
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.FontSize));
+            Assert.Equal("return SheetName_B_A2;", _pluginFunctionLoader.ObservableFunctions.Single().GetUserFriendlyCode(labelCell.Model, x => x, []));
         }
     }
 }

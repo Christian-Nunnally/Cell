@@ -98,7 +98,7 @@ namespace Cell.ViewModel.ToolWindow
                 }
                 catch (JsonException)
                 {
-                    DialogWindow.ShowDialog("Did not save", "Invalid json for item");
+                    DialogFactory.ShowDialog("Did not save", "Invalid json for item");
                 }
             }
         }

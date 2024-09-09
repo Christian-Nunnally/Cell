@@ -3,7 +3,7 @@ using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
 using System.ComponentModel;
 
 namespace Cell.Data
@@ -57,7 +57,7 @@ namespace Cell.Data
                 if (Model.Name == value) return;
                 var oldName = Model.Name;
                 var newName = value;
-                DialogWindow.ShowYesNoConfirmationDialog("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
+                DialogFactory.ShowYesNoConfirmationDialog("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
                 {
                     _userCollectionLoader.ProcessCollectionRename(oldName, newName);
                     Model.Name = newName;

@@ -1,6 +1,5 @@
 ﻿using Cell.Data;
 using Cell.Model;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
@@ -54,44 +53,17 @@ namespace Cell.ViewModel.ToolWindow
         public void AddNewSheet()
         {
             if (!CanAddSheet()) return;
-            AddDefaultCells(NewSheetName);
+            SheetFactory.CreateSheet(NewSheetName, _initialRows, _initialColumns, ApplicationViewModel.Instance.CellTracker);
             ApplicationViewModel.Instance.GoToSheet(NewSheetName);
             NewSheetName = string.Empty;
         }
 
         private bool CanAddSheet()
         {
-            if (_sheetTracker.Sheets.Any(x => x.Name == NewSheetName)) DialogWindow.ShowDialog("Sheet already exists", $"Cannot create a sheet named {NewSheetName} because one already exists with that name.");
-            else if (string.IsNullOrEmpty(NewSheetName)) DialogWindow.ShowDialog("Sheet name can not be empty", $"New sheet name can not be empty.");
+            if (_sheetTracker.Sheets.Any(x => x.Name == NewSheetName)) DialogFactory.ShowDialog("Sheet already exists", $"Cannot create a sheet named {NewSheetName} because one already exists with that name.");
+            else if (string.IsNullOrEmpty(NewSheetName)) DialogFactory.ShowDialog("Sheet name can not be empty", $"New sheet name can not be empty.");
             else return true;
             return false;
-        }
-
-        private void AddDefaultCells(string sheetName)
-        {
-            var corner = CellModelFactory.Create(0, 0, CellType.Corner, sheetName);
-            ApplicationViewModel.Instance.CellTracker.AddCell(corner);
-
-            for (var i = 0; i < _initialRows; i++)
-            {
-                var row = CellModelFactory.Create(i + 1, 0, CellType.Row, sheetName);
-                ApplicationViewModel.Instance.CellTracker.AddCell(row);
-            }
-
-            for (var i = 0; i < _initialColumns; i++)
-            {
-                var columnCell = CellModelFactory.Create(0, i + 1, CellType.Column, sheetName);
-                ApplicationViewModel.Instance.CellTracker.AddCell(columnCell);
-            }
-
-            for (var i = 0; i < _initialRows; i++)
-            {
-                for (var j = 0; j < _initialColumns; j++)
-                {
-                    var newCell = CellModelFactory.Create(i + 1, j + 1, CellType.Label, sheetName);
-                    ApplicationViewModel.Instance.CellTracker.AddCell(newCell);
-                }
-            }   
         }
     }
 }

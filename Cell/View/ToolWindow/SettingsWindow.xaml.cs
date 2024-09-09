@@ -113,14 +113,14 @@ namespace Cell.View.ToolWindow
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.BackupManager.CreateBackup();
-            DialogWindow.ShowDialog("Backup created", "Backup created successfully.");
+            DialogFactory.ShowDialog("Backup created", "Backup created successfully.");
         }
 
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            var printDialog = new PrintDialog();
+            //var printDialog = new PrintDialog();
 
-            DialogWindow.ShowDialog("Under construction", "Not quite ready :)");
+            DialogFactory.ShowDialog("Under construction", "Not quite ready :)");
             // TODO print cells without black background
             //printDialog.PrintVisual(ApplicationViewModel.Instance.ActiveSheetView, $"Print {ApplicationViewModel.Instance.SheetViewModel?.SheetName}");
             //printDialog.ShowDialog();

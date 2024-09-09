@@ -21,6 +21,7 @@ namespace CellTest.ViewModel.Cell
         private CellPopulateManager _cellPopulateManager;
         private SheetModel _sheetModel;
         private SheetTracker _sheetTracker;
+        private ApplicationSettings _applicationSettings;
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
 
@@ -35,7 +36,8 @@ namespace CellTest.ViewModel.Cell
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _userCollectionLoader);
+            _applicationSettings = new ApplicationSettings();
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new LabelCellViewModel(_cellModel, _sheetViewModel);
         }
@@ -64,7 +66,7 @@ namespace CellTest.ViewModel.Cell
             var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
-            _cellModel.FontSize = 20;
+            _cellModel.Style.FontSize = 20;
 
             propertyChangedTester.AssertPropertyChanged(nameof(testing.FontSize));
         }

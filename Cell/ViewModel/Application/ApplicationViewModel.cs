@@ -5,9 +5,7 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
 using Cell.View.Cells;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
-using System.IO;
 using System.Windows.Controls;
 
 namespace Cell.ViewModel.Application
@@ -25,6 +23,7 @@ namespace Cell.ViewModel.Application
             }
         }
 
+        public const string NoMigratorForVersionError = "Unable to load version";
         private ApplicationView? _applicationView;
         private readonly CellClipboard _cellClipboard;
         private static ApplicationViewModel? instance;
@@ -33,24 +32,37 @@ namespace Cell.ViewModel.Application
         private SheetViewModel? sheetViewModel;
         private bool _isProjectLoaded;
 
-        private ApplicationViewModel()
+        public ApplicationViewModel(
+            PersistenceManager persistenceManager, 
+            PluginFunctionLoader pluginFunctionLoader, 
+            CellLoader cellLoader, 
+            CellTracker cellTracker, 
+            UserCollectionLoader userCollectionLoader, 
+            CellPopulateManager cellPopulateManager, 
+            CellTriggerManager cellTriggerManager, 
+            SheetTracker sheetTracker, 
+            TitleBarSheetNavigationViewModel titleBarSheetNavigationViewModel,
+            ApplicationSettings applicationSettings,
+            UndoRedoManager undoRedoManager,
+            CellClipboard cellClipboard,
+            BackupManager backupManager)
         {
-            PersistenceManager = new(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LGF", "Cell"), new FileIO());
-            PluginFunctionLoader = new(PersistenceManager);
-            CellLoader = new(PersistenceManager);
-            CellTracker = new CellTracker(CellLoader);
-            UserCollectionLoader = new(PersistenceManager, PluginFunctionLoader, CellTracker);
-            CellPopulateManager = new(CellTracker, PluginFunctionLoader, UserCollectionLoader);
-            CellTriggerManager = new(CellTracker, PluginFunctionLoader, UserCollectionLoader);
-            SheetTracker = new(PersistenceManager, CellLoader, CellTracker, PluginFunctionLoader, UserCollectionLoader);
-            TitleBarSheetNavigationViewModel = new(SheetTracker);
-            ApplicationSettings = ApplicationSettings.CreateInstance(PersistenceManager);
-            UndoRedoManager = new(CellTracker);
-            _cellClipboard = new(UndoRedoManager, CellTracker, new TextClipboard());
-            BackupManager = new(PersistenceManager, CellTracker, SheetTracker, UserCollectionLoader, PluginFunctionLoader);
+            PersistenceManager = persistenceManager;
+            PluginFunctionLoader = pluginFunctionLoader;
+            CellLoader = cellLoader;
+            CellTracker = cellTracker;
+            UserCollectionLoader = userCollectionLoader;
+            CellPopulateManager = cellPopulateManager;
+            CellTriggerManager = cellTriggerManager;
+            SheetTracker = sheetTracker;
+            TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
+            ApplicationSettings = applicationSettings;
+            UndoRedoManager = undoRedoManager;
+            _cellClipboard = cellClipboard;
+            BackupManager = backupManager;
         }
 
-        public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
+        public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
         public static ApplicationViewModel? SafeInstance => instance;
 
@@ -111,12 +123,6 @@ namespace Cell.ViewModel.Application
 
         private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
 
-        public static ApplicationViewModel GetOrCreateInstance()
-        {
-            instance ??= new ApplicationViewModel();
-            return instance;
-        }
-
         public static UndoRedoManager? GetUndoRedoManager()
         {
             if (instance == null)
@@ -141,10 +147,11 @@ namespace Cell.ViewModel.Application
             SheetViewModel.UpdateLayout();
         }
 
-        public void Load()
+        public LoadingProgressResult Load()
         {
             var progress = LoadWithProgress();
             while (!progress.IsComplete) progress = progress.Continue();
+            return progress;
         }
 
         public LoadingProgressResult LoadWithProgress()
@@ -155,14 +162,19 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase1()
         {
-            var versionSchema = PersistenceManager.LoadVersion();
-            if (PersistenceManager.Version != versionSchema)
+            if (PersistenceManager.NeedsMigration())
             {
-                DialogWindow.ShowYesNoConfirmationDialog(
+                if (!PersistenceManager.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
+                DialogFactory.ShowYesNoConfirmationDialog(
                     "Version Mismatch",
-                    $"The version of the data is {versionSchema} but the application is expecting {PersistenceManager.Version}. Do you want to attempt to migrate?",
-                    () => MigrateSave(versionSchema, PersistenceManager.Version),
-                    () => { Environment.Exit(0); });
+                    $"The version of your project is outdated. would you like to migrate it?",
+                    () => {
+                        BackupManager.CreateBackup();
+                        PersistenceManager.Migrate();
+                        DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
+                        },
+                    () => { });
+                return new LoadingProgressResult(false, "Migration needed, try loading again.");
             }
 
             PersistenceManager.SaveVersion();
@@ -204,11 +216,6 @@ namespace Cell.ViewModel.Application
             return new LoadingProgressResult(true, "Load Complete");
         }
 
-        public void MigrateSave(string fromVersion, string toVersion)
-        {
-
-        }
-
         internal void CopySelectedCells(bool copyTextOnly)
         {
             if (SheetViewModel == null) return;
@@ -234,7 +241,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, UserCollectionLoader);
+                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             _applicationView?.ShowSheetView(SheetViewModel);

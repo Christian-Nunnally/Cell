@@ -12,7 +12,6 @@ using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Cell.View.ToolWindow
 {
@@ -117,7 +116,7 @@ namespace Cell.View.ToolWindow
         public bool HandleBeingClosed()
         {
             if (!_isDirty || _isAllowingCloseWhileDirty) return true;
-            DialogWindow.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", () =>
+            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", () =>
             {
                 SaveCode();
                 RequestClose?.Invoke();
@@ -161,12 +160,6 @@ namespace Cell.View.ToolWindow
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultString)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultColumnWidth)));
-        }
-
-        private void NotifyDockPropertiesChanged()
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
         }
 
         private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;

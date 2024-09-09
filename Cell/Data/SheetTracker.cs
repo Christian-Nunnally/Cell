@@ -1,11 +1,10 @@
 ﻿using Cell.Model;
 using Cell.Persistence;
-using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 
 namespace Cell.Data
 {
@@ -159,7 +158,7 @@ namespace Cell.Data
             var functionsBeingImported = GetFunctionsFromTemplate(templatePath);
             if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
             {
-                DialogWindow.ShowDialog("Import canceled", reason);
+                DialogFactory.ShowDialog("Import canceled", reason);
                 return;
             }
 
@@ -180,7 +179,7 @@ namespace Cell.Data
                 }
                 else if (!skipExistingCollectionsDuringImport)
                 {
-                    DialogWindow.ShowDialog("Import canceled", $"A collection with the name '{collectionBeingImported}' already exists. Please rename that collection before importing or enable 'Skip Existing Collections'.");
+                    DialogFactory.ShowDialog("Import canceled", $"A collection with the name '{collectionBeingImported}' already exists. Please rename that collection before importing or enable 'Skip Existing Collections'.");
                     return;
                 }
             }

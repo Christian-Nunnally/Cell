@@ -15,7 +15,7 @@ namespace CellTest
         private TestFileIO _testFileIO;
         private PersistenceManager _persistenceManager;
         private CellLoader _cellLoader;
-        private ITextClipboard _textClipboard;
+        private TestTextClipboard _textClipboard;
 
         private CellClipboard CreateInstance()
         {
@@ -52,14 +52,15 @@ namespace CellTest
         public void TwoCells_CellACopiedToCellB_FontSizeIsCopied()
         {
             var testing = CreateInstance();
-            var cellToCopy = new CellModel() { FontSize = 20 };
+            var cellToCopy = new CellModel();
+            cellToCopy.Style.FontSize = 20;
             var cellToPasteInto = new CellModel();
             testing.CopyCells([cellToCopy], false);
-            Assert.NotEqual(cellToCopy.FontSize, cellToPasteInto.FontSize);
+            Assert.NotEqual(cellToCopy.Style.FontSize, cellToPasteInto.Style.FontSize);
 
             testing.PasteIntoCells(cellToPasteInto, [cellToPasteInto]);
 
-            Assert.Equal(cellToCopy.FontSize, cellToPasteInto.FontSize);
+            Assert.Equal(cellToCopy.Style.FontSize, cellToPasteInto.Style.FontSize);
         }
 
         [Fact]

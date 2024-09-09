@@ -8,7 +8,7 @@ namespace CellTest.TestUtilities
 
         public void CopyDirectory(string from, string to)
         {
-            throw new NotImplementedException();
+            _testFileSystem.CopyDirectory(from, to);
         }
 
         public void DeleteDirectory(string path)
@@ -38,16 +38,15 @@ namespace CellTest.TestUtilities
 
         public IEnumerable<string> GetDirectories(string path)
         {
-            throw new NotImplementedException();
+            var directory = _testFileSystem.GetDirectory(path);
+            return directory?.Where(x => x.Value is Dictionary<string, object>).Select(x => Path.Combine(path, x.Key)) ?? [];
         }
 
         public IEnumerable<string> GetFiles(string path)
         {
-            var directoryPath = Path.GetDirectoryName(path);
-            if (directoryPath == null) return [];
-            var directory = _testFileSystem.GetDirectory(directoryPath);
+            var directory = _testFileSystem.GetDirectory(path);
             if (directory == null) return [];
-            return directory.Where(x => x.Value is string).Select(x => Path.Combine(directoryPath, x.Key));
+            return directory.Where(x => x.Value is string).Select(x => Path.Combine(path, x.Key));
         }
 
         public void MoveDirectory(string from, string to)
@@ -70,7 +69,7 @@ namespace CellTest.TestUtilities
 
         public void ZipDirectory(string path, string zipPath)
         {
-            throw new NotImplementedException();
+            CopyDirectory(path, zipPath);
         }
     }
 }

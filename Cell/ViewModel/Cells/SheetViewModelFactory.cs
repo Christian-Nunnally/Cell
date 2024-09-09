@@ -10,9 +10,16 @@ namespace Cell.ViewModel.Cells
 {
     public static class SheetViewModelFactory
     {
-        public static SheetViewModel Create(SheetModel sheetModel, CellPopulateManager cellPopulateManager, CellTracker cellTracker, SheetTracker sheetTracker, UserCollectionLoader userCollectionLoader)
+        public static SheetViewModel Create(
+            SheetModel sheetModel, 
+            CellPopulateManager cellPopulateManager, 
+            CellTracker cellTracker, 
+            SheetTracker sheetTracker, 
+            UserCollectionLoader userCollectionLoader, 
+            ApplicationSettings applicationSettings, 
+            PluginFunctionLoader pluginFunctionLoader)
         {
-            var sheetViewModel = new SheetViewModel(sheetModel, cellPopulateManager, cellTracker, sheetTracker, userCollectionLoader);
+            var sheetViewModel = new SheetViewModel(sheetModel, cellPopulateManager, cellTracker, sheetTracker, userCollectionLoader, applicationSettings, pluginFunctionLoader);
             sheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
             return sheetViewModel;
         }

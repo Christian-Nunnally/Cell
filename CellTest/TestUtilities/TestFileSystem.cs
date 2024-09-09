@@ -1,4 +1,5 @@
 ﻿
+
 namespace CellTest.TestUtilities
 {
     internal class TestFileSystem
@@ -6,7 +7,7 @@ namespace CellTest.TestUtilities
         private readonly Dictionary<string, object> _root = [];
         public void CreateDirectory(string path)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var currentDir = _root;
             for (int i = 0; i < directories.Length; i++)
             {
@@ -22,9 +23,9 @@ namespace CellTest.TestUtilities
 
         public void DeleteFile(string path)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var fileName = directories[^1];
-            var parentDirPath = string.Join("/", directories[..^1]);
+            var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
             if (parentDir == null) return;
             if (!parentDir.TryGetValue(fileName, out object? value)) return;
@@ -34,7 +35,7 @@ namespace CellTest.TestUtilities
 
         public Dictionary<string, object>? GetDirectory(string path)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var currentDir = _root;
             foreach (var dir in directories)
             {
@@ -48,9 +49,9 @@ namespace CellTest.TestUtilities
 
         public string? ReadFile(string path)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var fileName = directories[^1];
-            var parentDirPath = string.Join("/", directories[..^1]);
+            var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
             if (parentDir == null) return null;
             if (!parentDir.TryGetValue(fileName, out var content)) return null;
@@ -60,17 +61,37 @@ namespace CellTest.TestUtilities
 
         public void WriteFile(string path, string content)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var fileName = directories[^1];
-            var parentDirPath = string.Join("/", directories[..^1]);
+            var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
             if (parentDir == null) return;
             parentDir[fileName] = content;
         }
 
+        internal void CopyDirectory(string from, string to)
+        {
+            var fromDir = GetDirectory(from);
+            if (fromDir == null) return;
+            CreateDirectory(to);
+            var toDir = GetDirectory(to);
+            if (toDir == null) return;
+            foreach (var (key, value) in fromDir)
+            {
+                if (value is string content)
+                {
+                    toDir[key] = content;
+                }
+                else if (value is Dictionary<string, object>)
+                {
+                    CopyDirectory($"{from}\\{key}", $"{to}\\{key}");
+                }
+            }
+        }
+
         internal void DeleteDirectory(string path)
         {
-            var directories = path.Split('/');
+            var directories = path.Split('\\');
             var currentDir = _root;
 
             int i = 0;

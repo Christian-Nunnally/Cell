@@ -101,22 +101,25 @@
                     WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
         </DockPanel>
-        <Button
-            Width="Auto"
-            Height="{Binding ApplicationWindowHeight}"
-            BorderThickness="0"
-            Click="LoadProjectButtonClicked"
-            Content="Load Project"
-            DockPanel.Dock="Top"
-            FontSize="16"
-            Visibility="{Binding IsProjectLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-        <Grid Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Label
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Content="No open cells" />
-            <ContentControl x:Name="_sheetViewContentControl" />
-            <Canvas x:Name="_toolWindowCanvas" />
+        <Grid>
+            <Button
+                Width="Auto"
+                Height="{Binding ApplicationWindowHeight}"
+                BorderThickness="0"
+                Click="LoadProjectButtonClicked"
+                Content="Load Project"
+                DockPanel.Dock="Top"
+                FontSize="16"
+                Visibility="{Binding IsProjectLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+            <Grid>
+                <Label
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="No open cells"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ContentControl x:Name="_sheetViewContentControl" />
+                <Canvas x:Name="_toolWindowCanvas" />
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>

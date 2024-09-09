@@ -15,20 +15,31 @@ namespace Cell.ViewModel.Cells
 {
     public class SheetViewModel : PropertyChangedBase
     {
-        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!);
+        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!);
+        private readonly ApplicationSettings _applicationSettings;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly SheetTracker _sheetTracker;
         private readonly CellTracker _cellTracker;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly SheetModel _model;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private bool _enableMultiEditSelectedCells = true;
         private CellModel? oldSelectedCellState;
         private CellViewModel? selectedCellViewModel;
 
         public CellPopulateManager CellPopulateManager => _cellPopulateManager;
 
-        public SheetViewModel(SheetModel model, CellPopulateManager cellPopulateManager, CellTracker cellTracker, SheetTracker sheetTracker, UserCollectionLoader userCollectionLoader)
+        public SheetViewModel(
+            SheetModel model, 
+            CellPopulateManager cellPopulateManager, 
+            CellTracker cellTracker, 
+            SheetTracker sheetTracker, 
+            UserCollectionLoader userCollectionLoader, 
+            ApplicationSettings applicationSettings, 
+            PluginFunctionLoader pluginFunctionLoader)
         {
+            _pluginFunctionLoader = pluginFunctionLoader;
+            _applicationSettings = applicationSettings;
             _userCollectionLoader = userCollectionLoader;
             _sheetTracker = sheetTracker;
             _cellTracker = cellTracker;
@@ -79,6 +90,10 @@ namespace Cell.ViewModel.Cells
         public SheetTracker SheetTracker => _sheetTracker;
 
         public UserCollectionLoader UserCollectionLoader => _userCollectionLoader;
+
+        public ApplicationSettings ApplicationSettings => _applicationSettings;
+
+        public PluginFunctionLoader PluginFunctionLoader => _pluginFunctionLoader;
 
         public void HighlightCell(CellViewModel cellToHighlight, string color)
         {

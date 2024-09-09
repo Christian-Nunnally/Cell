@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Persistence.Migration;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,11 +7,12 @@ namespace Cell.Persistence
 {
     public class PersistenceManager
     {
-        public const string Version = "0.0.0";
+        public string Version = "1";
         private readonly IFileIO _fileIO;
         private string _rootPath;
+        private readonly Dictionary<string, IMigrator> _registeredMigrators = [];
 
-        public string RootPath { get =>_rootPath; set => _rootPath = value; }
+        public string RootPath { get => _rootPath; set => _rootPath = value; }
 
         public PersistenceManager(string rootPath, IFileIO fileIO)
         {
@@ -37,7 +39,8 @@ namespace Cell.Persistence
             if (!DirectoryExists(path)) return [];
             var fullPath = Path.Combine(_rootPath, path);
             var directories = _fileIO.GetDirectories(fullPath);
-            return directories.Select(x => x[(_rootPath.Length + 1)..]);
+            var extraChar = string.IsNullOrEmpty(_rootPath) ? 0 : 1;
+            return directories.Select(x => x[(_rootPath.Length + extraChar)..]);
         }
 
         public string LoadVersion()
@@ -65,33 +68,34 @@ namespace Cell.Persistence
             _fileIO.WriteFile(versionPath, Version);
         }
 
-        internal void CopyDirectory(string from, string to)
+        public void CopyDirectory(string from, string to)
         {
             var fullFrom = Path.Combine(_rootPath, from);
             var fullTo = Path.Combine(_rootPath, to);
             _fileIO.CopyDirectory(fullFrom, fullTo);
         }
 
-        internal void DeleteDirectory(string path)
+        public void DeleteDirectory(string path)
         {
             var fullPath = Path.Combine(_rootPath, path);
             _fileIO.DeleteDirectory(fullPath);
         }
 
-        internal IEnumerable<string> GetFiles(string path)
+        public IEnumerable<string> GetFiles(string path)
         {
             var fullPath = Path.Combine(_rootPath, path);
             var fullPaths = _fileIO.GetFiles(fullPath);
-            return fullPaths.Select(x => x[(_rootPath.Length + 1)..]);
+            var extraChar = string.IsNullOrEmpty(_rootPath) ? 0 : 1;
+            return fullPaths.Select(x => x[(_rootPath.Length + extraChar)..]);
         }
 
-        internal IEnumerable<string> GetTemplateNames()
+        public IEnumerable<string> GetTemplateNames()
         {
             if (!DirectoryExists(CurrentTemplatePath)) return [];
             return GetDirectories(CurrentTemplatePath).Select(Path.GetFileName).OfType<string>();
         }
 
-        internal string? LoadFile(string path)
+        public string? LoadFile(string path)
         {
             if (path.StartsWith("//") || path.StartsWith('\\')) throw new CellError("Invalid path");
             var fullPath = Path.Combine(_rootPath, path);
@@ -99,7 +103,7 @@ namespace Cell.Persistence
             return _fileIO.ReadFile(fullPath);
         }
 
-        internal void SaveFile(string path, string content)
+        public void SaveFile(string path, string content)
         {
             var fullPath = Path.Combine(_rootPath, path);
             _fileIO.WriteFile(fullPath, content);
@@ -115,6 +119,25 @@ namespace Cell.Persistence
             var zipPath = path + ".zip";
             _fileIO.ZipDirectory(path, zipPath);
             _fileIO.DeleteDirectory(path);
+        }
+
+        public bool NeedsMigration() => Version != LoadVersion();
+
+        public bool CanMigrate() => _registeredMigrators.ContainsKey(GetMigratorKey(LoadVersion(), Version));
+
+        private string GetMigratorKey(string fromVersion, string toVersion) => $"{fromVersion}to{toVersion}";
+
+        public void Migrate()
+        {
+            var migratorKey = GetMigratorKey(LoadVersion(), Version);
+            var migrator = _registeredMigrators[migratorKey];
+            migrator.Migrate(this);
+        }
+
+        public void RegisterMigrator(string fromVersion, string toVersion, IMigrator migrator)
+        {
+            var migratorKey = GetMigratorKey(fromVersion, toVersion);
+            _registeredMigrators.Add(migratorKey, migrator);
         }
     }
 }

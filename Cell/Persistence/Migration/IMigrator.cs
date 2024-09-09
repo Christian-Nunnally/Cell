@@ -1,12 +1,8 @@
 ﻿
 namespace Cell.Persistence.Migration
 {
-    internal interface IMigrator
+    public interface IMigrator
     {
-        void Migrate();
-
-        public string FromVersion { get; }
-
-        public string ToVersion { get; }
+        void Migrate(PersistenceManager persistenceManager);
     }
 }

@@ -1,52 +1,53 @@
 ﻿
 using System.Windows;
 using Cell.Common;
-using Cell.View.Skin;
 
 namespace Cell.Model
 {
-    internal class CellStyleModel : PropertyChangedBase
+    public class CellStyleModel : PropertyChangedBase
     {
         public static readonly CellModel Null = new();
-        private string borderThickness = "1";
-        private CellType cellType = CellType.None;
-        private string[] colorHexes = [
-            ColorConstants.BackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ControlBackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ForegroundColorConstantHex,
-            ColorConstants.AccentColorConstantHex];
-        private int column;
-        private string contentBorderThickness = "1";
-        private string errorText = string.Empty;
-        private string font = "Consolas";
-        private double fontSize = 10;
-        private double height;
+        private string _borderThickness = "1";
+        private string _contentBorderThickness = "1";
+        private string _font = "Consolas";
+        private double _fontSize = 10;
         private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center;
-        private string id = Utilities.GenerateUnqiueId(12);
-        private int index = 0;
         private bool _isFontBold = false;
         private bool _isFontItalic = false;
         private bool _isFontStrikethrough = false;
         private string _margin = "0";
-        private string mergedWith = string.Empty;
-        private string populateFunctionName = string.Empty;
-        private int row;
-        private string sheetName = string.Empty;
-        private string text = string.Empty;
-        private TextAlignment textAlignment = TextAlignment.Center;
-        private string triggerFunctionName = string.Empty;
-        private VerticalAlignment verticalAlignment = VerticalAlignment.Center;
-        private double width;
-        private string _backgroundColorHex;
-        private string _foregroundColorHex;
-        private string _contentBackgroundColorHex;
-        private string _highlightColorHex;
-        private string _borderColorHex;
-        private string _contentBorderColorHex;
+        private TextAlignment _textAlignment = TextAlignment.Center;
+        private VerticalAlignment _verticalAlignment = VerticalAlignment.Center;
+        private string _backgroundColorHex = "#000000";
+        private string _foregroundColorHex = "#ffffff";
+        private string _contentBackgroundColorHex = "#aa00ff";
+        private string _highlightColorHex = "#bbbbbb";
+        private string _borderColorHex = "#aaff00";
+        private string _contentBorderColorHex = "#00ffaa";
 
         public event Action<CellModel>? AfterCellEdited;
+
+        public string Font
+        {
+            get => _font;
+            set 
+            { 
+                if (_font == value) return;
+                _font = value; 
+                NotifyPropertyChanged(nameof(Font)); 
+            }
+        }
+
+        public double FontSize
+        {
+            get => _fontSize;
+            set 
+            { 
+                if (_fontSize == value) return; 
+                _fontSize = value;
+                NotifyPropertyChanged(nameof(FontSize));
+            }
+        }
 
         public HorizontalAlignment HorizontalAlignment
         {
@@ -58,141 +59,189 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(HorizontalAlignment)); }
         }
 
-        public string ID
-        {
-            get => id;
-            set 
-            {
-                if (id == value) return; 
-                id = value; 
-                NotifyPropertyChanged(nameof(ID)); 
-            }
-        }
-
-        public int Index
-        {
-            get => index;
-            set 
-            {
-                if (index == value) return;
-                index = value; 
-                NotifyPropertyChanged(nameof(Index));
-            }
-        }
-
-        public bool IsFontBold
+        public bool Bold
         {
             get => _isFontBold;
             set 
             { 
                 if (_isFontBold == value) return; 
                 _isFontBold = value; 
-                NotifyPropertyChanged(nameof(IsFontBold)); 
+                NotifyPropertyChanged(nameof(Bold)); 
             }
         }
 
-        public bool IsFontItalic
+        public bool Italic
         {
             get => _isFontItalic;
             set 
             { 
                 if (_isFontItalic == value) return; 
                 _isFontItalic = value; 
-                NotifyPropertyChanged(nameof(IsFontItalic)); 
+                NotifyPropertyChanged(nameof(Italic)); 
             }
         }
 
-        public bool IsFontStrikethrough
+        public bool Strikethrough
         {
             get => _isFontStrikethrough;
             set 
             { 
                 if (_isFontStrikethrough == value) return; 
                 _isFontStrikethrough = value; 
-                NotifyPropertyChanged(nameof(IsFontStrikethrough)); 
+                NotifyPropertyChanged(nameof(Strikethrough)); 
             }
         }
 
-        public string MarginString
+        public string ContentMargin
         {
             get => _margin;
             set 
             { 
                 if (_margin == value) return; 
                 _margin = value; 
-                NotifyPropertyChanged(nameof(MarginString)); 
+                NotifyPropertyChanged(nameof(ContentMargin)); 
             }
         }
 
-        public string BackgroundColorHex
+        public string BackgroundColor
         {
             get => _backgroundColorHex;
             set
             {
                 if (_backgroundColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _backgroundColorHex = value;
-                NotifyPropertyChanged(nameof(BackgroundColorHex));
+                NotifyPropertyChanged(nameof(BackgroundColor));
             }
         }
 
-        public string ContentBackgroundColorHex
+        public string ContentBackgroundColor
         {
             get => _contentBackgroundColorHex;
             set
             {
                 if (_contentBackgroundColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _contentBackgroundColorHex = value;
-                NotifyPropertyChanged(nameof(ContentBackgroundColorHex));
+                NotifyPropertyChanged(nameof(ContentBackgroundColor));
             }
         }
 
-        public string ForegroundColorHex
+        public string ForegroundColor
         {
             get => _foregroundColorHex;
             set
             {
                 if (_foregroundColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _foregroundColorHex = value;
-                NotifyPropertyChanged(nameof(ForegroundColorHex));
+                NotifyPropertyChanged(nameof(ForegroundColor));
             }
         }
 
-        public string BorderColorHex
+        public string BorderColor
         {
             get => _borderColorHex;
             set
             {
                 if (_borderColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _borderColorHex = value;
-                NotifyPropertyChanged(nameof(BorderColorHex));
+                NotifyPropertyChanged(nameof(BorderColor));
             }
         }
 
-        public string ContentBorderColorHex
+        public string ContentBorderColor
         {
             get => _contentBorderColorHex;
             set
             {
                 if (_contentBorderColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _contentBorderColorHex = value;
-                NotifyPropertyChanged(nameof(BorderColorHex));
+                NotifyPropertyChanged(nameof(BorderColor));
             }
         }
-        public string HighlightColorHex
+        public string HighlightColor
         {
             get => _highlightColorHex;
             set
             {
                 if (_highlightColorHex == value) return;
+                if (value == null) return;
+                if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _highlightColorHex = value;
-                NotifyPropertyChanged(nameof(HighlightColorHex));
+                NotifyPropertyChanged(nameof(HighlightColor));
             }
         }
 
-        public string BorderThicknessString
+        public string Border
         {
-            get { return borderThickness; }
-            set { if (borderThickness == value) return; borderThickness = value; NotifyPropertyChanged(nameof(BorderThicknessString)); }
+            get { return _borderThickness; }
+            set 
+            { 
+                if (_borderThickness == value) return;
+                _borderThickness = value; 
+                NotifyPropertyChanged(nameof(Border)); }
+        }
+
+        public string ContentBorder
+        {
+            get => _contentBorderThickness;
+            set 
+            { 
+                if (_contentBorderThickness == value) return; 
+                _contentBorderThickness = value; 
+                NotifyPropertyChanged(nameof(ContentBorder)); 
+            }
+        }
+
+        public TextAlignment TextAlignment
+        {
+            get => _textAlignment;
+            set 
+            { 
+                if (_textAlignment == value) return; 
+                _textAlignment = value; 
+                NotifyPropertyChanged(nameof(TextAlignment)); 
+            }
+        }
+
+        public VerticalAlignment VerticalAlignment
+        {
+            get => _verticalAlignment;
+            set 
+            { 
+                if (_verticalAlignment == value) return; 
+                _verticalAlignment = value; 
+                NotifyPropertyChanged(nameof(VerticalAlignment)); 
+            }
+        }
+
+        internal void CopyTo(CellStyleModel styleToRestoreInto)
+        {
+            styleToRestoreInto.Font = Font;
+            styleToRestoreInto.FontSize = FontSize;
+            styleToRestoreInto.Bold = Bold;
+            styleToRestoreInto.Italic = Italic;
+            styleToRestoreInto.Strikethrough = Strikethrough;
+            styleToRestoreInto.HorizontalAlignment = HorizontalAlignment;
+            styleToRestoreInto.VerticalAlignment = VerticalAlignment;
+            styleToRestoreInto.TextAlignment = TextAlignment;
+            styleToRestoreInto.Border = Border;
+            styleToRestoreInto.ContentBorder = ContentBorder;
+            styleToRestoreInto.ContentMargin = ContentMargin;
+            styleToRestoreInto.BackgroundColor = BackgroundColor;
+            styleToRestoreInto.ContentBackgroundColor = ContentBackgroundColor;
+            styleToRestoreInto.ForegroundColor = ForegroundColor;
+            styleToRestoreInto.BorderColor = BorderColor;
+            styleToRestoreInto.ContentBorderColor = ContentBorderColor;
+            styleToRestoreInto.HighlightColor = HighlightColor;
         }
     }
 }

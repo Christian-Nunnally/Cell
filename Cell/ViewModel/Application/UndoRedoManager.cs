@@ -85,29 +85,12 @@ namespace Cell.ViewModel.Application
             cellToRestoreInto.MergedWith = cellToCopyFrom.MergedWith;
             cellToRestoreInto.Text = cellToCopyFrom.Text;
             cellToRestoreInto.Index = cellToCopyFrom.Index;
-            cellToRestoreInto.ColorHexes = cellToCopyFrom.ColorHexes;
-            cellToRestoreInto.SetBackground(cellToCopyFrom.ColorHexes[(int)ColorFor.Background]);
-            cellToRestoreInto.SetForeground(cellToCopyFrom.ColorHexes[(int)ColorFor.Foreground]);
-            cellToRestoreInto.SetContentBackground(cellToCopyFrom.ColorHexes[(int)ColorFor.ContentBackground]);
-            cellToRestoreInto.SetContentBorder(cellToCopyFrom.ColorHexes[(int)ColorFor.ContentBorder]);
-            cellToRestoreInto.SetContentHighlight(cellToCopyFrom.ColorHexes[(int)ColorFor.ContentHighlight]);
-            cellToRestoreInto.SetBorder(cellToCopyFrom.ColorHexes[(int)ColorFor.Border]);
-            cellToRestoreInto.BorderThicknessString = cellToCopyFrom.BorderThicknessString;
-            cellToRestoreInto.ContentBorderThicknessString = cellToCopyFrom.ContentBorderThicknessString;
-            cellToRestoreInto.MarginString = cellToCopyFrom.MarginString;
-            cellToRestoreInto.FontSize = cellToCopyFrom.FontSize;
-            cellToRestoreInto.FontFamily = cellToCopyFrom.FontFamily;
-            cellToRestoreInto.IsFontBold = cellToCopyFrom.IsFontBold;
-            cellToRestoreInto.IsFontItalic = cellToCopyFrom.IsFontItalic;
-            cellToRestoreInto.IsFontStrikethrough = cellToCopyFrom.IsFontStrikethrough;
-            cellToRestoreInto.HorizontalAlignment = cellToCopyFrom.HorizontalAlignment;
-            cellToRestoreInto.VerticalAlignment = cellToCopyFrom.VerticalAlignment;
-            cellToRestoreInto.TextAlignmentForView = cellToCopyFrom.TextAlignmentForView;
             cellToRestoreInto.PopulateFunctionName = cellToCopyFrom.PopulateFunctionName;
             cellToRestoreInto.TriggerFunctionName = cellToCopyFrom.TriggerFunctionName;
             cellToRestoreInto.StringProperties = cellToCopyFrom.StringProperties;
             cellToRestoreInto.BooleanProperties = cellToCopyFrom.BooleanProperties;
             cellToRestoreInto.NumericProperties = cellToCopyFrom.NumericProperties;
+            cellToCopyFrom.Style.CopyTo(cellToRestoreInto.Style);
         }
 
         private void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)

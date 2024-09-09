@@ -53,7 +53,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementRowOfAllAtOrBelow(Row, -1);
             _sheetViewModel.UpdateLayout();
 
-            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _sheetViewModel.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(Row, function, -1);
             }
@@ -91,7 +91,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             IncrementRowOfAllAtOrBelow(newRowIndex);
 
             var rowModel = CellModelFactory.Create(newRowIndex, 0, CellType.Row, Model.SheetName);
-            ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel.CopyPublicProperties(rowModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
+            _sheetViewModel.ApplicationSettings.DefaultSpecialCellStyleCellModel.CopyPublicProperties(rowModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
             _sheetViewModel.CellTracker.AddCell(rowModel);
 
             var sheet = _sheetViewModel.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
@@ -100,7 +100,7 @@ namespace Cell.ViewModel.Cells.Types.Special
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, Model.SheetName);
-                ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
+                _sheetViewModel.ApplicationSettings.DefaultCellStyleCellModel.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
                 _sheetViewModel.CellTracker.AddCell(cellModel);
                 _sheetViewModel.CellPopulateManager.NotifyCellValueUpdated(cellModel);
 
@@ -112,7 +112,7 @@ namespace Cell.ViewModel.Cells.Types.Special
                 }
             }
 
-            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _sheetViewModel.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(newRowIndex, function, 1);
             }

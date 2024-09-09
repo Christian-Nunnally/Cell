@@ -146,7 +146,9 @@ namespace Cell.Persistence
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
             var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             var itemsDirectory = Path.Combine(directory, "Items");
-            var paths = _persistanceManager.GetFiles(itemsDirectory);
+            var paths = !_persistanceManager.DirectoryExists(itemsDirectory)
+                ? []
+                :  _persistanceManager.GetFiles(itemsDirectory);
             paths.Select(LoadItem).ToList().ForEach(collection.Add);
             StartTrackingCollection(collection);
         }
