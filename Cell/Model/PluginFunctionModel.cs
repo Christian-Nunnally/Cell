@@ -8,7 +8,7 @@ namespace Cell.Model
     public class PluginFunctionModel : PropertyChangedBase
     {
         private const string codeFooter = "\n}}}";
-        private const string codeHeader = "using System; using System.Linq; using System.Collections.Generic; using Cell.Model; using Cell.Model.Plugin; using Cell.ViewModel; using Cell.Execution; using Cell.ViewModel.Cells.Types;\n\nnamespace Plugin { public class Program { public static ";
+        private const string codeHeader = "using System; using System.Linq; using System.Collections.Generic; using System.Collections; using Cell.Model; using Cell.Model.Plugin; using Cell.ViewModel; using Cell.Execution; using Cell.ViewModel.Cells.Types;\n\nnamespace Plugin { public class Program { public static ";
         private const string methodHeader = " PluginMethod(PluginContext c, CellModel cell) {\n";
         private string _code = string.Empty;
         private string _name = string.Empty;

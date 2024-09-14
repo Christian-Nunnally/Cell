@@ -19,7 +19,15 @@ namespace Cell.Execution
             var method = populateFunction.CompiledMethod;
             if (populateFunction.CompileResult.Success)
             {
-                var resultObject = method?.Invoke(null, [pluginContext, cell]);
+                object? resultObject;
+                try
+                {
+                    resultObject = method?.Invoke(null, [pluginContext, cell]);
+                }
+                catch (Exception e)
+                {
+                    resultObject = "Populate error: " + e.Message;
+                }
                 var resultString = ConvertReturnedObjectToString(resultObject);
                 var result = new CompileResult { Success = true, Result = resultString };
                 Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, result, false);

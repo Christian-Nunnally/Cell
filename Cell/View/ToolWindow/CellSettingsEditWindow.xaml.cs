@@ -1,4 +1,5 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Model;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types.Special;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +23,7 @@ namespace Cell.View.ToolWindow
         {
             var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
             if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Cell settings editor - {currentlySelectedCell.GetName()}";
+            return $"Cell settings editor - {currentlySelectedCell.Model.GetName()}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [];
@@ -64,9 +65,9 @@ namespace Cell.View.ToolWindow
         private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<ColumnCellViewModel>().ToList())
+            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.CellViewModels.Where(x => x.IsSelected).OfType<ColumnCellViewModel>().ToList())
             {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
+                ApplicationViewModel.Instance.SheetViewModel.CellSelector.UnselectAllCells();
                 cell.DeleteColumn();
             }
         }
@@ -74,9 +75,9 @@ namespace Cell.View.ToolWindow
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<RowCellViewModel>().ToList())
+            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.CellViewModels.Where(x => x.IsSelected).OfType<RowCellViewModel>().ToList())
             {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
+                ApplicationViewModel.Instance.SheetViewModel.CellSelector.UnselectAllCells();
                 cell.DeleteRow();
             }
         }

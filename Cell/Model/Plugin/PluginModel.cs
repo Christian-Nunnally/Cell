@@ -9,7 +9,7 @@ namespace Cell.Model.Plugin
     [JsonDerivedType(typeof(TodoItem), typeDiscriminator: "todoItem")]
     [JsonDerivedType(typeof(TransactionItem), typeDiscriminator: "transactionItem")]
     [JsonDerivedType(typeof(BudgetCategoryItem), typeDiscriminator: "budgetCategoryItem")]
-    public class PluginModel : INotifyPropertyChanged
+    public class PluginModel : INotifyPropertyChanged, ICloneable
     {
         private static List<string>? _cachedDataTypeNames;
         private string _id = Utilities.GenerateUnqiueId(12);
@@ -36,5 +36,10 @@ namespace Cell.Model.Plugin
         }
 
         override public string ToString() => ID;
+
+        public virtual object Clone()
+        {
+            return new PluginModel();
+        }
     }
 }

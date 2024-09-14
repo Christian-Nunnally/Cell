@@ -1,8 +1,7 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells;
+using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,16 +9,14 @@ using Xceed.Wpf.Toolkit;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for EditCellPanel.xaml
-    /// </summary>
     public partial class CellFormatEditWindow : UserControl, IToolWindow
     {
-        private readonly CellTracker _cellTracker;
+        private readonly CellFormatEditWindowViewModel _viewModel;
 
-        public CellFormatEditWindow(CellTracker cellTracker)
+        public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel)
         {
-            _cellTracker = cellTracker;
+            _viewModel = viewModel;
+            DataContext = viewModel;
             InitializeComponent();
         }
 
@@ -36,90 +33,23 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle()
         {
-            if (DataContext is not CellViewModel currentlySelectedCell) return "Select a cell to edit";
-            if (currentlySelectedCell.Model == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
-            if (currentlySelectedCell.Model == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
+            var currentlySelectedCell = _viewModel.CellsBeingEdited.FirstOrDefault();
+            if (currentlySelectedCell is null) return "Select a cell to edit";
+            if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
+            if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
             return $"Format editor - {currentlySelectedCell.GetName()}";
         }
 
-        public List<CommandViewModel> GetToolBarCommands() => [
-            //new CommandViewModel("void", new RelayCommand(x => true, x => {})),
-            ];
+        public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public bool HandleBeingClosed()
-        {
-            return true;
-        }
-
-        private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName, CellTracker cellTracker)
-        {
-            var cells = new List<CellModel>();
-            for (var row = startRow; row <= endRow; row++)
-            {
-                for (var column = startColumn; column <= endColumn; column++)
-                {
-                    var cell = cellTracker.GetCell(sheetName, row, column);
-                    if (cell is not null) cells.Add(cell);
-                }
-            }
-            return cells;
-        }
-
-        private static void MergeCells(List<CellModel> cells, CellTracker cellTracker)
-        {
-            if (cells.Count < 2) return;
-            var leftmost = cells.Select(x => x.Column).Min();
-            var topmost = cells.Select(x => x.Row).Min();
-            var rightmost = cells.Select(x => x.Column).Max();
-            var bottommost = cells.Select(x => x.Row).Max();
-
-            var topLeftCell = cells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
-            if (topLeftCell is null) return;
-            var bottomRightCell = cells.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
-            if (bottomRightCell is null) return;
-
-            var sheetName = topLeftCell.SheetName;
-            var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName, cellTracker);
-            if (cellsToMerge.Count(cell => cell.IsMerged()) <= 1)
-            {
-                UnmergeCells(cellsToMerge, cellTracker);
-            }
-            else return;
-            SetMergedWithToCellsId(cellsToMerge, topLeftCell);
-        }
-
-        private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellModel topLeftCell)
-        {
-            foreach (var cell in cellsToMerge) cell.MergedWith = topLeftCell.ID;
-        }
-
-        private static void UnmergeCells(IEnumerable<CellModel> cells, CellTracker cellTracker)
-        {
-            foreach (var cell in cells.Where(x => x.IsMergedParent()))
-            {
-                UnmergeCell(cell, cellTracker);
-            }
-        }
-
-        public static void UnmergeCell(CellModel mergeParent, CellTracker cellTracker)
-        {
-            var mergedCells = cellTracker.GetCellModelsForSheet(mergeParent.SheetName).Where(x => x.IsMergedWith(mergeParent));
-            foreach (var cell in mergedCells)
-            {
-                if (mergeParent == cell) continue;
-                cell.MergedWith = string.Empty;
-            }
-            mergeParent.MergedWith = string.Empty;
-        }
+        public bool HandleBeingClosed() => true;
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button) return;
             var cellTypeString = button.Content is Label label ? label.Content.ToString() : button.Content.ToString();
-            if (Enum.TryParse(cellTypeString, out CellType newType))
-            {
-                ApplicationViewModel.Instance.ChangeSelectedCellsType(newType);
-            }
+            if (Enum.TryParse(cellTypeString, out CellType newType)) _viewModel.CellType = newType;
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
@@ -135,119 +65,89 @@ namespace Cell.View.ToolWindow
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
-            var rows = selectedCells?.Select(x => x.Row).Distinct().ToList() ?? [];
-            foreach (var row in rows)
-            {
-                var cellsToMerge = selectedCells?.Where(x => x.Row == row).ToList() ?? [];
-                MergeCells(cellsToMerge, _cellTracker);
-            }
+            _viewModel.MergeCellsAcross();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
-            MergeCells(selectedCells ?? [], _cellTracker);
+            _viewModel.MergeCells();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model).ToList();
-            MergeCellsDown(selectedCells, _cellTracker);
+            _viewModel.MergeCellsDown();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
-        }
-
-        public static void MergeCellsDown(List<CellModel>? selectedCells, CellTracker cellTracker)
-        {
-            var columns = selectedCells?.Select(x => x.Column).Distinct().ToList() ?? [];
-            foreach (var column in columns)
-            {
-                var cellsToMerge = selectedCells?.Where(x => x.Column == column).ToList();
-                MergeCells(cellsToMerge ?? [], cellTracker);
-            }
         }
 
         private void SetAlignmentToBottomButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Center;
-            cell.VerticalAlignmentForView = VerticalAlignment.Center;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Center;
+            _viewModel.VerticalAlignment = VerticalAlignment.Center;
         }
 
         private void SetAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToTopButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetTextAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Center;
+            _viewModel.TextAlignment = TextAlignment.Center;
         }
 
         private void SetTextAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Left;
+            _viewModel.TextAlignment = TextAlignment.Left;
         }
 
         private void SetTextAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Right;
+            _viewModel.TextAlignment = TextAlignment.Right;
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)
@@ -257,8 +157,7 @@ namespace Cell.View.ToolWindow
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            UnmergeCells(ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModels.Select(x => x.Model) ?? [], _cellTracker);
-            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
+            _viewModel.UnmergeCells();
         }
     }
 }

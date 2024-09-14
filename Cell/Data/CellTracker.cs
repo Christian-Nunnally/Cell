@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Model;
 using Cell.Persistence;
+using System.ComponentModel;
 
 namespace Cell.Data
 {
@@ -31,8 +32,15 @@ namespace Cell.Data
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
+            cellModel.StylePropertyChanged += CellModelStylePropertyChanged;
             CellAdded?.Invoke(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
+        }
+
+        private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not CellModel model) return;
+            _cellLoader.SaveCell(model);
         }
 
         public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
@@ -48,6 +56,8 @@ namespace Cell.Data
 
         public void RemoveCell(CellModel cellModel)
         {
+            cellModel.PropertyChanged -= CellModelPropertyChanged;
+            cellModel.Style.PropertyChanged -= CellModelStylePropertyChanged;
             RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
             _cellLoader.DeleteCell(cellModel);
             _cellsToLocation.Remove(cellModel.ID);

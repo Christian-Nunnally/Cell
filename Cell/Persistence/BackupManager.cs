@@ -1,11 +1,10 @@
 ﻿using Cell.Data;
+using System.IO;
 
 namespace Cell.Persistence
 {
     public class BackupManager
     {
-        private static readonly TimeSpan MinimumBackupInterval = TimeSpan.FromMinutes(1);
-        private static DateTime _lastBackupDate = DateTime.Now - MinimumBackupInterval;
         private readonly SheetTracker _sheetTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
@@ -21,18 +20,17 @@ namespace Cell.Persistence
             _persistenceManager = persistenceManager;
         }
 
-        public void CreateBackup()
+        public void CreateBackup(string backupName = "backup")
         {
-            if (_lastBackupDate.Add(MinimumBackupInterval) > DateTime.Now) return;
             var oldSaveLocation = _persistenceManager.RootPath;
-            _persistenceManager.RootPath = oldSaveLocation + "_backup_" + CreateFileFriendlyCurrentDateTime();
+            var backupPath = Path.Combine("CellBackups", $"{oldSaveLocation}_{backupName}_{CreateFileFriendlyCurrentDateTime()}");
+            _persistenceManager.RootPath = backupPath;
             SaveAll();
             _persistenceManager.ZipFolder();
-            _lastBackupDate = DateTime.Now;
             _persistenceManager.RootPath = oldSaveLocation;
         }
 
-        public void SaveAll()
+        private void SaveAll()
         {
             _pluginFunctionLoader.SavePlugins();
             _userCollectionLoader.SaveCollections();

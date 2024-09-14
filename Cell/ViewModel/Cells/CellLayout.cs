@@ -15,6 +15,10 @@ namespace Cell.ViewModel
 
         private readonly bool _canLayout = true;
 
+        public double LayoutWidth { get; private set; }
+
+        public double LayoutHeight { get; private set; }
+
         public CellLayout(IEnumerable<CellViewModel> cells, CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -102,6 +106,7 @@ namespace Cell.ViewModel
                 columnCellViewModel.Y = 0;
                 lastCell = columnCellViewModel;
             }
+            LayoutWidth = lastCell.X + lastCell.Width;
         }
 
         private void LayoutMergedCell(CellViewModel cellModel)
@@ -135,6 +140,7 @@ namespace Cell.ViewModel
                 rowCellViewModel.Y = lastCell.Y + lastCell.Height;
                 lastCell = rowCellViewModel;
             }
+            LayoutHeight = lastCell.Y + lastCell.Height;
         }
     }
 }

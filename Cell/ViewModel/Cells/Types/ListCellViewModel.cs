@@ -80,7 +80,7 @@ namespace Cell.ViewModel.Cells.Types
                 int i = 0;
                 foreach (var item in collection.Items)
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(_sheetViewModel.CellTracker, _sheetViewModel.UserCollectionLoader, i++), Model);
+                    var result = DynamicCellPluginExecutor.RunPopulate(_sheetViewModel.PluginFunctionLoader, new PluginContext(_sheetViewModel.CellTracker, _sheetViewModel.UserCollectionLoader, i++), Model);
                     if (result.Result == null) continue;
                     ListItems.Add(result.Result);
                     if (ListItems.Count >= MaxNumberOfItems) break;

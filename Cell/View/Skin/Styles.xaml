@@ -5,8 +5,6 @@
     xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:converters="clr-namespace:Cell.View.Converters">
 
-    <converters:BrushToColorConverter x:Key="BrushToColorConverter" />
-
     <Style TargetType="{x:Type avalonEdit:TextEditor}">
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />

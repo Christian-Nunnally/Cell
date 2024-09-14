@@ -1,6 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Data;
-using Cell.Execution.SyntaxWalkers;
+using Cell.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Microsoft.CodeAnalysis.CSharp;
@@ -30,7 +30,7 @@ namespace Cell.Persistence
 
         public UserCollection? GetCollection(string name)
         {
-            if (name == string.Empty) throw new CellError("Collection name cannot be empty");
+            if (name == string.Empty) return null;
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
             return null;
         }

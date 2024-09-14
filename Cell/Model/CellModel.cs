@@ -1,8 +1,8 @@
 ﻿using Cell.Common;
 using Cell.Execution;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Cells.Types.Special;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace Cell.Model
@@ -10,6 +10,7 @@ namespace Cell.Model
     public class CellModel : PropertyChangedBase
     {
         public static readonly CellModel Null = new();
+        private CellStyleModel _cellStyle = new();
         private CellType cellType = CellType.None;
         private int column;
         private string errorText = string.Empty;
@@ -23,22 +24,18 @@ namespace Cell.Model
         private string text = string.Empty;
         private string triggerFunctionName = string.Empty;
         private double width;
-        private CellStyleModel _cellStyle = new ();
+        public CellModel()
+        {
+            _cellStyle.PropertyChanged += StylePropertyChangedHandler;
+        }
+
         public event Action<CellModel>? AfterCellEdited;
 
         public event Action<CellModel, EditContext>? CellTriggered;
 
-        public Dictionary<string, bool> BooleanProperties { get; set; } = [];
+        public event PropertyChangedEventHandler? StylePropertyChanged;
 
-        public CellStyleModel Style
-        {
-            get => _cellStyle;
-            set 
-            { 
-                if (_cellStyle == value) return; 
-                _cellStyle = value; 
-                NotifyPropertyChanged(nameof(_cellStyle)); }
-        }
+        public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
         public CellType CellType
         {
@@ -80,6 +77,9 @@ namespace Cell.Model
             set { if (index != value) { index = value; NotifyPropertyChanged(nameof(Index)); } }
         }
 
+        [JsonIgnore]
+        public int Int { get => int.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
+
         public string MergedWith
         {
             get => mergedWith;
@@ -120,6 +120,19 @@ namespace Cell.Model
 
         public Dictionary<string, string> StringProperties { get; set; } = [];
 
+        public CellStyleModel Style
+        {
+            get => _cellStyle;
+            set
+            {
+                if (_cellStyle == value) return;
+                if (_cellStyle != null) _cellStyle.PropertyChanged -= StylePropertyChangedHandler;
+                _cellStyle = value;
+                if (_cellStyle != null) _cellStyle.PropertyChanged += StylePropertyChangedHandler;
+                NotifyPropertyChanged(nameof(Style));
+            }
+        }
+
         public string Text
         {
             get => text;
@@ -150,9 +163,6 @@ namespace Cell.Model
         [JsonIgnore]
         public double Value { get => double.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
 
-        [JsonIgnore]
-        public int Int { get => int.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
-
         public double Width
         {
             get => width;
@@ -169,15 +179,6 @@ namespace Cell.Model
         public double GetNumericProperty(string key, double defaultValue = 0) => NumericProperties.TryGetValue(key, out var value) ? value : defaultValue;
 
         public string GetStringProperty(string key) => StringProperties.TryGetValue(key, out var value) ? value : string.Empty;
-
-        public void PopulateText()
-        {
-            if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(ApplicationViewModel.Instance.PluginFunctionLoader, new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, Index), this);
-            if (result.Result == null) return;
-            if (result.Success) Text = result.Result;
-            else ErrorText = result.Result;
-        }
 
         public void SetBackgrounds(string color)
         {
@@ -246,5 +247,10 @@ namespace Cell.Model
         public override string ToString() => Text;
 
         public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
+
+        private void StylePropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
+        {
+            StylePropertyChanged?.Invoke(this, e);
+        }
     }
 }

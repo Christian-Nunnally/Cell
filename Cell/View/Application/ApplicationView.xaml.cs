@@ -110,8 +110,23 @@ namespace Cell.View.Application
             var textClipboard = new TextClipboard();
             var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
             var backupManager = new BackupManager(persistenceManager, cellTracker, sheetTracker, userCollectionLoader, pluginFunctionLoader);
+            var cellSelector = new CellSelector();
 
-            _viewModel = new ApplicationViewModel(persistenceManager, pluginFunctionLoader, cellLoader, cellTracker, userCollectionLoader, cellPopulateManager, cellTriggerManager, sheetTracker, titleBarSheetNavigationViewModel, applicationSettings, undoRedoManager, cellClipboard, backupManager);
+            _viewModel = new ApplicationViewModel(
+                persistenceManager, 
+                pluginFunctionLoader, 
+                cellLoader, 
+                cellTracker, 
+                userCollectionLoader, 
+                cellPopulateManager, 
+                cellTriggerManager, 
+                sheetTracker, 
+                cellSelector, 
+                titleBarSheetNavigationViewModel, 
+                applicationSettings, 
+                undoRedoManager, 
+                cellClipboard, 
+                backupManager);
             ApplicationViewModel.Instance = _viewModel;
             _viewModel.AttachToView(this);
             base.OnInitialized(e);
@@ -194,9 +209,9 @@ namespace Cell.View.Application
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
-            var editPanel = new CellFormatEditWindow(_viewModel.CellTracker);
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
+            if (_viewModel?.SheetViewModel == null) return;
+            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker);
+            var editPanel = new CellFormatEditWindow(viewModel);
             ShowToolWindow(editPanel);
         }
 
@@ -274,7 +289,7 @@ namespace Cell.View.Application
             }
             else if (e.Key == Key.Escape)
             {
-                _viewModel?.SheetViewModel?.UnselectAllCells();
+                _viewModel?.SheetViewModel?.CellSelector.UnselectAllCells();
                 e.Handled = true;
             }
         }

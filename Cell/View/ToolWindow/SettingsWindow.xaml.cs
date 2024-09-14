@@ -1,6 +1,4 @@
-﻿using Cell.Model;
-using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types.Special;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
@@ -85,7 +83,7 @@ namespace Cell.View.ToolWindow
             if (sender is not Button) return;
             var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
             if (activeSheetView is null) return;
-            activeSheetView.PanCanvasTo(CellModelFactory.DefaultCellWidth, CellModelFactory.DefaultCellHeight);
+            activeSheetView.PanCanvasTo(-((ApplicationViewModel.Instance.ApplicationWindowWidth / 2) - (activeSheetView.SheetViewModel.SheetWidth / 2)), -((ApplicationViewModel.Instance.ApplicationWindowHeight / 2) - (activeSheetView.SheetViewModel.SheetHeight / 2)));
             activeSheetView.ZoomCanvasTo(new Point(0, 0), 1);
             activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
@@ -130,11 +128,9 @@ namespace Cell.View.ToolWindow
         {
             if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var editPanel = new CellFormatEditWindow(ApplicationViewModel.Instance.CellTracker)
-            {
-                // This could be a "Style cell view model" that will promt to set the entire sheet.
-                DataContext = new CornerCellViewModel(ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel, ApplicationViewModel.Instance.SheetViewModel)
-            };
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker);
+            var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
             ApplicationViewModel.Instance.ShowToolWindow(editPanel);
         }
 
@@ -142,12 +138,16 @@ namespace Cell.View.ToolWindow
         {
             if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var editPanel = new CellFormatEditWindow(ApplicationViewModel.Instance.CellTracker)
-            {
-                // This could be a "Style cell view model" that will promt to set the entire sheet.
-                DataContext = new CornerCellViewModel(ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel, ApplicationViewModel.Instance.SheetViewModel)
-            };
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker);
+            var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
             ApplicationViewModel.Instance.ShowToolWindow(editPanel);
+        }
+
+        private void LoadFromBackupButtonPressed(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            _viewModel.LoadFromBackup();
         }
     }
 }

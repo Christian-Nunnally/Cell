@@ -189,10 +189,20 @@ namespace Cell.Execution
 
         private void PopulateFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (sender is not PluginFunctionModel pluginFunctionModel) return;
             if (e.PropertyName == nameof(PluginFunctionModel.Code))
             {
-                _cellsToUpdateWhenFunctionChanges[sender as PluginFunctionModel].ForEach(cell => cell.PopulateText());
+                _cellsToUpdateWhenFunctionChanges[pluginFunctionModel].ForEach(PopulateCellsText);
             }
+        }
+
+        public void PopulateCellsText(CellModel cell)
+        {
+            if (string.IsNullOrEmpty(cell.PopulateFunctionName)) return;
+            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, new PluginContext(_cellTracker, _userCollectionLoader, cell.Index), cell);
+            if (result.Result == null) return;
+            if (result.Success) cell.Text = result.Result;
+            else cell.ErrorText = result.Result;
         }
 
         public void SubscribeToCollectionUpdates(CellModel subscriber, string collectionName)

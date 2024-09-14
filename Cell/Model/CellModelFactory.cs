@@ -1,4 +1,6 @@
 ﻿using Cell.Common;
+using Cell.Data;
+using Cell.ViewModel.Application;
 using System.Text.Json;
 
 namespace Cell.Model
@@ -15,7 +17,7 @@ namespace Cell.Model
 
         internal static CellModel Create(int row, int column, CellType type, string sheet)
         {
-            return new CellModel
+            var newCell = new CellModel
             {
                 Width = DefaultCellWidth,
                 Height = DefaultCellHeight,
@@ -24,6 +26,22 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
+            if (type.IsSpecial())
+            {
+                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultSpecialCellStyleCellModel.Style.CopyTo(newCell.Style);
+            }
+            else
+            {
+                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultCellStyleCellModel.Style.CopyTo(newCell.Style);
+            }
+            return newCell;
+        }
+
+        internal static CellModel Create(int row, int column, CellType type, string sheet, CellTracker trackerToTrackCellWith)
+        {
+            var newCell = Create(row, column, type, sheet);
+            trackerToTrackCellWith.AddCell(newCell);
+            return newCell;
         }
     }
 }

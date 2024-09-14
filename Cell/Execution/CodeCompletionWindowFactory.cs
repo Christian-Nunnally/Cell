@@ -46,6 +46,8 @@ namespace Cell.Execution
                 data.Add(new PluginContextCompletionData("GoToSheet"));
                 data.Add(new PluginContextCompletionData("GoToCell"));
                 data.Add(new PluginContextCompletionData("SheetNames"));
+                data.Add(new PluginContextCompletionData("E"));
+                data.Add(new PluginContextCompletionData("ShowDialog"));
                 return completionWindow;
             }
             else if (type == "cell" || CellReferenceToCodeSyntaxRewriter.IsCellLocation(type))

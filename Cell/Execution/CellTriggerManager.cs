@@ -18,6 +18,13 @@ namespace Cell.Execution
         {
             _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
+            _cellTracker.CellAdded += StartMonitoringCell;
+            _cellTracker.CellRemoved += StopMonitoringCell;
+            foreach (var cell in _cellTracker.AllCells)
+            {
+                // TODO: Only monitor cells that a trigger function is set on.
+                StartMonitoringCell(cell);
+            }
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 

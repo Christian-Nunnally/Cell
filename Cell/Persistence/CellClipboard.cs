@@ -84,7 +84,8 @@ namespace Cell.Persistence
         private void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
             _undoRedoManager.RecordStateIfRecording(cellToReplace);
-            cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date)]);
+            cellToPaste.CopyPublicProperties(cellToReplace, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.Int)]);
+            cellToPaste.Style.CopyTo(cellToReplace.Style);
         }
 
         private bool TryGetCellToReplace(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)

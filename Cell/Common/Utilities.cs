@@ -89,6 +89,27 @@ namespace Cell.Common
             return false;
         }
 
+        public static Thickness ParseStringIntoThickness(string stringThickness)
+        {
+            var split = stringThickness.Split(',');
+            if (split.Length == 1)
+            {
+                var size = double.Parse(split[0]);
+                return new Thickness(size, size, size, size);
+            }
+            else if (split.Length == 2)
+            {
+                var horizontial = double.Parse(split[0]);
+                var vertical = double.Parse(split[1]);
+                return new Thickness(vertical, horizontial, vertical, horizontial);
+            }
+            var left = double.Parse(split[0]);
+            var top = double.Parse(split[1]);
+            var right = double.Parse(split[2]);
+            var bottom = double.Parse(split[3]);
+            return new Thickness(left, top, right, bottom);
+        }
+
         private static void CopyProperty(object source, object target, string[] blacklist, Type targetType, PropertyInfo sourceProperty)
         {
             // Can read source property

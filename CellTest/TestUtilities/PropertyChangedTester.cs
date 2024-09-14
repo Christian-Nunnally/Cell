@@ -13,9 +13,12 @@ namespace CellTest.TestUtilities
 
         public void OnPropertyChanged(object? sender, PropertyChangedEventArgs e) => Notifications.Add(e?.PropertyName ?? "");
 
-        internal void AssertPropertyChanged(string propertyName)
+        internal void AssertPropertyChanged(string propertyName, int count = 1)
         {
-            Notifications.Single(x => x == propertyName);
+            if (count != Notifications.Count(x => x == propertyName))
+            {
+                Assert.Fail("Expected " + count + " notifications for " + propertyName + " but got " + Notifications.Count(x => x == propertyName) + " notifications.");
+            }
         }
     }
 }

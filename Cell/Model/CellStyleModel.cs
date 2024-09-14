@@ -25,8 +25,6 @@ namespace Cell.Model
         private string _borderColorHex = "#aaff00";
         private string _contentBorderColorHex = "#00ffaa";
 
-        public event Action<CellModel>? AfterCellEdited;
-
         public string Font
         {
             get => _font;
@@ -164,7 +162,7 @@ namespace Cell.Model
                 if (value == null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _contentBorderColorHex = value;
-                NotifyPropertyChanged(nameof(BorderColor));
+                NotifyPropertyChanged(nameof(ContentBorderColor));
             }
         }
         public string HighlightColor

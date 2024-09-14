@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -23,7 +24,10 @@ namespace Cell.Execution
             GetMetadataReferenceForType(typeof(object)),
             GetMetadataReferenceForType(typeof(PluginContext)),
             GetMetadataReferenceForType(typeof(Console)),
-            GetMetadataReferenceForType(typeof(Enumerable))
+            GetMetadataReferenceForType(typeof(Enumerable)),
+            GetMetadataReferenceForType(typeof(List<>)),
+            GetMetadataReferenceForType(typeof(System.Collections.SortedList)),
+            GetCollectionsReference()
         ];
 
         public Type Compile()
@@ -69,6 +73,11 @@ namespace Cell.Execution
             var directory = Path.GetDirectoryName(assemblyLocation) ?? throw new Exception($"Could not get directory name from {assemblyLocation}");
             var systemRuntimeDllPath = Path.Combine(directory, "System.Runtime.dll");
             return MetadataReference.CreateFromFile(systemRuntimeDllPath);
+        }
+
+        private static PortableExecutableReference GetCollectionsReference()
+        {
+            return MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(Dictionary<,>).Assembly.Location), "System.Collections.dll"));
         }
     }
 }

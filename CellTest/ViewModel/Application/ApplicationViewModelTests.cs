@@ -22,8 +22,10 @@ namespace CellTest.ViewModel.Application
         private TitleBarSheetNavigationViewModel _titleBarSheetNavigationViewModel;
         private ApplicationSettings _applicationSettings;
         private UndoRedoManager _undoRedoManager;
+        private ITextClipboard _textClipboard;
         private CellClipboard _cellClipboard;
         private BackupManager _backupManager;
+        private CellSelector _cellSelector;
 
         private ApplicationViewModel CreateTestInstance()
         {
@@ -37,7 +39,13 @@ namespace CellTest.ViewModel.Application
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _backupManager = new BackupManager(_persistenceManager, _cellTracker, _sheetTracker, _userCollectionLoader, _pluginFunctionLoader);
-            return new ApplicationViewModel(_persistenceManager, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            _cellSelector = new CellSelector();
+            _applicationSettings = new ApplicationSettings();
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(_sheetTracker);
+            _textClipboard = new TestTextClipboard();
+            _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
+            return new ApplicationViewModel(_persistenceManager, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]

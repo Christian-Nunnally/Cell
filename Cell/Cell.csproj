@@ -7,10 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <StartupObject>Cell.App</StartupObject>
+    <ApplicationIcon>Resources\cellIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Page Remove="View\Skin\Colors.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\cellIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>

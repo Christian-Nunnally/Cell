@@ -1,7 +1,5 @@
-﻿using Cell.Common;
-using Cell.Execution.SyntaxWalkers;
+﻿using Cell.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -68,12 +66,14 @@ namespace Cell.ViewModel.Cells.Types.Special
             var cellsToDelete = _sheetViewModel.CellTracker.GetCellModelsForSheet(Model.SheetName).Where(x => x.Column == Column).ToList();
             foreach (var cell in cellsToDelete)
             {
+                var nextCell = _sheetViewModel.CellTracker.GetCell(Model.SheetName, cell.Row, cell.Column + 1);
+                cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _sheetViewModel.CellTracker);
                 _sheetViewModel.CellTracker.RemoveCell(cell);
             }
             IncrementColumnOfAllAtOrToTheRightOf(Column, -1);
             _sheetViewModel.UpdateLayout();
 
-            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _sheetViewModel.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(Column, function, -1);
             }
@@ -98,9 +98,9 @@ namespace Cell.ViewModel.Cells.Types.Special
             var refactorer = new CellReferenceRefactorRewriter(x =>
             {
                 if (x.SheetName != Model.SheetName) return x;
-                if (!x.IsColumnRelative) return x;
+                if (x.IsColumnRelative) return x;
                 if (x.Column >= newColumnIndex) x.Column += 1;
-                if (x.IsRange && x.ColumnRangeEnd >= newColumnIndex) x.ColumnRangeEnd += incrementAmount;
+                if (x.IsRange && x.ColumnRangeEnd + 1 >= newColumnIndex) x.ColumnRangeEnd += incrementAmount;
                 return x;
             });
             function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
@@ -110,29 +110,23 @@ namespace Cell.ViewModel.Cells.Types.Special
         {
             IncrementColumnOfAllAtOrToTheRightOf(index);
 
-            var columnModel = CellModelFactory.Create(0, index, CellType.Column, Model.SheetName);
-            ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel.CopyPublicProperties(columnModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
-            _sheetViewModel.CellTracker.AddCell(columnModel);
+            CellModelFactory.Create(0, index, CellType.Column, Model.SheetName, _sheetViewModel.CellTracker);
 
             var sheet = _sheetViewModel.SheetTracker.Sheets.FirstOrDefault(x => x.Name == Model.SheetName);
 
             var rowIndexs = _sheetViewModel.CellViewModels.OfType<RowCellViewModel>().Select(x => x.Row).ToList();
             foreach (var rowIndex in rowIndexs)
             {
-                var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName);
-                ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel.CopyPublicProperties(cellModel, [nameof(CellModel.ID), nameof(CellModel.SheetName), nameof(CellModel.Width), nameof(CellModel.Height), nameof(CellModel.Row), nameof(CellModel.Column), nameof(CellModel.MergedWith), nameof(CellModel.Value), nameof(CellModel.Date), nameof(CellModel.CellType)]);
-                _sheetViewModel.CellTracker.AddCell(cellModel);
+                var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, Model.SheetName, _sheetViewModel.CellTracker);
                 _sheetViewModel.CellPopulateManager.NotifyCellValueUpdated(cellModel);
 
-                var cellAboveMergedId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, rowIndex, index - 1)?.MergedWith ?? string.Empty;
-                var cellBelowMergedId = _sheetViewModel.CellTracker.GetCell(Model.SheetName, rowIndex, index + 1)?.MergedWith ?? string.Empty;
-                if (!string.IsNullOrWhiteSpace(cellAboveMergedId) && cellAboveMergedId == cellBelowMergedId)
-                {
-                    cellModel.MergedWith = cellAboveMergedId;
-                }
+                var firstNeighbor = _sheetViewModel.CellTracker.GetCell(Model.SheetName, rowIndex, index - 1);
+                var secondNeighbor = _sheetViewModel.CellTracker.GetCell(Model.SheetName, rowIndex, index + 1);
+                cellModel.MergeCellIntoCellsIfTheyWereMerged(firstNeighbor, secondNeighbor);
+                cellModel.EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(firstNeighbor, secondNeighbor, _sheetViewModel.CellTracker);
             }
 
-            foreach (var function in ApplicationViewModel.Instance.PluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _sheetViewModel.PluginFunctionLoader.ObservableFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(index, function, 1);
             }

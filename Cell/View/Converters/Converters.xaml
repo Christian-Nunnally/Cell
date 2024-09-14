@@ -10,5 +10,6 @@
     <xctk:AdditionConverter x:Key="AdditionConverter" />
     <xctk:ColorModeToTabItemSelectedConverter x:Key="ColorModeToTabItemSelectedConverter" />
     <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
-    <converters:RGBHexColorConverter x:Key="HexToColorConverter" />
+    <converters:HexToColorConverter x:Key="HexToColorConverter" />
+    <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
 </ResourceDictionary>

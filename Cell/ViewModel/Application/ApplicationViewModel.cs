@@ -31,6 +31,7 @@ namespace Cell.ViewModel.Application
         private double _applicationWindowWidth = 1200;
         private SheetViewModel? sheetViewModel;
         private bool _isProjectLoaded;
+        private bool _isProjectLoading;
 
         public ApplicationViewModel(
             PersistenceManager persistenceManager, 
@@ -41,6 +42,7 @@ namespace Cell.ViewModel.Application
             CellPopulateManager cellPopulateManager, 
             CellTriggerManager cellTriggerManager, 
             SheetTracker sheetTracker, 
+            CellSelector cellSelector,
             TitleBarSheetNavigationViewModel titleBarSheetNavigationViewModel,
             ApplicationSettings applicationSettings,
             UndoRedoManager undoRedoManager,
@@ -55,6 +57,7 @@ namespace Cell.ViewModel.Application
             CellPopulateManager = cellPopulateManager;
             CellTriggerManager = cellTriggerManager;
             SheetTracker = sheetTracker;
+            CellSelector = cellSelector;
             TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
             ApplicationSettings = applicationSettings;
             UndoRedoManager = undoRedoManager;
@@ -88,21 +91,22 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public CellLoader CellLoader { get; private set; } // Good
+        public CellLoader CellLoader { get; private set; }
 
-        public CellPopulateManager CellPopulateManager { get; private set; } // Good
+        public CellPopulateManager CellPopulateManager { get; private set; }
 
-        public CellTracker CellTracker { get; private set; } // Good
+        public CellTracker CellTracker { get; private set; }
 
-        public CellTriggerManager CellTriggerManager { get; private set; } // Good
+        public CellTriggerManager CellTriggerManager { get; private set; }
 
-        public PersistenceManager PersistenceManager { get; private set; } // Good
+        public PersistenceManager PersistenceManager { get; private set; }
 
         public PluginFunctionLoader PluginFunctionLoader { get; private set; }
 
-        public BackupManager BackupManager { get; private set; } // Good
+        public BackupManager BackupManager { get; private set; }
 
-        public SheetTracker SheetTracker { get; private set; } // Good
+        public SheetTracker SheetTracker { get; private set; }
+        public CellSelector CellSelector{ get; private set; }
 
         public SheetViewModel? SheetViewModel
         {
@@ -125,26 +129,8 @@ namespace Cell.ViewModel.Application
 
         public static UndoRedoManager? GetUndoRedoManager()
         {
-            if (instance == null)
-            {
-                return null;
-            }
+            if (instance == null) return null;
             return Instance.UndoRedoManager;
-        }
-
-        public void ChangeSelectedCellsType(CellType newType)
-        {
-            if (SheetViewModel == null) return;
-            UndoRedoManager.StartRecordingUndoState();
-            SheetViewModel.SelectedCellViewModels.Select(x => x.Model).ToList().ForEach(UndoRedoManager.RecordStateIfRecording);
-            UndoRedoManager.FinishRecordingUndoState();
-            var selectedCells = SheetViewModel.SelectedCellViewModels.ToList();
-            foreach (var selectedCell in selectedCells)
-            {
-                selectedCell.CellType = newType;
-            }
-            selectedCells.ForEach(x => SheetViewModel.SelectCell(x.Model));
-            SheetViewModel.UpdateLayout();
         }
 
         public LoadingProgressResult Load()
@@ -157,6 +143,8 @@ namespace Cell.ViewModel.Application
         public LoadingProgressResult LoadWithProgress()
         {
             if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
+            if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
+            _isProjectLoading = true;
             return new LoadingProgressResult("Checking Save Version", LoadPhase1);
         }
 
@@ -213,13 +201,14 @@ namespace Cell.ViewModel.Application
         {
             BackupManager.CreateBackup();
             IsProjectLoaded = true;
+            _isProjectLoading = false;
             return new LoadingProgressResult(true, "Load Complete");
         }
 
         internal void CopySelectedCells(bool copyTextOnly)
         {
             if (SheetViewModel == null) return;
-            _cellClipboard.CopyCells(SheetViewModel.SelectedCellViewModels.Select(x => x.Model), copyTextOnly);
+            _cellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
         internal void GoToCell(CellModel cellModel)
@@ -235,13 +224,14 @@ namespace Cell.ViewModel.Application
             if (SheetViewModel?.SheetName == sheetName) return;
             var sheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == sheetName);
             if (sheet == null) return;
+            SheetViewModel?.CellSelector.UnselectAllCells();
             if (_sheetModelToViewModelMap.TryGetValue(sheet, out SheetViewModel? existingSheetViewModel))
             {
                 SheetViewModel = existingSheetViewModel;
             }
             else
             {
-                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
+                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, CellSelector, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             _applicationView?.ShowSheetView(SheetViewModel);
@@ -252,7 +242,7 @@ namespace Cell.ViewModel.Application
         {
             if (SheetViewModel == null) return;
             UndoRedoManager.StartRecordingUndoState();
-            if (SheetViewModel.SelectedCellViewModel != null) _cellClipboard.PasteIntoCells(SheetViewModel.SelectedCellViewModel.Model, SheetViewModel.SelectedCellViewModels.Select(x => x.Model));
+            if (SheetViewModel.SelectedCellViewModel != null) _cellClipboard.PasteIntoCells(SheetViewModel.SelectedCellViewModel.Model, SheetViewModel.CellSelector.SelectedCells);
             SheetViewModel.UpdateLayout();
             UndoRedoManager.FinishRecordingUndoState();
         }

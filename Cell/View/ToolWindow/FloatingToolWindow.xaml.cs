@@ -160,12 +160,20 @@ namespace Cell.View.ToolWindow
             if (_isDocked) return;
             if (sender is FloatingToolWindow toolbox)
             {
+                MoveToolboxToFrontOfCanvas(toolbox);
                 var offset = e.GetPosition(_canvas);
                 offset.X -= Canvas.GetLeft(toolbox);
                 offset.Y -= Canvas.GetTop(toolbox);
                 toolbox.Tag = offset;
                 toolbox.CaptureMouse();
             }
+        }
+
+        private void MoveToolboxToFrontOfCanvas(FloatingToolWindow toolbox)
+        {
+            if (_canvas.Children[^1] == toolbox) return;
+            _canvas.Children.Remove(toolbox);
+            _canvas.Children.Add(toolbox);
         }
 
         private void ToolboxMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

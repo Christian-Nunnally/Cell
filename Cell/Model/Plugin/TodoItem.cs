@@ -1,4 +1,6 @@
-﻿namespace Cell.Model.Plugin
+﻿using Cell.Common;
+
+namespace Cell.Model.Plugin
 {
     [Serializable]
     public class TodoItem : PluginModel
@@ -12,6 +14,9 @@
         private int _priority = 0;
         private int _status = 0;
         private string _title = string.Empty;
+        private string _parent = string.Empty;
+        private string _taskID = Utilities.GenerateUnqiueId(12);
+
         public string Category
         {
             get => _category;
@@ -66,9 +71,39 @@
             set { if (value != _title) { _title = value; OnPropertyChanged(nameof(Title)); } }
         }
 
+        public string Parent
+        {
+            get => _parent;
+            set { if (value != _parent) { _parent = value; OnPropertyChanged(nameof(Parent)); } }
+        }
+
+        public string TaskID
+        {
+            get => _taskID;
+            set { if (value != _taskID) { _taskID = value; OnPropertyChanged(nameof(TaskID)); } }
+        }
+
         override public string ToString()
         {
-            return $"{Priority} - {(IsComplete ? "✅" : "❎")} {Title} - {Notes}";
+            return $"{(IsComplete ? "✅" : "❎")} {Title}";
+        }
+
+        public override object Clone()
+        {
+            return new TodoItem
+            {
+                Category = Category,
+                CompletionDate = CompletionDate,
+                CreationDate = CreationDate,
+                DueDate = DueDate,
+                IsComplete = IsComplete,
+                Notes = Notes,
+                Priority = Priority,
+                Status = Status,
+                Title = Title,
+                Parent = Parent,
+                TaskID = TaskID
+            };
         }
     }
 }

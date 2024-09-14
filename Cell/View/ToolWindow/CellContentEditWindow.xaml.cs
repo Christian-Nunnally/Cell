@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
@@ -8,9 +9,6 @@ using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for CellTextEditBar.xaml
-    /// </summary>
     public partial class CellContentEditWindow : UserControl, IToolWindow
     {
         public CellContentEditWindow()
@@ -24,7 +22,7 @@ namespace Cell.View.ToolWindow
         {
             var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
             if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Content editor - {currentlySelectedCell.GetName()}";
+            return $"Content editor - {currentlySelectedCell.Model.GetName()}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
@@ -39,7 +37,7 @@ namespace Cell.View.ToolWindow
         private static void IndexSelectedCells()
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.CellSelector.SelectedCells.ToList();
             var leftmost = selectedCells.Select(x => x.Column).Min();
             var topmost = selectedCells.Select(x => x.Row).Min();
             var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);

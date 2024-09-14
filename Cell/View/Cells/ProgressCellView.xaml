@@ -3,13 +3,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types">
     <DataTemplate DataType="{x:Type viewModel:ProgressCellViewModel}">
-        <Rectangle
-            x:Name="progressRectangle"
-            Width="{Binding ProgressBarWidth, NotifyOnTargetUpdated=True}"
-            Height="{Binding ProgressBarHeight}"
-            Margin="{Binding Margin}"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Bottom"
-            Fill="{Binding ForegroundColor}" />
+        <Grid>
+            <Rectangle
+                x:Name="progressRectangleBackground"
+                Width="{Binding Width}"
+                Height="{Binding Height}"
+                Margin="{Binding Margin}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Fill="{Binding ContentBackgroundColor}" />
+            <Rectangle
+                x:Name="progressRectangle"
+                Width="{Binding ProgressBarWidth}"
+                Height="{Binding ProgressBarHeight}"
+                Margin="{Binding Margin}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Fill="{Binding ForegroundColor}" />
+        </Grid>
     </DataTemplate>
 </ResourceDictionary>

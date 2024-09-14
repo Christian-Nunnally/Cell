@@ -2,7 +2,6 @@
 using Cell.View.Application;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
-using Cell.ViewModel.Cells.Types.Special;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -41,8 +40,8 @@ namespace Cell.View.Cells
             if (!cell.CellType.IsSpecial() && IsSelectingNonSpecialCellsAllowed()) return false;
             return true;
 
-            bool IsSelectingSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.Where(x => x is not SpecialCellViewModel).Any();
-            bool IsSelectingNonSpecialCellsAllowed() => SheetViewModel.SelectedCellViewModels.OfType<SpecialCellViewModel>().Any();
+            bool IsSelectingSpecialCellsAllowed() => SheetViewModel.CellSelector.SelectedCells.Where(x => !x.CellType.IsSpecial()).Any();
+            bool IsSelectingNonSpecialCellsAllowed() => SheetViewModel.CellSelector.SelectedCells.Where(x => x.CellType.IsSpecial()).Any();
         }
 
         private void CellPreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -54,9 +53,9 @@ namespace Cell.View.Cells
                     var wasSelected = cell.IsSelected;
                     if (!(Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down))
                     {
-                        SheetViewModel.UnselectAllCells();
+                        SheetViewModel.CellSelector.UnselectAllCells();
                     }
-                    SheetViewModel.SelectCell(cell);
+                    SheetViewModel.CellSelector.SelectCell(cell.Model);
                     _selectingCells = true;
                     _selectionStart = cell;
                     if (wasSelected)
@@ -66,18 +65,18 @@ namespace Cell.View.Cells
                             foreach (var rowCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
                             {
                                 if (rowCell == cell.Model) continue;
-                                SheetViewModel.SelectCell(rowCell);
+                                SheetViewModel.CellSelector.SelectCell(rowCell);
                             }
-                            SheetViewModel.UnselectCell(cell);
+                            SheetViewModel.CellSelector.UnselectCell(cell.Model);
                         }
                         else if (cell.Model.CellType == CellType.Column)
                         {
                             foreach (var columnCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
                             {
                                 if (columnCell == cell.Model) continue;
-                                SheetViewModel.SelectCell(columnCell);
+                                SheetViewModel.CellSelector.SelectCell(columnCell);
                             }
-                            SheetViewModel.UnselectCell(cell);
+                            SheetViewModel.CellSelector.UnselectCell(cell.Model);
                         }
                     }
                 }
@@ -98,11 +97,11 @@ namespace Cell.View.Cells
                     {
                         if (Keyboard.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || Keyboard.GetKeyStates(Key.RightCtrl) == KeyStates.Down)
                         {
-                            if (CanSelectCell(cell.Model)) SheetViewModel.SelectCell(cell);
+                            if (CanSelectCell(cell.Model)) SheetViewModel.CellSelector.SelectCell(cell.Model);
                         }
                         else
                         {
-                            SheetViewModel.UnselectAllCells();
+                            SheetViewModel?.CellSelector.UnselectAllCells();
                             var startColumn = Math.Min(_selectionStart!.Column, cell.Column);
                             var endColumn = Math.Max(_selectionStart!.Column, cell.Column);
                             var startRow = Math.Min(_selectionStart!.Row, cell.Row);
@@ -111,18 +110,18 @@ namespace Cell.View.Cells
                             {
                                 for (var column = startColumn; column <= endColumn; column++)
                                 {
-                                    var cellToSelect = SheetViewModel.CellTracker.GetCell(SheetViewModel.SheetName, row, column);
-                                    if (CanSelectCell(cellToSelect)) SheetViewModel.SelectCell(cellToSelect!);
+                                    var cellToSelect = SheetViewModel?.CellTracker.GetCell(SheetViewModel.SheetName, row, column);
+                                    if (CanSelectCell(cellToSelect)) SheetViewModel?.CellSelector.SelectCell(cellToSelect!);
                                 }
                             }
-                            var topLeftCell = SheetViewModel.CellTracker.GetCell(SheetViewModel.SheetName, startRow, startColumn);
-                            if (topLeftCell is not null) SheetViewModel.SelectCell(topLeftCell);
+                            var topLeftCell = SheetViewModel?.CellTracker.GetCell(SheetViewModel.SheetName, startRow, startColumn);
+                            if (topLeftCell is not null) SheetViewModel?.CellSelector.SelectCell(topLeftCell);
                         }
                     }
                     else
                     {
                         SheetViewModel.UnhighlightAllCells();
-                        SheetViewModel.HighlightCell(cell, "#44444488");
+                        SheetViewModel.HighlightCell(cell, "#33333333");
                     }
                 }
                 _currentCellMouseIsOver = cell;

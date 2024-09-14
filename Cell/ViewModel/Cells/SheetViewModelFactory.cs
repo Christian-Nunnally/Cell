@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 
@@ -14,18 +13,20 @@ namespace Cell.ViewModel.Cells
             SheetModel sheetModel, 
             CellPopulateManager cellPopulateManager, 
             CellTracker cellTracker, 
-            SheetTracker sheetTracker, 
+            SheetTracker sheetTracker,
+            CellSelector cellSelector,
             UserCollectionLoader userCollectionLoader, 
             ApplicationSettings applicationSettings, 
             PluginFunctionLoader pluginFunctionLoader)
         {
-            var sheetViewModel = new SheetViewModel(sheetModel, cellPopulateManager, cellTracker, sheetTracker, userCollectionLoader, applicationSettings, pluginFunctionLoader);
+            var sheetViewModel = new SheetViewModel(sheetModel, cellPopulateManager, cellTracker, sheetTracker, cellSelector, userCollectionLoader, applicationSettings, pluginFunctionLoader);
             sheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
             return sheetViewModel;
         }
 
         private static void SheetViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            // TODO: Make trigger off CellSelector changes
             if (e.PropertyName == nameof(SheetViewModel.SelectedCellViewModel))
             {
                 if (sender is SheetViewModel sheetViewModel)
@@ -38,15 +39,15 @@ namespace Cell.ViewModel.Cells
         private static void HighlightFunctionDependencies(SheetViewModel sheet)
         {
             if (sheet.SelectedCellViewModel == null) return;
-            if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("object", sheet.SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
+            if (sheet.PluginFunctionLoader.TryGetFunction("object", sheet.SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
             {
-                if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies) HighlightCellDependenciesOfFunction(sheet, populate);
-                if (ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, populate);
+                if (sheet.ApplicationSettings.HighlightPopulateCellDependencies) HighlightCellDependenciesOfFunction(sheet, populate);
+                if (sheet.ApplicationSettings.HighlightPopulateCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, populate);
             }
-            if (ApplicationViewModel.Instance.PluginFunctionLoader.TryGetFunction("void", sheet.SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
+            if (sheet.PluginFunctionLoader.TryGetFunction("void", sheet.SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
             {
-                if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies) HighlightCellDependenciesOfFunction(sheet, trigger);
-                if (ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, trigger);
+                if (sheet.ApplicationSettings.HighlightTriggerCellDependencies) HighlightCellDependenciesOfFunction(sheet, trigger);
+                if (sheet.ApplicationSettings.HighlightTriggerCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, trigger);
             }
         }
 

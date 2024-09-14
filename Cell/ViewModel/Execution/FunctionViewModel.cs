@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
-using Cell.Execution.SyntaxWalkers;
+using Cell.Execution.SyntaxWalkers.CellReferences;
+using Cell.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis;
@@ -118,7 +119,7 @@ namespace Cell.ViewModel.Execution
 
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
         {
-            var intermediateCode = userFriendlyCode.Replace("..", "_Range_");
+            var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
             Model.Code = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformFrom(intermediateCode);
         }
