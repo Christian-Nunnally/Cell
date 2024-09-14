@@ -1,0 +1,22 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+namespace Cell.Execution.SyntaxWalkers.CellReferences
+{
+    public class CellReferenceRefactorRewriter(Func<CellReference, CellReference> refactorFunction) : CSharpSyntaxRewriter
+    {
+        private readonly Func<CellReference, CellReference> _refactorFunction = refactorFunction;
+        public override SyntaxNode? Visit(SyntaxNode? node)
+        {
+            node = base.Visit(node);
+            if (node == null) return node;
+            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
+            {
+                var refactoredReference = _refactorFunction(cellReference);
+                var codeForReference = refactoredReference.CreateCodeForReference();
+                return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, codeForReference);
+            }
+            return node;
+        }
+    }
+}
