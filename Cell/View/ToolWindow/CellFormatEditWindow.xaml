@@ -6,38 +6,223 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:special="clr-namespace:Cell.ViewModel.Cells.Types.Special"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     d:DataContext="{d:DesignInstance Type=viewModel:CellFormatEditWindowViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <StackPanel>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
         <Grid>
+            <ToggleButton
+                x:Name="DeleteRowOrColumnPopupButton"
+                Height="20"
+                Content="x"
+                FontSize="14"
+                Foreground="{StaticResource ErrorForegroundColor}">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                        <Setter Property="IsHitTestVisible" Value="True" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{StaticResource CellBorderColor}"
+                                        BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=DeleteRowOrColumnPopup, Path=IsOpen}" Value="True">
+                                <Setter Property="IsHitTestVisible" Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <Popup
+                x:Name="DeleteRowOrColumnPopup"
+                IsOpen="{Binding IsChecked, ElementName=DeleteRowOrColumnPopupButton, Mode=TwoWay}"
+                PlacementTarget="{Binding ElementName=DeleteRowOrColumnPopupButton}">
+                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                    <StackPanel>
+                        <Button
+                            Click="DeleteRowButtonClicked"
+                            Content="Delete row(s)"
+                            Foreground="{StaticResource ErrorForegroundColor}" />
+                        <Button
+                            Click="DeleteColumnButtonClicked"
+                            Content="Delete columns(s)"
+                            Foreground="{StaticResource ErrorForegroundColor}" />
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </Grid>
+        <Grid
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="10" />
+            </Grid.RowDefinitions>
+            <Path
+                Grid.Row="0"
+                Data="M 0,1 L .5,0 L 1,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+            <Line
+                Grid.Row="0"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Line
+                Grid.Row="1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Line
+                Grid.Row="2"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Path
+                Grid.Row="2"
+                Data="M 0,0 L .5,1 L 1,0"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+        </Grid>
+        <Grid
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="10" />
+            </Grid.ColumnDefinitions>
+            <Path
+                Grid.Column="0"
+                Data="M 1,0 L 0,.5 L 1,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+            <Line
+                Grid.Column="0"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Line
+                Grid.Column="1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Line
+                Grid.Column="2"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Path
+                Grid.Column="2"
+                Data="M 0,0 L 1,.5 L 0,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+        </Grid>
+        <TextBox
+            Grid.Row="1"
+            Width="60"
+            Height="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ClipToBounds="False"
+            KeyDown="TextBoxKeyDown"
+            Text="{Binding Height, Mode=TwoWay}">
+            <TextBox.LayoutTransform>
+                <RotateTransform Angle="-90" CenterX="10" CenterY="10" />
+            </TextBox.LayoutTransform>
+        </TextBox>
+        <TextBox
+            Grid.Column="1"
+            Width="60"
+            Height="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ClipToBounds="False"
+            KeyDown="TextBoxKeyDown"
+            Text="{Binding Width, Mode=TwoWay}" />
+        <Grid Grid.Row="1" Grid.Column="1">
             <xctk:ColorPicker
-                Height="150"
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
                 SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}"
                 Style="{StaticResource TestColorPicker}" />
             <xctk:ColorPicker
-                Margin="10"
+                Margin="20"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
                 SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}"
                 Style="{StaticResource TestColorPicker}" />
             <xctk:ColorPicker
-                Margin="30"
+                Margin="40"
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
                 SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}"
                 Style="{StaticResource TestColorPicker}" />
             <xctk:ColorPicker
-                Margin="40"
+                Margin="60"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
@@ -63,7 +248,7 @@
                                             Padding="0"
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
-                                            FontFamily="{Binding FontFamily}"
+                                            FontFamily="{Binding Font}"
                                             FontSize="20"
                                             FontStyle="{Binding FontStyleForView}"
                                             FontWeight="{Binding FontWeightForView}"
@@ -105,7 +290,7 @@
                                 <TextBox
                                     Width="125"
                                     KeyDown="TextBoxKeyDown"
-                                    Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" />
+                                    Text="{Binding Path=Font, UpdateSourceTrigger=LostFocus}" />
                                 <TextBox
                                     Width="25"
                                     HorizontalContentAlignment="Center"
@@ -257,6 +442,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding BorderThicknessLeft}" />
             <TextBox
@@ -271,12 +457,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding BorderThicknessRight}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="10,65"
+                Margin="20,45"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
@@ -285,12 +472,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding MarginLeft}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="10,65"
+                Margin="20,45"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 HorizontalContentAlignment="Center"
@@ -299,12 +487,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding MarginRight}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="30,65"
+                Margin="40,45"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
@@ -313,12 +502,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding ContentBorderThicknessLeft}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="30,65"
+                Margin="40,45"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 HorizontalContentAlignment="Center"
@@ -327,12 +517,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding ContentBorderThicknessRight}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="70,0"
+                Margin="45,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
@@ -341,11 +532,12 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Text="{Binding BorderThicknessTop}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="70,0"
+                Margin="45,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 HorizontalContentAlignment="Center"
@@ -354,12 +546,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding BorderThicknessBottom}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="90,10"
+                Margin="45,20"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
@@ -368,11 +561,12 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Text="{Binding MarginTop}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="90,10"
+                Margin="45,20"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 HorizontalContentAlignment="Center"
@@ -381,12 +575,13 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding MarginBottom}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="90,30"
+                Margin="45,40"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Center"
@@ -395,11 +590,12 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Text="{Binding ContentBorderThicknessTop}" />
             <TextBox
                 Width="20"
                 Height="20"
-                Margin="90,30"
+                Margin="45,40"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 HorizontalContentAlignment="Center"
@@ -408,6 +604,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                KeyDown="TextBoxKeyDown"
                 Opacity=".5"
                 Text="{Binding ContentBorderThicknessBottom}" />
 
@@ -477,11 +674,11 @@
             <Grid>
                 <ToggleButton
                     x:Name="TypeTogglePopupButton"
-                    Margin="46,40"
+                    Margin="25,17"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     Content="{Binding CellType}"
-                    FontSize="10">
+                    FontSize="12">
                     <ToggleButton.Style>
                         <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
                             <Setter Property="Background" Value="Transparent" />
@@ -550,6 +747,34 @@
                     </Border>
                 </Popup>
             </Grid>
+            <Button
+                Width="60"
+                Height="20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Click="CreateNewColumnToTheLeftButtonClicked"
+                Content="+Column" />
+            <Button
+                Width="60"
+                Height="20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Click="CreateNewColumnToTheRightButtonClicked"
+                Content="+Column" />
+            <Button
+                Width="60"
+                Height="20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Click="CreateNewRowAboveButtonClicked"
+                Content="+Row" />
+            <Button
+                Width="60"
+                Height="20"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Click="CreateNewRowBelowButtonClicked"
+                Content="+row" />
         </Grid>
-    </StackPanel>
+    </Grid>
 </UserControl>

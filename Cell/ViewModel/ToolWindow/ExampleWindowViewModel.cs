@@ -1,6 +1,8 @@
-﻿namespace Cell.ViewModel.ToolWindow
+﻿using Cell.Common;
+
+namespace Cell.ViewModel.ToolWindow
 {
-    public class ExampleWindowViewModel : ResizeableToolWindowViewModel
+    public class ExampleWindowViewModel : PropertyChangedBase
     {
         public ExampleWindowViewModel()
         {

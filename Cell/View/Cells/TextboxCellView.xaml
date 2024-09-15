@@ -14,7 +14,7 @@
             Background="{Binding ContentBackgroundColor}"
             BorderBrush="{Binding ContentBorderColor}"
             BorderThickness="{Binding ContentBorderThickness}"
-            FontFamily="{Binding FontFamily}"
+            FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             KeyDown="TextBoxKeyDownForCell"
             Loaded="CellTextBoxLoaded"

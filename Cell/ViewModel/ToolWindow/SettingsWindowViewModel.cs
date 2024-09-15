@@ -1,9 +1,10 @@
-﻿using Cell.Persistence;
+﻿using Cell.Common;
+using Cell.Persistence;
 using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class SettingsWindowViewModel : ResizeableToolWindowViewModel
+    public class SettingsWindowViewModel : PropertyChangedBase
     {
         public SettingsWindowViewModel()
         {

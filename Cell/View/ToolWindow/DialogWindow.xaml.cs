@@ -7,7 +7,7 @@ namespace Cell.View.ToolWindow
     /// <summary>
     /// Interaction logic for HelpWindow.xaml
     /// </summary>
-    public partial class DialogWindow : UserControl, IToolWindow, IDialogWindow
+    public partial class DialogWindow : UserControl, IResizableToolWindow, IDialogWindow
     {
         private readonly string _title;
         public DialogWindow(string title, string message, List<CommandViewModel> actions)
@@ -26,11 +26,15 @@ namespace Cell.View.ToolWindow
 
         public Action? RequestClose { get; set; }
 
+        public double GetMinimumHeight() => 100;
+
+        public double GetMinimumWidth() => 100;
+
         public string GetTitle() => _title;
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
@@ -43,6 +47,14 @@ namespace Cell.View.ToolWindow
         private void ButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             RequestClose?.Invoke();
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

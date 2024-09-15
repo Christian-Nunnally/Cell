@@ -7,20 +7,16 @@ namespace Cell.View.ToolWindow
     public partial class ExportWindow : UserControl, IResizableToolWindow
     {
         private readonly ExportWindowViewModel _viewModel;
-        private double _height = 200;
-        private double _width = 200;
         public ExportWindow(ExportWindowViewModel viewModel)
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 200;
 
         public string GetTitle() => "Export";
 
@@ -31,30 +27,26 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 200;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            _height = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            _width = width;
-            _viewModel.UserSetWidth = width;
         }
 
         private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             var sheetName = _viewModel.SheetNameToExport;
             ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);
-            DialogFactory.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template. ({ApplicationViewModel.Instance.PersistenceManager.CurrentTemplatePath})");
+            DialogFactory.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template.");
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

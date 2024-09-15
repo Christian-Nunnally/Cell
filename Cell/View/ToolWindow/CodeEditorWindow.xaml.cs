@@ -4,8 +4,9 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
+using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
@@ -15,31 +16,28 @@ using System.Windows.Media;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for CodeEditor.xaml
-    /// 
-    /// TODO: make view model for this.
-    /// </summary>
     public partial class CodeEditorWindow : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
         private readonly CellModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
         private readonly FunctionViewModel _function;
-        private readonly Action<string> saveCodeCallback = x => { };
+        private readonly Action<string> _saveCodeCallback = x => { };
         private static bool _haveAssembliesBeenRegistered;
         private bool _isAllowingCloseWhileDirty = false;
         private bool _isDirty = false;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-        public CodeEditorWindow(FunctionViewModel function, Action<string> callback, CellModel? currentCell)
+
+        private readonly CodeEditorWindowViewModel _viewModel;
+        public CodeEditorWindow(CodeEditorWindowViewModel viewModel, FunctionViewModel function, Action<string> saveCodeCallback, CellModel? currentCell)
         {
-            DataContext = this;
+            _viewModel = viewModel;
+            DataContext = viewModel;
             InitializeComponent();
+
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
 
-            UserSetWidth = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
-            UserSetHeight = ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
             _function = function;
@@ -47,13 +45,8 @@ namespace Cell.View.ToolWindow
             _function.Model.PropertyChanged += FunctionPropertyChanged;
             ReloadFunctionCode();
 
-            saveCodeCallback = callback;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
+            _saveCodeCallback = saveCodeCallback;
             DisplayResult(_function.CompileResult);
-            textEditor.TextArea.TextEntering += OnTextEntering;
-            textEditor.TextArea.TextEntered += OnTextEntered;
-            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
 
             if (!_haveAssembliesBeenRegistered)
             {
@@ -87,14 +80,7 @@ namespace Cell.View.ToolWindow
 
         public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
 
-        public double UserSetHeight { get; set; }
-
-        public double UserSetWidth { get; set; }
-
-        public double GetHeight()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight;
-        }
+        public double GetMinimumHeight() => 400;
 
         public string GetTitle()
         {
@@ -108,12 +94,9 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Save and Close", new RelayCommand(x => SaveAndClose()))
             ];
 
-        public double GetWidth()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth;
-        }
+        public double GetMinimumWidth() => 400;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             if (!_isDirty || _isAllowingCloseWhileDirty) return true;
             DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", () =>
@@ -128,20 +111,6 @@ namespace Cell.View.ToolWindow
                 _function.Model.PropertyChanged -= FunctionPropertyChanged;
             });
             return false;
-        }
-
-        public void SetHeight(double height)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.CodeEditorHeight = height;
-            UserSetHeight = height;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetHeight)));
-        }
-
-        public void SetWidth(double width)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.CodeEditorWidth = width;
-            UserSetWidth = width;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserSetWidth)));
         }
 
         private static string GetVariableTypePriorToCarot(TextArea textArea)
@@ -204,7 +173,7 @@ namespace Cell.View.ToolWindow
 
         private void SaveCode()
         {
-            saveCodeCallback?.Invoke(textEditor.Text);
+            _saveCodeCallback?.Invoke(textEditor.Text);
             _isDirty = false;
         }
 
@@ -256,6 +225,22 @@ namespace Cell.View.ToolWindow
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
+        }
+
+        public void HandleBeingClosed()
+        {
+            _function.Model.PropertyChanged -= FunctionPropertyChanged;
+            textEditor.TextArea.TextEntering -= OnTextEntering;
+            textEditor.TextArea.TextEntered -= OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
+        }
+
+        public void HandleBeingShown()
+        {
+            _function.Model.PropertyChanged += FunctionPropertyChanged;
+            textEditor.TextArea.TextEntering += OnTextEntering;
+            textEditor.TextArea.TextEntered += OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
         }
     }
 }

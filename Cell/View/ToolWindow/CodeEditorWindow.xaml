@@ -10,10 +10,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid
-        Width="{Binding UserSetWidth}"
-        Height="{Binding UserSetHeight}"
-        Background="{StaticResource CellBackground}">
+    <Grid Background="{StaticResource CellBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="{Binding ResultColumnWidth}" />

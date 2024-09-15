@@ -34,7 +34,8 @@ namespace Cell.ViewModel.Application
         private bool _isProjectLoading;
 
         public ApplicationViewModel(
-            PersistenceManager persistenceManager, 
+            PersistedDirectory persistenceManager, 
+            PersistedProject persistedProject,
             PluginFunctionLoader pluginFunctionLoader, 
             CellLoader cellLoader, 
             CellTracker cellTracker, 
@@ -50,6 +51,7 @@ namespace Cell.ViewModel.Application
             BackupManager backupManager)
         {
             PersistenceManager = persistenceManager;
+            PersistedProject = persistedProject;
             PluginFunctionLoader = pluginFunctionLoader;
             CellLoader = cellLoader;
             CellTracker = cellTracker;
@@ -97,15 +99,18 @@ namespace Cell.ViewModel.Application
 
         public CellTracker CellTracker { get; private set; }
 
+        public PersistedProject PersistedProject { get; private set; }
+
         public CellTriggerManager CellTriggerManager { get; private set; }
 
-        public PersistenceManager PersistenceManager { get; private set; }
+        public PersistedDirectory PersistenceManager { get; private set; }
 
         public PluginFunctionLoader PluginFunctionLoader { get; private set; }
 
         public BackupManager BackupManager { get; private set; }
 
         public SheetTracker SheetTracker { get; private set; }
+
         public CellSelector CellSelector{ get; private set; }
 
         public SheetViewModel? SheetViewModel
@@ -145,28 +150,37 @@ namespace Cell.ViewModel.Application
             if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
             if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
             _isProjectLoading = true;
+            return new LoadingProgressResult("Creating backup", LoadPhase0);
+        }
+
+        private LoadingProgressResult LoadPhase0()
+        {
+            BackupManager.CreateBackup();
             return new LoadingProgressResult("Checking Save Version", LoadPhase1);
         }
 
         private LoadingProgressResult LoadPhase1()
         {
-            if (PersistenceManager.NeedsMigration())
+            if (PersistedProject.NeedsMigration())
             {
-                if (!PersistenceManager.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
+                if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
                 DialogFactory.ShowYesNoConfirmationDialog(
                     "Version Mismatch",
                     $"The version of your project is outdated. would you like to migrate it?",
-                    () => {
-                        BackupManager.CreateBackup();
-                        PersistenceManager.Migrate();
-                        DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
-                        },
+                    MigrateProject,
                     () => { });
                 return new LoadingProgressResult(false, "Migration needed, try loading again.");
             }
 
-            PersistenceManager.SaveVersion();
+            PersistedProject.SaveVersion();
             return new LoadingProgressResult("Loading Collections", LoadPhase2);
+        }
+
+        private void MigrateProject()
+        {
+            BackupManager.CreateBackup("PreMigration");
+            PersistedProject.Migrate();
+            DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
         }
 
         private LoadingProgressResult LoadPhase2()
@@ -194,12 +208,6 @@ namespace Cell.ViewModel.Application
             {
                 CellTracker.AddCell(cell, false);
             }
-            return new LoadingProgressResult("Creating Backup", LoadPhase6);
-        }
-
-        private LoadingProgressResult LoadPhase6()
-        {
-            BackupManager.CreateBackup();
             IsProjectLoaded = true;
             _isProjectLoading = false;
             return new LoadingProgressResult(true, "Load Complete");

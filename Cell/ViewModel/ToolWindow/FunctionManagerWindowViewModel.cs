@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
@@ -6,7 +7,7 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class FunctionManagerWindowViewModel : ResizeableToolWindowViewModel
+    public class FunctionManagerWindowViewModel : PropertyChangedBase
     {
         private readonly ObservableCollection<FunctionViewModel> _functions;
         private readonly PluginFunctionLoader _pluginFunctionLoader;

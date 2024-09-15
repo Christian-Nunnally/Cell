@@ -1,9 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types.Special;
 using System.ComponentModel;
-using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Media;
 
@@ -201,14 +199,14 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public virtual string FontFamily
+        public virtual string Font
         {
             get => _model.Style.Font;
             set
             {
                 ApplicationViewModel.Instance.UndoRedoManager.RecordStateIfRecording(_model);
                 _model.Style.Font = value;
-                NotifyPropertyChanged(nameof(FontFamily));
+                NotifyPropertyChanged(nameof(Font));
             }
         }
 
@@ -223,9 +221,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public FontStyle FontStyleForView => IsFontItalic ? FontStyles.Italic : FontStyles.Normal;
+        public FontStyle FontStyleForView => _model.Style.Italic ? FontStyles.Italic : FontStyles.Normal;
 
-        public FontWeight FontWeightForView => IsFontBold ? FontWeights.Bold : FontWeights.Normal;
+        public FontWeight FontWeightForView => _model.Style.Bold ? FontWeights.Bold : FontWeights.Normal;
 
         public virtual SolidColorBrush ForegroundColor
         {
@@ -284,42 +282,6 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public virtual bool IsFontBold
-        {
-            get => _model.Style.Bold;
-            set
-            {
-                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.Style.Bold = value;
-                NotifyPropertyChanged(nameof(IsFontBold));
-                NotifyPropertyChanged(nameof(FontWeightForView));
-            }
-        }
-
-        public virtual bool IsFontItalic
-        {
-            get => _model.Style.Italic;
-            set
-            {
-                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.Style.Italic = value;
-                NotifyPropertyChanged(nameof(IsFontItalic));
-                NotifyPropertyChanged(nameof(FontStyleForView));
-            }
-        }
-
-        public virtual bool IsFontStrikethrough
-        {
-            get => _model.Style.Strikethrough;
-            set
-            {
-                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                _model.Style.Strikethrough = value;
-                NotifyPropertyChanged(nameof(IsFontStrikethrough));
-                NotifyPropertyChanged(nameof(TextDecorationsForView));
-            }
-        }
-
         public virtual bool IsHighlighted
         {
             get => _isHighlighted;
@@ -352,31 +314,6 @@ namespace Cell.ViewModel.Cells
         }
 
         public CellModel Model => _model;
-
-        public virtual string PopulateFunctionName
-        {
-            get => _model.PopulateFunctionName;
-            set
-            {
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
-                {
-                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                    _model.PopulateFunctionName = value;
-                    NotifyPropertyChanged(nameof(PopulateFunctionName));
-                }
-            }
-        }
-
-        [JsonIgnore]
-        public IEnumerable<string> PrettyCellLocationDependencyNames => _sheetViewModel.CellPopulateManager.GetAllLocationSubscriptions(Model).Select(x =>
-            {
-                var split = x.Replace($"{Model.SheetName}_", "").Split('_');
-                if (split.Length == 2) return $"{ColumnCellViewModel.GetColumnName(int.Parse(split[1]))}{split[0]}";
-                return $"{split[0]}_{ColumnCellViewModel.GetColumnName(int.Parse(split[2]))}{split[1]}";
-            });
-
-        [JsonIgnore]
-        public List<string> PrettyDependencyNames => [.. _sheetViewModel.CellPopulateManager.GetAllCollectionSubscriptions(Model), .. PrettyCellLocationDependencyNames];
 
         public virtual int Row
         {
@@ -431,21 +368,7 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
-
-        public virtual string TriggerFunctionName
-        {
-            get => _model.TriggerFunctionName;
-            set
-            {
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
-                {
-                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
-                    _model.TriggerFunctionName = value;
-                    NotifyPropertyChanged(nameof(TriggerFunctionName));
-                };
-            }
-        }
+        public TextDecorationCollection? TextDecorationsForView => _model.Style.Strikethrough ? TextDecorations.Strikethrough : null;
 
         public virtual VerticalAlignment VerticalAlignmentForView
         {
@@ -574,6 +497,18 @@ namespace Cell.ViewModel.Cells
             else if (e.PropertyName == nameof(CellStyleModel.ContentBorder))
             {
                 UpdateContentBorderThickness(Model.Style.ContentBorder);
+            }
+            else if (e.PropertyName == nameof(CellStyleModel.Bold))
+            {
+                NotifyPropertyChanged(nameof(FontWeightForView));
+            }
+            else if (e.PropertyName == nameof(CellStyleModel.Italic))
+            {
+                NotifyPropertyChanged(nameof(FontStyleForView));
+            }
+            else if (e.PropertyName == nameof(CellStyleModel.Strikethrough))
+            {
+                NotifyPropertyChanged(nameof(TextDecorationsForView));
             }
             else if (e.PropertyName != null)
             {

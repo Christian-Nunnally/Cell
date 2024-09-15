@@ -1,5 +1,5 @@
 ﻿using Cell.Model;
-using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Cells.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

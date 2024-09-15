@@ -7,20 +7,16 @@ namespace Cell.View.ToolWindow
     public partial class CreateCollectionWindow : UserControl, IResizableToolWindow
     {
         private readonly CreateCollectionWindowViewModel _viewModel;
-        private double _height = 100;
-        private double _width = 350;
         public CreateCollectionWindow(CreateCollectionWindowViewModel viewModel)
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 100;
 
         public string GetTitle() => "Creating new collection";
 
@@ -31,29 +27,25 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 350;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            _height = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            _width = width;
-            _viewModel.UserSetWidth = width;
         }
 
         private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             _viewModel.AddCurrentCollection();
             RequestClose?.Invoke();
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

@@ -13,18 +13,18 @@ namespace CellTest
     {
         private CellTracker _cellTracker;
         private TestFileIO _testFileIO;
-        private PersistenceManager _persistenceManager;
+        private PersistedDirectory _persistenceManager;
         private CellLoader _cellLoader;
         private ObservableCollection<CellModel> _cellsToEdit;
 
         private CellFormatEditWindowViewModel CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistenceManager("", _testFileIO);
+            _persistenceManager = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _cellsToEdit = [];
-            return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker);
+            return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, null);
         }
 
         [Fact]

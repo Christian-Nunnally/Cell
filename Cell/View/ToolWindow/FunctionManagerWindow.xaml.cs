@@ -16,42 +16,22 @@ namespace Cell.View.ToolWindow
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
-        }
+        public double GetMinimumHeight() => 300;
 
         public string GetTitle() => "Function Manager";
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public double GetWidth()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
-        }
+        public double GetMinimumWidth() => 300;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth = width;
-            _viewModel.UserSetWidth = width;
         }
 
         private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
@@ -77,7 +57,8 @@ namespace Cell.View.ToolWindow
             {
                 if (_viewModel.SelectedFunction == null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
-                var editor = new CodeEditorWindow(_viewModel.SelectedFunction, x =>
+                var codeEditorWindowViewModel = new CodeEditorWindowViewModel();
+                var editor = new CodeEditorWindow(codeEditorWindowViewModel, _viewModel.SelectedFunction, x =>
                 {
                     capturedFunction.SetUserFriendlyCode(x, cell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 }, cell);
@@ -110,6 +91,14 @@ namespace Cell.View.ToolWindow
                 _viewModel.SelectedFunction = null;
                 _viewModel.SelectedFunction = selectedFunction;
             }
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

@@ -1,34 +1,37 @@
 ﻿using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types.Special;
-using System.Windows;
+using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for EditCellPanel.xaml
-    /// </summary>
-    public partial class CellSettingsEditWindow : UserControl, IToolWindow
+    public partial class CellSettingsEditWindow : UserControl, IResizableToolWindow
     {
-        public CellSettingsEditWindow()
+        private readonly CellSettingsEditWindowViewModel _viewModel;
+        public CellSettingsEditWindow(CellSettingsEditWindowViewModel viewModel)
         {
+            _viewModel = viewModel;
+            DataContext = viewModel;
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
+        public double GetMinimumHeight() => 200;
+
+        public double GetMinimumWidth() => 200;
+
         public string GetTitle()
         {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
+            var currentlySelectedCell = _viewModel.CellsBeingEdited.FirstOrDefault();
             if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Cell settings editor - {currentlySelectedCell.Model.GetName()}";
+            return $"Cell settings editor - {currentlySelectedCell.GetName()}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
@@ -38,48 +41,12 @@ namespace Cell.View.ToolWindow
             if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
 
-        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
+        public void HandleBeingClosed()
         {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheLeft();
         }
 
-        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
+        public void HandleBeingShown()
         {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheRight();
-        }
-
-        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowAbove();
-        }
-
-        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowBelow();
-        }
-
-        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.CellViewModels.Where(x => x.IsSelected).OfType<ColumnCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.CellSelector.UnselectAllCells();
-                cell.DeleteColumn();
-            }
-        }
-
-        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.CellViewModels.Where(x => x.IsSelected).OfType<RowCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.CellSelector.UnselectAllCells();
-                cell.DeleteRow();
-            }
         }
     }
 }

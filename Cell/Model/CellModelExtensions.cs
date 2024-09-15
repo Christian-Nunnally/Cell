@@ -1,7 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Cells.Types;
 
 namespace Cell.Model
 {

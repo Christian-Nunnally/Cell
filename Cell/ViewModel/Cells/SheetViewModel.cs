@@ -199,7 +199,7 @@ namespace Cell.ViewModel.Cells
         private void EnsureUnmerged(CellModel cell)
         {
             if (!cell.IsMergedParent()) return;
-            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker);
+            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker, _pluginFunctionLoader);
             cellEditor.UnmergeCells();
         }
 

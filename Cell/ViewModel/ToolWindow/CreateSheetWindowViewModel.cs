@@ -1,10 +1,11 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CreateSheetWindowViewModel : ResizeableToolWindowViewModel
+    public class CreateSheetWindowViewModel : PropertyChangedBase
     {
         private string _newSheetName = "NewSheet";
         private int _initialRows = 5;

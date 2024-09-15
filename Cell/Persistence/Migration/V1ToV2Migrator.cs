@@ -7,7 +7,7 @@ namespace Cell.Persistence.Migration
 {
     public class V1ToV2Migrator : IMigrator
     {
-        public void Migrate(PersistenceManager persistenceManager)
+        public bool Migrate(PersistedDirectory persistenceManager)
         {
             foreach (var sheet in persistenceManager.GetDirectories("Sheets"))
             {
@@ -56,10 +56,9 @@ namespace Cell.Persistence.Migration
                     var newCellSerialized = JsonSerializer.Serialize(newCellModel);
                     persistenceManager.SaveFile(cell, newCellSerialized);
 
-                    persistenceManager.Version = "1";
-                    persistenceManager.SaveVersion();
                 }
             }
+            return true;
         }
     }
 }

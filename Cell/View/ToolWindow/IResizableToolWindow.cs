@@ -1,13 +1,23 @@
-﻿namespace Cell.View.ToolWindow
+﻿using Cell.ViewModel.Application;
+
+namespace Cell.View.ToolWindow
 {
-    internal interface IResizableToolWindow : IToolWindow
+    internal interface IResizableToolWindow
     {
-        public double GetHeight();
+        Action? RequestClose { get; set; }
 
-        public double GetWidth();
+        string GetTitle();
 
-        public void SetHeight(double height);
+        List<CommandViewModel> GetToolBarCommands();
 
-        public void SetWidth(double width);
+        bool HandleCloseRequested();
+
+        void HandleBeingClosed();
+
+        void HandleBeingShown();
+
+        double GetMinimumHeight();
+
+        double GetMinimumWidth();
     }
 }

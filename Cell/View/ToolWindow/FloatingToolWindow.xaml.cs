@@ -7,20 +7,15 @@ using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for FloatingToolWindow.xaml
-    /// </summary>
     public partial class FloatingToolWindow : UserControl, INotifyPropertyChanged
     {
-        private const int AdditionalHeightFromToolWindowBorder = 52;
-        private const int AdditionalWidthFromToolWindowBorder = 24;
-        private const int MinimumToolWindowSize = 120;
         private readonly Canvas _canvas;
-        private IToolWindow? _content;
+        private IResizableToolWindow? _content;
         private bool _isDocked;
-        private IResizableToolWindow? _resizableContent;
         private bool _resizing;
         private Point _resizingStartPosition;
+        private double _contentHeight;
+        private double _contentWidth;
         public FloatingToolWindow(Canvas canvas)
         {
             InitializeComponent();
@@ -31,13 +26,27 @@ namespace Cell.View.ToolWindow
 
         public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
 
-        public double ContentHeight => _resizableContent?.GetHeight() ?? MinimumToolWindowSize;
+        public double ContentHeight
+        {
+            get => _contentHeight;
+            set
+            {
+                _contentHeight = Math.Max(value, _content?.GetMinimumHeight() ?? 100);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeight)));
+            }
+        }
 
-        public double ContentWidth => _resizableContent?.GetWidth() ?? MinimumToolWindowSize;
+        public double ContentWidth
+        {
+            get => _contentWidth;
+            set
+            {
+                _contentWidth = Math.Max(value, _content?.GetMinimumWidth() ?? 100);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidth)));
+            }
+        }
 
         public bool IsDocked => _isDocked;
-
-        public bool IsToolWindowResizeable => _resizableContent != null;
 
         public bool IsUndocked => !_isDocked;
 
@@ -47,9 +56,10 @@ namespace Cell.View.ToolWindow
         {
             ContentHost.Content = content;
             content.DataContextChanged += ContentDataContextChanged;
-            _content = content as IToolWindow;
+            _content = content as IResizableToolWindow;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-            _resizableContent = content as IResizableToolWindow;
+            ContentWidth = _contentWidth;
+            ContentHeight = _contentHeight;
             DataContext = this;
 
             if (_content != null)
@@ -63,10 +73,10 @@ namespace Cell.View.ToolWindow
         {
             var boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ActualWidth, x));
             var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
-            if (_resizableContent != null)
+            if (_content != null)
             {
-                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _resizableContent.GetWidth() - AdditionalWidthFromToolWindowBorder, x));
-                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _resizableContent.GetHeight() - AdditionalHeightFromToolWindowBorder, y));
+                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _content.GetMinimumWidth(), x));
+                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _content.GetMinimumHeight(), y));
             }
             Canvas.SetLeft(this, boundedX);
             Canvas.SetTop(this, boundedY);
@@ -74,10 +84,10 @@ namespace Cell.View.ToolWindow
 
         internal void UpdateSizeAndPositionRespectingBounds()
         {
-            if (_resizableContent != null)
+            if (_content != null)
             {
-                var width = _resizableContent.GetWidth();
-                var height = _resizableContent.GetHeight();
+                var width = _content.GetMinimumWidth();
+                var height = _content.GetMinimumHeight();
                 SetSizeWhileRespectingBounds(width, height);
             }
 
@@ -107,14 +117,18 @@ namespace Cell.View.ToolWindow
 
         private void RequestClose()
         {
-            var isAllowingClose = _content?.HandleBeingClosed() ?? true;
-            if (isAllowingClose) _canvas.Children.Remove(this);
+            var isAllowingClose = _content?.HandleCloseRequested() ?? true;
+            if (isAllowingClose)
+            {
+                _canvas.Children.Remove(this);
+                 _content?.HandleBeingClosed();
+            }
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_resizableContent == null) return;
+            if (_content == null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
             Mouse.Capture(sender as IInputElement);
@@ -124,13 +138,12 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseMove(object sender, MouseEventArgs e)
         {
             if (_isDocked) return;
-            if (_resizableContent == null) return;
             if (_resizing)
             {
                 var mousePosition = e.GetPosition(this);
                 var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                var desiredWidth = _resizableContent.GetWidth() - delta.X;
-                var desiredHeight = _resizableContent.GetHeight() - delta.Y;
+                var desiredWidth = ContentWidth - delta.X;
+                var desiredHeight = ContentHeight - delta.Y;
                 SetSizeWhileRespectingBounds(desiredWidth, desiredHeight);
                 _resizingStartPosition = mousePosition;
                 e.Handled = true;
@@ -140,7 +153,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_resizableContent == null) return;
+            if (_content == null) return;
             _resizing = false;
             Mouse.Capture(null);
             e.Handled = true;
@@ -148,11 +161,10 @@ namespace Cell.View.ToolWindow
 
         private void SetSizeWhileRespectingBounds(double desiredWidth, double desiredHeight)
         {
-            if (_resizableContent == null) return;
-            var boundedWidth = Math.Max(MinimumToolWindowSize, Math.Min(_canvas.ActualWidth - Canvas.GetLeft(this) - AdditionalWidthFromToolWindowBorder, desiredWidth));
-            var boundedHeight = Math.Max(MinimumToolWindowSize, Math.Min(_canvas.ActualHeight - Canvas.GetTop(this) - AdditionalHeightFromToolWindowBorder, desiredHeight));
-            _resizableContent.SetWidth(boundedWidth);
-            _resizableContent.SetHeight(boundedHeight);
+            var boundedWidth = Math.Max(50, Math.Min(_canvas.ActualWidth - Canvas.GetLeft(this), desiredWidth));
+            var boundedHeight = Math.Max(50, Math.Min(_canvas.ActualHeight - Canvas.GetTop(this), desiredHeight));
+            ContentWidth = boundedWidth;
+            ContentHeight = boundedHeight;
         }
 
         private void ToolboxMouseDown(object sender, MouseButtonEventArgs e)

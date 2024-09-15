@@ -8,20 +8,16 @@ namespace Cell.View.ToolWindow
     public partial class UndoRedoStackWindow : UserControl, IResizableToolWindow
     {
         private readonly UndoRedoStackWindowViewModel _viewModel;
-        private double _height = 200;
-        private double _width = 200;
         public UndoRedoStackWindow(UndoRedoStackWindowViewModel viewModel)
         {
             _viewModel = viewModel;
-            DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
+            DataContext = _viewModel;
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 200;
 
         public string GetTitle() => "Undo/Redo Stack";
 
@@ -34,23 +30,16 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 200;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested() => true;
+
+        public void HandleBeingClosed()
         {
-            return true;
         }
 
-        public void SetHeight(double height)
+        public void HandleBeingShown()
         {
-            _height = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            _width = width;
-            _viewModel.UserSetWidth = width;
         }
     }
 }

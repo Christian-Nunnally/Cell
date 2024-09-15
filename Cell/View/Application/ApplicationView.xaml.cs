@@ -11,7 +11,6 @@ using ICSharpCode.AvalonEdit.Editing;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -84,36 +83,42 @@ namespace Cell.View.Application
             Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
 
             _toolWindowCanvas.Children.Add(toolbox);
+            (content as IResizableToolWindow)?.HandleBeingShown();
         }
 
         protected override void OnInitialized(EventArgs e)
         {
             var appDataPath = Environment.SpecialFolder.ApplicationData;
             var appDataRoot = Environment.GetFolderPath(appDataPath);
-            var savePath = Path.Combine(appDataRoot, "LGF", "Cell");
+            var appPersistanceRoot = Path.Combine(appDataRoot, "LGF");
+            var savePath = Path.Combine(appPersistanceRoot, "Cell");
+            var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
             var fileIo = new FileIO();
-            var persistenceManager = new PersistenceManager(savePath, fileIo);
+            var projectDirectory = new PersistedDirectory(savePath, fileIo);
+            var persistedProject = new PersistedProject(projectDirectory);
+            var backupDirectory = new PersistedDirectory(backupPath, fileIo);
 
             var v0ToV1Migration = new V1ToV2Migrator();
-            persistenceManager.RegisterMigrator("0.0.0", "1", v0ToV1Migration);
+            persistedProject.RegisterMigrator("0.0.0", "1", v0ToV1Migration);
 
-            var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
-            var cellLoader = new CellLoader(persistenceManager);
+            var pluginFunctionLoader = new PluginFunctionLoader(projectDirectory);
+            var cellLoader = new CellLoader(projectDirectory);
             var cellTracker = new CellTracker(cellLoader);
-            var userCollectionLoader = new UserCollectionLoader(persistenceManager, pluginFunctionLoader, cellTracker);
+            var userCollectionLoader = new UserCollectionLoader(projectDirectory, pluginFunctionLoader, cellTracker);
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
-            var sheetTracker = new SheetTracker(persistenceManager, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
             var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
-            var applicationSettings = ApplicationSettings.CreateInstance(persistenceManager);
+            var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
             var undoRedoManager = new UndoRedoManager(cellTracker);
             var textClipboard = new TextClipboard();
             var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
-            var backupManager = new BackupManager(persistenceManager, cellTracker, sheetTracker, userCollectionLoader, pluginFunctionLoader);
+            var backupManager = new BackupManager(projectDirectory, backupDirectory);
             var cellSelector = new CellSelector();
 
             _viewModel = new ApplicationViewModel(
-                persistenceManager, 
+                projectDirectory,
+                persistedProject,
                 pluginFunctionLoader, 
                 cellLoader, 
                 cellTracker, 
@@ -155,15 +160,17 @@ namespace Cell.View.Application
 
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            var editPanel = new CellSettingsEditWindow();
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
+            if (_viewModel == null) return;
+            var cellSettingsEditWindowviewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
+            var editPanel = new CellSettingsEditWindow(cellSettingsEditWindowviewModel);
             ShowToolWindow(editPanel);
         }
 
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            var editPanel = new CellContentEditWindow();
-            editPanel.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = _viewModel });
+            if (_viewModel == null) return;
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellPopulateManager);
+            var editPanel = new CellContentEditWindow(cellContentEditWindowViewModel);
             ShowToolWindow(editPanel);
         }
 
@@ -210,7 +217,7 @@ namespace Cell.View.Application
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel?.SheetViewModel == null) return;
-            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker);
+            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
             var editPanel = new CellFormatEditWindow(viewModel);
             ShowToolWindow(editPanel);
         }

@@ -2,18 +2,18 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
-using Cell.ViewModel.Cells.Types.Special;
 using Cell.ViewModel.Cells;
+using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-namespace CellTest.ViewModel.Cell.Special
+namespace CellTest.ViewModel.Cell.Types
 {
-    public class CornerCellViewModelTests
+    public class LabelCellViewModelTests
     {
         private TestFileIO _testFileIO;
-        private PersistenceManager _persistenceManager;
+        private PersistedDirectory _persistenceManager;
         private CellLoader _cellLoader;
         private CellTracker _cellTracker;
         private PluginFunctionLoader _pluginFunctionLoader;
@@ -26,10 +26,10 @@ namespace CellTest.ViewModel.Cell.Special
         private CellModel _cellModel;
         private CellSelector _cellSelector;
 
-        private CornerCellViewModel CreateInstance()
+        private LabelCellViewModel CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistenceManager("", _testFileIO);
+            _persistenceManager = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
@@ -41,8 +41,9 @@ namespace CellTest.ViewModel.Cell.Special
             _cellSelector = new CellSelector();
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
-            return new CornerCellViewModel(_cellModel, _sheetViewModel);
+            return new LabelCellViewModel(_cellModel, _sheetViewModel);
         }
+
 
         [Fact]
         public void BasicLaunchTest()
@@ -62,14 +63,25 @@ namespace CellTest.ViewModel.Cell.Special
         }
 
         [Fact]
-        public void SimpleTest_ViewModelBackgroundHexSet_ViewModelBackgroundHexChangedChangedNotified()
+        public void SimpleTest_ModelFontSizeChanged_ViewModelFontSizeChangedNotified()
         {
             var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
-            testing.BackgroundColorHex = "#FF0000";
+            _cellModel.Style.FontSize = 20;
 
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.BackgroundColorHex));
+            propertyChangedTester.AssertPropertyChanged(nameof(testing.FontSize));
+        }
+
+        [Fact]
+        public void SimpleTest_ModelContentBorderColorChanged_ViewModelBorderColorChangedNotified()
+        {
+            var testing = CreateInstance();
+            var propertyChangedTester = new PropertyChangedTester(testing);
+
+            _cellModel.Style.ContentBorderColor = "#efefef";
+
+            propertyChangedTester.AssertPropertyChanged(nameof(testing.ContentBorderColor));
         }
     }
 }

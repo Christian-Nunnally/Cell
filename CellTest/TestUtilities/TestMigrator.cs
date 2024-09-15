@@ -11,9 +11,10 @@ namespace CellTest.TestUtilities
 
         public bool Migrated { get; private set; } = false;
 
-        public void Migrate(PersistenceManager persistenceManager)
+        public bool Migrate(PersistedDirectory persistenceManager)
         {
             Migrated = true;
+            return Migrated;
         }
     }
 }

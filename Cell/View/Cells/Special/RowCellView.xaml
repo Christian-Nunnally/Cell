@@ -1,13 +1,13 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types.Special">
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types">
     <DataTemplate DataType="{x:Type viewModel:RowCellViewModel}">
         <TextBlock
             Margin="3"
             HorizontalAlignment="{Binding HorizontalAlignmentForView}"
             VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
-            FontFamily="{Binding FontFamily}"
+            FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             FontStyle="{Binding FontStyleForView}"
             FontWeight="{Binding FontWeightForView}"

@@ -1,18 +1,21 @@
 ﻿using Cell.Common;
 using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells;
-using Cell.ViewModel.Cells.Types;
+using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CellContentEditWindow : UserControl, IToolWindow
+    public partial class CellContentEditWindow : UserControl, IResizableToolWindow
     {
-        public CellContentEditWindow()
+        private readonly CellContentEditWindowViewModel _viewModel;
+
+        public CellContentEditWindow(CellContentEditWindowViewModel viewModel)
         {
+            _viewModel = viewModel;
+            DataContext = viewModel;
             InitializeComponent();
         }
 
@@ -29,7 +32,7 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Auto-Index", new RelayCommand(x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
             ];
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
@@ -55,31 +58,12 @@ namespace Cell.View.ToolWindow
 
         private void EditPopulateFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
-                var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
-                var editor = new CodeEditorWindow(function, x =>
-                {
-                    function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                    (cell as ListCellViewModel)?.UpdateList();
-                }, cell.Model);
-                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
-            }
+            _viewModel.EditPopulateFunction();
         }
 
         private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
-                var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
-                var editor = new CodeEditorWindow(function, x =>
-                {
-                    function.SetUserFriendlyCode(x, cell.Model, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                }, cell.Model);
-                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
-            }
+            _viewModel.EditTriggerFunction();
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)
@@ -94,6 +78,18 @@ namespace Cell.View.ToolWindow
                 if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 e.Handled = true;
             }
+        }
+
+        public double GetMinimumHeight() => 200;
+
+        public double GetMinimumWidth() => 600;
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

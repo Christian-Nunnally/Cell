@@ -2,27 +2,22 @@
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Cell.View.ToolWindow
 {
     public partial class SettingsWindow : UserControl, IResizableToolWindow
     {
         private readonly SettingsWindowViewModel _viewModel;
-        private double _height = 350;
-        private double _width = 350;
         public SettingsWindow(SettingsWindowViewModel viewModel)
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 350;
 
         public string GetTitle() => "Settings";
 
@@ -33,35 +28,16 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 350;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
 
-        public void SetHeight(double height)
-        {
-            _height = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            _width = width;
-            _viewModel.UserSetWidth = width;
-        }
-
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.PersistenceManager.OpenRootDirectoryInExplorer();
-        }
-
-        private void ShowHelpButtonClick(object sender, RoutedEventArgs e)
-        {
-            var helpWindow = new HelpWindow();
-            helpWindow.SetBinding(DataContextProperty, new Binding("SheetViewModel.SelectedCellViewModel") { Source = ApplicationViewModel.Instance });
-            ApplicationViewModel.Instance.ShowToolWindow(helpWindow);
+            ApplicationViewModel.Instance.PersistenceManager.GetFullPath();
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
@@ -129,7 +105,7 @@ namespace Cell.View.ToolWindow
             if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker);
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
             var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
             ApplicationViewModel.Instance.ShowToolWindow(editPanel);
         }
@@ -139,7 +115,7 @@ namespace Cell.View.ToolWindow
             if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker);
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
             var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
             ApplicationViewModel.Instance.ShowToolWindow(editPanel);
         }
@@ -148,6 +124,14 @@ namespace Cell.View.ToolWindow
         {
             if (_viewModel == null) return;
             _viewModel.LoadFromBackup();
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

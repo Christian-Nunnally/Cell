@@ -9,20 +9,16 @@ namespace Cell.View.ToolWindow
     public partial class SheetManagerWindow : UserControl, IResizableToolWindow
     {
         private readonly SheetManagerWindowViewModel _viewModel;
-        private double _height = 400;
-        private double _width = 400;
         public SheetManagerWindow(SheetManagerWindowViewModel viewModel)
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 250;
 
         public string GetTitle() => "Sheet Manager";
 
@@ -35,23 +31,11 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 250;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            _height = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            _width = width;
-            _viewModel.UserSetWidth = width;
         }
 
         private static void MakeSureSheetOrderingIsConsecutive()
@@ -147,6 +131,14 @@ namespace Cell.View.ToolWindow
                 _viewModel.RefreshSheetsList();
             }
             MakeSureSheetOrderingIsConsecutive();
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

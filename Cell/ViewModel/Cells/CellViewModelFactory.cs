@@ -1,7 +1,6 @@
 ﻿using Cell.Model;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Cells.Types.Special;
 
 namespace Cell.ViewModel
 {

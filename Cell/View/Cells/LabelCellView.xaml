@@ -7,7 +7,7 @@
             Margin="3"
             HorizontalAlignment="{Binding HorizontalAlignmentForView}"
             VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
-            FontFamily="{Binding FontFamily}"
+            FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             FontStyle="{Binding FontStyleForView}"
             FontWeight="{Binding FontWeightForView}"

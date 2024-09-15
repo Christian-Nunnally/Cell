@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -9,7 +10,7 @@ using Xceed.Wpf.Toolkit;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CellFormatEditWindow : UserControl, IToolWindow
+    public partial class CellFormatEditWindow : UserControl, IResizableToolWindow
     {
         private readonly CellFormatEditWindowViewModel _viewModel;
 
@@ -22,14 +23,16 @@ namespace Cell.View.ToolWindow
 
         public Action? RequestClose { get; set; }
 
-        public static void AddColorsToColorPicker(ColorPicker colorPicker, List<string> colors, float brightnessFactor)
+        public static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
         {
             foreach (var color in colors)
             {
                 var adjustedColor = ColorAdjuster.AdjustBrightness(color, brightnessFactor);
-                colorPicker.AvailableColors.Add(new ColorItem(ColorAdjuster.ConvertHexStringToColor(adjustedColor), ""));
+                availableColors.Add(new ColorItem(ColorAdjuster.ConvertHexStringToColor(adjustedColor), adjustedColor));
             }
         }
+
+        public double GetMinimumHeight() => 250;
 
         public string GetTitle()
         {
@@ -42,7 +45,9 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public bool HandleBeingClosed() => true;
+        public double GetMinimumWidth() => 250;
+
+        public bool HandleCloseRequested() => true;
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
         {
@@ -57,10 +62,19 @@ namespace Cell.View.ToolWindow
             if (sender is not ColorPicker colorPicker) return;
             var colors = new List<string> { "#9678b5", "#b272a1", "#c17188", "#c3776f", "#b8825c", "#a48f54", "#8a9b5c", "#6da471", "#50aa8f", "#3dadaf", "#4aadca", "#6fa9dc" };
             colorPicker.AvailableColors.Clear();
+            var availableColors = new ObservableCollection<ColorItem>();
             colorPicker.AvailableColorsSortingMode = ColorSortingMode.Alphabetical;
-            AddColorsToColorPicker(colorPicker, colors, 1.0f);
-            AddColorsToColorPicker(colorPicker, colors, .1f);
-            AddColorsToColorPicker(colorPicker, colors, 1.9f);
+            AddColorsToColorPicker(availableColors, colors, 1.9f);
+            AddColorsToColorPicker(availableColors, colors, 1.4f);
+            AddColorsToColorPicker(availableColors, colors, 1.0f);
+            AddColorsToColorPicker(availableColors, colors, .7f);
+            AddColorsToColorPicker(availableColors, colors, .5f);
+            AddColorsToColorPicker(availableColors, colors, .35f);
+            AddColorsToColorPicker(availableColors, colors, .27f);
+            AddColorsToColorPicker(availableColors, colors, .2f);
+            AddColorsToColorPicker(availableColors, colors, .15f);
+            AddColorsToColorPicker(availableColors, colors, .1f);
+            colorPicker.AvailableColors = availableColors;
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
@@ -158,6 +172,50 @@ namespace Cell.View.ToolWindow
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
             _viewModel.UnmergeCells();
+        }
+
+        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddColumnToTheLeft();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddColumnToTheRight();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddRowAbove();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddRowBelow();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.DeleteColumns();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.DeleteRows();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

@@ -11,12 +11,12 @@ namespace CellTest
     public class UndoRedoManagerTests
     {
         private CellTracker _cellTracker;
-        private PersistenceManager _persistanceManager;
+        private PersistedDirectory _persistanceManager;
         private CellLoader _cellLoader;
 
         private UndoRedoManager GetInstance()
         {
-            _persistanceManager = new PersistenceManager("", new TestFileIO());
+            _persistanceManager = new PersistedDirectory("", new TestFileIO());
             _cellLoader = new CellLoader(_persistanceManager);
             _cellTracker = new CellTracker(_cellLoader);
             return new UndoRedoManager(_cellTracker);

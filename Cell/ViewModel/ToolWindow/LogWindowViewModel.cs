@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class LogWindowViewModel : ResizeableToolWindowViewModel
+    public class LogWindowViewModel : PropertyChangedBase
     {
         private readonly StringBuilder _logBufferBuilder = new();
         public LogWindowViewModel()

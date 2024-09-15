@@ -11,7 +11,8 @@ namespace CellTest.ViewModel.Application
     public class ApplicationViewModelTests
     {
         private static TestFileIO _testFileIO;
-        private PersistenceManager _persistenceManager;
+        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _backupDirectory;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
         private CellLoader _cellLoader;
@@ -26,11 +27,14 @@ namespace CellTest.ViewModel.Application
         private CellClipboard _cellClipboard;
         private BackupManager _backupManager;
         private CellSelector _cellSelector;
+        private PersistedProject _persistedProject;
 
         private ApplicationViewModel CreateTestInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistenceManager("", _testFileIO);
+            _persistenceManager = new PersistedDirectory("", _testFileIO);
+            _backupDirectory = new PersistedDirectory("", _testFileIO);
+            _persistedProject = new PersistedProject(_persistenceManager);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
@@ -38,14 +42,14 @@ namespace CellTest.ViewModel.Application
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _backupManager = new BackupManager(_persistenceManager, _cellTracker, _sheetTracker, _userCollectionLoader, _pluginFunctionLoader);
+            _backupManager = new BackupManager(_persistenceManager, _backupDirectory);
             _cellSelector = new CellSelector();
             _applicationSettings = new ApplicationSettings();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(_sheetTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            return new ApplicationViewModel(_persistenceManager, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            return new ApplicationViewModel(_persistenceManager, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]
@@ -58,10 +62,10 @@ namespace CellTest.ViewModel.Application
         public void UpgradeRequired_LoadStarted_FailsWithoutMigrator()
         {
             var testing = CreateTestInstance();
-            _persistenceManager.Version = "0";
-            Assert.NotEqual("1", _persistenceManager.Version);
-            _persistenceManager.SaveVersion();
-            _persistenceManager.Version = "1";
+            _persistedProject.Version = "0";
+            Assert.NotEqual("1", _persistedProject.Version);
+            _persistedProject.SaveVersion();
+            _persistedProject.Version = "1";
 
             var result = testing.Load();
 
@@ -73,11 +77,11 @@ namespace CellTest.ViewModel.Application
         public void MigratorExists_LoadStarted_PromptsUserToMigrate()
         {
             var testing = CreateTestInstance();
-            _persistenceManager.Version = "0";
-            _persistenceManager.SaveVersion();
-            _persistenceManager.Version = "1";
+            _persistedProject.Version = "0";
+            _persistedProject.SaveVersion();
+            _persistedProject.Version = "1";
             var migrator = new TestMigrator();
-            _persistenceManager.RegisterMigrator("0", "1", migrator);
+            _persistedProject.RegisterMigrator("0", "1", migrator);
             var dialog = new TestDialogWindow();
 
             testing.Load();
@@ -89,11 +93,11 @@ namespace CellTest.ViewModel.Application
         public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
         {
             var testing = CreateTestInstance();
-            _persistenceManager.Version = "0";
-            _persistenceManager.SaveVersion();
-            _persistenceManager.Version = "1";
+            _persistedProject.Version = "0";
+            _persistedProject.SaveVersion();
+            _persistedProject.Version = "1";
             var migrator = new TestMigrator();
-            _persistenceManager.RegisterMigrator("0", "1", migrator);
+            _persistedProject.RegisterMigrator("0", "1", migrator);
             var _ = new TestDialogWindow(0);
             Assert.False(migrator.Migrated);
 

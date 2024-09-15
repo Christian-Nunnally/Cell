@@ -16,8 +16,8 @@ namespace Cell.Persistence
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly CellTracker _cellTracker;
-        private readonly PersistenceManager _persistanceManager;
-        public UserCollectionLoader(PersistenceManager persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
+        private readonly PersistedDirectory _persistanceManager;
+        public UserCollectionLoader(PersistedDirectory persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             _persistanceManager = persistenceManager;
             _pluginFunctionLoader = pluginFunctionLoader;

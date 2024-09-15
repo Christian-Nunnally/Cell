@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Persistence;
 using System.Collections.ObjectModel;
@@ -6,7 +7,7 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CreateCollectionWindowViewModel : ResizeableToolWindowViewModel
+    public class CreateCollectionWindowViewModel : PropertyChangedBase
     {
         private bool isBaseOnCheckBoxChecked;
 

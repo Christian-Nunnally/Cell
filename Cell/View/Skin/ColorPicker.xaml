@@ -175,11 +175,11 @@
                         <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0" />
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="13" />
+                                <Setter Property="CornerRadius" Value=".9" />
                                 <Setter Property="ClipToBounds" Value="False" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="Background" Value="{StaticResource ControlBackground}" />
-                                <Setter Property="BorderThickness" Value="10" />
+                                <Setter Property="BorderThickness" Value="20" />
                             </Style>
                         </Border.Style>
                     </Border>
@@ -206,7 +206,7 @@
                     <Border Name="_backgroundColorPickerToggleButtonBorder" BorderThickness="0">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="5" />
+                                <Setter Property="CornerRadius" Value="2" />
                                 <Setter Property="Background" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                             </Style>
@@ -378,6 +378,8 @@
                                         <Grid x:Name="_colorCanvasHost" Width="{Binding MaxDropDownWidth, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource AdditionConverter}, ConverterParameter=-18}">
                                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
                                                 <xctk:ColorCanvas
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
@@ -401,7 +403,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type xctk:ColorPicker}">
+    <!--<Style TargetType="{x:Type xctk:ColorPicker}">
         <Setter Property="Background" Value="{StaticResource CellBackground}" />
         <Setter Property="HeaderBackground" Value="{StaticResource CellBackground}" />
         <Setter Property="DropDownBackground" Value="{StaticResource CellBackground}" />
@@ -481,7 +483,9 @@
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
-                                            <!--  Available Colors  -->
+    -->
+    <!--  Available Colors  -->
+    <!--
                                             <Grid Grid.Row="1" Visibility="{TemplateBinding ShowAvailableColors, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -502,7 +506,9 @@
                                                 </Grid>
                                             </Grid>
 
-                                            <!--  Standard Colors  -->
+    -->
+    <!--  Standard Colors  -->
+    <!--
                                             <Grid Grid.Row="2" Visibility="{TemplateBinding ShowStandardColors, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -523,7 +529,9 @@
                                                 </Grid>
                                             </Grid>
 
-                                            <!--  Recent Colors  -->
+    -->
+    <!--  Recent Colors  -->
+    <!--
                                             <Grid
                                                 Grid.Row="3"
                                                 Margin="0,1,0,1"
@@ -555,8 +563,10 @@
                                         Foreground="{TemplateBinding TabForeground}"
                                         Header="{Binding AdvancedTabHeader, RelativeSource={RelativeSource TemplatedParent}}"
                                         Template="{StaticResource TabItemTemplate}">
-                                        <!--  ColorCanvas  -->
-                                        <!--  ConverterParameter is margin/Padding from Popup  -->
+    -->
+    <!--  ColorCanvas  -->
+    <!--  ConverterParameter is margin/Padding from Popup  -->
+    <!--
                                         <Grid x:Name="_colorCanvasHost" Width="{Binding MaxDropDownWidth, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource AdditionConverter}, ConverterParameter=-18}">
                                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
                                                 <xctk:ColorCanvas
@@ -581,5 +591,5 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
+    </Style>-->
 </ResourceDictionary>

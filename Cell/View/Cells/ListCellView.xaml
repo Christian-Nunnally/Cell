@@ -23,7 +23,7 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         Content="{Binding}"
-                        FontFamily="{Binding DataContext.FontFamily, ElementName=CellListBox}"
+                        FontFamily="{Binding DataContext.Font, ElementName=CellListBox}"
                         FontSize="{Binding DataContext.FontSize, ElementName=CellListBox}"
                         Foreground="{Binding DataContext.ForegroundColor, ElementName=CellListBox}" />
                 </DataTemplate>

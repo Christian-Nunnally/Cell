@@ -13,11 +13,11 @@ namespace Cell.Data
         private const string TemplatesSaveDirectory = "Templates";
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly PersistenceManager _persistenceManager;
+        private readonly PersistedDirectory _persistenceManager;
         private readonly CellTracker _cellTracker;
         private readonly CellLoader _cellLoader;
 
-        public SheetTracker(PersistenceManager persistenceManager, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
+        public SheetTracker(PersistedDirectory persistenceManager, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;

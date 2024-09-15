@@ -12,14 +12,12 @@ namespace Cell.View.ToolWindow
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight()
+        public double GetMinimumHeight()
         {
             return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
         }
@@ -34,26 +32,22 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth()
+        public double GetMinimumWidth()
         {
             return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
         }
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
 
-        public void SetHeight(double height)
+        public void HandleBeingClosed()
         {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight = height;
-            _viewModel.UserSetHeight = height;
         }
 
-        public void SetWidth(double width)
+        public void HandleBeingShown()
         {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth = width;
-            _viewModel.UserSetWidth = width;
         }
     }
 }

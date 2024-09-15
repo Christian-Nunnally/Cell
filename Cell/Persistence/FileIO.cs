@@ -63,6 +63,7 @@ namespace Cell.Persistence
 
         public void ZipDirectory(string folderPath, string zipPath)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(zipPath)!);
             ZipFile.CreateFromDirectory(folderPath, zipPath);
         }
 

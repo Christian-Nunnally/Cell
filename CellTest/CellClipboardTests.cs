@@ -13,14 +13,14 @@ namespace CellTest
         private CellTracker _cellTracker;
         private UndoRedoManager _undoRedoManager;
         private TestFileIO _testFileIO;
-        private PersistenceManager _persistenceManager;
+        private PersistedDirectory _persistenceManager;
         private CellLoader _cellLoader;
         private TestTextClipboard _textClipboard;
 
         private CellClipboard CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistenceManager("", _testFileIO);
+            _persistenceManager = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _undoRedoManager = new UndoRedoManager(_cellTracker);

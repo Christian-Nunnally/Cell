@@ -139,14 +139,6 @@ namespace Cell.View.Cells
             if (_panAndZoomCanvas == null) return;
         }
 
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && sender is TextBox textbox)
-            {
-                textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-            }
-        }
-
         public void PanCanvasTo(double x, double y)
         {
             _panAndZoomCanvas?.PanCanvasTo(x, y);

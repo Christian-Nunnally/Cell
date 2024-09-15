@@ -1,8 +1,9 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Common;
+using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class ImportWindowViewModel : ResizeableToolWindowViewModel
+    public class ImportWindowViewModel : PropertyChangedBase
     {
         public ImportWindowViewModel()
         {
@@ -14,6 +15,6 @@ namespace Cell.ViewModel.ToolWindow
 
         public string NewSheetNameForImportedTemplates { get; set; } = string.Empty;
 
-        public IEnumerable<string> PossibleTemplates => ApplicationViewModel.Instance.PersistenceManager.GetTemplateNames();
+        public IEnumerable<string> PossibleTemplates => ApplicationViewModel.Instance.PersistedProject.GetTemplateNames();
     }
 }

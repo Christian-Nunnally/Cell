@@ -8,91 +8,49 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:special="clr-namespace:Cell.ViewModel.Cells.Types.Special"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
     MinWidth="200"
-    d:DataContext="{d:DesignInstance Type=cell:CellViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewModel:CellSettingsEditWindowViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <ContentControl Content="{Binding}">
-        <ContentControl.Resources>
-            <DataTemplate DataType="{x:Type special:RowCellViewModel}">
-                <StackPanel Height="150">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Height" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                    <Button Click="CreateNewRowAboveButtonClicked" Content="Insert Row Above" />
-                    <Button Click="CreateNewRowBelowButtonClicked" Content="Insert Row Below" />
-                    <Button Click="DeleteRowButtonClicked" Content="Delete Row" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type special:ColumnCellViewModel}">
-                <StackPanel Height="150">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Width" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                    <Button Click="CreateNewColumnToTheLeftButtonClicked" Content="Insert Column to Left" />
-                    <Button Click="CreateNewColumnToTheRightButtonClicked" Content="Insert Column to Right" />
-                    <Button Click="DeleteColumnButtonClicked" Content="Delete Column" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cellTypes:ListCellViewModel}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Collection" />
-                        <controls:BetterComboBox
-                            Width="100"
-                            ItemsSource="{Binding CollectionNames}"
-                            SelectedItem="{Binding CollectionName}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Max Items" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding MaxItemsString, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cellTypes:DropdownCellViewModel}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="50" Content="Items" />
-                        <TextBox
-                            Width="150"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cellTypes:GraphCellViewModel}">
-                <StackPanel Orientation="Horizontal">
-                    <Label Width="100" Content="Max Points" />
-                    <TextBox
-                        Width="100"
-                        KeyDown="TextBoxKeyDown"
-                        Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cellTypes:ProgressCellViewModel}">
-                <StackPanel>
-                    <CheckBox Content="Vertical Orientation" IsChecked="{Binding IsVerticalOrientation}" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
-                <StackPanel />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cell:CellViewModel}">
-                <StackPanel />
-            </DataTemplate>
-        </ContentControl.Resources>
-    </ContentControl>
+    <Grid>
+        <StackPanel Height="250">
+            <StackPanel Orientation="Horizontal">
+                <Label Width="100" Content="Collection" />
+                <controls:BetterComboBox
+                    Width="100"
+                    ItemsSource="{Binding CollectionNames}"
+                    SelectedItem="{Binding CollectionName}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Width="100" Content="Max Items" />
+                <TextBox
+                    Width="100"
+                    KeyDown="TextBoxKeyDown"
+                    Text="{Binding MaxItemsString, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Width="100" Content="Items" />
+                <TextBox
+                    Width="100"
+                    KeyDown="TextBoxKeyDown"
+                    Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Width="100" Content="Max Points" />
+                <TextBox
+                    Width="100"
+                    KeyDown="TextBoxKeyDown"
+                    Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
+            </StackPanel>
+
+            <CheckBox
+                Margin="5"
+                Content="Vertical Orientation"
+                IsChecked="{Binding IsVerticalOrientation}" />
+        </StackPanel>
+    </Grid>
 </UserControl>

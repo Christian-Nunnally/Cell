@@ -1,7 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Cells.Types.Special;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 

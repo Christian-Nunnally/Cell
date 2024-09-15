@@ -15,6 +15,8 @@ namespace Cell.Persistence
         private double codeEditorWidth = 400;
         private double functionManagerWindowHeight = 400;
         private double functionManagerWindowWidth = 400;
+        private double cellFormatEditWindowHeight = 400;
+        private double cellFormatEditWindowWidth = 400;
         private bool highlightPopulateCellDependencies = true;
         private bool highlightPopulateCollectionDependencies = true;
         private bool highlightTriggerCellDependencies = true;
@@ -57,6 +59,18 @@ namespace Cell.Persistence
         {
             get => functionManagerWindowWidth;      
             set { if (functionManagerWindowWidth != value) { functionManagerWindowWidth = value; NotifyPropertyChanged(nameof(FunctionManagerWindowWidth)); } }
+        }
+
+        public double CellFormatEditWindowHeight
+        {
+            get => cellFormatEditWindowHeight;
+            set { if (cellFormatEditWindowHeight != value) { cellFormatEditWindowHeight = value; NotifyPropertyChanged(nameof(CellFormatEditWindowHeight)); } }
+        }
+
+        public double CellFormatEditWindowWidth
+        {
+            get => cellFormatEditWindowWidth;
+            set { if (cellFormatEditWindowWidth != value) { cellFormatEditWindowWidth = value; NotifyPropertyChanged(nameof(CellFormatEditWindowWidth)); } }
         }
 
         public bool HighlightPopulateCellDependencies
@@ -125,14 +139,14 @@ namespace Cell.Persistence
             }
         }
 
-        public static ApplicationSettings CreateInstance(PersistenceManager persistenceManager)
+        public static ApplicationSettings CreateInstance(PersistedDirectory persistenceManager)
         {
             var instance = Load(persistenceManager) ?? new ApplicationSettings();
             instance.PropertyChanged += (s, e) => instance.Save(persistenceManager);
             return instance;
         }
 
-        private static ApplicationSettings? Load(PersistenceManager persistenceManager)
+        private static ApplicationSettings? Load(PersistedDirectory persistenceManager)
         {
             var path = Path.Combine(ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
             var text = persistenceManager.LoadFile(path);
@@ -140,7 +154,7 @@ namespace Cell.Persistence
             return JsonSerializer.Deserialize<ApplicationSettings>(text);
         }
 
-        private void Save(PersistenceManager persistenceManager)
+        private void Save(PersistedDirectory persistenceManager)
         {
             var path = Path.Combine(ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
             var serialized = JsonSerializer.Serialize(this);

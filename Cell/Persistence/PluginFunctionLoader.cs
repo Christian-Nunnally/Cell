@@ -12,8 +12,8 @@ namespace Cell.Persistence
     public class PluginFunctionLoader
     {
         public const string FunctionsDirectoryName = "Functions";
-        private readonly PersistenceManager _persistanceManager;
-        public PluginFunctionLoader(PersistenceManager persistenceManager)
+        private readonly PersistedDirectory _persistanceManager;
+        public PluginFunctionLoader(PersistedDirectory persistenceManager)
         {
             _persistanceManager = persistenceManager;
         }

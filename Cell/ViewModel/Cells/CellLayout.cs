@@ -1,7 +1,6 @@
 ﻿using Cell.Data;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
-using Cell.ViewModel.Cells.Types.Special;
+using Cell.ViewModel.Cells.Types;
 
 namespace Cell.ViewModel
 {
@@ -104,6 +103,7 @@ namespace Cell.ViewModel
             {
                 columnCellViewModel.X = lastCell.X + lastCell.Width;
                 columnCellViewModel.Y = 0;
+                columnCellViewModel.Height = lastCell.Height;
                 lastCell = columnCellViewModel;
             }
             LayoutWidth = lastCell.X + lastCell.Width;
@@ -138,6 +138,7 @@ namespace Cell.ViewModel
                 RowCellViewModel rowCellViewModel = (RowCellViewModel)cellViewModel;
                 rowCellViewModel.X = 0;
                 rowCellViewModel.Y = lastCell.Y + lastCell.Height;
+                rowCellViewModel.Width = lastCell.Width;
                 lastCell = rowCellViewModel;
             }
             LayoutHeight = lastCell.Y + lastCell.Height;

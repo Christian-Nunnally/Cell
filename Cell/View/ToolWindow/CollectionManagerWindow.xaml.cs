@@ -16,43 +16,23 @@ namespace Cell.View.ToolWindow
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
-        }
+        public double GetMinimumHeight() => 300;
 
         public string GetTitle() => "Collection Manager";
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public double GetWidth()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
-        }
+        public double GetMinimumWidth() => 600;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth = width;
-            _viewModel.UserSetWidth = width;
         }
 
         private void OpenCreateCollectionWindowButtonClick(object sender, RoutedEventArgs e)
@@ -99,7 +79,9 @@ namespace Cell.View.ToolWindow
             var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
-            var editor = new CodeEditorWindow(function, x =>
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel();
+            // TODO move args to vm.
+            var editor = new CodeEditorWindow(codeEditorWindowViewModel, function, x =>
             {
                 function.SetUserFriendlyCode(x, null, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 _viewModel.SelectedCollection?.RefreshSortAndFilter();
@@ -137,6 +119,14 @@ namespace Cell.View.ToolWindow
         private void SaveSelectedItemJsonButtonClick(object sender, RoutedEventArgs e)
         {
             _viewModel.SelectedItemSerialized = _itemJsonEditor.Text;
+        }
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
         }
     }
 }

@@ -75,7 +75,7 @@ namespace Cell.ViewModel.Cells.Types
             ListItems.Clear();
             var collection = _sheetViewModel.UserCollectionLoader.GetCollection(CollectionName);
             if (collection == null) return;
-            if (!string.IsNullOrEmpty(PopulateFunctionName))
+            if (!string.IsNullOrEmpty(Model.PopulateFunctionName))
             {
                 int i = 0;
                 foreach (var item in collection.Items)

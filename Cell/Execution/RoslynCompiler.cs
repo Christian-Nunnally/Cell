@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;

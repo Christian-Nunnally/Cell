@@ -8,8 +8,8 @@ namespace Cell.Persistence
     public class CellLoader
     {
         private const string SheetsSaveDirectory = "Sheets";
-        private readonly PersistenceManager _persistenceManager;
-        public CellLoader(PersistenceManager persistenceManager)
+        private readonly PersistedDirectory _persistenceManager;
+        public CellLoader(PersistedDirectory persistenceManager)
         {
             _persistenceManager = persistenceManager;
         }

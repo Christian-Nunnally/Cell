@@ -11,13 +11,15 @@ namespace CellTest
     public class V1ToV2MigrationTests
     {
         private TestFileIO _testFileIO;
-        private PersistenceManager _persistenceManager;
+        private PersistedDirectory _persistenceManager;
+        private PersistedProject _persistedProject;
 
         private V1ToV2Migrator CreateTestInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistenceManager("", _testFileIO);
-            _persistenceManager.RegisterMigrator("0", "1", new V1ToV2Migrator());
+            _persistenceManager = new PersistedDirectory("", _testFileIO);
+            _persistedProject = new PersistedProject(_persistenceManager);
+            _persistedProject.RegisterMigrator("0", "1", new V1ToV2Migrator());
             return new V1ToV2Migrator();
         }
 

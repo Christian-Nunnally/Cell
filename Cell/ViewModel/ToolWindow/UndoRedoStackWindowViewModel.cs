@@ -1,9 +1,10 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Common;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class UndoRedoStackWindowViewModel : ResizeableToolWindowViewModel
+    public class UndoRedoStackWindowViewModel : PropertyChangedBase
     {
         public UndoRedoStackWindowViewModel()
         {

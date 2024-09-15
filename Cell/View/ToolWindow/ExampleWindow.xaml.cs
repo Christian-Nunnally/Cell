@@ -8,20 +8,16 @@ namespace Cell.View.ToolWindow
     public partial class ExampleWindow : UserControl, IResizableToolWindow
     {
         private readonly ExampleWindowViewModel _viewModel;
-        private double _height = 200;
-        private double _width = 200;
         public ExampleWindow(ExampleWindowViewModel viewModel)
         {
             _viewModel = viewModel;
-            DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
+            DataContext = _viewModel;
             InitializeComponent();
         }
 
         public Action? RequestClose { get; set; }
 
-        public double GetHeight() => _height;
+        public double GetMinimumHeight() => 200;
 
         public string GetTitle() => "Example";
 
@@ -33,23 +29,19 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetWidth() => _width;
+        public double GetMinimumWidth() => 200;
 
-        public bool HandleBeingClosed()
+        public bool HandleCloseRequested()
         {
             return true;
         }
 
-        public void SetHeight(double height)
+        public void HandleBeingClosed()
         {
-            _height = height;
-            _viewModel.UserSetHeight = height;
         }
 
-        public void SetWidth(double width)
+        public void HandleBeingShown()
         {
-            _width = width;
-            _viewModel.UserSetWidth = width;
         }
     }
 }
