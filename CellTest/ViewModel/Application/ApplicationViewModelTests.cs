@@ -39,8 +39,8 @@ namespace CellTest.ViewModel.Application
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _backupManager = new BackupManager(_persistenceManager, _backupDirectory);
             _cellSelector = new CellSelector();

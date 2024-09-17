@@ -120,10 +120,10 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(editPanel);
         }
 
-        private void LoadFromBackupButtonPressed(object sender, RoutedEventArgs e)
+        private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            _viewModel.LoadFromBackup();
+            _viewModel.RestoreFromBackup();
         }
 
         public void HandleBeingClosed()

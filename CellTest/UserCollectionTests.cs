@@ -30,8 +30,8 @@ namespace CellTest
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             return _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
 

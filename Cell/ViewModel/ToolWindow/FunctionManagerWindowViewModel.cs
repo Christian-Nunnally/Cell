@@ -9,13 +9,13 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class FunctionManagerWindowViewModel : PropertyChangedBase
     {
-        private readonly ObservableCollection<FunctionViewModel> _functions;
+        private readonly ObservableCollection<PluginFunction> _functions;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private string _filterSheet = "All";
         private string _filterString = string.Empty;
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
-        private FunctionViewModel? _selectedFunction;
+        private PluginFunction? _selectedFunction;
         private string _filterCollection = string.Empty;
 
         public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
@@ -73,7 +73,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public ObservableCollection<FunctionViewModel> Functions { get; set; } = [];
+        public ObservableCollection<PluginFunction> Functions { get; set; } = [];
 
         public bool IncludePopulateFunctions
         {
@@ -101,7 +101,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public ObservableCollection<string> ReferencedCollectionsByTheSelectedFunction { get; set; } = [];
 
-        public FunctionViewModel? SelectedFunction
+        public PluginFunction? SelectedFunction
         {
             get => _selectedFunction; set
             {
@@ -151,7 +151,7 @@ namespace Cell.ViewModel.ToolWindow
             FilterVisibleFunctions();
         }
 
-        private bool IsFunctionIncludedInFilter(FunctionViewModel function)
+        private bool IsFunctionIncludedInFilter(PluginFunction function)
         {
             if (!function.Model.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
             if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;

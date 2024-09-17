@@ -6,7 +6,6 @@ namespace Cell.Model
 {
     public class CellStyleModel : PropertyChangedBase
     {
-        public static readonly CellModel Null = new();
         private string _borderThickness = "1";
         private string _contentBorderThickness = "1";
         private string _font = "Consolas";

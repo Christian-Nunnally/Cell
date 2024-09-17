@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
+using System.Windows.Forms;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -12,9 +13,23 @@ namespace Cell.ViewModel.ToolWindow
 
         public ApplicationSettings? ApplicationSettings => ApplicationViewModel.SafeInstance?.ApplicationSettings;
 
-        internal void LoadFromBackup()
+        public void RestoreFromBackup()
         {
-            ApplicationViewModel.Instance.BackupManager.CreateBackup();
+            ApplicationViewModel.Instance.BackupManager.CreateBackup("PreRestore");
+            OpenFileDialog openFileDialog = new()
+            {
+                Filter = "Cell Backup Files (*.zip)",
+                Title = "Load Backup",
+                CheckPathExists = true,
+                CheckFileExists = true,
+                InitialDirectory = ApplicationViewModel.Instance.BackupManager.BackupDirectory.GetFullPath()
+            };
+            var result = openFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                ApplicationViewModel.Instance.BackupManager.RestoreBackup(openFileDialog.FileName);
+                App.Current.Shutdown();
+            }
         }
     }
 }

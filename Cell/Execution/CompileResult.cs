@@ -2,8 +2,10 @@
 {
     public struct CompileResult
     {
-        public string? Result { get; set; }
+        public string? ExecutionResult { get; set; }
 
-        public bool Success { get; set; }
+        public bool WasSuccess { get; set; }
+
+        public object? ReturnedObject { get; set; }
     }
 }

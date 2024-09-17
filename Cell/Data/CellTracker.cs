@@ -32,7 +32,6 @@ namespace Cell.Data
             _cellsToLocation.Add(cellModel.ID, cellModel.GetUnqiueLocationString());
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
-            cellModel.StylePropertyChanged += CellModelStylePropertyChanged;
             CellAdded?.Invoke(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }

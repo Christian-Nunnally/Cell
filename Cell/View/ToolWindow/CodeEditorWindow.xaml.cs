@@ -20,7 +20,7 @@ namespace Cell.View.ToolWindow
     {
         private readonly CellModel? _currentCell;
         private readonly bool _doesFunctionReturnValue;
-        private readonly FunctionViewModel _function;
+        private readonly PluginFunction _function;
         private readonly Action<string> _saveCodeCallback = x => { };
         private static bool _haveAssembliesBeenRegistered;
         private bool _isAllowingCloseWhileDirty = false;
@@ -29,7 +29,7 @@ namespace Cell.View.ToolWindow
         private CompletionWindow? completionWindow;
 
         private readonly CodeEditorWindowViewModel _viewModel;
-        public CodeEditorWindow(CodeEditorWindowViewModel viewModel, FunctionViewModel function, Action<string> saveCodeCallback, CellModel? currentCell)
+        public CodeEditorWindow(CodeEditorWindowViewModel viewModel, PluginFunction function, Action<string> saveCodeCallback, CellModel? currentCell)
         {
             _viewModel = viewModel;
             DataContext = viewModel;
@@ -78,7 +78,7 @@ namespace Cell.View.ToolWindow
 
         public string? ResultString { get; set; } = string.Empty;
 
-        public SolidColorBrush ResultStringColor => _lastCompileResult.Success ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
+        public SolidColorBrush ResultStringColor => _lastCompileResult.WasSuccess ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
 
         public double GetMinimumHeight() => 400;
 
@@ -124,7 +124,7 @@ namespace Cell.View.ToolWindow
         private void DisplayResult(CompileResult result)
         {
             _lastCompileResult = result;
-            ResultString = result.Result ?? "";
+            ResultString = result.ExecutionResult ?? "";
             ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultString)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
@@ -183,28 +183,28 @@ namespace Cell.View.ToolWindow
             {
                 if (_currentCell is null) return;
                 var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
-                var function = new FunctionViewModel(model);
+                var function = new PluginFunction(model);
                 function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
                 var compiled = function.CompiledMethod;
                 var result = function.CompileResult;
-                if (result.Success)
+                if (result.WasSuccess)
                 {
                     if (_doesFunctionReturnValue)
                     {
                         var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
-                        result = new CompileResult { Success = true, Result = resultObject?.ToString() ?? "" };
+                        result = new CompileResult { WasSuccess = true, ExecutionResult = resultObject?.ToString() ?? "" };
                     }
                     else
                     {
                         compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
-                        result = new CompileResult { Success = true, Result = "Success" };
+                        result = new CompileResult { WasSuccess = true, ExecutionResult = "Success" };
                     }
                 }
                 DisplayResult(result);
             }
             catch (Exception ex)
             {
-                var result = new CompileResult { Success = false, Result = ex.Message };
+                var result = new CompileResult { WasSuccess = false, ExecutionResult = ex.Message };
                 DisplayResult(result);
             }
         }
@@ -218,7 +218,7 @@ namespace Cell.View.ToolWindow
                 return;
             }
             var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
-            var function = new FunctionViewModel(model);
+            var function = new PluginFunction(model);
             if (_currentCell is null) return;
             function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
             var syntaxTree = function.SyntaxTree;

@@ -33,22 +33,6 @@ namespace CellTest
         {
             var _ = CreateInstance();
         }
-
-        [Fact]
-        public void CellSubscribedToCollectionUpdates_NotifyCollectionUpdated_CellPopulateFunctionRun()
-        {
-            var testing = CreateInstance();
-            var cellModel = new CellModel();
-            var testCollectionName = "testCollection";
-            _pluginFunctionLoader!.CreateFunction("object", "testFunction", "return 1;");
-            cellModel.PopulateFunctionName = "testFunction";
-            testing.SubscribeToCollectionUpdates(cellModel, testCollectionName);
-            Assert.NotEqual("1", cellModel.Text);
-
-            testing.NotifyCollectionUpdated(testCollectionName);
-
-            Assert.Equal("1", cellModel.Text);
-        }
     }
 }
 

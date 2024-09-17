@@ -188,7 +188,7 @@ namespace Cell.Data
 
             foreach (var functionModel in functionsBeingImported)
             {
-                var function = new FunctionViewModel(functionModel);
+                var function = new PluginFunction(functionModel);
                 _pluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
                 _pluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
             }
@@ -237,7 +237,7 @@ namespace Cell.Data
             }
             return true;
 
-            FunctionViewModel? GetExistingFunction(PluginFunctionModel function)
+            PluginFunction? GetExistingFunction(PluginFunctionModel function)
             {
                 return _pluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }

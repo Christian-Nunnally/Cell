@@ -56,6 +56,12 @@ namespace Cell.Common
 
         public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
 
+        public static (string SheetName, int Row, int Column) GetLocationFromUnqiueLocationString(string unqiueLocationString)
+        {
+            var splitString = unqiueLocationString.Split('_');
+            return (splitString[0], int.Parse(splitString[1]), int.Parse(splitString[2]));
+        }
+
         public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.SheetName, model.Row, model.Column);
 
         [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]

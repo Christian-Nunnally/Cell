@@ -9,7 +9,7 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
         public readonly List<string> CollectionReferences = [];
         private readonly Func<string, string> _getDataTypeFromCollectionNameFunction = getDataTypeFromCollectionNameFunction;
         private readonly Predicate<string> _isCollectionPredicate = isCollectionPredicate;
-        public CompileResult Result { get; private set; } = new CompileResult { Success = true };
+        public CompileResult Result { get; private set; } = new CompileResult { WasSuccess = true };
 
         public bool IsCollectionName(string input)
         {
@@ -27,7 +27,7 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
                 {
                     CollectionReferences.Add(variableName);
                     var dataType = _getDataTypeFromCollectionNameFunction(variableName);
-                    if (string.IsNullOrWhiteSpace(dataType)) Result = new CompileResult { Success = false, Result = $"Datatype for Collection {variableName} does not exist or cells have not loaded yet." };
+                    if (string.IsNullOrWhiteSpace(dataType)) Result = new CompileResult { WasSuccess = false, ExecutionResult = $"Datatype for Collection {variableName} does not exist or cells have not loaded yet." };
                     var code = $"c.GetUserList<{dataType}>(\"{variableName}\")";
                     return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, code);
                 }

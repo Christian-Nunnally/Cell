@@ -57,6 +57,10 @@
                 Content="Create Backup (Also created every time application opens)"
                 DockPanel.Dock="Left" />
             <Button
+                Click="RestoreFromBackupButtonClicked"
+                Content="Restore from Backup (Closes the application)"
+                DockPanel.Dock="Left" />
+            <Button
                 Click="PrintCurrentSheetButtonClicked"
                 Content="Print Active Sheet"
                 DockPanel.Dock="Left" />

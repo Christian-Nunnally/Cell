@@ -23,22 +23,30 @@ namespace Cell.Persistence
             _fileIO.CopyDirectory(fullFrom, fullTo);
         }
 
-        public void CopyTo(PersistedDirectory to, string path = "")
+        public void CopyTo(PersistedDirectory to, string fromPath = "", string toPath = "")
         {
-            var fullFrom = Path.Combine(_rootPath, path);
-            var fullTo = to.GetFullPath();
+            var fullFrom = Path.Combine(_rootPath, fromPath);
+            var fullTo = to.GetFullPath(toPath);
             _fileIO.CopyDirectory(fullFrom, fullTo);
         }
 
-        public void ZipTo(PersistedDirectory to, string path = "")
+        public void UnzipTo(PersistedDirectory to, string fromPathZip = "", string toPath = "")
         {
-            var fullPath = GetFullPath();
-            var fullTo = to.GetFullPath(path);
+            var fullFrom = GetFullPath(fromPathZip);
+            var fullTo = to.GetFullPath(toPath);
             var zipPath = fullTo + ".zip";
-            _fileIO.ZipDirectory(fullPath, zipPath);
+            _fileIO.ZipDirectory(fullFrom, zipPath);
         }
 
-        public void DeleteDirectory(string path)
+        public void ZipTo(PersistedDirectory to, string fromPath = "", string toPathZip = "")
+        {
+            var fullFrom = GetFullPath(fromPath);
+            var fullTo = to.GetFullPath(toPathZip);
+            var zipPath = fullTo + ".zip";
+            _fileIO.ZipDirectory(fullFrom, zipPath);
+        }
+
+        public void DeleteDirectory(string path = "")
         {
             var fullPath = GetFullPath(path);
             _fileIO.DeleteDirectory(fullPath);

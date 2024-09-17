@@ -747,7 +747,7 @@ namespace Cell.ViewModel.ToolWindow
             foreach (var cell in cells) cell.Column += amount;
         }
 
-        private void IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(string sheetName, int columnIndex, FunctionViewModel function, int incrementAmount)
+        private void IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(string sheetName, int columnIndex, PluginFunction function, int incrementAmount)
         {
             var refactorer = new CellReferenceRefactorRewriter(x =>
             {
@@ -766,7 +766,7 @@ namespace Cell.ViewModel.ToolWindow
             foreach (var cell in cells) cell.Row += amount;
         }
 
-        private void IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(string sheetName, int rowIndex, FunctionViewModel function, int incrementAmount)
+        private void IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(string sheetName, int rowIndex, PluginFunction function, int incrementAmount)
         {
             // TODO: record this in undo stack.
             var refactorer = new CellReferenceRefactorRewriter(x =>

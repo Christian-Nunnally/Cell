@@ -105,8 +105,8 @@ namespace Cell.View.Application
             var cellLoader = new CellLoader(projectDirectory);
             var cellTracker = new CellTracker(cellLoader);
             var userCollectionLoader = new UserCollectionLoader(projectDirectory, pluginFunctionLoader, cellTracker);
-            var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
             var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);

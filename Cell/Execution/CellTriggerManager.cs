@@ -1,6 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
+using System.ComponentModel;
 
 namespace Cell.Execution
 {
@@ -13,6 +14,7 @@ namespace Cell.Execution
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly Dictionary<CellModel, string> _cellModelToCurrentTextValueMap = [];
 
         public CellTriggerManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
@@ -33,21 +35,32 @@ namespace Cell.Execution
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);
             var result = DynamicCellPluginExecutor.RunTrigger(_pluginFunctionLoader, new PluginContext(_cellTracker, _userCollectionLoader, cell.Index) { E = editContext }, cell);
-            if (!result.Success)
+            if (!result.WasSuccess)
             {
-                cell.ErrorText = result.Result ?? "error message is null";
+                cell.ErrorText = result.ExecutionResult ?? "error message is null";
             }
             _cellsBeingEdited.Remove(cell.ID);
         }
 
         public void StartMonitoringCell(CellModel model)
         {
-            model.CellTriggered += CellTriggered;
+            model.PropertyChanged += CellModelPropertyChanged;
+            _cellModelToCurrentTextValueMap.Add(model, model.Text);
+        }
+
+        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(CellModel.Text)) return;
+            var cell = (CellModel)sender!;
+            var oldValue = _cellModelToCurrentTextValueMap[cell];
+            CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));  
+            _cellModelToCurrentTextValueMap[cell] = cell.Text;
         }
 
         public void StopMonitoringCell(CellModel model)
         {
-            model.CellTriggered -= CellTriggered;
+            model.PropertyChanged -= CellModelPropertyChanged;
+            _cellModelToCurrentTextValueMap.Remove(model);
         }
     }
 }

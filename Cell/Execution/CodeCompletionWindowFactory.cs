@@ -20,7 +20,7 @@ namespace Cell.Execution
         public static CompletionWindow? Create(TextArea textArea, string type, bool doesFunctionReturnValue)
         {
             var model = new PluginFunctionModel("testtesttest", textArea.Document.Text, doesFunctionReturnValue ? "object" : "void");
-            var function = new FunctionViewModel(model);
+            var function = new PluginFunction(model);
             var syntaxTree = function.SyntaxTree;
             var sematicModel = function.GetSemanticModel();
             var variableNode = syntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclarationSyntax>().FirstOrDefault(x => x.Variables.First().Identifier.Text == type);

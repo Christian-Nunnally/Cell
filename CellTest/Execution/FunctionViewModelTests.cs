@@ -9,7 +9,7 @@ namespace CellTest.Execution
         public void UserFriendlyCodeSet_UserFriendlyCodeReturned_CodeUnchanged()
         {
             var model = new PluginFunctionModel();
-            var testing = new FunctionViewModel(model);
+            var testing = new PluginFunction(model);
             var testCode = @"
 var itemsToSearch = new List<TodoItem>();
 itemsToSearch.Add(todoItem);
@@ -33,7 +33,7 @@ while (itemsToSearch.Any())
         public void UserFriendlyCodeSetWithTabs_UserFriendlyCodeReturned_CodeNowContainsSpaces()
         {
             var model = new PluginFunctionModel();
-            var testing = new FunctionViewModel(model);
+            var testing = new PluginFunction(model);
             var testCode = "\treturn test;";
             testing.SetUserFriendlyCode(testCode, CellModel.Null, x => x, []);
 

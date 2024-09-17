@@ -36,7 +36,7 @@ namespace Cell.View.ToolWindow
 
         private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is FunctionViewModel function)
+            if (sender is Button button && button.DataContext is PluginFunction function)
             {
                 if (function.UsageCount != 0)
                 {

@@ -6,12 +6,15 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class ListCellViewModel : CellViewModel
+    public class ListCellViewModel : CellViewModel, ISubscriber
     {
+        private CollectionChangeNotifier _collectionChangedNotifier;
+
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
+            _collectionChangedNotifier = new CollectionChangeNotifier(sheetViewModel.UserCollectionLoader);
             if (CollectionName == string.Empty) return;
-            _sheetViewModel.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+            _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
             UpdateList();
         }
 
@@ -20,11 +23,11 @@ namespace Cell.ViewModel.Cells.Types
             get => Model.GetStringProperty(nameof(CollectionName));
             set
             {
-                _sheetViewModel.CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
+                if (!string.IsNullOrEmpty(CollectionName)) _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(CollectionName))
                 {
-                    _sheetViewModel.CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                    _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
                     UpdateList();
                 }
                 NotifyPropertyChanged(nameof(CollectionName));
@@ -70,6 +73,11 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
+        public void Action()
+        {
+            UpdateList();
+        }
+
         internal void UpdateList()
         {
             ListItems.Clear();
@@ -81,8 +89,8 @@ namespace Cell.ViewModel.Cells.Types
                 foreach (var item in collection.Items)
                 {
                     var result = DynamicCellPluginExecutor.RunPopulate(_sheetViewModel.PluginFunctionLoader, new PluginContext(_sheetViewModel.CellTracker, _sheetViewModel.UserCollectionLoader, i++), Model);
-                    if (result.Result == null) continue;
-                    ListItems.Add(result.Result);
+                    if (result.ExecutionResult == null) continue;
+                    ListItems.Add(result.ExecutionResult);
                     if (ListItems.Count >= MaxNumberOfItems) break;
                 }
             }

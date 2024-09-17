@@ -51,7 +51,7 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        private static void HighlightCellDependenciesOfFunction(SheetViewModel sheet, FunctionViewModel function)
+        private static void HighlightCellDependenciesOfFunction(SheetViewModel sheet, PluginFunction function)
         {
             foreach (var locationDependencies in function.LocationDependencies)
             {
@@ -95,7 +95,7 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        private static void HighlightCollectionDependenciesForFunction(SheetViewModel sheet, FunctionViewModel function)
+        private static void HighlightCollectionDependenciesForFunction(SheetViewModel sheet, PluginFunction function)
         {
             foreach (var collectionReference in function.CollectionDependencies)
             {

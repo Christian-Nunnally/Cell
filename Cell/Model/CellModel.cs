@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Execution;
 using Cell.ViewModel.Cells.Types;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
@@ -27,12 +26,6 @@ namespace Cell.Model
         {
             _cellStyle.PropertyChanged += StylePropertyChangedHandler;
         }
-
-        public event Action<CellModel>? AfterCellEdited;
-
-        public event Action<CellModel, EditContext>? CellTriggered;
-
-        public event PropertyChangedEventHandler? StylePropertyChanged;
 
         public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
@@ -138,11 +131,8 @@ namespace Cell.Model
             set
             {
                 if (text == value) return;
-                var oldValue = text;
                 text = value;
                 NotifyPropertyChanged(nameof(Text));
-                CellTriggered?.Invoke(this, new EditContext(nameof(Text), text, oldValue));
-                AfterCellEdited?.Invoke(this);
             }
         }
 
@@ -245,11 +235,9 @@ namespace Cell.Model
 
         public override string ToString() => Text;
 
-        public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
-
         private void StylePropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
         {
-            StylePropertyChanged?.Invoke(this, e);
+            NotifyPropertyChanged(nameof(Style));
         }
     }
 }
