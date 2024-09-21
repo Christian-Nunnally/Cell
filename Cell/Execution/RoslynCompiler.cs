@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Cell.Common;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.IO;
 using System.Reflection;
@@ -76,7 +77,10 @@ namespace Cell.Execution
 
         private static PortableExecutableReference GetCollectionsReference()
         {
-            return MetadataReference.CreateFromFile(Path.Combine(Path.GetDirectoryName(typeof(Dictionary<,>).Assembly.Location), "System.Collections.dll"));
+            var assemblyLocation = typeof(Dictionary<,>).Assembly.Location;
+            var directoryName = Path.GetDirectoryName(assemblyLocation) ?? throw new CellError($"Could not get directory name from {assemblyLocation}");
+            var collectionsDllPath = Path.Combine(directoryName, "System.Collections.dll");
+            return MetadataReference.CreateFromFile(collectionsDllPath);
         }
     }
 }

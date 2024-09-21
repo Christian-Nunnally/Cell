@@ -21,7 +21,7 @@ namespace Cell.Execution.References
             pluginFunctionRunContext.Cell = cell;
             var result = _calculateCollectionNameFunction.Run(pluginFunctionRunContext, cell);
             if (result.WasSuccess && result.ReturnedObject is not null) return result.ReturnedObject.ToString() ?? "";
-            Logger.Log($"Error calculating collection name from function {_calculateCollectionNameFunction}: {result.ExecutionResult}");
+            Logger.Instance.Log($"Error calculating collection name from function {_calculateCollectionNameFunction}: {result.ExecutionResult}");
             return string.Empty;
         }
 

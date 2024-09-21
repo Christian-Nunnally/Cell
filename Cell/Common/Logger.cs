@@ -1,16 +1,20 @@
-﻿namespace Cell.Common
+﻿
+namespace Cell.Common
 {
-    // TODO: Make not static.
-    public static class Logger
+    public class Logger
     {
-        private const int MaxRetainedLogs = 2000;
-        private static readonly Queue<string> _logsQueue = new();
-        private static int LogNumber = 0;
-        public static event Action<string>? LogAdded;
+        private const int MaxRetainedLogs = 1000;
+        private readonly Queue<string> _logsQueue = new();
+        private int LogNumber = 0;
+        public event Action<string>? LogAdded;
 
-        public static IEnumerable<string> Logs { get; } = [.. _logsQueue];
+        private static Logger? _instance;
 
-        public static void Log(string message)
+        public static Logger Instance => _instance ??= new Logger();
+
+        public IEnumerable<string> Logs =>_logsQueue.AsEnumerable();
+
+        public void Log(string message)
         {
             var log = $"{DateTime.Now:HH:mm:ss} {LogNumber++:0000}: {message}";
             Console.WriteLine(log);

@@ -1,7 +1,9 @@
 ﻿using Cell.Common;
 using System.Windows;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Cell.Model
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     public class OldCellModel : PropertyChangedBase
     {
@@ -11,7 +13,7 @@ namespace Cell.Model
 
         public CellType CellType { get; set; }
 
-        public string[] ColorHexes { get; set; } = { "#deadbe", "#aaaaaa", "#bbbbbb", "#111111", "#121212", "#555555" };
+        public string[] ColorHexes { get; set; } = ["#deadbe", "#aaaaaa", "#bbbbbb", "#111111", "#121212", "#555555"];
 
         public int Column { get; set; }
 
@@ -25,7 +27,7 @@ namespace Cell.Model
 
         public HorizontalAlignment HorizontalAlignment { get; set; }
 
-        public string ID { get; set; }
+        public string ID { get; set; } = string.Empty;
 
         public int Index { get; set; }
 
@@ -49,7 +51,7 @@ namespace Cell.Model
 
         public Dictionary<string, string> StringProperties { get; set; } = [];
 
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
 
         public string TriggerFunctionName { get; set; } = string.Empty;
 

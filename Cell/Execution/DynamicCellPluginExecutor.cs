@@ -10,7 +10,7 @@ namespace Cell.Execution
         public static void Log(string functionName, string sheet, int row, int column, CompileResult compileResult, bool isTrigger)
         {
             var logStart = isTrigger ? $"Trigger: {functionName}" : $"Populate: {functionName}";
-            Logger.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.WasSuccess} - {compileResult.ExecutionResult}");
+            Logger.Instance.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.WasSuccess} - {compileResult.ExecutionResult}");
         }
 
         public static CompileResult RunPopulate(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)

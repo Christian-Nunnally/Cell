@@ -4,9 +4,6 @@ using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for HelpWindow.xaml
-    /// </summary>
     public partial class DialogWindow : UserControl, IResizableToolWindow, IDialogWindow
     {
         private readonly string _title;

@@ -16,6 +16,7 @@ namespace CellTest
         private PersistedDirectory _persistenceManager;
         private CellLoader _cellLoader;
         private ObservableCollection<CellModel> _cellsToEdit;
+        private PluginFunctionLoader _pluginFunctionLoader;
 
         private CellFormatEditWindowViewModel CreateInstance()
         {
@@ -24,7 +25,8 @@ namespace CellTest
             _cellLoader = new CellLoader(_persistenceManager);
             _cellTracker = new CellTracker(_cellLoader);
             _cellsToEdit = [];
-            return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, null);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
+            return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _pluginFunctionLoader);
         }
 
         [Fact]

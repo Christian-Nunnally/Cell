@@ -8,8 +8,8 @@ namespace Cell.ViewModel.ToolWindow
         private readonly StringBuilder _logBufferBuilder = new();
         public LogWindowViewModel()
         {
-            Logger.LogAdded += AddLog;
-            foreach (var log in Logger.Logs.Take(100))
+            Logger.Instance.LogAdded += AddLog;
+            foreach (var log in Logger.Instance.Logs.Take(100))
             {
                 AddLog(log);
             }
