@@ -29,7 +29,10 @@ namespace Cell.Execution
 
         private void RunPopulateForSubscriber(CellModel subscriber)
         {
-            var pluginContext = new PluginContext(_cellTracker, _userCollectionLoader, subscriber.Index, subscriber);
+            // You can remove this once cells are properly unsubscribed from this when PopulateFunctionName is set to "";
+            if (subscriber.PopulateFunctionName == "") return;
+
+            var pluginContext = new PluginContext(_cellTracker, _userCollectionLoader, subscriber);
             var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, pluginContext, subscriber);
             if (result.WasSuccess)
             {

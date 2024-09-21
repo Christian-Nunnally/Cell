@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Execution;
+﻿using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.View.Skin;
@@ -32,19 +31,16 @@ namespace Cell.View.ToolWindow
         public CodeEditorWindow(CodeEditorWindowViewModel viewModel, PluginFunction function, Action<string> saveCodeCallback, CellModel? currentCell)
         {
             _viewModel = viewModel;
-            DataContext = viewModel;
-            InitializeComponent();
+            //DataContext = viewModel;
+            DataContext = this;
 
+            InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
 
             _currentCell = currentCell;
             _doesFunctionReturnValue = function.Model.ReturnType != "void";
             _function = function;
-
-            _function.Model.PropertyChanged += FunctionPropertyChanged;
-            ReloadFunctionCode();
-
             _saveCodeCallback = saveCodeCallback;
             DisplayResult(_function.CompileResult);
 
@@ -55,17 +51,15 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void FunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code))
-            {
-                ReloadFunctionCode();
-            }
+            if (e.PropertyName == nameof(PluginFunctionModel.Code)) ReloadFunctionCode();
         }
 
         private void ReloadFunctionCode()
         {
             textEditor.Text = _function.GetUserFriendlyCode(_currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
+            _isDirty = false;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -89,9 +83,9 @@ namespace Cell.View.ToolWindow
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Test Code", new RelayCommand(x => TestCode())),
-            new CommandViewModel("Syntax", new RelayCommand(x => ToggleSyntaxTreePreview())),
-            new CommandViewModel("Save and Close", new RelayCommand(x => SaveAndClose()))
+            new CommandViewModel("Test Code", TestCode),
+            new CommandViewModel("Syntax", ToggleSyntaxTreePreview),
+            new CommandViewModel("Save and Close", SaveAndClose)
             ];
 
         public double GetMinimumWidth() => 400;
@@ -103,12 +97,10 @@ namespace Cell.View.ToolWindow
             {
                 SaveCode();
                 RequestClose?.Invoke();
-                _function.Model.PropertyChanged -= FunctionPropertyChanged;
             }, () =>
             {
                 _isAllowingCloseWhileDirty = true;
                 RequestClose?.Invoke();
-                _function.Model.PropertyChanged -= FunctionPropertyChanged;
             });
             return false;
         }
@@ -229,7 +221,7 @@ namespace Cell.View.ToolWindow
 
         public void HandleBeingClosed()
         {
-            _function.Model.PropertyChanged -= FunctionPropertyChanged;
+            _function.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
             textEditor.TextArea.TextEntering -= OnTextEntering;
             textEditor.TextArea.TextEntered -= OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
@@ -237,10 +229,11 @@ namespace Cell.View.ToolWindow
 
         public void HandleBeingShown()
         {
-            _function.Model.PropertyChanged += FunctionPropertyChanged;
+            _function.Model.PropertyChanged += ReloadFunctionCodeWhenItChanges;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
+            ReloadFunctionCode();
         }
     }
 }

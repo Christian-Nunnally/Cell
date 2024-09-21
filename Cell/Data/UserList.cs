@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Model.Plugin;
+﻿using Cell.Model.Plugin;
 using Cell.Persistence;
 using System.Collections;
 
@@ -11,7 +10,7 @@ namespace Cell.Data
         private readonly UserCollectionLoader _userCollectionLoader;
         private UserCollection? _internalUserCollection;
 
-        private UserCollection UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName) ?? throw new CellError($"Collection {_collectionName} does not exist");
+        private UserCollection? UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName);
 
         private UserList(string collectionName, UserCollectionLoader userCollectionLoader)
         {
@@ -30,12 +29,12 @@ namespace Cell.Data
 
         public void Add(T item)
         {
-            UserCollection.Add(item);
+            UserCollection?.Add(item);
         }
 
         public void Remove(T item)
         {
-            UserCollection.Remove(item);
+            UserCollection?.Remove(item);
         }
 
         public void RemoveAt(int index)
@@ -48,7 +47,7 @@ namespace Cell.Data
 
         public T? this[int key]
         {
-            get => key >= 0 && key < UserCollection.Items.Count ? (T)UserCollection.Items[key] : new T();
+            get => key >= 0 && key < (UserCollection?.Items.Count ?? 0) ? (T?)UserCollection?.Items[key] : new T();
         }
 
         public int Count => UserCollection?.Items.Count ?? 0;

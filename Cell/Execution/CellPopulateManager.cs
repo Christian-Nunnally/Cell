@@ -1,7 +1,7 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
-using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 using System.ComponentModel;
 
@@ -12,6 +12,7 @@ namespace Cell.Execution
     /// </summary>
     public class CellPopulateManager
     {
+        private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly Dictionary<PluginFunctionModel, List<CellModel>> _cellsToUpdateWhenFunctionChanges = [];
         private readonly CellTextChangesAtLocationNotifier _cellTextChangesAtLocationNotifier;
         private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
@@ -20,18 +21,19 @@ namespace Cell.Execution
         private readonly CollectionChangeNotifier _collectionChangeNotifier;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly PluginContext _pluginFunctionRunContext;
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
+            _pluginFunctionRunContext = new PluginContext(cellTracker, userCollectionLoader);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
             _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionLoader);
             _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
-            _cellTracker.CellAdded += StartMonitoringCellForUpdates;
-            _cellTracker.CellRemoved += StopMonitoringCellForUpdates;
+            _cellTracker.CellAdded += StartMonitoringCellForChanges;
+            _cellTracker.CellRemoved += StopMonitoringCellForChanges;
             foreach (var cell in _cellTracker.AllCells)
             {
-                // TODO: Only monitor cells that a populate function depends on.
-                StartMonitoringCellForUpdates(cell);
+                StartMonitoringCellForChanges(cell);
             }
             _pluginFunctionLoader = pluginFunctionLoader;
         }
@@ -53,7 +55,7 @@ namespace Cell.Execution
             return _cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cells) ? cells : [];
         }
 
-        public void PopulateCellsText(CellModel cell)
+        private void PopulateCellsText(CellModel cell)
         {
             if (string.IsNullOrEmpty(cell.PopulateFunctionName)) return;
             var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, new PluginContext(_cellTracker, _userCollectionLoader, cell.Index), cell);
@@ -62,99 +64,125 @@ namespace Cell.Execution
             else cell.ErrorText = result.ExecutionResult;
         }
 
-        public void StartMonitoringCellForUpdates(CellModel cell)
+        private void StartMonitoringCellForChanges(CellModel cell)
         {
             cell.PropertyChanged += CellPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(cell.PopulateFunctionName))
-            {
-                if (_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function))
-                {
-                    UpdateDependencySubscriptions(cell, function);
-                    _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
-                    AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
-                }
-            }
+            if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
+            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            UpdateDependencySubscriptions(cell, function);
+            _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
+            AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
         }
 
-        public void StopMonitoringCellForUpdates(CellModel cell)
+        private void StopMonitoringCellForChanges(CellModel cell)
         {
-            cell.PropertyChanged -= CellPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(cell.PopulateFunctionName))
-            {
-                if (_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function))
-                {
-                    UpdateDependencySubscriptions(cell, function);
-                    _cellToPopulateFunctionNameMap.Remove(cell);
-                    RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
-                }
-            }
             UnsubscribeFromAllCollectionUpdates(cell);
             UnsubscribeFromAllLocationUpdates(cell);
+            cell.PropertyChanged -= CellPropertyChanged;
+            if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
+            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            UpdateDependencySubscriptions(cell, function);
+            _cellToPopulateFunctionNameMap.Remove(cell);
+            RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
         }
 
-        public void SubscribeToCollectionUpdates(CellModel cell, string collectionName)
+        private void SubscribeToCollectionUpdates(CellModel cell, string collectionName)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
             _collectionChangeNotifier.SubscribeToCollectionUpdates(subscriber, collectionName);
         }
 
-        public void SubscribeToUpdatesAtLocation(CellModel cell, string sheet, int row, int column)
+        private void SubscribeToUpdatesAtLocation(CellModel cell, string locationString)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
-            _cellTextChangesAtLocationNotifier.SubscribeToUpdatesAtLocation(subscriber, sheet, row, column);
+            _cellTextChangesAtLocationNotifier.SubscribeToUpdatesAtLocation(subscriber, locationString);
         }
 
-        public void UnsubscribeFromAllCollectionUpdates(CellModel cell)
+        private void UnsubscribeFromAllCollectionUpdates(CellModel cell)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
             _collectionChangeNotifier.UnsubscribeFromAllCollections(subscriber);
+            _collectionDependenciesForCellsPopulateFunction.Remove(cell);
         }
 
-        public void UnsubscribeFromAllLocationUpdates(CellModel cell)
+        private void UnsubscribeFromAllLocationUpdates(CellModel cell)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
             _cellTextChangesAtLocationNotifier.UnsubscribeFromAllLocations(subscriber);
         }
 
-        public void UpdateDependencySubscriptions(CellModel cell, PluginFunction function)
+        private void UpdateDependencySubscriptions(CellModel cell, PluginFunction function)
         {
             if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
             var _ = function.CompiledMethod;
 
+            UntrackCollectionReferences(cell);
             UnsubscribeFromAllLocationUpdates(cell);
             UnsubscribeFromAllCollectionUpdates(cell);
-            if (!string.IsNullOrWhiteSpace(function.Model.Code))
-            {
-                foreach (var locationDependency in function.LocationDependencies)
-                {
-                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? cell.SheetName : locationDependency.SheetName;
+            ResolveLocationDependenciesForCell(cell, function);
+            ResolveCollectionDependenciesForCell(cell, function);
+        }
 
-                    var row = locationDependency.ResolveRow(cell);
-                    var column = locationDependency.ResolveColumn(cell);
-                    if (row == cell.Row && column == cell.Column) continue;
-                    if (locationDependency.IsRange)
-                    {
-                        var rowRangeEnd = locationDependency.ResolveRowRangeEnd(cell);
-                        var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(cell);
-                        for (var r = row; r <= rowRangeEnd; r++)
-                        {
-                            for (var c = column; c <= columnRangeEnd; c++)
-                            {
-                                SubscribeToUpdatesAtLocation(cell, sheetName, r, c);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        SubscribeToUpdatesAtLocation(cell, sheetName, row, column);
-                    }
-                }
-                SubscribeToUpdatesAtLocation(cell, cell.SheetName, cell.Row, cell.Column);
-                foreach (var collectionName in function.CollectionDependencies)
+        private void ResolveCollectionDependenciesForCell(CellModel cell, PluginFunction function)
+        {
+            UnsubscribeFromAllCollectionUpdates(cell);
+            foreach (var collectionReference in function.CollectionDependencies)
+            {
+                var cellSpecificCollectionReference = new CellSpecificCollectionReference(cell, collectionReference, _cellTextChangesAtLocationNotifier, _pluginFunctionRunContext);
+                TrackCollectionReference(cell, cellSpecificCollectionReference);
+
+                var collectionName = cellSpecificCollectionReference.GetCollectionName();
+                SubscribeToCollectionUpdates(cellSpecificCollectionReference.Cell, collectionName);
+            }
+        }
+
+        private void TrackCollectionReference(CellModel cell, CellSpecificCollectionReference cellSpecificCollectionReference)
+        {
+            cellSpecificCollectionReference.CollectionNameChanged += CollectionNameChangedInCellsCollectionDependencies;
+            if (_collectionDependenciesForCellsPopulateFunction.TryGetValue(cell, out var cellSpecificCollectionReferences))
+            {
+                cellSpecificCollectionReferences.Add(cellSpecificCollectionReference);
+            }
+            else
+            {
+                _collectionDependenciesForCellsPopulateFunction.Add(cell, [cellSpecificCollectionReference]);
+            }
+        }
+
+        private void UntrackCollectionReferences(CellModel cell)
+        {
+            if (_collectionDependenciesForCellsPopulateFunction.TryGetValue(cell, out var cellSpecificCollectionReferences))
+            {
+                foreach (var cellSpecificCollectionReference in cellSpecificCollectionReferences)
                 {
-                    SubscribeToCollectionUpdates(cell, collectionName);
+                    cellSpecificCollectionReference.CollectionNameChanged -= CollectionNameChangedInCellsCollectionDependencies;
+                }
+                _collectionDependenciesForCellsPopulateFunction.Remove(cell);
+            }
+        }
+
+        private void CollectionNameChangedInCellsCollectionDependencies(CellSpecificCollectionReference reference)
+        {
+            if (string.IsNullOrWhiteSpace(reference.Cell.PopulateFunctionName)) return;
+            if (!_pluginFunctionLoader.TryGetFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
+            UpdateDependencySubscriptions(reference.Cell, function);
+        }
+
+        private void ResolveLocationDependenciesForCell(CellModel cell, PluginFunction function)
+        {
+            var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
+            foreach (var locationDependency in function.LocationDependencies)
+            {
+                var locations = locationDependency.ResolveLocations(cell);
+                foreach (var location in locations)
+                {
+                    if (thisLocation == location) continue;
+                    SubscribeToUpdatesAtLocation(cell, location);
                 }
             }
+
+            // Because this cell has a populate function, always listen to changes to itself.
+            SubscribeToUpdatesAtLocation(cell, thisLocation);
         }
 
         private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
@@ -179,6 +207,10 @@ namespace Cell.Execution
                 UnsubscribeCellFromFunctionChanges(cell);
                 SubscribeCellToFunctionChanges(cell);
             }
+            //if (e.PropertyName == nameof(CellModel.Text))
+            //{
+            //    _cellTextChangesAtLocationNotifier.
+            //}
         }
 
         private void SubscribeCellToFunctionChanges(CellModel cell)

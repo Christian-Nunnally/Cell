@@ -7,7 +7,7 @@ namespace Cell.ViewModel.Application
         public bool Success { get; }
         public string Message { get; }
 
-        private Func<LoadingProgressResult>? _continuation { get; set; }
+        private Func<LoadingProgressResult>? _continuation;
 
         public LoadingProgressResult(bool success, string message)
         {

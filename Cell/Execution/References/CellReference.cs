@@ -1,10 +1,11 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Cell.Execution
+namespace Cell.Execution.References
 {
     /// <summary>
     /// A class that represents a reference to a cell in a sheet, including the sheet name, row, and column.
@@ -128,6 +129,28 @@ namespace Cell.Execution
             if (!int.TryParse(row, out var rowValue)) return false;
             position = rowValue;
             return true;
+        }
+
+        public IEnumerable<string> ResolveLocations(CellModel cell)
+        {
+            var sheetName = string.IsNullOrWhiteSpace(SheetName) ? cell.SheetName : SheetName;
+            var row = ResolveRow(cell);
+            var column = ResolveColumn(cell);
+            var locations = new List<string>();
+            if (IsRange)
+            {
+                var rowRangeEnd = ResolveRowRangeEnd(cell);
+                var columnRangeEnd = ResolveColumnRangeEnd(cell);
+                for (var r = row; r <= rowRangeEnd; r++)
+                {
+                    for (var c = column; c <= columnRangeEnd; c++)
+                    {
+                        locations.Add(Utilities.GetUnqiueLocationString(sheetName, r, c));
+                    }
+                }
+            }
+            else locations.Add(Utilities.GetUnqiueLocationString(sheetName, row, column));
+            return locations;
         }
     }
 }

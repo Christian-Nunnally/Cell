@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cell.Persistence
 {
-    internal class SaveMigrator
+    public class SaveMigrator
     {
     }
 }

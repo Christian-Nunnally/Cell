@@ -220,7 +220,7 @@ namespace Cell.Model
             }
         }
 
-        internal void CopyTo(CellStyleModel styleToRestoreInto)
+        public void CopyTo(CellStyleModel styleToRestoreInto)
         {
             styleToRestoreInto.Font = Font;
             styleToRestoreInto.FontSize = FontSize;

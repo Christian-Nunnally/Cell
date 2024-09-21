@@ -2,7 +2,7 @@
 
 namespace CellTest.Model
 {
-    internal class TestPluginModel : PluginModel
+    public class TestPluginModel : PluginModel
     {
         private string _property = string.Empty;
         public string Property

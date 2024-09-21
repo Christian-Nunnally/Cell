@@ -5,7 +5,7 @@ namespace Cell.ViewModel.Cells.Types
 {
     public class DateCellViewModel : CellViewModel
     {
-        internal DatePicker picker = new();
+        public DatePicker picker = new();
         public DateCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             model.PropertyChanged += ModelPropertyChanged;

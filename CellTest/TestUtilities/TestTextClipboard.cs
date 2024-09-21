@@ -2,7 +2,7 @@
 
 namespace CellTest.TestUtilities
 {
-    internal class TestTextClipboard : ITextClipboard
+    public class TestTextClipboard : ITextClipboard
     {
         private string? _textInClipboard;
 

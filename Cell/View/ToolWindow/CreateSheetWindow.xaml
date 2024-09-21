@@ -29,7 +29,6 @@
 
         <Label
             Grid.Row="1"
-            Grid.Column="0"
             Height="25"
             HorizontalAlignment="Right"
             Content="Sheet Name" />
@@ -41,7 +40,6 @@
 
         <Label
             Grid.Row="2"
-            Grid.Column="0"
             Height="25"
             HorizontalAlignment="Right"
             Content="Initial Columns" />
@@ -53,7 +51,6 @@
 
         <Label
             Grid.Row="3"
-            Grid.Column="0"
             Height="25"
             HorizontalAlignment="Right"
             Content="Initial Rows" />
@@ -65,7 +62,6 @@
 
         <Button
             Grid.Row="4"
-            Grid.Column="0"
             Grid.ColumnSpan="2"
             Click="AddNewSheetButtonClicked"
             Content="Create" />

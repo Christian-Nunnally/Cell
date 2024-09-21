@@ -128,20 +128,20 @@ namespace Cell.Data
             var populateAndTriggerFunctions = populateFunctions.Concat(triggerFunctions).ToList();
 
             var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
-            AddBaseCollectionsToUsedCollectionList(usedCollections);
+            //AddBaseCollectionsToUsedCollectionList(usedCollections);
 
-            var collectionSortFunctions = usedCollections.Select(x => _pluginFunctionLoader.GetOrCreateFunction("object", x));
-            var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
-            foreach (var function in allFunctions)
-            {
-                _pluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
-            }
+            //var collectionSortFunctions = usedCollections.Select(x => _pluginFunctionLoader.GetOrCreateFunction("object", x));
+            //var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
+            //foreach (var function in allFunctions)
+            //{
+            //    _pluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
+            //}
 
-            foreach (var collection in usedCollections)
-            {
-                var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
-                _userCollectionLoader.ExportCollection(collection, collectionDirectory);
-            }
+            //foreach (var collection in usedCollections)
+            //{
+            //    var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
+            //    _userCollectionLoader.ExportCollection(collection, collectionDirectory);
+            //}
         }
 
         public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)

@@ -24,11 +24,6 @@
             Grid.Row="1"
             ItemsSource="{Binding Sheets}"
             SelectedItem="{Binding SelectedSheetName}">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Height="20" HorizontalAlignment="Stretch">
@@ -133,7 +128,7 @@
                         <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                             <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                             <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
-                            <Setter TargetName="_renameButton" Property="Content" Value="✅" />
+                            <Setter TargetName="_renameButton" Property="Content" Value="✔" />
                         </Trigger>
                         <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                             <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />

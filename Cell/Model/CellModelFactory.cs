@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Cell.Model
 {
-    internal static class CellModelFactory
+    public static class CellModelFactory
     {
         public const int DefaultCellHeight = 25;
         public const int DefaultCellWidth = 125;
@@ -15,7 +15,7 @@ namespace Cell.Model
             return JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new CellError("Unable to copy model");
         }
 
-        internal static CellModel Create(int row, int column, CellType type, string sheet)
+        public static CellModel Create(int row, int column, CellType type, string sheet)
         {
             var newCell = new CellModel
             {
@@ -37,7 +37,7 @@ namespace Cell.Model
             return newCell;
         }
 
-        internal static CellModel Create(int row, int column, CellType type, string sheet, CellTracker trackerToTrackCellWith)
+        public static CellModel Create(int row, int column, CellType type, string sheet, CellTracker trackerToTrackCellWith)
         {
             var newCell = Create(row, column, type, sheet);
             trackerToTrackCellWith.AddCell(newCell);

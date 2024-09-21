@@ -4,7 +4,7 @@ using Cell.ViewModel.Cells.Types;
 
 namespace Cell.ViewModel
 {
-    internal static class CellViewModelFactory
+    public static class CellViewModelFactory
     {
         public static CellViewModel Create(CellModel model, SheetViewModel sheetViewModel)
         {

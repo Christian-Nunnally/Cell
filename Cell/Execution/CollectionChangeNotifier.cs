@@ -60,12 +60,12 @@ namespace Cell.Execution
 
         public IEnumerable<string> GetCollectionsSubscriberIsSubscribedTo(ISubscriber subscriber) => _subscriberNotifier.GetChannelsSubscriberIsSubscribedTo(subscriber);
 
-        internal void UnsubscribeFromAllCollections(ISubscriber subscriber)
+        public void UnsubscribeFromAllCollections(ISubscriber subscriber)
         {
             _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
         }
 
-        internal void SubscribeToCollectionUpdates(ISubscriber subscriber, string collectionName)
+        public void SubscribeToCollectionUpdates(ISubscriber subscriber, string collectionName)
         {
             _subscriberNotifier.SubscribeToChannel(subscriber, collectionName);
         }

@@ -91,7 +91,7 @@ namespace Cell.ViewModel.Cells.Types
             NotifyPropertyChanged(nameof(DataPoints));
         }
 
-        internal static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
+        public static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
         {
             if (points.Count == 0) return [];
 

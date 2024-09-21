@@ -7,6 +7,8 @@ namespace Cell.Model
     /// </summary>
     public class PluginFunctionModel : PropertyChangedBase
     {
+        public static readonly PluginFunctionModel Null = new() { Name = "Null", Code = "" };
+
         private const string codeFooter = "\n}}}";
         private const string codeHeader = "using System; using System.Linq; using System.Collections.Generic; using System.Collections; using Cell.Model; using Cell.Model.Plugin; using Cell.ViewModel; using Cell.Execution; using Cell.ViewModel.Cells.Types;\n\nnamespace Plugin { public class Program { public static ";
         private const string methodHeader = " PluginMethod(PluginContext c, CellModel cell) {\n";

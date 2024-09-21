@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Cell.Execution
 {
-    internal static class CodeCompletionWindowFactory
+    public static class CodeCompletionWindowFactory
     {
         private readonly static Dictionary<string, List<string>> _cachedTypes = [];
         private readonly static Dictionary<string, string> _typeNameToFullyQualifiedTypeNameMap = [];

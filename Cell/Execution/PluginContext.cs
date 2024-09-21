@@ -11,18 +11,43 @@ namespace Cell.Execution
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly CellModel? _cell;
-        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index, CellModel? cell = null)
+        private CellModel? cell;
+
+        public CellModel? Cell
+        {
+            get => cell; set
+            {
+                cell = value;
+                if (cell is not null) Index = cell.Index;
+            }
+        }
+
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
-            _cell = cell;
+            Cell = null;
             Index = index;
+        }
+
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
+        {
+            _cellTracker = cellTracker;
+            _userCollectionLoader = userCollectionLoader;
+            Cell = cell;
+            Index = cell.Index;
+        }
+
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
+        {
+            _cellTracker = cellTracker;
+            _userCollectionLoader = userCollectionLoader;
+            Cell = null;
         }
 
         public EditContext E { get; set; } = new EditContext("");
 
-        public int Index { get; set; }
+        public int Index { get; set; } = 0;
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 
@@ -62,7 +87,7 @@ namespace Cell.Execution
 
         public void ShowDialog(string text)
         {
-            var title = _cell?.UserFriendlyCellName ?? "Function";
+            var title = Cell?.UserFriendlyCellName ?? "Function";
             DialogFactory.ShowDialog(title, text);
         }
     }

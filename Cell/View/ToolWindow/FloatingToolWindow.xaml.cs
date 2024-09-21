@@ -82,7 +82,7 @@ namespace Cell.View.ToolWindow
             Canvas.SetTop(this, boundedY);
         }
 
-        internal void UpdateSizeAndPositionRespectingBounds()
+        public void UpdateSizeAndPositionRespectingBounds()
         {
             if (_content != null)
             {

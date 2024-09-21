@@ -23,7 +23,7 @@
             return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         }
 
-        internal void RestoreBackup(string backupName)
+        public void RestoreBackup(string backupName)
         {
             _backupDirectory.UnzipTo(_projectDirectory, backupName, "");
         }

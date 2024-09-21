@@ -15,7 +15,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public ObservableCollection<SheetModel> Sheets => ApplicationViewModel.Instance.SheetTracker.OrderedSheets;
 
-        internal void RefreshSheetsList()
+        public void RefreshSheetsList()
         {
             NotifyPropertyChanged(nameof(Sheets));
         }

@@ -51,8 +51,7 @@ namespace Cell.View.ToolWindow
         private void AddNewSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
-            var createSheetWindow = new CreateSheetWindow(createSheetWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 
         private void CopySheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
@@ -101,13 +100,13 @@ namespace Cell.View.ToolWindow
 
         private void OpenExportWindow()
         {
-            var exportWindow = new ExportWindow(new ExportWindowViewModel());
+            var exportWindow = new ExportWindowViewModel();
             ApplicationViewModel.Instance.ShowToolWindow(exportWindow);
         }
 
         private void OpenImportWindow()
         {
-            var importWindow = new ImportWindow(new ImportWindowViewModel());
+            var importWindow = new ImportWindowViewModel();
             ApplicationViewModel.Instance.ShowToolWindow(importWindow);
         }
 

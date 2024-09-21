@@ -28,15 +28,11 @@
         </Grid.RowDefinitions>
         <Button
             Grid.Row="4"
-            Grid.Column="0"
             Grid.ColumnSpan="2"
             VerticalAlignment="Center"
             Click="AddCollectionButtonClick"
             Content="Add Collection" />
-        <Label
-            Grid.Row="1"
-            Grid.Column="0"
-            Content="Collection Name" />
+        <Label Grid.Row="1" Content="Collection Name" />
         <TextBox
             Grid.Row="1"
             Grid.Column="1"

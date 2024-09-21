@@ -2,7 +2,7 @@
 
 namespace CellTest.TestUtilities
 {
-    internal class PropertyChangedTester
+    public class PropertyChangedTester
     {
         public PropertyChangedTester(INotifyPropertyChanged objectToTrack)
         {
@@ -13,7 +13,7 @@ namespace CellTest.TestUtilities
 
         public void OnPropertyChanged(object? sender, PropertyChangedEventArgs e) => Notifications.Add(e?.PropertyName ?? "");
 
-        internal void AssertPropertyChanged(string propertyName, int count = 1)
+        public void AssertPropertyChanged(string propertyName, int count = 1)
         {
             if (count != Notifications.Count(x => x == propertyName))
             {

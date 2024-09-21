@@ -1,5 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Data;
+using Cell.Execution.References;
 using Cell.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Cell.Model.Plugin;
@@ -66,7 +67,7 @@ namespace Cell.Persistence
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
             foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
-                if (function.CollectionDependencies.Contains(oldName))
+                if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
                 {
                     function.Model.Code = collectionRenamer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
                 }
@@ -88,7 +89,7 @@ namespace Cell.Persistence
             return collection;
         }
 
-        internal void DeleteCollection(UserCollection collection)
+        public void DeleteCollection(UserCollection collection)
         {
             UnlinkFromBaseCollection(collection);
             StopTrackingCollection(collection);
@@ -96,13 +97,13 @@ namespace Cell.Persistence
             _persistanceManager.DeleteDirectory(directory);
         }
 
-        internal void ImportCollection(string collectionDirectory, string collectionName)
+        public void ImportCollection(string collectionDirectory, string collectionName)
         {
             var toDirectory = Path.Combine("Collections", collectionName);
             _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
         }
 
-        internal void LinkUpBaseCollectionsAfterLoad()
+        public void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
             foreach (var collection in ObservableCollections)

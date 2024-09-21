@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Cell.Execution
 {
-    internal static class DynamicCellPluginExecutor
+    public static class DynamicCellPluginExecutor
     {
         public static void Log(string functionName, string sheet, int row, int column, CompileResult compileResult, bool isTrigger)
         {
@@ -29,7 +29,7 @@ namespace Cell.Execution
             return triggerFunction.Run(pluginContext, cell);
         }
 
-        internal static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, string functionName)
+        public static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, string functionName)
         {
             if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
             var method = populateFunction.CompiledMethod;

@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace Cell.View.Controls
 {
-    internal class BetterComboBox : ComboBox
+    public class BetterComboBox : ComboBox
     {
         public static readonly DependencyProperty HighlightBrushProperty =
             DependencyProperty.Register("HighlightBrush", typeof(Brush), typeof(BetterComboBox), new PropertyMetadata(Brushes.LawnGreen));

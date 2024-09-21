@@ -19,8 +19,7 @@ namespace Cell.View.Application
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
-            var createSheetWindow = new CreateSheetWindow(createSheetWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 
         private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)

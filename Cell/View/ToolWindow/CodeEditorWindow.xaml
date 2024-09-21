@@ -17,7 +17,6 @@
         </Grid.ColumnDefinitions>
         <avalonEdit:TextEditor
             Name="textEditor"
-            Grid.Row="0"
             Padding="4"
             Background="{StaticResource CellBackground}"
             FontFamily="Consolas"

@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Data;
 using Cell.Model;
+using System.ComponentModel;
 
 namespace Cell.Execution
 {
@@ -15,11 +16,29 @@ namespace Cell.Execution
     {
         private readonly CellTracker _cellTracker;
         private readonly SubscriberNotifier _subscriberNotifier = new();
+        private readonly List<string> _locationsThatNeedToBeTrackedIfCellsAreAddedThere = [];
+
         public CellTextChangesAtLocationNotifier(CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
+            _cellTracker.CellAdded += CellAdded;
             _subscriberNotifier.NewChannelSubscribedTo += StartListeningToCellForTextPropertyChanges;
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCellForTextPropertyChanges;
+        }
+
+        private void CellAdded(CellModel addedCell)
+        {
+            var locationString = addedCell.GetUnqiueLocationString();
+            if (_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString))
+            {
+                StartListeningToCellForTextPropertyChanges(locationString);
+                _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Remove(locationString);
+            }
+        }
+
+        private void CellRemoved(CellModel removedCell)
+        {
+            StopListeningToCellForTextPropertyChanges(removedCell.GetUnqiueLocationString());
         }
 
         public IEnumerable<string> GetLocationsSubscriberIsSubscribedTo(CellPopulateSubscriber subscriber)
@@ -27,10 +46,9 @@ namespace Cell.Execution
             return _subscriberNotifier.GetChannelsSubscriberIsSubscribedTo(subscriber);
         }
 
-        public void SubscribeToUpdatesAtLocation(ISubscriber subscriber, string sheet, int row, int column)
+        public void SubscribeToUpdatesAtLocation(ISubscriber subscriber, string locationString)
         {
-            var key = Utilities.GetUnqiueLocationString(sheet, row, column);
-            _subscriberNotifier.SubscribeToChannel(subscriber, key);
+            _subscriberNotifier.SubscribeToChannel(subscriber, locationString);
         }
 
         public void UnsubscribeFromAllLocations(ISubscriber subscriber)
@@ -43,6 +61,7 @@ namespace Cell.Execution
             var (SheetName, Row, Column) = Utilities.GetLocationFromUnqiueLocationString(locationString);
             var cell = _cellTracker.GetCell(SheetName, Row, Column);
             if (cell is not null) cell.PropertyChanged += TrackedCellPropertyChanged;
+            else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
         }
 
         private void StopListeningToCellForTextPropertyChanges(string locationString)
@@ -52,7 +71,7 @@ namespace Cell.Execution
             if (cell is not null) cell.PropertyChanged -= TrackedCellPropertyChanged;
         }
 
-        private void TrackedCellPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var cell = (CellModel)sender!;
             if (e.PropertyName == nameof(CellModel.Text))
@@ -62,15 +81,15 @@ namespace Cell.Execution
             }
             else if (e.PropertyName == nameof(CellModel.Row))
             {
-                throw new NotImplementedException("This cell needs to be untracked and a new cell tracked");
+                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
             }
             else if (e.PropertyName == nameof(CellModel.Column))
             {
-                throw new NotImplementedException("This cell needs to be untracked and a new cell tracked");
+                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
             }
             else if (e.PropertyName == nameof(CellModel.SheetName))
             {
-                throw new NotImplementedException("This cell needs to be untracked and a new cell tracked");
+                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
             }
         }
     }

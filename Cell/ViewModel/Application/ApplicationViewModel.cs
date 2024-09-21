@@ -213,20 +213,20 @@ namespace Cell.ViewModel.Application
             return new LoadingProgressResult(true, "Load Complete");
         }
 
-        internal void CopySelectedCells(bool copyTextOnly)
+        public void CopySelectedCells(bool copyTextOnly)
         {
             if (SheetViewModel == null) return;
             _cellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
-        internal void GoToCell(CellModel cellModel)
+        public void GoToCell(CellModel cellModel)
         {
             GoToSheet(cellModel.SheetName);
             var cell = SheetViewModel?.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
             if (cell is not null) ActiveSheetView?.PanCanvasTo(cell.X, cell.Y);
         }
 
-        internal void GoToSheet(string sheetName)
+        public void GoToSheet(string sheetName)
         {
             if (!SheetModel.IsValidSheetName(sheetName)) return;
             if (SheetViewModel?.SheetName == sheetName) return;
@@ -246,7 +246,7 @@ namespace Cell.ViewModel.Application
             ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
-        internal void PasteCopiedCells()
+        public void PasteCopiedCells()
         {
             if (SheetViewModel == null) return;
             UndoRedoManager.StartRecordingUndoState();
@@ -258,6 +258,11 @@ namespace Cell.ViewModel.Application
         public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
         {
             _applicationView?.ShowToolWindow(content, allowDuplicates);
+        }
+
+        public void ShowToolWindow(PropertyChangedBase viewModel, bool allowDuplicates = false)
+        {
+            _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
         }
 
         public void AttachToView(ApplicationView applicationView)

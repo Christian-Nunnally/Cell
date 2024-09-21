@@ -8,6 +8,7 @@
     <Style TargetType="{x:Type avalonEdit:TextEditor}">
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+        <Setter Property="ScrollViewer.Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="FontFamily" Value="Consolas" />
         <Setter Property="FontSize" Value="10pt" />
         <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
@@ -104,8 +105,47 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <Style
+        x:Key="ListItemInlineButtonStyle"
+        BasedOn="{StaticResource {x:Type Button}}"
+        TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontSize" Value="9" />
+    </Style>
+
+    <Style
+        x:Key="ListItemInlineToggleButtonStyle"
+        BasedOn="{StaticResource {x:Type ToggleButton}}"
+        TargetType="{x:Type ToggleButton}">
+        <Setter Property="Width" Value="20" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontSize" Value="9" />
+    </Style>
+
     <Style TargetType="{x:Type Label}">
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+    </Style>
+
+    <Style
+        x:Key="FilterIconLabelStyle"
+        BasedOn="{StaticResource {x:Type Label}}"
+        TargetType="{x:Type Label}">
+        <Setter Property="Foreground" Value="{StaticResource SelectedBorderColor}" />
+        <Setter Property="Content" Value="🔎" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+
+    <Style
+        x:Key="ListHeaderLabelStyle"
+        BasedOn="{StaticResource {x:Type Label}}"
+        TargetType="{x:Type Label}">
+        <Setter Property="Margin" Value="5,0,10,0" />
+        <Setter Property="FontWeight" Value="Bold" />
     </Style>
 
     <Style TargetType="{x:Type TextBox}">
@@ -114,7 +154,30 @@
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border
+                        Name="border"
+                        Background="{TemplateBinding Panel.Background}"
+                        BorderBrush="{TemplateBinding Border.BorderBrush}"
+                        BorderThickness="{TemplateBinding Border.BorderThickness}"
+                        SnapsToDevicePixels="True">
+                        <ScrollViewer
+                            Name="PART_ContentHost"
+                            Focusable="False"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="UIElement.IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Border.BorderBrush" Value="{StaticResource AccentColor}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="{x:Type CheckBox}">
@@ -202,7 +265,6 @@
 
             <ScrollContentPresenter
                 x:Name="PART_ScrollContentPresenter"
-                Grid.Column="0"
                 Margin="{TemplateBinding Padding}"
                 CanContentScroll="{TemplateBinding CanContentScroll}"
                 CanHorizontallyScroll="False"
@@ -229,6 +291,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="ScrollViewer.CanContentScroll" Value="true" />
         <Setter Property="ScrollViewer.PanningMode" Value="Both" />
@@ -258,6 +321,13 @@
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
             </Setter.Value>
         </Setter>
     </Style>

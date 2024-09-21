@@ -84,8 +84,7 @@
             MouseMove="ResizerRectangleMouseMove"
             MouseUp="ResizerRectangleMouseUp"
             RadiusX="5"
-            RadiusY="5"
-            Visibility="{Binding IsToolWindowResizeable, Converter={StaticResource BooleanToVisibilityConverter}}">
+            RadiusY="5">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />

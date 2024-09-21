@@ -1,13 +1,23 @@
-﻿using System.Windows.Input;
+﻿using Cell.Common;
+using System.Windows.Input;
 
 namespace Cell.ViewModel.Application
 {
-    public class CommandViewModel(string name, ICommand command)
+    public class CommandViewModel
     {
-        public ICommand Command { get; set; } = command;
+        public ICommand Command { get; set; }
 
-        public string Name { get; set; } = name;
+        public string Name { get; set; }
 
-        public string ToolTip { get; set; } = name;
+        public string ToolTip { get; set; }
+
+        public CommandViewModel(string name, ICommand command)
+        {
+            Command = command;
+            Name = name;
+            ToolTip = name;
+        }
+
+        public CommandViewModel(string name, Action command) : this(name, new RelayCommand(x => command())) { }
     }
 }

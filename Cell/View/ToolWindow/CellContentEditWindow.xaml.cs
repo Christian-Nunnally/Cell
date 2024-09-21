@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
@@ -29,7 +28,7 @@ namespace Cell.View.ToolWindow
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Auto-Index", new RelayCommand(x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
+            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];
 
         public bool HandleCloseRequested()

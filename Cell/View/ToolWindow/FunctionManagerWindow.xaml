@@ -28,10 +28,7 @@
                 <ColumnDefinition Width="60" />
                 <ColumnDefinition Width="60" />
             </Grid.ColumnDefinitions>
-            <Label
-                Grid.Column="0"
-                VerticalAlignment="Center"
-                Content="Filter" />
+            <Label VerticalAlignment="Center" Content="Filter" />
             <TextBox
                 Grid.Column="1"
                 Height="25"
@@ -94,16 +91,9 @@
             <ListBox
                 Grid.Row="1"
                 Grid.RowSpan="3"
-                Grid.Column="0"
                 Margin="0,0,10,0"
-                HorizontalAlignment="Stretch"
                 ItemsSource="{Binding Functions}"
                 SelectedItem="{Binding SelectedFunction}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid HorizontalAlignment="Stretch">
@@ -114,15 +104,11 @@
                             </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Left"
-                                BorderThickness="0"
                                 Click="DeleteFunctionButtonClicked"
                                 Content="❌"
-                                FontSize="9"
                                 Foreground="{StaticResource ErrorForegroundColor}"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Delete this function"
                                 Visibility="Hidden" />
                             <TextBlock
@@ -172,14 +158,10 @@
                                     Visibility="Collapsed" />
                                 <ToggleButton
                                     x:Name="_renameButton"
-                                    Width="20"
-                                    Height="20"
                                     Margin="10,0"
-                                    Padding="0"
                                     HorizontalAlignment="Left"
-                                    BorderThickness="0"
                                     Content="🏷️"
-                                    FontSize="9"
+                                    Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
                             </StackPanel>
@@ -188,6 +170,7 @@
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                                 <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="_renameButton" Property="Content" Value="✔" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
@@ -208,14 +191,10 @@
                         <Grid Height="20" HorizontalAlignment="Stretch">
                             <Button
                                 x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Left"
-                                BorderThickness="0"
                                 Click="RemoveFunctionReferenceFromCellButtonClick"
                                 Content="➖"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Makes this cell stop using the selected function"
                                 Visibility="Hidden" />
                             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
@@ -235,25 +214,19 @@
                             </StackPanel>
                             <Button
                                 x:Name="_viewButton"
-                                Width="20"
-                                Height="20"
                                 Margin="0,0,20,0"
-                                Padding="0"
                                 HorizontalAlignment="Right"
                                 Click="GoToCellButtonClick"
                                 Content="👁️"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Edit the selected function from the context of this cell"
                                 Visibility="Hidden" />
                             <Button
                                 x:Name="_editButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Right"
                                 Click="EditFunctionFromCellsContextButtonClick"
                                 Content="✏️"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Edit the selected function from the context of this cell"
                                 Visibility="Hidden" />
                         </Grid>
@@ -266,11 +239,6 @@
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
             </ListBox>
             <ListBox
                 Grid.Row="3"

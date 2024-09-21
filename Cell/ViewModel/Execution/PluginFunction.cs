@@ -1,5 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Execution;
+using Cell.Execution.References;
 using Cell.Execution.SyntaxWalkers.CellReferences;
 using Cell.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
@@ -12,7 +13,7 @@ namespace Cell.ViewModel.Execution
 {
     public partial class PluginFunction : PropertyChangedBase
     {
-        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(this);
+        public static readonly PluginFunction Null = new(PluginFunctionModel.Null);
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool wasCompileSuccessful;
@@ -25,7 +26,9 @@ namespace Cell.ViewModel.Execution
 
         public event Action<PluginFunction>? DependenciesChanged;
 
-        public List<string> CollectionDependencies { get; set; } = [];
+        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(this);
+
+        public List<ICollectionReference> CollectionDependencies { get; set; } = [];
 
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
 
@@ -117,6 +120,20 @@ namespace Cell.ViewModel.Execution
             return intermediateCode.Replace("_Range_", "..");
         }
 
+        public CompileResult Run(PluginContext pluginContext, CellModel cell)
+        {
+            var method = CompiledMethod;
+            if (!CompileResult.WasSuccess) return CompileResult;
+            try
+            {
+                return RunUnsafe(pluginContext, cell, method);
+            }
+            catch (Exception e)
+            {
+                return new CompileResult { WasSuccess = false, ExecutionResult = "Function errored during execution: " + e.Message };
+            }
+        }
+
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
@@ -166,23 +183,9 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        public CompileResult Run(PluginContext pluginContext, CellModel cell)
-        {
-            var method = CompiledMethod;
-            if (!CompileResult.WasSuccess) return CompileResult;
-            try
-            {
-                return RunUnsafe(pluginContext, cell, method);
-            }
-            catch (Exception e)
-            {
-                return new CompileResult { WasSuccess = false, ExecutionResult = "Function errored during execution: " + e.Message };
-            }
-        }
-
         private CompileResult RunUnsafe(PluginContext pluginContext, CellModel cell, MethodInfo? method)
         {
-            var result = new CompileResult { WasSuccess = true, ExecutionResult = "Success"};
+            var result = new CompileResult { WasSuccess = true, ExecutionResult = "Success" };
             // TODO: Do I actually need to check the return type here?
             if (Model.ReturnType != "void") result.ReturnedObject = method?.Invoke(null, [pluginContext, cell]);
             else method?.Invoke(null, [pluginContext, cell]);

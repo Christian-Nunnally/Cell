@@ -64,7 +64,7 @@ namespace Cell.Data
             CellRemoved?.Invoke(cellModel);
         }
 
-        internal void RenameSheet(string oldSheetName, string newSheetName)
+        public void RenameSheet(string oldSheetName, string newSheetName)
         {
             _cellLoader.RenameSheet(oldSheetName, newSheetName);
         }

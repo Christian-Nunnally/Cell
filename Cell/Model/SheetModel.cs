@@ -70,7 +70,7 @@ namespace Cell.Model
             }
         }
 
-        internal static bool IsValidSheetName(string sheetName)
+        public static bool IsValidSheetName(string sheetName)
         {
             if (string.IsNullOrWhiteSpace(sheetName)) return false;
             if (sheetName.Length > 60) return false;

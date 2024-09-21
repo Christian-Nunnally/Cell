@@ -1,7 +1,7 @@
 ﻿namespace Cell.Common
 {
     [Serializable]
-    internal class CellError : Exception
+    public class CellError : Exception
     {
         public CellError()
         {

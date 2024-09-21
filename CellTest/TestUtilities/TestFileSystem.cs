@@ -2,7 +2,7 @@
 
 namespace CellTest.TestUtilities
 {
-    internal class TestFileSystem
+    public class TestFileSystem
     {
         private readonly Dictionary<string, object> _root = [];
         public void CreateDirectory(string path)
@@ -69,7 +69,7 @@ namespace CellTest.TestUtilities
             parentDir[fileName] = content;
         }
 
-        internal void CopyDirectory(string from, string to)
+        public void CopyDirectory(string from, string to)
         {
             var fromDir = GetDirectory(from);
             if (fromDir == null) return;
@@ -89,7 +89,7 @@ namespace CellTest.TestUtilities
             }
         }
 
-        internal void DeleteDirectory(string path)
+        public void DeleteDirectory(string path)
         {
             var directories = path.Split('\\');
             var currentDir = _root;

@@ -51,7 +51,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
 
-        internal void AddCurrentCollection()
+        public void AddCurrentCollection()
         {
             var collectionName = NewCollectionName;
             if (string.IsNullOrEmpty(collectionName)) return;

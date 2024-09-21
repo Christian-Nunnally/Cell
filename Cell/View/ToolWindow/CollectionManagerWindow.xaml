@@ -13,78 +13,24 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="1*" />
-            <RowDefinition Height="1*" />
-        </Grid.RowDefinitions>
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
-        <Label
-            Content="Collections"
-            FontSize="14"
-            FontWeight="Bold" />
-        <Button
-            Width="100"
-            Height="20"
-            Margin="100,0,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Click="OpenCreateCollectionWindowButtonClick"
-            Content="New Collection"
-            FontSize="10" />
-        <Label
-            Grid.Column="1"
-            Content="Items"
-            FontSize="14"
-            FontWeight="Bold" />
-        <Grid
-            Grid.Row="1"
-            Grid.RowSpan="2"
-            Grid.Column="0"
-            Margin="0,0,10,25">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="20" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="150" />
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="25" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Label
-                Grid.Column="1"
-                Margin="8,0"
-                HorizontalAlignment="Left"
-                Content="Name" />
-            <Label
-                Grid.Column="2"
-                HorizontalAlignment="Left"
-                Content="Item Type" />
-            <Label
-                Grid.Column="3"
-                HorizontalAlignment="Left"
-                Content="Items" />
-            <Label
-                Grid.Column="4"
-                HorizontalContentAlignment="Left"
-                Content="Usages" />
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top">
+                <Label Content="Collections" Style="{StaticResource ListHeaderLabelStyle}" />
+                <Grid>
+                    <TextBox Padding="24,0,0,0" Text="{Binding CollectionListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                    <Label Style="{StaticResource FilterIconLabelStyle}" />
+                </Grid>
+            </DockPanel>
             <ListBox
                 Grid.Row="1"
-                Grid.ColumnSpan="6"
-                HorizontalAlignment="Stretch"
-                ItemsSource="{Binding Collections}"
+                Grid.RowSpan="1"
+                ItemsSource="{Binding FilteredCollections}"
                 SelectedItem="{Binding SelectedCollection}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid HorizontalAlignment="Stretch" d:DataContext="{d:DesignInstance Type=plugin:UserCollection}">
@@ -97,15 +43,11 @@
                             </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Left"
-                                BorderThickness="0"
                                 Click="DeleteCollectionButtonClicked"
                                 Content="❌"
-                                FontSize="9"
                                 Foreground="{StaticResource ErrorForegroundColor}"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Delete this collection"
                                 Visibility="Hidden" />
                             <StackPanel
@@ -128,14 +70,10 @@
                                     Visibility="Collapsed" />
                                 <ToggleButton
                                     x:Name="_renameButton"
-                                    Width="20"
-                                    Height="20"
                                     Margin="10,0"
-                                    Padding="0"
                                     HorizontalAlignment="Left"
-                                    BorderThickness="0"
                                     Content="🏷️"
-                                    FontSize="9"
+                                    Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
                             </StackPanel>
@@ -168,6 +106,7 @@
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                                 <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="_renameButton" Property="Content" Value="✔" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
@@ -177,85 +116,150 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-        </Grid>
-        <DockPanel
-            Grid.Row="1"
-            Grid.RowSpan="1"
-            Grid.Column="1">
-            <Label
-                Margin="25,0"
-                HorizontalAlignment="Left"
-                Content="Details"
-                DockPanel.Dock="Top" />
-            <ListBox
-                Grid.Row="1"
-                Grid.RowSpan="1"
-                Grid.Column="1"
-                VerticalAlignment="Stretch"
-                ItemsSource="{Binding ItemsInSelectedCollection}"
-                SelectedItem="{Binding SelectedItem}"
-                SelectionChanged="ItemsInSelectedCollectionListBoxSelectionChanged">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="20" HorizontalAlignment="Stretch">
-                            <Button
-                                x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
-                                HorizontalAlignment="Left"
-                                BorderThickness="0"
-                                Click="RemoveItemFromCollectionClick"
-                                Content="❌"
-                                FontSize="9"
-                                Foreground="{StaticResource ErrorForegroundColor}"
-                                ToolTip="Remove this item from the collection (will delete if not stored in another collection)"
-                                Visibility="Hidden" />
-                            <TextBlock
-                                Margin="25,0"
-                                VerticalAlignment="Center"
-                                FontFamily="Consolas"
-                                Text="{Binding}"
-                                ToolTip="{Binding}" />
-                        </Grid>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
         </DockPanel>
-        <DockPanel
-            Grid.Row="2"
-            Margin="0,0,10,0"
-            VerticalAlignment="Bottom">
-            <Label Content="Sort/Filter Function" DockPanel.Dock="Left" />
-            <Button
-                Width="50"
-                Click="EditSortAndFilterFunctionButtonClick"
-                Content="Edit"
-                DockPanel.Dock="Right" />
-            <TextBox Height="25" Text="{Binding SelectedCollection.Model.SortAndFilterFunctionName}" />
-        </DockPanel>
-        <DockPanel Grid.Row="2" Grid.Column="1">
-            <Button
-                Click="SaveSelectedItemJsonButtonClick"
-                Content="Save"
-                DockPanel.Dock="Bottom" />
-            <avalonEdit:TextEditor
-                Name="_itemJsonEditor"
-                Margin="0,10"
-                FontFamily="Consolas"
-                Foreground="{StaticResource ForegroundColor}"
-                SyntaxHighlighting="Json"
-                TextChanged="ItemJsonEditorTextChanged" />
-        </DockPanel>
+        <Border
+            Grid.Column="1"
+            BorderBrush="{StaticResource CellBorderColor}"
+            BorderThickness="1">
+
+            <DockPanel Grid.Column="1" Margin="5">
+                <StackPanel
+                    Margin="0,0,0,10"
+                    DockPanel.Dock="Top"
+                    Orientation="Horizontal">
+                    <Label
+                        Margin="5,0,-10,0"
+                        Content="Settings and content for &lt;"
+                        Style="{StaticResource ListHeaderLabelStyle}" />
+                    <Label Content="{Binding SelectedCollection.Name}" Style="{StaticResource ListHeaderLabelStyle}" />
+                    <Label
+                        Margin="-15,0"
+                        Content="&gt;"
+                        Style="{StaticResource ListHeaderLabelStyle}" />
+                </StackPanel>
+                <DockPanel>
+                    <DockPanel
+                        Grid.Column="1"
+                        Margin="0,0,0,5"
+                        VerticalAlignment="Bottom"
+                        DockPanel.Dock="Top">
+                        <Label
+                            Margin="5,0,0,0"
+                            Content="Sort/Filter Function"
+                            DockPanel.Dock="Left" />
+                        <Button
+                            Width="50"
+                            Margin="5,0,0,0"
+                            Click="EditSortAndFilterFunctionButtonClick"
+                            Content="Edit"
+                            DockPanel.Dock="Right" />
+                        <TextBox Height="25" Text="{Binding SelectedCollection.Model.SortAndFilterFunctionName}" />
+                    </DockPanel>
+                    <Grid DockPanel.Dock="Bottom" Visibility="{Binding IsEditJsonTextBoxVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <avalonEdit:TextEditor
+                            Name="_itemJsonEditor"
+                            MaxHeight="300"
+                            Background="{StaticResource ControlBackground}"
+                            BorderBrush="{StaticResource CellBorderColor}"
+                            BorderThickness="1"
+                            FontFamily="Consolas"
+                            Foreground="{StaticResource ForegroundColor}"
+                            SyntaxHighlighting="Json"
+                            TextChanged="ItemJsonEditorTextChanged" />
+                        <Border
+                            Width="100"
+                            Height="40"
+                            Margin="20"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            BorderBrush="{StaticResource CellBackground}"
+                            BorderThickness="6"
+                            CornerRadius="3"
+                            Visibility="{Binding IsSaveItemJsonButtonVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Border BorderBrush="{StaticResource ForegroundColor}" BorderThickness=".5">
+                                <Button
+                                    Height="Auto"
+                                    Click="SaveSelectedItemJsonButtonClick"
+                                    Content="Save" />
+                            </Border>
+                        </Border>
+                        <Grid.Resources>
+                            <Style TargetType="avalonEdit:TextEditor">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type avalonEdit:TextEditor}">
+                                            <Border
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                                <ScrollViewer
+                                                    Name="PART_ScrollViewer"
+                                                    Padding="{TemplateBinding Padding}"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    VerticalContentAlignment="Stretch"
+                                                    Background="{StaticResource ControlBackground}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CanContentScroll="True"
+                                                    Focusable="False"
+                                                    HorizontalScrollBarVisibility="Auto"
+                                                    VerticalScrollBarVisibility="Auto">
+                                                    <ContentPresenter Content="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TextArea}" />
+                                                </ScrollViewer>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="WordWrap" Value="True">
+                                                    <Setter TargetName="PART_ScrollViewer" Property="HorizontalScrollBarVisibility" Value="Disabled" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
+                    </Grid>
+                    <DockPanel>
+                        <DockPanel DockPanel.Dock="Top">
+                            <Label Content="Items" Style="{StaticResource ListHeaderLabelStyle}" />
+                            <Grid>
+                                <TextBox Padding="24,0,0,0" Text="{Binding CollectionItemListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label Style="{StaticResource FilterIconLabelStyle}" />
+                            </Grid>
+                        </DockPanel>
+                        <ListBox
+                            VerticalAlignment="Stretch"
+                            ItemsSource="{Binding FilteredItemsInSelectedCollection}"
+                            SelectedItem="{Binding SelectedItem}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Height="20" HorizontalAlignment="Stretch">
+                                        <Button
+                                            x:Name="_removeButton"
+                                            HorizontalAlignment="Left"
+                                            Click="RemoveItemFromCollectionClick"
+                                            Content="❌"
+                                            Foreground="{StaticResource ErrorForegroundColor}"
+                                            Style="{StaticResource ListItemInlineButtonStyle}"
+                                            ToolTip="Remove this item from the collection (will delete if not stored in another collection)"
+                                            Visibility="Hidden" />
+                                        <TextBlock
+                                            Margin="25,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Consolas"
+                                            Text="{Binding}"
+                                            ToolTip="{Binding}" />
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                            <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </DockPanel>
+            </DockPanel>
+        </Border>
     </Grid>
 </UserControl>

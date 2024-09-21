@@ -116,10 +116,10 @@ namespace Cell.ViewModel.ToolWindow
                 }
 
                 ReferencedCollectionsByTheSelectedFunction.Clear();
-                foreach (var collection in _selectedFunction.CollectionDependencies)
-                {
-                    ReferencedCollectionsByTheSelectedFunction.Add(collection);
-                }
+                //foreach (var collection in _selectedFunction.CollectionDependencies)
+                //{
+                //    ReferencedCollectionsByTheSelectedFunction.Add(collection);
+                //}
             }
         }
 
@@ -155,7 +155,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (!function.Model.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
             if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;
-            if (_filterCollection != "All" && !function.CollectionDependencies.Contains(_filterCollection)) return false;
+            //if (_filterCollection != "All" && !function.CollectionDependencies.Contains(_filterCollection)) return false;
             if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
             return true;

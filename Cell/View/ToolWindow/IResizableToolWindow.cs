@@ -2,7 +2,7 @@
 
 namespace Cell.View.ToolWindow
 {
-    internal interface IResizableToolWindow
+    public interface IResizableToolWindow
     {
         Action? RequestClose { get; set; }
 

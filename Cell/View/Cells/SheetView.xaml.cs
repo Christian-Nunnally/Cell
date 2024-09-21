@@ -144,7 +144,7 @@ namespace Cell.View.Cells
             _panAndZoomCanvas?.PanCanvasTo(x, y);
         }
 
-        internal void ZoomCanvasTo(Point point, double zoom)
+        public void ZoomCanvasTo(Point point, double zoom)
         {
             _panAndZoomCanvas?.ZoomCanvasTo(point, zoom);
         }

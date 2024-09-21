@@ -38,7 +38,7 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        internal void SetTextBox(TextBox textBox)
+        public void SetTextBox(TextBox textBox)
         {
             _textBox = textBox;
         }

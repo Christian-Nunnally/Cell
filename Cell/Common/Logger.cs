@@ -1,7 +1,7 @@
 ﻿namespace Cell.Common
 {
     // TODO: Make not static.
-    internal static class Logger
+    public static class Logger
     {
         private const int MaxRetainedLogs = 2000;
         private static readonly Queue<string> _logsQueue = new();

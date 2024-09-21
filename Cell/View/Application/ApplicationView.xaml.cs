@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Execution;
 using Cell.Persistence;
 using Cell.Persistence.Migration;
@@ -61,6 +62,13 @@ namespace Cell.View.Application
                 ActiveSheetView = sheetView;
                 _sheetViews.Add(sheetViewModel, sheetView);
             }
+        }
+
+        public void ShowToolWindow(PropertyChangedBase viewModel, bool allowDuplicates = false)
+        {
+            var window = ToolWindowViewFactory.Create(viewModel);
+            if (window is null) return;
+            ShowToolWindow(window);
         }
 
         public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
@@ -161,25 +169,22 @@ namespace Cell.View.Application
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var cellSettingsEditWindowviewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
-            var editPanel = new CellSettingsEditWindow(cellSettingsEditWindowviewModel);
-            ShowToolWindow(editPanel);
+            var cellSettingsEditWindowViewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
+            ShowToolWindow(cellSettingsEditWindowViewModel);
         }
 
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellPopulateManager);
-            var editPanel = new CellContentEditWindow(cellContentEditWindowViewModel);
-            ShowToolWindow(editPanel);
+            ShowToolWindow(cellContentEditWindowViewModel);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
             var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader);
-            var collectionManager = new CollectionManagerWindow(collectionManagerViewModel);
-            ShowToolWindow(collectionManager);
+            ShowToolWindow(collectionManagerViewModel);
         }
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
@@ -187,22 +192,19 @@ namespace Cell.View.Application
             if (_viewModel == null) return;
             var functionLoader = _viewModel.PluginFunctionLoader;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
-            var functionManager = new FunctionManagerWindow(functionManagerViewModel);
-            ShowToolWindow(functionManager);
+            ShowToolWindow(functionManagerViewModel);
         }
 
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var settingsWindowViewModel = new SettingsWindowViewModel();
-            var settingsWindow = new SettingsWindow(settingsWindowViewModel);
-            ShowToolWindow(settingsWindow);
+            ShowToolWindow(settingsWindowViewModel);
         }
 
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
             var sheetManagerViewModel = new SheetManagerWindowViewModel();
-            var sheetManager = new SheetManagerWindow(sheetManagerViewModel);
-            ShowToolWindow(sheetManager);
+            ShowToolWindow(sheetManagerViewModel);
         }
 
         private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
@@ -218,8 +220,7 @@ namespace Cell.View.Application
         {
             if (_viewModel?.SheetViewModel == null) return;
             var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
-            var editPanel = new CellFormatEditWindow(viewModel);
-            ShowToolWindow(editPanel);
+            ShowToolWindow(viewModel);
         }
 
         private void UpdateToolWindowLocation()

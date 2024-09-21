@@ -3,7 +3,7 @@ using Cell.Plugin.SyntaxWalkers;
 
 namespace Cell.Execution.SyntaxWalkers.CellReferences
 {
-    internal class CellReferenceSyntaxTransformer(CellModel cell) : SyntaxTransformer(new CodeToCellReferenceSyntaxRewriter(cell), new CellReferenceToCodeSyntaxRewriter(cell))
+    public class CellReferenceSyntaxTransformer(CellModel cell) : SyntaxTransformer(new CodeToCellReferenceSyntaxRewriter(cell), new CellReferenceToCodeSyntaxRewriter(cell))
     {
     }
 }

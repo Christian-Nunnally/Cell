@@ -534,6 +534,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
                 NotifyPropertyChanged(nameof(Width));
                 NotifyPropertyChanged(nameof(Height));
+                NotifyPropertyChanged(nameof(CellType));
             }
         }
 
@@ -639,7 +640,7 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
-        internal void DeleteColumns()
+        public void DeleteColumns()
         {
             foreach (var cell in _cellsToEdit.ToList())
             {
@@ -648,7 +649,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        internal void MergeCellsAcross()
+        public void MergeCellsAcross()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             var selectedCells = _cellsToEdit.ToList();

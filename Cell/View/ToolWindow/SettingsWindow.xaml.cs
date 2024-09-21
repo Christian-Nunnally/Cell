@@ -43,15 +43,13 @@ namespace Cell.View.ToolWindow
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var logWindowViewModel = new LogWindowViewModel();
-            var logWindow = new LogWindow(logWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(logWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(logWindowViewModel);
         }
 
         private void ShowUndoRedoStackWindowButtonClick(object sender, RoutedEventArgs e)
         {
             var undoRedoStackWindowViewModel = new UndoRedoStackWindowViewModel();
-            var undoRedoStackWindow = new UndoRedoStackWindow(undoRedoStackWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindow);
+            ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindowViewModel);
         }
 
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
@@ -106,8 +104,7 @@ namespace Cell.View.ToolWindow
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(editPanel);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
         }
 
         private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
@@ -116,8 +113,7 @@ namespace Cell.View.ToolWindow
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            var editPanel = new CellFormatEditWindow(cellFormatEditorWindowViewModel);
-            ApplicationViewModel.Instance.ShowToolWindow(editPanel);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
         }
 
         private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)

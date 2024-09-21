@@ -3,7 +3,7 @@ using System.IO.Compression;
 
 namespace Cell.Persistence
 {
-    internal class FileIO : IFileIO
+    public class FileIO : IFileIO
     {
         public void CopyDirectory(string fromPath, string toPath)
         {

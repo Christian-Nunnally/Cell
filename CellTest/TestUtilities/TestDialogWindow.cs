@@ -2,7 +2,7 @@
 
 namespace CellTest.TestUtilities
 {
-    internal class TestDialogWindow : IDialogWindow
+    public class TestDialogWindow : IDialogWindow
     {
         private List<CommandViewModel> _actions = [];
         private static readonly Stack<TestDialogWindow> _instances = new();

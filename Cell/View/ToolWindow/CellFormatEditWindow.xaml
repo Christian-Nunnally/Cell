@@ -70,23 +70,18 @@
                 </Border>
             </Popup>
         </Grid>
-        <Grid
-            Grid.Row="1"
-            Grid.Column="0"
-            Margin="5">
+        <Grid Grid.Row="1" Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="10" />
                 <RowDefinition Height="1*" />
                 <RowDefinition Height="10" />
             </Grid.RowDefinitions>
             <Path
-                Grid.Row="0"
                 Data="M 0,1 L .5,0 L 1,1"
                 Stretch="Fill"
                 Stroke="White"
                 StrokeThickness="1" />
             <Line
-                Grid.Row="0"
                 Stretch="Fill"
                 Stroke="White"
                 StrokeEndLineCap="Triangle"
@@ -123,23 +118,18 @@
                 Stroke="White"
                 StrokeThickness="1" />
         </Grid>
-        <Grid
-            Grid.Row="0"
-            Grid.Column="1"
-            Margin="5">
+        <Grid Grid.Column="1" Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="10" />
             </Grid.ColumnDefinitions>
             <Path
-                Grid.Column="0"
                 Data="M 1,0 L 0,.5 L 1,1"
                 Stretch="Fill"
                 Stroke="White"
                 StrokeThickness="1" />
             <Line
-                Grid.Column="0"
                 Stretch="Fill"
                 Stroke="White"
                 StrokeEndLineCap="Triangle"

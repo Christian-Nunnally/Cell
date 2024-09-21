@@ -26,9 +26,9 @@ namespace Cell.View.ToolWindow
 
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 100;
+        public double GetMinimumHeight() => 200;
 
-        public double GetMinimumWidth() => 100;
+        public double GetMinimumWidth() => 280;
 
         public string GetTitle() => _title;
 

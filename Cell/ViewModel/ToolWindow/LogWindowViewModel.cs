@@ -17,7 +17,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public string LogBuffer => _logBufferBuilder.ToString();
 
-        internal void ClearBuffer()
+        public void ClearBuffer()
         {
             _logBufferBuilder.Clear();
             NotifyPropertyChanged(nameof(LogBuffer));

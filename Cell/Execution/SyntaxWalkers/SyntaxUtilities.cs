@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Cell.Execution.SyntaxWalkers
 {
-    internal class SyntaxUtilities
+    public class SyntaxUtilities
     {
-        internal static SyntaxNode CreateSyntaxNodePreservingTrivia(SyntaxNode? nodeToGetTriviaFrom, string code)
+        public static SyntaxNode CreateSyntaxNodePreservingTrivia(SyntaxNode? nodeToGetTriviaFrom, string code)
         {
             var result = SyntaxFactory.ParseExpression(code);
             if (nodeToGetTriviaFrom == null) return result;

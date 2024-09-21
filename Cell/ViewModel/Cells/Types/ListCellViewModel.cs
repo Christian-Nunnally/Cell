@@ -78,7 +78,7 @@ namespace Cell.ViewModel.Cells.Types
             UpdateList();
         }
 
-        internal void UpdateList()
+        public void UpdateList()
         {
             ListItems.Clear();
             var collection = _sheetViewModel.UserCollectionLoader.GetCollection(CollectionName);

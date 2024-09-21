@@ -2,7 +2,7 @@
 
 namespace CellTest.TestUtilities
 {
-    internal class TestFileIO : IFileIO
+    public class TestFileIO : IFileIO
     {
         private readonly TestFileSystem _testFileSystem = new();
 

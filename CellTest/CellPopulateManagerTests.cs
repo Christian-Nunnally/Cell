@@ -1,6 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Execution;
 using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Persistence;
 using CellTest.TestUtilities;
 
@@ -32,6 +33,101 @@ namespace CellTest
         public void BasicLaunchTest()
         {
             var _ = CreateInstance();
+        }
+
+        [Fact]
+        public void CellWithPopulateFunction_CellTextChanged_PopulateFunctionRunsToSetTheTextToItsResult()
+        {
+            var _ = CreateInstance();
+            var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "return \"Hello world\";");
+            cell.PopulateFunctionName = function.Name;
+
+            cell.Text += "1";
+
+            Assert.Equal("Hello world", cell.Text);
+        }
+
+        [Fact]
+        public void A1CellWithPopulateFunctionDependingOnA2_CellTextChanged_PopulateFunctionRunsToSetTheTextToItsResult()
+        {
+            var _ = CreateInstance();
+            var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
+            var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "");
+            function.SetUserFriendlyCode("return A2.Text;", a1, x => x, []);
+            a1.PopulateFunctionName = function.Name;
+
+            a2.Text += "HelloWorld";
+
+            Assert.Equal("HelloWorld", a1.Text);
+        }
+
+        [Fact]
+        public void CellWithPopulateFunctionDependingOnCollection_ItemAddedToCollection_PopulateFunctionRunsToSetTheTextToItsResult()
+        {
+            var _ = CreateInstance();
+            var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
+            var collection = _userCollectionLoader.CreateCollection("testList", "TodoItem", string.Empty);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "");
+            function.SetUserFriendlyCode("return testList.Count();", cell, x => "TodoItem", ["testList"]);
+            cell.PopulateFunctionName = function.Name;
+
+            collection.Add(new TodoItem());
+
+            Assert.Equal("1", cell.Text);
+        }
+
+        [Fact]
+        public void A1PopulateFunctionReferencesCollectionNamedA2Text_A2SetToCollectionName_CollectionReferenceRecognizedByPopulateManagerForA1()
+        {
+            var testing = CreateInstance();
+            var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
+            var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
+            var collection = _userCollectionLoader.CreateCollection("testList", "TodoItem", string.Empty);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "");
+            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, x => "TodoItem", ["testList"]);
+            a1.PopulateFunctionName = function.Name;
+
+            a2.Text = "testList";
+
+            Assert.Contains("testList", testing.GetAllCollectionSubscriptions(a1));
+        }
+
+        [Fact]
+        public void A1PopulateFunctionReferencesCollectionNamedA2Text_A2SetToNewCollectionName_CollectionReferenceRecognizedByPopulateManagerForA1()
+        {
+            var testing = CreateInstance();
+            var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
+            var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
+            var collection = _userCollectionLoader.CreateCollection("testList", "TodoItem", string.Empty);
+            var collection2 = _userCollectionLoader.CreateCollection("testList2", "TodoItem", string.Empty);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "");
+            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, x => "TodoItem", ["testList"]);
+            a1.PopulateFunctionName = function.Name;
+            a2.Text = "testList";
+            Assert.Contains("testList", testing.GetAllCollectionSubscriptions(a1));
+
+            a2.Text = "testList2";
+            Assert.Contains("testList2", testing.GetAllCollectionSubscriptions(a1));
+            Assert.DoesNotContain("testList", testing.GetAllCollectionSubscriptions(a1));
+        }
+
+        [Fact]
+        public void A1PopulateFunctionReferencesCollectionNamedA2Text_ItemAddedToCollection_PopulateFunctionRunsToSetTheTextToItsResult()
+        {
+            var _ = CreateInstance();
+            var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
+            var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
+            var collection = _userCollectionLoader.CreateCollection("testList", "TodoItem", string.Empty);
+            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "");
+            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, x => "TodoItem", ["testList"]);
+            a1.PopulateFunctionName = function.Name;
+            a2.Text = "testList";
+
+            _userCollectionLoader.GetCollection("testList")!.Add(new TodoItem());
+
+            Assert.Equal("1", a1.Text);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Cell.Common;
 using Cell.Execution;
+using Cell.Execution.References;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
@@ -23,6 +24,8 @@ namespace Cell.Data
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
         }
+
+        public int UsageCount => _pluginFunctionLoader.ObservableFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -72,8 +75,6 @@ namespace Cell.Data
         }
 
         public string Type { get; internal set; } = string.Empty;
-
-        public int UsageCount => _pluginFunctionLoader.ObservableFunctions.SelectMany(x => x.CollectionDependencies).Count(x => x == Name) + _userCollectionLoader.ObservableCollections.Count(x => x.Model.BasedOnCollectionName == Name);
 
         public void Add(PluginModel item)
         {

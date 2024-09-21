@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 
@@ -25,7 +24,7 @@ namespace Cell.View.ToolWindow
         {
             return
             [
-                new("Example", new RelayCommand(x => {}))
+                new("Example", () => {})
             ];
         }
 

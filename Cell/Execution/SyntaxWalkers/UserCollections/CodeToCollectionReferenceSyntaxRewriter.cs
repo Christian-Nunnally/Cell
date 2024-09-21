@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Cell.Execution.References;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Cell.Execution.SyntaxWalkers.UserCollections
@@ -11,9 +12,11 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
 
             if (CollectionReferenceSyntaxWalker.TryGetCollectionReferenceFromNode(node, out var collectionReference))
             {
-                return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, collectionReference);
+                if (collectionReference is ConstantCollectionReference constantCollectionReference)
+                {
+                    return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, constantCollectionReference.ConstantCollectionName);
+                }
             }
-
             return node;
         }
     }

@@ -2,7 +2,6 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
-using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 
 namespace Cell.ViewModel.Cells
@@ -42,12 +41,10 @@ namespace Cell.ViewModel.Cells
             if (sheet.PluginFunctionLoader.TryGetFunction("object", sheet.SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
             {
                 if (sheet.ApplicationSettings.HighlightPopulateCellDependencies) HighlightCellDependenciesOfFunction(sheet, populate);
-                if (sheet.ApplicationSettings.HighlightPopulateCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, populate);
             }
             if (sheet.PluginFunctionLoader.TryGetFunction("void", sheet.SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
             {
                 if (sheet.ApplicationSettings.HighlightTriggerCellDependencies) HighlightCellDependenciesOfFunction(sheet, trigger);
-                if (sheet.ApplicationSettings.HighlightTriggerCollectionDependencies) HighlightCollectionDependenciesForFunction(sheet, trigger);
             }
         }
 
@@ -90,18 +87,6 @@ namespace Cell.ViewModel.Cells
                     if (locationDependencies.IsRowRelative) row += sheet.SelectedCellViewModel.Row;
                     var cellToHighlight = sheet.CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                     if (cellToHighlight == null) continue;
-                    sheet.HighlightCell(cellToHighlight, "#0438ff44");
-                }
-            }
-        }
-
-        private static void HighlightCollectionDependenciesForFunction(SheetViewModel sheet, PluginFunction function)
-        {
-            foreach (var collectionReference in function.CollectionDependencies)
-            {
-                var cellsToHighlight = sheet.CellViewModels.OfType<ListCellViewModel>().Where(x => x.CollectionName == collectionReference);
-                foreach (var cellToHighlight in cellsToHighlight)
-                {
                     sheet.HighlightCell(cellToHighlight, "#0438ff44");
                 }
             }

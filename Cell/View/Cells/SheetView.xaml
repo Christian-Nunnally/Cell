@@ -12,10 +12,6 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <ListBox
-        Grid.RowSpan="3"
-        Grid.ColumnSpan="3"
-        Margin="0"
-        Padding="0"
         Background="{StaticResource CellBackground}"
         BorderThickness="0"
         ItemsSource="{Binding Path=CellViewModels}">

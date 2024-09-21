@@ -86,7 +86,7 @@ namespace Cell.Persistence
             }
         }
 
-        internal void DeleteFunction(PluginFunction function)
+        public void DeleteFunction(PluginFunction function)
         {
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {
@@ -100,13 +100,13 @@ namespace Cell.Persistence
             }
         }
 
-        internal PluginFunction GetOrCreateFunction(string space, string name)
+        public PluginFunction GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
             return CreateFunction(space, name, string.Empty);
         }
 
-        internal bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)
+        public bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {

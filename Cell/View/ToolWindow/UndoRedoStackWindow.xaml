@@ -15,11 +15,6 @@
     mc:Ignorable="d">
     <Grid>
         <ListBox ItemsSource="{Binding UndoStack}">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid Height="20" HorizontalAlignment="Stretch">
