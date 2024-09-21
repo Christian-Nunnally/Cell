@@ -1,11 +1,10 @@
-﻿using Cell.Common;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class SheetManagerWindowViewModel : PropertyChangedBase
+    public class SheetManagerWindowViewModel : ToolWindowViewModel
     {
         public SheetManagerWindowViewModel()
         {

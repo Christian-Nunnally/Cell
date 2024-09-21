@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Persistence;
 using System.Collections.ObjectModel;
@@ -7,7 +6,7 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CreateCollectionWindowViewModel : PropertyChangedBase
+    public class CreateCollectionWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<UserCollection> _collections;
         private readonly UserCollectionLoader _userCollectionLoader;

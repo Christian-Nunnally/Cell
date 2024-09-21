@@ -179,7 +179,7 @@
                                 <Setter Property="ClipToBounds" Value="False" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="Background" Value="{StaticResource ControlBackground}" />
-                                <Setter Property="BorderThickness" Value="20" />
+                                <Setter Property="BorderThickness" Value="15" />
                             </Style>
                         </Border.Style>
                     </Border>

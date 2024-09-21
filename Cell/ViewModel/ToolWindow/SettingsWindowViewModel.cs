@@ -1,17 +1,19 @@
-﻿using Cell.Common;
-using Cell.Persistence;
+﻿using Cell.Persistence;
 using Cell.ViewModel.Application;
 using System.Windows.Forms;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class SettingsWindowViewModel : PropertyChangedBase
+    public class SettingsWindowViewModel : ToolWindowViewModel
     {
-        public SettingsWindowViewModel()
+        private readonly ApplicationSettings _applicationSettings;
+
+        public SettingsWindowViewModel(ApplicationSettings applicationSettings)
         {
+            _applicationSettings = applicationSettings;
         }
 
-        public ApplicationSettings? ApplicationSettings => ApplicationViewModel.SafeInstance?.ApplicationSettings;
+        public ApplicationSettings? ApplicationSettings => _applicationSettings;
 
         public void RestoreFromBackup()
         {

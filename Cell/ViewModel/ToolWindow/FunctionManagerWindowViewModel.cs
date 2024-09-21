@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
@@ -7,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class FunctionManagerWindowViewModel : PropertyChangedBase
+    public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<PluginFunction> _functions;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
@@ -21,6 +20,10 @@ namespace Cell.ViewModel.ToolWindow
         {
             _pluginFunctionLoader = pluginFunctionLoader;
             _functions = _pluginFunctionLoader.ObservableFunctions;
+        }
+
+        public override void ShowToolWindow()
+        {
             _functions.CollectionChanged += FunctionsCollectionChanged;
             foreach (var function in _functions)
             {
@@ -31,12 +34,19 @@ namespace Cell.ViewModel.ToolWindow
             {
                 FilterSheetOptions.Add(sheet.Name);
             }
-
             FilterCollectionOptions.Add("All");
             foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames)
             {
                 FilterCollectionOptions.Add(collectionName);
             }
+        }
+
+        public override void CloseToolWindow()
+        {
+            _functions.CollectionChanged -= FunctionsCollectionChanged;
+            Functions.Clear();
+            FilterSheetOptions.Clear();
+            FilterCollectionOptions.Clear();
         }
 
         public string FilterCollection

@@ -1,11 +1,10 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CreateSheetWindowViewModel : PropertyChangedBase
+    public class CreateSheetWindowViewModel : ToolWindowViewModel
     {
         private readonly SheetTracker _sheetTracker;
         private int _initialColumns = 5;

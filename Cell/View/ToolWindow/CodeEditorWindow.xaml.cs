@@ -1,66 +1,50 @@
 ﻿using Cell.Execution;
-using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Cell.View.ToolWindow
 {
     public partial class CodeEditorWindow : UserControl, INotifyPropertyChanged, IResizableToolWindow
     {
-        private readonly CellModel? _currentCell;
-        private readonly bool _doesFunctionReturnValue;
-        private readonly PluginFunction _function;
-        private readonly Action<string> _saveCodeCallback = x => { };
         private readonly CodeEditorWindowViewModel _viewModel;
-        private static bool _haveAssembliesBeenRegistered;
         private bool _isAllowingCloseWhileDirty = false;
-        private bool _isDirty = false;
-        private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-        public CodeEditorWindow(CodeEditorWindowViewModel viewModel, PluginFunction function, Action<string> saveCodeCallback, CellModel? currentCell)
+        private bool _isDirty = false;
+
+        public CodeEditorWindow(CodeEditorWindowViewModel viewModel)
         {
             _viewModel = viewModel;
-            //DataContext = viewModel;
-            DataContext = this;
-
+            viewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
+            DataContext = viewModel;
+            
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
+        }
 
-            _currentCell = currentCell;
-            _doesFunctionReturnValue = function.Model.ReturnType != "void";
-            _function = function;
-            _saveCodeCallback = saveCodeCallback;
-            DisplayResult(_function.CompileResult);
-
-            if (!_haveAssembliesBeenRegistered)
+        private void CodeEditorWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CodeEditorWindowViewModel.SyntaxTreePreviewText))
             {
-                CodeCompletionWindowFactory.RegisterTypesInAssembly(typeof(TodoItem).Assembly);
-                _haveAssembliesBeenRegistered = true;
+                syntaxTreePreviewViewer.Text = _viewModel.SyntaxTreePreviewText;
+            }
+            else if (e.PropertyName == nameof(CodeEditorWindowViewModel.UserFriendlyCodeString))
+            {
+                textEditor.Text = _viewModel.UserFriendlyCodeString;
+                _isDirty = false;
             }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool IsTransformedSyntaxTreeViewerVisible { get; set; }
-
         public Action? RequestClose { get; set; }
-
-        public double ResultColumnWidth => ResultString == string.Empty ? 0 : 200;
-
-        public string? ResultString { get; set; } = string.Empty;
-
-        public SolidColorBrush ResultStringColor => _lastCompileResult.WasSuccess ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
 
         public double GetMinimumHeight() => 400;
 
@@ -69,18 +53,20 @@ namespace Cell.View.ToolWindow
         public string GetTitle()
         {
             var dirtyDot = _isDirty ? "*" : string.Empty;
-            return _currentCell == null ? $"Code Editor - {_function.Model.Name}{dirtyDot}" : $"Code Editor - {_function.Model.Name} - {ColumnCellViewModel.GetColumnName(_currentCell.Column)}{_currentCell.Row}";
+            var functionBeingEdited = _viewModel.FunctionBeingEdited.Model;
+            var cellContext = _viewModel.CellContext;
+            return cellContext == null ? $"Code Editor - {functionBeingEdited.Name}{dirtyDot}" : $"Code Editor - {functionBeingEdited.Name} - {ColumnCellViewModel.GetColumnName(cellContext.Column)}{cellContext.Row}";
         }
 
         public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Test Code", TestCode),
-            new CommandViewModel("Syntax", ToggleSyntaxTreePreview),
+            new CommandViewModel("Test Code", () => _viewModel.TestCode(textEditor.Text)),
+            new CommandViewModel("Syntax", () => _viewModel.ToggleSyntaxTreePreview(textEditor.Text)),
             new CommandViewModel("Save and Close", SaveAndClose)
             ];
 
         public void HandleBeingClosed()
         {
-            _function.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
+            _viewModel.HandleBeingClosed();
             textEditor.TextArea.TextEntering -= OnTextEntering;
             textEditor.TextArea.TextEntered -= OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
@@ -88,44 +74,17 @@ namespace Cell.View.ToolWindow
 
         public void HandleBeingShown()
         {
-            _function.Model.PropertyChanged += ReloadFunctionCodeWhenItChanges;
+            _viewModel.HandleBeingShown();
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
-            ReloadFunctionCode();
         }
 
         public bool HandleCloseRequested()
         {
             if (!_isDirty || _isAllowingCloseWhileDirty) return true;
-            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", () =>
-            {
-                SaveCode();
-                RequestClose?.Invoke();
-            }, () =>
-            {
-                _isAllowingCloseWhileDirty = true;
-                RequestClose?.Invoke();
-            });
+            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
             return false;
-        }
-
-        private static string GetVariableTypePriorToCarot(TextArea textArea)
-        {
-            var offset = textArea.Caret.Offset - 1;
-            var text = textArea.Document.Text;
-            while (offset > 0 && char.IsLetterOrDigit(text[offset - 1])) offset--;
-            return text[offset..(textArea.Caret.Offset - 1)];
-        }
-
-        private void DisplayResult(CompileResult result)
-        {
-            _lastCompileResult = result;
-            ResultString = result.ExecutionResult ?? "";
-            ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultString)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultStringColor)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResultColumnWidth)));
         }
 
         private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;
@@ -133,106 +92,52 @@ namespace Cell.View.ToolWindow
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
             _isDirty = true;
-            if (e.Text == ".")
+            if (ShouldOpenAutoCompleteWindow(e)) OpenAutoCompleteWindow();
+
+            static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e)
             {
-                TextArea textArea = textEditor.TextArea;
-                var type = GetVariableTypePriorToCarot(textArea);
-                completionWindow = CodeCompletionWindowFactory.Create(textArea, type, _doesFunctionReturnValue);
-                if (completionWindow is not null)
-                {
-                    completionWindow.Show();
-                    completionWindow.Closed += delegate
-                    {
-                        completionWindow = null;
-                    };
-                }
+                return e.Text == ".";
             }
+        }
+
+        private void OpenAutoCompleteWindow()
+        {
+            TextArea textArea = textEditor.TextArea;
+            var returnType = _viewModel.FunctionBeingEdited.Model.ReturnType;
+            completionWindow = CodeCompletionWindowFactory.Create(textArea, returnType);
+            if (completionWindow is null) return;
+            completionWindow.Show();
+            completionWindow.Closed += delegate { completionWindow = null; };
         }
 
         private void OnTextEntering(object sender, TextCompositionEventArgs e)
         {
-            if (e.Text.Length > 0 && completionWindow != null)
+            if (ShouldSubmitAutoCompleteResult(e)) InsertCurrentAutoCompleteResult(e);
+
+            bool ShouldSubmitAutoCompleteResult(TextCompositionEventArgs e)
             {
-                if (!char.IsLetterOrDigit(e.Text[0]))
-                {
-                    // Whenever a non-letter is typed while the completion window is open,
-                    // insert the currently selected element.
-                    completionWindow.CompletionList.RequestInsertion(e);
-                }
+                var anyText = e.Text.Length != 0;
+                var isAutoCompleteOpen = completionWindow is not null;
+                var isFirstChangedCharacterALetterOrDigit = char.IsLetterOrDigit(e.Text[0]);
+                return anyText && isAutoCompleteOpen && !isFirstChangedCharacterALetterOrDigit;
             }
         }
 
-        private void ReloadFunctionCode()
+        private void InsertCurrentAutoCompleteResult(TextCompositionEventArgs e)
         {
-            textEditor.Text = _function.GetUserFriendlyCode(_currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-            _isDirty = false;
+            completionWindow?.CompletionList.RequestInsertion(e);
         }
 
-        private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
+        private void CloseWithoutSaving()
         {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code)) ReloadFunctionCode();
+            _isAllowingCloseWhileDirty = true;
+            RequestClose?.Invoke();
         }
 
         private void SaveAndClose()
         {
-            SaveCode();
+            _viewModel.UserFriendlyCodeString = textEditor.Text;
             RequestClose?.Invoke();
-        }
-
-        private void SaveCode()
-        {
-            _saveCodeCallback?.Invoke(textEditor.Text);
-            _isDirty = false;
-        }
-
-        private void TestCode()
-        {
-            try
-            {
-                if (_currentCell is null) return;
-                var model = new PluginFunctionModel("testtesttest", string.Empty, !_doesFunctionReturnValue ? "void" : "object");
-                var function = new PluginFunction(model);
-                function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                var compiled = function.CompiledMethod;
-                var result = function.CompileResult;
-                if (result.WasSuccess)
-                {
-                    if (_doesFunctionReturnValue)
-                    {
-                        var resultObject = compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
-                        result = new CompileResult { WasSuccess = true, ExecutionResult = resultObject?.ToString() ?? "" };
-                    }
-                    else
-                    {
-                        compiled?.Invoke(null, [new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, _currentCell.Index), _currentCell]);
-                        result = new CompileResult { WasSuccess = true, ExecutionResult = "Success" };
-                    }
-                }
-                DisplayResult(result);
-            }
-            catch (Exception ex)
-            {
-                var result = new CompileResult { WasSuccess = false, ExecutionResult = ex.Message };
-                DisplayResult(result);
-            }
-        }
-
-        private void ToggleSyntaxTreePreview()
-        {
-            if (IsTransformedSyntaxTreeViewerVisible)
-            {
-                IsTransformedSyntaxTreeViewerVisible = false;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
-                return;
-            }
-            var model = new PluginFunctionModel("testtesttest", "", !_doesFunctionReturnValue ? "void" : "object");
-            var function = new PluginFunction(model);
-            if (_currentCell is null) return;
-            function.SetUserFriendlyCode(textEditor.Text, _currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-            var syntaxTree = function.SyntaxTree;
-            syntaxTreePreviewViewer.Text = syntaxTree.ToString();
-            IsTransformedSyntaxTreeViewerVisible = true;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
         }
     }
 }

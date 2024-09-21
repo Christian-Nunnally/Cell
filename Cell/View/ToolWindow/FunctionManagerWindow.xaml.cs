@@ -65,12 +65,9 @@ namespace Cell.View.ToolWindow
             {
                 if (_viewModel.SelectedFunction == null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
-                var codeEditorWindowViewModel = new CodeEditorWindowViewModel();
-                var editor = new CodeEditorWindow(codeEditorWindowViewModel, _viewModel.SelectedFunction, x =>
-                {
-                    capturedFunction.SetUserFriendlyCode(x, cell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                }, cell);
-                ApplicationViewModel.Instance.ShowToolWindow(editor, true);
+                var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction, cell, collectionNameToDataTypeMap);
+                ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
             }
         }
 

@@ -18,6 +18,9 @@ namespace Cell.Persistence
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistedDirectory _persistanceManager;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private Dictionary<string, string> _dataTypeForCollectionMap;
+        private bool _hasGenerateDataTypeForCollectionMapChanged;
+
         public UserCollectionLoader(PersistedDirectory persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             _persistanceManager = persistenceManager;
@@ -60,7 +63,7 @@ namespace Cell.Persistence
             return null;
         }
 
-        public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
+        public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "object";
 
         public void ImportCollection(string collectionDirectory, string collectionName)
         {
@@ -123,6 +126,17 @@ namespace Cell.Persistence
         public void SaveCollections()
         {
             foreach (var collection in _collections) SaveCollection(collection.Value);
+        }
+
+        internal IReadOnlyDictionary<string, string> GenerateDataTypeForCollectionMap()
+        {
+            if (_hasGenerateDataTypeForCollectionMapChanged)
+            {
+                _dataTypeForCollectionMap.Clear();
+                _dataTypeForCollectionMap = CollectionNames.ToDictionary(GetDataTypeStringForCollection);
+            }
+            _hasGenerateDataTypeForCollectionMapChanged = false;
+            return _dataTypeForCollectionMap;
         }
 
         private void DeleteItem(string collectionName, string idToRemove)
@@ -188,6 +202,7 @@ namespace Cell.Persistence
             userCollection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
             _collections.Add(userCollection.Name, userCollection);
             ObservableCollections.Add(userCollection);
+            _hasGenerateDataTypeForCollectionMapChanged = true;
         }
 
         private void StopTrackingCollection(UserCollection userCollection)
@@ -198,6 +213,7 @@ namespace Cell.Persistence
             userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
             _collections.Remove(userCollection.Name);
             ObservableCollections.Remove(userCollection);
+            _hasGenerateDataTypeForCollectionMapChanged = true;
         }
 
         private void UnlinkFromBaseCollection(UserCollection collection)

@@ -17,12 +17,23 @@ namespace Cell.Execution
     {
         private readonly static Dictionary<string, List<string>> _cachedTypes = [];
         private readonly static Dictionary<string, string> _typeNameToFullyQualifiedTypeNameMap = [];
-        public static CompletionWindow? Create(TextArea textArea, string type, bool doesFunctionReturnValue)
+        private static bool _haveAssembliesBeenRegistered = false;
+        
+        private static void RegisterTypesInAssembly()
         {
-            var model = new PluginFunctionModel("testtesttest", textArea.Document.Text, doesFunctionReturnValue ? "object" : "void");
+            if (_haveAssembliesBeenRegistered) return;
+            RegisterTypesInAssembly(typeof(TodoItem).Assembly);
+            _haveAssembliesBeenRegistered = true;
+        }
+
+        public static CompletionWindow? Create(TextArea textArea, string returnType)
+        {
+            RegisterTypesInAssembly();
+            var model = new PluginFunctionModel("testtesttest", textArea.Document.Text, returnType);
             var function = new PluginFunction(model);
             var syntaxTree = function.SyntaxTree;
             var sematicModel = function.GetSemanticModel();
+            var type = GetVariableTypePriorToCarot(textArea);
             var variableNode = syntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclarationSyntax>().FirstOrDefault(x => x.Variables.First().Identifier.Text == type);
             if (variableNode != null)
             {
@@ -138,6 +149,14 @@ namespace Cell.Execution
         private static bool IsRootNamespace(ISymbol symbol)
         {
             return symbol is INamespaceSymbol s && s.IsGlobalNamespace;
+        }
+
+        private static string GetVariableTypePriorToCarot(TextArea textArea)
+        {
+            var offset = textArea.Caret.Offset - 1;
+            var text = textArea.Document.Text;
+            while (offset > 0 && char.IsLetterOrDigit(text[offset - 1])) offset--;
+            return text[offset..(textArea.Caret.Offset - 1)];
         }
     }
 }

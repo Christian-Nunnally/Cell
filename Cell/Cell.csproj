@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <StartupObject>Cell.App</StartupObject>
-    <ApplicationIcon>Resources\cellIcon.ico</ApplicationIcon>
+    <ApplicationIcon>ApplicationResources\cellIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\cellIcon.ico" />
+    <Content Include="ApplicationResources\cellIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,7 @@
-﻿using Cell.Common;
-
+﻿
 namespace Cell.ViewModel.ToolWindow
 {
-    public class ExampleWindowViewModel : PropertyChangedBase
+    public class ExampleWindowViewModel : ToolWindowViewModel
     {
         public ExampleWindowViewModel()
         {

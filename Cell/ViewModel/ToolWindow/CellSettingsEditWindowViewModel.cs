@@ -1,34 +1,41 @@
-﻿using Cell.Common;
-using Cell.Model;
-using Cell.Persistence;
+﻿using Cell.Model;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CellSettingsEditWindowViewModel : PropertyChangedBase
+    public class CellSettingsEditWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private CellModel _cellToDisplay = CellModel.Null;
-        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, PluginFunctionLoader pluginFunctionLoader)
+        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit)
         {
-            _pluginFunctionLoader = pluginFunctionLoader;
             _cellsToEdit = cellsToEdit;
+        }
+
+        public override void ShowToolWindow()
+        {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
         }
 
+        public override void CloseToolWindow()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
+        }
+
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
-        private CellModel CellToDisplay
+        public CellModel CellToDisplay
         {
             get => _cellToDisplay;
             set
             {
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged -= CellToDisplayPropertyChanged;
                 _cellToDisplay = value;
+                NotifyPropertyChanged(nameof(CellToDisplay));
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
             }
         }

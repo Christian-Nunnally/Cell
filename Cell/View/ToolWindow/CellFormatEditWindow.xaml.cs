@@ -31,9 +31,9 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        public double GetMinimumHeight() => 250;
+        public double GetMinimumHeight() => 200;
 
-        public double GetMinimumWidth() => 250;
+        public double GetMinimumWidth() => 230;
 
         public string GetTitle()
         {
@@ -44,7 +44,9 @@ namespace Cell.View.ToolWindow
             return $"Format editor - {currentlySelectedCell.GetName()}";
         }
 
-        public List<CommandViewModel> GetToolBarCommands() => [];
+        public List<CommandViewModel> GetToolBarCommands() => [
+            new CommandViewModel("╾╼", () => _viewModel.IsDetailedBorderEditingEnabled = !_viewModel.IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
+            ];
 
         public void HandleBeingClosed()
         {

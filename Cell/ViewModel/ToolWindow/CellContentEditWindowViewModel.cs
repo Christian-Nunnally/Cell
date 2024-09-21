@@ -1,7 +1,5 @@
-﻿using Cell.Common;
-using Cell.Execution;
+﻿using Cell.Execution;
 using Cell.Model;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
 using System.Collections.ObjectModel;
@@ -10,7 +8,7 @@ using System.ComponentModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CellContentEditWindowViewModel : PropertyChangedBase
+    public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
@@ -19,8 +17,18 @@ namespace Cell.ViewModel.ToolWindow
         {
             _cellPopulateManager = cellPopulateManager;
             _cellsToEdit = cellsToEdit;
+        }
+
+        public override void ShowToolWindow()
+        {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
+        }
+
+        public override void CloseToolWindow()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
         }
 
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
@@ -100,6 +108,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged -= CellToDisplayPropertyChanged;
                 _cellToDisplay = value;
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
+                NotifyPropertyChanged(nameof(CellToDisplay));
                 NotifyPropertyChanged(nameof(Text));
                 NotifyPropertyChanged(nameof(Index));
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
@@ -112,13 +121,9 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName)) CellToDisplay.PopulateFunctionName = "Untitled";
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel();
-            var editor = new CodeEditorWindow(codeEditWindowViewModel, function, x =>
-            {
-                function.SetUserFriendlyCode(x, CellToDisplay, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                // TODO: update list cells when function code changes they depend on. (cell as ListCellViewModel)?.UpdateList();
-            }, CellToDisplay);
-            ApplicationViewModel.Instance.ShowToolWindow(editor, true);
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
+            ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 
         public void EditTriggerFunction()
@@ -126,12 +131,9 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName)) CellToDisplay.TriggerFunctionName = "Untitled";
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel();
-            var editor = new CodeEditorWindow(codeEditWindowViewModel, function, x =>
-            {
-                function.SetUserFriendlyCode(x, CellToDisplay, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-            }, CellToDisplay);
-            ApplicationViewModel.Instance.ShowToolWindow(editor, true);
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
+            ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 
         private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();

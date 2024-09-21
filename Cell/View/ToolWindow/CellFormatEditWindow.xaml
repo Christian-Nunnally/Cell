@@ -198,14 +198,14 @@
                 SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}"
                 Style="{StaticResource TestColorPicker}" />
             <xctk:ColorPicker
-                Margin="20"
+                Margin="15"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
                 SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}"
                 Style="{StaticResource TestColorPicker}" />
             <xctk:ColorPicker
-                Margin="40"
+                Margin="45"
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
@@ -433,8 +433,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding BorderThicknessLeft}" />
+                Text="{Binding BorderThicknessLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -448,8 +448,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding BorderThicknessRight}" />
+                Text="{Binding BorderThicknessRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -463,8 +463,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding MarginLeft}" />
+                Text="{Binding MarginLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -478,8 +478,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding MarginRight}" />
+                Text="{Binding MarginRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -493,8 +493,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding ContentBorderThicknessLeft}" />
+                Text="{Binding ContentBorderThicknessLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -508,8 +508,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding ContentBorderThicknessRight}" />
+                Text="{Binding ContentBorderThicknessRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -537,8 +537,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding BorderThicknessBottom}" />
+                Text="{Binding BorderThicknessBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -566,8 +566,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding MarginBottom}" />
+                Text="{Binding MarginBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
                 Width="20"
                 Height="20"
@@ -595,8 +595,8 @@
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
                 KeyDown="TextBoxKeyDown"
-                Opacity=".5"
-                Text="{Binding ContentBorderThicknessBottom}" />
+                Text="{Binding ContentBorderThicknessBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <Grid>
                 <ToggleButton
@@ -737,34 +737,46 @@
                     </Border>
                 </Popup>
             </Grid>
-            <Button
-                Width="60"
-                Height="20"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Click="CreateNewColumnToTheLeftButtonClicked"
-                Content="+Column" />
-            <Button
-                Width="60"
-                Height="20"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Click="CreateNewColumnToTheRightButtonClicked"
-                Content="+Column" />
-            <Button
-                Width="60"
-                Height="20"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Click="CreateNewRowAboveButtonClicked"
-                Content="+Row" />
-            <Button
-                Width="60"
-                Height="20"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
-                Click="CreateNewRowBelowButtonClicked"
-                Content="+row" />
         </Grid>
+        <Button
+            Grid.Row="1"
+            Width="20"
+            Height="20"
+            Margin="0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Click="CreateNewRowAboveButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Row="1"
+            Width="20"
+            Height="20"
+            Margin="0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Click="CreateNewRowBelowButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Column="1"
+            Width="20"
+            Height="20"
+            Margin="20,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="CreateNewColumnToTheLeftButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Column="1"
+            Width="20"
+            Height="20"
+            Margin="20,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Click="CreateNewColumnToTheRightButtonClicked"
+            Content="➕"
+            FontSize="10" />
     </Grid>
 </UserControl>

@@ -62,7 +62,7 @@ namespace Cell.View.Application
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
-            ShowToolWindow(window);
+            ShowToolWindow(window, allowDuplicates);
         }
 
         public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
@@ -183,7 +183,7 @@ namespace Cell.View.Application
         private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var cellSettingsEditWindowViewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
+            var cellSettingsEditWindowViewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
             ShowToolWindow(cellSettingsEditWindowViewModel);
         }
 
@@ -211,7 +211,8 @@ namespace Cell.View.Application
 
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
-            var settingsWindowViewModel = new SettingsWindowViewModel();
+            if (_viewModel == null) return;
+            var settingsWindowViewModel = new SettingsWindowViewModel(_viewModel.ApplicationSettings);
             ShowToolWindow(settingsWindowViewModel);
         }
 

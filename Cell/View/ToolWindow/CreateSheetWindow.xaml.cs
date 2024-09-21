@@ -23,12 +23,7 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle() => "Create New Sheet";
 
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-            ];
-        }
+        public List<CommandViewModel> GetToolBarCommands() => [];
 
         public void HandleBeingClosed()
         {
@@ -38,10 +33,7 @@ namespace Cell.View.ToolWindow
         {
         }
 
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public bool HandleCloseRequested() => true;
 
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {

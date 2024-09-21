@@ -8,7 +8,7 @@ using System.Text.Json;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CollectionManagerWindowViewModel : PropertyChangedBase
+    public class CollectionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly JsonSerializerOptions _jsonDeserializerOptions = new()
         {

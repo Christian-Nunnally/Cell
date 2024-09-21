@@ -24,7 +24,7 @@ namespace Cell.ViewModel.Application
                 SettingsWindowViewModel convertedViewModel => new SettingsWindow(convertedViewModel),
                 SheetManagerWindowViewModel convertedViewModel => new SheetManagerWindow(convertedViewModel),
                 UndoRedoStackWindowViewModel convertedViewModel => new UndoRedoStackWindow(convertedViewModel),
-                //CodeEditorWindowViewModel convertedViewModel => new CodeEditorWindow(convertedViewModel),
+                CodeEditorWindowViewModel convertedViewModel => new CodeEditorWindow(convertedViewModel),
                 _ => throw new CellError($"Unable to create window view for view model {viewModel.GetType().FullName}. Add a type mapping to {nameof(ToolWindowViewFactory)} for {viewModel.GetType().FullName}."),
             };
         }

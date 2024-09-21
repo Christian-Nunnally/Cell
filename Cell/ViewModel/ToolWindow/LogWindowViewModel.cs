@@ -1,18 +1,26 @@
 ﻿using Cell.Common;
+using Cell.Model;
 using System.Text;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class LogWindowViewModel : PropertyChangedBase
+    public class LogWindowViewModel : ToolWindowViewModel
     {
         private readonly StringBuilder _logBufferBuilder = new();
-        public LogWindowViewModel()
+
+        public override void ShowToolWindow()
         {
             Logger.Instance.LogAdded += AddLog;
             foreach (var log in Logger.Instance.Logs.Take(100))
             {
                 AddLog(log);
             }
+        }
+
+        public override void CloseToolWindow()
+        {
+            Logger.Instance.LogAdded -= AddLog;
+            ClearBuffer();
         }
 
         public string LogBuffer => _logBufferBuilder.ToString();

@@ -113,9 +113,9 @@ namespace Cell.ViewModel.Execution
             return compilation.GetSemanticModel(SyntaxTree);
         }
 
-        public string GetUserFriendlyCode(CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
+        public string GetUserFriendlyCode(CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
-            var intermediateCode = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformTo(Model.Code);
+            var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformTo(Model.Code);
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
             return intermediateCode.Replace("_Range_", "..");
         }
@@ -134,11 +134,11 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, Func<string, string> getDataTypeFromCollectionNameFunction, IEnumerable<string> collectionNames)
+        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
             if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
-            Model.Code = new CollectionReferenceSyntaxTransformer(getDataTypeFromCollectionNameFunction, collectionNames.Contains).TransformFrom(intermediateCode);
+            Model.Code = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformFrom(intermediateCode);
         }
 
         private static void RefactorCellsFunctionUseage(string oldName, string newName)

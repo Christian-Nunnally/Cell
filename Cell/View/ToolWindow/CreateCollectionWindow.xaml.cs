@@ -22,12 +22,7 @@ namespace Cell.View.ToolWindow
 
         public string GetTitle() => "Creating new collection";
 
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-            ];
-        }
+        public List<CommandViewModel> GetToolBarCommands() => [];
 
         public void HandleBeingClosed()
         {
@@ -37,10 +32,7 @@ namespace Cell.View.ToolWindow
         {
         }
 
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public bool HandleCloseRequested() => true;
 
         private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {

@@ -1,9 +1,8 @@
-﻿using Cell.Common;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class ExportWindowViewModel : PropertyChangedBase
+    public class ExportWindowViewModel : ToolWindowViewModel
     {
         public ExportWindowViewModel()
         {

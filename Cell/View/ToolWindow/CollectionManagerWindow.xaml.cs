@@ -63,14 +63,10 @@ namespace Cell.View.ToolWindow
             var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
-            var codeEditorWindowViewModel = new CodeEditorWindowViewModel();
-            // TODO move args to vm.
-            var editor = new CodeEditorWindow(codeEditorWindowViewModel, function, x =>
-            {
-                function.SetUserFriendlyCode(x, null, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-                _viewModel.SelectedCollection?.RefreshSortAndFilter();
-            }, null);
-            ApplicationViewModel.Instance.ShowToolWindow(editor, true);
+
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap);
+            ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
 
         private void ItemJsonEditorTextChanged(object sender, EventArgs e)

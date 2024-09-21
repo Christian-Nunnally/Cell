@@ -13,20 +13,42 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CellFormatEditWindowViewModel : PropertyChangedBase
+    public class CellFormatEditWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private CellStyleModel? _cellStyleToDisplay = null;
         private CellModel _cellToDisplay = CellModel.Null;
+        private bool isDetailedBorderEditingEnabled = false;
+
         public CellFormatEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellsToEdit = cellsToEdit;
             _cellTracker = cellTracker;
+        }
+
+        public override void ShowToolWindow()
+        {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
+        }
+
+        public override void CloseToolWindow()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
+        }
+
+        public bool IsDetailedBorderEditingEnabled
+        {
+            get => isDetailedBorderEditingEnabled; set
+            {
+                if (isDetailedBorderEditingEnabled == value) return;
+                isDetailedBorderEditingEnabled = value;
+                NotifyPropertyChanged(nameof(IsDetailedBorderEditingEnabled));
+            }
         }
 
         public string BackgroundColor
@@ -532,6 +554,7 @@ namespace Cell.ViewModel.ToolWindow
                 _cellToDisplay = value;
                 CellStyleToDisplay = _cellToDisplay.Style;
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
+                NotifyPropertyChanged(nameof(CellToDisplay));
                 NotifyPropertyChanged(nameof(Width));
                 NotifyPropertyChanged(nameof(Height));
                 NotifyPropertyChanged(nameof(CellType));

@@ -22,9 +22,9 @@ while (itemsToSearch.Any())
     todo.Remove(item);
     itemsToSearch.Remove(item);
 }";
-            testing.SetUserFriendlyCode(testCode, CellModel.Null, x => x, []);
+            testing.SetUserFriendlyCode(testCode, CellModel.Null, new Dictionary<string, string>());
 
-            var result = testing.GetUserFriendlyCode(CellModel.Null, x => x, []);
+            var result = testing.GetUserFriendlyCode(CellModel.Null, new Dictionary<string, string>());
 
             Assert.Equal(testCode, result);
         }
@@ -35,9 +35,9 @@ while (itemsToSearch.Any())
             var model = new PluginFunctionModel();
             var testing = new PluginFunction(model);
             var testCode = "\treturn test;";
-            testing.SetUserFriendlyCode(testCode, CellModel.Null, x => x, []);
+            testing.SetUserFriendlyCode(testCode, CellModel.Null, new Dictionary<string, string>());
 
-            var result = testing.GetUserFriendlyCode(CellModel.Null, x => x, []);
+            var result = testing.GetUserFriendlyCode(CellModel.Null, new Dictionary<string, string>());
 
             Assert.Equal("    return test;", result);
         }
