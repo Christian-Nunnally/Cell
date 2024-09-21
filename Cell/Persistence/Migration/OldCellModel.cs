@@ -2,10 +2,8 @@
 using System.Windows;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
-
-#pragma warning disable IDE0130 // Namespace does not match folder structure
-
 namespace Cell.Model
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 {
     public class OldCellModel : PropertyChangedBase
     {

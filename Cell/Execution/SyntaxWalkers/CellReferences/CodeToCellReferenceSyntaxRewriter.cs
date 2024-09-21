@@ -8,7 +8,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
 {
     public partial class CodeToCellReferenceSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
     {
-        private readonly CellModel cell = cell;
+        private readonly CellModel _cell = cell;
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -27,7 +27,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
                 }
                 else
                 {
-                    cellReference.Row += cell.Row;
+                    cellReference.Row += _cell.Row;
                 }
                 if (!cellReference.IsColumnRelative)
                 {
@@ -35,7 +35,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
                 }
                 else
                 {
-                    cellReference.Column += cell.Column;
+                    cellReference.Column += _cell.Column;
                 }
                 relativitySymbol ??= string.Empty;
 
@@ -53,7 +53,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
                     }
                     else
                     {
-                        cellReference.RowRangeEnd += cell.Row;
+                        cellReference.RowRangeEnd += _cell.Row;
                     }
                     if (!cellReference.IsColumnRelativeRangeEnd)
                     {
@@ -61,7 +61,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
                     }
                     else
                     {
-                        cellReference.ColumnRangeEnd += cell.Column;
+                        cellReference.ColumnRangeEnd += _cell.Column;
                     }
                     rangeRelativitySymbol ??= string.Empty;
 

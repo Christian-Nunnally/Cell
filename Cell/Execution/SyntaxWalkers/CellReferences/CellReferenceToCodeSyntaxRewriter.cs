@@ -9,7 +9,7 @@ namespace Cell.Plugin.SyntaxWalkers
 {
     public partial class CellReferenceToCodeSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
     {
-        private readonly CellModel cell = cell;
+        private readonly CellModel _cell = cell;
         public static bool IsCellLocation(string input)
         {
             return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
@@ -107,9 +107,9 @@ namespace Cell.Plugin.SyntaxWalkers
         {
             return relativitySymbol switch
             {
-                "" => $", cell.Row + {rowOffset - cell.Row}, cell.Column + {columnOffset - cell.Column}",
-                "C" => $", cell.Row + {rowOffset - cell.Row}, {columnOffset}",
-                "R" => $", {rowOffset}, cell.Column + {columnOffset - cell.Column}",
+                "" => $", cell.Row + {rowOffset - _cell.Row}, cell.Column + {columnOffset - _cell.Column}",
+                "C" => $", cell.Row + {rowOffset - _cell.Row}, {columnOffset}",
+                "R" => $", {rowOffset}, cell.Column + {columnOffset - _cell.Column}",
                 "B" => $", {rowOffset}, {columnOffset}",
                 _ => throw new InvalidOperationException("Only 'B', 'C', 'R' and '' are valid relativity types for a cell reference"),
             };

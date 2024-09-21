@@ -7,8 +7,8 @@ namespace Cell.Model
     {
         public static readonly SheetModel Null = new("");
         public string OldName;
-        private CellModel? cornerCell;
-        private string name = string.Empty;
+        private CellModel? _cornerCell;
+        private string _name = string.Empty;
         public SheetModel(string sheetName)
         {
             Name = sheetName;
@@ -20,10 +20,10 @@ namespace Cell.Model
 
         public CellModel? CornerCell
         {
-            get => cornerCell;
+            get => _cornerCell;
             set
             {
-                cornerCell = value;
+                _cornerCell = value;
                 NotifyPropertyChanged(nameof(Order));
             }
         }
@@ -44,13 +44,13 @@ namespace Cell.Model
 
         public string Name
         {
-            get => name;
+            get => _name;
             set
             {
-                if (value == name) return;
+                if (value == _name) return;
                 if (!IsValidSheetName(value)) return;
-                OldName = name;
-                name = value;
+                OldName = _name;
+                _name = value;
                 NotifyPropertyChanged(nameof(Name));
             }
         }

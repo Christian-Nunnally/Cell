@@ -9,19 +9,19 @@ namespace Cell.Model
     {
         public static readonly CellModel Null = new();
         private CellStyleModel _cellStyle = new();
-        private CellType cellType = CellType.None;
-        private int column;
-        private string errorText = string.Empty;
-        private double height;
-        private string id = Utilities.GenerateUnqiueId(12);
-        private int index = 0;
-        private string mergedWith = string.Empty;
-        private string populateFunctionName = string.Empty;
-        private int row;
-        private string sheetName = string.Empty;
-        private string text = string.Empty;
-        private string triggerFunctionName = string.Empty;
-        private double width;
+        private CellType _cellType = CellType.None;
+        private int _column;
+        private string _errorText = string.Empty;
+        private double _height;
+        private string _id = Utilities.GenerateUnqiueId(12);
+        private int _index = 0;
+        private string _mergedWith = string.Empty;
+        private string _populateFunctionName = string.Empty;
+        private int _row;
+        private string _sheetName = string.Empty;
+        private string _text = string.Empty;
+        private string _triggerFunctionName = string.Empty;
+        private double _width;
         public CellModel()
         {
             _cellStyle.PropertyChanged += StylePropertyChangedHandler;
@@ -31,14 +31,14 @@ namespace Cell.Model
 
         public CellType CellType
         {
-            get => cellType;
-            set { if (cellType != value) { cellType = value; NotifyPropertyChanged(nameof(CellType)); } }
+            get => _cellType;
+            set { if (_cellType != value) { _cellType = value; NotifyPropertyChanged(nameof(CellType)); } }
         }
 
         public int Column
         {
-            get => column;
-            set { if (column != value) { column = value; NotifyPropertyChanged(nameof(Column)); } }
+            get => _column;
+            set { if (_column != value) { _column = value; NotifyPropertyChanged(nameof(Column)); } }
         }
 
         [JsonIgnore]
@@ -47,26 +47,26 @@ namespace Cell.Model
         [JsonIgnore]
         public string ErrorText
         {
-            get => errorText;
-            set { if (errorText != value) { errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
+            get => _errorText;
+            set { if (_errorText != value) { _errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
         }
 
         public double Height
         {
-            get => height;
-            set { if (height != value) { height = value; NotifyPropertyChanged(nameof(Height)); } }
+            get => _height;
+            set { if (_height != value) { _height = value; NotifyPropertyChanged(nameof(Height)); } }
         }
 
         public string ID
         {
-            get => id;
-            set { if (id != null) { id = value; NotifyPropertyChanged(nameof(ID)); } }
+            get => _id;
+            set { if (_id != null) { _id = value; NotifyPropertyChanged(nameof(ID)); } }
         }
 
         public int Index
         {
-            get => index;
-            set { if (index != value) { index = value; NotifyPropertyChanged(nameof(Index)); } }
+            get => _index;
+            set { if (_index != value) { _index = value; NotifyPropertyChanged(nameof(Index)); } }
         }
 
         [JsonIgnore]
@@ -74,38 +74,38 @@ namespace Cell.Model
 
         public string MergedWith
         {
-            get => mergedWith;
-            set { if (mergedWith != value) { mergedWith = value; NotifyPropertyChanged(nameof(MergedWith)); } }
+            get => _mergedWith;
+            set { if (_mergedWith != value) { _mergedWith = value; NotifyPropertyChanged(nameof(MergedWith)); } }
         }
 
         public Dictionary<string, double> NumericProperties { get; set; } = [];
 
         public string PopulateFunctionName
         {
-            get => populateFunctionName;
+            get => _populateFunctionName;
             set
             {
-                if (populateFunctionName == value) return;
-                populateFunctionName = value;
+                if (_populateFunctionName == value) return;
+                _populateFunctionName = value;
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
             }
         }
 
         public int Row
         {
-            get => row;
-            set { if (row != value) { row = value; NotifyPropertyChanged(nameof(Row)); } }
+            get => _row;
+            set { if (_row != value) { _row = value; NotifyPropertyChanged(nameof(Row)); } }
         }
 
         public string SelectedItem => GetStringProperty(nameof(ListCellViewModel.SelectedItem));
 
         public string SheetName
         {
-            get => sheetName;
+            get => _sheetName;
             set
             {
-                if (sheetName == value) return;
-                sheetName = value;
+                if (_sheetName == value) return;
+                _sheetName = value;
                 NotifyPropertyChanged(nameof(SheetName));
             }
         }
@@ -127,22 +127,22 @@ namespace Cell.Model
 
         public string Text
         {
-            get => text;
+            get => _text;
             set
             {
-                if (text == value) return;
-                text = value;
+                if (_text == value) return;
+                _text = value;
                 NotifyPropertyChanged(nameof(Text));
             }
         }
 
         public string TriggerFunctionName
         {
-            get => triggerFunctionName;
+            get => _triggerFunctionName;
             set
             {
-                if (triggerFunctionName == value) return;
-                triggerFunctionName = value;
+                if (_triggerFunctionName == value) return;
+                _triggerFunctionName = value;
                 NotifyPropertyChanged(nameof(TriggerFunctionName));
             }
         }
@@ -154,8 +154,8 @@ namespace Cell.Model
 
         public double Width
         {
-            get => width;
-            set { if (width != value) { width = value; NotifyPropertyChanged(nameof(Width)); } }
+            get => _width;
+            set { if (_width != value) { _width = value; NotifyPropertyChanged(nameof(Width)); } }
         }
 
         public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;

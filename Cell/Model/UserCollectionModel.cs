@@ -5,7 +5,7 @@ namespace Cell.Model
     public class UserCollectionModel : PropertyChangedBase
     {
         private string _sortAndFilterFunctionName = string.Empty;
-        private string name = string.Empty;
+        private string _name = string.Empty;
         public UserCollectionModel()
         {
         }
@@ -25,10 +25,10 @@ namespace Cell.Model
 
         public string Name
         {
-            get => name; set
+            get => _name; set
             {
-                if (name == value) return;
-                name = value;
+                if (_name == value) return;
+                _name = value;
                 NotifyPropertyChanged(nameof(Name));
             }
         }

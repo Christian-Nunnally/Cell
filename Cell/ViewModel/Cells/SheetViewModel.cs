@@ -24,7 +24,7 @@ namespace Cell.ViewModel.Cells
         private readonly UserCollectionLoader _userCollectionLoader;
         private double _sheetHeight;
         private double _sheetWidth;
-        private CellViewModel? selectedCellViewModel;
+        private CellViewModel? _selectedCellViewModel;
         public SheetViewModel(
             SheetModel model,
             CellPopulateManager cellPopulateManager,
@@ -68,19 +68,19 @@ namespace Cell.ViewModel.Cells
 
         public CellViewModel? SelectedCellViewModel
         {
-            get => selectedCellViewModel;
+            get => _selectedCellViewModel;
             set
             {
-                if (selectedCellViewModel is not null)
+                if (_selectedCellViewModel is not null)
                 {
-                    selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 100));
-                    selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 175));
+                    _selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 100));
+                    _selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 175));
                 }
-                selectedCellViewModel = value;
-                if (selectedCellViewModel is not null)
+                _selectedCellViewModel = value;
+                if (_selectedCellViewModel is not null)
                 {
-                    selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 100));
-                    selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(selectedCellViewModel.BackgroundColorHex), 175));
+                    _selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 100));
+                    _selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 175));
                 }
                 NotifyPropertyChanged(nameof(SelectedCellViewModel));
             }

@@ -8,7 +8,7 @@ namespace Cell.ViewModel.Cells.Types
 {
     public class ListCellViewModel : CellViewModel, ISubscriber
     {
-        private CollectionChangeNotifier _collectionChangedNotifier;
+        private readonly CollectionChangeNotifier _collectionChangedNotifier;
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             _collectionChangedNotifier = new CollectionChangeNotifier(sheetViewModel.UserCollectionLoader);

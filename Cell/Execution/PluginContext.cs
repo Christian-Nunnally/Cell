@@ -11,7 +11,7 @@ namespace Cell.Execution
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private CellModel? cell;
+        private CellModel? _cell;
         public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
         {
             _cellTracker = cellTracker;
@@ -37,10 +37,10 @@ namespace Cell.Execution
 
         public CellModel? Cell
         {
-            get => cell; set
+            get => _cell; set
             {
-                cell = value;
-                if (cell is not null) Index = cell.Index;
+                _cell = value;
+                if (_cell is not null) Index = _cell.Index;
             }
         }
 

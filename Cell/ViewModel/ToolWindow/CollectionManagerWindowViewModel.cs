@@ -21,7 +21,7 @@ namespace Cell.ViewModel.ToolWindow
         private bool _isSaveItemJsonButtonVisible;
         private UserCollection? _selectedCollection;
         private PluginModel? _selectedItem;
-        private string selectedItemSerialized = string.Empty;
+        private string _selectedItemSerialized = string.Empty;
         public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -113,7 +113,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 if (_selectedItem == value) return;
                 _selectedItem = value;
-                selectedItemSerialized = _selectedItem != null ? JsonSerializer.Serialize(_selectedItem, _jsonDeserializerOptions) : string.Empty;
+                _selectedItemSerialized = _selectedItem != null ? JsonSerializer.Serialize(_selectedItem, _jsonDeserializerOptions) : string.Empty;
                 IsSaveItemJsonButtonVisible = false;
                 IsEditJsonTextBoxVisible = _selectedItem is not null;
                 NotifyPropertyChanged(nameof(SelectedItemSerialized));
@@ -122,10 +122,10 @@ namespace Cell.ViewModel.ToolWindow
 
         public string SelectedItemSerialized
         {
-            get => selectedItemSerialized;
+            get => _selectedItemSerialized;
             set
             {
-                if (selectedItemSerialized == value) return;
+                if (_selectedItemSerialized == value) return;
 
                 try
                 {
@@ -134,7 +134,7 @@ namespace Cell.ViewModel.ToolWindow
                     {
                         item.CopyPublicProperties(_selectedItem, ["ID"]);
                         IsSaveItemJsonButtonVisible = false;
-                        selectedItemSerialized = value;
+                        _selectedItemSerialized = value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));
                     }
                 }

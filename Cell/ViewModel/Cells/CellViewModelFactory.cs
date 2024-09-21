@@ -1,8 +1,7 @@
 ﻿using Cell.Model;
-using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells
 {
     public static class CellViewModelFactory
     {
@@ -22,7 +21,7 @@ namespace Cell.ViewModel
                 CellType.List => new ListCellViewModel(model, sheetViewModel),
                 CellType.Graph => new GraphCellViewModel(model, sheetViewModel),
                 CellType.Date => new DateCellViewModel(model, sheetViewModel),
-                _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
+                _ => throw new Exception($"Unknown cell type '{model.CellType}'"),
             };
         }
     }

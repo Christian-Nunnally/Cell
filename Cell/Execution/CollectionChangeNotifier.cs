@@ -6,7 +6,7 @@ namespace Cell.Execution
 {
     public class CollectionChangeNotifier
     {
-        private readonly List<string> _collectionsBeingUpdated = new();
+        private readonly List<string> _collectionsBeingUpdated = [];
         private readonly SubscriberNotifier _subscriberNotifier = new();
         private readonly UserCollectionLoader _userCollectionLoader;
         public CollectionChangeNotifier(UserCollectionLoader userCollectionLoader)

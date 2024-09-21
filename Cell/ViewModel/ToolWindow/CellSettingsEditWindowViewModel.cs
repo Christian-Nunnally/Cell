@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using System.Collections.ObjectModel;
@@ -11,14 +10,12 @@ namespace Cell.ViewModel.ToolWindow
     public class CellSettingsEditWindowViewModel : PropertyChangedBase
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
-        private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private CellModel _cellToDisplay = CellModel.Null;
-        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
+        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellsToEdit = cellsToEdit;
-            _cellTracker = cellTracker;
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
         }

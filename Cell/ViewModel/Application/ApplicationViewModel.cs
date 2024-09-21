@@ -15,13 +15,13 @@ namespace Cell.ViewModel.Application
         public const string NoMigratorForVersionError = "Unable to load version";
         private readonly CellClipboard _cellClipboard;
         private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
-        private static ApplicationViewModel? instance;
+        private static ApplicationViewModel? _instance;
         private ApplicationView? _applicationView;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
-        private SheetViewModel? sheetViewModel;
+        private SheetViewModel? _sheetViewModel;
         public ApplicationViewModel(
             PersistedDirectory persistenceManager,
             PersistedProject persistedProject,
@@ -56,9 +56,9 @@ namespace Cell.ViewModel.Application
             BackupManager = backupManager;
         }
 
-        public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
+        public static ApplicationViewModel Instance { get => _instance ?? throw new NullReferenceException("Application instance not set"); set => _instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
-        public static ApplicationViewModel? SafeInstance => instance;
+        public static ApplicationViewModel? SafeInstance => _instance;
 
         public SheetView? ActiveSheetView => _applicationView?.ActiveSheetView;
 
@@ -117,10 +117,10 @@ namespace Cell.ViewModel.Application
 
         public SheetViewModel? SheetViewModel
         {
-            get { return sheetViewModel; }
+            get { return _sheetViewModel; }
             set
             {
-                sheetViewModel = value;
+                _sheetViewModel = value;
                 NotifyPropertyChanged(nameof(SheetViewModel));
             }
         }
@@ -133,7 +133,7 @@ namespace Cell.ViewModel.Application
 
         public static UndoRedoManager? GetUndoRedoManager()
         {
-            if (instance == null) return null;
+            if (_instance == null) return null;
             return Instance.UndoRedoManager;
         }
 

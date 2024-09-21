@@ -2,7 +2,7 @@
 {
     public class LoadingProgressResult
     {
-        private Func<LoadingProgressResult>? _continuation;
+        private readonly Func<LoadingProgressResult>? _continuation;
         public LoadingProgressResult(bool success, string message)
         {
             IsComplete = true;

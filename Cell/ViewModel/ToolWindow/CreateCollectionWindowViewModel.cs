@@ -11,7 +11,7 @@ namespace Cell.ViewModel.ToolWindow
     {
         private readonly ObservableCollection<UserCollection> _collections;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private bool isBaseOnCheckBoxChecked;
+        private bool _isBaseOnCheckBoxChecked;
         public CreateCollectionWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -31,11 +31,11 @@ namespace Cell.ViewModel.ToolWindow
 
         public bool IsBaseOnCheckBoxChecked
         {
-            get => isBaseOnCheckBoxChecked; set
+            get => _isBaseOnCheckBoxChecked; set
             {
-                isBaseOnCheckBoxChecked = value;
-                CollectionBaseSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Visible : Visibility.Collapsed;
-                CollectionTypeSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Collapsed : Visibility.Visible;
+                _isBaseOnCheckBoxChecked = value;
+                CollectionBaseSettingVisibility = _isBaseOnCheckBoxChecked ? Visibility.Visible : Visibility.Collapsed;
+                CollectionTypeSettingVisibility = _isBaseOnCheckBoxChecked ? Visibility.Collapsed : Visibility.Visible;
                 NotifyPropertyChanged(nameof(CollectionBaseSettingVisibility));
                 NotifyPropertyChanged(nameof(CollectionTypeSettingVisibility));
             }

@@ -16,7 +16,7 @@ namespace Cell.ViewModel.Execution
         public static readonly PluginFunction Null = new(PluginFunctionModel.Null);
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
-        private bool wasCompileSuccessful;
+        private bool _wasCompileSuccessful;
         public PluginFunction(PluginFunctionModel model)
         {
             Model = model;
@@ -57,10 +57,10 @@ namespace Cell.ViewModel.Execution
 
         public bool WasCompileSuccessful
         {
-            get => wasCompileSuccessful; set
+            get => _wasCompileSuccessful; set
             {
-                if (wasCompileSuccessful == value) return;
-                wasCompileSuccessful = value;
+                if (_wasCompileSuccessful == value) return;
+                _wasCompileSuccessful = value;
                 NotifyPropertyChanged(nameof(WasCompileSuccessful));
             }
         }

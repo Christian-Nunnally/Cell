@@ -21,7 +21,7 @@ namespace Cell.Model
         private string _margin = "0";
         private TextAlignment _textAlignment = TextAlignment.Center;
         private VerticalAlignment _verticalAlignment = VerticalAlignment.Center;
-        private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center;
+        private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Center;
         public string BackgroundColor
         {
             get => _backgroundColorHex;
@@ -168,11 +168,11 @@ namespace Cell.Model
 
         public HorizontalAlignment HorizontalAlignment
         {
-            get => horizontalAlignment;
+            get => _horizontalAlignment;
             set
             {
-                if (horizontalAlignment == value) return;
-                horizontalAlignment = value;
+                if (_horizontalAlignment == value) return;
+                _horizontalAlignment = value;
                 NotifyPropertyChanged(nameof(HorizontalAlignment));
             }
         }

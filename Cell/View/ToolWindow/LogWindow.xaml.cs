@@ -17,15 +17,9 @@ namespace Cell.View.ToolWindow
 
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
-        }
+        public double GetMinimumHeight() => 400;
 
-        public double GetMinimumWidth()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
-        }
+        public double GetMinimumWidth() => 400;
 
         public string GetTitle() => "Logs";
 
