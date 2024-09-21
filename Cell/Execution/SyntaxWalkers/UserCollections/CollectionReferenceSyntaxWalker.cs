@@ -23,7 +23,6 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
             if (syntax.ArgumentList.Arguments.Count != 1) return false;
             var argument = syntax.ArgumentList.Arguments[0];
 
-
             if (argument.Expression is LiteralExpressionSyntax literalExpressionSyntax)
             {
                 var collectionName = literalExpressionSyntax.Token.ValueText;

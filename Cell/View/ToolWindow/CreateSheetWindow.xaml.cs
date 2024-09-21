@@ -19,6 +19,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 150;
 
+        public double GetMinimumWidth() => 300;
+
         public string GetTitle() => "Create New Sheet";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -28,7 +30,13 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 300;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -39,14 +47,6 @@ namespace Cell.View.ToolWindow
         {
             _viewModel.AddNewSheet();
             RequestClose?.Invoke();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

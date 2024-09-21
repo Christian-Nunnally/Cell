@@ -22,6 +22,11 @@ namespace Cell.View.ToolWindow
             return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowHeight;
         }
 
+        public double GetMinimumWidth()
+        {
+            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
+        }
+
         public string GetTitle() => "Logs";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -32,22 +37,17 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth()
-        {
-            return ApplicationViewModel.Instance.ApplicationSettings.FunctionManagerWindowWidth;
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
-
         public void HandleBeingClosed()
         {
         }
 
         public void HandleBeingShown()
         {
+        }
+
+        public bool HandleCloseRequested()
+        {
+            return true;
         }
     }
 }

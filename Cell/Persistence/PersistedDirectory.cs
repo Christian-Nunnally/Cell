@@ -30,22 +30,6 @@ namespace Cell.Persistence
             _fileIO.CopyDirectory(fullFrom, fullTo);
         }
 
-        public void UnzipTo(PersistedDirectory to, string fromPathZip = "", string toPath = "")
-        {
-            var fullFrom = GetFullPath(fromPathZip);
-            var fullTo = to.GetFullPath(toPath);
-            var zipPath = fullTo + ".zip";
-            _fileIO.ZipDirectory(fullFrom, zipPath);
-        }
-
-        public void ZipTo(PersistedDirectory to, string fromPath = "", string toPathZip = "")
-        {
-            var fullFrom = GetFullPath(fromPath);
-            var fullTo = to.GetFullPath(toPathZip);
-            var zipPath = fullTo + ".zip";
-            _fileIO.ZipDirectory(fullFrom, zipPath);
-        }
-
         public void DeleteDirectory(string path = "")
         {
             var fullPath = GetFullPath(path);
@@ -81,6 +65,11 @@ namespace Cell.Persistence
             return fullPaths.Select(x => x[(_rootPath.Length + extraChar)..]);
         }
 
+        public string GetFullPath(string additionalPath = "")
+        {
+            return Path.Combine(_rootPath, additionalPath);
+        }
+
         public string? LoadFile(string path)
         {
             if (path.StartsWith("//") || path.StartsWith('\\')) throw new CellError("Invalid path");
@@ -96,15 +85,18 @@ namespace Cell.Persistence
             _fileIO.MoveDirectory(fullFrom, fullTo);
         }
 
-        public string GetFullPath(string additionalPath = "")
-        {
-            return Path.Combine(_rootPath, additionalPath);
-        }
-
         public void SaveFile(string path, string content)
         {
             var fullPath = GetFullPath(path);
             _fileIO.WriteFile(fullPath, content);
+        }
+
+        public void UnzipTo(PersistedDirectory to, string fromPathZip = "", string toPath = "")
+        {
+            var fullFrom = GetFullPath(fromPathZip);
+            var fullTo = to.GetFullPath(toPath);
+            var zipPath = fullTo + ".zip";
+            _fileIO.ZipDirectory(fullFrom, zipPath);
         }
 
         public void ZipFolder(string path = "")
@@ -113,6 +105,14 @@ namespace Cell.Persistence
             var zipPath = fullPath + ".zip";
             _fileIO.ZipDirectory(fullPath, zipPath);
             _fileIO.DeleteDirectory(fullPath);
+        }
+
+        public void ZipTo(PersistedDirectory to, string fromPath = "", string toPathZip = "")
+        {
+            var fullFrom = GetFullPath(fromPath);
+            var fullTo = to.GetFullPath(toPathZip);
+            var zipPath = fullTo + ".zip";
+            _fileIO.ZipDirectory(fullFrom, zipPath);
         }
     }
 }

@@ -9,8 +9,9 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class CreateCollectionWindowViewModel : PropertyChangedBase
     {
+        private readonly ObservableCollection<UserCollection> _collections;
+        private readonly UserCollectionLoader _userCollectionLoader;
         private bool isBaseOnCheckBoxChecked;
-
         public CreateCollectionWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -21,9 +22,6 @@ namespace Cell.ViewModel.ToolWindow
             };
             SelectedItemType = PluginTypeNames.FirstOrDefault(string.Empty);
         }
-
-        private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly ObservableCollection<UserCollection> _collections;
 
         public ObservableCollection<string> CollectionBaseOptions { get; set; }
 
@@ -47,9 +45,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public string NewCollectionName { get; set; } = string.Empty;
 
-        public string SelectedItemType { get; set; } = string.Empty;
-
         public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
+
+        public string SelectedItemType { get; set; } = string.Empty;
 
         public void AddCurrentCollection()
         {

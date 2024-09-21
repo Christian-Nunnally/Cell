@@ -6,18 +6,12 @@ namespace Cell.ViewModel
 {
     public class CellLayout
     {
-        private readonly CellTracker _cellTracker;
+        private readonly bool _canLayout = true;
         private readonly IEnumerable<CellViewModel> _cells;
+        private readonly CellTracker _cellTracker;
         private readonly List<CellViewModel> _columns;
         private readonly CellViewModel? _corner;
         private readonly List<CellViewModel> _rows;
-
-        private readonly bool _canLayout = true;
-
-        public double LayoutWidth { get; private set; }
-
-        public double LayoutHeight { get; private set; }
-
         public CellLayout(IEnumerable<CellViewModel> cells, CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -32,6 +26,10 @@ namespace Cell.ViewModel
                 _columns.Insert(0, _corner!);
             }
         }
+
+        public double LayoutHeight { get; private set; }
+
+        public double LayoutWidth { get; private set; }
 
         public void UpdateLayout()
         {

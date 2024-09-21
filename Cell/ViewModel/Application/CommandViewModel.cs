@@ -5,11 +5,9 @@ namespace Cell.ViewModel.Application
 {
     public class CommandViewModel
     {
-        public ICommand Command { get; set; }
-
-        public string Name { get; set; }
-
-        public string ToolTip { get; set; }
+        public CommandViewModel(string name, Action command) : this(name, new RelayCommand(x => command()))
+        {
+        }
 
         public CommandViewModel(string name, ICommand command)
         {
@@ -18,6 +16,10 @@ namespace Cell.ViewModel.Application
             ToolTip = name;
         }
 
-        public CommandViewModel(string name, Action command) : this(name, new RelayCommand(x => command())) { }
+        public ICommand Command { get; set; }
+
+        public string Name { get; set; }
+
+        public string ToolTip { get; set; }
     }
 }

@@ -12,37 +12,26 @@ namespace Cell.ViewModel.Application
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
-        public bool IsProjectLoaded
-        {
-            get => _isProjectLoaded;
-            set
-            {
-                if (_isProjectLoaded == value) return;
-                _isProjectLoaded = value;
-                NotifyPropertyChanged(nameof(IsProjectLoaded));
-            }
-        }
-
         public const string NoMigratorForVersionError = "Unable to load version";
-        private ApplicationView? _applicationView;
         private readonly CellClipboard _cellClipboard;
+        private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
         private static ApplicationViewModel? instance;
+        private ApplicationView? _applicationView;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private SheetViewModel? sheetViewModel;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
-
+        private SheetViewModel? sheetViewModel;
         public ApplicationViewModel(
-            PersistedDirectory persistenceManager, 
+            PersistedDirectory persistenceManager,
             PersistedProject persistedProject,
-            PluginFunctionLoader pluginFunctionLoader, 
-            CellLoader cellLoader, 
-            CellTracker cellTracker, 
-            UserCollectionLoader userCollectionLoader, 
-            CellPopulateManager cellPopulateManager, 
-            CellTriggerManager cellTriggerManager, 
-            SheetTracker sheetTracker, 
+            PluginFunctionLoader pluginFunctionLoader,
+            CellLoader cellLoader,
+            CellTracker cellTracker,
+            UserCollectionLoader userCollectionLoader,
+            CellPopulateManager cellPopulateManager,
+            CellTriggerManager cellTriggerManager,
+            SheetTracker sheetTracker,
             CellSelector cellSelector,
             TitleBarSheetNavigationViewModel titleBarSheetNavigationViewModel,
             ApplicationSettings applicationSettings,
@@ -71,6 +60,8 @@ namespace Cell.ViewModel.Application
 
         public static ApplicationViewModel? SafeInstance => instance;
 
+        public SheetView? ActiveSheetView => _applicationView?.ActiveSheetView;
+
         public ApplicationSettings ApplicationSettings { get; private set; }
 
         public double ApplicationWindowHeight
@@ -93,25 +84,36 @@ namespace Cell.ViewModel.Application
             }
         }
 
+        public BackupManager BackupManager { get; private set; }
+
         public CellLoader CellLoader { get; private set; }
 
         public CellPopulateManager CellPopulateManager { get; private set; }
 
+        public CellSelector CellSelector { get; private set; }
+
         public CellTracker CellTracker { get; private set; }
 
-        public PersistedProject PersistedProject { get; private set; }
-
         public CellTriggerManager CellTriggerManager { get; private set; }
+
+        public bool IsProjectLoaded
+        {
+            get => _isProjectLoaded;
+            set
+            {
+                if (_isProjectLoaded == value) return;
+                _isProjectLoaded = value;
+                NotifyPropertyChanged(nameof(IsProjectLoaded));
+            }
+        }
+
+        public PersistedProject PersistedProject { get; private set; }
 
         public PersistedDirectory PersistenceManager { get; private set; }
 
         public PluginFunctionLoader PluginFunctionLoader { get; private set; }
 
-        public BackupManager BackupManager { get; private set; }
-
         public SheetTracker SheetTracker { get; private set; }
-
-        public CellSelector CellSelector{ get; private set; }
 
         public SheetViewModel? SheetViewModel
         {
@@ -128,9 +130,6 @@ namespace Cell.ViewModel.Application
         public UndoRedoManager UndoRedoManager { get; private set; }
 
         public UserCollectionLoader UserCollectionLoader { get; private set; }
-        public SheetView? ActiveSheetView => _applicationView?.ActiveSheetView;
-
-        private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
 
         public static UndoRedoManager? GetUndoRedoManager()
         {
@@ -138,79 +137,10 @@ namespace Cell.ViewModel.Application
             return Instance.UndoRedoManager;
         }
 
-        public LoadingProgressResult Load()
+        public void AttachToView(ApplicationView applicationView)
         {
-            var progress = LoadWithProgress();
-            while (!progress.IsComplete) progress = progress.Continue();
-            return progress;
-        }
-
-        public LoadingProgressResult LoadWithProgress()
-        {
-            if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
-            if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
-            _isProjectLoading = true;
-            return new LoadingProgressResult("Creating backup", LoadPhase0);
-        }
-
-        private LoadingProgressResult LoadPhase0()
-        {
-            BackupManager.CreateBackup();
-            return new LoadingProgressResult("Checking Save Version", LoadPhase1);
-        }
-
-        private LoadingProgressResult LoadPhase1()
-        {
-            if (PersistedProject.NeedsMigration())
-            {
-                if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
-                DialogFactory.ShowYesNoConfirmationDialog(
-                    "Version Mismatch",
-                    $"The version of your project is outdated. would you like to migrate it?",
-                    MigrateProject,
-                    () => { });
-                return new LoadingProgressResult(false, "Migration needed, try loading again.");
-            }
-
-            PersistedProject.SaveVersion();
-            return new LoadingProgressResult("Loading Collections", LoadPhase2);
-        }
-
-        private void MigrateProject()
-        {
-            BackupManager.CreateBackup("PreMigration");
-            PersistedProject.Migrate();
-            DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
-        }
-
-        private LoadingProgressResult LoadPhase2()
-        {
-            UserCollectionLoader.LoadCollections();
-            return new LoadingProgressResult("Loading Plugins", LoadPhase3);
-        }
-
-        private LoadingProgressResult LoadPhase3()
-        {
-            PluginFunctionLoader.LoadPlugins();
-            return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
-        }
-
-        private LoadingProgressResult LoadPhase4()
-        {
-            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
-            return new LoadingProgressResult("Loading Cells", LoadPhase5);
-        }
-
-        private LoadingProgressResult LoadPhase5()
-        {
-            var cells = CellLoader.LoadCells();
-            foreach (var cell in cells)
-            {
-                CellTracker.AddCell(cell, false);
-            }
-            IsProjectLoaded = true;
-            _isProjectLoading = false;
-            return new LoadingProgressResult(true, "Load Complete");
+            _applicationView = applicationView;
+            _applicationView.DataContext = this;
         }
 
         public void CopySelectedCells(bool copyTextOnly)
@@ -246,6 +176,21 @@ namespace Cell.ViewModel.Application
             ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
+        public LoadingProgressResult Load()
+        {
+            var progress = LoadWithProgress();
+            while (!progress.IsComplete) progress = progress.Continue();
+            return progress;
+        }
+
+        public LoadingProgressResult LoadWithProgress()
+        {
+            if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
+            if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
+            _isProjectLoading = true;
+            return new LoadingProgressResult("Creating backup", LoadPhase0);
+        }
+
         public void PasteCopiedCells()
         {
             if (SheetViewModel == null) return;
@@ -255,20 +200,74 @@ namespace Cell.ViewModel.Application
             UndoRedoManager.FinishRecordingUndoState();
         }
 
-        public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
-        {
-            _applicationView?.ShowToolWindow(content, allowDuplicates);
-        }
-
         public void ShowToolWindow(PropertyChangedBase viewModel, bool allowDuplicates = false)
         {
             _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
         }
 
-        public void AttachToView(ApplicationView applicationView)
+        public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
         {
-            _applicationView = applicationView;
-            _applicationView.DataContext = this;
+            _applicationView?.ShowToolWindow(content, allowDuplicates);
+        }
+
+        private LoadingProgressResult LoadPhase0()
+        {
+            BackupManager.CreateBackup();
+            return new LoadingProgressResult("Checking Save Version", LoadPhase1);
+        }
+
+        private LoadingProgressResult LoadPhase1()
+        {
+            if (PersistedProject.NeedsMigration())
+            {
+                if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
+                DialogFactory.ShowYesNoConfirmationDialog(
+                    "Version Mismatch",
+                    $"The version of your project is outdated. would you like to migrate it?",
+                    MigrateProject,
+                    () => { });
+                return new LoadingProgressResult(false, "Migration needed, try loading again.");
+            }
+
+            PersistedProject.SaveVersion();
+            return new LoadingProgressResult("Loading Collections", LoadPhase2);
+        }
+
+        private LoadingProgressResult LoadPhase2()
+        {
+            UserCollectionLoader.LoadCollections();
+            return new LoadingProgressResult("Loading Plugins", LoadPhase3);
+        }
+
+        private LoadingProgressResult LoadPhase3()
+        {
+            PluginFunctionLoader.LoadPlugins();
+            return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
+        }
+
+        private LoadingProgressResult LoadPhase4()
+        {
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            return new LoadingProgressResult("Loading Cells", LoadPhase5);
+        }
+
+        private LoadingProgressResult LoadPhase5()
+        {
+            var cells = CellLoader.LoadCells();
+            foreach (var cell in cells)
+            {
+                CellTracker.AddCell(cell, false);
+            }
+            IsProjectLoaded = true;
+            _isProjectLoading = false;
+            return new LoadingProgressResult(true, "Load Complete");
+        }
+
+        private void MigrateProject()
+        {
+            BackupManager.CreateBackup("PreMigration");
+            PersistedProject.Migrate();
+            DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
         }
     }
 }

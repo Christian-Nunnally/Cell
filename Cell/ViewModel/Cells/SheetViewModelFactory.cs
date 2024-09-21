@@ -9,43 +9,18 @@ namespace Cell.ViewModel.Cells
     public static class SheetViewModelFactory
     {
         public static SheetViewModel Create(
-            SheetModel sheetModel, 
-            CellPopulateManager cellPopulateManager, 
-            CellTracker cellTracker, 
+            SheetModel sheetModel,
+            CellPopulateManager cellPopulateManager,
+            CellTracker cellTracker,
             SheetTracker sheetTracker,
             CellSelector cellSelector,
-            UserCollectionLoader userCollectionLoader, 
-            ApplicationSettings applicationSettings, 
+            UserCollectionLoader userCollectionLoader,
+            ApplicationSettings applicationSettings,
             PluginFunctionLoader pluginFunctionLoader)
         {
             var sheetViewModel = new SheetViewModel(sheetModel, cellPopulateManager, cellTracker, sheetTracker, cellSelector, userCollectionLoader, applicationSettings, pluginFunctionLoader);
             sheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
             return sheetViewModel;
-        }
-
-        private static void SheetViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            // TODO: Make trigger off CellSelector changes
-            if (e.PropertyName == nameof(SheetViewModel.SelectedCellViewModel))
-            {
-                if (sender is SheetViewModel sheetViewModel)
-                {
-                    HighlightFunctionDependencies(sheetViewModel);
-                }
-            }
-        }
-
-        private static void HighlightFunctionDependencies(SheetViewModel sheet)
-        {
-            if (sheet.SelectedCellViewModel == null) return;
-            if (sheet.PluginFunctionLoader.TryGetFunction("object", sheet.SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
-            {
-                if (sheet.ApplicationSettings.HighlightPopulateCellDependencies) HighlightCellDependenciesOfFunction(sheet, populate);
-            }
-            if (sheet.PluginFunctionLoader.TryGetFunction("void", sheet.SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
-            {
-                if (sheet.ApplicationSettings.HighlightTriggerCellDependencies) HighlightCellDependenciesOfFunction(sheet, trigger);
-            }
         }
 
         private static void HighlightCellDependenciesOfFunction(SheetViewModel sheet, PluginFunction function)
@@ -88,6 +63,31 @@ namespace Cell.ViewModel.Cells
                     var cellToHighlight = sheet.CellViewModels.FirstOrDefault(x => x.Row == row && x.Column == column);
                     if (cellToHighlight == null) continue;
                     sheet.HighlightCell(cellToHighlight, "#0438ff44");
+                }
+            }
+        }
+
+        private static void HighlightFunctionDependencies(SheetViewModel sheet)
+        {
+            if (sheet.SelectedCellViewModel == null) return;
+            if (sheet.PluginFunctionLoader.TryGetFunction("object", sheet.SelectedCellViewModel.Model.PopulateFunctionName, out var populate))
+            {
+                if (sheet.ApplicationSettings.HighlightPopulateCellDependencies) HighlightCellDependenciesOfFunction(sheet, populate);
+            }
+            if (sheet.PluginFunctionLoader.TryGetFunction("void", sheet.SelectedCellViewModel.Model.TriggerFunctionName, out var trigger))
+            {
+                if (sheet.ApplicationSettings.HighlightTriggerCellDependencies) HighlightCellDependenciesOfFunction(sheet, trigger);
+            }
+        }
+
+        private static void SheetViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // TODO: Make trigger off CellSelector changes
+            if (e.PropertyName == nameof(SheetViewModel.SelectedCellViewModel))
+            {
+                if (sender is SheetViewModel sheetViewModel)
+                {
+                    HighlightFunctionDependencies(sheetViewModel);
                 }
             }
         }

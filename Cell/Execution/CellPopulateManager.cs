@@ -12,16 +12,16 @@ namespace Cell.Execution
     /// </summary>
     public class CellPopulateManager
     {
-        private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly Dictionary<PluginFunctionModel, List<CellModel>> _cellsToUpdateWhenFunctionChanges = [];
         private readonly CellTextChangesAtLocationNotifier _cellTextChangesAtLocationNotifier;
         private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
         private readonly Dictionary<CellModel, CellPopulateSubscriber> _cellToPopulateSubscriberMap = [];
         private readonly CellTracker _cellTracker;
         private readonly CollectionChangeNotifier _collectionChangeNotifier;
+        private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly UserCollectionLoader _userCollectionLoader;
         private readonly PluginContext _pluginFunctionRunContext;
+        private readonly UserCollectionLoader _userCollectionLoader;
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _pluginFunctionRunContext = new PluginContext(cellTracker, userCollectionLoader);
@@ -55,6 +55,50 @@ namespace Cell.Execution
             return _cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cells) ? cells : [];
         }
 
+        private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
+        {
+            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
+            {
+                if (!cellList.Contains(cell)) cellList.Add(cell);
+            }
+            else
+            {
+                _cellsToUpdateWhenFunctionChanges.Add(function.Model, [cell]);
+                function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
+                function.Model.PropertyChanged += RunPopulateWhenCodeChanges;
+            }
+        }
+
+        private void CellPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var cell = (CellModel)sender!;
+            if (e.PropertyName == nameof(CellModel.PopulateFunctionName))
+            {
+                UnsubscribeCellFromFunctionChanges(cell);
+                SubscribeCellToFunctionChanges(cell);
+            }
+        }
+
+        private void CollectionNameChangedInCellsCollectionDependencies(CellSpecificCollectionReference reference)
+        {
+            if (string.IsNullOrWhiteSpace(reference.Cell.PopulateFunctionName)) return;
+            if (!_pluginFunctionLoader.TryGetFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
+            UpdateDependencySubscriptions(reference.Cell, function);
+        }
+
+        private CellPopulateSubscriber GetOrCreatePopulateSubscriber(CellModel cell)
+        {
+            if (_cellToPopulateSubscriberMap.TryGetValue(cell, out var subscriber)) return subscriber;
+            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionLoader, _pluginFunctionLoader);
+            _cellToPopulateSubscriberMap.Add(cell, subscriber);
+            return subscriber;
+        }
+
+        private void NotifyCellsAboutFunctionDependencyChanges(PluginFunction function)
+        {
+            _cellsToUpdateWhenFunctionChanges[function.Model].ForEach(cell => UpdateDependencySubscriptions(cell, function));
+        }
+
         private void PopulateCellsText(CellModel cell)
         {
             if (string.IsNullOrEmpty(cell.PopulateFunctionName)) return;
@@ -62,6 +106,58 @@ namespace Cell.Execution
             if (result.ExecutionResult == null) return;
             if (result.WasSuccess) cell.Text = result.ExecutionResult;
             else cell.ErrorText = result.ExecutionResult;
+        }
+
+        private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
+        {
+            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
+            {
+                cellList.Remove(cell);
+                if (cellList.Count == 0)
+                {
+                    _cellsToUpdateWhenFunctionChanges.Remove(function.Model);
+                    function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
+                    function.Model.PropertyChanged -= RunPopulateWhenCodeChanges;
+                }
+            }
+        }
+
+        private void ResolveCollectionDependenciesForCell(CellModel cell, PluginFunction function)
+        {
+            UnsubscribeFromAllCollectionUpdates(cell);
+            foreach (var collectionReference in function.CollectionDependencies)
+            {
+                var cellSpecificCollectionReference = new CellSpecificCollectionReference(cell, collectionReference, _cellTextChangesAtLocationNotifier, _pluginFunctionRunContext);
+                TrackCollectionReference(cell, cellSpecificCollectionReference);
+
+                var collectionName = cellSpecificCollectionReference.GetCollectionName();
+                SubscribeToCollectionUpdates(cellSpecificCollectionReference.Cell, collectionName);
+            }
+        }
+
+        private void ResolveLocationDependenciesForCell(CellModel cell, PluginFunction function)
+        {
+            var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
+            foreach (var locationDependency in function.LocationDependencies)
+            {
+                var locations = locationDependency.ResolveLocations(cell);
+                foreach (var location in locations)
+                {
+                    if (thisLocation == location) continue;
+                    SubscribeToUpdatesAtLocation(cell, location);
+                }
+            }
+
+            // Because this cell has a populate function, always listen to changes to itself.
+            SubscribeToUpdatesAtLocation(cell, thisLocation);
+        }
+
+        private void RunPopulateWhenCodeChanges(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            {
+                _cellsToUpdateWhenFunctionChanges[(PluginFunctionModel)sender!].ForEach(PopulateCellsText);
+            }
         }
 
         private void StartMonitoringCellForChanges(CellModel cell)
@@ -86,6 +182,14 @@ namespace Cell.Execution
             RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
         }
 
+        private void SubscribeCellToFunctionChanges(CellModel cell)
+        {
+            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            UpdateDependencySubscriptions(cell, function);
+            AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
+            _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
+        }
+
         private void SubscribeToCollectionUpdates(CellModel cell, string collectionName)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
@@ -96,44 +200,6 @@ namespace Cell.Execution
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
             _cellTextChangesAtLocationNotifier.SubscribeToUpdatesAtLocation(subscriber, locationString);
-        }
-
-        private void UnsubscribeFromAllCollectionUpdates(CellModel cell)
-        {
-            var subscriber = GetOrCreatePopulateSubscriber(cell);
-            _collectionChangeNotifier.UnsubscribeFromAllCollections(subscriber);
-            _collectionDependenciesForCellsPopulateFunction.Remove(cell);
-        }
-
-        private void UnsubscribeFromAllLocationUpdates(CellModel cell)
-        {
-            var subscriber = GetOrCreatePopulateSubscriber(cell);
-            _cellTextChangesAtLocationNotifier.UnsubscribeFromAllLocations(subscriber);
-        }
-
-        private void UpdateDependencySubscriptions(CellModel cell, PluginFunction function)
-        {
-            if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
-            var _ = function.CompiledMethod;
-
-            UntrackCollectionReferences(cell);
-            UnsubscribeFromAllLocationUpdates(cell);
-            UnsubscribeFromAllCollectionUpdates(cell);
-            ResolveLocationDependenciesForCell(cell, function);
-            ResolveCollectionDependenciesForCell(cell, function);
-        }
-
-        private void ResolveCollectionDependenciesForCell(CellModel cell, PluginFunction function)
-        {
-            UnsubscribeFromAllCollectionUpdates(cell);
-            foreach (var collectionReference in function.CollectionDependencies)
-            {
-                var cellSpecificCollectionReference = new CellSpecificCollectionReference(cell, collectionReference, _cellTextChangesAtLocationNotifier, _pluginFunctionRunContext);
-                TrackCollectionReference(cell, cellSpecificCollectionReference);
-
-                var collectionName = cellSpecificCollectionReference.GetCollectionName();
-                SubscribeToCollectionUpdates(cellSpecificCollectionReference.Cell, collectionName);
-            }
         }
 
         private void TrackCollectionReference(CellModel cell, CellSpecificCollectionReference cellSpecificCollectionReference)
@@ -149,6 +215,27 @@ namespace Cell.Execution
             }
         }
 
+        private void UnsubscribeCellFromFunctionChanges(CellModel cell)
+        {
+            if (!_cellToPopulateFunctionNameMap.TryGetValue(cell, out var oldFunctionName)) return;
+            _cellToPopulateFunctionNameMap.Remove(cell);
+            if (!_pluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction)) return;
+            RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, oldFunction);
+        }
+
+        private void UnsubscribeFromAllCollectionUpdates(CellModel cell)
+        {
+            var subscriber = GetOrCreatePopulateSubscriber(cell);
+            _collectionChangeNotifier.UnsubscribeFromAllCollections(subscriber);
+            _collectionDependenciesForCellsPopulateFunction.Remove(cell);
+        }
+
+        private void UnsubscribeFromAllLocationUpdates(CellModel cell)
+        {
+            var subscriber = GetOrCreatePopulateSubscriber(cell);
+            _cellTextChangesAtLocationNotifier.UnsubscribeFromAllLocations(subscriber);
+        }
+
         private void UntrackCollectionReferences(CellModel cell)
         {
             if (_collectionDependenciesForCellsPopulateFunction.TryGetValue(cell, out var cellSpecificCollectionReferences))
@@ -161,107 +248,16 @@ namespace Cell.Execution
             }
         }
 
-        private void CollectionNameChangedInCellsCollectionDependencies(CellSpecificCollectionReference reference)
+        private void UpdateDependencySubscriptions(CellModel cell, PluginFunction function)
         {
-            if (string.IsNullOrWhiteSpace(reference.Cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
-            UpdateDependencySubscriptions(reference.Cell, function);
-        }
+            if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
+            var _ = function.CompiledMethod;
 
-        private void ResolveLocationDependenciesForCell(CellModel cell, PluginFunction function)
-        {
-            var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
-            foreach (var locationDependency in function.LocationDependencies)
-            {
-                var locations = locationDependency.ResolveLocations(cell);
-                foreach (var location in locations)
-                {
-                    if (thisLocation == location) continue;
-                    SubscribeToUpdatesAtLocation(cell, location);
-                }
-            }
-
-            // Because this cell has a populate function, always listen to changes to itself.
-            SubscribeToUpdatesAtLocation(cell, thisLocation);
-        }
-
-        private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
-        {
-            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
-            {
-                if (!cellList.Contains(cell)) cellList.Add(cell);
-            }
-            else
-            {
-                _cellsToUpdateWhenFunctionChanges.Add(function.Model, [cell]);
-                function.DependenciesChanged += NotifyCellsAboutFunctionDependencyChanges;
-                function.Model.PropertyChanged += RunPopulateWhenCodeChanges;
-            }
-        }
-
-        private void CellPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var cell = (CellModel)sender!;
-            if (e.PropertyName == nameof(CellModel.PopulateFunctionName))
-            {
-                UnsubscribeCellFromFunctionChanges(cell);
-                SubscribeCellToFunctionChanges(cell);
-            }
-            //if (e.PropertyName == nameof(CellModel.Text))
-            //{
-            //    _cellTextChangesAtLocationNotifier.
-            //}
-        }
-
-        private void SubscribeCellToFunctionChanges(CellModel cell)
-        {
-            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
-            UpdateDependencySubscriptions(cell, function);
-            AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
-            _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
-        }
-
-        private void UnsubscribeCellFromFunctionChanges(CellModel cell)
-        {
-            if (!_cellToPopulateFunctionNameMap.TryGetValue(cell, out var oldFunctionName)) return;
-            _cellToPopulateFunctionNameMap.Remove(cell);
-            if (!_pluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction)) return;
-            RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, oldFunction);
-        }
-
-        private CellPopulateSubscriber GetOrCreatePopulateSubscriber(CellModel cell)
-        {
-            if (_cellToPopulateSubscriberMap.TryGetValue(cell, out var subscriber)) return subscriber;
-            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionLoader, _pluginFunctionLoader);
-            _cellToPopulateSubscriberMap.Add(cell, subscriber);
-            return subscriber;
-        }
-
-        private void NotifyCellsAboutFunctionDependencyChanges(PluginFunction function)
-        {
-            _cellsToUpdateWhenFunctionChanges[function.Model].ForEach(cell => UpdateDependencySubscriptions(cell, function));
-        }
-
-        private void RunPopulateWhenCodeChanges(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code))
-            {
-                _cellsToUpdateWhenFunctionChanges[(PluginFunctionModel)sender!].ForEach(PopulateCellsText);
-            }
-        }
-
-        private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
-        {
-            if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
-            {
-                cellList.Remove(cell);
-                if (cellList.Count == 0)
-                {
-                    _cellsToUpdateWhenFunctionChanges.Remove(function.Model);
-                    function.DependenciesChanged -= NotifyCellsAboutFunctionDependencyChanges;
-                    function.Model.PropertyChanged -= RunPopulateWhenCodeChanges;
-                }
-            }
+            UntrackCollectionReferences(cell);
+            UnsubscribeFromAllLocationUpdates(cell);
+            UnsubscribeFromAllCollectionUpdates(cell);
+            ResolveLocationDependenciesForCell(cell, function);
+            ResolveCollectionDependenciesForCell(cell, function);
         }
     }
 }

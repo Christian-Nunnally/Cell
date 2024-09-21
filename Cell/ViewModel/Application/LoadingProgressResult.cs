@@ -1,14 +1,8 @@
-﻿
-namespace Cell.ViewModel.Application
+﻿namespace Cell.ViewModel.Application
 {
     public class LoadingProgressResult
     {
-        public bool IsComplete { get; }
-        public bool Success { get; }
-        public string Message { get; }
-
         private Func<LoadingProgressResult>? _continuation;
-
         public LoadingProgressResult(bool success, string message)
         {
             IsComplete = true;
@@ -22,6 +16,12 @@ namespace Cell.ViewModel.Application
             Message = message;
             _continuation = continuation;
         }
+
+        public bool IsComplete { get; }
+
+        public string Message { get; }
+
+        public bool Success { get; }
 
         public LoadingProgressResult Continue()
         {

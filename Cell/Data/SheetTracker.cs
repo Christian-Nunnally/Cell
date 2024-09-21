@@ -11,12 +11,11 @@ namespace Cell.Data
     public class SheetTracker
     {
         private const string TemplatesSaveDirectory = "Templates";
-        private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly PersistedDirectory _persistenceManager;
-        private readonly CellTracker _cellTracker;
         private readonly CellLoader _cellLoader;
-
+        private readonly CellTracker _cellTracker;
+        private readonly PersistedDirectory _persistenceManager;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly UserCollectionLoader _userCollectionLoader;
         public SheetTracker(PersistedDirectory persistenceManager, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -29,86 +28,27 @@ namespace Cell.Data
             Sheets.CollectionChanged += SheetsCollectionChanged;
         }
 
-        private void CellRemovedFromTracker(CellModel model)
-        {
-            var sheet = Sheets.First(x => x.Name == model.SheetName);
-            sheet.Cells.Remove(model);
-            if (sheet.Cells.Count == 0)
-            {
-                if (sheet != null)
-                {
-                    Sheets.Remove(sheet);
-                    RefreshOrderedSheetsList();
-                }
-            }
-        }
-
-        private void CellAddedToTracker(CellModel model)
-        {
-            var sheet = Sheets.FirstOrDefault(x => x.Name == model.SheetName);
-            if (sheet == null)
-            {
-                sheet = new SheetModel(model.SheetName);
-                Sheets.Add(sheet);
-            }
-
-            sheet.Cells.Add(model);
-
-            if (model.CellType == CellType.Corner)
-            {
-                sheet.CornerCell = model;
-            }
-        }
-
         public ObservableCollection<SheetModel> OrderedSheets { get; } = [];
 
         public ObservableCollection<SheetModel> Sheets { get; } = [];
 
-        public void RenameSheet(string oldSheetName, string newSheetName)
+        public void AddAndSaveCells(IEnumerable<CellModel> cellsToAdd)
         {
-            _cellTracker.RenameSheet(oldSheetName, newSheetName);
-            _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
-        }
-
-        private void SheetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (sender is not SheetModel sheetModel) return;
-            if (e.PropertyName == nameof(SheetModel.Order))
+            foreach (var cell in cellsToAdd)
             {
-                RefreshOrderedSheetsList();
-            }
-            if (e.PropertyName == nameof(SheetModel.Name))
-            {
-                RenameSheet(sheetModel.OldName, sheetModel.Name);
-                sheetModel.OldName = sheetModel.Name;
+                _cellTracker.AddCell(cell, saveAfterAdding: true);
             }
         }
 
-        private void RefreshOrderedSheetsList()
+        public List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
         {
-            OrderedSheets.Clear();
-            foreach (var sheet in Sheets.OrderBy(x => x.Order))
+            var copiedCells = _cellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
+            foreach (var copiedCell in copiedCells)
             {
-                OrderedSheets.Add(sheet);
+                copiedCell.SheetName = "";
             }
-        }
 
-        private void SheetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-                foreach (var sheet in e.NewItems.OfType<SheetModel>())
-                {
-                    sheet.PropertyChanged += SheetPropertyChanged;
-                }
-            }
-            if (e.OldItems != null)
-            {
-                foreach (var sheet in e.OldItems.OfType<SheetModel>())
-                {
-                    sheet.PropertyChanged -= SheetPropertyChanged;
-                }
-            }
+            return copiedCells;
         }
 
         public void ExportSheetTemplate(string sheetName)
@@ -128,20 +68,6 @@ namespace Cell.Data
             var populateAndTriggerFunctions = populateFunctions.Concat(triggerFunctions).ToList();
 
             var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
-            //AddBaseCollectionsToUsedCollectionList(usedCollections);
-
-            //var collectionSortFunctions = usedCollections.Select(x => _pluginFunctionLoader.GetOrCreateFunction("object", x));
-            //var allFunctions = populateAndTriggerFunctions.Concat(collectionSortFunctions);
-            //foreach (var function in allFunctions)
-            //{
-            //    _pluginFunctionLoader.SavePluginFunction(templateDirectory, function.Model.ReturnType, function.Model);
-            //}
-
-            //foreach (var collection in usedCollections)
-            //{
-            //    var collectionDirectory = Path.Combine(templateDirectory, "Collections", collection);
-            //    _userCollectionLoader.ExportCollection(collection, collectionDirectory);
-            //}
         }
 
         public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)
@@ -200,15 +126,16 @@ namespace Cell.Data
             }
         }
 
-        public List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
+        public void RenameSheet(string oldSheetName, string newSheetName)
         {
-            var copiedCells = _cellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
-            foreach (var copiedCell in copiedCells)
-            {
-                copiedCell.SheetName = "";
-            }
+            _cellTracker.RenameSheet(oldSheetName, newSheetName);
+            _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
+        }
 
-            return copiedCells;
+        public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
+        {
+            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
+            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
         }
 
         private void AddBaseCollectionsToUsedCollectionList(List<string> usedCollections)
@@ -240,6 +167,37 @@ namespace Cell.Data
             PluginFunction? GetExistingFunction(PluginFunctionModel function)
             {
                 return _pluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
+            }
+        }
+
+        private void CellAddedToTracker(CellModel model)
+        {
+            var sheet = Sheets.FirstOrDefault(x => x.Name == model.SheetName);
+            if (sheet == null)
+            {
+                sheet = new SheetModel(model.SheetName);
+                Sheets.Add(sheet);
+            }
+
+            sheet.Cells.Add(model);
+
+            if (model.CellType == CellType.Corner)
+            {
+                sheet.CornerCell = model;
+            }
+        }
+
+        private void CellRemovedFromTracker(CellModel model)
+        {
+            var sheet = Sheets.First(x => x.Name == model.SheetName);
+            sheet.Cells.Remove(model);
+            if (sheet.Cells.Count == 0)
+            {
+                if (sheet != null)
+                {
+                    Sheets.Remove(sheet);
+                    RefreshOrderedSheetsList();
+                }
             }
         }
 
@@ -279,17 +237,44 @@ namespace Cell.Data
             return oldIdToNewIdMap;
         }
 
-        public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
+        private void RefreshOrderedSheetsList()
         {
-            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
-            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
+            OrderedSheets.Clear();
+            foreach (var sheet in Sheets.OrderBy(x => x.Order))
+            {
+                OrderedSheets.Add(sheet);
+            }
         }
 
-        public void AddAndSaveCells(IEnumerable<CellModel> cellsToAdd)
+        private void SheetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            foreach (var cell in cellsToAdd)
+            if (sender is not SheetModel sheetModel) return;
+            if (e.PropertyName == nameof(SheetModel.Order))
             {
-                _cellTracker.AddCell(cell, saveAfterAdding: true);
+                RefreshOrderedSheetsList();
+            }
+            if (e.PropertyName == nameof(SheetModel.Name))
+            {
+                RenameSheet(sheetModel.OldName, sheetModel.Name);
+                sheetModel.OldName = sheetModel.Name;
+            }
+        }
+
+        private void SheetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (var sheet in e.NewItems.OfType<SheetModel>())
+                {
+                    sheet.PropertyChanged += SheetPropertyChanged;
+                }
+            }
+            if (e.OldItems != null)
+            {
+                foreach (var sheet in e.OldItems.OfType<SheetModel>())
+                {
+                    sheet.PropertyChanged -= SheetPropertyChanged;
+                }
             }
         }
     }

@@ -19,6 +19,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 380;
 
+        public double GetMinimumWidth() => 350;
+
         public string GetTitle() => "Settings";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -28,16 +30,59 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 350;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
             return true;
         }
 
+        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
+        {
+            ApplicationViewModel.Instance.BackupManager.CreateBackup();
+            DialogFactory.ShowDialog("Backup created", "Backup created successfully.");
+        }
+
+        private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+        }
+
+        private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+        }
+
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.PersistenceManager.GetFullPath();
+        }
+
+        private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
+        {
+            //var printDialog = new PrintDialog();
+
+            DialogFactory.ShowDialog("Under construction", "Not quite ready :)");
+        }
+
+        private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel == null) return;
+            _viewModel.RestoreFromBackup();
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
@@ -80,54 +125,6 @@ namespace Cell.View.ToolWindow
         private void ToggleTriggerCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies;
-        }
-
-        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.BackupManager.CreateBackup();
-            DialogFactory.ShowDialog("Backup created", "Backup created successfully.");
-        }
-
-        private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
-        {
-            //var printDialog = new PrintDialog();
-
-            DialogFactory.ShowDialog("Under construction", "Not quite ready :)");
-            // TODO print cells without black background
-            //printDialog.PrintVisual(ApplicationViewModel.Instance.ActiveSheetView, $"Print {ApplicationViewModel.Instance.SheetViewModel?.SheetName}");
-            //printDialog.ShowDialog();
-        }
-
-        private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel == null) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
-        }
-
-        private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel == null) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
-        }
-
-        private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel == null) return;
-            _viewModel.RestoreFromBackup();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

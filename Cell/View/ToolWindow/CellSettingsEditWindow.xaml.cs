@@ -31,6 +31,14 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
+
         public bool HandleCloseRequested()
         {
             return true;
@@ -39,14 +47,6 @@ namespace Cell.View.ToolWindow
         private void TextBoxKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

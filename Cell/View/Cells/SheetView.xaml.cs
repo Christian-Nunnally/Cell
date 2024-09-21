@@ -13,8 +13,8 @@ namespace Cell.View.Cells
     /// </summary>
     public partial class SheetView : UserControl
     {
-        private PanAndZoomCanvas? _panAndZoomCanvas;
         private CellViewModel? _currentCellMouseIsOver;
+        private PanAndZoomCanvas? _panAndZoomCanvas;
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
         public SheetView()
@@ -22,15 +22,25 @@ namespace Cell.View.Cells
             InitializeComponent();
         }
 
-        public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
-
-        public bool IsPanningEnabled 
-        { 
+        public bool IsPanningEnabled
+        {
             get => _panAndZoomCanvas?.IsPanningEnabled ?? false;
-            set 
+            set
             {
                 if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsPanningEnabled = value;
-            } 
+            }
+        }
+
+        public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
+
+        public void PanCanvasTo(double x, double y)
+        {
+            _panAndZoomCanvas?.PanCanvasTo(x, y);
+        }
+
+        public void ZoomCanvasTo(Point point, double zoom)
+        {
+            _panAndZoomCanvas?.ZoomCanvasTo(point, zoom);
         }
 
         private bool CanSelectCell(CellModel? cell)
@@ -137,16 +147,6 @@ namespace Cell.View.Cells
         {
             _panAndZoomCanvas = sender as PanAndZoomCanvas;
             if (_panAndZoomCanvas == null) return;
-        }
-
-        public void PanCanvasTo(double x, double y)
-        {
-            _panAndZoomCanvas?.PanCanvasTo(x, y);
-        }
-
-        public void ZoomCanvasTo(Point point, double zoom)
-        {
-            _panAndZoomCanvas?.ZoomCanvasTo(point, zoom);
         }
     }
 }

@@ -11,12 +11,11 @@ namespace Cell.Model.Plugin
         private DateTime _dueDate = DateTime.Now;
         private bool _isComplete = false;
         private string _notes = string.Empty;
+        private string _parent = string.Empty;
         private int _priority = 0;
         private int _status = 0;
-        private string _title = string.Empty;
-        private string _parent = string.Empty;
         private string _taskID = Utilities.GenerateUnqiueId(12);
-
+        private string _title = string.Empty;
         public string Category
         {
             get => _category;
@@ -53,6 +52,12 @@ namespace Cell.Model.Plugin
             set { if (value != _notes) { _notes = value; OnPropertyChanged(nameof(Notes)); } }
         }
 
+        public string Parent
+        {
+            get => _parent;
+            set { if (value != _parent) { _parent = value; OnPropertyChanged(nameof(Parent)); } }
+        }
+
         public int Priority
         {
             get => _priority;
@@ -65,27 +70,16 @@ namespace Cell.Model.Plugin
             set { if (value != _status) { _status = value; OnPropertyChanged(nameof(Status)); } }
         }
 
-        public string Title
-        {
-            get => _title;
-            set { if (value != _title) { _title = value; OnPropertyChanged(nameof(Title)); } }
-        }
-
-        public string Parent
-        {
-            get => _parent;
-            set { if (value != _parent) { _parent = value; OnPropertyChanged(nameof(Parent)); } }
-        }
-
         public string TaskID
         {
             get => _taskID;
             set { if (value != _taskID) { _taskID = value; OnPropertyChanged(nameof(TaskID)); } }
         }
 
-        override public string ToString()
+        public string Title
         {
-            return $"{(IsComplete ? "✅" : "❎")} {Title}";
+            get => _title;
+            set { if (value != _title) { _title = value; OnPropertyChanged(nameof(Title)); } }
         }
 
         public override object Clone()
@@ -104,6 +98,11 @@ namespace Cell.Model.Plugin
                 Parent = Parent,
                 TaskID = TaskID
             };
+        }
+
+        override public string ToString()
+        {
+            return $"{(IsComplete ? "✅" : "❎")} {Title}";
         }
     }
 }

@@ -13,7 +13,6 @@ namespace Cell.View.ToolWindow
     public partial class CellFormatEditWindow : UserControl, IResizableToolWindow
     {
         private readonly CellFormatEditWindowViewModel _viewModel;
-
         public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel)
         {
             _viewModel = viewModel;
@@ -34,6 +33,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 250;
 
+        public double GetMinimumWidth() => 250;
+
         public string GetTitle()
         {
             var currentlySelectedCell = _viewModel.CellsBeingEdited.FirstOrDefault();
@@ -45,7 +46,13 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public double GetMinimumWidth() => 250;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested() => true;
 
@@ -75,6 +82,42 @@ namespace Cell.View.ToolWindow
             AddColorsToColorPicker(availableColors, colors, .15f);
             AddColorsToColorPicker(availableColors, colors, .1f);
             colorPicker.AvailableColors = availableColors;
+        }
+
+        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddColumnToTheLeft();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddColumnToTheRight();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddRowAbove();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddRowBelow();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.DeleteColumns();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+        }
+
+        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.DeleteRows();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
@@ -172,50 +215,6 @@ namespace Cell.View.ToolWindow
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
             _viewModel.UnmergeCells();
-        }
-
-        private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.AddColumnToTheLeft();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.AddColumnToTheRight();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.AddRowAbove();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.AddRowBelow();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.DeleteColumns();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _viewModel.DeleteRows();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

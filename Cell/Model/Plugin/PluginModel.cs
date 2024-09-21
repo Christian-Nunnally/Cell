@@ -30,16 +30,16 @@ namespace Cell.Model.Plugin
                 .ToList();
         }
 
+        public virtual object Clone()
+        {
+            return new PluginModel();
+        }
+
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         override public string ToString() => ID;
-
-        public virtual object Clone()
-        {
-            return new PluginModel();
-        }
     }
 }

@@ -12,22 +12,11 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private CellModel? cell;
-
-        public CellModel? Cell
-        {
-            get => cell; set
-            {
-                cell = value;
-                if (cell is not null) Index = cell.Index;
-            }
-        }
-
-        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index)
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
             Cell = null;
-            Index = index;
         }
 
         public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
@@ -38,11 +27,21 @@ namespace Cell.Execution
             Index = cell.Index;
         }
 
-        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
+        public PluginContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
             Cell = null;
+            Index = index;
+        }
+
+        public CellModel? Cell
+        {
+            get => cell; set
+            {
+                cell = value;
+                if (cell is not null) Index = cell.Index;
+            }
         }
 
         public EditContext E { get; set; } = new EditContext("");

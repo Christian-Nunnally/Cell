@@ -11,11 +11,11 @@ namespace Cell.View.ToolWindow
     {
         private readonly Canvas _canvas;
         private IResizableToolWindow? _content;
+        private double _contentHeight;
+        private double _contentWidth;
         private bool _isDocked;
         private bool _resizing;
         private Point _resizingStartPosition;
-        private double _contentHeight;
-        private double _contentWidth;
         public FloatingToolWindow(Canvas canvas)
         {
             InitializeComponent();
@@ -115,13 +115,20 @@ namespace Cell.View.ToolWindow
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
 
+        private void MoveToolboxToFrontOfCanvas(FloatingToolWindow toolbox)
+        {
+            if (_canvas.Children[^1] == toolbox) return;
+            _canvas.Children.Remove(toolbox);
+            _canvas.Children.Add(toolbox);
+        }
+
         private void RequestClose()
         {
             var isAllowingClose = _content?.HandleCloseRequested() ?? true;
             if (isAllowingClose)
             {
                 _canvas.Children.Remove(this);
-                 _content?.HandleBeingClosed();
+                _content?.HandleBeingClosed();
             }
         }
 
@@ -179,13 +186,6 @@ namespace Cell.View.ToolWindow
                 toolbox.Tag = offset;
                 toolbox.CaptureMouse();
             }
-        }
-
-        private void MoveToolboxToFrontOfCanvas(FloatingToolWindow toolbox)
-        {
-            if (_canvas.Children[^1] == toolbox) return;
-            _canvas.Children.Remove(toolbox);
-            _canvas.Children.Add(toolbox);
         }
 
         private void ToolboxMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

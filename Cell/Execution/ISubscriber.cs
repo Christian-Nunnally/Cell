@@ -1,5 +1,4 @@
-﻿
-namespace Cell.Execution
+﻿namespace Cell.Execution
 {
     public interface ISubscriber
     {

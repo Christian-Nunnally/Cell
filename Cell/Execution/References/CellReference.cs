@@ -81,6 +81,28 @@ namespace Cell.Execution.References
 
         public int ResolveColumnRangeEnd(CellModel cell) => IsColumnRelativeRangeEnd ? ColumnRangeEnd + cell.Column : ColumnRangeEnd;
 
+        public IEnumerable<string> ResolveLocations(CellModel cell)
+        {
+            var sheetName = string.IsNullOrWhiteSpace(SheetName) ? cell.SheetName : SheetName;
+            var row = ResolveRow(cell);
+            var column = ResolveColumn(cell);
+            var locations = new List<string>();
+            if (IsRange)
+            {
+                var rowRangeEnd = ResolveRowRangeEnd(cell);
+                var columnRangeEnd = ResolveColumnRangeEnd(cell);
+                for (var r = row; r <= rowRangeEnd; r++)
+                {
+                    for (var c = column; c <= columnRangeEnd; c++)
+                    {
+                        locations.Add(Utilities.GetUnqiueLocationString(sheetName, r, c));
+                    }
+                }
+            }
+            else locations.Add(Utilities.GetUnqiueLocationString(sheetName, row, column));
+            return locations;
+        }
+
         public int ResolveRow(CellModel cell) => IsRowRelative ? Row + cell.Row : Row;
 
         public int ResolveRowRangeEnd(CellModel cell) => IsRowRelativeRangeEnd ? RowRangeEnd + cell.Row : RowRangeEnd;
@@ -129,28 +151,6 @@ namespace Cell.Execution.References
             if (!int.TryParse(row, out var rowValue)) return false;
             position = rowValue;
             return true;
-        }
-
-        public IEnumerable<string> ResolveLocations(CellModel cell)
-        {
-            var sheetName = string.IsNullOrWhiteSpace(SheetName) ? cell.SheetName : SheetName;
-            var row = ResolveRow(cell);
-            var column = ResolveColumn(cell);
-            var locations = new List<string>();
-            if (IsRange)
-            {
-                var rowRangeEnd = ResolveRowRangeEnd(cell);
-                var columnRangeEnd = ResolveColumnRangeEnd(cell);
-                for (var r = row; r <= rowRangeEnd; r++)
-                {
-                    for (var c = column; c <= columnRangeEnd; c++)
-                    {
-                        locations.Add(Utilities.GetUnqiueLocationString(sheetName, r, c));
-                    }
-                }
-            }
-            else locations.Add(Utilities.GetUnqiueLocationString(sheetName, row, column));
-            return locations;
         }
     }
 }

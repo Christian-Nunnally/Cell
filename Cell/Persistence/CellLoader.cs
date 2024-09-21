@@ -22,6 +22,13 @@ namespace Cell.Persistence
             if (!_persistenceManager.GetFiles(cellDirectory).Any()) _persistenceManager.DeleteDirectory(cellDirectory);
         }
 
+        public CellModel LoadCell(string file)
+        {
+            var text = _persistenceManager.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
+            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
+            return cell;
+        }
+
         public IEnumerable<CellModel> LoadCells()
         {
             if (!_persistenceManager.DirectoryExists(SheetsSaveDirectory)) return [];
@@ -32,13 +39,6 @@ namespace Cell.Persistence
                 foreach (var file in _persistenceManager.GetFiles(directory)) cells.Add(LoadCell(file));
             }
             return cells;
-        }
-
-        public CellModel LoadCell(string file)
-        {
-            var text = _persistenceManager.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
-            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
-            return cell;
         }
 
         public IEnumerable<CellModel> LoadSheet(string directory)
@@ -68,6 +68,12 @@ namespace Cell.Persistence
             _persistenceManager.SaveFile(path, serialized);
         }
 
+        public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
+        {
+            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
+            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
+        }
+
         private void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
         {
             foreach (var cell in cells.Where(cell => cell.MergedWith != string.Empty))
@@ -87,12 +93,6 @@ namespace Cell.Persistence
                 cell.SheetName = sheetName;
             }
             return oldIdToNewIdMap;
-        }
-
-        public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
-        {
-            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
-            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
         }
     }
 }

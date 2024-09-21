@@ -18,6 +18,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 200;
 
+        public double GetMinimumWidth() => 200;
+
         public string GetTitle() => "Export";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -27,7 +29,13 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 200;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -39,14 +47,6 @@ namespace Cell.View.ToolWindow
             var sheetName = _viewModel.SheetNameToExport;
             ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);
             DialogFactory.ShowDialog("Sheet exported", $"The sheet has been exported to the default export location as a template.");
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

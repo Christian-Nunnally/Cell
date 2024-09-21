@@ -18,6 +18,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 100;
 
+        public double GetMinimumWidth() => 350;
+
         public string GetTitle() => "Creating new collection";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -27,7 +29,13 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 350;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -38,14 +46,6 @@ namespace Cell.View.ToolWindow
         {
             _viewModel.AddCurrentCollection();
             RequestClose?.Invoke();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

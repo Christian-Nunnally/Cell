@@ -7,7 +7,6 @@ namespace Cell.ViewModel.Cells.Types
     public class TextboxCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
     {
         private static TextBox? _focusedTextBox;
-
         private TextBox? _textBox;
         public override bool IsSelected
         {

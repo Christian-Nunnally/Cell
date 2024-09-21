@@ -586,6 +586,15 @@ namespace Cell.ViewModel.ToolWindow
             InsertRowAtIndex(bottomMostRowCell.SheetName, bottomMostRowCell.Row + 1);
         }
 
+        public void DeleteColumns()
+        {
+            foreach (var cell in _cellsToEdit.ToList())
+            {
+                var columnCell = _cellTracker.GetCell(cell.SheetName, 0, cell.Column);
+                if (columnCell is not null) DeleteColumn(columnCell);
+            }
+        }
+
         public void DeleteRow(CellModel rowCell)
         {
             if (rowCell.CellType != CellType.Row) return;
@@ -620,6 +629,19 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
+        public void MergeCellsAcross()
+        {
+            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            var selectedCells = _cellsToEdit.ToList();
+            var rows = selectedCells?.Select(x => x.Row).Distinct().ToList() ?? [];
+            foreach (var row in rows)
+            {
+                var cellsToMerge = selectedCells?.Where(x => x.Row == row).ToList() ?? [];
+                MergeCells(cellsToMerge);
+            }
+            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
+        }
+
         public void MergeCellsDown()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
@@ -637,28 +659,6 @@ namespace Cell.ViewModel.ToolWindow
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             UnmergeCells(_cellsToEdit.Where(x => x.IsMergedParent()));
-            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
-        }
-
-        public void DeleteColumns()
-        {
-            foreach (var cell in _cellsToEdit.ToList())
-            {
-                var columnCell = _cellTracker.GetCell(cell.SheetName, 0, cell.Column);
-                if (columnCell is not null) DeleteColumn(columnCell);
-            }
-        }
-
-        public void MergeCellsAcross()
-        {
-            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
-            var selectedCells = _cellsToEdit.ToList();
-            var rows = selectedCells?.Select(x => x.Row).Distinct().ToList() ?? [];
-            foreach (var row in rows)
-            {
-                var cellsToMerge = selectedCells?.Where(x => x.Row == row).ToList() ?? [];
-                MergeCells(cellsToMerge);
-            }
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 

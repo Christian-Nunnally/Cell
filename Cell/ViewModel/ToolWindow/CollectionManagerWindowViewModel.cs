@@ -2,7 +2,6 @@
 using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using System.Collections.Specialized;
 using System.Text.Json;

@@ -5,17 +5,15 @@ namespace Cell.Persistence
 {
     public class PersistedProject
     {
-        public string Version = "1";
+        public const string TemplateDirectory = "Templates";
+        private const string VersionFileName = "version";
         private readonly PersistedDirectory _projectDirectory;
         private readonly Dictionary<string, IMigrator> _registeredMigrators = [];
+        public string Version = "1";
         public PersistedProject(PersistedDirectory projectDirectory)
         {
             _projectDirectory = projectDirectory;
         }
-
-        public const string TemplateDirectory = "Templates";
-
-        private const string VersionFileName = "version";
 
         public bool CanMigrate() => _registeredMigrators.ContainsKey(IMigrator.GetMigratorKey(LoadVersion(), Version));
 

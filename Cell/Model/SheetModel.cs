@@ -9,15 +9,14 @@ namespace Cell.Model
         public string OldName;
         private CellModel? cornerCell;
         private string name = string.Empty;
-
-        public ObservableCollection<CellModel> Cells { get; set; } = [];
-
         public SheetModel(string sheetName)
         {
             Name = sheetName;
             if (Name != sheetName) throw new ArgumentException("Invalid sheet name");
             OldName = sheetName;
         }
+
+        public ObservableCollection<CellModel> Cells { get; set; } = [];
 
         public CellModel? CornerCell
         {

@@ -18,6 +18,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 200;
 
+        public double GetMinimumWidth() => 200;
+
         public string GetTitle() => "Import";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -27,7 +29,13 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 200;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -49,14 +57,6 @@ namespace Cell.View.ToolWindow
             var templateName = _viewModel.ImportingTemplateName;
             var sheetName = _viewModel.NewSheetNameForImportedTemplates;
             ApplicationViewModel.Instance.SheetTracker.ImportSheetTemplate(templateName, sheetName, _viewModel.SkipExistingCollectionsDuringImport);
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

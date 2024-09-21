@@ -14,10 +14,10 @@ namespace Cell.Persistence
 {
     public class UserCollectionLoader
     {
-        private readonly Dictionary<string, UserCollection> _collections = [];
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly CellTracker _cellTracker;
+        private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistedDirectory _persistanceManager;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         public UserCollectionLoader(PersistedDirectory persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             _persistanceManager = persistenceManager;
@@ -29,11 +29,22 @@ namespace Cell.Persistence
 
         public ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
 
-        public UserCollection? GetCollection(string name)
+        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
         {
-            if (name == string.Empty) return null;
-            if (_collections.TryGetValue(name, out UserCollection? value)) return value;
-            return null;
+            var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
+            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
+            StartTrackingCollection(collection);
+            SaveCollection(collection);
+            EnsureLinkedToBaseCollection(collection);
+            return collection;
+        }
+
+        public void DeleteCollection(UserCollection collection)
+        {
+            UnlinkFromBaseCollection(collection);
+            StopTrackingCollection(collection);
+            var directory = Path.Combine("Collections", collection.Name);
+            _persistanceManager.DeleteDirectory(directory);
         }
 
         public void ExportCollection(string collectionName, string toDirectory)
@@ -42,7 +53,42 @@ namespace Cell.Persistence
             _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
         }
 
+        public UserCollection? GetCollection(string name)
+        {
+            if (name == string.Empty) return null;
+            if (_collections.TryGetValue(name, out UserCollection? value)) return value;
+            return null;
+        }
+
         public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "";
+
+        public void ImportCollection(string collectionDirectory, string collectionName)
+        {
+            var toDirectory = Path.Combine("Collections", collectionName);
+            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
+        }
+
+        public void LinkUpBaseCollectionsAfterLoad()
+        {
+            var loadedCollections = new List<string>();
+            foreach (var collection in ObservableCollections)
+            {
+                collection.RefreshSortAndFilter();
+            }
+            while (loadedCollections.Count != ObservableCollections.Count)
+            {
+                foreach (var collection in ObservableCollections)
+                {
+                    if (loadedCollections.Contains(collection.Name)) continue;
+                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
+                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
+                    {
+                        loadedCollections.Add(collection.Name);
+                        EnsureLinkedToBaseCollection(collection);
+                    }
+                }
+            }
+        }
 
         public void LoadCollections()
         {
@@ -79,50 +125,10 @@ namespace Cell.Persistence
             foreach (var collection in _collections) SaveCollection(collection.Value);
         }
 
-        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
+        private void DeleteItem(string collectionName, string idToRemove)
         {
-            var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
-            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
-            StartTrackingCollection(collection);
-            SaveCollection(collection);
-            EnsureLinkedToBaseCollection(collection);
-            return collection;
-        }
-
-        public void DeleteCollection(UserCollection collection)
-        {
-            UnlinkFromBaseCollection(collection);
-            StopTrackingCollection(collection);
-            var directory = Path.Combine("Collections", collection.Name);
-            _persistanceManager.DeleteDirectory(directory);
-        }
-
-        public void ImportCollection(string collectionDirectory, string collectionName)
-        {
-            var toDirectory = Path.Combine("Collections", collectionName);
-            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
-        }
-
-        public void LinkUpBaseCollectionsAfterLoad()
-        {
-            var loadedCollections = new List<string>();
-            foreach (var collection in ObservableCollections)
-            {
-                collection.RefreshSortAndFilter();
-            }
-            while (loadedCollections.Count != ObservableCollections.Count)
-            {
-                foreach (var collection in ObservableCollections)
-                {
-                    if (loadedCollections.Contains(collection.Name)) continue;
-                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
-                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
-                    {
-                        loadedCollections.Add(collection.Name);
-                        EnsureLinkedToBaseCollection(collection);
-                    }
-                }
-            }
+            var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
+            _persistanceManager.DeleteFile(path);
         }
 
         private void EnsureLinkedToBaseCollection(UserCollection collection)
@@ -134,12 +140,6 @@ namespace Cell.Persistence
             }
         }
 
-        private void DeleteItem(string collectionName, string idToRemove)
-        {
-            var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
-            _persistanceManager.DeleteFile(path);
-        }
-
         private void LoadCollection(string directory)
         {
             var path = Path.Combine(directory, "collection");
@@ -149,7 +149,7 @@ namespace Cell.Persistence
             var itemsDirectory = Path.Combine(directory, "Items");
             var paths = !_persistanceManager.DirectoryExists(itemsDirectory)
                 ? []
-                :  _persistanceManager.GetFiles(itemsDirectory);
+                : _persistanceManager.GetFiles(itemsDirectory);
             paths.Select(LoadItem).ToList().ForEach(collection.Add);
             StartTrackingCollection(collection);
         }

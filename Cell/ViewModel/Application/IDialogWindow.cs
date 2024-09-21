@@ -1,5 +1,4 @@
-﻿
-namespace Cell.ViewModel.Application
+﻿namespace Cell.ViewModel.Application
 {
     public interface IDialogWindow
     {

@@ -57,6 +57,14 @@ namespace Cell.Execution
             return generatedAssembly.GetType(_typeName) ?? throw new Exception($"Unable to get type '{_typeName}' from assembly");
         }
 
+        private static PortableExecutableReference GetCollectionsReference()
+        {
+            var assemblyLocation = typeof(Dictionary<,>).Assembly.Location;
+            var directoryName = Path.GetDirectoryName(assemblyLocation) ?? throw new CellError($"Could not get directory name from {assemblyLocation}");
+            var collectionsDllPath = Path.Combine(directoryName, "System.Collections.dll");
+            return MetadataReference.CreateFromFile(collectionsDllPath);
+        }
+
         private static PortableExecutableReference GetMetadataReferenceForType(Type type)
         {
             var assembly = type.Assembly;
@@ -73,14 +81,6 @@ namespace Cell.Execution
             var directory = Path.GetDirectoryName(assemblyLocation) ?? throw new Exception($"Could not get directory name from {assemblyLocation}");
             var systemRuntimeDllPath = Path.Combine(directory, "System.Runtime.dll");
             return MetadataReference.CreateFromFile(systemRuntimeDllPath);
-        }
-
-        private static PortableExecutableReference GetCollectionsReference()
-        {
-            var assemblyLocation = typeof(Dictionary<,>).Assembly.Location;
-            var directoryName = Path.GetDirectoryName(assemblyLocation) ?? throw new CellError($"Could not get directory name from {assemblyLocation}");
-            var collectionsDllPath = Path.Combine(directoryName, "System.Collections.dll");
-            return MetadataReference.CreateFromFile(collectionsDllPath);
         }
     }
 }

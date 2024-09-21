@@ -1,5 +1,4 @@
-﻿
-using Cell.Common;
+﻿using Cell.Common;
 using Cell.Model;
 using System.Text.Json;
 

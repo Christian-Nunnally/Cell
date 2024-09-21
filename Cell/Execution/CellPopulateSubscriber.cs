@@ -11,9 +11,8 @@ namespace Cell.Execution
     {
         private readonly CellModel _cell;
         private readonly CellTracker _cellTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-
+        private readonly UserCollectionLoader _userCollectionLoader;
         public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader)
         {
             _cell = cell;

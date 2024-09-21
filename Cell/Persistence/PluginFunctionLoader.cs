@@ -41,6 +41,26 @@ namespace Cell.Persistence
             return function;
         }
 
+        public void DeleteFunction(PluginFunction function)
+        {
+            if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
+            {
+                function.Model.PropertyChanged -= OnPluginFunctionPropertyChanged;
+                namespaceFunctions.Remove(function.Model.Name);
+                ObservableFunctions.Remove(function);
+
+                if (string.IsNullOrEmpty(function.Model.Name)) return;
+                var path = Path.Combine(FunctionsDirectoryName, function.Model.ReturnType, function.Model.Name);
+                _persistanceManager.DeleteFile(path);
+            }
+        }
+
+        public PluginFunction GetOrCreateFunction(string space, string name)
+        {
+            if (TryGetFunction(space, name, out var function)) return function;
+            return CreateFunction(space, name, string.Empty);
+        }
+
         public PluginFunctionModel LoadFunction(string file)
         {
             var text = _persistanceManager.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
@@ -84,26 +104,6 @@ namespace Cell.Persistence
                     SavePluginFunction("", space, function.Model);
                 }
             }
-        }
-
-        public void DeleteFunction(PluginFunction function)
-        {
-            if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
-            {
-                function.Model.PropertyChanged -= OnPluginFunctionPropertyChanged;
-                namespaceFunctions.Remove(function.Model.Name);
-                ObservableFunctions.Remove(function);
-
-                if (string.IsNullOrEmpty(function.Model.Name)) return;
-                var path = Path.Combine(FunctionsDirectoryName, function.Model.ReturnType, function.Model.Name);
-                _persistanceManager.DeleteFile(path);
-            }
-        }
-
-        public PluginFunction GetOrCreateFunction(string space, string name)
-        {
-            if (TryGetFunction(space, name, out var function)) return function;
-            return CreateFunction(space, name, string.Empty);
         }
 
         public bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)

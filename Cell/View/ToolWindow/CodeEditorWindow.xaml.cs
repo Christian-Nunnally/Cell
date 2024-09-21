@@ -21,13 +21,12 @@ namespace Cell.View.ToolWindow
         private readonly bool _doesFunctionReturnValue;
         private readonly PluginFunction _function;
         private readonly Action<string> _saveCodeCallback = x => { };
+        private readonly CodeEditorWindowViewModel _viewModel;
         private static bool _haveAssembliesBeenRegistered;
         private bool _isAllowingCloseWhileDirty = false;
         private bool _isDirty = false;
         private CompileResult _lastCompileResult;
         private CompletionWindow? completionWindow;
-
-        private readonly CodeEditorWindowViewModel _viewModel;
         public CodeEditorWindow(CodeEditorWindowViewModel viewModel, PluginFunction function, Action<string> saveCodeCallback, CellModel? currentCell)
         {
             _viewModel = viewModel;
@@ -51,17 +50,6 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code)) ReloadFunctionCode();
-        }
-
-        private void ReloadFunctionCode()
-        {
-            textEditor.Text = _function.GetUserFriendlyCode(_currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
-            _isDirty = false;
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool IsTransformedSyntaxTreeViewerVisible { get; set; }
@@ -76,6 +64,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 400;
 
+        public double GetMinimumWidth() => 400;
+
         public string GetTitle()
         {
             var dirtyDot = _isDirty ? "*" : string.Empty;
@@ -88,7 +78,22 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Save and Close", SaveAndClose)
             ];
 
-        public double GetMinimumWidth() => 400;
+        public void HandleBeingClosed()
+        {
+            _function.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
+            textEditor.TextArea.TextEntering -= OnTextEntering;
+            textEditor.TextArea.TextEntered -= OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
+        }
+
+        public void HandleBeingShown()
+        {
+            _function.Model.PropertyChanged += ReloadFunctionCodeWhenItChanges;
+            textEditor.TextArea.TextEntering += OnTextEntering;
+            textEditor.TextArea.TextEntered += OnTextEntered;
+            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
+            ReloadFunctionCode();
+        }
 
         public bool HandleCloseRequested()
         {
@@ -157,6 +162,17 @@ namespace Cell.View.ToolWindow
             }
         }
 
+        private void ReloadFunctionCode()
+        {
+            textEditor.Text = _function.GetUserFriendlyCode(_currentCell, ApplicationViewModel.Instance.UserCollectionLoader.GetDataTypeStringForCollection, ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames);
+            _isDirty = false;
+        }
+
+        private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PluginFunctionModel.Code)) ReloadFunctionCode();
+        }
+
         private void SaveAndClose()
         {
             SaveCode();
@@ -217,23 +233,6 @@ namespace Cell.View.ToolWindow
             syntaxTreePreviewViewer.Text = syntaxTree.ToString();
             IsTransformedSyntaxTreeViewerVisible = true;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsTransformedSyntaxTreeViewerVisible)));
-        }
-
-        public void HandleBeingClosed()
-        {
-            _function.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
-            textEditor.TextArea.TextEntering -= OnTextEntering;
-            textEditor.TextArea.TextEntered -= OnTextEntered;
-            textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
-        }
-
-        public void HandleBeingShown()
-        {
-            _function.Model.PropertyChanged += ReloadFunctionCodeWhenItChanges;
-            textEditor.TextArea.TextEntering += OnTextEntering;
-            textEditor.TextArea.TextEntered += OnTextEntered;
-            textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
-            ReloadFunctionCode();
         }
     }
 }

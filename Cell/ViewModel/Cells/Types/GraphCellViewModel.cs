@@ -79,18 +79,6 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        public void UpdatePointsScaling()
-        {
-            while (_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
-
-            for (int i = 0; i < _rawDataPoints.Count; i++)
-            {
-                _rawDataPoints[i] = new Point(i, _rawDataPoints[i].Y);
-            }
-            DataPoints = ScaleAndCenterPoints(_rawDataPoints, (int)Model.Width - 10, (int)Model.Height - 10);
-            NotifyPropertyChanged(nameof(DataPoints));
-        }
-
         public static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
         {
             if (points.Count == 0) return [];
@@ -115,6 +103,18 @@ namespace Cell.ViewModel.Cells.Types
             }
 
             return [.. scaledAndCenteredPoints];
+        }
+
+        public void UpdatePointsScaling()
+        {
+            while (_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
+
+            for (int i = 0; i < _rawDataPoints.Count; i++)
+            {
+                _rawDataPoints[i] = new Point(i, _rawDataPoints[i].Y);
+            }
+            DataPoints = ScaleAndCenterPoints(_rawDataPoints, (int)Model.Width - 10, (int)Model.Height - 10);
+            NotifyPropertyChanged(nameof(DataPoints));
         }
 
         private void UpdatePointsFromCellText()

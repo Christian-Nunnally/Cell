@@ -23,11 +23,19 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 300;
 
+        public double GetMinimumWidth() => 300;
+
         public string GetTitle() => "Function Manager";
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
-        public double GetMinimumWidth() => 300;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -91,14 +99,6 @@ namespace Cell.View.ToolWindow
                 _viewModel.SelectedFunction = null;
                 _viewModel.SelectedFunction = selectedFunction;
             }
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

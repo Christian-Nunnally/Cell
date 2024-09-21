@@ -10,12 +10,11 @@ namespace Cell.Execution
     /// </summary>
     public class CellTriggerManager
     {
+        private readonly Dictionary<CellModel, string> _cellModelToCurrentTextValueMap = [];
         private readonly Dictionary<string, CellModel> _cellsBeingEdited = [];
-        private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly Dictionary<CellModel, string> _cellModelToCurrentTextValueMap = [];
-
+        private readonly UserCollectionLoader _userCollectionLoader;
         public CellTriggerManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -48,19 +47,19 @@ namespace Cell.Execution
             _cellModelToCurrentTextValueMap.Add(model, model.Text);
         }
 
+        public void StopMonitoringCell(CellModel model)
+        {
+            model.PropertyChanged -= CellModelPropertyChanged;
+            _cellModelToCurrentTextValueMap.Remove(model);
+        }
+
         private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName != nameof(CellModel.Text)) return;
             var cell = (CellModel)sender!;
             var oldValue = _cellModelToCurrentTextValueMap[cell];
-            CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));  
+            CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));
             _cellModelToCurrentTextValueMap[cell] = cell.Text;
-        }
-
-        public void StopMonitoringCell(CellModel model)
-        {
-            model.PropertyChanged -= CellModelPropertyChanged;
-            _cellModelToCurrentTextValueMap.Remove(model);
         }
     }
 }

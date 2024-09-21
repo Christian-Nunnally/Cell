@@ -28,12 +28,6 @@ namespace Cell.View.Application
             DataContextChanged += ApplicationViewDataContextChanged;
         }
 
-        private void ApplicationViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.OldValue is ApplicationViewModel oldViewModel) oldViewModel.PropertyChanged -= ApplicationViewModelPropertyChanged;
-            if (e.NewValue is ApplicationViewModel newViewModel) newViewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
-        }
-
         public SheetView? ActiveSheetView { get; set; }
 
         public void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -127,18 +121,18 @@ namespace Cell.View.Application
             _viewModel = new ApplicationViewModel(
                 projectDirectory,
                 persistedProject,
-                pluginFunctionLoader, 
-                cellLoader, 
-                cellTracker, 
-                userCollectionLoader, 
-                cellPopulateManager, 
-                cellTriggerManager, 
-                sheetTracker, 
-                cellSelector, 
-                titleBarSheetNavigationViewModel, 
-                applicationSettings, 
-                undoRedoManager, 
-                cellClipboard, 
+                pluginFunctionLoader,
+                cellLoader,
+                cellTracker,
+                userCollectionLoader,
+                cellPopulateManager,
+                cellTriggerManager,
+                sheetTracker,
+                cellSelector,
+                titleBarSheetNavigationViewModel,
+                applicationSettings,
+                undoRedoManager,
+                cellClipboard,
                 backupManager);
             ApplicationViewModel.Instance = _viewModel;
             _viewModel.AttachToView(this);
@@ -149,6 +143,26 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) WindowState = WindowState.Normal;
             else WindowState = WindowState.Maximized;
+        }
+
+        private void ApplicationViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is ApplicationViewModel oldViewModel) oldViewModel.PropertyChanged -= ApplicationViewModelPropertyChanged;
+            if (e.NewValue is ApplicationViewModel newViewModel) newViewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
+        }
+
+        private void LoadProjectButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button loadButton) return;
+            loadButton.Content = "Loading...";
+            var loadProgress = ApplicationViewModel.Instance.LoadWithProgress();
+            while (!loadProgress.IsComplete)
+            {
+                loadButton.Content = loadProgress.Message;
+                App.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+                loadProgress = loadProgress.Continue();
+            }
+            loadButton.Content = loadProgress.Message;
         }
 
         private void MaximizeButtonClick(object sender, RoutedEventArgs e)
@@ -306,20 +320,6 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(8);
             else BorderThickness = new Thickness(0);
-        }
-
-        private void LoadProjectButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button loadButton) return;
-            loadButton.Content = "Loading...";
-            var loadProgress = ApplicationViewModel.Instance.LoadWithProgress();
-            while (!loadProgress.IsComplete)
-            {
-                loadButton.Content = loadProgress.Message;
-                App.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                loadProgress = loadProgress.Continue();
-            }
-            loadButton.Content = loadProgress.Message;
         }
     }
 }

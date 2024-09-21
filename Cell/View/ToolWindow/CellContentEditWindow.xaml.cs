@@ -10,7 +10,6 @@ namespace Cell.View.ToolWindow
     public partial class CellContentEditWindow : UserControl, IResizableToolWindow
     {
         private readonly CellContentEditWindowViewModel _viewModel;
-
         public CellContentEditWindow(CellContentEditWindowViewModel viewModel)
         {
             _viewModel = viewModel;
@@ -19,6 +18,10 @@ namespace Cell.View.ToolWindow
         }
 
         public Action? RequestClose { get; set; }
+
+        public double GetMinimumHeight() => 200;
+
+        public double GetMinimumWidth() => 600;
 
         public string GetTitle()
         {
@@ -30,6 +33,14 @@ namespace Cell.View.ToolWindow
         public List<CommandViewModel> GetToolBarCommands() => [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];
+
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -77,18 +88,6 @@ namespace Cell.View.ToolWindow
                 if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                 e.Handled = true;
             }
-        }
-
-        public double GetMinimumHeight() => 200;
-
-        public double GetMinimumWidth() => 600;
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

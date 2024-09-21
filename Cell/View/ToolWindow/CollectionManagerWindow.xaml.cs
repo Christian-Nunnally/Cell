@@ -23,13 +23,23 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 300;
 
+        public double GetMinimumWidth() => 600;
+
         public string GetTitle() => "Collection Manager";
 
         public List<CommandViewModel> GetToolBarCommands() => [
             new CommandViewModel("New Collection", _viewModel.OpenCreateCollectionWindow),
             ];
 
-        public double GetMinimumWidth() => 600;
+        public void HandleBeingClosed()
+        {
+            _viewModel.StartTrackingCollections();
+        }
+
+        public void HandleBeingShown()
+        {
+            _viewModel.StopTrackingCollections();
+        }
 
         public bool HandleCloseRequested() => true;
 
@@ -77,16 +87,6 @@ namespace Cell.View.ToolWindow
         private void SaveSelectedItemJsonButtonClick(object sender, RoutedEventArgs e)
         {
             _viewModel.SelectedItemSerialized = _itemJsonEditor.Text;
-        }
-
-        public void HandleBeingClosed()
-        {
-            _viewModel.StartTrackingCollections();
-        }
-
-        public void HandleBeingShown()
-        {
-            _viewModel.StopTrackingCollections();
         }
     }
 }

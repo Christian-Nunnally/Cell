@@ -31,6 +31,14 @@ namespace Cell.View.ToolWindow
 
         public List<CommandViewModel> GetToolBarCommands() => [];
 
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
+
         public bool HandleCloseRequested()
         {
             return true;
@@ -44,14 +52,6 @@ namespace Cell.View.ToolWindow
         private void ButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             RequestClose?.Invoke();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

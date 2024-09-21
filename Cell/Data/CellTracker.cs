@@ -14,10 +14,8 @@ namespace Cell.Data
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<string, string> _cellsToLocation = [];
-
         public Action<CellModel>? CellAdded;
         public Action<CellModel>? CellRemoved;
-
         public CellTracker(CellLoader cellLoader)
         {
             _cellLoader = cellLoader;
@@ -34,12 +32,6 @@ namespace Cell.Data
             cellModel.PropertyChanged += CellModelPropertyChanged;
             CellAdded?.Invoke(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
-        }
-
-        private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (sender is not CellModel model) return;
-            _cellLoader.SaveCell(model);
         }
 
         public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
@@ -67,6 +59,11 @@ namespace Cell.Data
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
             _cellLoader.RenameSheet(oldSheetName, newSheetName);
+        }
+
+        public void SaveSheet(string sheetName)
+        {
+            GetCellModelsForSheet(sheetName).ForEach(_cellLoader.SaveCell);
         }
 
         private void AddCellToCellByLocationMap(CellModel cellModel)
@@ -113,6 +110,12 @@ namespace Cell.Data
             _cellLoader.SaveCell(model);
         }
 
+        private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not CellModel model) return;
+            _cellLoader.SaveCell(model);
+        }
+
         private bool RemoveFromCellsByLocationMap(CellModel cellModel)
         {
             return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
@@ -127,11 +130,6 @@ namespace Cell.Data
                 _cellsBySheetMap.Remove(sheetName);
             }
             return result;
-        }
-
-        public void SaveSheet(string sheetName)
-        {
-            GetCellModelsForSheet(sheetName).ForEach(_cellLoader.SaveCell);
         }
     }
 }

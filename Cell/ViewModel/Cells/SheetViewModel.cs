@@ -15,13 +15,13 @@ namespace Cell.ViewModel.Cells
     {
         public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!, null!);
         private readonly ApplicationSettings _applicationSettings;
+        private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellTracker _cellTracker;
         private readonly SheetModel _model;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly SheetTracker _sheetTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];
         private double _sheetHeight;
         private double _sheetWidth;
         private CellViewModel? selectedCellViewModel;

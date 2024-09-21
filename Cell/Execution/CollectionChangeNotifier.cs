@@ -7,9 +7,8 @@ namespace Cell.Execution
     public class CollectionChangeNotifier
     {
         private readonly List<string> _collectionsBeingUpdated = new();
-        private readonly UserCollectionLoader _userCollectionLoader;
         private readonly SubscriberNotifier _subscriberNotifier = new();
-
+        private readonly UserCollectionLoader _userCollectionLoader;
         public CollectionChangeNotifier(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -17,22 +16,21 @@ namespace Cell.Execution
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCollectionForChanges;
         }
 
-        private void StopListeningToCollectionForChanges(string collectionName)
+        public IEnumerable<string> GetCollectionsSubscriberIsSubscribedTo(ISubscriber subscriber) => _subscriberNotifier.GetChannelsSubscriberIsSubscribedTo(subscriber);
+
+        public void SubscribeToCollectionUpdates(ISubscriber subscriber, string collectionName)
         {
-            var collection = _userCollectionLoader.GetCollection(collectionName);
-            if (collection == null) return;
-            collection.ItemAdded -= ItemAddedToUserCollection;
-            collection.ItemRemoved -= ItemRemovedFromUserCollection;
-            collection.ItemPropertyChanged -= ItemPropertyChangedInUserCollection;
+            _subscriberNotifier.SubscribeToChannel(subscriber, collectionName);
         }
 
-        private void StartListeningToCollectionForChanges(string collectionName)
+        public void UnsubscribeFromAllCollections(ISubscriber subscriber)
         {
-            var collection = _userCollectionLoader.GetCollection(collectionName);
-            if (collection == null) return;
-            collection.ItemAdded += ItemAddedToUserCollection;
-            collection.ItemRemoved += ItemRemovedFromUserCollection;
-            collection.ItemPropertyChanged += ItemPropertyChangedInUserCollection;
+            _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
+        }
+
+        private void ItemAddedToUserCollection(UserCollection collection, PluginModel model)
+        {
+            NotifyCollectionUpdated(collection.Name);
         }
 
         private void ItemPropertyChangedInUserCollection(UserCollection collection, PluginModel model)
@@ -45,11 +43,6 @@ namespace Cell.Execution
             NotifyCollectionUpdated(collection.Name);
         }
 
-        private void ItemAddedToUserCollection(UserCollection collection, PluginModel model)
-        {
-            NotifyCollectionUpdated(collection.Name);
-        }
-
         private void NotifyCollectionUpdated(string userCollectionName)
         {
             if (_collectionsBeingUpdated.Contains(userCollectionName)) return;
@@ -58,16 +51,22 @@ namespace Cell.Execution
             _collectionsBeingUpdated.Remove(userCollectionName);
         }
 
-        public IEnumerable<string> GetCollectionsSubscriberIsSubscribedTo(ISubscriber subscriber) => _subscriberNotifier.GetChannelsSubscriberIsSubscribedTo(subscriber);
-
-        public void UnsubscribeFromAllCollections(ISubscriber subscriber)
+        private void StartListeningToCollectionForChanges(string collectionName)
         {
-            _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
+            var collection = _userCollectionLoader.GetCollection(collectionName);
+            if (collection == null) return;
+            collection.ItemAdded += ItemAddedToUserCollection;
+            collection.ItemRemoved += ItemRemovedFromUserCollection;
+            collection.ItemPropertyChanged += ItemPropertyChangedInUserCollection;
         }
 
-        public void SubscribeToCollectionUpdates(ISubscriber subscriber, string collectionName)
+        private void StopListeningToCollectionForChanges(string collectionName)
         {
-            _subscriberNotifier.SubscribeToChannel(subscriber, collectionName);
+            var collection = _userCollectionLoader.GetCollection(collectionName);
+            if (collection == null) return;
+            collection.ItemAdded -= ItemAddedToUserCollection;
+            collection.ItemRemoved -= ItemRemovedFromUserCollection;
+            collection.ItemPropertyChanged -= ItemPropertyChangedInUserCollection;
         }
     }
 }

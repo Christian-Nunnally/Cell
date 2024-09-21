@@ -12,10 +12,12 @@ namespace Cell.Data
     public class UserCollection : PropertyChangedBase
     {
         private readonly Dictionary<string, int?> _cachedSortFilterResult = [];
+        private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, PluginModel> _items = [];
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly List<PluginModel> _sortedItems = [];
+        private readonly UserCollectionLoader _userCollectionLoader;
         private UserCollection? _baseCollection;
-
         public UserCollection(UserCollectionModel model, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             Model = model;
@@ -23,16 +25,6 @@ namespace Cell.Data
             _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
-        }
-
-        public int UsageCount => _pluginFunctionLoader.ObservableFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
-
-        private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(UserCollectionModel.SortAndFilterFunctionName))
-            {
-                RefreshSortAndFilter();
-            }
         }
 
         public event Action<UserCollection, PluginModel>? ItemAdded;
@@ -48,10 +40,6 @@ namespace Cell.Data
         public List<PluginModel> Items => _sortedItems;
 
         public UserCollectionModel Model { get; private set; }
-
-        private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly CellTracker _cellTracker;
 
         public string Name
         {
@@ -76,22 +64,11 @@ namespace Cell.Data
 
         public string Type { get; internal set; } = string.Empty;
 
+        public int UsageCount => _pluginFunctionLoader.ObservableFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
+
         public void Add(PluginModel item)
         {
             InsertItemWithSortAndFilter(item);
-        }
-
-        public void Remove(PluginModel item) => Remove(item.ID);
-
-        public void Remove(string id)
-        {
-            if (!_items.TryGetValue(id, out var item)) return;
-            _items.Remove(item.ID);
-            _sortedItems.Remove(item);
-            _cachedSortFilterResult.Remove(item.ID);
-            item.PropertyChanged -= PropertyChangedOnItemInCollection;
-            ItemRemoved?.Invoke(this, item);
-            _baseCollection?.Remove(item);
         }
 
         public void BecomeViewIntoCollection(UserCollection baseCollection)
@@ -130,9 +107,22 @@ namespace Cell.Data
                 {
                     Remove(Items[i]);
                 }
-            
+
                 _baseCollection?.Items.ForEach(InsertItemWithSortAndFilter);
             }
+        }
+
+        public void Remove(PluginModel item) => Remove(item.ID);
+
+        public void Remove(string id)
+        {
+            if (!_items.TryGetValue(id, out var item)) return;
+            _items.Remove(item.ID);
+            _sortedItems.Remove(item);
+            _cachedSortFilterResult.Remove(item.ID);
+            item.PropertyChanged -= PropertyChangedOnItemInCollection;
+            ItemRemoved?.Invoke(this, item);
+            _baseCollection?.Remove(item);
         }
 
         public void StopBeingViewIntoCollection(UserCollection baseCollection)
@@ -209,6 +199,14 @@ namespace Cell.Data
                     inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                     OrderChanged?.Invoke(this);
                 }
+            }
+        }
+
+        private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(UserCollectionModel.SortAndFilterFunctionName))
+            {
+                RefreshSortAndFilter();
             }
         }
     }

@@ -6,18 +6,18 @@ namespace Cell.View.ToolWindow
     {
         Action? RequestClose { get; set; }
 
+        double GetMinimumHeight();
+
+        double GetMinimumWidth();
+
         string GetTitle();
 
         List<CommandViewModel> GetToolBarCommands();
-
-        bool HandleCloseRequested();
 
         void HandleBeingClosed();
 
         void HandleBeingShown();
 
-        double GetMinimumHeight();
-
-        double GetMinimumWidth();
+        bool HandleCloseRequested();
     }
 }

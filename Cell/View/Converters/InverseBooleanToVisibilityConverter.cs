@@ -6,8 +6,6 @@ namespace Cell.View.Converters
     [ValueConversion(typeof(bool), typeof(bool))]
     public class InverseBooleanToVisibilityConverter : IValueConverter
     {
-        #region IValueConverter Members
-
         public object Convert(object value, Type targetType, object parameter,
             System.Globalization.CultureInfo culture)
         {
@@ -23,7 +21,5 @@ namespace Cell.View.Converters
         {
             throw new NotSupportedException();
         }
-
-        #endregion
     }
 }

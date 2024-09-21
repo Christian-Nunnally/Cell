@@ -18,6 +18,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 200;
 
+        public double GetMinimumWidth() => 200;
+
         public string GetTitle() => "Example";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -28,19 +30,17 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 200;
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
-
         public void HandleBeingClosed()
         {
         }
 
         public void HandleBeingShown()
         {
+        }
+
+        public bool HandleCloseRequested()
+        {
+            return true;
         }
     }
 }

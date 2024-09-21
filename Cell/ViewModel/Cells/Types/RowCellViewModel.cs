@@ -23,11 +23,7 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        public override string Text
-        {
-            get => Row.ToString();
-            set => base.Text = value;
-        }
+        public override string Text { get => Row.ToString(); set => base.Text = value; }
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {

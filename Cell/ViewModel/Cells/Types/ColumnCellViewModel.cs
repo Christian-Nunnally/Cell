@@ -10,11 +10,7 @@ namespace Cell.ViewModel.Cells.Types
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public override string Text
-        {
-            get => GetColumnName(Column);
-            set => base.Text = value;
-        }
+        public override string Text { get => GetColumnName(Column); set => base.Text = value; }
 
         public override double Width
         {

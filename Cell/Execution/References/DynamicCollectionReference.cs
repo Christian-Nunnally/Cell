@@ -7,7 +7,6 @@ namespace Cell.Execution.References
     public class DynamicCollectionReference : ICollectionReference
     {
         private readonly PluginFunction _calculateCollectionNameFunction;
-
         public DynamicCollectionReference(PluginFunction calculateCollectionNameFunction)
         {
             _calculateCollectionNameFunction = calculateCollectionNameFunction;

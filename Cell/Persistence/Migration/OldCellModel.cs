@@ -2,8 +2,10 @@
 using System.Windows;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
+
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+
 namespace Cell.Model
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     public class OldCellModel : PropertyChangedBase
     {
@@ -53,12 +55,12 @@ namespace Cell.Model
 
         public string Text { get; set; } = string.Empty;
 
+        public TextAlignment TextAlignmentForView { get; set; }
+
         public string TriggerFunctionName { get; set; } = string.Empty;
 
         public VerticalAlignment VerticalAlignment { get; set; }
 
         public double Width { get; set; }
-
-        public TextAlignment TextAlignmentForView { get; set; }
     }
 }

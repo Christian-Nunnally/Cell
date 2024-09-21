@@ -18,7 +18,19 @@ namespace Cell.View.ToolWindow
 
         public Action? RequestClose { get; set; }
 
+        public void CopySheet(string sheetName)
+        {
+            var copiedSheetName = sheetName + "Copy";
+            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
+
+            var copiedCells = ApplicationViewModel.Instance.SheetTracker.CreateUntrackedCopiesOfCellsInSheet(sheetName);
+            ApplicationViewModel.Instance.CellLoader.UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
+            ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
+        }
+
         public double GetMinimumHeight() => 250;
+
+        public double GetMinimumWidth() => 250;
 
         public string GetTitle() => "Sheet Manager";
 
@@ -31,7 +43,13 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 250;
+        public void HandleBeingClosed()
+        {
+        }
+
+        public void HandleBeingShown()
+        {
+        }
 
         public bool HandleCloseRequested()
         {
@@ -61,16 +79,6 @@ namespace Cell.View.ToolWindow
                 var sheetName = sheetModel.Name;
                 CopySheet(sheetName);
             }
-        }
-
-        public void CopySheet(string sheetName)
-        {
-            var copiedSheetName = sheetName + "Copy";
-            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
-
-            var copiedCells = ApplicationViewModel.Instance.SheetTracker.CreateUntrackedCopiesOfCellsInSheet(sheetName);
-            ApplicationViewModel.Instance.CellLoader.UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
-            ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
         }
 
         private void DeleteSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
@@ -130,14 +138,6 @@ namespace Cell.View.ToolWindow
                 _viewModel.RefreshSheetsList();
             }
             MakeSureSheetOrderingIsConsecutive();
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
         }
     }
 }

@@ -34,7 +34,6 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CellModel.Text))

@@ -12,8 +12,18 @@ namespace Cell.ViewModel.ToolWindow
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly CellTracker _cellTracker;
-        private CellModel _cellToDisplay = CellModel.Null;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private CellModel _cellToDisplay = CellModel.Null;
+        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
+        {
+            _pluginFunctionLoader = pluginFunctionLoader;
+            _cellsToEdit = cellsToEdit;
+            _cellTracker = cellTracker;
+            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
+            PickDisplayedCell();
+        }
+
+        public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
         private CellModel CellToDisplay
         {
@@ -26,27 +36,15 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();
+
         private void CellToDisplayPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-        }
-
-        public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
-
-        public CellSettingsEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
-        {
-            _pluginFunctionLoader = pluginFunctionLoader;
-            _cellsToEdit = cellsToEdit;
-            _cellTracker = cellTracker;
-            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
-            PickDisplayedCell();
         }
 
         private void PickDisplayedCell()
         {
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
-
         }
-
-        private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();
     }
 }

@@ -13,20 +13,19 @@ namespace Cell.ViewModel.Cells
         protected SheetViewModel _sheetViewModel;
         private SolidColorBrush _backgroundColor = new();
         private SolidColorBrush _borderColor = new();
+        private Thickness _borderThickness;
         private SolidColorBrush _contentBackgroundColor = new();
+        private SolidColorBrush _contentBorderColor = new();
+        private Thickness _contentBorderThickness;
         private SolidColorBrush _contentHighlightColor = new();
         private SolidColorBrush _foregroundColor = new();
         private bool _isHighlighted;
         private bool _isSelected;
+        private Thickness _margin;
         private SolidColorBrush _selectionBorderColor = ColorAdjuster.ConvertHexStringToBrush("#ffff0000");
         private SolidColorBrush _selectionColor = ColorAdjuster.ConvertHexStringToBrush("#ffff0000");
         private double _x;
         private double _y;
-        private Thickness _borderThickness;
-        private Thickness _contentBorderThickness;
-        private Thickness _margin;
-        private SolidColorBrush _contentBorderColor = new();
-
         public CellViewModel(CellModel model, SheetViewModel sheet)
         {
             _sheetViewModel = sheet;
@@ -466,12 +465,12 @@ namespace Cell.ViewModel.Cells
                 ContentBackgroundColor = ColorAdjuster.ConvertHexStringToBrush(ContentBackgroundColorHex);
                 NotifyPropertyChanged(nameof(ContentBackgroundColorHex));
             }
-            else if (e.PropertyName == nameof(CellStyleModel.ForegroundColor)) 
+            else if (e.PropertyName == nameof(CellStyleModel.ForegroundColor))
             {
                 ForegroundColor = ColorAdjuster.ConvertHexStringToBrush(ForegroundColorHex);
                 NotifyPropertyChanged(nameof(ForegroundColorHex));
             }
-            else if (e.PropertyName == nameof(CellStyleModel.BorderColor)) 
+            else if (e.PropertyName == nameof(CellStyleModel.BorderColor))
             {
                 BorderColor = ColorAdjuster.ConvertHexStringToBrush(BorderColorHex);
                 NotifyPropertyChanged(nameof(BorderColorHex));
@@ -481,13 +480,13 @@ namespace Cell.ViewModel.Cells
                 ContentBorderColor = ColorAdjuster.ConvertHexStringToBrush(ContentBorderColorHex);
                 NotifyPropertyChanged(nameof(ContentBorderColorHex));
             }
-            else if (e.PropertyName == nameof(CellStyleModel.HighlightColor)) 
+            else if (e.PropertyName == nameof(CellStyleModel.HighlightColor))
             {
                 ContentHighlightColor = ColorAdjuster.ConvertHexStringToBrush(ContentHighlightColorHex);
                 NotifyPropertyChanged(nameof(ContentHighlightColorHex));
             }
             else if (e.PropertyName == nameof(CellStyleModel.ContentMargin))
-            {                 
+            {
                 UpdateMargin(Model.Style.ContentMargin);
             }
             else if (e.PropertyName == nameof(CellStyleModel.Border))

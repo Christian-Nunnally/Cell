@@ -85,15 +85,15 @@ namespace Cell.Persistence
         {
             _undoRedoManager.RecordStateIfRecording(cellToReplace);
             List<string> blacklist = [
-                nameof(CellModel.ID), 
-                nameof(CellModel.SheetName), 
-                nameof(CellModel.Width), 
-                nameof(CellModel.Height), 
-                nameof(CellModel.Row), 
-                nameof(CellModel.Column), 
-                nameof(CellModel.MergedWith), 
-                nameof(CellModel.Value), 
-                nameof(CellModel.Date), 
+                nameof(CellModel.ID),
+                nameof(CellModel.SheetName),
+                nameof(CellModel.Width),
+                nameof(CellModel.Height),
+                nameof(CellModel.Row),
+                nameof(CellModel.Column),
+                nameof(CellModel.MergedWith),
+                nameof(CellModel.Value),
+                nameof(CellModel.Date),
                 nameof(CellModel.Int)];
             if (cellToReplace.CellType.IsSpecial()) blacklist.Add(nameof(CellModel.CellType));
             cellToPaste.CopyPublicProperties(cellToReplace, [.. blacklist]);

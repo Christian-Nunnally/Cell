@@ -7,18 +7,24 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class CreateSheetWindowViewModel : PropertyChangedBase
     {
-        private string _newSheetName = "NewSheet";
-        private int _initialRows = 5;
-        private int _initialColumns = 5;
         private readonly SheetTracker _sheetTracker;
-
-        public string NewSheetName
+        private int _initialColumns = 5;
+        private int _initialRows = 5;
+        private string _newSheetName = "NewSheet";
+        public CreateSheetWindowViewModel(SheetTracker sheetTracker)
         {
-            get => _newSheetName;
+            _sheetTracker = sheetTracker;
+        }
+
+        public string InitialColumns
+        {
+            get => _initialColumns.ToString();
             set
             {
-                _newSheetName = value;
-                NotifyPropertyChanged(nameof(NewSheetName));
+                _initialColumns = int.TryParse(value, out var result) ? result : 1;
+                if (_initialColumns < 1) _initialColumns = 1;
+                if (_initialColumns > 50) _initialColumns = 50;
+                NotifyPropertyChanged(nameof(InitialColumns));
             }
         }
 
@@ -34,21 +40,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public string InitialColumns
+        public string NewSheetName
         {
-            get => _initialColumns.ToString();
+            get => _newSheetName;
             set
             {
-                _initialColumns = int.TryParse(value, out var result) ? result : 1;
-                if (_initialColumns < 1) _initialColumns = 1;
-                if (_initialColumns > 50) _initialColumns = 50;
-                NotifyPropertyChanged(nameof(InitialColumns));
+                _newSheetName = value;
+                NotifyPropertyChanged(nameof(NewSheetName));
             }
-        }
-
-        public CreateSheetWindowViewModel(SheetTracker sheetTracker)
-        {
-            _sheetTracker = sheetTracker;
         }
 
         public void AddNewSheet()

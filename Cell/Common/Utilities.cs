@@ -46,6 +46,12 @@ namespace Cell.Common
             return hashedValue;
         }
 
+        public static (string SheetName, int Row, int Column) GetLocationFromUnqiueLocationString(string unqiueLocationString)
+        {
+            var splitString = unqiueLocationString.Split('_');
+            return (splitString[0], int.Parse(splitString[1]), int.Parse(splitString[2]));
+        }
+
         public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace)
         {
             return
@@ -56,16 +62,31 @@ namespace Cell.Common
 
         public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
 
-        public static (string SheetName, int Row, int Column) GetLocationFromUnqiueLocationString(string unqiueLocationString)
-        {
-            var splitString = unqiueLocationString.Split('_');
-            return (splitString[0], int.Parse(splitString[1]), int.Parse(splitString[2]));
-        }
-
         public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.SheetName, model.Row, model.Column);
 
         [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
         public static partial Regex IsHexidecimalColorCode();
+
+        public static Thickness ParseStringIntoThickness(string stringThickness)
+        {
+            var split = stringThickness.Split(',');
+            if (split.Length == 1)
+            {
+                var size = double.Parse(split[0]);
+                return new Thickness(size, size, size, size);
+            }
+            else if (split.Length == 2)
+            {
+                var horizontial = double.Parse(split[0]);
+                var vertical = double.Parse(split[1]);
+                return new Thickness(vertical, horizontial, vertical, horizontial);
+            }
+            var left = double.Parse(split[0]);
+            var top = double.Parse(split[1]);
+            var right = double.Parse(split[2]);
+            var bottom = double.Parse(split[3]);
+            return new Thickness(left, top, right, bottom);
+        }
 
         public static bool TryParseStringIntoThickness(string stringThickness, [MaybeNullWhen(false)] out Thickness thickness)
         {
@@ -93,27 +114,6 @@ namespace Cell.Common
                 return true;
             }
             return false;
-        }
-
-        public static Thickness ParseStringIntoThickness(string stringThickness)
-        {
-            var split = stringThickness.Split(',');
-            if (split.Length == 1)
-            {
-                var size = double.Parse(split[0]);
-                return new Thickness(size, size, size, size);
-            }
-            else if (split.Length == 2)
-            {
-                var horizontial = double.Parse(split[0]);
-                var vertical = double.Parse(split[1]);
-                return new Thickness(vertical, horizontial, vertical, horizontial);
-            }
-            var left = double.Parse(split[0]);
-            var top = double.Parse(split[1]);
-            var right = double.Parse(split[2]);
-            var bottom = double.Parse(split[3]);
-            return new Thickness(left, top, right, bottom);
         }
 
         private static void CopyProperty(object source, object target, string[] blacklist, Type targetType, PropertyInfo sourceProperty)

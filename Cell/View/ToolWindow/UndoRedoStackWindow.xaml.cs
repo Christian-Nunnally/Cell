@@ -19,6 +19,8 @@ namespace Cell.View.ToolWindow
 
         public double GetMinimumHeight() => 200;
 
+        public double GetMinimumWidth() => 200;
+
         public string GetTitle() => "Undo/Redo Stack";
 
         public List<CommandViewModel> GetToolBarCommands()
@@ -30,10 +32,6 @@ namespace Cell.View.ToolWindow
             ];
         }
 
-        public double GetMinimumWidth() => 200;
-
-        public bool HandleCloseRequested() => true;
-
         public void HandleBeingClosed()
         {
         }
@@ -41,5 +39,7 @@ namespace Cell.View.ToolWindow
         public void HandleBeingShown()
         {
         }
+
+        public bool HandleCloseRequested() => true;
     }
 }

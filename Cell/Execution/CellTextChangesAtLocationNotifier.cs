@@ -15,30 +15,14 @@ namespace Cell.Execution
     public class CellTextChangesAtLocationNotifier
     {
         private readonly CellTracker _cellTracker;
-        private readonly SubscriberNotifier _subscriberNotifier = new();
         private readonly List<string> _locationsThatNeedToBeTrackedIfCellsAreAddedThere = [];
-
+        private readonly SubscriberNotifier _subscriberNotifier = new();
         public CellTextChangesAtLocationNotifier(CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
             _cellTracker.CellAdded += CellAdded;
             _subscriberNotifier.NewChannelSubscribedTo += StartListeningToCellForTextPropertyChanges;
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCellForTextPropertyChanges;
-        }
-
-        private void CellAdded(CellModel addedCell)
-        {
-            var locationString = addedCell.GetUnqiueLocationString();
-            if (_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString))
-            {
-                StartListeningToCellForTextPropertyChanges(locationString);
-                _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Remove(locationString);
-            }
-        }
-
-        private void CellRemoved(CellModel removedCell)
-        {
-            StopListeningToCellForTextPropertyChanges(removedCell.GetUnqiueLocationString());
         }
 
         public IEnumerable<string> GetLocationsSubscriberIsSubscribedTo(CellPopulateSubscriber subscriber)
@@ -54,6 +38,21 @@ namespace Cell.Execution
         public void UnsubscribeFromAllLocations(ISubscriber subscriber)
         {
             _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
+        }
+
+        private void CellAdded(CellModel addedCell)
+        {
+            var locationString = addedCell.GetUnqiueLocationString();
+            if (_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString))
+            {
+                StartListeningToCellForTextPropertyChanges(locationString);
+                _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Remove(locationString);
+            }
+        }
+
+        private void CellRemoved(CellModel removedCell)
+        {
+            StopListeningToCellForTextPropertyChanges(removedCell.GetUnqiueLocationString());
         }
 
         private void StartListeningToCellForTextPropertyChanges(string locationString)

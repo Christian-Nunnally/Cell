@@ -1,5 +1,4 @@
-﻿
-namespace Cell.Execution
+﻿namespace Cell.Execution
 {
     /// <summary>
     /// Maintains subscriptions to 'Channels' which are arbitrary strings. When a channel is published to, all subscribers to that channel have thier actions invoked.
@@ -10,21 +9,11 @@ namespace Cell.Execution
     /// </summary>
     public class SubscriberNotifier
     {
-        private readonly Dictionary<ISubscriber, Dictionary<string, int>> _subscriberToChannelMap = [];
         private readonly Dictionary<string, Dictionary<ISubscriber, int>> _channelToSubscriberMap = [];
-
-        public event Action<string>? NewChannelSubscribedTo;
-
+        private readonly Dictionary<ISubscriber, Dictionary<string, int>> _subscriberToChannelMap = [];
         public event Action<string>? LastChannelUnsubscribedFrom;
 
-        public void UnsubscribeFromAllChannels(ISubscriber subscriber)
-        {
-            if (!_subscriberToChannelMap.TryGetValue(subscriber, out var subscriptions)) return;
-            foreach (var subscription in subscriptions.ToList())
-            {
-                UnsubscribeFromChannel(subscriber, subscription.Key);
-            }
-        }
+        public event Action<string>? NewChannelSubscribedTo;
 
         public IEnumerable<string> GetChannelsSubscriberIsSubscribedTo(ISubscriber subscriber)
         {
@@ -34,6 +23,15 @@ namespace Cell.Execution
         public IEnumerable<ISubscriber> GetSubscribersToChannel(string channel)
         {
             return _channelToSubscriberMap.TryGetValue(channel, out var subscribers) ? [.. subscribers.Keys] : [];
+        }
+
+        public void NotifySubscribers(string reference)
+        {
+            var subscribers = GetSubscribersToChannel(reference);
+            foreach (var subscriber in subscribers)
+            {
+                subscriber.Action();
+            }
         }
 
         public void SubscribeToChannel(ISubscriber subscriber, string channel)
@@ -62,6 +60,15 @@ namespace Cell.Execution
             }
         }
 
+        public void UnsubscribeFromAllChannels(ISubscriber subscriber)
+        {
+            if (!_subscriberToChannelMap.TryGetValue(subscriber, out var subscriptions)) return;
+            foreach (var subscription in subscriptions.ToList())
+            {
+                UnsubscribeFromChannel(subscriber, subscription.Key);
+            }
+        }
+
         private void UnsubscribeFromChannel(ISubscriber subscriber, string channel)
         {
             if (!_subscriberToChannelMap.TryGetValue(subscriber, out var subscriptions)) return;
@@ -78,15 +85,6 @@ namespace Cell.Execution
             {
                 _channelToSubscriberMap.Remove(channel);
                 LastChannelUnsubscribedFrom?.Invoke(channel);
-            }
-        }
-
-        public void NotifySubscribers(string reference)
-        {
-            var subscribers = GetSubscribersToChannel(reference);
-            foreach (var subscriber in subscribers)
-            {
-                subscriber.Action();
             }
         }
     }

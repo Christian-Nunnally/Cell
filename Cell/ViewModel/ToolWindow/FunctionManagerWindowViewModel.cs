@@ -11,13 +11,12 @@ namespace Cell.ViewModel.ToolWindow
     {
         private readonly ObservableCollection<PluginFunction> _functions;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private string _filterCollection = string.Empty;
         private string _filterSheet = "All";
         private string _filterString = string.Empty;
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
         private PluginFunction? _selectedFunction;
-        private string _filterCollection = string.Empty;
-
         public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
@@ -40,6 +39,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public string FilterCollection
+        {
+            get => _filterCollection; set
+            {
+                if (_filterCollection == value) return;
+                _filterCollection = value;
+                NotifyPropertyChanged(nameof(FilterCollection));
+                FilterVisibleFunctions();
+            }
+        }
+
+        public ObservableCollection<string> FilterCollectionOptions { get; set; } = [];
+
         public string FilterSheet
         {
             get => _filterSheet; set
@@ -51,6 +63,8 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public ObservableCollection<string> FilterSheetOptions { get; set; } = [];
+
         public string FilterString
         {
             get => _filterString; set
@@ -58,17 +72,6 @@ namespace Cell.ViewModel.ToolWindow
                 if (_filterString == value) return;
                 _filterString = value;
                 NotifyPropertyChanged(nameof(FilterString));
-                FilterVisibleFunctions();
-            }
-        }
-
-        public string FilterCollection
-        {
-            get => _filterCollection; set
-            {
-                if (_filterCollection == value) return;
-                _filterCollection = value;
-                NotifyPropertyChanged(nameof(FilterCollection));
                 FilterVisibleFunctions();
             }
         }
@@ -122,10 +125,6 @@ namespace Cell.ViewModel.ToolWindow
                 //}
             }
         }
-
-        public ObservableCollection<string> FilterSheetOptions { get; set; } = [];
-
-        public ObservableCollection<string> FilterCollectionOptions { get; set; } = [];
 
         public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
 

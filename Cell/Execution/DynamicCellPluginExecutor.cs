@@ -22,13 +22,6 @@ namespace Cell.Execution
             return result;
         }
 
-        public static CompileResult RunTrigger(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
-        {
-            if (!pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Trigger function not found" };
-            Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, triggerFunction.CompileResult, true);
-            return triggerFunction.Run(pluginContext, cell);
-        }
-
         public static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, string functionName)
         {
             if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
@@ -39,6 +32,13 @@ namespace Cell.Execution
                 return ConvertReturnedObjectToSortFilterResult(resultObject);
             }
             return 0;
+        }
+
+        public static CompileResult RunTrigger(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
+        {
+            if (!pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Trigger function not found" };
+            Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, triggerFunction.CompileResult, true);
+            return triggerFunction.Run(pluginContext, cell);
         }
 
         private static int? ConvertReturnedObjectToSortFilterResult(object? resultObject)
