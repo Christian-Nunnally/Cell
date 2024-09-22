@@ -20,5 +20,9 @@ namespace Cell.Execution.References
         public string GetCollectionName(CellModel cell, PluginContext pluginFunctionRunContext) => ConstantCollectionName;
 
         public IEnumerable<string> GetLocationsThatWillInvalidateCollectionNameForCell(CellModel cell) => [];
+
+        public string ResolveUserFriendlyCellAgnosticName() => ConstantCollectionName;
+
+        public string ResolveUserFriendlyNameForCell(CellModel cell) => ConstantCollectionName;
     }
 }

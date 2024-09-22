@@ -1,22 +1,14 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
-using System.Collections.ObjectModel;
 
 namespace Cell.View.ToolWindow
 {
     public partial class DialogWindow : ResizableToolWindow, IDialogWindow
     {
-        public DialogWindow(string title, string message, List<CommandViewModel> actions) : base(new DialogWindowViewModel(title))
+        public DialogWindow(DialogWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
-            _messageLabel.Text = message;
-            foreach (var action in actions)
-            {
-                DialogOptions.Add(action);
-            }
         }
-
-        public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
 
         public override double MinimumHeight => 200;
 

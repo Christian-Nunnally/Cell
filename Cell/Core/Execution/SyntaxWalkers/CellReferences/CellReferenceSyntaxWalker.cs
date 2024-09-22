@@ -6,11 +6,11 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
 {
     public partial class CellReferenceSyntaxWalker : CSharpSyntaxWalker
     {
-        public readonly List<CellReference> LocationReferences = [];
+        public readonly List<LocationReference> LocationReferences = [];
         public override void Visit(SyntaxNode? node)
         {
             base.Visit(node);
-            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
+            if (LocationReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 LocationReferences.Add(cellReference);
             }

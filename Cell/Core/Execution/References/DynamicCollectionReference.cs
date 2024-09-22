@@ -29,6 +29,16 @@ namespace Cell.Execution.References
             return _calculateCollectionNameFunction.LocationDependencies.SelectMany(x => x.ResolveLocations(cell));
         }
 
+        public string ResolveUserFriendlyCellAgnosticName()
+        {
+            return _calculateCollectionNameFunction.Model.Code;
+        }
+
+        public string ResolveUserFriendlyNameForCell(CellModel cell)
+        {
+            return string.Join(',', GetLocationsThatWillInvalidateCollectionNameForCell(cell));
+        }
+
         private void CalculateCollectionNameFunctionDependenciesChanged(PluginFunction function)
         {
             LocationsThatWillInvalidateCollectionNameForCellHaveChanged?.Invoke();

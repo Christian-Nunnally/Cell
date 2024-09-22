@@ -5,7 +5,6 @@ using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Xceed.Wpf.Toolkit;
 
 namespace Cell.View.ToolWindow
@@ -185,11 +184,6 @@ namespace Cell.View.ToolWindow
         private void SetTextAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
             CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Right;
-        }
-
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
         }
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)

@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.Execution;
 using Cell.Persistence;
 using Cell.Persistence.Migration;
@@ -218,17 +217,9 @@ namespace Cell.View.Application
 
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            var sheetManagerViewModel = new SheetManagerWindowViewModel();
+            if (_viewModel == null) return;
+            var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker);
             ShowToolWindow(sheetManagerViewModel);
-        }
-
-        private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
-            {
-                if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                e.Handled = true;
-            }
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)

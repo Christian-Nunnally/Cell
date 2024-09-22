@@ -12,7 +12,7 @@ namespace Cell.Execution.SyntaxWalkers.CellReferences
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
-            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
+            if (LocationReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 var sheetPrefix = string.IsNullOrEmpty(cellReference.SheetName) ? string.Empty : $"{cellReference.SheetName}_";
 

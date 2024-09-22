@@ -6,20 +6,24 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
-    d:DataContext="{d:DesignInstance Type=viewModel:LogWindowViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type=viewModel:SheetManagerWindowViewModel}"
+    d:DesignHeight="{Binding MinimimWidth}"
+    d:DesignWidth="400"
     mc:Ignorable="d">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="30" />
-        </Grid.RowDefinitions>
-        <Label Content="Sheets" />
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Label Content="Sheets" Style="{StaticResource ListHeaderLabelStyle}" />
+            <Grid>
+                <TextBox
+                    Padding="24,0,0,0"
+                    PreviewKeyDown="TextBoxPreviewKeyDown"
+                    Text="{Binding SheetsListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                <Label Style="{StaticResource FilterIconLabelStyle}" />
+            </Grid>
+        </DockPanel>
         <ListBox
             Grid.Row="1"
-            ItemsSource="{Binding Sheets}"
+            ItemsSource="{Binding FilteredSheets}"
             SelectedItem="{Binding SelectedSheetName}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -31,15 +35,11 @@
                         </Grid.ColumnDefinitions>
                         <Button
                             x:Name="_removeButton"
-                            Width="20"
-                            Height="20"
-                            Padding="0"
                             HorizontalAlignment="Left"
-                            BorderThickness="0"
                             Click="DeleteSheetButtonClicked"
                             Content="❌"
-                            FontSize="9"
                             Foreground="{StaticResource ErrorForegroundColor}"
+                            Style="{StaticResource ListItemInlineButtonStyle}"
                             ToolTip="Delete this sheet"
                             Visibility="Hidden" />
                         <StackPanel
@@ -56,67 +56,48 @@
                                 Visibility="Collapsed" />
                             <ToggleButton
                                 x:Name="_renameButton"
-                                Width="20"
-                                Height="20"
                                 Margin="10,0"
-                                Padding="0"
                                 HorizontalAlignment="Left"
-                                BorderThickness="0"
                                 Content="🏷️"
-                                FontSize="9"
+                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                 ToolTip="Rename this function"
                                 Visibility="Hidden" />
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal">
                             <ToggleButton
                                 x:Name="_isVisibleInTopBarButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Right"
                                 Content="👁️"
-                                FontSize="10"
                                 IsChecked="{Binding IsVisibleInTopBar}"
+                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                 ToolTip="Show in the top bar navigation"
                                 Visibility="Hidden" />
                             <Button
                                 x:Name="_moveUpButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 Click="OrderSheetUpButtonClicked"
                                 Content="↑"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Move this sheet up in the list"
                                 Visibility="Hidden" />
                             <Button
                                 x:Name="_moveDownButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 Click="OrderSheetDownButtonClicked"
                                 Content="↓"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Move this sheet down in the list"
                                 Visibility="Hidden" />
                             <Button
                                 x:Name="_copyButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 Click="CopySheetButtonClicked"
                                 Content="📄"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Create a copy of this sheet"
                                 Visibility="Hidden" />
                             <Button
                                 x:Name="_viewButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 Click="GoToSheetButtonClicked"
                                 Content="🔎"
-                                FontSize="10"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Go to this sheet"
                                 Visibility="Hidden" />
                         </StackPanel>
@@ -140,10 +121,5 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button
-            Grid.Row="2"
-            Click="AddNewSheetButtonClicked"
-            Content="+"
-            FontSize="16" />
-    </Grid>
+    </DockPanel>
 </view:ResizableToolWindow>

@@ -1,8 +1,6 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
@@ -50,20 +48,6 @@ namespace Cell.View.ToolWindow
         private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
             CellContentEditWindowViewModel.EditTriggerFunction();
-        }
-
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-        }
-
-        private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
-            {
-                if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                e.Handled = true;
-            }
         }
     }
 }

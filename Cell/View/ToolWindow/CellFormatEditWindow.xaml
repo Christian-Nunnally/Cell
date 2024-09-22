@@ -174,7 +174,7 @@
             VerticalAlignment="Center"
             HorizontalContentAlignment="Center"
             ClipToBounds="False"
-            KeyDown="TextBoxKeyDown"
+            PreviewKeyDown="TextBoxPreviewKeyDown"
             Text="{Binding Height, Mode=TwoWay}">
             <TextBox.LayoutTransform>
                 <RotateTransform Angle="-90" CenterX="10" CenterY="10" />
@@ -188,7 +188,7 @@
             VerticalAlignment="Center"
             HorizontalContentAlignment="Center"
             ClipToBounds="False"
-            KeyDown="TextBoxKeyDown"
+            PreviewKeyDown="TextBoxPreviewKeyDown"
             Text="{Binding Width, Mode=TwoWay}" />
         <Grid Grid.Row="1" Grid.Column="1">
             <xctk:ColorPicker
@@ -279,12 +279,12 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBox
                                     Width="125"
-                                    KeyDown="TextBoxKeyDown"
+                                    PreviewKeyDown="TextBoxPreviewKeyDown"
                                     Text="{Binding Path=Font, UpdateSourceTrigger=LostFocus}" />
                                 <TextBox
                                     Width="25"
                                     HorizontalContentAlignment="Center"
-                                    KeyDown="TextBoxKeyDown"
+                                    PreviewKeyDown="TextBoxPreviewKeyDown"
                                     Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" />
                                 <ToggleButton
                                     Width="25"
@@ -432,7 +432,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding BorderThicknessLeft}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -447,7 +447,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding BorderThicknessRight}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -462,7 +462,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding MarginLeft}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -477,7 +477,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding MarginRight}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -492,7 +492,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding ContentBorderThicknessLeft}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -507,7 +507,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding ContentBorderThicknessRight}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -522,7 +522,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding BorderThicknessTop}" />
             <TextBox
                 Width="20"
@@ -536,7 +536,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding BorderThicknessBottom}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -551,7 +551,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding MarginTop}" />
             <TextBox
                 Width="20"
@@ -565,7 +565,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding MarginBottom}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <TextBox
@@ -580,7 +580,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding ContentBorderThicknessTop}" />
             <TextBox
                 Width="20"
@@ -594,7 +594,7 @@
                 BorderThickness="2"
                 FontWeight="Bold"
                 Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
-                KeyDown="TextBoxKeyDown"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
                 Text="{Binding ContentBorderThicknessBottom}"
                 Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 

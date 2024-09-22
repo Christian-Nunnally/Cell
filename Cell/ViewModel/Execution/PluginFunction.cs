@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Core.Execution.References;
 using Cell.Execution;
 using Cell.Execution.References;
 using Cell.Execution.SyntaxWalkers.CellReferences;
@@ -34,7 +35,9 @@ namespace Cell.ViewModel.Execution
 
         public CompileResult CompileResult { get; private set; }
 
-        public List<CellReference> LocationDependencies { get; set; } = [];
+        public List<LocationReference> LocationDependencies { get; set; } = [];
+
+        public IEnumerable<IReferenceFromCell> Dependencies => ((IEnumerable<IReferenceFromCell>)LocationDependencies).Concat(CollectionDependencies);
 
         public PluginFunctionModel Model { get; set; }
 

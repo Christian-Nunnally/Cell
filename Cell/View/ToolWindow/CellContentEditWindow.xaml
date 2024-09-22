@@ -17,7 +17,7 @@
                     Width="35"
                     HorizontalContentAlignment="Center"
                     DockPanel.Dock="Right"
-                    KeyDown="TextBoxKeyDown"
+                    PreviewKeyDown="TextBoxPreviewKeyDown"
                     Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}" />
                 <TextBox
                     Padding="4"
@@ -40,7 +40,7 @@
                             Content="Edit" />
                         <TextBox
                             Width="230"
-                            KeyDown="TextBoxKeyDown"
+                            PreviewKeyDown="TextBoxPreviewKeyDown"
                             Text="{Binding Path=PopulateFunctionName, UpdateSourceTrigger=LostFocus}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -135,7 +135,7 @@
                             Content="Edit" />
                         <TextBox
                             Width="230"
-                            KeyDown="TextBoxKeyDown"
+                            PreviewKeyDown="TextBoxPreviewKeyDown"
                             Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
                     </StackPanel>
                     <TextBlock

@@ -121,6 +121,7 @@ namespace Cell.View.ToolWindow
         private void SaveAndClose()
         {
             CodeEditorWindowViewModel.UserFriendlyCodeString = textEditor.Text;
+            _isDirty = false;
             RequestClose?.Invoke();
         }
     }

@@ -5,6 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:DialogWindowViewModel}"
     d:DesignHeight="200"
     d:DesignWidth="200"
     mc:Ignorable="d">
@@ -14,9 +16,9 @@
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
         <TextBlock
-            x:Name="_messageLabel"
             VerticalAlignment="Bottom"
             Foreground="{StaticResource ForegroundColor}"
+            Text="{Binding Message}"
             TextWrapping="Wrap" />
         <ItemsControl
             Grid.Row="1"

@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.Core.Execution.References;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -8,9 +9,13 @@ using System.Diagnostics.CodeAnalysis;
 namespace Cell.Execution.References
 {
     /// <summary>
-    /// A class that represents a reference to a cell in a sheet, including the sheet name, row, and column.
+    /// A class that represents a reference to a location or range represented by two locations.
+    /// 
+    /// A location is a sheet, row, and column.
+    /// 
+    /// The locations can be relative or absolute.
     /// </summary>
-    public class CellReference
+    public class LocationReference : IReferenceFromCell
     {
         public const string CellReferenceVariableName = "cell";
         public const string GetCellFunctionName = nameof(PluginContext.GetCell);
@@ -38,9 +43,9 @@ namespace Cell.Execution.References
 
         private string SheetArgument => IsSheetRelative ? CellReferenceVariableName : $"\"{SheetName}\"";
 
-        public static bool TryCreateReferenceFromCode(SyntaxNode? node, out CellReference cellReference)
+        public static bool TryCreateReferenceFromCode(SyntaxNode? node, out LocationReference cellReference)
         {
-            cellReference = new CellReference();
+            cellReference = new LocationReference();
             if (!DoesNodeMatchCellReferenceSyntax(node, out var arguments)) return false;
             var sheetName = arguments[0].ToString();
             if (sheetName != CellReferenceVariableName && sheetName.StartsWith('"') && sheetName.EndsWith('"')) sheetName = sheetName[1..^1];
@@ -151,6 +156,16 @@ namespace Cell.Execution.References
             if (!int.TryParse(row, out var rowValue)) return false;
             position = rowValue;
             return true;
+        }
+
+        public string ResolveUserFriendlyNameForCell(CellModel cell)
+        {
+            return string.Join(',', ResolveLocations(cell));
+        }
+
+        public string ResolveUserFriendlyCellAgnosticName()
+        {
+            return CreateCodeForReference();
         }
     }
 }

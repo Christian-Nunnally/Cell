@@ -1,8 +1,9 @@
-﻿using Cell.Model;
+﻿using Cell.Core.Execution.References;
+using Cell.Model;
 
 namespace Cell.Execution.References
 {
-    public interface ICollectionReference
+    public interface ICollectionReference : IReferenceFromCell
     {
         event Action? LocationsThatWillInvalidateCollectionNameForCellHaveChanged;
 

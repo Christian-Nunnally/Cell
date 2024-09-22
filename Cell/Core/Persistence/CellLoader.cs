@@ -67,32 +67,5 @@ namespace Cell.Persistence
             var path = Path.Combine(directory, cell.ID);
             _persistenceManager.SaveFile(path, serialized);
         }
-
-        public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
-        {
-            var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
-            FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
-        }
-
-        private void FixMergedCellsWithNewIdentities(IEnumerable<CellModel> cells, Dictionary<string, string> oldIdToNewIdMap)
-        {
-            foreach (var cell in cells.Where(cell => cell.MergedWith != string.Empty))
-            {
-                cell.MergedWith = oldIdToNewIdMap[cell.MergedWith];
-            }
-        }
-
-        private Dictionary<string, string> GiveCellsNewUniqueIndentities(string sheetName, IEnumerable<CellModel> cells)
-        {
-            var oldIdToNewIdMap = new Dictionary<string, string>();
-            foreach (var cell in cells)
-            {
-                var newId = Guid.NewGuid().ToString();
-                oldIdToNewIdMap[cell.ID] = newId;
-                cell.ID = newId;
-                cell.SheetName = sheetName;
-            }
-            return oldIdToNewIdMap;
-        }
     }
 }

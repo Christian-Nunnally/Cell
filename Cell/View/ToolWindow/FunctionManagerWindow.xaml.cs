@@ -73,5 +73,15 @@ namespace Cell.View.ToolWindow
                 FunctionManagerWindowViewModel.SelectedFunction = selectedFunction;
             }
         }
+
+        public override List<CommandViewModel> ToolBarCommands => 
+        [
+            new CommandViewModel("New Function", OpenCreateFunctionWindow) { ToolTip = "Open the 'create function' window" }
+        ];
+
+        private void OpenCreateFunctionWindow()
+        {
+            DialogFactory.ShowDialog("Not implemented :)", "Not implemented :)");
+        }
     }
 }

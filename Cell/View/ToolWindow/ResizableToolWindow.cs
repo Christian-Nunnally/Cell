@@ -1,6 +1,7 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
@@ -27,5 +28,16 @@ namespace Cell.View.ToolWindow
         public virtual void HandleBeingShown() => ToolViewModel.HandleBeingShown();
 
         public virtual bool HandleCloseRequested() => true;
+
+        protected void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Shift) return;
+            if (e.Key == Key.Enter || e.Key == Key.Tab)
+            {
+                if (sender is not TextBox textbox) return;
+                textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                e.Handled = true;
+            }
+        }
     }
 }

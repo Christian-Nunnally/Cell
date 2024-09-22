@@ -15,24 +15,15 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumHeight => 250;
 
-        public override double MinimumWidth => 250;
+        public override double MinimumWidth => 350;
 
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
-            new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow()))
+            new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow())),
+            new CommandViewModel("New Sheet", new RelayCommand(x => AddNewSheetButtonClicked()))
         ];
 
         private SheetManagerWindowViewModel SheetManagerWindowViewModel => (SheetManagerWindowViewModel)ToolViewModel;
-
-        public void CopySheet(string sheetName)
-        {
-            var copiedSheetName = sheetName + "Copy";
-            while (ApplicationViewModel.Instance.SheetTracker.Sheets.Any(x => x.Name == copiedSheetName)) copiedSheetName += "Copy";
-
-            var copiedCells = ApplicationViewModel.Instance.SheetTracker.CreateUntrackedCopiesOfCellsInSheet(sheetName);
-            ApplicationViewModel.Instance.CellLoader.UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
-            ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
-        }
 
         private static void MakeSureSheetOrderingIsConsecutive()
         {
@@ -44,7 +35,7 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
+        private void AddNewSheetButtonClicked()
         {
             var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
             ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
@@ -54,7 +45,7 @@ namespace Cell.View.ToolWindow
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             var sheetName = sheetModel.Name;
-            CopySheet(sheetName);
+            SheetManagerWindowViewModel.CopySheet(sheetName);
         }
 
         private void DeleteSheetButtonClicked(object sender, RoutedEventArgs e)

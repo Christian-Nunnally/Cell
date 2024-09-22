@@ -4,14 +4,14 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Cell.Execution.SyntaxWalkers.CellReferences
 {
-    public class CellReferenceRefactorRewriter(Func<CellReference, CellReference> refactorFunction) : CSharpSyntaxRewriter
+    public class CellReferenceRefactorRewriter(Func<LocationReference, LocationReference> refactorFunction) : CSharpSyntaxRewriter
     {
-        private readonly Func<CellReference, CellReference> _refactorFunction = refactorFunction;
+        private readonly Func<LocationReference, LocationReference> _refactorFunction = refactorFunction;
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
             if (node == null) return node;
-            if (CellReference.TryCreateReferenceFromCode(node, out var cellReference))
+            if (LocationReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 var refactoredReference = _refactorFunction(cellReference);
                 var codeForReference = refactoredReference.CreateCodeForReference();
