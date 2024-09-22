@@ -8,7 +8,7 @@ namespace Cell.ViewModel.ToolWindow
     {
         private readonly StringBuilder _logBufferBuilder = new();
 
-        public override void ShowToolWindow()
+        public override void HandleBeingShown()
         {
             Logger.Instance.LogAdded += AddLog;
             foreach (var log in Logger.Instance.Logs.Take(100))
@@ -17,7 +17,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public override void CloseToolWindow()
+        public override void HandleBeingClosed()
         {
             Logger.Instance.LogAdded -= AddLog;
             ClearBuffer();

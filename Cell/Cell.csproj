@@ -34,6 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="View\ToolWindow\ResizableToolWindow.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Update="View\ToolWindow\SettingsWindow.xaml">
       <SubType>Designer</SubType>
     </Page>

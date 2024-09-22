@@ -15,22 +15,26 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 150;
+
+        public double MinimumWidth => 300;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 150;
+        public List<CommandViewModel> ToolBarCommands => [];
 
-        public double GetMinimumWidth() => 300;
+        public string ToolWindowTitle => "Create New Sheet";
 
-        public string GetTitle() => "Create New Sheet";
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
         public void HandleBeingClosed()
         {
+            _viewModel.HandleBeingShown();
         }
 
         public void HandleBeingShown()
         {
+            _viewModel.HandleBeingClosed();
         }
 
         public bool HandleCloseRequested() => true;

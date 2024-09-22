@@ -19,22 +19,26 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 300;
+
+        public double MinimumWidth => 300;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 300;
+        public List<CommandViewModel> ToolBarCommands => [];
 
-        public double GetMinimumWidth() => 300;
+        public string ToolWindowTitle => "Function Manager";
 
-        public string GetTitle() => "Function Manager";
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
         public void HandleBeingClosed()
         {
+            _viewModel.HandleBeingShown();
         }
 
         public void HandleBeingShown()
         {
+            _viewModel.HandleBeingClosed();
         }
 
         public bool HandleCloseRequested()

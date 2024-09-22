@@ -15,33 +15,24 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 400;
+
+        public double MinimumWidth => 400;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 400;
+        public List<CommandViewModel> ToolBarCommands => [
+            new("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
+        ];
 
-        public double GetMinimumWidth() => 400;
+        public string ToolWindowTitle => "Logs";
 
-        public string GetTitle() => "Logs";
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-                new("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
-            ];
-        }
+        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
 
-        public void HandleBeingClosed()
-        {
-        }
+        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
 
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public bool HandleCloseRequested() => true;
     }
 }

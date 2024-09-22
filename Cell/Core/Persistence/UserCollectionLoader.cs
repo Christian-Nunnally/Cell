@@ -18,7 +18,7 @@ namespace Cell.Persistence
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistedDirectory _persistanceManager;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private Dictionary<string, string> _dataTypeForCollectionMap;
+        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private bool _hasGenerateDataTypeForCollectionMapChanged;
 
         public UserCollectionLoader(PersistedDirectory persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
@@ -48,12 +48,6 @@ namespace Cell.Persistence
             StopTrackingCollection(collection);
             var directory = Path.Combine("Collections", collection.Name);
             _persistanceManager.DeleteDirectory(directory);
-        }
-
-        public void ExportCollection(string collectionName, string toDirectory)
-        {
-            var fromDirectory = Path.Combine("Collections", collectionName);
-            _persistanceManager.CopyDirectory(fromDirectory, toDirectory);
         }
 
         public UserCollection? GetCollection(string name)
@@ -123,17 +117,15 @@ namespace Cell.Persistence
             }
         }
 
-        public void SaveCollections()
-        {
-            foreach (var collection in _collections) SaveCollection(collection.Value);
-        }
-
         internal IReadOnlyDictionary<string, string> GenerateDataTypeForCollectionMap()
         {
             if (_hasGenerateDataTypeForCollectionMapChanged)
             {
                 _dataTypeForCollectionMap.Clear();
-                _dataTypeForCollectionMap = CollectionNames.ToDictionary(GetDataTypeStringForCollection);
+                foreach (var collectionName in CollectionNames)
+                {
+                    _dataTypeForCollectionMap.Add(collectionName, GetDataTypeStringForCollection(collectionName));
+                }
             }
             _hasGenerateDataTypeForCollectionMapChanged = false;
             return _dataTypeForCollectionMap;

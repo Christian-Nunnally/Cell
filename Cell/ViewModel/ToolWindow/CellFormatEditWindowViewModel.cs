@@ -29,13 +29,13 @@ namespace Cell.ViewModel.ToolWindow
             _cellTracker = cellTracker;
         }
 
-        public override void ShowToolWindow()
+        public override void HandleBeingShown()
         {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
         }
 
-        public override void CloseToolWindow()
+        public override void HandleBeingClosed()
         {
             _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
             CellToDisplay = CellModel.Null;

@@ -22,7 +22,7 @@ namespace Cell.ViewModel.ToolWindow
             _functions = _pluginFunctionLoader.ObservableFunctions;
         }
 
-        public override void ShowToolWindow()
+        public override void HandleBeingShown()
         {
             _functions.CollectionChanged += FunctionsCollectionChanged;
             foreach (var function in _functions)
@@ -41,7 +41,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public override void CloseToolWindow()
+        public override void HandleBeingClosed()
         {
             _functions.CollectionChanged -= FunctionsCollectionChanged;
             Functions.Clear();

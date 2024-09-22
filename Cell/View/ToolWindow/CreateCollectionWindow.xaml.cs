@@ -1,42 +1,24 @@
-﻿using Cell.ViewModel.Application;
-using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
+﻿using Cell.ViewModel.ToolWindow;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CreateCollectionWindow : UserControl, IResizableToolWindow
+    public partial class CreateCollectionWindow : ResizableToolWindow
     {
-        private readonly CreateCollectionWindowViewModel _viewModel;
-        public CreateCollectionWindow(CreateCollectionWindowViewModel viewModel)
+        private CreateCollectionWindowViewModel CreateCollectionWindowViewModel => (CreateCollectionWindowViewModel)ToolViewModel;
+        public CreateCollectionWindow(CreateCollectionWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
+        public override double MinimumHeight => 250;
 
-        public double GetMinimumHeight() => 100;
+        public override double MinimumWidth => 350;
 
-        public double GetMinimumWidth() => 350;
-
-        public string GetTitle() => "Creating new collection";
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested() => true;
+        public override string ToolWindowTitle => "Creating new collection";
 
         private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
-            _viewModel.AddCurrentCollection();
+            CreateCollectionWindowViewModel.AddCurrentCollection();
             RequestClose?.Invoke();
         }
     }

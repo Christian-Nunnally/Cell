@@ -1,18 +1,21 @@
 ﻿using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
 
 namespace Cell.View.ToolWindow
 {
     public interface IResizableToolWindow
     {
+        double MinimumHeight { get; }
+
+        double MinimumWidth { get; }
+
         Action? RequestClose { get; set; }
 
-        double GetMinimumHeight();
+        List<CommandViewModel> ToolBarCommands { get; }
 
-        double GetMinimumWidth();
+        string ToolWindowTitle { get; }
 
-        string GetTitle();
-
-        List<CommandViewModel> GetToolBarCommands();
+        ToolWindowViewModel ToolViewModel { get; }
 
         void HandleBeingClosed();
 

@@ -1,47 +1,30 @@
 ﻿using Cell.Model;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CellSettingsEditWindow : UserControl, IResizableToolWindow
+    public partial class CellSettingsEditWindow : ResizableToolWindow
     {
-        private readonly CellSettingsEditWindowViewModel _viewModel;
-        public CellSettingsEditWindow(CellSettingsEditWindowViewModel viewModel)
+        private CellSettingsEditWindowViewModel CellSettingsEditWindowViewModel => (CellSettingsEditWindowViewModel)ToolViewModel;
+        public CellSettingsEditWindow(CellSettingsEditWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
+        public override double MinimumHeight => 200;
 
-        public double GetMinimumHeight() => 200;
+        public override double MinimumWidth => 200;
 
-        public double GetMinimumWidth() => 200;
-
-        public string GetTitle()
+        public override string ToolWindowTitle
         {
-            var currentlySelectedCell = _viewModel.CellsBeingEdited.FirstOrDefault();
-            if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Cell settings editor - {currentlySelectedCell.GetName()}";
-        }
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
+            get
+            {
+                var currentlySelectedCell = CellSettingsEditWindowViewModel.CellsBeingEdited.FirstOrDefault();
+                if (currentlySelectedCell is null) return "Select a cell to edit";
+                return $"Cell settings editor - {currentlySelectedCell.GetName()}";
+            }
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)

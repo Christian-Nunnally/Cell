@@ -8,6 +8,7 @@
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:plugin="clr-namespace:Cell.Data"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
     d:DataContext="{d:DesignInstance Type=viewModel:ImportWindowViewModel}"
     d:DesignHeight="450"

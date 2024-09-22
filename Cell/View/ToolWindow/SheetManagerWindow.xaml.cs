@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
@@ -16,7 +17,20 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 250;
+
+        public double MinimumWidth => 250;
+
         public Action? RequestClose { get; set; }
+
+        public List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
+            new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow()))
+        ];
+
+        public string ToolWindowTitle => "Sheet Manager";
+
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
         public void CopySheet(string sheetName)
         {
@@ -28,33 +42,11 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
         }
 
-        public double GetMinimumHeight() => 250;
+        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
 
-        public double GetMinimumWidth() => 250;
+        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
 
-        public string GetTitle() => "Sheet Manager";
-
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-                new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
-                new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow()))
-            ];
-        }
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public bool HandleCloseRequested() => true;
 
         private static void MakeSureSheetOrderingIsConsecutive()
         {
@@ -66,44 +58,38 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void AddNewSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
             ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 
-        private void CopySheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void CopySheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
-            {
-                var sheetName = sheetModel.Name;
-                CopySheet(sheetName);
-            }
+            if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
+            var sheetName = sheetModel.Name;
+            CopySheet(sheetName);
         }
 
-        private void DeleteSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void DeleteSheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
+            if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
+            if (ApplicationViewModel.Instance.SheetViewModel?.SheetName == sheetModel.Name)
             {
-                if (ApplicationViewModel.Instance.SheetViewModel?.SheetName == sheetModel.Name)
-                {
-                    DialogFactory.ShowDialog("Cannot delete active sheet", "This sheet cannot be deleted because it is open, switch to another sheet and then try again.");
-                    return;
-                }
-
-                DialogFactory.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
-                {
-                    ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));
-                });
+                DialogFactory.ShowDialog("Cannot delete active sheet", "This sheet cannot be deleted because it is open, switch to another sheet and then try again.");
+                return;
             }
+
+            DialogFactory.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
+            {
+                ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));
+            });
         }
 
-        private void GoToSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
-            {
-                ApplicationViewModel.Instance.GoToSheet(sheetModel.Name);
-            }
+            if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
+            ApplicationViewModel.Instance.GoToSheet(sheetModel.Name);
         }
 
         private void OpenExportWindow()
@@ -118,25 +104,21 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(importWindow);
         }
 
-        private void OrderSheetDownButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void OrderSheetDownButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
-            {
-                sheetModel.Order += 3;
-                _viewModel.RefreshSheetsList();
-            }
+            sheetModel.Order += 3;
+            _viewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
 
-        private void OrderSheetUpButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void OrderSheetUpButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
-            if (ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel))
-            {
-                sheetModel.Order -= 3;
-                _viewModel.RefreshSheetsList();
-            }
+            sheetModel.Order -= 3;
+            _viewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
     }

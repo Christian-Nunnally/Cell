@@ -51,13 +51,15 @@ namespace Cell.ViewModel.ToolWindow
 
         public string UserFriendlyCodeString { get => FunctionBeingEdited.GetUserFriendlyCode(CellContext, _collectionNameToDataTypeMap); set => FunctionBeingEdited.SetUserFriendlyCode(value, CellContext, _collectionNameToDataTypeMap); }
 
-        public void HandleBeingClosed()
+        public override void HandleBeingClosed()
         {
+            base.HandleBeingClosed();
             FunctionBeingEdited.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
         }
 
-        public void HandleBeingShown()
+        public override void HandleBeingShown()
         {
+            base.HandleBeingShown();
             FunctionBeingEdited.Model.PropertyChanged -= ReloadFunctionCodeWhenItChanges;
             NotifyPropertyChanged(nameof(UserFriendlyCodeString));
         }

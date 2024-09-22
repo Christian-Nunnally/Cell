@@ -15,30 +15,25 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 200;
+
+        public double MinimumWidth => 200;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 200;
+        public List<CommandViewModel> ToolBarCommands =>
+        [
+            new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
+            new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
+        ];
 
-        public double GetMinimumWidth() => 200;
+        public string ToolWindowTitle => "Undo/Redo Stack";
 
-        public string GetTitle() => "Undo/Redo Stack";
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-                new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
-                new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
-            ];
-        }
+        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
 
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
+        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
 
         public bool HandleCloseRequested() => true;
     }

@@ -113,7 +113,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 if (_selectedItem == value) return;
                 _selectedItem = value;
-                _selectedItemSerialized = _selectedItem != null ? JsonSerializer.Serialize(_selectedItem, _jsonDeserializerOptions) : string.Empty;
+                _selectedItemSerialized = _selectedItem != null ? JsonSerializer.Serialize(_selectedItem, _jsonDeserializerOptions)[1..^1].Trim().Replace("\n  ", "\n") : string.Empty;
                 IsSaveItemJsonButtonVisible = false;
                 IsEditJsonTextBoxVisible = _selectedItem is not null;
                 NotifyPropertyChanged(nameof(SelectedItemSerialized));
@@ -129,12 +129,13 @@ namespace Cell.ViewModel.ToolWindow
 
                 try
                 {
-                    var item = JsonSerializer.Deserialize<PluginModel>(value);
+                    var stringToDeserialize = value.StartsWith('{') ? value : $"{{\n{value}\n}}";
+                    var item = JsonSerializer.Deserialize<PluginModel>(stringToDeserialize);
                     if (item != null && _selectedItem != null)
                     {
                         item.CopyPublicProperties(_selectedItem, ["ID"]);
                         IsSaveItemJsonButtonVisible = false;
-                        _selectedItemSerialized = value;
+                        _selectedItemSerialized = value.StartsWith('{') ? value[1..^1].Trim().Replace("\n  ", "\n") : value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));
                     }
                 }
@@ -161,14 +162,14 @@ namespace Cell.ViewModel.ToolWindow
             SelectedCollection?.Remove(item);
         }
 
-        public void StartTrackingCollections()
-        {
-            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
-        }
-
-        public void StopTrackingCollections()
+        public override void HandleBeingClosed()
         {
             _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
         internal bool CanDeleteCollection(UserCollection collection, out string reason)

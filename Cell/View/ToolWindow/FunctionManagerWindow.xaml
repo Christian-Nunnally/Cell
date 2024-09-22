@@ -7,6 +7,7 @@
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolWindow="clr-namespace:Cell.ViewModel.ToolWindow"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel"
     d:DataContext="{d:DesignInstance Type=toolWindow:FunctionManagerWindowViewModel}"
     d:DesignHeight="450"

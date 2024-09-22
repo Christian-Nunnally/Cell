@@ -1,4 +1,5 @@
 ﻿using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 
@@ -21,15 +22,17 @@ namespace Cell.View.ToolWindow
 
         public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
 
+        public double MinimumHeight => 200;
+
+        public double MinimumWidth => 280;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 200;
+        public List<CommandViewModel> ToolBarCommands => [];
 
-        public double GetMinimumWidth() => 280;
+        public string ToolWindowTitle => _title;
 
-        public string GetTitle() => _title;
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
+        public ToolWindowViewModel ToolViewModel => new DialogWindowViewModel();
 
         public void HandleBeingClosed()
         {

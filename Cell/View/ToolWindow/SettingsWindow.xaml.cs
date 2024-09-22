@@ -15,33 +15,23 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 380;
+
+        public double MinimumWidth => 350;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 380;
+        public List<CommandViewModel> ToolBarCommands => [];
 
-        public double GetMinimumWidth() => 350;
+        public string ToolWindowTitle => "Settings";
 
-        public string GetTitle() => "Settings";
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-            ];
-        }
+        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
 
-        public void HandleBeingClosed()
-        {
-        }
+        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
 
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public bool HandleCloseRequested() => true;
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
@@ -75,7 +65,6 @@ namespace Cell.View.ToolWindow
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             //var printDialog = new PrintDialog();
-
             DialogFactory.ShowDialog("Under construction", "Not quite ready :)");
         }
 

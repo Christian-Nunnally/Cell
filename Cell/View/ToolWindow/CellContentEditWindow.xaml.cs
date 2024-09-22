@@ -7,44 +7,27 @@ using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CellContentEditWindow : UserControl, IResizableToolWindow
+    public partial class CellContentEditWindow : ResizableToolWindow
     {
-        private readonly CellContentEditWindowViewModel _viewModel;
-        public CellContentEditWindow(CellContentEditWindowViewModel viewModel)
+        private CellContentEditWindowViewModel CellContentEditWindowViewModel => (CellContentEditWindowViewModel)ToolViewModel;
+
+        public CellContentEditWindow(CellContentEditWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
-
-        public double GetMinimumHeight() => 200;
-
-        public double GetMinimumWidth() => 600;
-
-        public string GetTitle()
-        {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
-            if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Content editor - {currentlySelectedCell.Model.GetName()}";
-        }
-
-        public List<CommandViewModel> GetToolBarCommands() => [
+        public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];
 
-        public void HandleBeingClosed()
+        public override string ToolWindowTitle
         {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
+            get
+            {
+                var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
+                if (currentlySelectedCell is null) return "Select a cell to edit";
+                return $"Content editor - {currentlySelectedCell.Model.GetName()}";
+            }
         }
 
         private static void IndexSelectedCells()
@@ -68,12 +51,12 @@ namespace Cell.View.ToolWindow
 
         private void EditPopulateFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            _viewModel.EditPopulateFunction();
+            CellContentEditWindowViewModel.EditPopulateFunction();
         }
 
         private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            _viewModel.EditTriggerFunction();
+            CellContentEditWindowViewModel.EditTriggerFunction();
         }
 
         private void TextBoxKeyDown(object sender, KeyEventArgs e)

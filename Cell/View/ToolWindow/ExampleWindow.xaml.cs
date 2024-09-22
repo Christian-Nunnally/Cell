@@ -14,28 +14,28 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
+        public double MinimumHeight => 200;
+
+        public double MinimumWidth => 200;
+
         public Action? RequestClose { get; set; }
 
-        public double GetMinimumHeight() => 200;
+        public List<CommandViewModel> ToolBarCommands => [
+            new("Example", () => {})
+        ];
 
-        public double GetMinimumWidth() => 200;
+        public string ToolWindowTitle => "Example";
 
-        public string GetTitle() => "Example";
-
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-                new("Example", () => {})
-            ];
-        }
+        public ToolWindowViewModel ToolViewModel => _viewModel;
 
         public void HandleBeingClosed()
         {
+            _viewModel.HandleBeingShown();
         }
 
         public void HandleBeingShown()
         {
+            _viewModel.HandleBeingClosed();
         }
 
         public bool HandleCloseRequested()

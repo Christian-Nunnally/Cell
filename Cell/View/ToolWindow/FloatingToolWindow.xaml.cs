@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
             get => _contentHeight;
             set
             {
-                _contentHeight = Math.Max(value, _content?.GetMinimumHeight() ?? 100);
+                _contentHeight = Math.Max(value, _content?.MinimumHeight ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeight)));
             }
         }
@@ -41,7 +41,7 @@ namespace Cell.View.ToolWindow
             get => _contentWidth;
             set
             {
-                _contentWidth = Math.Max(value, _content?.GetMinimumWidth() ?? 100);
+                _contentWidth = Math.Max(value, _content?.MinimumWidth ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidth)));
             }
         }
@@ -50,12 +50,11 @@ namespace Cell.View.ToolWindow
 
         public bool IsUndocked => !_isDocked;
 
-        public string ToolWindowTitle => _content?.GetTitle() ?? "";
+        public string ToolWindowTitle => _content?.ToolWindowTitle ?? "";
 
         public void SetContent(UserControl content)
         {
             ContentHost.Content = content;
-            content.DataContextChanged += ContentDataContextChanged;
             _content = content as IResizableToolWindow;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
             ContentWidth = _contentWidth;
@@ -64,7 +63,7 @@ namespace Cell.View.ToolWindow
 
             if (_content != null)
             {
-                _content.GetToolBarCommands().ForEach(Commands.Add);
+                _content.ToolBarCommands.ForEach(Commands.Add);
                 _content.RequestClose = RequestClose;
             }
         }
@@ -75,8 +74,8 @@ namespace Cell.View.ToolWindow
             var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
             if (_content != null)
             {
-                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _content.GetMinimumWidth(), x));
-                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _content.GetMinimumHeight(), y));
+                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _content.MinimumWidth, x));
+                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _content.MinimumHeight, y));
             }
             Canvas.SetLeft(this, boundedX);
             Canvas.SetTop(this, boundedY);
@@ -86,8 +85,8 @@ namespace Cell.View.ToolWindow
         {
             if (_content != null)
             {
-                var width = _content.GetMinimumWidth();
-                var height = _content.GetMinimumHeight();
+                var width = _content.MinimumWidth;
+                var height = _content.MinimumHeight;
                 SetSizeWhileRespectingBounds(width, height);
             }
 
@@ -101,11 +100,6 @@ namespace Cell.View.ToolWindow
         private void CloseButtonClicked(object sender, RoutedEventArgs e)
         {
             RequestClose();
-        }
-
-        private void ContentDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
         }
 
         private void DockButtonClicked(object sender, RoutedEventArgs e)

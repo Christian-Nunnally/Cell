@@ -5,11 +5,11 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class ToolWindowViewModel : PropertyChangedBase
     {
-        public virtual void ShowToolWindow()
+        public virtual void HandleBeingShown()
         {
         }
 
-        public virtual void CloseToolWindow()
+        public virtual void HandleBeingClosed()
         {
         }
     }
