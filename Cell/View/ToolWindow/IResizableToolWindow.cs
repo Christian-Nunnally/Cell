@@ -13,9 +13,9 @@ namespace Cell.View.ToolWindow
 
         List<CommandViewModel> ToolBarCommands { get; }
 
-        string ToolWindowTitle { get; }
-
         ToolWindowViewModel ToolViewModel { get; }
+
+        string ToolWindowTitle { get; }
 
         void HandleBeingClosed();
 

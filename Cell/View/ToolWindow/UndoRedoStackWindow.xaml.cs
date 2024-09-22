@@ -1,40 +1,26 @@
 ﻿using Cell.Common;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class UndoRedoStackWindow : UserControl, IResizableToolWindow
+    public partial class UndoRedoStackWindow : ResizableToolWindow
     {
-        private readonly UndoRedoStackWindowViewModel _viewModel;
-        public UndoRedoStackWindow(UndoRedoStackWindowViewModel viewModel)
+        public UndoRedoStackWindow(UndoRedoStackWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = _viewModel;
             InitializeComponent();
         }
 
-        public double MinimumHeight => 200;
+        public override double MinimumHeight => 200;
 
-        public double MinimumWidth => 200;
+        public override double MinimumWidth => 200;
 
-        public Action? RequestClose { get; set; }
-
-        public List<CommandViewModel> ToolBarCommands =>
+        public override List<CommandViewModel> ToolBarCommands =>
         [
             new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
             new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
         ];
 
-        public string ToolWindowTitle => "Undo/Redo Stack";
-
-        public ToolWindowViewModel ToolViewModel => _viewModel;
-
-        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
-
-        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
-
-        public bool HandleCloseRequested() => true;
+        public override string ToolWindowTitle => "Undo/Redo Stack";
     }
 }

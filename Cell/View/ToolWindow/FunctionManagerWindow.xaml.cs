@@ -6,45 +6,19 @@ using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for HelpWindow.xaml
-    /// </summary>
-    public partial class FunctionManagerWindow : UserControl, IResizableToolWindow
+    public partial class FunctionManagerWindow : ResizableToolWindow
     {
-        private readonly FunctionManagerWindowViewModel _viewModel;
-        public FunctionManagerWindow(FunctionManagerWindowViewModel viewModel)
+        private FunctionManagerWindowViewModel FunctionManagerWindowViewModel => (FunctionManagerWindowViewModel)ToolViewModel;
+        public FunctionManagerWindow(FunctionManagerWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public double MinimumHeight => 300;
+        public override double MinimumHeight => 300;
 
-        public double MinimumWidth => 300;
+        public override double MinimumWidth => 300;
 
-        public Action? RequestClose { get; set; }
-
-        public List<CommandViewModel> ToolBarCommands => [];
-
-        public string ToolWindowTitle => "Function Manager";
-
-        public ToolWindowViewModel ToolViewModel => _viewModel;
-
-        public void HandleBeingClosed()
-        {
-            _viewModel.HandleBeingShown();
-        }
-
-        public void HandleBeingShown()
-        {
-            _viewModel.HandleBeingClosed();
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public override string ToolWindowTitle => "Function Manager";
 
         private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -67,8 +41,8 @@ namespace Cell.View.ToolWindow
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
-                if (_viewModel.SelectedFunction == null) return;
-                var capturedFunction = _viewModel.SelectedFunction;
+                if (FunctionManagerWindowViewModel.SelectedFunction == null) return;
+                var capturedFunction = FunctionManagerWindowViewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
                 var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction, cell, collectionNameToDataTypeMap);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
@@ -87,7 +61,7 @@ namespace Cell.View.ToolWindow
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
-                var selectedFunction = _viewModel.SelectedFunction;
+                var selectedFunction = FunctionManagerWindowViewModel.SelectedFunction;
                 if (selectedFunction == null) return;
                 if (cell.TriggerFunctionName == selectedFunction.Model.Name)
                 {
@@ -97,8 +71,8 @@ namespace Cell.View.ToolWindow
                 {
                     cell.PopulateFunctionName = "";
                 }
-                _viewModel.SelectedFunction = null;
-                _viewModel.SelectedFunction = selectedFunction;
+                FunctionManagerWindowViewModel.SelectedFunction = null;
+                FunctionManagerWindowViewModel.SelectedFunction = selectedFunction;
             }
         }
     }

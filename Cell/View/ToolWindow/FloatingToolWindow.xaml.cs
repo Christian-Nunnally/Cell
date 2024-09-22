@@ -10,6 +10,7 @@ namespace Cell.View.ToolWindow
     public partial class FloatingToolWindow : UserControl, INotifyPropertyChanged
     {
         private readonly Canvas _canvas;
+        // TODO: change to ResizableToolWindow
         private IResizableToolWindow? _content;
         private double _contentHeight;
         private double _contentWidth;

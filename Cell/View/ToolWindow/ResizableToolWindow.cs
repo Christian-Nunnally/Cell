@@ -20,9 +20,9 @@ namespace Cell.View.ToolWindow
 
         public virtual List<CommandViewModel> ToolBarCommands => [];
 
-        public virtual string ToolWindowTitle { get; } = string.Empty;
-
         public ToolWindowViewModel ToolViewModel { get; }
+
+        public virtual string ToolWindowTitle { get; } = string.Empty;
 
         public virtual void HandleBeingClosed() => ToolViewModel.HandleBeingClosed();
 

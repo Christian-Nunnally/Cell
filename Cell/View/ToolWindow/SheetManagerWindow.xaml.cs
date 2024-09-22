@@ -3,34 +3,28 @@ using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class SheetManagerWindow : UserControl, IResizableToolWindow
+    public partial class SheetManagerWindow : ResizableToolWindow
     {
-        private readonly SheetManagerWindowViewModel _viewModel;
-        public SheetManagerWindow(SheetManagerWindowViewModel viewModel)
+        public SheetManagerWindow(SheetManagerWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public double MinimumHeight => 250;
+        public override double MinimumHeight => 250;
 
-        public double MinimumWidth => 250;
+        public override double MinimumWidth => 250;
 
-        public Action? RequestClose { get; set; }
-
-        public List<CommandViewModel> ToolBarCommands => [
+        public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
             new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow()))
         ];
 
-        public string ToolWindowTitle => "Sheet Manager";
+        public override string ToolWindowTitle => "Sheet Manager";
 
-        public ToolWindowViewModel ToolViewModel => _viewModel;
+        private SheetManagerWindowViewModel SheetManagerWindowViewModel => (SheetManagerWindowViewModel)ToolViewModel;
 
         public void CopySheet(string sheetName)
         {
@@ -41,12 +35,6 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.CellLoader.UpdateIdentitiesOfCellsForNewSheet(copiedSheetName, copiedCells);
             ApplicationViewModel.Instance.SheetTracker.AddAndSaveCells(copiedCells);
         }
-
-        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
-
-        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
-
-        public bool HandleCloseRequested() => true;
 
         private static void MakeSureSheetOrderingIsConsecutive()
         {
@@ -109,7 +97,7 @@ namespace Cell.View.ToolWindow
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
             sheetModel.Order += 3;
-            _viewModel.RefreshSheetsList();
+            SheetManagerWindowViewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
 
@@ -118,7 +106,7 @@ namespace Cell.View.ToolWindow
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
             sheetModel.Order -= 3;
-            _viewModel.RefreshSheetsList();
+            SheetManagerWindowViewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
     }

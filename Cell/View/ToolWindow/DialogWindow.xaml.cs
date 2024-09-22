@@ -1,16 +1,14 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class DialogWindow : UserControl, IResizableToolWindow, IDialogWindow
+    public partial class DialogWindow : ResizableToolWindow, IDialogWindow
     {
         private readonly string _title;
-        public DialogWindow(string title, string message, List<CommandViewModel> actions)
+        public DialogWindow(string title, string message, List<CommandViewModel> actions) : base(new DialogWindowViewModel())
         {
-            DataContext = this;
             InitializeComponent();
             _messageLabel.Text = message;
             _title = title;
@@ -22,30 +20,11 @@ namespace Cell.View.ToolWindow
 
         public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
 
-        public double MinimumHeight => 200;
+        public override double MinimumHeight => 200;
 
-        public double MinimumWidth => 280;
+        public override double MinimumWidth => 280;
 
-        public Action? RequestClose { get; set; }
-
-        public List<CommandViewModel> ToolBarCommands => [];
-
-        public string ToolWindowTitle => _title;
-
-        public ToolWindowViewModel ToolViewModel => new DialogWindowViewModel();
-
-        public void HandleBeingClosed()
-        {
-        }
-
-        public void HandleBeingShown()
-        {
-        }
-
-        public bool HandleCloseRequested()
-        {
-            return true;
-        }
+        public override string ToolWindowTitle => _title;
 
         public void ShowDialog()
         {

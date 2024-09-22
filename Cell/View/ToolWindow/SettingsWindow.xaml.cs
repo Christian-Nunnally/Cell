@@ -5,33 +5,20 @@ using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class SettingsWindow : UserControl, IResizableToolWindow
+    public partial class SettingsWindow : ResizableToolWindow
     {
-        private readonly SettingsWindowViewModel _viewModel;
-        public SettingsWindow(SettingsWindowViewModel viewModel)
+        public SettingsWindow(SettingsWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
             InitializeComponent();
         }
 
-        public double MinimumHeight => 380;
+        public override double MinimumHeight => 380;
 
-        public double MinimumWidth => 350;
+        public override double MinimumWidth => 350;
 
-        public Action? RequestClose { get; set; }
+        public override string ToolWindowTitle => "Settings";
 
-        public List<CommandViewModel> ToolBarCommands => [];
-
-        public string ToolWindowTitle => "Settings";
-
-        public ToolWindowViewModel ToolViewModel => _viewModel;
-
-        public void HandleBeingClosed() => _viewModel.HandleBeingShown();
-
-        public void HandleBeingShown() => _viewModel.HandleBeingClosed();
-
-        public bool HandleCloseRequested() => true;
+        private SettingsWindowViewModel SettingsWindowViewModel => (SettingsWindowViewModel)ToolViewModel;
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
@@ -41,7 +28,7 @@ namespace Cell.View.ToolWindow
 
         private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (SettingsWindowViewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
@@ -50,7 +37,7 @@ namespace Cell.View.ToolWindow
 
         private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (SettingsWindowViewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
@@ -70,8 +57,8 @@ namespace Cell.View.ToolWindow
 
         private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
-            _viewModel.RestoreFromBackup();
+            if (SettingsWindowViewModel == null) return;
+            SettingsWindowViewModel.RestoreFromBackup();
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
