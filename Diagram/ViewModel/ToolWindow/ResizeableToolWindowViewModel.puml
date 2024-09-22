@@ -1,9 +1,0 @@
-@startuml
-class ResizeableToolWindowViewModel {
-    - userSetHeight : double
-    - userSetWidth : double
-    + UserSetHeight : double <<get>> <<set>>
-    + UserSetWidth : double <<get>> <<set>>
-}
-PropertyChangedBase <|-- ResizeableToolWindowViewModel
-@enduml

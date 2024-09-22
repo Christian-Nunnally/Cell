@@ -1,8 +1,0 @@
-@startuml
-class CollectionReferenceRenameRewriter {
-    - <<readonly>> _newName : string
-    - <<readonly>> _oldName : string
-    + <<override>> Visit(node:SyntaxNode?) : SyntaxNode?
-}
-CSharpSyntaxRewriter <|-- CollectionReferenceRenameRewriter
-@enduml

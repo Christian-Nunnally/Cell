@@ -1,5 +1,0 @@
-@startuml
-class SyntaxHighlightingColors <<static>> {
-    + {static} ApplySyntaxHighlightingToEditor(editor:TextEditor) : void
-}
-@enduml

@@ -1,5 +1,0 @@
-@startuml
-class ViewUtilities <<static>> {
-    + {static} TryGetSendersDataContext(sender:object, dataContext:T) : bool
-}
-@enduml

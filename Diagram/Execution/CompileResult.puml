@@ -1,6 +1,0 @@
-@startuml
-struct CompileResult {
-    + Result : string? <<get>> <<set>>
-    + Success : bool <<get>> <<set>>
-}
-@enduml

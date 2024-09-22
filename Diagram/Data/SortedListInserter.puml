@@ -1,9 +1,0 @@
-@startuml
-class "SortedListInserter`1"<T> {
-    + InsertSorted(list:List<T>, newItem:T, newItemCompareValue:int) : void
-    - BinarySearchIndex(list:List<T>, newItemCompareValue:int) : int
-}
-class "Func`2"<T1,T2> {
-}
-"SortedListInserter`1" o-> "_getSortValue<int,int>" "Func`2"
-@enduml

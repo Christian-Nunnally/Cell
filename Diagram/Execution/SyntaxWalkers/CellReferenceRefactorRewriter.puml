@@ -1,9 +1,0 @@
-@startuml
-class CellReferenceRefactorRewriter {
-    + <<override>> Visit(node:SyntaxNode?) : SyntaxNode?
-}
-class "Func`2"<T1,T2> {
-}
-CSharpSyntaxRewriter <|-- CellReferenceRefactorRewriter
-CellReferenceRefactorRewriter o-> "_refactorFunction<CellReference,CellReference>" "Func`2"
-@enduml

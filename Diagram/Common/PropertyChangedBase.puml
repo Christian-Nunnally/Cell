@@ -1,9 +1,0 @@
-@startuml
-class PropertyChangedBase {
-    +  <<event>> PropertyChanged : PropertyChangedEventHandler? 
-    + NotifyPropertyChanged(propertyName:string) : void
-    + NotifyPropertyChanged(propertyName:string, propertyName2:string) : void
-    + NotifyPropertyChanged(propertyName:string, propertyName2:string, propertyName3:string) : void
-}
-INotifyPropertyChanged <|-- PropertyChangedBase
-@enduml

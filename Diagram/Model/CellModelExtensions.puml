@@ -1,9 +1,0 @@
-@startuml
-class CellModelExtensions <<static>> {
-    + {static} CellsMergedBelow(model:CellModel) : int
-    + {static} CellsMergedToRight(model:CellModel) : int
-    + {static} IsMerged(model:CellModel) : bool
-    + {static} IsMergedParent(model:CellModel) : bool
-    + {static} IsMergedWith(model:CellModel, other:CellModel) : bool
-}
-@enduml

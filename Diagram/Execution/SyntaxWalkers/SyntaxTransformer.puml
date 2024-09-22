@@ -1,9 +1,0 @@
-@startuml
-class SyntaxTransformer {
-    + TransformFrom(code:string) : string
-    + TransformTo(code:string) : string
-    - {static} Transform(code:string, rewriter:CSharpSyntaxRewriter) : string
-}
-SyntaxTransformer o-> "_rewriterFrom" CSharpSyntaxRewriter
-SyntaxTransformer o-> "_rewriterTo" CSharpSyntaxRewriter
-@enduml

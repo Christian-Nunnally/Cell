@@ -1,8 +1,0 @@
-@startuml
-class TextboxCellViewModel {
-    - _textBox : TextBox?
-    + <<override>> IsSelected : bool <<get>> <<set>>
-    <<internal>> SetTextBox(textBox:TextBox) : void
-}
-CellViewModel <|-- TextboxCellViewModel
-@enduml

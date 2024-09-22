@@ -1,7 +1,0 @@
-@startuml
-class CodeToCellReferenceSyntaxRewriter <<partial>> {
-    + <<override>> Visit(node:SyntaxNode?) : SyntaxNode?
-}
-CSharpSyntaxRewriter <|-- CodeToCellReferenceSyntaxRewriter
-CodeToCellReferenceSyntaxRewriter o-> "cell" CellModel
-@enduml

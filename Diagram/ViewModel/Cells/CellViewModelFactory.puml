@@ -1,6 +1,0 @@
-@startuml
-class CellViewModelFactory <<static>> {
-    + {static} Create(model:CellModel, sheetViewModel:SheetViewModel) : CellViewModel
-    + {static} CreateCellViewModelsForSheet(sheet:SheetViewModel) : IEnumerable<CellViewModel>
-}
-@enduml

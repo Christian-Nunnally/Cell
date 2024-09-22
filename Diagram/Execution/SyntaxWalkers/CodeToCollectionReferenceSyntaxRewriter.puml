@@ -1,6 +1,0 @@
-@startuml
-class CodeToCollectionReferenceSyntaxRewriter {
-    + <<override>> Visit(node:SyntaxNode?) : SyntaxNode?
-}
-CSharpSyntaxRewriter <|-- CodeToCollectionReferenceSyntaxRewriter
-@enduml

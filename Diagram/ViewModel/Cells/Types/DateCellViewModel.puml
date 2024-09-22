@@ -1,9 +1,0 @@
-@startuml
-class DateCellViewModel {
-    + DateCellViewModel(model:CellModel, sheetViewModel:SheetViewModel)
-    - ModelPropertyChanged(sender:object?, e:System.ComponentModel.PropertyChangedEventArgs) : void
-}
-CellViewModel <|-- DateCellViewModel
-DateCellViewModel o-> "picker" DatePicker
-DateCellViewModel --> "SelectedDate" DateTime
-@enduml

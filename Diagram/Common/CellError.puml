@@ -1,8 +1,0 @@
-@startuml
-class CellError {
-    + CellError()
-    + CellError(message:string?)
-    + CellError(message:string?, innerException:Exception?)
-}
-Exception <|-- CellError
-@enduml

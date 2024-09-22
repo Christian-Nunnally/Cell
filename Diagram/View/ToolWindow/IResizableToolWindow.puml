@@ -1,9 +1,0 @@
-@startuml
-interface IResizableToolWindow {
-    + GetHeight() : double
-    + GetWidth() : double
-    + SetHeight(height:double) : void
-    + SetWidth(width:double) : void
-}
-IToolWindow <|-- IResizableToolWindow
-@enduml

@@ -1,8 +1,0 @@
-@startuml
-class TextboxCellView <<partial>> {
-    + TextboxCellView()
-    - CellTextBoxLoaded(sender:object, e:RoutedEventArgs) : void
-    - TextBoxKeyDownForCell(sender:object, e:KeyEventArgs) : void
-}
-ResourceDictionary <|-- TextboxCellView
-@enduml
