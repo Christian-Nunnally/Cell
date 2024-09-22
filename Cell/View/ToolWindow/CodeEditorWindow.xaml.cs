@@ -1,7 +1,6 @@
 ﻿using Cell.Execution;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
@@ -33,17 +32,6 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Syntax", () => CodeEditorWindowViewModel.ToggleSyntaxTreePreview(textEditor.Text)),
             new CommandViewModel("Save and Close", SaveAndClose)
         ];
-
-        public override string ToolWindowTitle
-        {
-            get
-            {
-                var dirtyDot = _isDirty ? "*" : string.Empty;
-                var functionBeingEdited = CodeEditorWindowViewModel.FunctionBeingEdited.Model;
-                var cellContext = CodeEditorWindowViewModel.CellContext;
-                return cellContext == null ? $"Code Editor - {functionBeingEdited.Name}{dirtyDot}" : $"Code Editor - {functionBeingEdited.Name} - {ColumnCellViewModel.GetColumnName(cellContext.Column)}{cellContext.Row}";
-            }
-        }
 
         private CodeEditorWindowViewModel CodeEditorWindowViewModel => (CodeEditorWindowViewModel)ToolViewModel;
 

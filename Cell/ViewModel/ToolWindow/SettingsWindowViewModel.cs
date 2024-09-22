@@ -7,13 +7,14 @@ namespace Cell.ViewModel.ToolWindow
     public class SettingsWindowViewModel : ToolWindowViewModel
     {
         private readonly ApplicationSettings _applicationSettings;
-
         public SettingsWindowViewModel(ApplicationSettings applicationSettings)
         {
             _applicationSettings = applicationSettings;
         }
 
         public ApplicationSettings? ApplicationSettings => _applicationSettings;
+
+        public override string ToolWindowTitle => "Settings";
 
         public void RestoreFromBackup()
         {

@@ -19,7 +19,5 @@ namespace Cell.View.ToolWindow
         public override List<CommandViewModel> ToolBarCommands => [
             new("Clear", new RelayCommand(x => LogWindowViewModel.ClearBuffer()))
         ];
-
-        public override string ToolWindowTitle => "Logs";
     }
 }

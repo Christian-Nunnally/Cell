@@ -15,8 +15,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 200;
 
-        public override string ToolWindowTitle => "Import";
-
         private void ImportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(ImportWindowViewModel.ImportingTemplateName))

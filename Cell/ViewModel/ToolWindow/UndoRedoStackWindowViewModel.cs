@@ -15,6 +15,8 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override string ToolWindowTitle => "Undo/Redo Stack";
+
         public ObservableCollection<string> UndoStack { get; set; } = [];
 
         private void UpdateUndoStackForViewModel(UndoRedoManager undoRedoManager)

@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public class ResizableToolWindow : UserControl, IResizableToolWindow
+    public class ResizableToolWindow : UserControl
     {
         public ResizableToolWindow(ToolWindowViewModel viewModel)
         {
@@ -21,8 +21,6 @@ namespace Cell.View.ToolWindow
         public virtual List<CommandViewModel> ToolBarCommands => [];
 
         public ToolWindowViewModel ToolViewModel { get; }
-
-        public virtual string ToolWindowTitle { get; } = string.Empty;
 
         public virtual void HandleBeingClosed() => ToolViewModel.HandleBeingClosed();
 

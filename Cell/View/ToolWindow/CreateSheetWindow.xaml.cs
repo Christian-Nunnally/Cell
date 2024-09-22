@@ -15,8 +15,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 300;
 
-        public override string ToolWindowTitle => "Create New Sheet";
-
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             CreateSheetWindowViewModel.AddNewSheet();

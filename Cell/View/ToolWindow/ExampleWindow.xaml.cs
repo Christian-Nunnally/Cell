@@ -17,7 +17,5 @@ namespace Cell.View.ToolWindow
         public override List<CommandViewModel> ToolBarCommands => [
             new("Example", () => {})
         ];
-
-        public override string ToolWindowTitle => "Example";
     }
 }

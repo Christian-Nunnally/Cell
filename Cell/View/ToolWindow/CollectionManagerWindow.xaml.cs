@@ -27,8 +27,6 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("New Collection", CollectionManagerWindowViewModel.OpenCreateCollectionWindow),
             ];
 
-        public override string ToolWindowTitle => "Collection Manager";
-
         public override void HandleBeingClosed()
         {
             base.HandleBeingClosed();

@@ -21,34 +21,11 @@ namespace Cell.ViewModel.ToolWindow
         private CellStyleModel? _cellStyleToDisplay = null;
         private CellModel _cellToDisplay = CellModel.Null;
         private bool isDetailedBorderEditingEnabled = false;
-
         public CellFormatEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellsToEdit = cellsToEdit;
             _cellTracker = cellTracker;
-        }
-
-        public override void HandleBeingShown()
-        {
-            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
-            PickDisplayedCell();
-        }
-
-        public override void HandleBeingClosed()
-        {
-            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
-            CellToDisplay = CellModel.Null;
-        }
-
-        public bool IsDetailedBorderEditingEnabled
-        {
-            get => isDetailedBorderEditingEnabled; set
-            {
-                if (isDetailedBorderEditingEnabled == value) return;
-                isDetailedBorderEditingEnabled = value;
-                NotifyPropertyChanged(nameof(IsDetailedBorderEditingEnabled));
-            }
         }
 
         public string BackgroundColor
@@ -360,6 +337,16 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public bool IsDetailedBorderEditingEnabled
+        {
+            get => isDetailedBorderEditingEnabled; set
+            {
+                if (isDetailedBorderEditingEnabled == value) return;
+                isDetailedBorderEditingEnabled = value;
+                NotifyPropertyChanged(nameof(IsDetailedBorderEditingEnabled));
+            }
+        }
+
         public bool IsFontBold
         {
             get => CellStyleToDisplay.Bold;
@@ -491,6 +478,18 @@ namespace Cell.ViewModel.ToolWindow
 
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
 
+        public override string ToolWindowTitle
+        {
+            get
+            {
+                var currentlySelectedCell = CellsBeingEdited.FirstOrDefault();
+                if (currentlySelectedCell is null) return "Select a cell to edit";
+                if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
+                if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
+                return $"Format editor - {currentlySelectedCell.GetName()}";
+            }
+        }
+
         public VerticalAlignment VerticalAlignment
         {
             get => CellStyleToDisplay.VerticalAlignment;
@@ -558,6 +557,7 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(Width));
                 NotifyPropertyChanged(nameof(Height));
                 NotifyPropertyChanged(nameof(CellType));
+                NotifyPropertyChanged(nameof(ToolWindowTitle));
             }
         }
 
@@ -643,6 +643,18 @@ namespace Cell.ViewModel.ToolWindow
                 var rowCell = _cellTracker.GetCell(cell.SheetName, cell.Row, 0);
                 if (rowCell is not null) DeleteRow(rowCell);
             }
+        }
+
+        public override void HandleBeingClosed()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
+            PickDisplayedCell();
         }
 
         public void MergeCells()

@@ -49,6 +49,8 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override string ToolWindowTitle => "Create New Sheet";
+
         public void AddNewSheet()
         {
             if (!CanAddSheet()) return;

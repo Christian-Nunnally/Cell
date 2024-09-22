@@ -146,9 +146,21 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override string ToolWindowTitle => "Collection Manager";
+
         public void DeleteCollection(UserCollection collection)
         {
             _userCollectionLoader.DeleteCollection(collection);
+        }
+
+        public override void HandleBeingClosed()
+        {
+            _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
         public void OpenCreateCollectionWindow()
@@ -160,16 +172,6 @@ namespace Cell.ViewModel.ToolWindow
         public void RemoveItemFromSelectedCollection(PluginModel item)
         {
             SelectedCollection?.Remove(item);
-        }
-
-        public override void HandleBeingClosed()
-        {
-            _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
-        }
-
-        public override void HandleBeingShown()
-        {
-            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
         internal bool CanDeleteCollection(UserCollection collection, out string reason)

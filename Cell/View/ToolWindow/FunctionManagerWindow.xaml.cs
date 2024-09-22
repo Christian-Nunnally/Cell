@@ -18,8 +18,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 300;
 
-        public override string ToolWindowTitle => "Function Manager";
-
         private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is PluginFunction function)

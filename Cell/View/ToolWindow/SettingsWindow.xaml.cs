@@ -16,8 +16,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 350;
 
-        public override string ToolWindowTitle => "Settings";
-
         private SettingsWindowViewModel SettingsWindowViewModel => (SettingsWindowViewModel)ToolViewModel;
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)

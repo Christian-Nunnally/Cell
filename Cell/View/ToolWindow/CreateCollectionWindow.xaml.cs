@@ -14,8 +14,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 350;
 
-        public override string ToolWindowTitle => "Creating new collection";
-
         private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             CreateCollectionWindowViewModel.AddCurrentCollection();

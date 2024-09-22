@@ -5,8 +5,9 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
 using Cell.View.Cells;
+using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
-using System.Windows.Controls;
+using Cell.ViewModel.ToolWindow;
 
 namespace Cell.ViewModel.Application
 {
@@ -200,12 +201,12 @@ namespace Cell.ViewModel.Application
             UndoRedoManager.FinishRecordingUndoState();
         }
 
-        public void ShowToolWindow(PropertyChangedBase viewModel, bool allowDuplicates = false)
+        public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
             _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
         }
 
-        public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
+        public void ShowToolWindow(ResizableToolWindow content, bool allowDuplicates = false)
         {
             _applicationView?.ShowToolWindow(content, allowDuplicates);
         }

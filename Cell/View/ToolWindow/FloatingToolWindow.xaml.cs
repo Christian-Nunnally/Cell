@@ -1,4 +1,5 @@
 ﻿using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -10,8 +11,6 @@ namespace Cell.View.ToolWindow
     public partial class FloatingToolWindow : UserControl, INotifyPropertyChanged
     {
         private readonly Canvas _canvas;
-        // TODO: change to ResizableToolWindow
-        private IResizableToolWindow? _content;
         private double _contentHeight;
         private double _contentWidth;
         private bool _isDocked;
@@ -32,7 +31,7 @@ namespace Cell.View.ToolWindow
             get => _contentHeight;
             set
             {
-                _contentHeight = Math.Max(value, _content?.MinimumHeight ?? 100);
+                _contentHeight = Math.Max(value, ResizableToolWindow?.MinimumHeight ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeight)));
             }
         }
@@ -42,7 +41,7 @@ namespace Cell.View.ToolWindow
             get => _contentWidth;
             set
             {
-                _contentWidth = Math.Max(value, _content?.MinimumWidth ?? 100);
+                _contentWidth = Math.Max(value, ResizableToolWindow?.MinimumWidth ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidth)));
             }
         }
@@ -51,21 +50,25 @@ namespace Cell.View.ToolWindow
 
         public bool IsUndocked => !_isDocked;
 
-        public string ToolWindowTitle => _content?.ToolWindowTitle ?? "";
+        public ResizableToolWindow? ResizableToolWindow { get; set; }
 
-        public void SetContent(UserControl content)
+        public string ToolWindowTitle => ResizableToolWindow?.ToolViewModel.ToolWindowTitle ?? "";
+
+        public void SetContent(ResizableToolWindow resizableToolWindow)
         {
-            ContentHost.Content = content;
-            _content = content as IResizableToolWindow;
+            ContentHost.Content = resizableToolWindow;
+            ResizableToolWindow = resizableToolWindow;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResizableToolWindow)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
             ContentWidth = _contentWidth;
             ContentHeight = _contentHeight;
             DataContext = this;
 
-            if (_content != null)
+            if (ResizableToolWindow != null)
             {
-                _content.ToolBarCommands.ForEach(Commands.Add);
-                _content.RequestClose = RequestClose;
+                ResizableToolWindow.ToolBarCommands.ForEach(Commands.Add);
+                ResizableToolWindow.RequestClose = RequestClose;
+                ResizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
             }
         }
 
@@ -73,10 +76,10 @@ namespace Cell.View.ToolWindow
         {
             var boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ActualWidth, x));
             var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
-            if (_content != null)
+            if (ResizableToolWindow != null)
             {
-                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _content.MinimumWidth, x));
-                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _content.MinimumHeight, y));
+                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ResizableToolWindow.MinimumWidth, x));
+                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ResizableToolWindow.MinimumHeight, y));
             }
             Canvas.SetLeft(this, boundedX);
             Canvas.SetTop(this, boundedY);
@@ -84,10 +87,10 @@ namespace Cell.View.ToolWindow
 
         public void UpdateSizeAndPositionRespectingBounds()
         {
-            if (_content != null)
+            if (ResizableToolWindow != null)
             {
-                var width = _content.MinimumWidth;
-                var height = _content.MinimumHeight;
+                var width = ResizableToolWindow.MinimumWidth;
+                var height = ResizableToolWindow.MinimumHeight;
                 SetSizeWhileRespectingBounds(width, height);
             }
 
@@ -119,18 +122,18 @@ namespace Cell.View.ToolWindow
 
         private void RequestClose()
         {
-            var isAllowingClose = _content?.HandleCloseRequested() ?? true;
+            var isAllowingClose = ResizableToolWindow?.HandleCloseRequested() ?? true;
             if (isAllowingClose)
             {
                 _canvas.Children.Remove(this);
-                _content?.HandleBeingClosed();
+                ResizableToolWindow?.HandleBeingClosed();
             }
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_content == null) return;
+            if (ResizableToolWindow == null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
             Mouse.Capture(sender as IInputElement);
@@ -155,7 +158,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_content == null) return;
+            if (ResizableToolWindow == null) return;
             _resizing = false;
             Mouse.Capture(null);
             e.Handled = true;
@@ -203,6 +206,11 @@ namespace Cell.View.ToolWindow
                 var desiredY = position.Y - offset.Y;
                 SetPositionRespectingBounds(desiredX, desiredY);
             }
+        }
+
+        private void ToolViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ToolWindowViewModel.ToolWindowTitle)) PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
         }
 
         private void UndockButtonClicked(object sender, RoutedEventArgs e)

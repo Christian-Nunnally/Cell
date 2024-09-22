@@ -6,12 +6,10 @@ namespace Cell.View.ToolWindow
 {
     public partial class DialogWindow : ResizableToolWindow, IDialogWindow
     {
-        private readonly string _title;
-        public DialogWindow(string title, string message, List<CommandViewModel> actions) : base(new DialogWindowViewModel())
+        public DialogWindow(string title, string message, List<CommandViewModel> actions) : base(new DialogWindowViewModel(title))
         {
             InitializeComponent();
             _messageLabel.Text = message;
-            _title = title;
             foreach (var action in actions)
             {
                 DialogOptions.Add(action);
@@ -23,8 +21,6 @@ namespace Cell.View.ToolWindow
         public override double MinimumHeight => 200;
 
         public override double MinimumWidth => 280;
-
-        public override string ToolWindowTitle => _title;
 
         public void ShowDialog()
         {

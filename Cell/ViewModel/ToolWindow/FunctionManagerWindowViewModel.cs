@@ -22,33 +22,6 @@ namespace Cell.ViewModel.ToolWindow
             _functions = _pluginFunctionLoader.ObservableFunctions;
         }
 
-        public override void HandleBeingShown()
-        {
-            _functions.CollectionChanged += FunctionsCollectionChanged;
-            foreach (var function in _functions)
-            {
-                Functions.Add(function);
-            }
-            FilterSheetOptions.Add("All");
-            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
-            {
-                FilterSheetOptions.Add(sheet.Name);
-            }
-            FilterCollectionOptions.Add("All");
-            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames)
-            {
-                FilterCollectionOptions.Add(collectionName);
-            }
-        }
-
-        public override void HandleBeingClosed()
-        {
-            _functions.CollectionChanged -= FunctionsCollectionChanged;
-            Functions.Clear();
-            FilterSheetOptions.Clear();
-            FilterCollectionOptions.Clear();
-        }
-
         public string FilterCollection
         {
             get => _filterCollection; set
@@ -136,7 +109,36 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override string ToolWindowTitle => "Function Manager";
+
         public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
+
+        public override void HandleBeingClosed()
+        {
+            _functions.CollectionChanged -= FunctionsCollectionChanged;
+            Functions.Clear();
+            FilterSheetOptions.Clear();
+            FilterCollectionOptions.Clear();
+        }
+
+        public override void HandleBeingShown()
+        {
+            _functions.CollectionChanged += FunctionsCollectionChanged;
+            foreach (var function in _functions)
+            {
+                Functions.Add(function);
+            }
+            FilterSheetOptions.Add("All");
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
+            {
+                FilterSheetOptions.Add(sheet.Name);
+            }
+            FilterCollectionOptions.Add("All");
+            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames)
+            {
+                FilterCollectionOptions.Add(collectionName);
+            }
+        }
 
         private void FilterVisibleFunctions()
         {

@@ -19,18 +19,6 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
         }
 
-        public override void HandleBeingShown()
-        {
-            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
-            PickDisplayedCell();
-        }
-
-        public override void HandleBeingClosed()
-        {
-            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
-            CellToDisplay = CellModel.Null;
-        }
-
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
         public int Index
@@ -84,6 +72,16 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override string ToolWindowTitle
+        {
+            get
+            {
+                var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
+                if (currentlySelectedCell is null) return "Select a cell to edit";
+                return $"Content editor - {currentlySelectedCell.Model.GetName()}";
+            }
+        }
+
         public virtual string TriggerFunctionName
         {
             get => CellToDisplay.TriggerFunctionName;
@@ -134,6 +132,18 @@ namespace Cell.ViewModel.ToolWindow
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
+        }
+
+        public override void HandleBeingClosed()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
+            PickDisplayedCell();
         }
 
         private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();

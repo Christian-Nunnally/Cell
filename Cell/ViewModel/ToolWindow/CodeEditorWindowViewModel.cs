@@ -2,6 +2,7 @@
 using Cell.Model;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 using System.ComponentModel;
 using System.Windows.Media;
@@ -46,6 +47,19 @@ namespace Cell.ViewModel.ToolWindow
                 syntaxTreePreviewText = value;
                 NotifyPropertyChanged(nameof(SyntaxTreePreviewText));
                 NotifyPropertyChanged(nameof(IsTransformedSyntaxTreeViewerVisible));
+            }
+        }
+
+        public override string ToolWindowTitle
+        {
+            get
+            {
+                // TODO: fix dirty dot
+                //var dirtyDot = _isDirty ? "*" : string.Empty;
+                var dirtyDot = false ? "*" : string.Empty;
+                var functionBeingEdited = FunctionBeingEdited.Model;
+                var cellContext = CellContext;
+                return cellContext == null ? $"Code Editor - {functionBeingEdited.Name}{dirtyDot}" : $"Code Editor - {functionBeingEdited.Name} - {ColumnCellViewModel.GetColumnName(cellContext.Column)}{cellContext.Row}";
             }
         }
 

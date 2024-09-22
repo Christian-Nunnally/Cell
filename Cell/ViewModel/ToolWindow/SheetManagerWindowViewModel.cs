@@ -14,6 +14,8 @@ namespace Cell.ViewModel.ToolWindow
 
         public ObservableCollection<SheetModel> Sheets => ApplicationViewModel.Instance.SheetTracker.OrderedSheets;
 
+        public override string ToolWindowTitle => "Sheet Manager";
+
         public void RefreshSheetsList()
         {
             NotifyPropertyChanged(nameof(Sheets));

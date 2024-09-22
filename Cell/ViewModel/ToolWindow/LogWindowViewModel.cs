@@ -1,5 +1,4 @@
 ﻿using Cell.Common;
-using Cell.Model;
 using System.Text;
 
 namespace Cell.ViewModel.ToolWindow
@@ -7,14 +6,14 @@ namespace Cell.ViewModel.ToolWindow
     public class LogWindowViewModel : ToolWindowViewModel
     {
         private readonly StringBuilder _logBufferBuilder = new();
+        public string LogBuffer => _logBufferBuilder.ToString();
 
-        public override void HandleBeingShown()
+        public override string ToolWindowTitle => "Logs";
+
+        public void ClearBuffer()
         {
-            Logger.Instance.LogAdded += AddLog;
-            foreach (var log in Logger.Instance.Logs.Take(100))
-            {
-                AddLog(log);
-            }
+            _logBufferBuilder.Clear();
+            NotifyPropertyChanged(nameof(LogBuffer));
         }
 
         public override void HandleBeingClosed()
@@ -23,12 +22,13 @@ namespace Cell.ViewModel.ToolWindow
             ClearBuffer();
         }
 
-        public string LogBuffer => _logBufferBuilder.ToString();
-
-        public void ClearBuffer()
+        public override void HandleBeingShown()
         {
-            _logBufferBuilder.Clear();
-            NotifyPropertyChanged(nameof(LogBuffer));
+            Logger.Instance.LogAdded += AddLog;
+            foreach (var log in Logger.Instance.Logs.Take(100))
+            {
+                AddLog(log);
+            }
         }
 
         private void AddLog(string log)

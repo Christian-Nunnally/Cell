@@ -15,8 +15,6 @@ namespace Cell.View.ToolWindow
 
         public override double MinimumWidth => 200;
 
-        public override string ToolWindowTitle => "Export";
-
         private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             var sheetName = ExportWindowViewModel.SheetNameToExport;

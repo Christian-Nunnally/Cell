@@ -1,5 +1,4 @@
-﻿using Cell.Model;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,26 +8,20 @@ namespace Cell.View.ToolWindow
 {
     public partial class CellContentEditWindow : ResizableToolWindow
     {
-        private CellContentEditWindowViewModel CellContentEditWindowViewModel => (CellContentEditWindowViewModel)ToolViewModel;
-
         public CellContentEditWindow(CellContentEditWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
         }
 
+        public override double MinimumHeight => 220;
+
+        public override double MinimumWidth => 260;
+
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];
 
-        public override string ToolWindowTitle
-        {
-            get
-            {
-                var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
-                if (currentlySelectedCell is null) return "Select a cell to edit";
-                return $"Content editor - {currentlySelectedCell.Model.GetName()}";
-            }
-        }
+        private CellContentEditWindowViewModel CellContentEditWindowViewModel => (CellContentEditWindowViewModel)ToolViewModel;
 
         private static void IndexSelectedCells()
         {

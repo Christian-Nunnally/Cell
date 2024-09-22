@@ -15,5 +15,7 @@ namespace Cell.ViewModel.ToolWindow
         public IEnumerable<string> PossibleTemplates => ApplicationViewModel.Instance.PersistedProject.GetTemplateNames();
 
         public bool SkipExistingCollectionsDuringImport { get; set; } = false;
+
+        public override string ToolWindowTitle => "Import";
     }
 }

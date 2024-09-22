@@ -12,7 +12,6 @@ namespace Cell.View.ToolWindow
 {
     public partial class CellFormatEditWindow : ResizableToolWindow
     {
-        private CellFormatEditWindowViewModel CellFormatEditWindowViewModel => (CellFormatEditWindowViewModel)ToolViewModel;
         public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
@@ -26,17 +25,7 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("╾╼", () => CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled = !CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
             ];
 
-        public override string ToolWindowTitle
-        {
-            get
-            {
-                var currentlySelectedCell = CellFormatEditWindowViewModel.CellsBeingEdited.FirstOrDefault();
-                if (currentlySelectedCell is null) return "Select a cell to edit";
-                if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
-                if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
-                return $"Format editor - {currentlySelectedCell.GetName()}";
-            }
-        }
+        private CellFormatEditWindowViewModel CellFormatEditWindowViewModel => (CellFormatEditWindowViewModel)ToolViewModel;
 
         public static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
         {

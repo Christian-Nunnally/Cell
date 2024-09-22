@@ -14,18 +14,6 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
         }
 
-        public override void HandleBeingShown()
-        {
-            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
-            PickDisplayedCell();
-        }
-
-        public override void HandleBeingClosed()
-        {
-            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
-            CellToDisplay = CellModel.Null;
-        }
-
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
         public CellModel CellToDisplay
@@ -38,6 +26,28 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(CellToDisplay));
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
             }
+        }
+
+        public override string ToolWindowTitle
+        {
+            get
+            {
+                var currentlySelectedCell = CellsBeingEdited.FirstOrDefault();
+                if (currentlySelectedCell is null) return "Select a cell to edit";
+                return $"Cell settings editor - {currentlySelectedCell.GetName()}";
+            }
+        }
+
+        public override void HandleBeingClosed()
+        {
+            _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
+            CellToDisplay = CellModel.Null;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
+            PickDisplayedCell();
         }
 
         private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();

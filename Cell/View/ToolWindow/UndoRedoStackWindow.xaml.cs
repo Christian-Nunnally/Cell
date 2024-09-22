@@ -20,7 +20,5 @@ namespace Cell.View.ToolWindow
             new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
             new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
         ];
-
-        public override string ToolWindowTitle => "Undo/Redo Stack";
     }
 }

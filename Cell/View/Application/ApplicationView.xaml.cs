@@ -58,20 +58,20 @@ namespace Cell.View.Application
             }
         }
 
-        public void ShowToolWindow(PropertyChangedBase viewModel, bool allowDuplicates = false)
+        public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
             ShowToolWindow(window, allowDuplicates);
         }
 
-        public void ShowToolWindow(UserControl content, bool allowDuplicates = false)
+        public void ShowToolWindow(ResizableToolWindow resizableToolWindow, bool allowDuplicates = false)
         {
             if (!allowDuplicates)
             {
                 foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
                 {
-                    if (floatingToolWindow.ContentHost.Content.GetType() == content.GetType())
+                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
                     {
                         return;
                     }
@@ -79,13 +79,13 @@ namespace Cell.View.Application
             }
 
             var toolbox = new FloatingToolWindow(_toolWindowCanvas);
-            toolbox.SetContent(content);
+            toolbox.SetContent(resizableToolWindow);
 
             Canvas.SetLeft(toolbox, (_toolWindowCanvas.ActualWidth / 2) - (toolbox.ContentWidth / 2));
             Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
 
             _toolWindowCanvas.Children.Add(toolbox);
-            (content as IResizableToolWindow)?.HandleBeingShown();
+            resizableToolWindow.HandleBeingShown();
         }
 
         protected override void OnInitialized(EventArgs e)

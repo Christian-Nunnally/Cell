@@ -1,13 +1,12 @@
 ﻿using Cell.Common;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
 
 namespace Cell.ViewModel.Application
 {
     public class ToolWindowViewFactory
     {
-        public static UserControl Create(PropertyChangedBase viewModel)
+        public static ResizableToolWindow Create(PropertyChangedBase viewModel)
         {
             return viewModel switch
             {

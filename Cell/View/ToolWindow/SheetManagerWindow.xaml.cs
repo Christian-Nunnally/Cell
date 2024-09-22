@@ -22,8 +22,6 @@ namespace Cell.View.ToolWindow
             new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow()))
         ];
 
-        public override string ToolWindowTitle => "Sheet Manager";
-
         private SheetManagerWindowViewModel SheetManagerWindowViewModel => (SheetManagerWindowViewModel)ToolViewModel;
 
         public void CopySheet(string sheetName)
