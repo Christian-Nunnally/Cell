@@ -72,8 +72,6 @@ namespace Cell.View.ToolWindow
             if (sender is not Button) return;
             var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
             if (activeSheetView is null) return;
-            activeSheetView.PanCanvasTo(-((ApplicationViewModel.Instance.ApplicationWindowWidth / 2) - (activeSheetView.SheetViewModel.SheetWidth / 2)), -((ApplicationViewModel.Instance.ApplicationWindowHeight / 2) - (activeSheetView.SheetViewModel.SheetHeight / 2)));
-            activeSheetView.ZoomCanvasTo(new Point(0, 0), 1);
             activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
 
@@ -82,8 +80,31 @@ namespace Cell.View.ToolWindow
             if (sender is not Button) return;
             var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
             if (activeSheetView is null) return;
-            activeSheetView.PanCanvasTo(-((ApplicationViewModel.Instance.ApplicationWindowWidth / 2) - (activeSheetView.SheetViewModel.SheetWidth / 2)), -((ApplicationViewModel.Instance.ApplicationWindowHeight / 2) - (activeSheetView.SheetViewModel.SheetHeight / 2)));
             activeSheetView.IsZoomingEnabled = !activeSheetView.IsZoomingEnabled;
+        }
+
+        private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button) return;
+            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
+            if (activeSheetView is null) return;
+            activeSheetView.IsLockedToCenter = !activeSheetView.IsLockedToCenter;
+        }
+
+        private void ToggleMouseOverCellHighlight(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button) return;
+            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
+            if (activeSheetViewModel is null) return;
+            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = !activeSheetViewModel.IsCellHighlightOnMouseOverEnabled;
+        }
+
+        private void ToggleAbilityToSelectCells(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button) return;
+            var cellSelector = ApplicationViewModel.Instance.CellSelector;
+            if (cellSelector is null) return;
+            cellSelector.IsSelectingDisabled = !cellSelector.IsSelectingDisabled;
         }
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)

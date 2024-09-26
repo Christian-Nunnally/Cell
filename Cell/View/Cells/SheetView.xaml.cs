@@ -36,7 +36,6 @@ namespace Cell.View.Cells
                 if (_panAndZoomCanvas != null)
                 {
                     _panAndZoomCanvas.IsPanningEnabled = value;
-                    _panAndZoomCanvas.IsLockedToCenter = value;
                 }
             }
         }
@@ -47,6 +46,15 @@ namespace Cell.View.Cells
             set
             {
                 if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsZoomingEnabled = value;
+            }
+        }
+
+        public bool IsLockedToCenter
+        {
+            get => _panAndZoomCanvas?.IsLockedToCenter ?? true;
+            set
+            {
+                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsLockedToCenter = value;
             }
         }
 
@@ -150,7 +158,7 @@ namespace Cell.View.Cells
                     else
                     {
                         SheetViewModel.UnhighlightAllCells();
-                        SheetViewModel.HighlightCell(cell, "#33333333");
+                        if (SheetViewModel.IsCellHighlightOnMouseOverEnabled) SheetViewModel.HighlightCell(cell, "#33333333");
                     }
                 }
                 _currentCellMouseIsOver = cell;

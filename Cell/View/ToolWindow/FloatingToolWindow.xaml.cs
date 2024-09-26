@@ -90,8 +90,8 @@ namespace Cell.View.ToolWindow
         {
             if (ResizableToolWindow != null)
             {
-                var width = ResizableToolWindow.ToolViewModel.MinimumWidth;
-                var height = ResizableToolWindow.ToolViewModel.MinimumHeight;
+                var width = ResizableToolWindow.ToolViewModel.DefaultWidth;
+                var height = ResizableToolWindow.ToolViewModel.DefaultHeight;
                 SetSizeWhileRespectingBounds(width, height);
             }
 

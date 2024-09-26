@@ -114,6 +114,8 @@ namespace Cell.ViewModel.Cells
 
         public UserCollectionLoader UserCollectionLoader => _userCollectionLoader;
 
+        public bool IsCellHighlightOnMouseOverEnabled { get; internal set; } = true;
+
         public CellViewModel GetCellViewModel(CellModel cellModel) => _cellModelToCellViewModelMap[cellModel];
 
         public void HighlightCell(CellViewModel cellToHighlight, string color)

@@ -206,7 +206,7 @@ namespace Cell.View.Application
             double scaleFactor = Zoomfactor;
             if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
             if (IsPanningEnabled) ZoomCanvas(e.GetPosition(this), scaleFactor);
-            else ZoomCanvas(new Point(LaidOutWidth / 2.0, LaidOutHeight / 2.0), scaleFactor);
+            else ZoomCanvas(new Point(ActualWidth/2, ActualHeight/2), scaleFactor);
         }
 
         private void ZoomCanvas(Point centerOfZoom, double scaleFactor)

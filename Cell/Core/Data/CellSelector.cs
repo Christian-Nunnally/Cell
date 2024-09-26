@@ -6,8 +6,17 @@ namespace Cell.Data
     public class CellSelector
     {
         private readonly CellTracker _cellTracker;
+        private bool _isSelectingDisabled;
 
         public ObservableCollection<CellModel> SelectedCells { get; } = [];
+        public bool IsSelectingDisabled
+        {
+            get => _isSelectingDisabled; internal set
+            {
+                _isSelectingDisabled = value;
+                UnselectAllCells();
+            }
+        }
 
         public CellSelector(CellTracker cellTracker)
         {
@@ -16,6 +25,7 @@ namespace Cell.Data
 
         public void SelectCell(CellModel cell)
         {
+            if (IsSelectingDisabled) return;
             SelectedCells.Add(cell);
         }
 

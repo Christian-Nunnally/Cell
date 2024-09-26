@@ -8,6 +8,7 @@
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
     Width="{Binding ApplicationWindowWidth, Mode=TwoWay}"
     Height="{Binding ApplicationWindowHeight, Mode=TwoWay}"
+    d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     d:Height="500"
     d:Width="500"
     AllowsTransparency="True"
@@ -21,85 +22,88 @@
         <WindowChrome CaptionHeight="28" />
     </WindowChrome.WindowChrome>
     <DockPanel x:Name="RootWindow" PreviewKeyDown="WindowPreviewKeyDown">
-        <DockPanel
-            x:Name="TitleBar"
-            Height="28"
-            Background="{StaticResource CellBackground}"
-            DockPanel.Dock="Top">
-            <Button
-                x:Name="CloseButton"
-                Click="OnCloseButtonClicked"
-                Content="x"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Button
-                x:Name="MaxButton"
-                Click="MaximizeButtonClick"
-                Content="☐"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Button
-                x:Name="MinButton"
-                Click="MinimizeButtonClick"
-                Content="-"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Button
-                Click="ShowSettingsWindowButtonClick"
-                Content="⚙️"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens settings window"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="ToggleEditPanelButtonClick"
-                Content="🛠️"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell format editor"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="OpenSpecialEditPanelButtonClick"
-                Content="⛏️"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell settings editor"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="OpenTextEditPanelButtonClick"
-                Content="⌶"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell content editor"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="ShowFunctionManagerButtonClick"
-                Content="f()"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Manage functions"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="ShowCollectionManagerButtonClick"
-                Content="≡"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Manage collections"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <Button
-                Click="ShowSheetManagerButtonClick"
-                Content="📄"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Manage sheets"
-                Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <Grid DockPanel.Dock="Top">
+            <DockPanel
+                x:Name="TitleBar"
+                Height="28"
+                Background="{StaticResource CellBackground}"
+                DockPanel.Dock="Top"
+                LastChildFill="False">
+                <Button
+                    x:Name="CloseButton"
+                    Click="OnCloseButtonClicked"
+                    Content="x"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    x:Name="MaxButton"
+                    Click="MaximizeButtonClick"
+                    Content="☐"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    x:Name="MinButton"
+                    Click="MinimizeButtonClick"
+                    Content="-"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    Click="ShowSettingsWindowButtonClick"
+                    Content="⚙️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens settings window"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ToggleEditPanelButtonClick"
+                    Content="🛠️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell format editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="OpenSpecialEditPanelButtonClick"
+                    Content="⛏️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell settings editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="OpenTextEditPanelButtonClick"
+                    Content="⌶"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell content editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowFunctionManagerButtonClick"
+                    Content="f()"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage functions"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowCollectionManagerButtonClick"
+                    Content="≡"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage collections"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowSheetManagerButtonClick"
+                    Content="📄"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage sheets"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </DockPanel>
             <Grid Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <local:TitleBarSheetNavigation
                     DataContext="{Binding TitleBarSheetNavigationViewModel}"
                     DockPanel.Dock="Bottom"
                     WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
-        </DockPanel>
+        </Grid>
         <Grid>
             <Button
                 Width="Auto"
