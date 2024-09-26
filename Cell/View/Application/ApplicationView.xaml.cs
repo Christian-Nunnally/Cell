@@ -40,21 +40,13 @@ namespace Cell.View.Application
         public void ShowSheetView(SheetViewModel sheetViewModel)
         {
             if (sheetViewModel == null) return;
-            if (_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
+            if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
             {
-                _sheetViewContentControl.Content = sheetView;
-                ActiveSheetView = sheetView;
-            }
-            else
-            {
-                sheetView = new SheetView
-                {
-                    DataContext = sheetViewModel
-                };
-                _sheetViewContentControl.Content = sheetView;
-                ActiveSheetView = sheetView;
+                sheetView = new SheetView(sheetViewModel);
                 _sheetViews.Add(sheetViewModel, sheetView);
             }
+            _sheetViewContentControl.Content = sheetView;
+            ActiveSheetView = sheetView;
         }
 
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
@@ -115,7 +107,7 @@ namespace Cell.View.Application
             var textClipboard = new TextClipboard();
             var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
             var backupManager = new BackupManager(projectDirectory, backupDirectory);
-            var cellSelector = new CellSelector();
+            var cellSelector = new CellSelector(cellTracker);
 
             _viewModel = new ApplicationViewModel(
                 projectDirectory,
@@ -265,34 +257,34 @@ namespace Cell.View.Application
             }
             else if (e.Key == Key.Tab)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.SheetViewModel?.MoveSelectionLeft();
-                else _viewModel?.SheetViewModel?.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.CellSelector.MoveSelectionLeft();
+                else _viewModel?.CellSelector.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.SheetViewModel?.MoveSelectionUp();
-                else _viewModel?.SheetViewModel?.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.CellSelector.MoveSelectionUp();
+                else _viewModel?.CellSelector.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                _viewModel?.SheetViewModel?.MoveSelectionUp();
+                _viewModel?.CellSelector.MoveSelectionUp();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                _viewModel?.SheetViewModel?.MoveSelectionDown();
+                _viewModel?.CellSelector.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                _viewModel?.SheetViewModel?.MoveSelectionLeft();
+                _viewModel?.CellSelector.MoveSelectionLeft();
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                _viewModel?.SheetViewModel?.MoveSelectionRight();
+                _viewModel?.CellSelector.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)

@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
             get => _contentHeight;
             set
             {
-                _contentHeight = Math.Max(value, ResizableToolWindow?.MinimumHeight ?? 100);
+                _contentHeight = Math.Max(value, ResizableToolWindow?.ToolViewModel.MinimumHeight ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeight)));
             }
         }
@@ -41,7 +41,7 @@ namespace Cell.View.ToolWindow
             get => _contentWidth;
             set
             {
-                _contentWidth = Math.Max(value, ResizableToolWindow?.MinimumWidth ?? 100);
+                _contentWidth = Math.Max(value, ResizableToolWindow?.ToolViewModel.MinimumWidth ?? 100);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidth)));
             }
         }
@@ -60,7 +60,8 @@ namespace Cell.View.ToolWindow
             ResizableToolWindow = resizableToolWindow;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ResizableToolWindow)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-            ContentWidth = _contentWidth;
+            ContentWidth = resizableToolWindow.ToolViewModel.DefaultWidth;
+            ContentHeight = resizableToolWindow.ToolViewModel.DefaultHeight;
             ContentHeight = _contentHeight;
             DataContext = this;
 
@@ -78,8 +79,8 @@ namespace Cell.View.ToolWindow
             var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
             if (ResizableToolWindow != null)
             {
-                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ResizableToolWindow.MinimumWidth, x));
-                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ResizableToolWindow.MinimumHeight, y));
+                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ResizableToolWindow.ToolViewModel.MinimumWidth, x));
+                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ResizableToolWindow.ToolViewModel.MinimumHeight, y));
             }
             Canvas.SetLeft(this, boundedX);
             Canvas.SetTop(this, boundedY);
@@ -89,8 +90,8 @@ namespace Cell.View.ToolWindow
         {
             if (ResizableToolWindow != null)
             {
-                var width = ResizableToolWindow.MinimumWidth;
-                var height = ResizableToolWindow.MinimumHeight;
+                var width = ResizableToolWindow.ToolViewModel.MinimumWidth;
+                var height = ResizableToolWindow.ToolViewModel.MinimumHeight;
                 SetSizeWhileRespectingBounds(width, height);
             }
 

@@ -19,6 +19,8 @@
             VerticalAlignment="Bottom"
             Foreground="{StaticResource ForegroundColor}"
             Text="{Binding Message}"
+            HorizontalAlignment="Center"
+            Margin="10"
             TextWrapping="Wrap" />
         <ItemsControl
             Grid.Row="1"

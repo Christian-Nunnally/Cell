@@ -8,6 +8,10 @@ namespace Cell.ViewModel.ToolWindow
         {
         }
 
+        public override double DefaultHeight => 200;
+
+        public override double DefaultWidth => 200;
+
         public string ImportingTemplateName { get; set; } = string.Empty;
 
         public string NewSheetNameForImportedTemplates { get; set; } = string.Empty;

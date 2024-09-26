@@ -13,10 +13,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 250;
-
-        public override double MinimumWidth => 350;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
             new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow())),

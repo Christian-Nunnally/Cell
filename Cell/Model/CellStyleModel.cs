@@ -6,15 +6,15 @@ namespace Cell.Model
     public class CellStyleModel : PropertyChangedBase
     {
         private string _backgroundColorHex = "#000000";
-        private string _borderColorHex = "#aaff00";
+        private string _borderColorHex = "#000000";
         private string _borderThickness = "1";
-        private string _contentBackgroundColorHex = "#aa00ff";
-        private string _contentBorderColorHex = "#00ffaa";
+        private string _contentBackgroundColorHex = "#000000";
+        private string _contentBorderColorHex = "#000000";
         private string _contentBorderThickness = "1";
         private string _font = "Consolas";
         private double _fontSize = 10;
-        private string _foregroundColorHex = "#ffffff";
-        private string _highlightColorHex = "#bbbbbb";
+        private string _foregroundColorHex = "#000000";
+        private string _highlightColorHex = "#000000";
         private bool _isFontBold = false;
         private bool _isFontItalic = false;
         private bool _isFontStrikethrough = false;

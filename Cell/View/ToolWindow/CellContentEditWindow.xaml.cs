@@ -11,10 +11,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 220;
-
-        public override double MinimumWidth => 260;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];

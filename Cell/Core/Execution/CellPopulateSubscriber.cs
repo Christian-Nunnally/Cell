@@ -44,5 +44,7 @@ namespace Cell.Execution
                 if (result.ExecutionResult != null) subscriber.ErrorText = result.ExecutionResult;
             }
         }
+
+        public override string ToString() => $"Populate subscriber for {_cell.UserFriendlyCellName}";
     }
 }

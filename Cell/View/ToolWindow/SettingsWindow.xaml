@@ -14,9 +14,14 @@
         <StackPanel>
             <Button
                 Click="TogglePanLockButtonClick"
-                Content="Lock Pan and Zoom for Current Sheet"
+                Content="Lock Pan for Current Sheet"
                 DockPanel.Dock="Left"
-                ToolTip="Toggles the ability to pan and zoom. Useful for creating a nice UI." />
+                ToolTip="Toggles the ability to pan on the current sheet. Useful for using a sheet as a nice UI." />
+            <Button
+                Click="ToggleZoomLockButtonClick"
+                Content="Lock Zoom for Current Sheet"
+                DockPanel.Dock="Left"
+                ToolTip="Toggles the ability to zoom on the current sheet. Useful for using a sheet as a nice UI." />
             <ToggleButton
                 Content="Highlight Populate Cell Dependencies of Selected Cell"
                 DockPanel.Dock="Left"

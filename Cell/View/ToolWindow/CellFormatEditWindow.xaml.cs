@@ -16,10 +16,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 220;
-
-        public override double MinimumWidth => 260;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("╾╼", () => CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled = !CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
             ];

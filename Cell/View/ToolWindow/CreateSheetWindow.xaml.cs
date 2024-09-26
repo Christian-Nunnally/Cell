@@ -11,10 +11,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 150;
-
-        public override double MinimumWidth => 300;
-
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             CreateSheetWindowViewModel.AddNewSheet();

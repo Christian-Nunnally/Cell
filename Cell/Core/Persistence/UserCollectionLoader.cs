@@ -32,7 +32,7 @@ namespace Cell.Persistence
 
         public ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
 
-        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName)
+        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName = "")
         {
             var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
             var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);

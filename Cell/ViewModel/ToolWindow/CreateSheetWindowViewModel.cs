@@ -27,6 +27,10 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override double DefaultHeight => 150;
+
+        public override double DefaultWidth => 300;
+
         public string InitialRows
         {
             get => _initialRows.ToString();

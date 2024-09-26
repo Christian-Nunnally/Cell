@@ -30,7 +30,7 @@ namespace Cell.Persistence
             function.Model.PropertyChanged += OnPluginFunctionPropertyChanged;
         }
 
-        public PluginFunction CreateFunction(string space, string name, string code)
+        public PluginFunction CreateFunction(string space, string name, string code = "")
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
@@ -58,7 +58,7 @@ namespace Cell.Persistence
         public PluginFunction GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
-            return CreateFunction(space, name, string.Empty);
+            return CreateFunction(space, name);
         }
 
         public PluginFunctionModel LoadFunction(string file)

@@ -27,6 +27,14 @@ namespace Cell.ViewModel.ToolWindow
             _userCollectionLoader = userCollectionLoader;
         }
 
+        public override double MinimumHeight => 150;
+
+        public override double MinimumWidth => 300;
+
+        public override double DefaultHeight => 300;
+
+        public override double DefaultWidth => 600;
+
         public string CollectionItemListBoxFilterText
         {
             get => _collectionItemListBoxFilterText; set

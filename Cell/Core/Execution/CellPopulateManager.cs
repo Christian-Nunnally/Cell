@@ -137,6 +137,7 @@ namespace Cell.Execution
 
         private void ResolveLocationDependenciesForCell(CellModel cell, PluginFunction function)
         {
+            UnsubscribeFromAllLocationUpdates(cell);
             var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
             foreach (var locationDependency in function.LocationDependencies)
             {
@@ -254,8 +255,6 @@ namespace Cell.Execution
             var _ = function.CompiledMethod;
 
             UntrackCollectionReferences(cell);
-            UnsubscribeFromAllLocationUpdates(cell);
-            UnsubscribeFromAllCollectionUpdates(cell);
             ResolveLocationDependenciesForCell(cell, function);
             ResolveCollectionDependenciesForCell(cell, function);
         }

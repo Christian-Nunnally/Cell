@@ -10,10 +10,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 200;
-
-        public override double MinimumWidth => 200;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new("Example", () => {})
         ];

@@ -16,15 +16,10 @@ namespace Cell.View.ToolWindow
         private CompletionWindow? completionWindow;
         public CodeEditorWindow(CodeEditorWindowViewModel viewModel) : base(viewModel)
         {
-            CodeEditorWindowViewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
         }
-
-        public override double MinimumHeight => 400;
-
-        public override double MinimumWidth => 400;
 
         public override List<CommandViewModel> ToolBarCommands =>
         [
@@ -38,6 +33,7 @@ namespace Cell.View.ToolWindow
         public override void HandleBeingClosed()
         {
             base.HandleBeingClosed();
+            CodeEditorWindowViewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
             textEditor.TextArea.TextEntering -= OnTextEntering;
             textEditor.TextArea.TextEntered -= OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
@@ -46,6 +42,9 @@ namespace Cell.View.ToolWindow
         public override void HandleBeingShown()
         {
             base.HandleBeingClosed();
+            textEditor.Text = CodeEditorWindowViewModel.UserFriendlyCodeString;
+            _isDirty = false;
+            CodeEditorWindowViewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;

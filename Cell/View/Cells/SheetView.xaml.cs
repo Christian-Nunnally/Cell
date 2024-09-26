@@ -2,24 +2,30 @@
 using Cell.View.Application;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.View.Cells
 {
-    /// <summary>
-    /// Interaction logic for SheetView.xaml
-    /// </summary>
     public partial class SheetView : UserControl
     {
         private CellViewModel? _currentCellMouseIsOver;
         private PanAndZoomCanvas? _panAndZoomCanvas;
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
-        public SheetView()
+        public SheetView(SheetViewModel sheetViewModel)
         {
+            DataContext = sheetViewModel;
             InitializeComponent();
+        }
+
+        private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_panAndZoomCanvas == null) return;
+            if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
+            else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
         }
 
         public bool IsPanningEnabled
@@ -27,7 +33,20 @@ namespace Cell.View.Cells
             get => _panAndZoomCanvas?.IsPanningEnabled ?? false;
             set
             {
-                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsPanningEnabled = value;
+                if (_panAndZoomCanvas != null)
+                {
+                    _panAndZoomCanvas.IsPanningEnabled = value;
+                    _panAndZoomCanvas.IsLockedToCenter = value;
+                }
+            }
+        }
+
+        public bool IsZoomingEnabled
+        {
+            get => _panAndZoomCanvas?.IsZoomingEnabled ?? false;
+            set
+            {
+                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsZoomingEnabled = value;
             }
         }
 
@@ -147,6 +166,9 @@ namespace Cell.View.Cells
         {
             _panAndZoomCanvas = sender as PanAndZoomCanvas;
             if (_panAndZoomCanvas == null) return;
+            _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
+            _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+            SheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
         }
     }
 }

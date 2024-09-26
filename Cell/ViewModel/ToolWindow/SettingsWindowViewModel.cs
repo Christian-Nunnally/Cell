@@ -16,6 +16,14 @@ namespace Cell.ViewModel.ToolWindow
 
         public override string ToolWindowTitle => "Settings";
 
+        public override double DefaultHeight => 380;
+
+        public override double DefaultWidth => 350;
+
+        public override double MinimumHeight => 100;
+
+        public override double MinimumWidth => 100;
+
         public void RestoreFromBackup()
         {
             ApplicationViewModel.Instance.BackupManager.CreateBackup("PreRestore");

@@ -39,7 +39,7 @@ namespace Cell.Execution
 
         private void ListenToLocationsThatChangeTheReferencedCollection()
         {
-            //_getTextChangesAtLocationNotifier.UnsubscribeFromAllLocations(_cellSpecificCollectionReferenceInvalidator);
+            _getTextChangesAtLocationNotifier.UnsubscribeFromAllLocations(_cellSpecificCollectionReferenceInvalidator);
             var locationsToListenTo = _underlyingGenericCollectionReference.GetLocationsThatWillInvalidateCollectionNameForCell(_cell);
             foreach (var location in locationsToListenTo)
             {

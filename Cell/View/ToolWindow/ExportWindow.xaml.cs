@@ -11,10 +11,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 200;
-
-        public override double MinimumWidth => 200;
-
         private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
         {
             var sheetName = ExportWindowViewModel.SheetNameToExport;

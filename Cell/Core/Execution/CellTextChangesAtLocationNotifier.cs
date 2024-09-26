@@ -59,7 +59,12 @@ namespace Cell.Execution
         {
             var (SheetName, Row, Column) = Utilities.GetLocationFromUnqiueLocationString(locationString);
             var cell = _cellTracker.GetCell(SheetName, Row, Column);
-            if (cell is not null) cell.PropertyChanged += TrackedCellPropertyChanged;
+            if (cell is not null)
+            {
+                cell.PropertyChanged += TrackedCellPropertyChanged;
+                // Ensure anyone already listening to this location is updated because now a cell exists here.
+                _subscriberNotifier.NotifySubscribers(locationString);
+            }
             else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
         }
 

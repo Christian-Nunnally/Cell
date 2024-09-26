@@ -28,6 +28,10 @@ namespace Cell.ViewModel.ToolWindow
             _cellTracker = cellTracker;
         }
 
+        public override double MinimumHeight => 220;
+
+        public override double MinimumWidth => 260;
+
         public string BackgroundColor
         {
             get => CellStyleToDisplay.BackgroundColor;

@@ -157,5 +157,13 @@ namespace Cell.ViewModel.ToolWindow
         {
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
         }
+
+        public override double DefaultHeight => 220;
+
+        public override double DefaultWidth => 500;
+
+        public override double MinimumHeight => 200;
+
+        public override double MinimumWidth => 250;
     }
 }

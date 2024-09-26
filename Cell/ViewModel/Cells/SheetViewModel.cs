@@ -122,25 +122,6 @@ namespace Cell.ViewModel.Cells
             HighlightedCellViewModels.Add(cellToHighlight);
         }
 
-        public void MoveSelection(int columnOffset, int rowOffset)
-        {
-            if (SelectedCellViewModel is null) return;
-            if (columnOffset > 0) columnOffset += SelectedCellViewModel.Model.CellsMergedToRight();
-            if (rowOffset > 0) rowOffset += SelectedCellViewModel.Model.CellsMergedBelow();
-            var cellToSelect = CellViewModels.FirstOrDefault(x => x.Column == SelectedCellViewModel.Column + columnOffset && x.Row == SelectedCellViewModel.Row + rowOffset);
-            if (cellToSelect is null) return;
-            CellSelector.UnselectAllCells();
-            CellSelector.SelectCell(cellToSelect.Model);
-        }
-
-        public void MoveSelectionDown() => MoveSelection(0, 1);
-
-        public void MoveSelectionLeft() => MoveSelection(-1, 0);
-
-        public void MoveSelectionRight() => MoveSelection(1, 0);
-
-        public void MoveSelectionUp() => MoveSelection(0, -1);
-
         public void ReinstantiateCellsViewModel(CellViewModel cellViewModel)
         {
             RemoveCellViewModel(cellViewModel.Model);

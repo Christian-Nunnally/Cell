@@ -22,6 +22,14 @@ namespace Cell.ViewModel.ToolWindow
             ClearBuffer();
         }
 
+        public override double MinimumHeight => 100;
+
+        public override double MinimumWidth => 100;
+
+        public override double DefaultHeight => 400;
+
+        public override double DefaultWidth => 400;
+
         public override void HandleBeingShown()
         {
             Logger.Instance.LogAdded += AddLog;

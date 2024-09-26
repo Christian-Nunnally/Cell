@@ -18,10 +18,6 @@ namespace Cell.View.ToolWindow
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
         }
 
-        public override double MinimumHeight => 300;
-
-        public override double MinimumWidth => 600;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new CommandViewModel("New Collection", CollectionManagerWindowViewModel.OpenCreateCollectionWindow),
             ];

@@ -12,10 +12,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 380;
-
-        public override double MinimumWidth => 350;
-
         private SettingsWindowViewModel SettingsWindowViewModel => (SettingsWindowViewModel)ToolViewModel;
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
@@ -79,6 +75,15 @@ namespace Cell.View.ToolWindow
             activeSheetView.PanCanvasTo(-((ApplicationViewModel.Instance.ApplicationWindowWidth / 2) - (activeSheetView.SheetViewModel.SheetWidth / 2)), -((ApplicationViewModel.Instance.ApplicationWindowHeight / 2) - (activeSheetView.SheetViewModel.SheetHeight / 2)));
             activeSheetView.ZoomCanvasTo(new Point(0, 0), 1);
             activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
+        }
+
+        private void ToggleZoomLockButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button) return;
+            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
+            if (activeSheetView is null) return;
+            activeSheetView.PanCanvasTo(-((ApplicationViewModel.Instance.ApplicationWindowWidth / 2) - (activeSheetView.SheetViewModel.SheetWidth / 2)), -((ApplicationViewModel.Instance.ApplicationWindowHeight / 2) - (activeSheetView.SheetViewModel.SheetHeight / 2)));
+            activeSheetView.IsZoomingEnabled = !activeSheetView.IsZoomingEnabled;
         }
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)

@@ -14,6 +14,14 @@ namespace Cell.ViewModel.ToolWindow
             _sheetTracker = sheetTracker;
         }
 
+        public override double MinimumHeight => 100;
+
+        public override double MinimumWidth => 200;
+
+        public override double DefaultHeight => 300;
+
+        public override double DefaultWidth => 400;
+
         private void SheetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => RefreshSheetsList();
 
         public string SelectedSheetName { get; set; } = string.Empty;

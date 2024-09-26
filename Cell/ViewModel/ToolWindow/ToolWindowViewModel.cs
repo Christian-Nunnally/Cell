@@ -13,5 +13,13 @@ namespace Cell.ViewModel.ToolWindow
         public virtual void HandleBeingShown()
         {
         }
+
+        public virtual double MinimumHeight => DefaultHeight;
+
+        public virtual double MinimumWidth => DefaultWidth;
+
+        public virtual double DefaultHeight { get; } = 200;
+
+        public virtual double DefaultWidth { get; } = 200;
     }
 }

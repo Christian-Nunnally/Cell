@@ -16,6 +16,14 @@ namespace Cell.ViewModel.ToolWindow
 
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
+        public override double DefaultHeight => 200;
+
+        public override double DefaultWidth => 200;
+
+        public override double MinimumHeight => 100;
+
+        public override double MinimumWidth => 100;
+
         public CellModel CellToDisplay
         {
             get => _cellToDisplay;

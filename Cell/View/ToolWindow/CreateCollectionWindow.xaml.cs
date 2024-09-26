@@ -10,10 +10,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 250;
-
-        public override double MinimumWidth => 350;
-
         private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             CreateCollectionWindowViewModel.AddCurrentCollection();

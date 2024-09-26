@@ -2,6 +2,7 @@
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
@@ -14,11 +15,7 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 300;
-
-        public override double MinimumWidth => 300;
-
-        private void DeleteFunctionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void DeleteFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.DataContext is PluginFunction function)
             {
@@ -35,7 +32,7 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void EditFunctionFromCellsContextButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void EditFunctionFromCellsContextButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
@@ -47,7 +44,7 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void GoToCellButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void GoToCellButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
@@ -55,7 +52,7 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void RemoveFunctionReferenceFromCellButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void RemoveFunctionReferenceFromCellButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
@@ -76,12 +73,8 @@ namespace Cell.View.ToolWindow
 
         public override List<CommandViewModel> ToolBarCommands => 
         [
-            new CommandViewModel("New Function", OpenCreateFunctionWindow) { ToolTip = "Open the 'create function' window" }
+            new CommandViewModel("New Populate", FunctionManagerWindowViewModel.CreateNewPopulateFunction) { ToolTip = "Create a new function that returns a value" },
+            new CommandViewModel("New Trigger", FunctionManagerWindowViewModel.CreateNewTriggerFunction) { ToolTip = "Create a new function that does not return a value" },
         ];
-
-        private void OpenCreateFunctionWindow()
-        {
-            DialogFactory.ShowDialog("Not implemented :)", "Not implemented :)");
-        }
     }
 }

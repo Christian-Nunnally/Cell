@@ -15,6 +15,10 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override double DefaultHeight => 180;
+
+        public override double DefaultWidth => 180;
+
         public override string ToolWindowTitle => "Undo/Redo Stack";
 
         public ObservableCollection<string> UndoStack { get; set; } = [];

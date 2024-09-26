@@ -38,11 +38,7 @@ namespace Cell.Data
 
         public List<CellModel> GetCellModelsForSheet(string sheetName)
         {
-            if (_cellsBySheetMap.TryGetValue(sheetName, out var cellDictionary))
-            {
-                return [.. cellDictionary.Values];
-            }
-            return [];
+            return _cellsBySheetMap.TryGetValue(sheetName, out var cellDictionary) ? ([.. cellDictionary.Values]) : ([]);
         }
 
         public void RemoveCell(CellModel cellModel)
@@ -87,7 +83,7 @@ namespace Cell.Data
             }
         }
 
-        private void CellModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not CellModel model) return;
             if (e.PropertyName == nameof(CellModel.Row) || e.PropertyName == nameof(CellModel.Column) || e.PropertyName == nameof(CellModel.SheetName))

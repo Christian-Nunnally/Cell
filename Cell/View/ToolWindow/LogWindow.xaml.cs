@@ -12,10 +12,6 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        public override double MinimumHeight => 400;
-
-        public override double MinimumWidth => 400;
-
         public override List<CommandViewModel> ToolBarCommands => [
             new("Clear", new RelayCommand(x => LogWindowViewModel.ClearBuffer()))
         ];

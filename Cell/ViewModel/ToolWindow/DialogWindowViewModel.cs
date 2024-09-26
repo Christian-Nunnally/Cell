@@ -15,6 +15,10 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        public override double DefaultHeight => 160;
+
+        public override double DefaultWidth => 250;
+
         public override string ToolWindowTitle { get; set; }
 
         public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];

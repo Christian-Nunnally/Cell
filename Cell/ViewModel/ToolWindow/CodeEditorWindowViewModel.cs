@@ -23,6 +23,14 @@ namespace Cell.ViewModel.ToolWindow
             DisplayResult(functionToBeEdited.CompileResult);
         }
 
+        public override double MinimumHeight => 200;
+
+        public override double MinimumWidth => 200;
+
+        public override double DefaultHeight => 400;
+
+        public override double DefaultWidth => 400;
+
         public CellModel? CellContext { get; private set; }
 
         public PluginFunction FunctionBeingEdited { get; private set; }
@@ -100,6 +108,7 @@ namespace Cell.ViewModel.ToolWindow
             _lastCompileResult = result;
             ResultString = result.ExecutionResult ?? "";
             ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
+            if (result.ReturnedObject is not null) ResultString = result.ReturnedObject.ToString();
             NotifyPropertyChanged(nameof(ResultString));
             NotifyPropertyChanged(nameof(ResultStringColor));
             NotifyPropertyChanged(nameof(ResultColumnWidth));

@@ -71,7 +71,7 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -92,7 +92,7 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -112,7 +112,7 @@ namespace CellTest
         public void CollectionWithSortFunction_ItemAdded_ItemAddedToCollection()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -129,7 +129,7 @@ namespace CellTest
         public void CollectionWithSortFunction_TwoItemsAdded_ItemAddedToCollectionAndSorted()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -149,8 +149,8 @@ namespace CellTest
         public void CollectionWithSortFunctionAndTwoItems_SortFunctionChanged_ItemOrderChanged()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
-            var sortFunction2 = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName + "2", "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
+            var sortFunction2 = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName + "2");
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var sortCode2 = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
@@ -174,7 +174,7 @@ namespace CellTest
         public void CollectionWithSortFunctionAndTwoItems_SortPropertyChangedOnOneItem_ItemSortUpdated()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -196,7 +196,7 @@ namespace CellTest
         public void CollectionWithReversedSortFunction_TwoItemsAdded_ItemAddedToCollectionAndSorted()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -216,7 +216,7 @@ namespace CellTest
         public void CollectionWithTwoItems_SortedCollectionCreated_ItemsAreSortedInSortedCollection()
         {
             var testing = CreateTestInstance();
-            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName, "");
+            var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);

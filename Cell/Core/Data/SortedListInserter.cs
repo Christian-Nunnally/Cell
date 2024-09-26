@@ -20,7 +20,7 @@
             {
                 int mid = low + (high - low) / 2;
                 var midValue = _getSortValue(mid);
-                if (midValue is null) midValue = 0;
+                midValue ??= 0;
 
                 int comparison = newItemValue.CompareTo(midValue);
 

@@ -13,10 +13,6 @@ namespace Cell.View.ToolWindow
             DataContext = viewModel;
         }
 
-        public virtual double MinimumHeight { get; }
-
-        public virtual double MinimumWidth { get; }
-
         public Action? RequestClose { get; set; }
 
         public virtual List<CommandViewModel> ToolBarCommands => [];

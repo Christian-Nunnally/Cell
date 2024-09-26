@@ -22,6 +22,10 @@ namespace Cell.ViewModel.ToolWindow
             SelectedItemType = PluginTypeNames.FirstOrDefault(string.Empty);
         }
 
+        public override double DefaultHeight => 250;
+
+        public override double DefaultWidth => 350;
+
         public ObservableCollection<string> CollectionBaseOptions { get; set; }
 
         public Visibility CollectionBaseSettingVisibility { get; private set; } = Visibility.Collapsed;
@@ -69,7 +73,7 @@ namespace Cell.ViewModel.ToolWindow
                 var collectionType = SelectedItemType;
                 if (string.IsNullOrEmpty(collectionType)) return;
 
-                _userCollectionLoader.CreateCollection(collectionName, collectionType, string.Empty);
+                _userCollectionLoader.CreateCollection(collectionName, collectionType);
             }
         }
     }

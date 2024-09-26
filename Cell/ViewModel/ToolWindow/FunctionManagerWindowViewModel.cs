@@ -25,6 +25,14 @@ namespace Cell.ViewModel.ToolWindow
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
+        public override double MinimumHeight => 200;
+
+        public override double MinimumWidth => 200;
+
+        public override double DefaultHeight => 400;
+
+        public override double DefaultWidth => 550;
+
         public string FilterCollection
         {
             get => _filterCollection; set
@@ -193,6 +201,32 @@ namespace Cell.ViewModel.ToolWindow
             if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
             return true;
+        }
+
+        public void CreateNewPopulateFunction()
+        {
+            var index = 0;
+            var newPopulateFunctionName = "NewPopulateFunction";
+            var existingNames = _pluginFunctionLoader.ObservableFunctions.Select(x => x.Model.Name).ToList();
+            while (existingNames.Any(x => x == newPopulateFunctionName))
+            {
+                index += 1;
+                newPopulateFunctionName += $"NewPopulateFunction{index}";
+            }
+            _pluginFunctionLoader.CreateFunction("object", newPopulateFunctionName, "return \"Hello world\";");
+        }
+
+        public void CreateNewTriggerFunction()
+        {
+            var index = 0;
+            var newTriggerFunctionName = "NewTriggerFunction";
+            var existingNames = _pluginFunctionLoader.ObservableFunctions.Select(x => x.Model.Name).ToList();
+            while (existingNames.Any(x => x == newTriggerFunctionName))
+            {
+                index += 1;
+                newTriggerFunctionName += $"NewTriggerFunction{index}";
+            }
+            _pluginFunctionLoader.CreateFunction("void", newTriggerFunctionName, string.Empty);
         }
     }
 }
