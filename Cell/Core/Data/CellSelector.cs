@@ -6,14 +6,14 @@ namespace Cell.Data
     public class CellSelector
     {
         private readonly CellTracker _cellTracker;
-        private bool _isSelectingDisabled;
+        private bool _isSelectingEnabled = true;
 
         public ObservableCollection<CellModel> SelectedCells { get; } = [];
-        public bool IsSelectingDisabled
+        public bool IsSelectingEnabled
         {
-            get => _isSelectingDisabled; internal set
+            get => _isSelectingEnabled; internal set
             {
-                _isSelectingDisabled = value;
+                _isSelectingEnabled = value;
                 UnselectAllCells();
             }
         }
@@ -25,7 +25,7 @@ namespace Cell.Data
 
         public void SelectCell(CellModel cell)
         {
-            if (IsSelectingDisabled) return;
+            if (!IsSelectingEnabled) return;
             SelectedCells.Add(cell);
         }
 

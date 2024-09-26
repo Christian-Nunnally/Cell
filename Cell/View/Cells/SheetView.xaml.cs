@@ -40,15 +40,6 @@ namespace Cell.View.Cells
             }
         }
 
-        public bool IsZoomingEnabled
-        {
-            get => _panAndZoomCanvas?.IsZoomingEnabled ?? false;
-            set
-            {
-                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsZoomingEnabled = value;
-            }
-        }
-
         public bool IsLockedToCenter
         {
             get => _panAndZoomCanvas?.IsLockedToCenter ?? true;

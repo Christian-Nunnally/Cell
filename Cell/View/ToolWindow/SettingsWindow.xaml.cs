@@ -75,14 +75,6 @@ namespace Cell.View.ToolWindow
             activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
 
-        private void ToggleZoomLockButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button) return;
-            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
-            if (activeSheetView is null) return;
-            activeSheetView.IsZoomingEnabled = !activeSheetView.IsZoomingEnabled;
-        }
-
         private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
@@ -91,20 +83,15 @@ namespace Cell.View.ToolWindow
             activeSheetView.IsLockedToCenter = !activeSheetView.IsLockedToCenter;
         }
 
-        private void ToggleMouseOverCellHighlight(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button) return;
-            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
-            if (activeSheetViewModel is null) return;
-            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = !activeSheetViewModel.IsCellHighlightOnMouseOverEnabled;
-        }
-
         private void ToggleAbilityToSelectCells(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
             var cellSelector = ApplicationViewModel.Instance.CellSelector;
+            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
             if (cellSelector is null) return;
-            cellSelector.IsSelectingDisabled = !cellSelector.IsSelectingDisabled;
+            if (activeSheetViewModel is null) return;
+            cellSelector.IsSelectingEnabled = !cellSelector.IsSelectingEnabled;
+            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = cellSelector.IsSelectingEnabled;
         }
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)

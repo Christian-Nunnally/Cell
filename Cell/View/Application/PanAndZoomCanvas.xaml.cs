@@ -46,8 +46,6 @@ namespace Cell.View.Application
 
         public bool IsPanningEnabled { get; set; } = true;
 
-        public bool IsZoomingEnabled { get; set; } = true;
-
         public bool IsLockedToCenter
         {
             get => _isLockedToCenter; set
@@ -202,7 +200,6 @@ namespace Cell.View.Application
 
         private void OnPanAndZoomCanvasMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!IsZoomingEnabled) return;
             double scaleFactor = Zoomfactor;
             if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
             if (IsPanningEnabled) ZoomCanvas(e.GetPosition(this), scaleFactor);

@@ -18,20 +18,10 @@
                 DockPanel.Dock="Left"
                 ToolTip="Toggles the ability to pan on the current sheet. Useful for using a sheet as a nice UI." />
             <Button
-                Click="ToggleZoomLockButtonClick"
-                Content="Lock Zoom for Current Sheet"
-                DockPanel.Dock="Left"
-                ToolTip="Toggles the ability to zoom on the current sheet. Useful for using a sheet as a nice UI." />
-            <Button
                 Click="ToggleCenterLockButtonClick"
                 Content="Snap position of sheet to center"
                 DockPanel.Dock="Left"
                 ToolTip="Toggles auto snapping to center" />
-            <Button
-                Click="ToggleMouseOverCellHighlight"
-                Content="Toggle highlighting the moused over cell"
-                DockPanel.Dock="Left"
-                ToolTip="Toggles whether the cell the mouse is under is highlighted. Disabling makes using UIs nicer." />
             <Button
                 Click="ToggleAbilityToSelectCells"
                 Content="Toggle ability to select cells"
