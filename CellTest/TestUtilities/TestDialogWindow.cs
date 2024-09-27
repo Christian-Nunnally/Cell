@@ -1,8 +1,10 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.View.ToolWindow;
+using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
 
 namespace CellTest.TestUtilities
 {
-    public class TestDialogWindow : IDialogWindow
+    public class TestDialogWindow : ResizableToolWindow, IDialogWindow
     {
         private List<CommandViewModel> _actions = [];
         private static readonly Stack<TestDialogWindow> _instances = new();
@@ -14,7 +16,7 @@ namespace CellTest.TestUtilities
 
         public bool WasShown { get; set; } = false;
 
-        public TestDialogWindow(int selectedAction = -1)
+        public TestDialogWindow(int selectedAction = -1) : base(new DialogWindowViewModel("", "", []))
         {
             DialogFactory.DialogFactoryFunction = GetInstance;
             _selectedAction = selectedAction;

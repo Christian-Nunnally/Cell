@@ -38,7 +38,7 @@ namespace CellTest.ViewModel.Cell.Types
             _sheetModel = new SheetModel("sheet");
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _applicationSettings = new ApplicationSettings();
-            _cellSelector = new CellSelector();
+            _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new RowCellViewModel(_cellModel, _sheetViewModel);

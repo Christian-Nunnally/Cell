@@ -43,7 +43,7 @@ namespace CellTest.ViewModel.Application
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _backupManager = new BackupManager(_persistenceManager, _backupDirectory);
-            _cellSelector = new CellSelector();
+            _cellSelector = new CellSelector(_cellTracker);
             _applicationSettings = new ApplicationSettings();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(_sheetTracker);
