@@ -1,18 +1,19 @@
 ﻿using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class ListCellViewModel : CellViewModel
+    public class ListCellViewModel : CellViewModel, ISubscriber
     {
+        private readonly CollectionChangeNotifier _collectionChangedNotifier;
         public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
+            _collectionChangedNotifier = new CollectionChangeNotifier(sheetViewModel.UserCollectionLoader);
             if (CollectionName == string.Empty) return;
-            CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+            _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
             UpdateList();
         }
 
@@ -21,19 +22,18 @@ namespace Cell.ViewModel.Cells.Types
             get => Model.GetStringProperty(nameof(CollectionName));
             set
             {
-                CellPopulateManager.UnsubscribeFromCollectionUpdates(this, CollectionName);
+                if (!string.IsNullOrEmpty(CollectionName)) _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
                 Model.SetStringProperty(nameof(CollectionName), value);
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrEmpty(CollectionName))
                 {
-                    CellPopulateManager.SubscribeToCollectionUpdates(this, CollectionName);
+                    _collectionChangedNotifier.SubscribeToCollectionUpdates(this, CollectionName);
                     UpdateList();
                 }
                 NotifyPropertyChanged(nameof(CollectionName));
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used in binding")]
-        public IEnumerable<string> CollectionNames => UserCollectionLoader.CollectionNames;
+        public IEnumerable<string> CollectionNames => ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames;
 
         public ObservableCollection<object> ListItems { get; set; } = [];
 
@@ -72,19 +72,24 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        internal void UpdateList()
+        public void Action()
+        {
+            UpdateList();
+        }
+
+        public void UpdateList()
         {
             ListItems.Clear();
-            var collection = UserCollectionLoader.GetCollection(CollectionName);
+            var collection = _sheetViewModel.UserCollectionLoader.GetCollection(CollectionName);
             if (collection == null) return;
-            if (!string.IsNullOrEmpty(PopulateFunctionName))
+            if (!string.IsNullOrEmpty(Model.PopulateFunctionName))
             {
                 int i = 0;
                 foreach (var item in collection.Items)
                 {
-                    var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, i++), Model);
-                    if (result.Result == null) continue;
-                    ListItems.Add(result.Result);
+                    var result = DynamicCellPluginExecutor.RunPopulate(_sheetViewModel.PluginFunctionLoader, new PluginContext(_sheetViewModel.CellTracker, _sheetViewModel.UserCollectionLoader, i++), Model);
+                    if (result.ExecutionResult == null) continue;
+                    ListItems.Add(result.ExecutionResult);
                     if (ListItems.Count >= MaxNumberOfItems) break;
                 }
             }

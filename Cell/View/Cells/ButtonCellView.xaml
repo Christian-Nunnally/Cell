@@ -8,7 +8,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             Command="{Binding ButtonClickedCommand}"
-            FontFamily="{Binding FontFamily}"
+            FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -36,10 +36,11 @@
                 Margin="3"
                 HorizontalAlignment="{Binding HorizontalAlignmentForView}"
                 VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
-                FontFamily="{Binding FontFamily}"
+                FontFamily="{Binding Font}"
                 FontSize="{Binding FontSize}"
                 FontStyle="{Binding FontStyleForView}"
                 FontWeight="{Binding FontWeightForView}"
+                Foreground="{Binding ForegroundColor}"
                 Text="{Binding Path=Text}"
                 TextAlignment="{Binding TextAlignmentForView}"
                 TextDecorations="{Binding TextDecorationsForView}" />

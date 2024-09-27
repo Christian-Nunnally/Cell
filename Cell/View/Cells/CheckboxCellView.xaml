@@ -14,7 +14,7 @@
             BorderBrush="{Binding ContentBorderColor}"
             BorderThickness="{Binding ContentBorderThickness}"
             Command="{Binding CheckboxCheckedCommand}"
-            FontFamily="{Binding FontFamily}"
+            FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             Foreground="{Binding ForegroundColor}"
             IsChecked="{Binding IsChecked, Mode=TwoWay}" />

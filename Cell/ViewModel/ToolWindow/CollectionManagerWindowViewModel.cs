@@ -2,176 +2,212 @@
 using Cell.Data;
 using Cell.Model.Plugin;
 using Cell.Persistence;
-using Cell.View.ToolWindow;
-using System.Collections.ObjectModel;
+using Cell.ViewModel.Application;
+using System.Collections.Specialized;
 using System.Text.Json;
-using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class CollectionManagerWindowViewModel : ResizeableToolWindowViewModel
+    public class CollectionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly JsonSerializerOptions _jsonDeserializerOptions = new()
         {
             WriteIndented = true
         };
-        private bool isBaseOnCheckBoxChecked;
-        private UserCollection? selectedCollection;
-        private PluginModel? selectedItem;
-        private string selectedItemSerialized = string.Empty;
-        public CollectionManagerWindowViewModel(ObservableCollection<UserCollection> _collections)
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private string _collectionItemListBoxFilterText = string.Empty;
+        private string _collectionListBoxFilterText = string.Empty;
+        private bool _isEditJsonTextBoxVisible;
+        private bool _isSaveItemJsonButtonVisible;
+        private UserCollection? _selectedCollection;
+        private PluginModel? _selectedItem;
+        private string _selectedItemSerialized = string.Empty;
+        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
-            Collections = _collections;
-            CollectionBaseOptions = new ObservableCollection<string>(Collections.Select(x => x.Name))
-            {
-                "---"
-            };
-            SelectedItemType = PluginTypeNames.FirstOrDefault(string.Empty);
+            _userCollectionLoader = userCollectionLoader;
         }
 
-        public ObservableCollection<string> CollectionBaseOptions { get; set; }
+        public override double MinimumHeight => 150;
 
-        public Visibility CollectionBaseSettingVisibility { get; private set; } = Visibility.Collapsed;
+        public override double MinimumWidth => 300;
 
-        public ObservableCollection<UserCollection> Collections { get; set; }
+        public override double DefaultHeight => 300;
 
-        public Visibility CollectionTypeSettingVisibility { get; private set; } = Visibility.Visible;
+        public override double DefaultWidth => 600;
 
-        public bool IsBaseOnCheckBoxChecked
+        public string CollectionItemListBoxFilterText
         {
-            get => isBaseOnCheckBoxChecked; set
+            get => _collectionItemListBoxFilterText; set
             {
-                isBaseOnCheckBoxChecked = value;
-                CollectionBaseSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Visible : Visibility.Collapsed;
-                CollectionTypeSettingVisibility = isBaseOnCheckBoxChecked ? Visibility.Collapsed : Visibility.Visible;
-                NotifyPropertyChanged(nameof(CollectionBaseSettingVisibility));
-                NotifyPropertyChanged(nameof(CollectionTypeSettingVisibility));
+                if (_collectionItemListBoxFilterText == value) return;
+                _collectionItemListBoxFilterText = value;
+                NotifyPropertyChanged(nameof(CollectionItemListBoxFilterText));
+                NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
             }
         }
 
-        public ObservableCollection<PluginModel> ItemsInSelectedCollection { get; set; } = [];
+        public string CollectionListBoxFilterText
+        {
+            get => _collectionListBoxFilterText; set
+            {
+                if (_collectionListBoxFilterText == value) return;
+                _collectionListBoxFilterText = value;
+                NotifyPropertyChanged(nameof(CollectionListBoxFilterText));
+                NotifyPropertyChanged(nameof(FilteredCollections));
+            }
+        }
+
+        public IEnumerable<UserCollection> FilteredCollections => _userCollectionLoader.ObservableCollections.Where(x => x.Name.Contains(CollectionListBoxFilterText));
+
+        public IEnumerable<PluginModel> FilteredItemsInSelectedCollection => _selectedCollection?.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
+
+        public bool IsEditJsonTextBoxVisible
+        {
+            get => _isEditJsonTextBoxVisible; set
+            {
+                if (_isEditJsonTextBoxVisible == value) return;
+                _isEditJsonTextBoxVisible = value;
+                NotifyPropertyChanged(nameof(IsEditJsonTextBoxVisible));
+            }
+        }
+
+        public bool IsSaveItemJsonButtonVisible
+        {
+            get => _isSaveItemJsonButtonVisible; set
+            {
+                if (_isSaveItemJsonButtonVisible == value) return;
+                _isSaveItemJsonButtonVisible = value;
+                NotifyPropertyChanged(nameof(IsSaveItemJsonButtonVisible));
+            }
+        }
 
         public string NewCollectionBaseName { get; set; } = string.Empty;
 
         public string NewCollectionName { get; set; } = string.Empty;
 
-        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
-
         public UserCollection? SelectedCollection
         {
-            get => selectedCollection; set
+            get => _selectedCollection; set
             {
-                if (selectedCollection == value) return;
-                if (selectedCollection != null)
+                if (_selectedCollection == value) return;
+                if (_selectedCollection != null)
                 {
-                    selectedCollection.ItemAdded -= SelectedCollectionChanged;
-                    selectedCollection.ItemRemoved -= SelectedCollectionChanged;
-                    selectedCollection.ItemPropertyChanged -= SelectedCollectionChanged;
-                    selectedCollection.OrderChanged -= SelectedCollectionOrderChanged;
+                    _selectedCollection.ItemAdded -= SelectedCollectionChanged;
+                    _selectedCollection.ItemRemoved -= SelectedCollectionChanged;
+                    _selectedCollection.ItemPropertyChanged -= SelectedCollectionChanged;
+                    _selectedCollection.OrderChanged -= SelectedCollectionOrderChanged;
                 }
 
-                selectedCollection = value;
-                RefreshItemsForSelectedCollection();
+                _selectedCollection = value;
+                SelectedItem = null;
 
-                if (selectedCollection != null)
+                if (_selectedCollection != null)
                 {
-                    selectedCollection.ItemAdded += SelectedCollectionChanged;
-                    selectedCollection.ItemRemoved += SelectedCollectionChanged;
-                    selectedCollection.ItemPropertyChanged += SelectedCollectionChanged;
-                    selectedCollection.OrderChanged += SelectedCollectionOrderChanged;
+                    _selectedCollection.ItemAdded += SelectedCollectionChanged;
+                    _selectedCollection.ItemRemoved += SelectedCollectionChanged;
+                    _selectedCollection.ItemPropertyChanged += SelectedCollectionChanged;
+                    _selectedCollection.OrderChanged += SelectedCollectionOrderChanged;
                 }
+                NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
                 NotifyPropertyChanged(nameof(SelectedCollection));
+                NotifyPropertyChanged(nameof(IsEditJsonTextBoxVisible));
             }
         }
 
         public PluginModel? SelectedItem
         {
-            get => selectedItem;
+            get => _selectedItem;
             set
             {
-                if (selectedItem == value) return;
-                selectedItem = value;
-                if (selectedItem != null)
-                {
-                    selectedItemSerialized = JsonSerializer.Serialize(selectedItem, _jsonDeserializerOptions);
-                    NotifyPropertyChanged(nameof(SelectedItemSerialized));
-                }
-                else
-                {
-                    selectedItemSerialized = string.Empty;
-                }
+                if (_selectedItem == value) return;
+                _selectedItem = value;
+                _selectedItemSerialized = _selectedItem != null ? JsonSerializer.Serialize(_selectedItem, _jsonDeserializerOptions)[1..^1].Trim().Replace("\n  ", "\n") : string.Empty;
+                IsSaveItemJsonButtonVisible = false;
+                IsEditJsonTextBoxVisible = _selectedItem is not null;
+                NotifyPropertyChanged(nameof(SelectedItemSerialized));
             }
         }
 
         public string SelectedItemSerialized
         {
-            get => selectedItemSerialized;
+            get => _selectedItemSerialized;
             set
             {
-                if (selectedItemSerialized == value) return;
+                if (_selectedItemSerialized == value) return;
 
                 try
                 {
-                    var item = JsonSerializer.Deserialize<PluginModel>(value);
-                    if (item != null && selectedItem != null)
+                    var stringToDeserialize = value.StartsWith('{') ? value : $"{{\n{value}\n}}";
+                    var item = JsonSerializer.Deserialize<PluginModel>(stringToDeserialize);
+                    if (item != null && _selectedItem != null)
                     {
-                        item.CopyPublicProperties(selectedItem, ["ID"]);
-                        selectedItemSerialized = value;
+                        item.CopyPublicProperties(_selectedItem, ["ID"]);
+                        IsSaveItemJsonButtonVisible = false;
+                        _selectedItemSerialized = value.StartsWith('{') ? value[1..^1].Trim().Replace("\n  ", "\n") : value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));
                     }
                 }
                 catch (JsonException)
                 {
-                    DialogWindow.ShowDialog("Did not save", "Invalid json for item");
+                    DialogFactory.ShowDialog("Did not save", "Invalid json for item");
                 }
             }
         }
 
-        public string SelectedItemType { get; set; }
+        public override string ToolWindowTitle => "Collection Manager";
 
-        internal void AddCurrentCollection()
+        public void DeleteCollection(UserCollection collection)
         {
-            var collectionName = NewCollectionName;
-            if (string.IsNullOrEmpty(collectionName)) return;
-            if (Collections.Any(x => x.Name == collectionName)) return;
-
-            if (IsBaseOnCheckBoxChecked)
-            {
-                var basedOnCollection = NewCollectionBaseName;
-                if (string.IsNullOrEmpty(basedOnCollection)) return;
-
-                var baseCollection = Collections.FirstOrDefault(x => x.Name == basedOnCollection);
-                if (baseCollection == null) return;
-
-                UserCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Name);
-            }
-            else
-            {
-                var collectionType = SelectedItemType;
-                if (string.IsNullOrEmpty(collectionType)) return;
-
-                UserCollectionLoader.CreateCollection(collectionName, collectionType, string.Empty);
-            }
+            _userCollectionLoader.DeleteCollection(collection);
         }
 
-        private void RefreshItemsForSelectedCollection()
+        public override void HandleBeingClosed()
         {
-            ItemsInSelectedCollection.Clear();
-            if (selectedCollection == null) return;
-            foreach (var item in selectedCollection.Items)
-            {
-                ItemsInSelectedCollection.Add(item);
-            }
+            _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
+        }
+
+        public override void HandleBeingShown()
+        {
+            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
+        }
+
+        public void OpenCreateCollectionWindow()
+        {
+            var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionLoader);
+            ApplicationViewModel.Instance.ShowToolWindow(createCollectionViewModel);
+        }
+
+        public void RemoveItemFromSelectedCollection(PluginModel item)
+        {
+            SelectedCollection?.Remove(item);
+        }
+
+        internal bool CanDeleteCollection(UserCollection collection, out string reason)
+        {
+            reason = string.Empty;
+            var conflictingBase = _userCollectionLoader.ObservableCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
+            if (conflictingBase != null) reason = $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.";
+            return reason == string.Empty;
+        }
+
+        private void GlobalCollectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(FilteredCollections));
+        }
+
+        private void ItemsInSelectedCollectionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }
 
         private void SelectedCollectionChanged(UserCollection collection, PluginModel model)
         {
-            RefreshItemsForSelectedCollection();
+            NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }
 
         private void SelectedCollectionOrderChanged(UserCollection collection)
         {
-            RefreshItemsForSelectedCollection();
+            NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }
     }
 }

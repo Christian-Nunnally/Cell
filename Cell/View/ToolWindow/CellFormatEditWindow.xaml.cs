@@ -1,101 +1,42 @@
-﻿using Cell.Model;
-using Cell.Persistence;
-using Cell.View.Converters;
-using Cell.ViewModel.Cells;
+﻿using Cell.Common;
+using Cell.Model;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Xceed.Wpf.Toolkit;
-using Cell.ViewModel.Cells.Types.Special;
-using Cell.Common;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for EditCellPanel.xaml
-    /// </summary>
-    public partial class CellFormatEditWindow : UserControl, IToolWindow
+    public partial class CellFormatEditWindow : ResizableToolWindow
     {
-        public CellFormatEditWindow()
+        public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
+        public override List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("╾╼", () => CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled = !CellFormatEditWindowViewModel.IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
+            ];
 
-        public static void AddColorsToColorPicker(ColorPicker colorPicker, List<string> colors, float brightnessFactor)
+        private CellFormatEditWindowViewModel CellFormatEditWindowViewModel => (CellFormatEditWindowViewModel)ToolViewModel;
+
+        public static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
         {
             foreach (var color in colors)
             {
                 var adjustedColor = ColorAdjuster.AdjustBrightness(color, brightnessFactor);
-                colorPicker.AvailableColors.Add(new ColorItem(RGBHexColorConverter.ConvertHexStringToColor(adjustedColor), ""));
+                availableColors.Add(new ColorItem(ColorAdjuster.ConvertHexStringToColor(adjustedColor), adjustedColor));
             }
-        }
-
-        public string GetTitle()
-        {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
-            if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Format editor - {currentlySelectedCell.GetName()}";
-        }
-
-        public List<CommandViewModel> GetToolBarCommands() => [
-            //new CommandViewModel("void", new RelayCommand(x => true, x => {})),
-            ];
-
-        public bool HandleBeingClosed()
-        {
-            return true;
-        }
-
-        private static List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName)
-        {
-            var cells = new List<CellModel>();
-            for (var row = startRow; row <= endRow; row++)
-            {
-                for (var column = startColumn; column <= endColumn; column++)
-                {
-                    var cell = Data.CellTracker.Instance.GetCell(sheetName, row, column);
-                    if (cell is not null) cells.Add(cell);
-                }
-            }
-            return cells;
-        }
-
-        private static void MergeCells(List<CellViewModel> cells)
-        {
-            if (cells.Count < 2) return;
-            var leftmost = cells.Select(x => x.Column).Min();
-            var topmost = cells.Select(x => x.Row).Min();
-            var rightmost = cells.Select(x => x.Column).Max();
-            var bottommost = cells.Select(x => x.Row).Max();
-
-            var topLeftCell = cells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
-            if (topLeftCell is null) return;
-            var bottomRightCell = cells.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
-            if (bottomRightCell is null) return;
-
-            var sheetName = topLeftCell.Model.SheetName;
-            var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName);
-            if (cellsToMerge.Any(cell => cell.IsMerged())) return;
-            SetMergedWithToCellsId(cellsToMerge, topLeftCell);
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
-        }
-
-        private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellViewModel topLeftCell)
-        {
-            foreach (var cell in cellsToMerge) cell.MergedWith = topLeftCell.ID;
         }
 
         private void ChangeCellTypeCellClicked(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button) return;
             var cellTypeString = button.Content is Label label ? label.Content.ToString() : button.Content.ToString();
-            if (Enum.TryParse(cellTypeString, out CellType newType))
-            {
-                ApplicationViewModel.Instance.ChangeSelectedCellsType(newType);
-            }
+            if (Enum.TryParse(cellTypeString, out CellType newType)) CellFormatEditWindowViewModel.CellType = newType;
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
@@ -103,184 +44,147 @@ namespace Cell.View.ToolWindow
             if (sender is not ColorPicker colorPicker) return;
             var colors = new List<string> { "#9678b5", "#b272a1", "#c17188", "#c3776f", "#b8825c", "#a48f54", "#8a9b5c", "#6da471", "#50aa8f", "#3dadaf", "#4aadca", "#6fa9dc" };
             colorPicker.AvailableColors.Clear();
+            var availableColors = new ObservableCollection<ColorItem>();
             colorPicker.AvailableColorsSortingMode = ColorSortingMode.Alphabetical;
-            AddColorsToColorPicker(colorPicker, colors, 1.0f);
-            AddColorsToColorPicker(colorPicker, colors, .1f);
-            AddColorsToColorPicker(colorPicker, colors, 1.9f);
-        }
-
-        private void ComboBox_DropDownClosed(object sender, EventArgs e)
-        {
-        }
-
-        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
-        {
-            PersistenceManager.CreateBackup();
+            AddColorsToColorPicker(availableColors, colors, 1.9f);
+            AddColorsToColorPicker(availableColors, colors, 1.4f);
+            AddColorsToColorPicker(availableColors, colors, 1.0f);
+            AddColorsToColorPicker(availableColors, colors, .7f);
+            AddColorsToColorPicker(availableColors, colors, .5f);
+            AddColorsToColorPicker(availableColors, colors, .35f);
+            AddColorsToColorPicker(availableColors, colors, .27f);
+            AddColorsToColorPicker(availableColors, colors, .2f);
+            AddColorsToColorPicker(availableColors, colors, .15f);
+            AddColorsToColorPicker(availableColors, colors, .1f);
+            colorPicker.AvailableColors = availableColors;
         }
 
         private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheLeft();
+            CellFormatEditWindowViewModel.AddColumnToTheLeft();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<ColumnCellViewModel>(sender, out var cell)) return;
-            cell.AddColumnToTheRight();
+            CellFormatEditWindowViewModel.AddColumnToTheRight();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowAbove();
+            CellFormatEditWindowViewModel.AddRowAbove();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<RowCellViewModel>(sender, out var cell)) return;
-            cell.AddRowBelow();
+            CellFormatEditWindowViewModel.AddRowBelow();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
         {
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<ColumnCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
-                cell.DeleteColumn();
-            }
+            CellFormatEditWindowViewModel.DeleteColumns();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
         {
-            foreach (var cell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.OfType<RowCellViewModel>().ToList())
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnselectAllCells();
-                cell.DeleteRow();
-            }
+            CellFormatEditWindowViewModel.DeleteRows();
+            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var rows = selectedCells.Select(x => x.Row).Distinct().ToList();
-            foreach (var row in rows)
-            {
-                var cellsToMerge = selectedCells.Where(x => x.Row == row).ToList();
-                MergeCells(cellsToMerge);
-            }
+            CellFormatEditWindowViewModel.MergeCellsAcross();
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            MergeCells(selectedCells);
+            CellFormatEditWindowViewModel.MergeCells();
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
-            var columns = selectedCells.Select(x => x.Column).Distinct().ToList();
-            foreach (var column in columns)
-            {
-                var cellsToMerge = selectedCells.Where(x => x.Column == column).ToList();
-                MergeCells(cellsToMerge);
-            }
+            CellFormatEditWindowViewModel.MergeCellsDown();
+            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void SetAlignmentToBottomButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Bottom;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Center;
-            cell.VerticalAlignmentForView = VerticalAlignment.Center;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Center;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Center;
         }
 
         private void SetAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Stretch;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToTopButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Stretch;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Left;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.HorizontalAlignmentForView = HorizontalAlignment.Right;
-            cell.VerticalAlignmentForView = VerticalAlignment.Top;
+            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetTextAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Center;
+            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Center;
         }
 
         private void SetTextAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Left;
+            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Left;
         }
 
         private void SetTextAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell)) return;
-            cell.TextAlignmentForView = TextAlignment.Right;
-        }
-
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Right;
         }
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            foreach (var selectedCell in ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.Where(x => x.ID == x.Model.MergedWith))
-            {
-                ApplicationViewModel.Instance.SheetViewModel.UnmergeCell(selectedCell);
-            }
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
+            CellFormatEditWindowViewModel.UnmergeCells();
         }
     }
 }

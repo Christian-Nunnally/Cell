@@ -6,11 +6,13 @@
     xmlns:local="clr-namespace:Cell.View.Application"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
-    Width="{Binding ApplicationWindowWidth}"
-    Height="{Binding ApplicationWindowWidth}"
+    Width="{Binding ApplicationWindowWidth, Mode=TwoWay}"
+    Height="{Binding ApplicationWindowHeight, Mode=TwoWay}"
+    d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     d:Height="500"
     d:Width="500"
     AllowsTransparency="True"
+    Background="{StaticResource CellBackground}"
     ResizeMode="CanResize"
     SizeChanged="WindowSizeChanged"
     WindowState="Normal"
@@ -20,124 +22,107 @@
         <WindowChrome CaptionHeight="28" />
     </WindowChrome.WindowChrome>
     <DockPanel x:Name="RootWindow" PreviewKeyDown="WindowPreviewKeyDown">
-        <DockPanel
-            x:Name="TitleBar"
-            Height="28"
-            Background="{StaticResource CellBackground}"
-            DockPanel.Dock="Top">
-            <Button
-                x:Name="CloseButton"
-                Click="OnCloseButtonClicked"
-                Content="x"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Button
-                x:Name="MaxButton"
-                Click="MaximizeButtonClick"
-                Content="☐"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Button
-                x:Name="MinButton"
-                Click="MinimizeButtonClick"
-                Content="-"
-                DockPanel.Dock="Right"
-                Style="{StaticResource TitleButtonStyle}" />
-            <Grid>
-                <ToggleButton x:Name="SettingTitleButtonPopupButton" Content="⚙️">
-                    <ToggleButton.Style>
-                        <Style BasedOn="{StaticResource TitleButtonToggleButtonStyle}" TargetType="{x:Type ToggleButton}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=SettingTitleButtonPopup, Path=IsOpen}" Value="True">
-                                    <Setter Property="IsHitTestVisible" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
-                <Popup
-                    x:Name="SettingTitleButtonPopup"
-                    IsOpen="{Binding IsChecked, ElementName=SettingTitleButtonPopupButton, Mode=TwoWay}"
-                    PlacementTarget="{Binding ElementName=SettingTitleButtonPopupButton}">
-                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4,0,4,4">
-                        <StackPanel>
-                            <Button
-                                Click="TogglePanLockButtonClick"
-                                Content="🔒"
-                                DockPanel.Dock="Left"
-                                Style="{StaticResource TitleButtonStyle}"
-                                ToolTip="Toggles the ability to pan and zoom. Useful for creating a nice UI." />
-                            <ToggleButton
-                                Content="⬜←"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightPopulateCellDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause cells used by the populate function to highlight." />
-                            <ToggleButton
-                                Content="⬜→"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightTriggerCellDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause cells used by the trigger function to highlight." />
-                            <ToggleButton
-                                Content="≡←"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightPopulateCollectionDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause collections used by the populate function to highlight." />
-                            <ToggleButton
-                                Content="≡→"
-                                DockPanel.Dock="Left"
-                                IsChecked="{Binding ApplicationSettings.HighlightTriggerCollectionDependencies}"
-                                Style="{StaticResource TitleButtonToggleButtonStyle}"
-                                ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
-                            <Button
-                                Click="ShowLogWindowButtonClick"
-                                Content="/&gt;"
-                                DockPanel.Dock="Left"
-                                Style="{StaticResource TitleButtonStyle}" />
-                        </StackPanel>
-                    </Border>
-                </Popup>
+        <Grid DockPanel.Dock="Top">
+            <DockPanel
+                x:Name="TitleBar"
+                Height="28"
+                Background="{StaticResource CellBackground}"
+                DockPanel.Dock="Top"
+                LastChildFill="False">
+                <Button
+                    x:Name="CloseButton"
+                    Click="OnCloseButtonClicked"
+                    Content="x"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    x:Name="MaxButton"
+                    Click="MaximizeButtonClick"
+                    Content="☐"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    x:Name="MinButton"
+                    Click="MinimizeButtonClick"
+                    Content="-"
+                    DockPanel.Dock="Right"
+                    Style="{StaticResource TitleButtonStyle}" />
+                <Button
+                    Click="ShowSettingsWindowButtonClick"
+                    Content="⚙️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens settings window"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ToggleEditPanelButtonClick"
+                    Content="🛠️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell format editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="OpenSpecialEditPanelButtonClick"
+                    Content="⛏️"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell settings editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="OpenTextEditPanelButtonClick"
+                    Content="⌶"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Opens the cell content editor"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowFunctionManagerButtonClick"
+                    Content="f()"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage functions"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowCollectionManagerButtonClick"
+                    Content="≡"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage collections"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Button
+                    Click="ShowSheetManagerButtonClick"
+                    Content="📄"
+                    DockPanel.Dock="Left"
+                    Style="{StaticResource TitleButtonStyle}"
+                    ToolTip="Manage sheets"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </DockPanel>
+            <Grid Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <local:TitleBarSheetNavigation
+                    DataContext="{Binding TitleBarSheetNavigationViewModel}"
+                    DockPanel.Dock="Bottom"
+                    WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
-            <Button
-                Click="ToggleEditPanelButtonClick"
-                Content="🛠️"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell format editor" />
-            <Button
-                Click="OpenSpecialEditPanelButtonClick"
-                Content="⛏️"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell settings editor" />
-            <Button
-                Click="OpenTextEditPanelButtonClick"
-                Content="⌶"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Opens the cell content editor" />
-            <Button
-                Click="ShowFunctionManagerButtonClick"
-                Content="f()"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Manage functions" />
-            <Button
-                Click="ShowCollectionManagerButtonClick"
-                Content="≡"
-                DockPanel.Dock="Left"
-                Style="{StaticResource TitleButtonStyle}"
-                ToolTip="Manage collections" />
-            <local:TitleBarSheetNavigation
-                DataContext="{Binding}"
-                DockPanel.Dock="Bottom"
-                WindowChrome.IsHitTestVisibleInChrome="True" />
-        </DockPanel>
+        </Grid>
         <Grid>
-            <ContentControl x:Name="_sheetViewContentControl" />
-            <Canvas x:Name="_toolWindowCanvas" />
+            <Button
+                Width="Auto"
+                Height="{Binding ApplicationWindowHeight}"
+                BorderThickness="0"
+                Click="LoadProjectButtonClicked"
+                Content="Load Project"
+                DockPanel.Dock="Top"
+                FontSize="16"
+                Visibility="{Binding IsProjectLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
+            <Grid>
+                <Label
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Content="No open cells"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ContentControl x:Name="_sheetViewContentControl" />
+                <Canvas x:Name="_toolWindowCanvas" />
+            </Grid>
         </Grid>
     </DockPanel>
 </Window>

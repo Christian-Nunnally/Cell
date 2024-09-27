@@ -13,8 +13,8 @@
     <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="20" />
+                <ColumnDefinition MinWidth="24" />
+                <ColumnDefinition Width="20" MaxWidth="24" />
             </Grid.ColumnDefinitions>
             <Border
                 x:Name="Border"
@@ -23,14 +23,14 @@
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}" />
             <Border
-                Grid.Column="0"
-                Margin="1"
+                Margin="0"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
-                BorderThickness="0,0,1,0" />
+                BorderThickness="{TemplateBinding BorderThickness}" />
             <Path
                 x:Name="Arrow"
                 Grid.Column="1"
+                Margin="2,0,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Data="M-2,0 L-2,2 L2,6 L6,2 L6,0 L2,4 z"
@@ -65,11 +65,11 @@
                     <Grid>
                         <ToggleButton
                             Name="ToggleButton"
-                            Grid.Column="2"
                             Height="Auto"
                             VerticalAlignment="Stretch"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             ClickMode="Press"
                             Focusable="false"
                             Foreground="{TemplateBinding Foreground}"
@@ -77,7 +77,7 @@
                             Template="{StaticResource ComboBoxToggleButton}" />
                         <ContentPresenter
                             Name="ContentSite"
-                            Margin="3,0,23,0"
+                            Margin="0,0,20,0"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Content="{TemplateBinding SelectionBoxItem}"

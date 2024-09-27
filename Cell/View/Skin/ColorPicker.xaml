@@ -45,6 +45,8 @@
 
     <Style x:Key="ColorItemContainerStyle" TargetType="{x:Type ListBoxItem}">
         <Setter Property="ToolTip" Value="{Binding Name}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ListBoxItem}">
@@ -114,6 +116,8 @@
     <Style x:Key="ColorListStyle" TargetType="ListBox">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="MaxHeight" Value="275" />
         <!--  ConverterParameter is margin/Padding from Popup  -->
         <Setter Property="Width" Value="{Binding MaxDropDownWidth, RelativeSource={RelativeSource AncestorType={x:Type xctk:ColorPicker}}, Converter={StaticResource AdditionConverter}, ConverterParameter=-18}" />
@@ -167,35 +171,31 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Border>
+                    <Border Name="_borderColorPickerToggleButtonBorder">
                         <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0" />
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="13" />
+                                <Setter Property="CornerRadius" Value=".9" />
                                 <Setter Property="ClipToBounds" Value="False" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="Background" Value="{StaticResource ControlBackground}" />
-                                <Setter Property="BorderThickness" Value="10" />
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
-                                    </Trigger>
-                                </Style.Triggers>
+                                <Setter Property="BorderThickness" Value="15" />
                             </Style>
                         </Border.Style>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="_borderColorPickerToggleButtonBorder" Property="Background" Value="{StaticResource SelectedBorderColor}" />
+                            <Setter TargetName="_borderColorPickerToggleButtonBorder" Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="_borderColorPickerToggleButtonBorder" Property="Background" Value="{StaticResource SelectedColor}" />
+                            <Setter TargetName="_borderColorPickerToggleButtonBorder" Property="BorderBrush" Value="{StaticResource SelectedColor}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-            </Trigger>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="BackgroundColorPickerToggleButtonStyle" TargetType="ToggleButton">
@@ -203,32 +203,27 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ToggleButton}">
-                    <Border BorderThickness="0">
+                    <Border Name="_backgroundColorPickerToggleButtonBorder" BorderThickness="0">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="5" />
+                                <Setter Property="CornerRadius" Value="2" />
                                 <Setter Property="Background" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
                                 <Setter Property="BorderBrush" Value="{Binding SelectedColor, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=xctk:ColorPicker}, Converter={StaticResource ColorToSolidColorBrushConverter}}" />
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
-                                    </Trigger>
-                                </Style.Triggers>
                             </Style>
                         </Border.Style>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="_backgroundColorPickerToggleButtonBorder" Property="Background" Value="{StaticResource SelectedBorderColor}" />
+                            <Setter TargetName="_backgroundColorPickerToggleButtonBorder" Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="_backgroundColorPickerToggleButtonBorder" Property="Background" Value="{StaticResource SelectedColor}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-            </Trigger>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="{StaticResource SelectedColor}" />
-            </Trigger>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="TestColorPicker" TargetType="{x:Type xctk:ColorPicker}">
@@ -261,7 +256,6 @@
                             BorderBrush="White"
                             BorderThickness="0"
                             IsChecked="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                            IsHitTestVisible="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource InverseBoolConverter}}"
                             IsTabStop="True"
                             Style="{TemplateBinding ButtonStyle}" />
 
@@ -384,6 +378,8 @@
                                         <Grid x:Name="_colorCanvasHost" Width="{Binding MaxDropDownWidth, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource AdditionConverter}, ConverterParameter=-18}">
                                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
                                                 <xctk:ColorCanvas
+                                                    HorizontalContentAlignment="Center"
+                                                    VerticalContentAlignment="Center"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Foreground="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
@@ -407,7 +403,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type xctk:ColorPicker}">
+    <!--<Style TargetType="{x:Type xctk:ColorPicker}">
         <Setter Property="Background" Value="{StaticResource CellBackground}" />
         <Setter Property="HeaderBackground" Value="{StaticResource CellBackground}" />
         <Setter Property="DropDownBackground" Value="{StaticResource CellBackground}" />
@@ -487,7 +483,9 @@
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
-                                            <!--  Available Colors  -->
+    -->
+    <!--  Available Colors  -->
+    <!--
                                             <Grid Grid.Row="1" Visibility="{TemplateBinding ShowAvailableColors, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -508,7 +506,9 @@
                                                 </Grid>
                                             </Grid>
 
-                                            <!--  Standard Colors  -->
+    -->
+    <!--  Standard Colors  -->
+    <!--
                                             <Grid Grid.Row="2" Visibility="{TemplateBinding ShowStandardColors, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -529,7 +529,9 @@
                                                 </Grid>
                                             </Grid>
 
-                                            <!--  Recent Colors  -->
+    -->
+    <!--  Recent Colors  -->
+    <!--
                                             <Grid
                                                 Grid.Row="3"
                                                 Margin="0,1,0,1"
@@ -561,8 +563,10 @@
                                         Foreground="{TemplateBinding TabForeground}"
                                         Header="{Binding AdvancedTabHeader, RelativeSource={RelativeSource TemplatedParent}}"
                                         Template="{StaticResource TabItemTemplate}">
-                                        <!--  ColorCanvas  -->
-                                        <!--  ConverterParameter is margin/Padding from Popup  -->
+    -->
+    <!--  ColorCanvas  -->
+    <!--  ConverterParameter is margin/Padding from Popup  -->
+    <!--
                                         <Grid x:Name="_colorCanvasHost" Width="{Binding MaxDropDownWidth, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource AdditionConverter}, ConverterParameter=-18}">
                                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
                                                 <xctk:ColorCanvas
@@ -587,5 +591,5 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
+    </Style>-->
 </ResourceDictionary>

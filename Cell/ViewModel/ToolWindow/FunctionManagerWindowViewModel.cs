@@ -1,138 +1,232 @@
-﻿using Cell.Data;
-using Cell.Model;
+﻿using Cell.Model;
+using Cell.Persistence;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace Cell.ViewModel.ToolWindow
 {
-    public class FunctionManagerWindowViewModel : ResizeableToolWindowViewModel
+    public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
-        private readonly ObservableCollection<FunctionViewModel> _functions;
-        private string filterSheet = "All";
-        private string filterString = string.Empty;
-        private bool includePopulateFunctions = true;
-        private bool includeTriggerFunctions = true;
-        private FunctionViewModel? selectedFunction;
-        public FunctionManagerWindowViewModel(ObservableCollection<FunctionViewModel> pluginFunctions)
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private string _filterCollection = string.Empty;
+        private string _filterSheet = "All";
+        private string _filterString = string.Empty;
+        private bool _includePopulateFunctions = true;
+        private bool _includeTriggerFunctions = true;
+        private PluginFunction? _selectedFunction;
+        private string _usersListBoxFilterText = string.Empty;
+        private string _dependencciesListBoxFilterText = string.Empty;
+        private CellModel? _selectedUserOfTheSelectedFunction;
+
+        public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
         {
-            _functions = pluginFunctions;
-            _functions.CollectionChanged += FunctionsCollectionChanged;
-            foreach (var function in _functions)
+            _pluginFunctionLoader = pluginFunctionLoader;
+        }
+
+        public override double MinimumHeight => 200;
+
+        public override double MinimumWidth => 200;
+
+        public override double DefaultHeight => 400;
+
+        public override double DefaultWidth => 550;
+
+        public string FilterCollection
+        {
+            get => _filterCollection; set
             {
-                Functions.Add(function);
-            }
-            SheetNameOptions.Add("All");
-            foreach (var sheet in CellTracker.Instance.SheetNames)
-            {
-                SheetNameOptions.Add(sheet);
+                if (_filterCollection == value) return;
+                _filterCollection = value;
+                NotifyPropertyChanged(nameof(FilterCollection));
+                NotifyPropertyChanged(nameof(FilteredFunctions));
             }
         }
+
+        public ObservableCollection<string> FilterCollectionOptions { get; set; } = [];
 
         public string FilterSheet
         {
-            get => filterSheet; set
+            get => _filterSheet; set
             {
-                if (filterSheet == value) return;
-                filterSheet = value;
+                if (_filterSheet == value) return;
+                _filterSheet = value;
                 NotifyPropertyChanged(nameof(FilterSheet));
-                FilterVisibleFunctions();
+                NotifyPropertyChanged(nameof(FilteredFunctions));
             }
         }
+
+        public ObservableCollection<string> FilterSheetOptions { get; set; } = [];
+
+        public string SelectedFunctionTitleString => SelectedFunction == null ? "No function selected" : SelectedFunction.Model.Name;
 
         public string FilterString
         {
-            get => filterString; set
+            get => _filterString; set
             {
-                if (filterString == value) return;
-                filterString = value;
+                if (_filterString == value) return;
+                _filterString = value;
                 NotifyPropertyChanged(nameof(FilterString));
-                FilterVisibleFunctions();
+                NotifyPropertyChanged(nameof(FilteredFunctions));
             }
         }
 
-        public ObservableCollection<FunctionViewModel> Functions { get; set; } = [];
+        public IEnumerable<PluginFunction> FilteredFunctions => _pluginFunctionLoader.ObservableFunctions.Where(IsFunctionIncludedInFilter);
 
         public bool IncludePopulateFunctions
         {
-            get => includePopulateFunctions; set
+            get => _includePopulateFunctions; set
             {
-                if (includePopulateFunctions == value) return;
-                includePopulateFunctions = value;
-                if (!includeTriggerFunctions && !includePopulateFunctions) IncludeTriggerFunctions = true;
+                if (_includePopulateFunctions == value) return;
+                _includePopulateFunctions = value;
+                if (!_includeTriggerFunctions && !_includePopulateFunctions) IncludeTriggerFunctions = true;
                 NotifyPropertyChanged(nameof(IncludePopulateFunctions));
-                FilterVisibleFunctions();
+                NotifyPropertyChanged(nameof(FilteredFunctions));
             }
         }
 
         public bool IncludeTriggerFunctions
         {
-            get => includeTriggerFunctions; set
+            get => _includeTriggerFunctions; set
             {
-                if (includeTriggerFunctions == value) return;
-                includeTriggerFunctions = value;
-                if (!includeTriggerFunctions && !includePopulateFunctions) IncludePopulateFunctions = true;
+                if (_includeTriggerFunctions == value) return;
+                _includeTriggerFunctions = value;
+                if (!_includeTriggerFunctions && !_includePopulateFunctions) IncludePopulateFunctions = true;
                 NotifyPropertyChanged(nameof(IncludeTriggerFunctions));
-                FilterVisibleFunctions();
+                NotifyPropertyChanged(nameof(FilteredFunctions));
             }
         }
 
-        public ObservableCollection<string> ReferencedCollectionsByTheSelectedFunction { get; set; } = [];
-
-        public FunctionViewModel? SelectedFunction
+        public IEnumerable<string> FilteredDependenciesOfTheSelectedFunction
         {
-            get => selectedFunction; set
+            get
             {
-                if (selectedFunction == value) return;
-                selectedFunction = value;
+                if (SelectedUserOfTheSelectedFunction is null)
+                {
+                    return SelectedFunction?.Dependencies
+                        .Select(x => x.ResolveUserFriendlyCellAgnosticName())
+                        .Where(x => x.Contains(DependenciesListBoxFilterText)) ?? [];
+                }
+                else
+                {
+                    return SelectedFunction?.Dependencies
+                        .Select(x => x.ResolveUserFriendlyNameForCell(SelectedUserOfTheSelectedFunction))
+                        .Where(x => x.Contains(DependenciesListBoxFilterText)) ?? [];
+                }
+            }
+        }
+
+        public string UsersListBoxFilterText
+        {
+            get => _usersListBoxFilterText; set
+            {
+                if (_usersListBoxFilterText == value) return;
+                _usersListBoxFilterText = value;
+                NotifyPropertyChanged(nameof(UsersListBoxFilterText));
+                NotifyPropertyChanged(nameof(FilteredUsersOfTheSelectedFunction));
+            }
+        }
+
+        public CellModel? SelectedUserOfTheSelectedFunction
+        {
+            get => _selectedUserOfTheSelectedFunction; set
+            {
+                if (_selectedUserOfTheSelectedFunction == value) return;
+                _selectedUserOfTheSelectedFunction = value;
+                NotifyPropertyChanged(nameof(SelectedUserOfTheSelectedFunction));
+                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
+            }
+        }
+
+        public string DependenciesListBoxFilterText
+        {
+            get => _dependencciesListBoxFilterText; set
+            {
+                if (_dependencciesListBoxFilterText == value) return;
+                _dependencciesListBoxFilterText = value;
+                NotifyPropertyChanged(nameof(DependenciesListBoxFilterText));
+                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
+            }
+        }
+
+        public PluginFunction? SelectedFunction
+        {
+            get => _selectedFunction; set
+            {
+                if (_selectedFunction == value) return;
+                _selectedFunction = value;
                 NotifyPropertyChanged(nameof(SelectedFunction));
-                UsersOfTheSelectedFunction.Clear();
-                if (selectedFunction == null) return;
-                foreach (var cell in selectedFunction.CellsThatUseFunction)
-                {
-                    UsersOfTheSelectedFunction.Add(cell);
-                }
-
-                ReferencedCollectionsByTheSelectedFunction.Clear();
-                foreach (var collection in selectedFunction.CollectionDependencies)
-                {
-                    ReferencedCollectionsByTheSelectedFunction.Add(collection);
-                }
+                NotifyPropertyChanged(nameof(SelectedFunctionTitleString));
+                NotifyPropertyChanged(nameof(FilteredUsersOfTheSelectedFunction));
+                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
             }
         }
 
-        public ObservableCollection<string> SheetNameOptions { get; set; } = [];
+        public override string ToolWindowTitle => "Function Manager";
 
-        public ObservableCollection<CellModel> UsersOfTheSelectedFunction { get; set; } = [];
+        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.UserFriendlyCellName.Contains(UsersListBoxFilterText)) ?? [];
 
-        private void FilterVisibleFunctions()
+        public override void HandleBeingClosed()
         {
-            for (int i = Functions.Count - 1; i >= 0; i--)
+            _pluginFunctionLoader.ObservableFunctions.CollectionChanged -= FunctionsCollectionChanged;
+            FilterSheetOptions.Clear();
+            FilterCollectionOptions.Clear();
+        }
+
+        private void FunctionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(FilteredFunctions));
+        }
+
+        public override void HandleBeingShown()
+        {
+            _pluginFunctionLoader.ObservableFunctions.CollectionChanged += FunctionsCollectionChanged;
+            FilterSheetOptions.Add("All");
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
             {
-                if (IsFunctionIncludedInFilter(Functions[i])) continue;
-                Functions.RemoveAt(i);
+                FilterSheetOptions.Add(sheet.Name);
             }
-
-            foreach (var function in _functions)
+            FilterCollectionOptions.Add("All");
+            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames)
             {
-                if (Functions.Contains(function)) continue;
-                if (!IsFunctionIncludedInFilter(function)) continue;
-                Functions.Add(function);
+                FilterCollectionOptions.Add(collectionName);
             }
         }
 
-        private void FunctionsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private bool IsFunctionIncludedInFilter(PluginFunction function)
         {
-            Functions.Clear();
-            FilterVisibleFunctions();
-        }
-
-        private bool IsFunctionIncludedInFilter(FunctionViewModel function)
-        {
-            if (!function.Model.Name.Contains(filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
-            if (filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == filterSheet)) return false;
+            if (!function.Model.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
+            if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;
             if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
             return true;
+        }
+
+        public void CreateNewPopulateFunction()
+        {
+            var index = 0;
+            var newPopulateFunctionName = "NewPopulateFunction";
+            var existingNames = _pluginFunctionLoader.ObservableFunctions.Select(x => x.Model.Name).ToList();
+            while (existingNames.Any(x => x == newPopulateFunctionName))
+            {
+                index += 1;
+                newPopulateFunctionName += $"NewPopulateFunction{index}";
+            }
+            _pluginFunctionLoader.CreateFunction("object", newPopulateFunctionName, "return \"Hello world\";");
+        }
+
+        public void CreateNewTriggerFunction()
+        {
+            var index = 0;
+            var newTriggerFunctionName = "NewTriggerFunction";
+            var existingNames = _pluginFunctionLoader.ObservableFunctions.Select(x => x.Model.Name).ToList();
+            while (existingNames.Any(x => x == newTriggerFunctionName))
+            {
+                index += 1;
+                newTriggerFunctionName += $"NewTriggerFunction{index}";
+            }
+            _pluginFunctionLoader.CreateFunction("void", newTriggerFunctionName, string.Empty);
         }
     }
 }

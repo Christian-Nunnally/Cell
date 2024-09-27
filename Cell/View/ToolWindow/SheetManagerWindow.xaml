@@ -1,0 +1,125 @@
+﻿<view:ResizableToolWindow
+    x:Class="Cell.View.ToolWindow.SheetManagerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:SheetManagerWindowViewModel}"
+    d:DesignHeight="{Binding MinimimWidth}"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Label Content="Sheets" Style="{StaticResource ListHeaderLabelStyle}" />
+            <Grid>
+                <TextBox
+                    Padding="24,0,0,0"
+                    PreviewKeyDown="TextBoxPreviewKeyDown"
+                    Text="{Binding SheetsListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                <Label Style="{StaticResource FilterIconLabelStyle}" />
+            </Grid>
+        </DockPanel>
+        <ListBox
+            Grid.Row="1"
+            ItemsSource="{Binding FilteredSheets}"
+            SelectedItem="{Binding SelectedSheetName}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="20" HorizontalAlignment="Stretch">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="_removeButton"
+                            HorizontalAlignment="Left"
+                            Click="DeleteSheetButtonClicked"
+                            Content="❌"
+                            Foreground="{StaticResource ErrorForegroundColor}"
+                            Style="{StaticResource ListItemInlineButtonStyle}"
+                            ToolTip="Delete this sheet"
+                            Visibility="Hidden" />
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="5,0"
+                            Orientation="Horizontal">
+                            <TextBlock Name="_nameLabel" Text="{Binding Name}" />
+                            <TextBox
+                                Name="_renameTextbox"
+                                VerticalAlignment="Center"
+                                FontFamily="Consolas"
+                                FontSize="13"
+                                Text="{Binding Name}"
+                                Visibility="Collapsed" />
+                            <ToggleButton
+                                x:Name="_renameButton"
+                                Margin="10,0"
+                                HorizontalAlignment="Left"
+                                Content="🏷️"
+                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
+                                ToolTip="Rename this function"
+                                Visibility="Hidden" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <ToggleButton
+                                x:Name="_isVisibleInTopBarButton"
+                                HorizontalAlignment="Right"
+                                Content="👁️"
+                                IsChecked="{Binding IsVisibleInTopBar}"
+                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
+                                ToolTip="Show in the top bar navigation"
+                                Visibility="Hidden" />
+                            <Button
+                                x:Name="_moveUpButton"
+                                Click="OrderSheetUpButtonClicked"
+                                Content="↑"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Move this sheet up in the list"
+                                Visibility="Hidden" />
+                            <Button
+                                x:Name="_moveDownButton"
+                                Click="OrderSheetDownButtonClicked"
+                                Content="↓"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Move this sheet down in the list"
+                                Visibility="Hidden" />
+                            <Button
+                                x:Name="_copyButton"
+                                Click="CopySheetButtonClicked"
+                                Content="📄"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Create a copy of this sheet"
+                                Visibility="Hidden" />
+                            <Button
+                                x:Name="_viewButton"
+                                Click="GoToSheetButtonClicked"
+                                Content="🔎"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Go to this sheet"
+                                Visibility="Hidden" />
+                        </StackPanel>
+                    </Grid>
+                    <DataTemplate.Triggers>
+                        <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
+                            <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_renameButton" Property="Content" Value="✔" />
+                        </Trigger>
+                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                            <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_renameButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_viewButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_copyButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_moveDownButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_moveUpButton" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="_isVisibleInTopBarButton" Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</view:ResizableToolWindow>

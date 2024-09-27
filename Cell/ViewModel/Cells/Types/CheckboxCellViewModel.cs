@@ -1,6 +1,7 @@
 ﻿using Cell.Common;
 using Cell.Execution;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
@@ -47,7 +48,7 @@ namespace Cell.ViewModel.Cells.Types
                 if (oldValue == value) return;
                 Model.SetBooleanProperty(nameof(IsChecked), value);
                 NotifyPropertyChanged(nameof(IsChecked));
-                Model.TriggerCellEdited(new EditContext(nameof(IsChecked), IsChecked, oldValue));
+                ApplicationViewModel.Instance.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(IsChecked), oldValue, value));
             }
         }
 

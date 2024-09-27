@@ -5,11 +5,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    Width="{Binding ContentWidth}"
+    Height="{Binding ContentHeight}"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    MouseDown="Toolbox_MouseDown"
-    MouseMove="Toolbox_MouseMove"
-    MouseUp="Toolbox_MouseLeftButtonUp"
+    MouseDown="ToolboxMouseDown"
+    MouseMove="ToolboxMouseMove"
+    MouseUp="ToolboxMouseLeftButtonUp"
     mc:Ignorable="d">
     <Grid>
         <DockPanel Background="{StaticResource CellBackground}">
@@ -28,7 +31,24 @@
                         BorderThickness="0"
                         Click="CloseButtonClicked"
                         Content="x"
-                        DockPanel.Dock="Right" />
+                        DockPanel.Dock="Right"
+                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <Button
+                        Width="28"
+                        Height="28"
+                        BorderThickness="0"
+                        Click="UndockButtonClicked"
+                        Content="🔒"
+                        DockPanel.Dock="Right"
+                        Visibility="{Binding IsDocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <Button
+                        Width="28"
+                        Height="28"
+                        BorderThickness="0"
+                        Click="DockButtonClicked"
+                        Content="🔓"
+                        DockPanel.Dock="Right"
+                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -65,8 +85,7 @@
             MouseMove="ResizerRectangleMouseMove"
             MouseUp="ResizerRectangleMouseUp"
             RadiusX="5"
-            RadiusY="5"
-            Visibility="{Binding IsToolWindowResizeable, Converter={StaticResource btv}}">
+            RadiusY="5">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />

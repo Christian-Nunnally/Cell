@@ -1,10 +1,11 @@
 ﻿using Cell.Common;
 using Cell.Data;
+using Cell.ViewModel.Application;
 using System.Text.Json;
 
 namespace Cell.Model
 {
-    internal static class CellModelFactory
+    public static class CellModelFactory
     {
         public const int DefaultCellHeight = 25;
         public const int DefaultCellWidth = 125;
@@ -14,17 +15,9 @@ namespace Cell.Model
             return JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new CellError("Unable to copy model");
         }
 
-        public static CellModel CopyAndTrackNewCell(this CellModel modelToCopy)
+        public static CellModel Create(int row, int column, CellType type, string sheet)
         {
-            var model = modelToCopy.Copy();
-            model.ID = Utilities.GenerateUnqiueId(12);
-            CellTracker.Instance.AddCell(model);
-            return model;
-        }
-
-        internal static CellModel Create(int row, int column, CellType type, string sheet)
-        {
-            var model = new CellModel
+            var newCell = new CellModel
             {
                 Width = DefaultCellWidth,
                 Height = DefaultCellHeight,
@@ -33,8 +26,22 @@ namespace Cell.Model
                 Row = row,
                 Column = column,
             };
-            CellTracker.Instance.AddCell(model);
-            return model;
+            if (type.IsSpecial())
+            {
+                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultSpecialCellStyleCellModel.Style.CopyTo(newCell.Style);
+            }
+            else
+            {
+                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultCellStyleCellModel.Style.CopyTo(newCell.Style);
+            }
+            return newCell;
+        }
+
+        public static CellModel Create(int row, int column, CellType type, string sheet, CellTracker trackerToTrackCellWith)
+        {
+            var newCell = Create(row, column, type, sheet);
+            trackerToTrackCellWith.AddCell(newCell);
+            return newCell;
         }
     }
 }

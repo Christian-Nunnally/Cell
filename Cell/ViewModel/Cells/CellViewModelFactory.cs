@@ -1,12 +1,9 @@
-﻿using Cell.Data;
-using Cell.Model;
-using Cell.ViewModel.Cells;
+﻿using Cell.Model;
 using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Cells.Types.Special;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells
 {
-    internal static class CellViewModelFactory
+    public static class CellViewModelFactory
     {
         public static CellViewModel Create(CellModel model, SheetViewModel sheetViewModel)
         {
@@ -24,13 +21,8 @@ namespace Cell.ViewModel
                 CellType.List => new ListCellViewModel(model, sheetViewModel),
                 CellType.Graph => new GraphCellViewModel(model, sheetViewModel),
                 CellType.Date => new DateCellViewModel(model, sheetViewModel),
-                _ => throw new System.Exception($"Unknown cell type '{model.CellType}'"),
+                _ => throw new Exception($"Unknown cell type '{model.CellType}'"),
             };
-        }
-
-        public static IEnumerable<CellViewModel> CreateCellViewModelsForSheet(SheetViewModel sheet)
-        {
-            return CellTracker.Instance.GetCellModelsForSheet(sheet.SheetName).Select(x => Create(x, sheet));
         }
     }
 }

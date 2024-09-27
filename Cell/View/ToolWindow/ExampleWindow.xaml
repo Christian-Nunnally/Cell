@@ -1,0 +1,14 @@
+﻿<view:ResizableToolWindow
+    x:Class="Cell.View.ToolWindow.ExampleWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Cell.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:data="clr-namespace:Cell.Data"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:ExampleWindowViewModel}"
+    d:DesignHeight="400"
+    d:DesignWidth="400"
+    mc:Ignorable="d" />

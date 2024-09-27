@@ -1,98 +1,57 @@
-﻿<UserControl
+﻿<view:ResizableToolWindow
     x:Class="Cell.View.ToolWindow.FunctionManagerWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:toolWindow="clr-namespace:Cell.ViewModel.ToolWindow"
-    xmlns:viewModel="clr-namespace:Cell.ViewModel"
-    d:DataContext="{d:DesignInstance Type=toolWindow:FunctionManagerWindowViewModel}"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:FunctionManagerWindowViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid Width="{Binding UserSetWidth}" Height="{Binding UserSetHeight}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
-            <RowDefinition Height="1*" />
-        </Grid.RowDefinitions>
-        <Grid Margin="5,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="44" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="44" />
-                <ColumnDefinition Width="120" />
-                <ColumnDefinition Width="60" />
-                <ColumnDefinition Width="60" />
-            </Grid.ColumnDefinitions>
-            <Label
-                Grid.Column="0"
-                VerticalAlignment="Center"
-                Content="Filter" />
-            <TextBox
-                Grid.Column="1"
-                Height="25"
-                Text="{Binding FilterString, UpdateSourceTrigger=PropertyChanged}" />
-            <Label
-                Grid.Column="2"
-                VerticalAlignment="Center"
-                Content="Sheet" />
-            <controls:BetterComboBox
-                Grid.Column="3"
-                Height="25"
-                ItemsSource="{Binding SheetNameOptions}"
-                SelectedItem="{Binding FilterSheet}" />
-            <ToggleButton
-                Grid.Column="4"
-                Margin="5,0,0,0"
-                Content="trigger"
-                IsChecked="{Binding IncludeTriggerFunctions}" />
-            <ToggleButton
-                Grid.Column="5"
-                Margin="5,0,0,0"
-                Content="populate"
-                IsChecked="{Binding IncludePopulateFunctions}" />
-        </Grid>
-        <Grid Grid.Row="1" Margin="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition Height="1*" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="1*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="200" />
-            </Grid.ColumnDefinitions>
-            <Label
-                Content="Functions"
-                FontSize="14"
-                FontWeight="Bold" />
-            <Label
-                Grid.Column="1"
-                Content="Used By Cells"
-                FontSize="14"
-                FontWeight="Bold" />
-            <Label
-                Grid.Row="2"
-                Grid.Column="1"
-                Content="Referenced Collections"
-                FontSize="14"
-                FontWeight="Bold" />
-            <ListBox
-                Grid.Row="1"
-                Grid.RowSpan="3"
-                Grid.Column="0"
-                Margin="0,0,10,0"
-                HorizontalAlignment="Stretch"
-                ItemsSource="{Binding Functions}"
-                SelectedItem="{Binding SelectedFunction}">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel>
+            <DockPanel DockPanel.Dock="Top">
+                <Label Content="Functions" Style="{StaticResource ListHeaderLabelStyle}" />
+                <ToggleButton
+                    Width="25"
+                    Content="↚"
+                    DockPanel.Dock="Right"
+                    IsChecked="{Binding IncludeTriggerFunctions}" />
+                <ToggleButton
+                    Width="25"
+                    Content="←"
+                    DockPanel.Dock="Right"
+                    IsChecked="{Binding IncludePopulateFunctions}" />
+                <controls:BetterComboBox
+                    Grid.Column="3"
+                    Width="200"
+                    Height="25"
+                    BorderThickness="1"
+                    DockPanel.Dock="Right"
+                    ItemsSource="{Binding FilterSheetOptions}"
+                    SelectedItem="{Binding FilterSheet}" />
+                <Label
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    Content="Sheet"
+                    DockPanel.Dock="Right" />
+                <Grid>
+                    <TextBox
+                        Padding="24,0,0,0"
+                        PreviewKeyDown="TextBoxPreviewKeyDown"
+                        Text="{Binding FilterString, UpdateSourceTrigger=PropertyChanged}" />
+                    <Label Style="{StaticResource FilterIconLabelStyle}" />
+                </Grid>
+            </DockPanel>
+
+            <ListBox ItemsSource="{Binding FilteredFunctions}" SelectedItem="{Binding SelectedFunction}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid HorizontalAlignment="Stretch">
@@ -100,19 +59,14 @@
                                 <ColumnDefinition Width="20" />
                                 <ColumnDefinition Width="70" />
                                 <ColumnDefinition Width="1*" />
-                                <ColumnDefinition Width="50" />
                             </Grid.ColumnDefinitions>
                             <Button
                                 x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
                                 HorizontalAlignment="Left"
-                                BorderThickness="0"
                                 Click="DeleteFunctionButtonClicked"
                                 Content="❌"
-                                FontSize="9"
                                 Foreground="{StaticResource ErrorForegroundColor}"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Delete this function"
                                 Visibility="Hidden" />
                             <TextBlock
@@ -162,29 +116,19 @@
                                     Visibility="Collapsed" />
                                 <ToggleButton
                                     x:Name="_renameButton"
-                                    Width="20"
-                                    Height="20"
                                     Margin="10,0"
-                                    Padding="0"
                                     HorizontalAlignment="Left"
-                                    BorderThickness="0"
                                     Content="🏷️"
-                                    FontSize="9"
+                                    Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
                             </StackPanel>
-                            <TextBlock
-                                Grid.Column="3"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontFamily="Consolas"
-                                FontSize="13"
-                                Text="{Binding UsageCount}" />
                         </Grid>
                         <DataTemplate.Triggers>
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                                 <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="_renameButton" Property="Content" Value="✔" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
@@ -194,85 +138,114 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <ListBox
-                Grid.Row="1"
-                Grid.RowSpan="1"
-                Grid.Column="1"
-                VerticalAlignment="Stretch"
-                ItemsSource="{Binding UsersOfTheSelectedFunction}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Height="20" HorizontalAlignment="Stretch">
-                            <Button
-                                x:Name="_removeButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
-                                HorizontalAlignment="Left"
-                                BorderThickness="0"
-                                Click="RemoveFunctionReferenceFromCellButtonClick"
-                                Content="➖"
-                                FontSize="10"
-                                ToolTip="Makes this cell stop using the selected function"
-                                Visibility="Hidden" />
-                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock
-                                    Padding="5,0"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    Text="{Binding UserFriendlyCellName}"
-                                    ToolTip="Cell name" />
-                                <TextBlock
-                                    Padding="5,2"
-                                    VerticalAlignment="Center"
-                                    FontFamily="Consolas"
-                                    FontSize="10"
-                                    Text="{Binding SheetName}"
-                                    ToolTip="Sheet name" />
-                            </StackPanel>
-                            <Button
-                                x:Name="_viewButton"
-                                Width="20"
-                                Height="20"
-                                Margin="0,0,20,0"
-                                Padding="0"
-                                HorizontalAlignment="Right"
-                                Click="GoToCellButtonClick"
-                                Content="👁️"
-                                FontSize="10"
-                                ToolTip="Edit the selected function from the context of this cell"
-                                Visibility="Hidden" />
-                            <Button
-                                x:Name="_editButton"
-                                Width="20"
-                                Height="20"
-                                Padding="0"
-                                HorizontalAlignment="Right"
-                                Click="EditFunctionFromCellsContextButtonClick"
-                                Content="✏️"
-                                FontSize="10"
-                                ToolTip="Edit the selected function from the context of this cell"
-                                Visibility="Hidden" />
+
+        </DockPanel>
+        <Border
+            Grid.Column="1"
+            BorderBrush="{StaticResource CellBorderColor}"
+            BorderThickness="1">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <DockPanel>
+                    <Label
+                        Margin="5,0,0,5"
+                        Content="{Binding SelectedFunctionTitleString}"
+                        DockPanel.Dock="Top"
+                        FontFamily="Consolas"
+                        Style="{StaticResource ListHeaderLabelStyle}" />
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label Content="Users" Style="{StaticResource ListHeaderLabelStyle}" />
+                        <Grid>
+                            <TextBox
+                                Padding="24,0,0,0"
+                                PreviewKeyDown="TextBoxPreviewKeyDown"
+                                Text="{Binding UsersListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Style="{StaticResource FilterIconLabelStyle}" />
                         </Grid>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
-                                <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
-                                <Setter TargetName="_editButton" Property="Visibility" Value="Visible" />
-                                <Setter TargetName="_viewButton" Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-            <ListBox
-                Grid.Row="3"
-                Grid.Column="1"
-                ItemsSource="{Binding ReferencedCollectionsByTheSelectedFunction}" />
-        </Grid>
+                    </DockPanel>
+                    <ListBox
+                        Grid.Row="1"
+                        Grid.RowSpan="1"
+                        Grid.Column="1"
+                        VerticalAlignment="Stretch"
+                        ItemsSource="{Binding FilteredUsersOfTheSelectedFunction}"
+                        SelectedItem="{Binding SelectedUserOfTheSelectedFunction}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="20" HorizontalAlignment="Stretch">
+                                    <Button
+                                        x:Name="_removeButton"
+                                        HorizontalAlignment="Left"
+                                        Click="RemoveFunctionReferenceFromCellButtonClick"
+                                        Content="➖"
+                                        Style="{StaticResource ListItemInlineButtonStyle}"
+                                        ToolTip="Makes this cell stop using the selected function"
+                                        Visibility="Hidden" />
+                                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                        <TextBlock
+                                            Padding="5,0"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Consolas"
+                                            Text="{Binding UserFriendlyCellName}"
+                                            ToolTip="Cell name" />
+                                        <TextBlock
+                                            Padding="5,2"
+                                            VerticalAlignment="Center"
+                                            FontFamily="Consolas"
+                                            FontSize="10"
+                                            Text="{Binding SheetName}"
+                                            ToolTip="Sheet name" />
+                                    </StackPanel>
+                                    <Button
+                                        x:Name="_viewButton"
+                                        Margin="0,0,20,0"
+                                        HorizontalAlignment="Right"
+                                        Click="GoToCellButtonClick"
+                                        Content="👁️"
+                                        Style="{StaticResource ListItemInlineButtonStyle}"
+                                        ToolTip="Edit the selected function from the context of this cell"
+                                        Visibility="Hidden" />
+                                    <Button
+                                        x:Name="_editButton"
+                                        HorizontalAlignment="Right"
+                                        Click="EditFunctionFromCellsContextButtonClick"
+                                        Content="✏️"
+                                        Style="{StaticResource ListItemInlineButtonStyle}"
+                                        ToolTip="Edit the selected function from the context of this cell"
+                                        Visibility="Hidden" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
+                                        <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="_editButton" Property="Visibility" Value="Visible" />
+                                        <Setter TargetName="_viewButton" Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+                <DockPanel Grid.Row="1" Margin="0,5,0,0">
+                    <DockPanel DockPanel.Dock="Top">
+                        <Label Content="Dependencies" Style="{StaticResource ListHeaderLabelStyle}" />
+                        <Grid>
+                            <TextBox
+                                Padding="24,0,0,0"
+                                PreviewKeyDown="TextBoxPreviewKeyDown"
+                                Text="{Binding DependenciesListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
+                            <Label Style="{StaticResource FilterIconLabelStyle}" />
+                        </Grid>
+                    </DockPanel>
+                    <ListBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        FontFamily="Consolas"
+                        ItemsSource="{Binding FilteredDependenciesOfTheSelectedFunction}" />
+                </DockPanel>
+            </Grid>
+        </Border>
     </Grid>
-</UserControl>
+</view:ResizableToolWindow>

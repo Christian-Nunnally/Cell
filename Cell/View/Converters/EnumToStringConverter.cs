@@ -1,10 +1,11 @@
-﻿using System.Windows.Data;
+﻿using System.Globalization;
+using System.Windows.Data;
 
 namespace Cell.View.Converters
 {
     public class EnumToStringConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string EnumString;
             try
@@ -18,8 +19,7 @@ namespace Cell.View.Converters
             }
         }
 
-        // No need to implement converting back on a one-way binding
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

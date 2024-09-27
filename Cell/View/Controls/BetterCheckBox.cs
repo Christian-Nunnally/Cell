@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace Cell.View.Controls
 {
-    internal class BetterCheckBox : Control
+    public class BetterCheckBox : Control
     {
         public static readonly DependencyProperty BackgroundWhenMouseOverProperty =
             DependencyProperty.Register("BackgroundWhenMouseOver", typeof(Brush), typeof(BetterCheckBox), new PropertyMetadata(default(Brush)));

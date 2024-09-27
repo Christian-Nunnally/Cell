@@ -3,65 +3,75 @@ using Cell.Model;
 
 namespace Cell.ViewModel.Application
 {
-    public static class UndoRedoManager
+    public class UndoRedoManager
     {
-        private static readonly Stack<List<CellModel>> _redoStack = new();
-        private static readonly Stack<List<CellModel>> _undoStack = new();
-        private static readonly Stack<CellModel> _recordingStateList = new();
-
-        private static bool _isRecordingUndoState;
-
-        public static void StartRecordingUndoState()
+        private readonly CellTracker _cellTracker;
+        private readonly List<string> _recordingStateIdList = [];
+        private readonly Stack<CellModel> _recordingStateList = new();
+        private readonly Stack<List<CellModel>> _redoStack = new();
+        private readonly Stack<List<CellModel>> _undoStack = new();
+        private bool _isRecordingUndoState;
+        private bool _isUndoingOrRedoing;
+        public UndoRedoManager(CellTracker cellTracker)
         {
-            _recordingStateList.Clear();
-            _isRecordingUndoState = true;
+            _cellTracker = cellTracker;
         }
 
-        public static void RecordCellStateForUndo(CellModel cell)
-        {
-            if (_isRecordingUndoState)
-            {
-                _recordingStateList.Push(cell.Copy());
-            }
-        }
+        public event Action? UndoStackChanged;
 
-        public static void FinishRecordingUndoState() 
+        public IEnumerable<string> UndoStack => _undoStack.Select(x => x.Count.ToString());
+
+        public void FinishRecordingUndoState()
         {
+            if (!_isRecordingUndoState) return;
+            if (_isUndoingOrRedoing) return;
             RecordCellStatesOntoUndoStack(_recordingStateList);
             _isRecordingUndoState = false;
         }
 
-        public static void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
+        public void RecordStateIfRecording(CellModel cell)
         {
-            _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
-            _redoStack.Clear();
-        }
-
-        public static void Redo()
-        {
-            ApplyStateFromStack(_redoStack, _undoStack);
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
-        }
-
-        public static void Undo()
-        {
-            ApplyStateFromStack(_undoStack, _redoStack);
-            ApplicationViewModel.Instance.SheetViewModel.UpdateLayout();
-        }
-
-        private static void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)
-        {
-            var redoItems = new List<CellModel>();
-            if (stackToRestoreStateFrom.Count == 0) return;
-            var cellsToRestore = stackToRestoreStateFrom.Pop();
-            foreach (var cellToCopyFrom in cellsToRestore)
+            if (_isUndoingOrRedoing) return;
+            if (_isRecordingUndoState)
             {
-                var cellToRestoreInto = CellTracker.Instance.GetCell(cellToCopyFrom.SheetName, cellToCopyFrom.Row, cellToCopyFrom.Column);
-                if (cellToRestoreInto == null) continue;
-                redoItems.Add(cellToRestoreInto.Copy());
-                RestoreCell(cellToRestoreInto, cellToCopyFrom);
+                if (_recordingStateIdList.Contains(cell.ID)) return;
+                _recordingStateList.Push(cell.Copy());
+                _recordingStateIdList.Add(cell.ID);
             }
-            stackToSaveOldState.Push(redoItems);
+        }
+
+        public void RecordStateIfRecording(IEnumerable<CellModel> cells)
+        {
+            foreach (var cell in cells) RecordStateIfRecording(cell);
+        }
+
+        public void Redo()
+        {
+            _isUndoingOrRedoing = true;
+            ApplyStateFromStack(_redoStack, _undoStack);
+            // TODO: Make this not required.
+            ApplicationViewModel.SafeInstance?.SheetViewModel?.UpdateLayout();
+            _isUndoingOrRedoing = false;
+            UndoStackChanged?.Invoke();
+        }
+
+        public void StartRecordingUndoState()
+        {
+            if (_isRecordingUndoState) return;
+            if (_isUndoingOrRedoing) return;
+            _recordingStateList.Clear();
+            _recordingStateIdList.Clear();
+            _isRecordingUndoState = true;
+        }
+
+        public void Undo()
+        {
+            _isUndoingOrRedoing = true;
+            ApplyStateFromStack(_undoStack, _redoStack);
+            // TODO: Make this not required.
+            ApplicationViewModel.SafeInstance?.SheetViewModel?.UpdateLayout();
+            _isUndoingOrRedoing = false;
+            UndoStackChanged?.Invoke();
         }
 
         private static void RestoreCell(CellModel cellToRestoreInto, CellModel cellToCopyFrom)
@@ -75,24 +85,34 @@ namespace Cell.ViewModel.Application
             cellToRestoreInto.MergedWith = cellToCopyFrom.MergedWith;
             cellToRestoreInto.Text = cellToCopyFrom.Text;
             cellToRestoreInto.Index = cellToCopyFrom.Index;
-            cellToRestoreInto.ColorHexes = cellToCopyFrom.ColorHexes;
-            cellToRestoreInto.SetBackground(cellToCopyFrom.ColorHexes[(int)ColorFor.Background]);
-            cellToRestoreInto.BorderThicknessString = cellToCopyFrom.BorderThicknessString;
-            cellToRestoreInto.ContentBorderThicknessString = cellToCopyFrom.ContentBorderThicknessString;
-            cellToRestoreInto.MarginString = cellToCopyFrom.MarginString;
-            cellToRestoreInto.FontSize = cellToCopyFrom.FontSize;
-            cellToRestoreInto.FontFamily = cellToCopyFrom.FontFamily;
-            cellToRestoreInto.IsFontBold = cellToCopyFrom.IsFontBold;
-            cellToRestoreInto.IsFontItalic = cellToCopyFrom.IsFontItalic;
-            cellToRestoreInto.IsFontStrikethrough = cellToCopyFrom.IsFontStrikethrough;
-            cellToRestoreInto.HorizontalAlignment = cellToCopyFrom.HorizontalAlignment;
-            cellToRestoreInto.VerticalAlignment = cellToCopyFrom.VerticalAlignment;
-            cellToRestoreInto.TextAlignmentForView = cellToCopyFrom.TextAlignmentForView;
             cellToRestoreInto.PopulateFunctionName = cellToCopyFrom.PopulateFunctionName;
             cellToRestoreInto.TriggerFunctionName = cellToCopyFrom.TriggerFunctionName;
             cellToRestoreInto.StringProperties = cellToCopyFrom.StringProperties;
             cellToRestoreInto.BooleanProperties = cellToCopyFrom.BooleanProperties;
             cellToRestoreInto.NumericProperties = cellToCopyFrom.NumericProperties;
+            cellToCopyFrom.Style.CopyTo(cellToRestoreInto.Style);
+        }
+
+        private void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)
+        {
+            var redoItems = new List<CellModel>();
+            if (stackToRestoreStateFrom.Count == 0) return;
+            var cellsToRestore = stackToRestoreStateFrom.Pop();
+            foreach (var cellToCopyFrom in cellsToRestore)
+            {
+                var cellToRestoreInto = _cellTracker.GetCell(cellToCopyFrom.SheetName, cellToCopyFrom.Row, cellToCopyFrom.Column);
+                if (cellToRestoreInto == null) continue;
+                redoItems.Add(cellToRestoreInto.Copy());
+                RestoreCell(cellToRestoreInto, cellToCopyFrom);
+            }
+            stackToSaveOldState.Push(redoItems);
+        }
+
+        private void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
+        {
+            _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
+            _redoStack.Clear();
+            UndoStackChanged?.Invoke();
         }
     }
 }

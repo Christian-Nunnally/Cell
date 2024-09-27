@@ -1,4 +1,5 @@
-﻿using Cell.ViewModel.Cells;
+﻿using Cell.ViewModel.Application;
+using Cell.ViewModel.Cells;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,25 +12,57 @@ namespace Cell.View.Application
         private readonly Dictionary<CellViewModel, FrameworkElement> _viewModelToViewMap = [];
         private Point _initialMousePosition;
         private MatrixTransform _transform = new();
+        private bool _isLockedToCenter = true;
+
         public PanAndZoomCanvas()
         {
             InitializeComponent();
 
-            PreviewMouseDown += PanAndZoomCanvas_MouseDown;
-            PreviewMouseUp += PanAndZoomCanvas_MouseUp;
-            PreviewMouseMove += PanAndZoomCanvas_MouseMove;
-            MouseWheel += PanAndZoomCanvas_MouseWheel;
+            PreviewMouseDown += OnPanAndZoomCanvasMouseDown;
+            PreviewMouseUp += OnPanAndZoomCanvasMouseUp;
+            PreviewMouseMove += OnPanAndZoomCanvasMouseMove;
+            MouseWheel += OnPanAndZoomCanvasMouseWheel;
+            SizeChanged += PanAndZoomCanvasSizeChanged;
+        }
+
+        private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (IsLockedToCenter)
+            {
+                PanSheetToCenter();
+            }
+        }
+
+        private void PanSheetToCenter()
+        {
+            if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
+            if (ActualWidth == 0 || ActualHeight == 0) return;
+            var horizontialCenter = LaidOutWidth / 2 - ActualWidth / CurrentZoom / 2;
+            var verticalCenter = LaidOutHeight / 2 - ActualHeight / CurrentZoom / 2;
+            PanCanvasTo(horizontialCenter, verticalCenter);
         }
 
         public double CurrentZoom { get; set; } = 1.0;
 
         public bool IsPanningEnabled { get; set; } = true;
 
+        public bool IsLockedToCenter
+        {
+            get => _isLockedToCenter; set
+            {
+                _isLockedToCenter = value;
+                PanSheetToCenter();
+            }
+        }
         public double XPan { get; private set; }
 
         public double YPan { get; private set; }
 
-        public double Zoomfactor { get; set; } = 1.1;
+        public double Zoomfactor { get; set; } = 1.15;
+        
+        public double LaidOutWidth { get; internal set; }
+
+        public double LaidOutHeight { get; internal set; }
 
         public void PanCanvasTo(double x, double y)
         {
@@ -133,15 +166,17 @@ namespace Cell.View.Application
             }
         }
 
-        private void PanAndZoomCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        private void OnPanAndZoomCanvasMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (sender is not PanAndZoomCanvas canvas) return;
             if (e.ChangedButton == MouseButton.Right)
             {
                 _initialMousePosition = _transform.Inverse.Transform(e.GetPosition(this));
+                Mouse.Capture(canvas);
             }
         }
 
-        private void PanAndZoomCanvas_MouseMove(object sender, MouseEventArgs e)
+        private void OnPanAndZoomCanvasMouseMove(object sender, MouseEventArgs e)
         {
             if (e.RightButton == MouseButtonState.Pressed)
             {
@@ -155,16 +190,20 @@ namespace Cell.View.Application
             }
         }
 
-        private void PanAndZoomCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+        private void OnPanAndZoomCanvasMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Right)
+            {
+                Mouse.Capture(null);
+            }
         }
 
-        private void PanAndZoomCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void OnPanAndZoomCanvasMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!IsPanningEnabled) return;
             double scaleFactor = Zoomfactor;
             if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
-            ZoomCanvas(e.GetPosition(this), scaleFactor);
+            if (IsPanningEnabled) ZoomCanvas(e.GetPosition(this), scaleFactor);
+            else ZoomCanvas(new Point(ActualWidth/2, ActualHeight/2), scaleFactor);
         }
 
         private void ZoomCanvas(Point centerOfZoom, double scaleFactor)

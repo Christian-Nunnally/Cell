@@ -1,4 +1,6 @@
-﻿namespace Cell.Model.Plugin
+﻿using Cell.Common;
+
+namespace Cell.Model.Plugin
 {
     [Serializable]
     public class TodoItem : PluginModel
@@ -9,8 +11,10 @@
         private DateTime _dueDate = DateTime.Now;
         private bool _isComplete = false;
         private string _notes = string.Empty;
+        private string _parent = string.Empty;
         private int _priority = 0;
         private int _status = 0;
+        private string _taskID = Utilities.GenerateUnqiueId(12);
         private string _title = string.Empty;
         public string Category
         {
@@ -48,6 +52,12 @@
             set { if (value != _notes) { _notes = value; OnPropertyChanged(nameof(Notes)); } }
         }
 
+        public string Parent
+        {
+            get => _parent;
+            set { if (value != _parent) { _parent = value; OnPropertyChanged(nameof(Parent)); } }
+        }
+
         public int Priority
         {
             get => _priority;
@@ -60,15 +70,39 @@
             set { if (value != _status) { _status = value; OnPropertyChanged(nameof(Status)); } }
         }
 
+        public string TaskID
+        {
+            get => _taskID;
+            set { if (value != _taskID) { _taskID = value; OnPropertyChanged(nameof(TaskID)); } }
+        }
+
         public string Title
         {
             get => _title;
             set { if (value != _title) { _title = value; OnPropertyChanged(nameof(Title)); } }
         }
 
+        public override object Clone()
+        {
+            return new TodoItem
+            {
+                Category = Category,
+                CompletionDate = CompletionDate,
+                CreationDate = CreationDate,
+                DueDate = DueDate,
+                IsComplete = IsComplete,
+                Notes = Notes,
+                Priority = Priority,
+                Status = Status,
+                Title = Title,
+                Parent = Parent,
+                TaskID = TaskID
+            };
+        }
+
         override public string ToString()
         {
-            return $"{Priority} - {(IsComplete ? "✅" : "❎")} {Title} - {Notes}";
+            return $"{(IsComplete ? "✅" : "❎")} {Title}";
         }
     }
 }

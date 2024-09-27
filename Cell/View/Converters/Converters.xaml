@@ -3,12 +3,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:Cell.View.Converters"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
-    <BooleanToVisibilityConverter x:Key="btv" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
     <xctk:InverseBoolConverter x:Key="InverseBoolConverter" />
     <xctk:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />
     <xctk:AdditionConverter x:Key="AdditionConverter" />
     <xctk:ColorModeToTabItemSelectedConverter x:Key="ColorModeToTabItemSelectedConverter" />
     <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
-    <converters:RGBHexColorConverter x:Key="HexToColorConverter" />
+    <converters:HexToColorConverter x:Key="HexToColorConverter" />
+    <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
 </ResourceDictionary>

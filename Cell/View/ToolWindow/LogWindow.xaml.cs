@@ -1,60 +1,19 @@
 ﻿using Cell.Common;
-using Cell.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class LogWindow : UserControl, IResizableToolWindow
+    public partial class LogWindow : ResizableToolWindow
     {
-        private readonly LogWindowViewModel _viewModel;
-        public LogWindow(LogWindowViewModel viewModel)
+        private LogWindowViewModel LogWindowViewModel => (LogWindowViewModel)ToolViewModel;
+        public LogWindow(LogWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
-
-        public double GetHeight()
-        {
-            return ApplicationSettings.Instance.FunctionManagerWindowHeight;
-        }
-
-        public string GetTitle() => "Logs";
-
-        public List<CommandViewModel> GetToolBarCommands()
-        {
-            return
-            [
-                new("Clear", new RelayCommand(x => _viewModel.ClearBuffer()))
-            ];
-        }
-
-        public double GetWidth()
-        {
-            return ApplicationSettings.Instance.FunctionManagerWindowWidth;
-        }
-
-        public bool HandleBeingClosed()
-        {
-            return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            ApplicationSettings.Instance.FunctionManagerWindowHeight = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            ApplicationSettings.Instance.FunctionManagerWindowWidth = width;
-            _viewModel.UserSetWidth = width;
-        }
+        public override List<CommandViewModel> ToolBarCommands => [
+            new("Clear", new RelayCommand(x => LogWindowViewModel.ClearBuffer()))
+        ];
     }
 }

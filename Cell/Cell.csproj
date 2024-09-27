@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <StartupObject>Cell.App</StartupObject>
+    <ApplicationIcon>ApplicationResources\cellIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="ApplicationResources\cellIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <PackageReference Include="Doxygen" Version="1.8.14">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.6.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
     <PackageReference Include="Wpf.Controls.PanAndZoom" Version="2.3.4" />
@@ -22,6 +31,18 @@
 
   <ItemGroup>
     <Resource Include="View\Skin\Colors.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="View\ToolWindow\ResizableToolWindow.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="View\ToolWindow\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 
 </Project>

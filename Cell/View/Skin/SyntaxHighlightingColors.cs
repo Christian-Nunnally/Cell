@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace Cell.View.Skin
 {
-    internal static class SyntaxHighlightingColors
+    public static class SyntaxHighlightingColors
     {
         public static void ApplySyntaxHighlightingToEditor(TextEditor editor)
         {

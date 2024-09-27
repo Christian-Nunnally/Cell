@@ -1,15 +1,18 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types.Special">
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types">
     <DataTemplate DataType="{x:Type viewModel:ColumnCellViewModel}">
-        <Grid>
-            <Label
-                Padding="0"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="{Binding Text}"
-                Foreground="{StaticResource ForegroundColor}" />
-        </Grid>
+        <TextBlock
+            Margin="3"
+            HorizontalAlignment="{Binding HorizontalAlignmentForView}"
+            VerticalAlignment="{Binding VerticalAlignmentForViewCenter}"
+            FontFamily="{Binding Font}"
+            FontSize="{Binding FontSize}"
+            FontStyle="{Binding FontStyleForView}"
+            FontWeight="{Binding FontWeightForView}"
+            Text="{Binding Path=Text}"
+            TextAlignment="{Binding TextAlignmentForView}"
+            TextDecorations="{Binding TextDecorationsForView}" />
     </DataTemplate>
 </ResourceDictionary>

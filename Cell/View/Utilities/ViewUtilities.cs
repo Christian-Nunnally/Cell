@@ -1,6 +1,4 @@
-﻿using Cell.View.ToolWindow;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 
 namespace Cell.View
@@ -11,10 +9,10 @@ namespace Cell.View
         {
             if (sender is FrameworkElement element)
             {
-                if (element.DataContext is T cellViewModel)
+                if (element.DataContext is T dataContextObject)
                 {
 
-                    dataContext = cellViewModel;
+                    dataContext = dataContextObject;
                     return true;
                 }
             }

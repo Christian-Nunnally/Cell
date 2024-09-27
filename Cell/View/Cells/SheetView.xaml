@@ -12,10 +12,6 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <ListBox
-        Grid.RowSpan="3"
-        Grid.ColumnSpan="3"
-        Margin="0"
-        Padding="0"
         Background="{StaticResource CellBackground}"
         BorderThickness="0"
         ItemsSource="{Binding Path=CellViewModels}">
@@ -74,12 +70,12 @@
                                     BorderThickness="2"
                                     IsHitTestVisible="False"
                                     SnapsToDevicePixels="True"
-                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource btv}}">
+                                    Visibility="{Binding ShouldShowSelectionBorder, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <Rectangle
                                         Fill="{Binding SelectionColor}"
                                         IsHitTestVisible="False"
                                         SnapsToDevicePixels="True"
-                                        Visibility="{Binding ShouldShowSelectionFill, Converter={StaticResource btv}}" />
+                                        Visibility="{Binding ShouldShowSelectionFill, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 </Border>
                             </Grid>
                         </ControlTemplate>

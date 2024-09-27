@@ -10,7 +10,7 @@ namespace Cell.Model.Plugin
     [JsonDerivedType(typeof(TransactionItem), typeDiscriminator: "transactionItem")]
     [JsonDerivedType(typeof(BudgetCategoryItem), typeDiscriminator: "budgetCategoryItem")]
     [JsonDerivedType(typeof(FoodItem), typeDiscriminator: "foodItem")]
-    public class PluginModel : INotifyPropertyChanged
+    public class PluginModel : INotifyPropertyChanged, ICloneable
     {
         private static List<string>? _cachedDataTypeNames;
         private string _id = Utilities.GenerateUnqiueId(12);
@@ -29,6 +29,11 @@ namespace Cell.Model.Plugin
                 .Where(x => x.BaseType == typeof(PluginModel))
                 .Select(x => x.Name)
                 .ToList();
+        }
+
+        public virtual object Clone()
+        {
+            return new PluginModel();
         }
 
         public void OnPropertyChanged(string propertyName)

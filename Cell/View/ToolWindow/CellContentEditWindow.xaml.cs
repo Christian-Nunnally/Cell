@@ -1,45 +1,26 @@
-﻿using Cell.Common;
-using Cell.Persistence;
-using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells;
-using Cell.ViewModel.Cells.Types;
+﻿using Cell.ViewModel.Application;
+using Cell.ViewModel.ToolWindow;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
-    /// <summary>
-    /// Interaction logic for CellTextEditBar.xaml
-    /// </summary>
-    public partial class CellContentEditWindow : UserControl, IToolWindow
+    public partial class CellContentEditWindow : ResizableToolWindow
     {
-        public CellContentEditWindow()
+        public CellContentEditWindow(CellContentEditWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
         }
 
-        public Action? RequestClose { get; set; }
-
-        public string GetTitle()
-        {
-            var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModel;
-            if (currentlySelectedCell is null) return "Select a cell to edit";
-            return $"Content editor - {currentlySelectedCell.GetName()}";
-        }
-
-        public List<CommandViewModel> GetToolBarCommands() => [
-            new CommandViewModel("Auto-Index", new RelayCommand(x => IndexSelectedCells())) {ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected."},
+        public override List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
             ];
 
-        public bool HandleBeingClosed()
-        {
-            return true;
-        }
+        private CellContentEditWindowViewModel CellContentEditWindowViewModel => (CellContentEditWindowViewModel)ToolViewModel;
 
         private static void IndexSelectedCells()
         {
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.SelectedCellViewModels.ToList();
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.CellSelector.SelectedCells.ToList();
             var leftmost = selectedCells.Select(x => x.Column).Min();
             var topmost = selectedCells.Select(x => x.Row).Min();
             var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
@@ -57,45 +38,12 @@ namespace Cell.View.ToolWindow
 
         private void EditPopulateFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.PopulateFunctionName)) cell.PopulateFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("object", cell.PopulateFunctionName);
-                var editor = new CodeEditorWindow(function, x =>
-                {
-                    function.SetUserFriendlyCode(x, cell.Model);
-                    (cell as ListCellViewModel)?.UpdateList();
-                }, cell.Model);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
-            }
+            CellContentEditWindowViewModel.EditPopulateFunction();
         }
 
         private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ViewUtilities.TryGetSendersDataContext<CellViewModel>(sender, out var cell))
-            {
-                if (string.IsNullOrEmpty(cell.TriggerFunctionName)) cell.TriggerFunctionName = "Untitled";
-                var function = PluginFunctionLoader.GetOrCreateFunction("void", cell.TriggerFunctionName);
-                var editor = new CodeEditorWindow(function, x =>
-                {
-                    function.SetUserFriendlyCode(x, cell.Model);
-                }, cell.Model);
-                ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
-            }
-        }
-
-        private void TextBoxKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-        }
-
-        private void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && Keyboard.Modifiers != ModifierKeys.Shift)
-            {
-                if (e.Key == Key.Enter && sender is TextBox textbox) textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                e.Handled = true;
-            }
+            CellContentEditWindowViewModel.EditTriggerFunction();
         }
     }
 }

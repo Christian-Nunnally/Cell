@@ -1,143 +1,88 @@
 ﻿using Cell.Data;
-using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class CollectionManagerWindow : UserControl, IResizableToolWindow
+    public partial class CollectionManagerWindow : ResizableToolWindow
     {
-        private readonly CollectionManagerWindowViewModel _viewModel;
-        public CollectionManagerWindow(CollectionManagerWindowViewModel viewModel)
+        private CollectionManagerWindowViewModel CollectionManagerWindowViewModel => (CollectionManagerWindowViewModel)ToolViewModel;
+        public CollectionManagerWindow(CollectionManagerWindowViewModel viewModel) : base(viewModel)
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
-            _viewModel.UserSetWidth = GetWidth();
-            _viewModel.UserSetHeight = GetHeight();
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
         }
 
-        public Action? RequestClose { get; set; }
+        public override List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("New Collection", CollectionManagerWindowViewModel.OpenCreateCollectionWindow),
+            ];
 
-        public double GetHeight()
+        public override void HandleBeingClosed()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowHeight;
+            base.HandleBeingClosed();
+            CollectionManagerWindowViewModel.PropertyChanged -= CollectionManagerWindowPropertyChanged;
         }
 
-        public string GetTitle() => "Collection Manager";
-
-        public List<CommandViewModel> GetToolBarCommands() => [];
-
-        public double GetWidth()
+        public override void HandleBeingShown()
         {
-            return ApplicationSettings.Instance.FunctionManagerWindowWidth;
+            base.HandleBeingShown();
+            CollectionManagerWindowViewModel.PropertyChanged += CollectionManagerWindowPropertyChanged;
         }
 
-        public bool HandleBeingClosed()
+        private void CollectionManagerWindowPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            return true;
-        }
-
-        public void SetHeight(double height)
-        {
-            ApplicationSettings.Instance.FunctionManagerWindowHeight = height;
-            _viewModel.UserSetHeight = height;
-        }
-
-        public void SetWidth(double width)
-        {
-            ApplicationSettings.Instance.FunctionManagerWindowWidth = width;
-            _viewModel.UserSetWidth = width;
-        }
-
-        private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            _viewModel.AddCurrentCollection();
-        }
-
-        private void DeleteCollectionButtonClicked(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (sender is Button button && button.DataContext is UserCollection collection)
+            if (e.PropertyName == nameof(CollectionManagerWindowViewModel.SelectedItemSerialized))
             {
-                if (collection.UsageCount != 0)
-                {
-                    DialogWindow.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it is being used by {collection.UsageCount} functions.");
-                    return;
-                }
-
-                var conflictingBase = _viewModel.Collections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
-                if (conflictingBase != null)
-                {
-                    DialogWindow.ShowDialog("Collection in use", $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.");
-                    return;
-                }
-
-                DialogWindow.ShowYesNoConfirmationDialog($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
-                {
-                    if (collection.Items.Count > 0)
-                    {
-                        DialogWindow.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () =>
-                        {
-                            UserCollectionLoader.DeleteCollection(collection);
-                        });
-                    }
-                    else
-                    {
-                        UserCollectionLoader.DeleteCollection(collection);
-                    }
-                });
+                _itemJsonEditor.Text = CollectionManagerWindowViewModel.SelectedItemSerialized;
+                CollectionManagerWindowViewModel.IsSaveItemJsonButtonVisible = false;
             }
+        }
+
+        private void DeleteCollectionButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.DataContext is not UserCollection collection) return;
+            if (!CollectionManagerWindowViewModel.CanDeleteCollection(collection, out var reason))
+            {
+                DialogFactory.ShowDialog("Unable to delete collection", $"Cannot delete '{collection.Model.Name}' because {reason}");
+                return;
+            }
+            DialogFactory.ShowYesNoConfirmationDialog($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
+            {
+                if (collection.Items.Count == 0) CollectionManagerWindowViewModel.DeleteCollection(collection);
+                else DialogFactory.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () => CollectionManagerWindowViewModel.DeleteCollection(collection));
+            });
         }
 
         private void EditSortAndFilterFunctionButtonClick(object sender, RoutedEventArgs e)
         {
-            var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
+            var functionName = CollectionManagerWindowViewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
-            var function = PluginFunctionLoader.GetOrCreateFunction("object", functionName);
-            var editor = new CodeEditorWindow(function, x =>
-            {
-                function.SetUserFriendlyCode(x, null);
-                _viewModel.SelectedCollection?.RefreshSortAndFilter();
-            }, null);
-            ApplicationViewModel.Instance.MainWindow.ShowToolWindow(editor, true);
-        }
+            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
 
-        private void GoToCellButtonClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is CellModel cell)
-            {
-                ApplicationViewModel.Instance.GoToCell(cell);
-                ApplicationViewModel.Instance.GoToCell(cell);
-            }
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap);
+            ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
 
         private void ItemJsonEditorTextChanged(object sender, EventArgs e)
         {
-        }
-
-        private void ItemsInSelectedCollectionListBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _itemJsonEditor.Text = _viewModel.SelectedItemSerialized;
+            CollectionManagerWindowViewModel.IsSaveItemJsonButtonVisible = true;
         }
 
         private void RemoveItemFromCollectionClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is PluginModel item)
-            {
-                var selectedCollection = _viewModel.SelectedCollection;
-                selectedCollection?.RemoveAll(item);
-            }
+            if (sender is not Button button || button.DataContext is not PluginModel item) return;
+            CollectionManagerWindowViewModel.RemoveItemFromSelectedCollection(item);
         }
 
         private void SaveSelectedItemJsonButtonClick(object sender, RoutedEventArgs e)
         {
-            _viewModel.SelectedItemSerialized = _itemJsonEditor.Text;
+            CollectionManagerWindowViewModel.SelectedItemSerialized = _itemJsonEditor.Text;
         }
     }
 }

@@ -1,0 +1,86 @@
+﻿<view:ResizableToolWindow
+    x:Class="Cell.View.ToolWindow.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
+    d:DataContext="{d:DesignInstance Type=viewModel:SettingsWindowViewModel}"
+    d:DesignHeight="360"
+    d:DesignWidth="400"
+    mc:Ignorable="d">
+    <Grid>
+        <StackPanel>
+            <Button
+                Click="TogglePanLockButtonClick"
+                Content="Lock Pan for Current Sheet"
+                DockPanel.Dock="Left"
+                ToolTip="Toggles the ability to pan on the current sheet. Useful for using a sheet as a nice UI." />
+            <Button
+                Click="ToggleCenterLockButtonClick"
+                Content="Snap position of sheet to center"
+                DockPanel.Dock="Left"
+                ToolTip="Toggles auto snapping to center" />
+            <Button
+                Click="ToggleAbilityToSelectCells"
+                Content="Toggle ability to select cells"
+                DockPanel.Dock="Left"
+                ToolTip="Toggles whether cells can be selected. Can be useful for using a sheet as a UI." />
+            <ToggleButton
+                Content="Highlight Populate Cell Dependencies of Selected Cell"
+                DockPanel.Dock="Left"
+                IsChecked="{Binding ApplicationSettings.HighlightPopulateCellDependencies}"
+                ToolTip="When enabled, selecting a single cell will cause cells used by the populate function to highlight." />
+            <ToggleButton
+                Content="Highlight Trigger Cell Dependencies of Selected Cell"
+                DockPanel.Dock="Left"
+                IsChecked="{Binding ApplicationSettings.HighlightTriggerCellDependencies}"
+                ToolTip="When enabled, selecting a single cell will cause cells used by the trigger function to highlight." />
+            <ToggleButton
+                Content="Highlight Populate Collection Dependencies of Selected Cell"
+                DockPanel.Dock="Left"
+                IsChecked="{Binding ApplicationSettings.HighlightPopulateCollectionDependencies}"
+                ToolTip="When enabled, selecting a single cell will cause collections used by the populate function to highlight." />
+            <ToggleButton
+                Content="Highlight Trigger Collection Dependencies of Selected Cell"
+                DockPanel.Dock="Left"
+                IsChecked="{Binding ApplicationSettings.HighlightTriggerCollectionDependencies}"
+                ToolTip="When enabled, selecting a single cell will cause collections used by the trigger function to highlight." />
+            <Button
+                Click="ShowLogWindowButtonClick"
+                Content="Open Application Logs Window"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="ShowUndoRedoStackWindowButtonClick"
+                Content="Open Undo/Redo Window"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="OpenSaveLocationButtonClicked"
+                Content="Open Save Directory in Explorer"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="CreateBackupButtonClicked"
+                Content="Create Backup (Also created every time application opens)"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="RestoreFromBackupButtonClicked"
+                Content="Restore from Backup (Closes the application)"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="PrintCurrentSheetButtonClicked"
+                Content="Print Active Sheet"
+                DockPanel.Dock="Left" />
+            <Button
+                Click="DefaultCellFormatEditorButtonClicked"
+                Content="Default Cell Format Editor"
+                DockPanel.Dock="Left"
+                ToolTip="Edit the deault format of newly created cells" />
+            <Button
+                Click="DefaultRowColumnCellFormatEditorButtonClicked"
+                Content="Default Row/Column Cell Format Editor"
+                DockPanel.Dock="Left"
+                ToolTip="Edit the deault format of newly created cells" />
+        </StackPanel>
+    </Grid>
+</view:ResizableToolWindow>

@@ -1,84 +1,44 @@
 ﻿using Cell.Common;
-using Cell.Execution;
-using Cell.Persistence;
-using Cell.View.Skin;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
-using Cell.ViewModel.Cells.Types.Special;
-using Cell.ViewModel.Execution;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
-using System.Windows;
 
 namespace Cell.Model
 {
     public class CellModel : PropertyChangedBase
     {
-        public static readonly CellModel Empty = new();
-        private string borderThickness = "1";
-        private CellType cellType = CellType.None;
-        private string[] colorHexes = [
-            ColorConstants.BackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ControlBackgroundColorConstantHex,
-            ColorConstants.BorderColorConstantHex,
-            ColorConstants.ForegroundColorConstantHex,
-            ColorConstants.AccentColorConstantHex];
-        private int column;
-        private string contentBorderThickness = "1";
-        private string errorText = string.Empty;
-        private string font = "Consolas";
-        private double fontSize = 10;
-        private double height;
-        private HorizontalAlignment horizontalAlignment = HorizontalAlignment.Center;
-        private string id = Utilities.GenerateUnqiueId(12);
-        private int index = 0;
-        private bool isFontBold = false;
-        private bool isFontItalic = false;
-        private bool isFontStrikethrough = false;
-        private string margin = "0";
-        private string mergedWith = string.Empty;
-        private string populateFunctionName = string.Empty;
-        private int row;
-        private string sheetName = string.Empty;
-        private string text = string.Empty;
-        private TextAlignment textAlignment = TextAlignment.Center;
-        private string triggerFunctionName = string.Empty;
-        private VerticalAlignment verticalAlignment = VerticalAlignment.Center;
-        private double width;
-        public event Action<CellModel>? AfterCellEdited;
-
-        public event Action<CellModel, EditContext>? CellTriggered;
+        public static readonly CellModel Null = new();
+        private CellStyleModel _cellStyle = new();
+        private CellType _cellType = CellType.None;
+        private int _column;
+        private string _errorText = string.Empty;
+        private double _height;
+        private string _id = Utilities.GenerateUnqiueId(12);
+        private int _index = 0;
+        private string _mergedWith = string.Empty;
+        private string _populateFunctionName = string.Empty;
+        private int _row;
+        private string _sheetName = string.Empty;
+        private string _text = string.Empty;
+        private string _triggerFunctionName = string.Empty;
+        private double _width;
+        public CellModel()
+        {
+            _cellStyle.PropertyChanged += StylePropertyChangedHandler;
+        }
 
         public Dictionary<string, bool> BooleanProperties { get; set; } = [];
 
-        public string BorderThicknessString
-        {
-            get { return borderThickness; }
-            set { if (borderThickness == value) return; borderThickness = value; NotifyPropertyChanged(nameof(BorderThicknessString)); }
-        }
-
         public CellType CellType
         {
-            get => cellType;
-            set { if (cellType != value) { cellType = value; NotifyPropertyChanged(nameof(CellType)); } }
-        }
-
-        public string[] ColorHexes
-        {
-            get { return colorHexes; }
-            set { if (colorHexes == value) return; colorHexes = value; NotifyPropertyChanged(nameof(ColorHexes)); }
+            get => _cellType;
+            set { if (_cellType != value) { _cellType = value; NotifyPropertyChanged(nameof(CellType)); } }
         }
 
         public int Column
         {
-            get => column;
-            set { if (column != value) { column = value; NotifyPropertyChanged(nameof(Column)); } }
-        }
-
-        public string ContentBorderThicknessString
-        {
-            get { return contentBorderThickness; }
-            set { if (contentBorderThickness == value) return; contentBorderThickness = value; NotifyPropertyChanged(nameof(ContentBorderThicknessString)); }
+            get => _column;
+            set { if (_column != value) { _column = value; NotifyPropertyChanged(nameof(Column)); } }
         }
 
         [JsonIgnore]
@@ -87,169 +47,102 @@ namespace Cell.Model
         [JsonIgnore]
         public string ErrorText
         {
-            get { return errorText; }
-            set { if (errorText != value) { errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
-        }
-
-        public string FontFamily
-        {
-            get { return font; }
-            set { if (font == value) return; font = value; NotifyPropertyChanged(nameof(FontFamily)); }
-        }
-
-        public double FontSize
-        {
-            get { return fontSize; }
-            set { if (fontSize == value) return; fontSize = value; NotifyPropertyChanged(nameof(FontSize)); }
+            get => _errorText;
+            set { if (_errorText != value) { _errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
         }
 
         public double Height
         {
-            get => height;
-            set { if (height != value) { height = value; NotifyPropertyChanged(nameof(Height)); } }
-        }
-
-        public HorizontalAlignment HorizontalAlignment
-        {
-            get { return horizontalAlignment; }
-            set { if (horizontalAlignment == value) return; horizontalAlignment = value; NotifyPropertyChanged(nameof(HorizontalAlignment)); }
+            get => _height;
+            set { if (_height != value) { _height = value; NotifyPropertyChanged(nameof(Height)); } }
         }
 
         public string ID
         {
-            get => id;
-            set { if (id != null) { id = value; NotifyPropertyChanged(nameof(ID)); } }
+            get => _id;
+            set { if (_id != null) { _id = value; NotifyPropertyChanged(nameof(ID)); } }
         }
 
         public int Index
         {
-            get { return index; }
-            set { if (index != value) { index = value; NotifyPropertyChanged(nameof(Index)); } }
+            get => _index;
+            set { if (_index != value) { _index = value; NotifyPropertyChanged(nameof(Index)); } }
         }
 
-        public bool IsFontBold
-        {
-            get { return isFontBold; }
-            set { if (isFontBold == value) return; isFontBold = value; NotifyPropertyChanged(nameof(IsFontBold)); }
-        }
-
-        public bool IsFontItalic
-        {
-            get { return isFontItalic; }
-            set { if (isFontItalic == value) return; isFontItalic = value; NotifyPropertyChanged(nameof(IsFontItalic)); }
-        }
-
-        public bool IsFontStrikethrough
-        {
-            get { return isFontStrikethrough; }
-            set { if (isFontStrikethrough == value) return; isFontStrikethrough = value; NotifyPropertyChanged(nameof(IsFontStrikethrough)); }
-        }
-
-        public string MarginString
-        {
-            get { return margin; }
-            set { if (margin == value) return; margin = value; NotifyPropertyChanged(nameof(MarginString)); }
-        }
+        [JsonIgnore]
+        public int Int { get => int.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
 
         public string MergedWith
         {
-            get => mergedWith;
-            set { if (mergedWith != value) { mergedWith = value; NotifyPropertyChanged(nameof(MergedWith)); } }
+            get => _mergedWith;
+            set { if (_mergedWith != value) { _mergedWith = value; NotifyPropertyChanged(nameof(MergedWith)); } }
         }
 
         public Dictionary<string, double> NumericProperties { get; set; } = [];
 
         public string PopulateFunctionName
         {
-            get { return populateFunctionName; }
+            get => _populateFunctionName;
             set
             {
-                if (populateFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function))
-                {
-                    function.StopListeningForDependencyChanges(this);
-                }
-                populateFunctionName = value;
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function2))
-                {
-                    function2.StartListeningForDependencyChanges(this);
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
-                }
+                if (_populateFunctionName == value) return;
+                _populateFunctionName = value;
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
             }
         }
 
         public int Row
         {
-            get => row;
-            set { if (row != value) { row = value; NotifyPropertyChanged(nameof(Row)); } }
+            get => _row;
+            set { if (_row != value) { _row = value; NotifyPropertyChanged(nameof(Row)); } }
         }
 
         public string SelectedItem => GetStringProperty(nameof(ListCellViewModel.SelectedItem));
 
         public string SheetName
         {
-            get => sheetName;
-            set 
+            get => _sheetName;
+            set
             {
-                if (sheetName == value) return;
-                sheetName = value; 
+                if (_sheetName == value) return;
+                _sheetName = value;
                 NotifyPropertyChanged(nameof(SheetName));
-
-                if (PluginFunctionLoader.TryGetFunction("object", populateFunctionName, out var function1))
-                {
-                    var _ = function1.CompiledMethod;
-                    UpdateDependencySubscriptions(function1);
-                }
-
-                if (PluginFunctionLoader.TryGetFunction("object", triggerFunctionName, out var function2))
-                {
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
-                }
             }
         }
 
         public Dictionary<string, string> StringProperties { get; set; } = [];
 
-        public string Text
+        public CellStyleModel Style
         {
-            get { return text; }
+            get => _cellStyle;
             set
             {
-                if (text == value) return;
-                var oldValue = text;
-                text = value;
-                NotifyPropertyChanged(nameof(Text));
-                CellTriggered?.Invoke(this, new EditContext(nameof(Text), text, oldValue));
-                AfterCellEdited?.Invoke(this);
+                if (_cellStyle == value) return;
+                if (_cellStyle != null) _cellStyle.PropertyChanged -= StylePropertyChangedHandler;
+                _cellStyle = value;
+                if (_cellStyle != null) _cellStyle.PropertyChanged += StylePropertyChangedHandler;
+                NotifyPropertyChanged(nameof(Style));
             }
         }
 
-        public TextAlignment TextAlignmentForView
+        public string Text
         {
-            get { return textAlignment; }
-            set { if (textAlignment == value) return; textAlignment = value; NotifyPropertyChanged(nameof(TextAlignment)); }
+            get => _text;
+            set
+            {
+                if (_text == value) return;
+                _text = value;
+                NotifyPropertyChanged(nameof(Text));
+            }
         }
 
         public string TriggerFunctionName
         {
-            get { return triggerFunctionName; }
+            get => _triggerFunctionName;
             set
             {
-                if (triggerFunctionName == value) return;
-                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function))
-                {
-                    function.StopListeningForDependencyChanges(this);
-                }
-                triggerFunctionName = value;
-                if (PluginFunctionLoader.TryGetFunction("void", triggerFunctionName, out var function2))
-                {
-                    function2.StartListeningForDependencyChanges(this);
-                    var _ = function2.CompiledMethod;
-                    UpdateDependencySubscriptions(function2);
-                }
+                if (_triggerFunctionName == value) return;
+                _triggerFunctionName = value;
                 NotifyPropertyChanged(nameof(TriggerFunctionName));
             }
         }
@@ -259,37 +152,27 @@ namespace Cell.Model
         [JsonIgnore]
         public double Value { get => double.TryParse(Text, out var value) ? value : 0; set => Text = value.ToString(); }
 
-        public VerticalAlignment VerticalAlignment
-        {
-            get { return verticalAlignment; }
-            set { if (verticalAlignment == value) return; verticalAlignment = value; NotifyPropertyChanged(nameof(VerticalAlignment)); }
-        }
-
         public double Width
         {
-            get => width;
-            set { if (width != value) { width = value; NotifyPropertyChanged(nameof(Width)); } }
+            get => _width;
+            set { if (_width != value) { _width = value; NotifyPropertyChanged(nameof(Width)); } }
         }
 
         public bool GetBooleanProperty(string key) => BooleanProperties.TryGetValue(key, out var value) && value;
+
+        public bool GetBooleanProperty(string key, bool defaultValue)
+        {
+            return BooleanProperties.TryGetValue(key, out var value) ? value : defaultValue;
+        }
 
         public double GetNumericProperty(string key, double defaultValue = 0) => NumericProperties.TryGetValue(key, out var value) ? value : defaultValue;
 
         public string GetStringProperty(string key) => StringProperties.TryGetValue(key, out var value) ? value : string.Empty;
 
-        public void PopulateText()
+        public void SetBackgrounds(string color)
         {
-            if (string.IsNullOrEmpty(PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(new PluginContext(ApplicationViewModel.Instance, Index), this);
-            if (result.Result == null) return;
-            if (result.Success) Text = result.Result;
-            else ErrorText = result.Result;
-        }
-
-        public void SetBackground(string color)
-        {
-            ColorHexes[(int)ColorFor.Background] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
+            Style.BackgroundColor = color;
+            Style.ContentBackgroundColor = color;
         }
 
         public void SetBooleanProperty(string key, bool value)
@@ -303,44 +186,16 @@ namespace Cell.Model
             NotifyPropertyChanged(nameof(BooleanProperties), key);
         }
 
-        public void SetBorder(string color)
+        public void SetBorders(string color)
         {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.Border] == color) return;
-            ColorHexes[(int)ColorFor.Border] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
+            Style.BorderColor = color;
+            Style.ContentBorderColor = color;
         }
 
-        public void SetContentBackground(string color)
+        public void SetColor(string color)
         {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentBackground] == color) return;
-            ColorHexes[(int)ColorFor.ContentBackground] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetContentBorder(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentBorder] == color) return;
-            ColorHexes[(int)ColorFor.ContentBorder] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetContentHighlight(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.ContentHighlight] == color) return;
-            ColorHexes[(int)ColorFor.ContentHighlight] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
-        }
-
-        public void SetForeground(string color)
-        {
-            if (!Utilities.IsHexidecimalColorCode().IsMatch(color)) return;
-            if (ColorHexes[(int)ColorFor.Foreground] == color) return;
-            ColorHexes[(int)ColorFor.Foreground] = color;
-            NotifyPropertyChanged(nameof(ColorHexes));
+            SetBackgrounds(color);
+            SetBorders(color);
         }
 
         public void SetItems(IEnumerable<object> objects)
@@ -380,47 +235,9 @@ namespace Cell.Model
 
         public override string ToString() => Text;
 
-        public void TriggerCellEdited(EditContext editContext) => CellTriggered?.Invoke(this, editContext);
-
-        public void UpdateDependencySubscriptions(FunctionViewModel function)
+        private void StylePropertyChangedHandler(object? sender, PropertyChangedEventArgs e)
         {
-            if (function.Model.ReturnType == "void") return;
-            if (string.IsNullOrWhiteSpace(SheetName)) return;
-
-            CellPopulateManager.UnsubscribeFromAllLocationUpdates(this);
-            CellPopulateManager.UnsubscribeFromAllCollectionUpdates(this);
-            if (!string.IsNullOrWhiteSpace(function.Model.Code))
-            {
-                foreach (var locationDependency in function.LocationDependencies)
-                {
-                    var sheetName = string.IsNullOrWhiteSpace(locationDependency.SheetName) ? SheetName : locationDependency.SheetName;
-
-                    var row = locationDependency.ResolveRow(this);
-                    var column = locationDependency.ResolveColumn(this);
-                    if (row == Row && column == Column) continue;
-                    if (locationDependency.IsRange)
-                    {
-                        var rowRangeEnd = locationDependency.ResolveRowRangeEnd(this);
-                        var columnRangeEnd = locationDependency.ResolveColumnRangeEnd(this);
-                        for (var r = row; r <= rowRangeEnd; r++)
-                        {
-                            for (var c = column; c <= columnRangeEnd; c++)
-                            {
-                                CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, r, c);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        CellPopulateManager.SubscribeToUpdatesAtLocation(this, sheetName, row, column);
-                    }
-                }
-                CellPopulateManager.SubscribeToUpdatesAtLocation(this, SheetName, Row, Column);
-                foreach (var collectionName in function.CollectionDependencies)
-                {
-                    CellPopulateManager.SubscribeToCollectionUpdates(this, collectionName);
-                }
-            }
+            NotifyPropertyChanged(nameof(Style));
         }
     }
 }

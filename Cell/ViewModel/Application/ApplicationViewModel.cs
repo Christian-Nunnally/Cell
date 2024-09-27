@@ -1,41 +1,71 @@
 ﻿using Cell.Common;
 using Cell.Data;
+using Cell.Execution;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
+using Cell.View.Cells;
+using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
-using System.Collections.ObjectModel;
+using Cell.ViewModel.ToolWindow;
 
 namespace Cell.ViewModel.Application
 {
     public class ApplicationViewModel : PropertyChangedBase
     {
-        private const int BottomPanelHeight = 0;
-        private const int LeftPanelHeight = 215;
-        private const int RightPanelHeight = 0;
-        private const int TopPanelHeight = 35;
-        public readonly ApplicationView MainWindow;
-        private readonly CellClipboard _cellClipboard = new();
-        public bool AreEditingPanelsOpen;
-        private static ApplicationViewModel? instance;
+        public const string NoMigratorForVersionError = "Unable to load version";
+        private readonly CellClipboard _cellClipboard;
+        private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
+        private static ApplicationViewModel? _instance;
+        private ApplicationView? _applicationView;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private bool _isAddingSheet;
-        private string _newSheetName = string.Empty;
-        private int editingSpaceBottom;
-        private int editingSpaceLeft;
-        private int editingSpaceRight;
-        private int editingSpaceTop;
-        private SheetViewModel sheetViewModel = SheetViewModelFactory.GetOrCreate(ApplicationSettings.Instance.LastLoadedSheet);
-        private ApplicationViewModel(ApplicationView mainWindow)
+        private bool _isProjectLoaded;
+        private bool _isProjectLoading;
+        private SheetViewModel? _sheetViewModel;
+        private Task _backupTask;
+
+        public ApplicationViewModel(
+            PersistedDirectory persistenceManager,
+            PersistedProject persistedProject,
+            PluginFunctionLoader pluginFunctionLoader,
+            CellLoader cellLoader,
+            CellTracker cellTracker,
+            UserCollectionLoader userCollectionLoader,
+            CellPopulateManager cellPopulateManager,
+            CellTriggerManager cellTriggerManager,
+            SheetTracker sheetTracker,
+            CellSelector cellSelector,
+            TitleBarSheetNavigationViewModel titleBarSheetNavigationViewModel,
+            ApplicationSettings applicationSettings,
+            UndoRedoManager undoRedoManager,
+            CellClipboard cellClipboard,
+            BackupManager backupManager)
         {
-            MainWindow = mainWindow;
+            PersistenceManager = persistenceManager;
+            PersistedProject = persistedProject;
+            PluginFunctionLoader = pluginFunctionLoader;
+            CellLoader = cellLoader;
+            CellTracker = cellTracker;
+            UserCollectionLoader = userCollectionLoader;
+            CellPopulateManager = cellPopulateManager;
+            CellTriggerManager = cellTriggerManager;
+            SheetTracker = sheetTracker;
+            CellSelector = cellSelector;
+            TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
+            ApplicationSettings = applicationSettings;
+            UndoRedoManager = undoRedoManager;
+            _cellClipboard = cellClipboard;
+            BackupManager = backupManager;
         }
 
-        public static ApplicationViewModel Instance { get => instance ?? throw new NullReferenceException("Application instance not set"); private set => instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
+        public static ApplicationViewModel Instance { get => _instance ?? throw new NullReferenceException("Application instance not set"); set => _instance = value ?? throw new NullReferenceException("Static instances not allowed to be null"); }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Binding")]
-        public ApplicationSettings ApplicationSettings => ApplicationSettings.Instance;
+        public static ApplicationViewModel? SafeInstance => _instance;
+
+        public SheetView? ActiveSheetView => _applicationView?.ActiveSheetView;
+
+        public ApplicationSettings ApplicationSettings { get; private set; }
 
         public double ApplicationWindowHeight
         {
@@ -57,158 +87,203 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public int EditingSpaceBottom
+        public BackupManager BackupManager { get; private set; }
+
+        public CellLoader CellLoader { get; private set; }
+
+        public CellPopulateManager CellPopulateManager { get; private set; }
+
+        public CellSelector CellSelector { get; private set; }
+
+        public CellTracker CellTracker { get; private set; }
+
+        public CellTriggerManager CellTriggerManager { get; private set; }
+
+        public bool IsProjectLoaded
         {
-            get => editingSpaceBottom;
+            get => _isProjectLoaded;
             set
             {
-                editingSpaceBottom = value;
-                NotifyPropertyChanged(nameof(EditingSpaceBottom));
+                if (_isProjectLoaded == value) return;
+                _isProjectLoaded = value;
+                NotifyPropertyChanged(nameof(IsProjectLoaded));
             }
         }
 
-        public int EditingSpaceLeft
+        public PersistedProject PersistedProject { get; private set; }
+
+        public PersistedDirectory PersistenceManager { get; private set; }
+
+        public PluginFunctionLoader PluginFunctionLoader { get; private set; }
+
+        public SheetTracker SheetTracker { get; private set; }
+
+        public SheetViewModel? SheetViewModel
         {
-            get => editingSpaceLeft;
+            get { return _sheetViewModel; }
             set
             {
-                editingSpaceLeft = value;
-                NotifyPropertyChanged(nameof(EditingSpaceLeft));
-            }
-        }
-
-        public int EditingSpaceRight
-        {
-            get => editingSpaceRight;
-            set
-            {
-                editingSpaceRight = value;
-                NotifyPropertyChanged(nameof(EditingSpaceRight));
-            }
-        }
-
-        public int EditingSpaceTop
-        {
-            get => editingSpaceTop;
-            set
-            {
-                editingSpaceTop = value;
-                NotifyPropertyChanged(nameof(EditingSpaceTop));
-            }
-        }
-
-        public bool IsAddingSheet
-        {
-            get => _isAddingSheet;
-            set
-            {
-                _isAddingSheet = value;
-                NotifyPropertyChanged(nameof(IsAddingSheet));
-            }
-        }
-
-        public string NewSheetName
-        {
-            get => _newSheetName;
-            set
-            {
-                _newSheetName = value;
-                NotifyPropertyChanged(nameof(NewSheetName));
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Binding")]
-        public ObservableCollection<string> SheetNames => CellTracker.Instance.SheetNames;
-
-        public SheetViewModel SheetViewModel
-        {
-            get { return sheetViewModel; }
-            set
-            {
-                sheetViewModel = value;
+                _sheetViewModel = value;
                 NotifyPropertyChanged(nameof(SheetViewModel));
             }
         }
 
-        public static ApplicationViewModel GetOrCreateInstance(ApplicationView mainWindow)
+        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
+
+        public UndoRedoManager UndoRedoManager { get; private set; }
+
+        public UserCollectionLoader UserCollectionLoader { get; private set; }
+
+        public static UndoRedoManager? GetUndoRedoManager()
         {
-            instance ??= new ApplicationViewModel(mainWindow);
-            return instance;
+            if (_instance == null) return null;
+            return Instance.UndoRedoManager;
         }
 
-        public void ChangeSelectedCellsType(CellType newType)
+        public void AttachToView(ApplicationView applicationView)
         {
-            UndoRedoManager.RecordCellStatesOntoUndoStack(SheetViewModel.SelectedCellViewModels.Select(x => x.Model));
-            var selectedCells = SheetViewModel.SelectedCellViewModels.ToList();
-            foreach (var selectedCell in selectedCells)
-            {
-                selectedCell.CellType = newType;
-            }
-            selectedCells.ForEach(x => SheetViewModel.SelectCell(x.Model));
-            SheetViewModel.UpdateLayout();
+            _applicationView = applicationView;
+            _applicationView.DataContext = this;
         }
 
-        public void CloseEditingPanels()
+        public void CopySelectedCells(bool copyTextOnly)
         {
-            AreEditingPanelsOpen = false;
-            EditingSpaceTop = 0;
-            EditingSpaceBottom = 0;
-            EditingSpaceLeft = 0;
-            EditingSpaceRight = 0;
+            if (SheetViewModel == null) return;
+            _cellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
-        public void OpenEditingPanels()
-        {
-            AreEditingPanelsOpen = true;
-            EditingSpaceTop = TopPanelHeight;
-            EditingSpaceBottom = BottomPanelHeight;
-            EditingSpaceLeft = LeftPanelHeight;
-            EditingSpaceRight = RightPanelHeight;
-        }
-
-        public bool ToggleEditingPanels()
-        {
-            if (AreEditingPanelsOpen)
-            {
-                CloseEditingPanels();
-                return false;
-            }
-            OpenEditingPanels();
-            return true;
-        }
-
-        internal void CopySelectedCells(bool copyTextOnly)
-        {
-            _cellClipboard.CopySelectedCells(SheetViewModel, copyTextOnly);
-        }
-
-        internal void GoToCell(CellModel cellModel)
+        public void GoToCell(CellModel cellModel)
         {
             GoToSheet(cellModel.SheetName);
-            var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
-            if (cell is not null) MainWindow.ActiveSheetView?.PanAndZoomCanvas?.PanCanvasTo(cell.X, cell.Y);
+            var cell = SheetViewModel?.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
+            if (cell is not null) ActiveSheetView?.PanCanvasTo(cell.X, cell.Y);
         }
 
-        internal void GoToSheet(string sheetName)
+        public void GoToSheet(string sheetName)
         {
-            if (SheetViewModel.SheetName == sheetName) return;
-            SheetViewModel = SheetViewModelFactory.GetOrCreate(sheetName);
-            if (!sheetViewModel.CellViewModels.Any()) sheetViewModel.LoadCellViewModels();
-            MainWindow.ShowSheetView(sheetViewModel);
-            ApplicationSettings.Instance.LastLoadedSheet = sheetName;
+            if (!SheetModel.IsValidSheetName(sheetName)) return;
+            if (SheetViewModel?.SheetName == sheetName) return;
+            var sheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == sheetName);
+            if (sheet == null) return;
+            SheetViewModel?.CellSelector.UnselectAllCells();
+            if (_sheetModelToViewModelMap.TryGetValue(sheet, out SheetViewModel? existingSheetViewModel))
+            {
+                SheetViewModel = existingSheetViewModel;
+            }
+            else
+            {
+                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, CellSelector, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
+                _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
+            }
+            _applicationView?.ShowSheetView(SheetViewModel);
+            ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
-        internal void PasteCopiedCells()
+        public LoadingProgressResult Load()
         {
+            var progress = LoadWithProgress();
+            while (!progress.IsComplete) progress = progress.Continue();
+            return progress;
+        }
+
+        public LoadingProgressResult LoadWithProgress()
+        {
+            if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
+            if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
+            _isProjectLoading = true;
+            return new LoadingProgressResult("Checking for migration", LoadPhase1);
+        }
+
+        public void PasteCopiedCells()
+        {
+            if (SheetViewModel == null) return;
             UndoRedoManager.StartRecordingUndoState();
-            _cellClipboard.PasteCopiedCells(SheetViewModel);
+            if (SheetViewModel.SelectedCellViewModel != null) _cellClipboard.PasteIntoCells(SheetViewModel.SelectedCellViewModel.Model, SheetViewModel.CellSelector.SelectedCells);
+            SheetViewModel.UpdateLayout();
             UndoRedoManager.FinishRecordingUndoState();
         }
 
-        internal static void RenameSheet(string oldSheetName, string newSheetName)
+        public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
-            if (oldSheetName == newSheetName) return;
-            CellTracker.Instance.RenameSheet(oldSheetName, newSheetName);
+            _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
+        }
+
+        public void ShowToolWindow(ResizableToolWindow content, bool allowDuplicates = false)
+        {
+            _applicationView?.ShowToolWindow(content, allowDuplicates);
+        }
+
+        private LoadingProgressResult LoadPhase1()
+        {
+            if (PersistedProject.NeedsMigration())
+            {
+                if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
+                DialogFactory.ShowYesNoConfirmationDialog(
+                    "Version Mismatch",
+                    $"The version of your project is outdated. would you like to migrate it?",
+                    MigrateProject,
+                    () => { });
+                return new LoadingProgressResult(false, "Migration needed, try loading again.");
+            }
+
+            PersistedProject.SaveVersion();
+            _backupTask = BackupAsync();
+            return new LoadingProgressResult("Loading Collections", LoadPhase2);
+        }
+
+        private async Task BackupAsync()
+        {
+            await Task.Run(() =>
+            {
+                PersistedProject.IsReadOnly = true;
+                BackupManager.CreateBackup();
+                PersistedProject.IsReadOnly = false;
+            });
+        }
+
+        private LoadingProgressResult LoadPhase2()
+        {
+            UserCollectionLoader.LoadCollections();
+            return new LoadingProgressResult("Loading Plugins", LoadPhase3);
+        }
+
+        private LoadingProgressResult LoadPhase3()
+        {
+            PluginFunctionLoader.LoadPlugins();
+            return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
+        }
+
+        private LoadingProgressResult LoadPhase4()
+        {
+            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            return new LoadingProgressResult("Loading Cells", LoadPhase5);
+        }
+
+        private LoadingProgressResult LoadPhase5()
+        {
+            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = false;
+            var cells = CellLoader.LoadCells();
+            foreach (var cell in cells)
+            {
+                CellTracker.AddCell(cell, false);
+            }
+            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = true;
+            return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
+        }
+
+        private LoadingProgressResult LoadPhase6()
+        {
+            _backupTask.Wait();
+            IsProjectLoaded = true;
+            _isProjectLoading = false;
+            return new LoadingProgressResult(true, "Load Complete");
+        }
+
+        private void MigrateProject()
+        {
+            BackupManager.CreateBackup("PreMigration");
+            PersistedProject.Migrate();
+            DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
         }
     }
 }

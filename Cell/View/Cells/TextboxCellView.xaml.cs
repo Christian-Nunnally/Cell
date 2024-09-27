@@ -24,23 +24,43 @@ namespace Cell.View.Cells
             }
         }
 
-        private void TextBoxKeyDownForCell(object sender, KeyEventArgs e)
+        private void PreviewTextBoxKeyDownForCell(object sender, KeyEventArgs e)
         {
             if (sender is not TextBox textbox) return;
             if (e.Key == Key.Enter)
             {
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionUp();
-                else ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector.MoveSelectionUp();
+                else ApplicationViewModel.Instance.CellSelector.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Tab)
             {
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionLeft();
-                else ApplicationViewModel.Instance.SheetViewModel?.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector.MoveSelectionLeft();
+                else ApplicationViewModel.Instance.CellSelector.MoveSelectionRight();
                 e.Handled = true;
             }
+            else if (e.Key == Key.Down)
+            {
+                ApplicationViewModel.Instance.CellSelector.MoveSelectionDown();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Up)
+            {
+                ApplicationViewModel.Instance.CellSelector.MoveSelectionUp();
+                e.Handled = true;
+            }
+        }
+
+        private void CellTextBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CellTextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

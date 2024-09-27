@@ -1,590 +1,782 @@
-﻿<UserControl
+﻿<view:ResizableToolWindow
     x:Class="Cell.View.ToolWindow.CellFormatEditWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cell="clr-namespace:Cell.ViewModel.Cells"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:Cell.View"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:special="clr-namespace:Cell.ViewModel.Cells.Types.Special"
-    xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types"
+    xmlns:view="clr-namespace:Cell.View.ToolWindow"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    d:DataContext="{d:DesignInstance Type=cell:CellViewModel}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DataContext="{d:DesignInstance Type=viewModel:CellFormatEditWindowViewModel}"
+    d:DesignHeight="200"
+    d:DesignWidth="230"
     mc:Ignorable="d">
-    <ContentControl Content="{Binding}">
-        <ContentControl.Resources>
-            <DataTemplate DataType="{x:Type special:RowCellViewModel}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Height" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=Height, UpdateSourceTrigger=LostFocus}" />
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <ToggleButton
+                x:Name="DeleteRowOrColumnPopupButton"
+                Height="20"
+                Content="x"
+                FontSize="14"
+                Foreground="{StaticResource ErrorForegroundColor}">
+                <ToggleButton.Style>
+                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                        <Setter Property="IsHitTestVisible" Value="True" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{StaticResource CellBorderColor}"
+                                        BorderThickness="1">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=DeleteRowOrColumnPopup, Path=IsOpen}" Value="True">
+                                <Setter Property="IsHitTestVisible" Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+            <Popup
+                x:Name="DeleteRowOrColumnPopup"
+                IsOpen="{Binding IsChecked, ElementName=DeleteRowOrColumnPopupButton, Mode=TwoWay}"
+                PlacementTarget="{Binding ElementName=DeleteRowOrColumnPopupButton}">
+                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                    <StackPanel>
+                        <Button
+                            Click="DeleteRowButtonClicked"
+                            Content="Delete row(s)"
+                            Foreground="{StaticResource ErrorForegroundColor}" />
+                        <Button
+                            Click="DeleteColumnButtonClicked"
+                            Content="Delete columns(s)"
+                            Foreground="{StaticResource ErrorForegroundColor}" />
                     </StackPanel>
-                    <Button Click="CreateNewRowAboveButtonClicked" Content="Insert Row Above" />
-                    <Button Click="CreateNewRowBelowButtonClicked" Content="Insert Row Below" />
-                    <Button Click="DeleteRowButtonClicked" Content="Delete Row" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type special:ColumnCellViewModel}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <Label Width="100" Content="Width" />
-                        <TextBox
-                            Width="100"
-                            KeyDown="TextBoxKeyDown"
-                            Text="{Binding Path=Width, UpdateSourceTrigger=LostFocus}" />
-                    </StackPanel>
-                    <Button Click="CreateNewColumnToTheLeftButtonClicked" Content="Insert Column to Left" />
-                    <Button Click="CreateNewColumnToTheRightButtonClicked" Content="Insert Column to Right" />
-                    <Button Click="DeleteColumnButtonClicked" Content="Delete Column" />
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type cell:CellViewModel}">
-                <StackPanel>
-                    <Grid>
-                        <xctk:ColorPicker
-                            Height="150"
-                            ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
-                            Foreground="{StaticResource ForegroundColor}"
-                            Loaded="ColorPicker_Loaded"
-                            SelectedColor="{Binding BorderColorHex, Converter={StaticResource HexToColorConverter}}"
-                            Style="{StaticResource TestColorPicker}" />
-                        <xctk:ColorPicker
-                            Margin="10"
-                            ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
-                            Foreground="{StaticResource ForegroundColor}"
-                            Loaded="ColorPicker_Loaded"
-                            SelectedColor="{Binding BackgroundColorHex, Converter={StaticResource HexToColorConverter}}"
-                            Style="{StaticResource TestColorPicker}" />
-                        <xctk:ColorPicker
-                            Margin="30"
-                            ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
-                            Foreground="{StaticResource ForegroundColor}"
-                            Loaded="ColorPicker_Loaded"
-                            SelectedColor="{Binding ContentBorderColorHex, Converter={StaticResource HexToColorConverter}}"
-                            Style="{StaticResource TestColorPicker}" />
-                        <xctk:ColorPicker
-                            Margin="40"
-                            ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
-                            Foreground="{StaticResource ForegroundColor}"
-                            Loaded="ColorPicker_Loaded"
-                            SelectedColor="{Binding ContentBackgroundColorHex, Converter={StaticResource HexToColorConverter}}"
-                            Style="{StaticResource TestColorPicker}" />
-                        <Grid Margin="40">
-                            <ToggleButton
-                                x:Name="TextFormattingTogglePopupButton"
-                                Grid.Row="1"
-                                Grid.Column="1">
-                                <ToggleButton.Style>
-                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                                        <Setter Property="Background" Value="{StaticResource ControlBackground}" />
-                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
-                                        <Setter Property="IsHitTestVisible" Value="True" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                                    <TextBlock
-                                                        Grid.Row="1"
-                                                        Grid.Column="1"
-                                                        Padding="0"
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        FontFamily="{Binding FontFamily}"
-                                                        FontSize="20"
-                                                        FontStyle="{Binding FontStyleForView}"
-                                                        FontWeight="{Binding FontWeightForView}"
-                                                        Text="Text"
-                                                        TextDecorations="{Binding TextDecorationsForView}">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="{Binding ForegroundColor}" />
-                                                                <Style.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                                        <Setter Property="Foreground" Value="{StaticResource SelectedBorderColor}" />
-                                                                    </Trigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=TextFormattingPopup, Path=IsOpen}" Value="True">
-                                                <Setter Property="IsHitTestVisible" Value="False" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ToggleButton.Style>
-                            </ToggleButton>
-                            <Popup
-                                x:Name="TextFormattingPopup"
-                                IsOpen="{Binding IsChecked, ElementName=TextFormattingTogglePopupButton, Mode=TwoWay}"
-                                PlacementTarget="{Binding ElementName=TextFormattingTogglePopupButton}">
-                                <Border
-                                    Background="{StaticResource CellBackground}"
-                                    BorderBrush="{StaticResource SelectedBorderColor}"
-                                    BorderThickness="4">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox
-                                                Width="125"
-                                                KeyDown="TextBoxKeyDown"
-                                                Text="{Binding Path=FontFamily, UpdateSourceTrigger=LostFocus}" />
-                                            <TextBox
-                                                Width="25"
-                                                HorizontalContentAlignment="Center"
-                                                KeyDown="TextBoxKeyDown"
-                                                Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" />
-                                            <ToggleButton
-                                                Width="25"
-                                                Content="b"
-                                                FontWeight="Bold"
-                                                IsChecked="{Binding IsFontBold}" />
-                                            <ToggleButton
-                                                Width="25"
-                                                Content="i"
-                                                FontStyle="Italic"
-                                                IsChecked="{Binding IsFontItalic}" />
-                                            <ToggleButton Width="25" IsChecked="{Binding IsFontStrikethrough}">
-                                                <TextBlock Text="s" TextDecorations="Strikethrough" />
-                                            </ToggleButton>
+                </Border>
+            </Popup>
+        </Grid>
+        <Grid Grid.Row="1" Margin="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="10" />
+            </Grid.RowDefinitions>
+            <Path
+                Data="M 0,1 L .5,0 L 1,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+            <Line
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Line
+                Grid.Row="1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Line
+                Grid.Row="2"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1=".5"
+                X2=".5"
+                Y1="0"
+                Y2="1" />
+            <Path
+                Grid.Row="2"
+                Data="M 0,0 L .5,1 L 1,0"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+        </Grid>
+        <Grid Grid.Column="1" Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="10" />
+            </Grid.ColumnDefinitions>
+            <Path
+                Data="M 1,0 L 0,.5 L 1,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+            <Line
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Line
+                Grid.Column="1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Line
+                Grid.Column="2"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeEndLineCap="Triangle"
+                StrokeStartLineCap="Triangle"
+                StrokeThickness="1"
+                X1="0"
+                X2="1"
+                Y1=".5"
+                Y2=".5" />
+            <Path
+                Grid.Column="2"
+                Data="M 0,0 L 1,.5 L 0,1"
+                Stretch="Fill"
+                Stroke="White"
+                StrokeThickness="1" />
+        </Grid>
+        <TextBox
+            Grid.Row="1"
+            Width="60"
+            Height="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ClipToBounds="False"
+            PreviewKeyDown="TextBoxPreviewKeyDown"
+            Text="{Binding Height, Mode=TwoWay}">
+            <TextBox.LayoutTransform>
+                <RotateTransform Angle="-90" CenterX="10" CenterY="10" />
+            </TextBox.LayoutTransform>
+        </TextBox>
+        <TextBox
+            Grid.Column="1"
+            Width="60"
+            Height="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            ClipToBounds="False"
+            PreviewKeyDown="TextBoxPreviewKeyDown"
+            Text="{Binding Width, Mode=TwoWay}" />
+        <Grid Grid.Row="1" Grid.Column="1">
+            <xctk:ColorPicker
+                ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
+                Foreground="{StaticResource ForegroundColor}"
+                Loaded="ColorPicker_Loaded"
+                SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}"
+                Style="{StaticResource TestColorPicker}" />
+            <xctk:ColorPicker
+                Margin="15"
+                ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
+                Foreground="{StaticResource ForegroundColor}"
+                Loaded="ColorPicker_Loaded"
+                SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}"
+                Style="{StaticResource TestColorPicker}" />
+            <xctk:ColorPicker
+                Margin="45"
+                ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
+                Foreground="{StaticResource ForegroundColor}"
+                Loaded="ColorPicker_Loaded"
+                SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}"
+                Style="{StaticResource TestColorPicker}" />
+            <xctk:ColorPicker
+                Margin="60"
+                ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
+                Foreground="{StaticResource ForegroundColor}"
+                Loaded="ColorPicker_Loaded"
+                SelectedColor="{Binding ContentBackgroundColor, Converter={StaticResource HexToColorConverter}}"
+                Style="{StaticResource TestColorPicker}" />
+            <Grid Margin="40">
+                <ToggleButton
+                    x:Name="TextFormattingTogglePopupButton"
+                    Grid.Row="1"
+                    Grid.Column="1">
+                    <ToggleButton.Style>
+                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Background" Value="{StaticResource ControlBackground}" />
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                            <Setter Property="IsHitTestVisible" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Padding="0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontFamily="{Binding Font}"
+                                            FontSize="20"
+                                            FontStyle="{Binding FontStyleForView}"
+                                            FontWeight="{Binding FontWeightForView}"
+                                            Text="Text"
+                                            TextDecorations="{Binding TextDecorationsForView}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="{StaticResource SelectedBorderColor}" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=TextFormattingPopup, Path=IsOpen}" Value="True">
+                                    <Setter Property="IsHitTestVisible" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Popup
+                    x:Name="TextFormattingPopup"
+                    AllowsTransparency="True"
+                    IsOpen="{Binding IsChecked, ElementName=TextFormattingTogglePopupButton, Mode=TwoWay}"
+                    PlacementTarget="{Binding ElementName=TextFormattingTogglePopupButton}">
+                    <Border
+                        Background="{StaticResource CellBackground}"
+                        BorderBrush="{StaticResource SelectedBorderColor}"
+                        BorderThickness="4">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox
+                                    Width="125"
+                                    PreviewKeyDown="TextBoxPreviewKeyDown"
+                                    Text="{Binding Path=Font, UpdateSourceTrigger=LostFocus}" />
+                                <TextBox
+                                    Width="25"
+                                    HorizontalContentAlignment="Center"
+                                    PreviewKeyDown="TextBoxPreviewKeyDown"
+                                    Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" />
+                                <ToggleButton
+                                    Width="25"
+                                    Content="b"
+                                    FontWeight="Bold"
+                                    IsChecked="{Binding IsFontBold}" />
+                                <ToggleButton
+                                    Width="25"
+                                    Content="i"
+                                    FontStyle="Italic"
+                                    IsChecked="{Binding IsFontItalic}" />
+                                <ToggleButton Width="25" IsChecked="{Binding IsFontStrikethrough}">
+                                    <TextBlock Text="s" TextDecorations="Strikethrough" />
+                                </ToggleButton>
 
-                                        </StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <xctk:ColorPicker
-                                                Width="25"
-                                                ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
-                                                Foreground="{StaticResource ForegroundColor}"
-                                                Loaded="ColorPicker_Loaded"
-                                                SelectedColor="{Binding ForegroundColorHex, Converter={StaticResource HexToColorConverter}}" />
-                                            <Label Width="75" Content="Foreground" />
-                                            <xctk:ColorPicker
-                                                Width="25"
-                                                ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
-                                                Loaded="ColorPicker_Loaded"
-                                                SelectedColor="{Binding ContentHighlightColorHex, Converter={StaticResource HexToColorConverter}}" />
-                                            <Label Width="75" Content="Highlight" />
-                                            <Grid>
-                                                <ToggleButton
-                                                    x:Name="TogglePopupButton"
-                                                    Width="25"
-                                                    Content="⇆"
-                                                    FontSize="14">
-                                                    <ToggleButton.Style>
-                                                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                                                            <Setter Property="Background" Value="{StaticResource ControlBackground}" />
-                                                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
-                                                            <Setter Property="IsHitTestVisible" Value="True" />
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                                                        <Border
-                                                                            Background="{TemplateBinding Background}"
-                                                                            BorderBrush="{StaticResource CellBorderColor}"
-                                                                            BorderThickness="1">
-                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                                        </Border>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ElementName=Popup, Path=IsOpen}" Value="True">
-                                                                    <Setter Property="IsHitTestVisible" Value="False" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ToggleButton.Style>
-                                                </ToggleButton>
-                                                <Popup
-                                                    x:Name="Popup"
-                                                    IsOpen="{Binding IsChecked, ElementName=TogglePopupButton, Mode=TwoWay}"
-                                                    PlacementTarget="{Binding ElementName=TogglePopupButton}">
-                                                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
-                                                        <StackPanel>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Button
-                                                                    Click="SetAlignmentToTopLeftButtonClick"
-                                                                    Content="↖"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToTopButtonClick"
-                                                                    Content="↑"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToTopRightButtonClick"
-                                                                    Content="↗"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                            </StackPanel>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Button
-                                                                    Click="SetAlignmentToLeftButtonClick"
-                                                                    Content="←"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToCenterButtonClick"
-                                                                    Content="•"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToRightButtonClick"
-                                                                    Content="→"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                            </StackPanel>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Button
-                                                                    Click="SetAlignmentToBottomLeftButtonClick"
-                                                                    Content="↙"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToBottomButtonClick"
-                                                                    Content="↓"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetAlignmentToBottomRightButtonClick"
-                                                                    Content="↘"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                            </StackPanel>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Button
-                                                                    Click="SetTextAlignmentToLeftButtonClick"
-                                                                    Content="←"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetTextAlignmentToCenterButtonClick"
-                                                                    Content="•"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                                <Button
-                                                                    Click="SetTextAlignmentToRightButtonClick"
-                                                                    Content="→"
-                                                                    Style="{StaticResource AlignmentButtonStyle}" />
-                                                            </StackPanel>
-                                                        </StackPanel>
-                                                    </Border>
-                                                </Popup>
-                                            </Grid>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <xctk:ColorPicker
+                                    Width="25"
+                                    ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                    Foreground="{StaticResource ForegroundColor}"
+                                    Loaded="ColorPicker_Loaded"
+                                    SelectedColor="{Binding ForegroundColor, Converter={StaticResource HexToColorConverter}}" />
+                                <Label Width="75" Content="Foreground" />
+                                <xctk:ColorPicker
+                                    Width="25"
+                                    ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                    Loaded="ColorPicker_Loaded"
+                                    SelectedColor="{Binding ContentHighlightColor, Converter={StaticResource HexToColorConverter}}" />
+                                <Label Width="75" Content="Highlight" />
+                                <Grid>
+                                    <ToggleButton
+                                        x:Name="TogglePopupButton"
+                                        Width="25"
+                                        Content="⇆"
+                                        FontSize="14">
+                                        <ToggleButton.Style>
+                                            <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                                                <Setter Property="Background" Value="{StaticResource ControlBackground}" />
+                                                <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                                                <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                                                <Setter Property="IsHitTestVisible" Value="True" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                            <Border
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{StaticResource CellBorderColor}"
+                                                                BorderThickness="1">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=Popup, Path=IsOpen}" Value="True">
+                                                        <Setter Property="IsHitTestVisible" Value="False" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
+                                    <Popup
+                                        x:Name="Popup"
+                                        AllowsTransparency="True"
+                                        IsOpen="{Binding IsChecked, ElementName=TogglePopupButton, Mode=TwoWay}"
+                                        PlacementTarget="{Binding ElementName=TogglePopupButton}">
+                                        <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button
+                                                        Click="SetAlignmentToTopLeftButtonClick"
+                                                        Content="↖"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToTopButtonClick"
+                                                        Content="↑"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToTopRightButtonClick"
+                                                        Content="↗"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button
+                                                        Click="SetAlignmentToLeftButtonClick"
+                                                        Content="←"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToCenterButtonClick"
+                                                        Content="•"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToRightButtonClick"
+                                                        Content="→"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button
+                                                        Click="SetAlignmentToBottomLeftButtonClick"
+                                                        Content="↙"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToBottomButtonClick"
+                                                        Content="↓"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetAlignmentToBottomRightButtonClick"
+                                                        Content="↘"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Button
+                                                        Click="SetTextAlignmentToLeftButtonClick"
+                                                        Content="←"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetTextAlignmentToCenterButtonClick"
+                                                        Content="•"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                    <Button
+                                                        Click="SetTextAlignmentToRightButtonClick"
+                                                        Content="→"
+                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
 
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="0,45"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding BorderThicknessLeft}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="0,45"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding BorderThicknessRight}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="10,65"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BackgroundColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding MarginLeft}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="10,65"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BackgroundColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding MarginRight}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="30,65"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding ContentBorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding ContentBorderThicknessLeft}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="30,65"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding ContentBorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding ContentBorderThicknessRight}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="70,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Text="{Binding BorderThicknessTop}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="70,0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding BorderThicknessBottom}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="90,10"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BackgroundColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Text="{Binding MarginTop}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="90,10"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding BackgroundColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding MarginBottom}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="90,30"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding ContentBorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Text="{Binding ContentBorderThicknessTop}" />
-                        <TextBox
-                            Width="20"
-                            Height="20"
-                            Margin="90,30"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Center"
-                            Background="{Binding ContentBackgroundColor}"
-                            BorderBrush="{Binding ContentBorderColor}"
-                            BorderThickness="2"
-                            FontWeight="Bold"
-                            Foreground="{Binding ForegroundColor}"
-                            Opacity=".5"
-                            Text="{Binding ContentBorderThicknessBottom}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="0,45"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding BorderThicknessLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="0,45"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding BorderThicknessRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="20,45"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding MarginLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="20,45"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding MarginRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="40,45"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding ContentBorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding ContentBorderThicknessLeft}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="40,45"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding ContentBorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding ContentBorderThicknessRight}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding BorderThicknessTop}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding BorderThicknessBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding MarginTop}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,20"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding BackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding MarginBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,40"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding ContentBorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding ContentBorderThicknessTop}" />
+            <TextBox
+                Width="20"
+                Height="20"
+                Margin="45,40"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                HorizontalContentAlignment="Center"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderBrush="{Binding ContentBorderColor, Converter={StaticResource HexToBrushConverter}}"
+                BorderThickness="2"
+                FontWeight="Bold"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource HexToBrushConverter}}"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                Text="{Binding ContentBorderThicknessBottom}"
+                Visibility="{Binding IsDetailedBorderEditingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                        <Grid>
-                            <ToggleButton
-                                x:Name="MergeTogglePopupButton"
-                                Width="25"
-                                Height="25"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom"
-                                Content="⇔"
-                                FontSize="16">
-                                <ToggleButton.Style>
-                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                                        <Setter Property="Background" Value="{StaticResource CellBackground}" />
-                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                                        <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
-                                        <Setter Property="IsHitTestVisible" Value="True" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                                    <Border
-                                                        Background="{TemplateBinding Background}"
-                                                        BorderBrush="{StaticResource CellBorderColor}"
-                                                        BorderThickness="1"
-                                                        CornerRadius="4">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=MergePopup, Path=IsOpen}" Value="True">
-                                                <Setter Property="IsHitTestVisible" Value="False" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ToggleButton.Style>
-                            </ToggleButton>
-                            <Popup
-                                x:Name="MergePopup"
-                                IsOpen="{Binding IsChecked, ElementName=MergeTogglePopupButton, Mode=TwoWay}"
-                                PlacementTarget="{Binding ElementName=MergeTogglePopupButton}">
-                                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
-                                    <StackPanel>
-                                        <Button
-                                            Width="70"
-                                            Click="MergeButtonClicked"
-                                            Content="Merge" />
-                                        <Button
-                                            Width="70"
-                                            Click="MergeAcrossButtonClicked"
-                                            Content="Across" />
-                                        <Button
-                                            Width="70"
-                                            Click="MergeDownButtonClicked"
-                                            Content="Down" />
-                                        <Button
-                                            Width="70"
-                                            Click="UnmergeButtonClicked"
-                                            Content="Unmerge" />
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
+            <Grid>
+                <ToggleButton
+                    x:Name="MergeTogglePopupButton"
+                    Width="25"
+                    Height="25"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Content="⇔"
+                    FontSize="16">
+                    <ToggleButton.Style>
+                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Background" Value="{StaticResource CellBackground}" />
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
+                            <Setter Property="IsHitTestVisible" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{StaticResource CellBorderColor}"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=MergePopup, Path=IsOpen}" Value="True">
+                                    <Setter Property="IsHitTestVisible" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Popup
+                    x:Name="MergePopup"
+                    IsOpen="{Binding IsChecked, ElementName=MergeTogglePopupButton, Mode=TwoWay}"
+                    PlacementTarget="{Binding ElementName=MergeTogglePopupButton}">
+                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                        <StackPanel>
+                            <Button
+                                Width="70"
+                                Click="MergeButtonClicked"
+                                Content="Merge" />
+                            <Button
+                                Width="70"
+                                Click="MergeAcrossButtonClicked"
+                                Content="Across" />
+                            <Button
+                                Width="70"
+                                Click="MergeDownButtonClicked"
+                                Content="Down" />
+                            <Button
+                                Width="70"
+                                Click="UnmergeButtonClicked"
+                                Content="Unmerge" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
 
-                        <Grid>
-                            <ToggleButton
-                                x:Name="TypeTogglePopupButton"
-                                Margin="46,40"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Top"
-                                Content="{Binding CellType}"
-                                FontSize="10">
-                                <ToggleButton.Style>
-                                    <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
-                                        <Setter Property="Background" Value="Transparent" />
-                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                                        <Setter Property="IsHitTestVisible" Value="True" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=TypePopup, Path=IsOpen}" Value="True">
-                                                <Setter Property="IsHitTestVisible" Value="False" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ToggleButton.Style>
-                            </ToggleButton>
-                            <Popup
-                                x:Name="TypePopup"
-                                IsOpen="{Binding IsChecked, ElementName=TypeTogglePopupButton, Mode=TwoWay}"
-                                PlacementTarget="{Binding ElementName=TypeTogglePopupButton}">
-                                <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
-                                    <StackPanel>
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Label" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Textbox" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Checkbox" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Button" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Dropdown" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="List" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Progress" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Graph" />
-                                        <Button
-                                            Width="70"
-                                            Click="ChangeCellTypeCellClicked"
-                                            Content="Date" />
-                                    </StackPanel>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </Grid>
-                </StackPanel>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type special:CornerCellViewModel}">
-                <Label />
-            </DataTemplate>
-        </ContentControl.Resources>
-    </ContentControl>
-</UserControl>
+            <Grid>
+                <ToggleButton
+                    x:Name="TypeTogglePopupButton"
+                    Margin="25,17"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="{Binding CellType}"
+                    FontSize="12">
+                    <ToggleButton.Style>
+                        <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+                            <Setter Property="IsHitTestVisible" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=TypePopup, Path=IsOpen}" Value="True">
+                                    <Setter Property="IsHitTestVisible" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Popup
+                    x:Name="TypePopup"
+                    IsOpen="{Binding IsChecked, ElementName=TypeTogglePopupButton, Mode=TwoWay}"
+                    PlacementTarget="{Binding ElementName=TypeTogglePopupButton}">
+                    <Border BorderBrush="{StaticResource SelectedBorderColor}" BorderThickness="4">
+                        <StackPanel>
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Label" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Textbox" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Checkbox" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Button" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Dropdown" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="List" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Progress" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Graph" />
+                            <Button
+                                Width="70"
+                                Click="ChangeCellTypeCellClicked"
+                                Content="Date" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Grid>
+        <Button
+            Grid.Row="1"
+            Width="20"
+            Height="20"
+            Margin="0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Click="CreateNewRowAboveButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Row="1"
+            Width="20"
+            Height="20"
+            Margin="0,20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Click="CreateNewRowBelowButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Column="1"
+            Width="20"
+            Height="20"
+            Margin="20,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="CreateNewColumnToTheLeftButtonClicked"
+            Content="➕"
+            FontSize="10" />
+        <Button
+            Grid.Column="1"
+            Width="20"
+            Height="20"
+            Margin="20,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Click="CreateNewColumnToTheRightButtonClicked"
+            Content="➕"
+            FontSize="10" />
+    </Grid>
+</view:ResizableToolWindow>
