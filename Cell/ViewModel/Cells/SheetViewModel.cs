@@ -128,6 +128,7 @@ namespace Cell.ViewModel.Cells
         {
             RemoveCellViewModel(cellViewModel.Model);
             AddCellViewModel(cellViewModel.Model);
+            UpdateLayout();
         }
 
         public void UnhighlightAllCells()
@@ -150,7 +151,6 @@ namespace Cell.ViewModel.Cells
             CellViewModels.Add(newViewModel);
             _cellModelToCellViewModelMap.Add(newModel, newViewModel);
             newViewModel.Model.PropertyChanged += CheckForCellTypePropertyChanged;
-            UpdateLayout();
         }
 
         private void CellsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -158,6 +158,7 @@ namespace Cell.ViewModel.Cells
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (CellModel cell in e.NewItems!) AddCellViewModel(cell);
+                UpdateLayout();
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
@@ -167,6 +168,7 @@ namespace Cell.ViewModel.Cells
             {
                 CellViewModels.Clear();
                 foreach (var cell in _model.Cells) AddCellViewModel(cell);
+                UpdateLayout();
             }
         }
 

@@ -86,6 +86,8 @@ namespace Cell.Data
         private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not CellModel model) return;
+            // Optimize by not saving width and height of non special cells.
+            //if (!model.CellType.IsSpecial() && (e.PropertyName == nameof(CellModel.Width) || e.PropertyName == nameof(CellModel.Height))) return;
             if (e.PropertyName == nameof(CellModel.Row) || e.PropertyName == nameof(CellModel.Column) || e.PropertyName == nameof(CellModel.SheetName))
             {
                 var previousLocation = _cellsToLocation[model.ID];

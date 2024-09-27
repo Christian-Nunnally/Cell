@@ -16,11 +16,19 @@ namespace Cell.Persistence
             _fileIO = fileIO;
         }
 
+        public bool IsReadOnly { get; internal set; } = false;
+
         public void CopyDirectory(string from, string to)
         {
+            CheckIsReadOnly();
             var fullFrom = Path.Combine(_rootPath, from);
             var fullTo = Path.Combine(_rootPath, to);
             _fileIO.CopyDirectory(fullFrom, fullTo);
+        }
+
+        private void CheckIsReadOnly()
+        {
+            if (IsReadOnly) throw new CellError($"{nameof(PersistedDirectory)} with {_rootPath} is in read read-only mode and can not be written to");
         }
 
         public void CopyTo(PersistedDirectory to, string fromPath = "", string toPath = "")
@@ -32,12 +40,14 @@ namespace Cell.Persistence
 
         public void DeleteDirectory(string path = "")
         {
+            CheckIsReadOnly();
             var fullPath = GetFullPath(path);
             _fileIO.DeleteDirectory(fullPath);
         }
 
         public void DeleteFile(string path)
         {
+            CheckIsReadOnly();
             var fullPath = GetFullPath(path);
             _fileIO.DeleteFile(fullPath);
         }
@@ -80,6 +90,7 @@ namespace Cell.Persistence
 
         public void MoveDirectory(string from, string to)
         {
+            CheckIsReadOnly();
             var fullFrom = Path.Combine(_rootPath, from);
             var fullTo = Path.Combine(_rootPath, to);
             _fileIO.MoveDirectory(fullFrom, fullTo);
@@ -87,6 +98,7 @@ namespace Cell.Persistence
 
         public void SaveFile(string path, string content)
         {
+            CheckIsReadOnly();
             var fullPath = GetFullPath(path);
             _fileIO.WriteFile(fullPath, content);
         }

@@ -22,6 +22,13 @@ namespace Cell.Execution
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly PluginContext _pluginFunctionRunContext;
         private readonly UserCollectionLoader _userCollectionLoader;
+
+        public bool UpdateCellsWhenANewCellIsAdded
+        { 
+            get => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded; 
+            set => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded = value; 
+        }
+
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _pluginFunctionRunContext = new PluginContext(cellTracker, userCollectionLoader);

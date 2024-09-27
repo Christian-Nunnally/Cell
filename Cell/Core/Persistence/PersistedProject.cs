@@ -15,6 +15,8 @@ namespace Cell.Persistence
             _projectDirectory = projectDirectory;
         }
 
+        public bool IsReadOnly { get => _projectDirectory.IsReadOnly; set => _projectDirectory.IsReadOnly = value; }
+
         public bool CanMigrate() => _registeredMigrators.ContainsKey(IMigrator.GetMigratorKey(LoadVersion(), Version));
 
         public IEnumerable<string> GetTemplateNames()

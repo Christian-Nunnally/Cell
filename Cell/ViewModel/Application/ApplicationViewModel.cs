@@ -23,6 +23,8 @@ namespace Cell.ViewModel.Application
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
+        private Task _backupTask;
+
         public ApplicationViewModel(
             PersistedDirectory persistenceManager,
             PersistedProject persistedProject,
@@ -189,7 +191,7 @@ namespace Cell.ViewModel.Application
             if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
             if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
             _isProjectLoading = true;
-            return new LoadingProgressResult("Creating backup", LoadPhase0);
+            return new LoadingProgressResult("Checking for migration", LoadPhase1);
         }
 
         public void PasteCopiedCells()
@@ -211,12 +213,6 @@ namespace Cell.ViewModel.Application
             _applicationView?.ShowToolWindow(content, allowDuplicates);
         }
 
-        private LoadingProgressResult LoadPhase0()
-        {
-            BackupManager.CreateBackup();
-            return new LoadingProgressResult("Checking Save Version", LoadPhase1);
-        }
-
         private LoadingProgressResult LoadPhase1()
         {
             if (PersistedProject.NeedsMigration())
@@ -231,7 +227,18 @@ namespace Cell.ViewModel.Application
             }
 
             PersistedProject.SaveVersion();
+            _backupTask = BackupAsync();
             return new LoadingProgressResult("Loading Collections", LoadPhase2);
+        }
+
+        private async Task BackupAsync()
+        {
+            await Task.Run(() =>
+            {
+                PersistedProject.IsReadOnly = true;
+                BackupManager.CreateBackup();
+                PersistedProject.IsReadOnly = false;
+            });
         }
 
         private LoadingProgressResult LoadPhase2()
@@ -254,11 +261,19 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase5()
         {
+            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = false;
             var cells = CellLoader.LoadCells();
             foreach (var cell in cells)
             {
                 CellTracker.AddCell(cell, false);
             }
+            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = true;
+            return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
+        }
+
+        private LoadingProgressResult LoadPhase6()
+        {
+            _backupTask.Wait();
             IsProjectLoaded = true;
             _isProjectLoading = false;
             return new LoadingProgressResult(true, "Load Complete");

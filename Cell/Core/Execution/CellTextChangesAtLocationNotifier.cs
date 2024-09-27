@@ -17,6 +17,9 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly List<string> _locationsThatNeedToBeTrackedIfCellsAreAddedThere = [];
         private readonly SubscriberNotifier _subscriberNotifier = new();
+
+        public bool NotifyWhenCellIsAdded { get; set; } = true;
+
         public CellTextChangesAtLocationNotifier(CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -63,7 +66,7 @@ namespace Cell.Execution
             {
                 cell.PropertyChanged += TrackedCellPropertyChanged;
                 // Ensure anyone already listening to this location is updated because now a cell exists here.
-                _subscriberNotifier.NotifySubscribers(locationString);
+                if (NotifyWhenCellIsAdded) _subscriberNotifier.NotifySubscribers(locationString);
             }
             else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
         }
