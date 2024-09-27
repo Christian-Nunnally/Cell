@@ -9,6 +9,7 @@ namespace Cell.Model.Plugin
     [JsonDerivedType(typeof(TodoItem), typeDiscriminator: "todoItem")]
     [JsonDerivedType(typeof(TransactionItem), typeDiscriminator: "transactionItem")]
     [JsonDerivedType(typeof(BudgetCategoryItem), typeDiscriminator: "budgetCategoryItem")]
+    [JsonDerivedType(typeof(FoodItem), typeDiscriminator: "foodItem")]
     public class PluginModel : INotifyPropertyChanged
     {
         private static List<string>? _cachedDataTypeNames;
