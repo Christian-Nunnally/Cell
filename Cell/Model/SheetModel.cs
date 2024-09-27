@@ -73,7 +73,7 @@ namespace Cell.Model
         {
             if (string.IsNullOrWhiteSpace(sheetName)) return false;
             if (sheetName.Length > 60) return false;
-            if (!sheetName.All("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789".Contains)) return false;
+            if (!sheetName.All("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789 ".Contains)) return false;
             return true;
         }
     }
