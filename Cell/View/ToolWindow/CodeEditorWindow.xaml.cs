@@ -122,7 +122,7 @@ namespace Cell.View.ToolWindow
         {
             TextArea textArea = textEditor.TextArea;
             var returnType = CodeEditorWindowViewModel.FunctionBeingEdited.Model.ReturnType;
-            completionWindow = CodeCompletionWindowFactory.Create(textArea, CodeEditorWindowViewModel.FunctionBeingEdited);
+            completionWindow = CodeCompletionWindowFactory.Create(textArea, ApplicationViewModel.Instance.UserCollectionLoader);
             if (completionWindow is null) return;
             completionWindow.Show();
             completionWindow.Closed += delegate { completionWindow = null; };

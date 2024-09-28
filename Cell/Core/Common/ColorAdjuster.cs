@@ -3,8 +3,17 @@ using System.Windows.Media;
 
 namespace Cell.Common
 {
+    /// <summary>
+    /// Contains helpers for converting and manipulating colors.
+    /// </summary>
     public class ColorAdjuster
     {
+        /// <summary>
+        /// Adjusts the brightness of the given color by the given amount.
+        /// </summary>
+        /// <param name="hexColor">The color to adjust the brightness of.</param>
+        /// <param name="brightnessFactor">The amount to ajust it by (0.5 would make the color darker, and 1.5 would make it lighter.)</param>
+        /// <returns></returns>
         public static string AdjustBrightness(string hexColor, float brightnessFactor)
         {
             HexColorToHSL(hexColor, out float hue, out float saturation, out float lightness);
@@ -12,17 +21,32 @@ namespace Cell.Common
             return HSLToHexColor(hue, saturation, lightness);
         }
 
+        /// <summary>
+        /// Converts a Media.Color object to a hex color string.
+        /// </summary>
+        /// <param name="color">The Media.Color object.</param>
+        /// <returns>A hex representation of the color.</returns>
         public static string ConvertColorToHexString(Color color)
         {
             return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
         }
 
+        /// <summary>
+        /// Converts a hex color string to a SolidColorBrush.
+        /// </summary>
+        /// <param name="hex">The hex string.</param>
+        /// <returns>A <see cref="SolidColorBrush"/>.</returns>
         public static SolidColorBrush ConvertHexStringToBrush(string hex)
         {
             var color = ConvertHexStringToColor(hex);
             return new SolidColorBrush(color);
         }
 
+        /// <summary>
+        /// Converts a hex color string to a Media.Color object.
+        /// </summary>
+        /// <param name="hex">The hex string.</param>
+        /// <returns>A Media.Color object.</returns>
         public static Color ConvertHexStringToColor(string hex)
         {
             if (!hex.StartsWith('#') || hex.Length != 7) return Colors.Green;
@@ -42,6 +66,7 @@ namespace Cell.Common
         /// Gets a highlight color that contrasts well with the given background color.
         /// </summary>
         /// <param name="backgroundColor">The background color.</param>
+        /// <param name="alpha">The amount of transparency to add.</param>
         /// <returns>A highlight color with good contrast against the background color.</returns>
         public static Color GetHighlightColor(Color backgroundColor, byte alpha)
         {

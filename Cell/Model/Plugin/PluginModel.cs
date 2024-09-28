@@ -12,7 +12,9 @@ namespace Cell.Model.Plugin
     [JsonDerivedType(typeof(FoodItem), typeDiscriminator: "foodItem")]
     public class PluginModel : INotifyPropertyChanged, ICloneable
     {
+        private static Dictionary<string, Type> _cachedTypes = [];
         private static List<string>? _cachedDataTypeNames;
+
         private string _id = Utilities.GenerateUnqiueId(12);
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -41,6 +43,18 @@ namespace Cell.Model.Plugin
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public static Type GetTypeFromString(string typeName)
+        {
+            if (_cachedTypes.TryGetValue(typeName, out Type? value)) return value;
+            var type = Assembly.GetExecutingAssembly().GetType($"Cell.Model.Plugin.{typeName}") ?? throw new CellError($"Unable to find type for the name {typeName}");
+            _cachedTypes.Add(typeName, type);
+            return type;
+        }
+
+        /// <summary>
+        /// Returns the ID of this object.
+        /// </summary>
+        /// <returns>The object unique ID.</returns>
         override public string ToString() => ID;
     }
 }

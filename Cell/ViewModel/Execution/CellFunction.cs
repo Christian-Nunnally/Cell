@@ -17,11 +17,19 @@ namespace Cell.ViewModel.Execution
     /// </summary>
     public partial class CellFunction : PropertyChangedBase
     {
+        private const string codeFooter = "\n}}}";
+        private const string codeHeader = "\n\nnamespace Plugin { public class Program { public static ";
+        private const string methodHeader = " M(Context c, CellModel cell) {\n";
+
         /// <summary>
         /// A null function that can be used as a placeholder.
         /// </summary>
         public static readonly CellFunction Null = new(CellFunctionModel.Null);
-        private static readonly List<string> UsingNamespaces = [
+
+        /// <summary>
+        /// The namespaces that are available to all functions preformatted for use in code.
+        /// </summary>
+        public static readonly List<string> UsingNamespaces = [
             "System",
             "System.Linq",
             "System.Collections",
@@ -113,9 +121,11 @@ namespace Cell.ViewModel.Execution
             return _compiledMethod;
         }
 
+        public string FullCode => UsingNamespacesString + codeHeader + Model.ReturnType + methodHeader + Model.Code + codeFooter;
+
         public void ExtractDependencies()
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(Model.FullCode);
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
             SyntaxNode? root = syntaxTree.GetRoot();
             try
             {

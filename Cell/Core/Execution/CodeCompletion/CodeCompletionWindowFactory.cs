@@ -1,5 +1,7 @@
 ﻿using Cell.Execution;
 using Cell.Model;
+using Cell.Model.Plugin;
+using Cell.Persistence;
 using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
@@ -15,13 +17,20 @@ namespace Cell.Core.Execution.CodeCompletion
         /// Creates a new completion window for the given text area.
         /// </summary>
         /// <param name="textArea">The text area to complete the text for.</param>
-        /// <returns></returns>
-        public static CompletionWindow? Create(TextArea textArea, CellFunction function)
+        /// <param name="userCollectionLoader">The collection manager used to resolve collection references and types.</param>
+        /// <returns>A CompletionWindow, populated with results.</returns>
+        public static CompletionWindow? Create(TextArea textArea, UserCollectionLoader userCollectionLoader)
         {
+            var userCollectionNames = userCollectionLoader.CollectionNames;
             var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
-            // TODO: pull these from the function.
-            var usings = new[] { "System", "Cell.Model"};
-            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, function, usings, outerContextVariables);
+            foreach ( var userCollectionName in userCollectionNames)
+            {
+                var typeName = userCollectionLoader.GetDataTypeStringForCollection(userCollectionName);
+                var type = PluginModel.GetTypeFromString(typeName);
+                outerContextVariables.Add(userCollectionName, type);
+            }
+
+            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, CellFunction.UsingNamespaces, outerContextVariables);
             var completionWindow = new CompletionWindow(textArea);
             var data = completionWindow.CompletionList.CompletionData;
             foreach (var item in completionData)

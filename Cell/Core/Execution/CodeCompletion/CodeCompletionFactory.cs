@@ -1,22 +1,30 @@
 ﻿using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.Plugin.SyntaxWalkers;
-using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
 
 namespace Cell.Core.Execution.CodeCompletion
 {
+    /// <summary>
+    /// Factory for generating code completion suggestions.
+    /// </summary>
     public static class CodeCompletionFactory
     {
         private static readonly IList<ICompletionData> NoCompletionData = [ new CodeCompletionData("", "No completion data found", "") ];
         private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
         private static List<ICompletionData>? _cachedGlobalCompletionData = null;
 
-        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, CellFunction function)
+        /// <summary>
+        /// Generates a list of completion suggestions given some code, the position of the carrot, the using statements, and any variables that are in a global scope.
+        /// </summary>
+        /// <param name="text">The code to generate suggestions from using semantic analysis.</param>
+        /// <param name="carrotPosition">The position of the carrot.</param>
+        /// <param name="usings">A list of namepsaces to include for type context.</param>
+        /// <param name="variableNameToTypeMapForOuterContext">A dictionary of variable names and thier type to be considered as valid even if they are not declared in the given code.</param>
+        /// <returns></returns>
+        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
-            // TODO: add collections to dictionary
             if (TryGetTypeUsingSemanticAnalyzer(text, carrotPosition, usings, variableNameToTypeMapForOuterContext, out var type))
             {
                 return CreateCompletionDataForType(type!);
@@ -61,7 +69,7 @@ namespace Cell.Core.Execution.CodeCompletion
             return Type.GetType(fullQualifiedName);
         }
 
-        private static IList<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
+        private static List<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
             if (_cachedGlobalCompletionData != null) return _cachedGlobalCompletionData;
 
