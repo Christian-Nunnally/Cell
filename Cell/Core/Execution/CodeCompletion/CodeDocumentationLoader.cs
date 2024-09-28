@@ -62,6 +62,7 @@ namespace Cell.Core.Execution.CodeCompletion
 
         public static string GetDocumentation(this Type type)
         {
+            LoadXmlDocumentation(type.Assembly);
             string key = "T:" + XmlDocumentationKeyHelper(type.FullName, null);
             if (_loadedXmlDocumentation.TryGetValue(key, out var documentation)) return documentation;
             return string.Empty;
@@ -138,15 +139,11 @@ namespace Cell.Core.Execution.CodeCompletion
             {
                 return ((MethodInfo)memberInfo).GetDocumentation();
             }
-            else if (memberInfo.MemberType.HasFlag(MemberTypes.TypeInfo) ||
-              memberInfo.MemberType.HasFlag(MemberTypes.NestedType))
+            else if (memberInfo.MemberType.HasFlag(MemberTypes.TypeInfo) || memberInfo.MemberType.HasFlag(MemberTypes.NestedType))
             {
                 return ((TypeInfo)memberInfo).GetDocumentation();
             }
-            else
-            {
-                return null;
-            }
+            return string.Empty;
         }
     }
 }

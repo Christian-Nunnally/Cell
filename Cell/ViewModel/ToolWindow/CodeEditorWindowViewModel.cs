@@ -14,7 +14,7 @@ namespace Cell.ViewModel.ToolWindow
         private readonly IReadOnlyDictionary<string, string> _collectionNameToDataTypeMap;
         private CompileResult _lastCompileResult;
         private string? syntaxTreePreviewText = string.Empty;
-        public CodeEditorWindowViewModel(PluginFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
+        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             FunctionBeingEdited = functionToBeEdited;
             _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
@@ -33,7 +33,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public CellModel? CellContext { get; private set; }
 
-        public PluginFunction FunctionBeingEdited { get; private set; }
+        public CellFunction FunctionBeingEdited { get; private set; }
 
         public string FunctionReturnType => FunctionBeingEdited.Model.ReturnType;
 
@@ -90,7 +90,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (CellContext is null) return;
             var model = new PluginFunctionModel("testtesttest", string.Empty, FunctionReturnType);
-            var function = new PluginFunction(model);
+            var function = new CellFunction(model);
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var pluginContext = new Context(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
             var result = function.Run(pluginContext, CellContext);
@@ -127,7 +127,7 @@ namespace Cell.ViewModel.ToolWindow
         private void ShowSyntaxTreePreview(string code)
         {
             var model = new PluginFunctionModel("testtesttest", "", FunctionReturnType);
-            var function = new PluginFunction(model);
+            var function = new CellFunction(model);
             if (CellContext is null) return;
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var syntaxTree = function.SyntaxTree;

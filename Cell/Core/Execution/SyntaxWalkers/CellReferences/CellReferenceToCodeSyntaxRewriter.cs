@@ -80,7 +80,7 @@ namespace Cell.Plugin.SyntaxWalkers
             return (int.Parse(rowPart), ColumnToIndex(columnPart));
         }
 
-        [GeneratedRegex(@"^[A-Za-z]+")]
+        [GeneratedRegex(@"^[A-Z]+")]
         private static partial Regex GetColumnFromCellLocationString();
 
         private static (string RelativitySymbol, string CellReferenceName) GetRelativitySymbolAndCellLocationNameFromCellReference(string[] cellReference)
@@ -99,7 +99,7 @@ namespace Cell.Plugin.SyntaxWalkers
         private static partial Regex GetRowFromCellLocationString();
 
         [GeneratedRegex(@"^[A-Z]+[0-9]+$")]
-        private static partial Regex IsCellLocationString();
+        public static partial Regex IsCellLocationString();
 
         private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
 

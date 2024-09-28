@@ -15,7 +15,7 @@ namespace Cell.ViewModel.ToolWindow
         private string _filterString = string.Empty;
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
-        private PluginFunction? _selectedFunction;
+        private CellFunction? _selectedFunction;
         private string _usersListBoxFilterText = string.Empty;
         private string _dependencciesListBoxFilterText = string.Empty;
         private CellModel? _selectedUserOfTheSelectedFunction;
@@ -72,7 +72,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public IEnumerable<PluginFunction> FilteredFunctions => _pluginFunctionLoader.ObservableFunctions.Where(IsFunctionIncludedInFilter);
+        public IEnumerable<CellFunction> FilteredFunctions => _pluginFunctionLoader.ObservableFunctions.Where(IsFunctionIncludedInFilter);
 
         public bool IncludePopulateFunctions
         {
@@ -150,7 +150,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public PluginFunction? SelectedFunction
+        public CellFunction? SelectedFunction
         {
             get => _selectedFunction; set
             {
@@ -194,7 +194,7 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        private bool IsFunctionIncludedInFilter(PluginFunction function)
+        private bool IsFunctionIncludedInFilter(CellFunction function)
         {
             if (!function.Model.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
             if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;

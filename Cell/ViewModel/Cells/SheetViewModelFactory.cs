@@ -23,7 +23,7 @@ namespace Cell.ViewModel.Cells
             return sheetViewModel;
         }
 
-        private static void HighlightCellDependenciesOfFunction(SheetViewModel sheet, PluginFunction function)
+        private static void HighlightCellDependenciesOfFunction(SheetViewModel sheet, CellFunction function)
         {
             foreach (var locationDependencies in function.LocationDependencies)
             {

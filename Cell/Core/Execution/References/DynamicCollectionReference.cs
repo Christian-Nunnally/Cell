@@ -6,8 +6,8 @@ namespace Cell.Execution.References
 {
     public class DynamicCollectionReference : ICollectionReference
     {
-        private readonly PluginFunction _calculateCollectionNameFunction;
-        public DynamicCollectionReference(PluginFunction calculateCollectionNameFunction)
+        private readonly CellFunction _calculateCollectionNameFunction;
+        public DynamicCollectionReference(CellFunction calculateCollectionNameFunction)
         {
             _calculateCollectionNameFunction = calculateCollectionNameFunction;
             _calculateCollectionNameFunction.DependenciesChanged += CalculateCollectionNameFunctionDependenciesChanged;
@@ -39,7 +39,7 @@ namespace Cell.Execution.References
             return string.Join(',', GetLocationsThatWillInvalidateCollectionNameForCell(cell));
         }
 
-        private void CalculateCollectionNameFunctionDependenciesChanged(PluginFunction function)
+        private void CalculateCollectionNameFunctionDependenciesChanged(CellFunction function)
         {
             LocationsThatWillInvalidateCollectionNameForCellHaveChanged?.Invoke();
         }

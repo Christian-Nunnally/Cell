@@ -1,5 +1,6 @@
 ﻿using Cell.Execution;
 using Cell.Model;
+using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 
@@ -15,10 +16,12 @@ namespace Cell.Core.Execution.CodeCompletion
         /// </summary>
         /// <param name="textArea">The text area to complete the text for.</param>
         /// <returns></returns>
-        public static CompletionWindow? Create(TextArea textArea)
+        public static CompletionWindow? Create(TextArea textArea, CellFunction function)
         {
             var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
-            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, outerContextVariables);
+            // TODO: pull these from the function.
+            var usings = new[] { "System", "Cell.Model"};
+            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, usings, outerContextVariables);
             var completionWindow = new CompletionWindow(textArea);
             var data = completionWindow.CompletionList.CompletionData;
             foreach (var item in completionData)

@@ -17,7 +17,7 @@ namespace Cell.View.ToolWindow
 
         private void DeleteFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is PluginFunction function)
+            if (sender is Button button && button.DataContext is CellFunction function)
             {
                 if (function.UsageCount != 0)
                 {

@@ -18,30 +18,30 @@ namespace Cell.Persistence
             _persistanceManager = persistenceManager;
         }
 
-        public Dictionary<string, Dictionary<string, PluginFunction>> Namespaces { get; set; } = [];
+        public Dictionary<string, Dictionary<string, CellFunction>> Namespaces { get; set; } = [];
 
-        public ObservableCollection<PluginFunction> ObservableFunctions { get; private set; } = [];
+        public ObservableCollection<CellFunction> ObservableFunctions { get; private set; } = [];
 
-        public void AddPluginFunctionToNamespace(string space, PluginFunction function)
+        public void AddPluginFunctionToNamespace(string space, CellFunction function)
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Model.Name, function);
-            else Namespaces.Add(space, new Dictionary<string, PluginFunction> { { function.Model.Name, function } });
+            else Namespaces.Add(space, new Dictionary<string, CellFunction> { { function.Model.Name, function } });
             ObservableFunctions.Add(function);
             function.Model.PropertyChanged += OnPluginFunctionPropertyChanged;
         }
 
-        public PluginFunction CreateFunction(string space, string name, string code = "")
+        public CellFunction CreateFunction(string space, string name, string code = "")
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             var model = new PluginFunctionModel(name, code, space);
-            var function = new PluginFunction(model);
+            var function = new CellFunction(model);
             AddPluginFunctionToNamespace(space, function);
             SavePluginFunction("", space, function.Model);
             return function;
         }
 
-        public void DeleteFunction(PluginFunction function)
+        public void DeleteFunction(CellFunction function)
         {
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {
@@ -55,7 +55,7 @@ namespace Cell.Persistence
             }
         }
 
-        public PluginFunction GetOrCreateFunction(string space, string name)
+        public CellFunction GetOrCreateFunction(string space, string name)
         {
             if (TryGetFunction(space, name, out var function)) return function;
             return CreateFunction(space, name);
@@ -77,7 +77,7 @@ namespace Cell.Persistence
                     {
                         PluginFunctionModel? model = LoadFunction(file);
                         if (model == null) continue;
-                        var function = new PluginFunction(model);
+                        var function = new CellFunction(model);
                         var space = Path.GetFileName(namespacePath);
                         AddPluginFunctionToNamespace(space, function);
                     }
@@ -106,7 +106,7 @@ namespace Cell.Persistence
             }
         }
 
-        public bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out PluginFunction function)
+        public bool TryGetFunction(string space, string name, [MaybeNullWhen(false)] out CellFunction function)
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {

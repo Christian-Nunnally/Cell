@@ -1,36 +1,63 @@
-﻿using Cell.Model.Plugin;
+﻿using Cell.Model;
+using Cell.Model.Plugin;
+using Cell.Plugin.SyntaxWalkers;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using Microsoft.CodeAnalysis;
 using System.Reflection;
 
 namespace Cell.Core.Execution.CodeCompletion
 {
     public static class CodeCompletionFactory
     {
-        private readonly static Dictionary<string, string> _typeToFullyQualifiedTypeNameMap = [];
+        private static readonly IList<ICompletionData> NoCompletionData = [ new CodeCompletionData("", "No completion data found", "") ];
         private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
         private static List<ICompletionData>? _cachedGlobalCompletionData = null;
-        private static bool _haveAssembliesBeenRegistered = false;
 
-        private static void RegisterTypesInAssembly()
+        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
-            if (_haveAssembliesBeenRegistered) return;
-            RegisterTypesInAssembly(typeof(TodoItem).Assembly);
-            _haveAssembliesBeenRegistered = true;
+            // TODO: add collections to dictionary
+            if (TryGetTypeUsingSemanticAnalyzer(text, carrotPosition, usings, variableNameToTypeMapForOuterContext, out var type))
+            {
+                return CreateCompletionDataForType(type!);
+            }
+
+            return TryGetCompletionDataFromTheWordBeforeTheCursor(text, carrotPosition, variableNameToTypeMapForOuterContext, out var completionData)
+                ? completionData!
+                : NoCompletionData;
         }
 
-        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
+        private static bool TryGetCompletionDataFromTheWordBeforeTheCursor(string text, int carrotPosition, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out IList<ICompletionData>? completionData)
         {
-            RegisterTypesInAssembly();
-            var typeNameInFrontOfCarrot = GetVariableTypePriorToCarot(text, carrotPosition);
-            if (variableNameToTypeMapForOuterContext.TryGetValue(typeNameInFrontOfCarrot, out var type))
-            {
-                return CreateCompletionDataForType(type);
-            }
+            completionData = null;
+            var typeNameInFrontOfCarrot = GetVariableNamePriorToCarot(text, carrotPosition);
             if (typeNameInFrontOfCarrot == string.Empty)
             {
-                return CreateCompletionDataForGlobalContext(variableNameToTypeMapForOuterContext);
+                completionData = CreateCompletionDataForGlobalContext(variableNameToTypeMapForOuterContext);
             }
-            return [];
+            else if (CellReferenceToCodeSyntaxRewriter.IsCellLocation(typeNameInFrontOfCarrot))
+            {
+                completionData = CreateCompletionDataForType(typeof(CellModel));
+            }
+            return completionData is not null;
+        }
+
+        private static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
+        {
+            type = null;
+            SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);
+            var typeSymbol = semanticAnalyzer.GetTypeAtPosition(carrotPosition);
+            if (typeSymbol is null) return false;
+            type = GetTypeFromSymbol(typeSymbol);
+            return type is not null;
+        }
+
+        private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
+        {
+            var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+            var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
+            fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
+
+            return Type.GetType(fullQualifiedName);
         }
 
         private static IList<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
@@ -54,7 +81,7 @@ namespace Cell.Core.Execution.CodeCompletion
             if (_cachedCompletionData.TryGetValue(type, out var completionData)) return completionData;
             CodeDocumentationLoader.LoadXmlDocumentation(type.Assembly);
 
-            var members = type.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).Where(m => m is not MethodInfo mi || !mi.IsSpecialName && m is not ConstructorInfo);
+            var members = type.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public).Where(m => (m is not MethodInfo mi || !mi.IsSpecialName) && m is not ConstructorInfo);
             var newCompletionData = members.Select(CreateCompletionDataFromMemberInfo).OfType<ICompletionData>().ToList();
             _cachedCompletionData.Add(type, newCompletionData);
             return newCompletionData;
@@ -62,49 +89,27 @@ namespace Cell.Core.Execution.CodeCompletion
 
         private static ICompletionData CreateCompletionDataFromMemberInfo(MemberInfo info)
         {
-            var userVisibleString = $"{info.Name} : {info.GetUnderlyingType().Name}";
-            return new CodeCompletionData(info.Name, userVisibleString, info.GetDocumentation());
+            var name = info.Name;
+            var userVisibleString = $"{name} : {info.GetUnderlyingType()?.Name ?? "Unable to get type name"}";
+            var documentation = info.GetDocumentation();
+            return new CodeCompletionData(name, userVisibleString, documentation);
         }
 
-        private static Type GetUnderlyingType(this MemberInfo member)
+        private static Type? GetUnderlyingType(this MemberInfo member)
         {
             ArgumentNullException.ThrowIfNull(member);
-            switch (member.MemberType)
+            return member.MemberType switch
             {
-                case MemberTypes.Event:
-                    return ((EventInfo)member).EventHandlerType;
-                case MemberTypes.Field:
-                    return ((FieldInfo)member).FieldType;
-                case MemberTypes.Method:
-                    return ((MethodInfo)member).ReturnType;
-                case MemberTypes.Property:
-                    return ((PropertyInfo)member).PropertyType;
-                case MemberTypes.Constructor:
-                    return ((ConstructorInfo)member).DeclaringType;
-                default:
-                    throw new ArgumentException
-                    (
-                     "Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"
-                    );
-            }
+                MemberTypes.Event => ((EventInfo)member).EventHandlerType,
+                MemberTypes.Field => ((FieldInfo)member).FieldType,
+                MemberTypes.Method => ((MethodInfo)member).ReturnType,
+                MemberTypes.Property => ((PropertyInfo)member).PropertyType,
+                MemberTypes.Constructor => ((ConstructorInfo)member).DeclaringType,
+                _ => throw new ArgumentException("Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"),
+            };
         }
 
-        private static void RegisterTypesInAssembly(Assembly assembly)
-        {
-            foreach (var type in assembly.GetTypes())
-            {
-                if (type.IsPublic)
-                {
-                    if (_typeToFullyQualifiedTypeNameMap.ContainsKey(type.Name))
-                    {
-                        throw new InvalidOperationException($"Type name {type.Name} is already registered. Semmantic analysis doesn't currently know the fqn of the type, so type names must be globally unique.");
-                    }
-                    if (type.FullName is not null) _typeToFullyQualifiedTypeNameMap[type.Name] = type.FullName;
-                }
-            }
-        }
-
-        private static string GetVariableTypePriorToCarot(string text, int carrotPosition)
+        private static string GetVariableNamePriorToCarot(string text, int carrotPosition)
         {
             if (text.Length > carrotPosition || text.Length == 0) return "";
             var offset = carrotPosition - 1;

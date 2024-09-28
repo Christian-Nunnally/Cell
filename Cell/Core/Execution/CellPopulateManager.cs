@@ -57,12 +57,12 @@ namespace Cell.Execution
             return _cellTextChangesAtLocationNotifier.GetLocationsSubscriberIsSubscribedTo(subscriber);
         }
 
-        public List<CellModel> GetCellsThatUsePopulateFunction(PluginFunction function)
+        public List<CellModel> GetCellsThatUsePopulateFunction(CellFunction function)
         {
             return _cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cells) ? cells : [];
         }
 
-        private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
+        private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, CellFunction function)
         {
             if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
             {
@@ -101,7 +101,7 @@ namespace Cell.Execution
             return subscriber;
         }
 
-        private void NotifyCellsAboutFunctionDependencyChanges(PluginFunction function)
+        private void NotifyCellsAboutFunctionDependencyChanges(CellFunction function)
         {
             _cellsToUpdateWhenFunctionChanges[function.Model].ForEach(cell => UpdateDependencySubscriptions(cell, function));
         }
@@ -115,7 +115,7 @@ namespace Cell.Execution
             else cell.ErrorText = result.ExecutionResult;
         }
 
-        private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, PluginFunction function)
+        private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, CellFunction function)
         {
             if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
             {
@@ -129,7 +129,7 @@ namespace Cell.Execution
             }
         }
 
-        private void ResolveCollectionDependenciesForCell(CellModel cell, PluginFunction function)
+        private void ResolveCollectionDependenciesForCell(CellModel cell, CellFunction function)
         {
             UnsubscribeFromAllCollectionUpdates(cell);
             foreach (var collectionReference in function.CollectionDependencies)
@@ -142,7 +142,7 @@ namespace Cell.Execution
             }
         }
 
-        private void ResolveLocationDependenciesForCell(CellModel cell, PluginFunction function)
+        private void ResolveLocationDependenciesForCell(CellModel cell, CellFunction function)
         {
             UnsubscribeFromAllLocationUpdates(cell);
             var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
@@ -256,7 +256,7 @@ namespace Cell.Execution
             }
         }
 
-        private void UpdateDependencySubscriptions(CellModel cell, PluginFunction function)
+        private void UpdateDependencySubscriptions(CellModel cell, CellFunction function)
         {
             if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
             var _ = function.CompiledMethod;

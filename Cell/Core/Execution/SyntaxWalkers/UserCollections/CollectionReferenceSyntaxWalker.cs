@@ -33,7 +33,7 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
             var collectionReferenceSyntax = argument.Expression.ToString();
             var codeWithReturn = $"return {collectionReferenceSyntax};";
             var functionModel = new PluginFunctionModel("collectionReference", codeWithReturn, "object");
-            var function = new PluginFunction(functionModel);
+            var function = new CellFunction(functionModel);
             collectionReference = new DynamicCollectionReference(function);
             return true;
         }

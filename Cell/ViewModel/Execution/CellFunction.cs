@@ -12,20 +12,20 @@ using System.Reflection;
 
 namespace Cell.ViewModel.Execution
 {
-    public partial class PluginFunction : PropertyChangedBase
+    public partial class CellFunction : PropertyChangedBase
     {
-        public static readonly PluginFunction Null = new(PluginFunctionModel.Null);
+        public static readonly CellFunction Null = new(PluginFunctionModel.Null);
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool _wasCompileSuccessful;
-        public PluginFunction(PluginFunctionModel model)
+        public CellFunction(PluginFunctionModel model)
         {
             Model = model;
             Model.PropertyChanged += ModelPropertyChanged;
             AttemptToRecompileMethod();
         }
 
-        public event Action<PluginFunction>? DependenciesChanged;
+        public event Action<CellFunction>? DependenciesChanged;
 
         public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(this);
 
