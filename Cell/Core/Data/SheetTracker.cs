@@ -151,7 +151,7 @@ namespace Cell.Data
             }
         }
 
-        private bool CanFunctionsBeMerged(List<PluginFunctionModel> functionsBeingImported, out string reason)
+        private bool CanFunctionsBeMerged(List<CellFunctionModel> functionsBeingImported, out string reason)
         {
             reason = string.Empty;
             foreach (var function in functionsBeingImported)
@@ -164,7 +164,7 @@ namespace Cell.Data
             }
             return true;
 
-            CellFunction? GetExistingFunction(PluginFunctionModel function)
+            CellFunction? GetExistingFunction(CellFunctionModel function)
             {
                 return _pluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }
@@ -209,9 +209,9 @@ namespace Cell.Data
             }
         }
 
-        private List<PluginFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
+        private List<CellFunctionModel> GetFunctionsFromTemplate(string templatesDirectory)
         {
-            var functionsBeingImported = new List<PluginFunctionModel>();
+            var functionsBeingImported = new List<CellFunctionModel>();
             var functionsTemplatePath = Path.Combine(templatesDirectory, "Functions");
             foreach (var spaceDirectory in _persistenceManager.GetDirectories(functionsTemplatePath))
             {

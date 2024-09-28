@@ -12,13 +12,40 @@ using System.Reflection;
 
 namespace Cell.ViewModel.Execution
 {
+    /// <summary>
+    /// Encapsulates a <see cref="CellFunctionModel"/> and gives it the ability to compile and run.
+    /// </summary>
     public partial class CellFunction : PropertyChangedBase
     {
-        public static readonly CellFunction Null = new(PluginFunctionModel.Null);
+        /// <summary>
+        /// A null function that can be used as a placeholder.
+        /// </summary>
+        public static readonly CellFunction Null = new(CellFunctionModel.Null);
+        private static readonly List<string> UsingNamespaces = [
+            "System",
+            "System.Linq",
+            "System.Collections",
+            "System.Collections.Generic",
+            "Cell.Model",
+            "Cell.Model.Plugin",
+            "Cell.ViewModel",
+            "Cell.Execution",
+            "Cell.ViewModel.Cells.Types",
+            ];
+
+        /// <summary>
+        /// The namespaces that are available to all functions preformatted for use in code.
+        /// </summary>
+        public static readonly string UsingNamespacesString = string.Join('\n', UsingNamespaces.Select(x => $"using {x};"));
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool _wasCompileSuccessful;
-        public CellFunction(PluginFunctionModel model)
+
+        /// <summary>
+        /// Creates a new instance of <see cref="CellFunction"/>
+        /// </summary>
+        /// <param name="model"></param>
+        public CellFunction(CellFunctionModel model)
         {
             Model = model;
             Model.PropertyChanged += ModelPropertyChanged;
@@ -35,11 +62,11 @@ namespace Cell.ViewModel.Execution
 
         public CompileResult CompileResult { get; private set; }
 
-        public List<LocationReference> LocationDependencies { get; set; } = [];
-
         public IEnumerable<IReferenceFromCell> Dependencies => ((IEnumerable<IReferenceFromCell>)LocationDependencies).Concat(CollectionDependencies);
 
-        public PluginFunctionModel Model { get; set; }
+        public List<LocationReference> LocationDependencies { get; set; } = [];
+
+        public CellFunctionModel Model { get; set; }
 
         public string Name
         {
@@ -180,7 +207,7 @@ namespace Cell.ViewModel.Execution
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            if (e.PropertyName == nameof(CellFunctionModel.Code))
             {
                 AttemptToRecompileMethod();
             }

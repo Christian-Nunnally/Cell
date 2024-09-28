@@ -21,7 +21,7 @@ namespace Cell.Core.Execution.CodeCompletion
             var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
             // TODO: pull these from the function.
             var usings = new[] { "System", "Cell.Model"};
-            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, usings, outerContextVariables);
+            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, function, usings, outerContextVariables);
             var completionWindow = new CompletionWindow(textArea);
             var data = completionWindow.CompletionList.CompletionData;
             foreach (var item in completionData)

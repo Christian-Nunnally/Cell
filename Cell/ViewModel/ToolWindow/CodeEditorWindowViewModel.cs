@@ -89,7 +89,7 @@ namespace Cell.ViewModel.ToolWindow
         public void TestCode(string code)
         {
             if (CellContext is null) return;
-            var model = new PluginFunctionModel("testtesttest", string.Empty, FunctionReturnType);
+            var model = new CellFunctionModel("testtesttest", string.Empty, FunctionReturnType);
             var function = new CellFunction(model);
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var pluginContext = new Context(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
@@ -121,12 +121,12 @@ namespace Cell.ViewModel.ToolWindow
 
         private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code)) NotifyPropertyChanged(nameof(UserFriendlyCodeString));
+            if (e.PropertyName == nameof(CellFunctionModel.Code)) NotifyPropertyChanged(nameof(UserFriendlyCodeString));
         }
 
         private void ShowSyntaxTreePreview(string code)
         {
-            var model = new PluginFunctionModel("testtesttest", "", FunctionReturnType);
+            var model = new CellFunctionModel("testtesttest", "", FunctionReturnType);
             var function = new CellFunction(model);
             if (CellContext is null) return;
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);

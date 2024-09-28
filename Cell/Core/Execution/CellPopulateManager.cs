@@ -12,7 +12,7 @@ namespace Cell.Execution
     /// </summary>
     public class CellPopulateManager
     {
-        private readonly Dictionary<PluginFunctionModel, List<CellModel>> _cellsToUpdateWhenFunctionChanges = [];
+        private readonly Dictionary<CellFunctionModel, List<CellModel>> _cellsToUpdateWhenFunctionChanges = [];
         private readonly CellTextChangesAtLocationNotifier _cellTextChangesAtLocationNotifier;
         private readonly Dictionary<CellModel, string> _cellToPopulateFunctionNameMap = [];
         private readonly Dictionary<CellModel, CellPopulateSubscriber> _cellToPopulateSubscriberMap = [];
@@ -162,9 +162,9 @@ namespace Cell.Execution
 
         private void RunPopulateWhenCodeChanges(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PluginFunctionModel.Code))
+            if (e.PropertyName == nameof(CellFunctionModel.Code))
             {
-                _cellsToUpdateWhenFunctionChanges[(PluginFunctionModel)sender!].ForEach(PopulateCellsText);
+                _cellsToUpdateWhenFunctionChanges[(CellFunctionModel)sender!].ForEach(PopulateCellsText);
             }
         }
 

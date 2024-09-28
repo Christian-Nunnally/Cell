@@ -34,7 +34,7 @@ namespace Cell.Persistence
         {
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
-            var model = new PluginFunctionModel(name, code, space);
+            var model = new CellFunctionModel(name, code, space);
             var function = new CellFunction(model);
             AddPluginFunctionToNamespace(space, function);
             SavePluginFunction("", space, function.Model);
@@ -61,10 +61,10 @@ namespace Cell.Persistence
             return CreateFunction(space, name);
         }
 
-        public PluginFunctionModel LoadFunction(string file)
+        public CellFunctionModel LoadFunction(string file)
         {
             var text = _persistanceManager.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
-            return JsonSerializer.Deserialize<PluginFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
+            return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
         }
 
         public void LoadPlugins()
@@ -75,7 +75,7 @@ namespace Cell.Persistence
                 {
                     foreach (var file in _persistanceManager.GetFiles(namespacePath))
                     {
-                        PluginFunctionModel? model = LoadFunction(file);
+                        CellFunctionModel? model = LoadFunction(file);
                         if (model == null) continue;
                         var function = new CellFunction(model);
                         var space = Path.GetFileName(namespacePath);
@@ -85,7 +85,7 @@ namespace Cell.Persistence
             }
         }
 
-        public void SavePluginFunction(string directory, string space, PluginFunctionModel function)
+        public void SavePluginFunction(string directory, string space, CellFunctionModel function)
         {
             if (string.IsNullOrWhiteSpace(function.Name)) return;
             directory = string.IsNullOrEmpty(directory) ? Path.Combine(FunctionsDirectoryName, space) : Path.Combine(directory, FunctionsDirectoryName, space);
@@ -122,7 +122,7 @@ namespace Cell.Persistence
 
         private void OnPluginFunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not PluginFunctionModel function) return;
+            if (sender is not CellFunctionModel function) return;
             SavePluginFunction("", function.ReturnType, function);
         }
     }

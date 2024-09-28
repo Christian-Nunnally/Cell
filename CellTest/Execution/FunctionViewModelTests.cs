@@ -8,7 +8,7 @@ namespace CellTest.Execution
         [Fact]
         public void UserFriendlyCodeSet_UserFriendlyCodeReturned_CodeUnchanged()
         {
-            var model = new PluginFunctionModel();
+            var model = new CellFunctionModel();
             var testing = new CellFunction(model);
             var testCode = @"
 var itemsToSearch = new List<TodoItem>();
@@ -32,7 +32,7 @@ while (itemsToSearch.Any())
         [Fact]
         public void UserFriendlyCodeSetWithTabs_UserFriendlyCodeReturned_CodeNowContainsSpaces()
         {
-            var model = new PluginFunctionModel();
+            var model = new CellFunctionModel();
             var testing = new CellFunction(model);
             var testCode = "\treturn test;";
             testing.SetUserFriendlyCode(testCode, CellModel.Null, new Dictionary<string, string>());

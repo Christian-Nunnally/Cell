@@ -1,6 +1,7 @@
 ﻿using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Plugin.SyntaxWalkers;
+using Cell.ViewModel.Execution;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
@@ -13,7 +14,7 @@ namespace Cell.Core.Execution.CodeCompletion
         private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
         private static List<ICompletionData>? _cachedGlobalCompletionData = null;
 
-        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
+        public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, CellFunction function)
         {
             // TODO: add collections to dictionary
             if (TryGetTypeUsingSemanticAnalyzer(text, carrotPosition, usings, variableNameToTypeMapForOuterContext, out var type))
