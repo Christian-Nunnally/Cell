@@ -18,7 +18,8 @@ namespace Cell.Execution.References
     public class LocationReference : IReferenceFromCell
     {
         public const string CellReferenceVariableName = "cell";
-        public const string GetCellFunctionName = nameof(PluginContext.GetCell);
+        public const string GetCellFunctionName = nameof(Context.GetCell);
+        public const string GetCellRangeFunctionName = nameof(Context.GetCellRange);
         public int Column { get; set; }
 
         public int ColumnRangeEnd { get; set; }
@@ -78,8 +79,12 @@ namespace Cell.Execution.References
         {
             string cellLocationArguments = SheetArgument;
             cellLocationArguments += CreateRowColumnArgumentSyntax(IsRowRelative, Row, IsColumnRelative, Column);
-            if (IsRange) cellLocationArguments += CreateRowColumnArgumentSyntax(IsRowRelativeRangeEnd, RowRangeEnd, IsColumnRelativeRangeEnd, ColumnRangeEnd);
-            return $"{PluginContext.PluginContextArgumentName}.{GetCellFunctionName}({cellLocationArguments})";
+            if (IsRange)
+            {
+                cellLocationArguments += CreateRowColumnArgumentSyntax(IsRowRelativeRangeEnd, RowRangeEnd, IsColumnRelativeRangeEnd, ColumnRangeEnd);
+                return $"{Context.PluginContextArgumentName}.{GetCellRangeFunctionName}({cellLocationArguments})";
+            }
+            return $"{Context.PluginContextArgumentName}.{GetCellFunctionName}({cellLocationArguments})";
         }
 
         public int ResolveColumn(CellModel cell) => IsColumnRelative ? Column + cell.Column : Column;
@@ -131,12 +136,21 @@ namespace Cell.Execution.References
             arguments = SyntaxFactory.SeparatedList<ArgumentSyntax>();
             if (node is not InvocationExpressionSyntax syntax) return false;
             if (syntax.Expression is not MemberAccessExpressionSyntax memberAccessExpressionSyntax) return false;
-            if (memberAccessExpressionSyntax.Name.Identifier.Text != GetCellFunctionName) return false;
             if (memberAccessExpressionSyntax.Expression is not IdentifierNameSyntax identifierName) return false;
-            if (identifierName.Identifier.Text != PluginContext.PluginContextArgumentName) return false;
-            if (!(syntax.ArgumentList.Arguments.Count == 3 || syntax.ArgumentList.Arguments.Count == 5)) return false;
-            arguments = syntax.ArgumentList.Arguments;
-            return true;
+            if (identifierName.Identifier.Text != Context.PluginContextArgumentName) return false;
+            if (memberAccessExpressionSyntax.Name.Identifier.Text == GetCellFunctionName)
+            {
+                if (syntax.ArgumentList.Arguments.Count != 3) return false;
+                arguments = syntax.ArgumentList.Arguments;
+                return true;
+            }
+            else if (memberAccessExpressionSyntax.Name.Identifier.Text == GetCellRangeFunctionName)
+            {
+                if (syntax.ArgumentList.Arguments.Count != 5) return false;
+                arguments = syntax.ArgumentList.Arguments;
+                return true;
+            }
+            return false;
         }
 
         private static bool TryParsePositionFromArgument(ArgumentSyntax argumentSyntax, string rowOrColumn, out int position, out bool isRelative)

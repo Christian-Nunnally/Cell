@@ -13,7 +13,7 @@ namespace Cell.Execution
             Logger.Instance.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.WasSuccess} - {compileResult.ExecutionResult}");
         }
 
-        public static CompileResult RunPopulate(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
+        public static CompileResult RunPopulate(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, CellModel cell)
         {
             if (!pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
             Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, populateFunction.CompileResult, false);
@@ -22,7 +22,7 @@ namespace Cell.Execution
             return result;
         }
 
-        public static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, string functionName)
+        public static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, string functionName)
         {
             if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
             var method = populateFunction.CompiledMethod;
@@ -34,7 +34,7 @@ namespace Cell.Execution
             return 0;
         }
 
-        public static CompileResult RunTrigger(PluginFunctionLoader pluginFunctionLoader, PluginContext pluginContext, CellModel cell)
+        public static CompileResult RunTrigger(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, CellModel cell)
         {
             if (!pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Trigger function not found" };
             Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, triggerFunction.CompileResult, true);

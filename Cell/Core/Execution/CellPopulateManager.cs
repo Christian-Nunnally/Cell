@@ -20,7 +20,7 @@ namespace Cell.Execution
         private readonly CollectionChangeNotifier _collectionChangeNotifier;
         private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly PluginContext _pluginFunctionRunContext;
+        private readonly Context _pluginFunctionRunContext;
         private readonly UserCollectionLoader _userCollectionLoader;
 
         public bool UpdateCellsWhenANewCellIsAdded
@@ -31,7 +31,7 @@ namespace Cell.Execution
 
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
-            _pluginFunctionRunContext = new PluginContext(cellTracker, userCollectionLoader);
+            _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
             _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionLoader);
             _userCollectionLoader = userCollectionLoader;
@@ -109,7 +109,7 @@ namespace Cell.Execution
         private void PopulateCellsText(CellModel cell)
         {
             if (string.IsNullOrEmpty(cell.PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, new PluginContext(_cellTracker, _userCollectionLoader, cell.Index), cell);
+            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, cell.Index), cell);
             if (result.ExecutionResult == null) return;
             if (result.WasSuccess) cell.Text = result.ExecutionResult;
             else cell.ErrorText = result.ExecutionResult;

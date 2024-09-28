@@ -7,7 +7,7 @@ namespace Cell.Execution.References
     {
         event Action? LocationsThatWillInvalidateCollectionNameForCellHaveChanged;
 
-        string GetCollectionName(CellModel cell, PluginContext pluginFunctionRunContext);
+        string GetCollectionName(CellModel cell, Context pluginFunctionRunContext);
 
         IEnumerable<string> GetLocationsThatWillInvalidateCollectionNameForCell(CellModel cell);
     }

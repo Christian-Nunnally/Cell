@@ -92,7 +92,7 @@ namespace Cell.ViewModel.ToolWindow
             var model = new PluginFunctionModel("testtesttest", string.Empty, FunctionReturnType);
             var function = new PluginFunction(model);
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
-            var pluginContext = new PluginContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
+            var pluginContext = new Context(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
             var result = function.Run(pluginContext, CellContext);
             DisplayResult(result);
         }

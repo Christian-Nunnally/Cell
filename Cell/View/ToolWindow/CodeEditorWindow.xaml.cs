@@ -1,4 +1,4 @@
-﻿using Cell.Execution;
+﻿using Cell.Core.Execution.CodeCompletion;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
@@ -37,6 +37,7 @@ namespace Cell.View.ToolWindow
             textEditor.TextArea.TextEntering -= OnTextEntering;
             textEditor.TextArea.TextEntered -= OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
+            textEditor.TextArea.PreviewKeyDown -= TextEditorPreviewKeyDown;
         }
 
         public override void HandleBeingShown()
@@ -48,6 +49,16 @@ namespace Cell.View.ToolWindow
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
+            textEditor.TextArea.PreviewKeyDown += TextEditorPreviewKeyDown;
+        }
+
+        private void TextEditorPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                OpenAutoCompleteWindow();
+                e.Handled = true;
+            } 
         }
 
         public override bool HandleCloseRequested()
@@ -111,7 +122,7 @@ namespace Cell.View.ToolWindow
         {
             TextArea textArea = textEditor.TextArea;
             var returnType = CodeEditorWindowViewModel.FunctionBeingEdited.Model.ReturnType;
-            completionWindow = CodeCompletionWindowFactory.Create(textArea, returnType);
+            completionWindow = CodeCompletionWindowFactory.Create(textArea);
             if (completionWindow is null) return;
             completionWindow.Show();
             completionWindow.Closed += delegate { completionWindow = null; };

@@ -15,7 +15,7 @@ namespace Cell.Execution.References
 
         public event Action? LocationsThatWillInvalidateCollectionNameForCellHaveChanged;
 
-        public string GetCollectionName(CellModel cell, PluginContext pluginFunctionRunContext)
+        public string GetCollectionName(CellModel cell, Context pluginFunctionRunContext)
         {
             pluginFunctionRunContext.Cell = cell;
             var result = _calculateCollectionNameFunction.Run(pluginFunctionRunContext, cell);

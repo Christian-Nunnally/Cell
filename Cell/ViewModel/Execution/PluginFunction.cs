@@ -123,7 +123,7 @@ namespace Cell.ViewModel.Execution
             return intermediateCode.Replace("_Range_", "..");
         }
 
-        public CompileResult Run(PluginContext pluginContext, CellModel cell)
+        public CompileResult Run(Context pluginContext, CellModel cell)
         {
             var method = CompiledMethod;
             if (!CompileResult.WasSuccess) return CompileResult;
@@ -186,7 +186,7 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        private CompileResult RunUnsafe(PluginContext pluginContext, CellModel cell, MethodInfo? method)
+        private CompileResult RunUnsafe(Context pluginContext, CellModel cell, MethodInfo? method)
         {
             var result = new CompileResult { WasSuccess = true, ExecutionResult = "Success" };
             // TODO: Do I actually need to check the return type here?

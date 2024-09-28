@@ -33,7 +33,7 @@ namespace Cell.Execution
         {
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);
-            var result = DynamicCellPluginExecutor.RunTrigger(_pluginFunctionLoader, new PluginContext(_cellTracker, _userCollectionLoader, cell.Index) { E = editContext }, cell);
+            var result = DynamicCellPluginExecutor.RunTrigger(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, cell.Index) { E = editContext }, cell);
             if (!result.WasSuccess)
             {
                 cell.ErrorText = result.ExecutionResult ?? "error message is null";

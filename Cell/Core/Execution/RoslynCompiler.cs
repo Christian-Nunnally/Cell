@@ -22,7 +22,7 @@ namespace Cell.Execution
         [
             GetRuntimeMetadataReference(),
             GetMetadataReferenceForType(typeof(object)),
-            GetMetadataReferenceForType(typeof(PluginContext)),
+            GetMetadataReferenceForType(typeof(Context)),
             GetMetadataReferenceForType(typeof(Console)),
             GetMetadataReferenceForType(typeof(Enumerable)),
             GetMetadataReferenceForType(typeof(List<>)),

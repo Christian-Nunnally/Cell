@@ -17,7 +17,7 @@ namespace Cell.Execution.References
 
         public event Action? LocationsThatWillInvalidateCollectionNameForCellHaveChanged { add { } remove { } }
 
-        public string GetCollectionName(CellModel cell, PluginContext pluginFunctionRunContext) => ConstantCollectionName;
+        public string GetCollectionName(CellModel cell, Context pluginFunctionRunContext) => ConstantCollectionName;
 
         public IEnumerable<string> GetLocationsThatWillInvalidateCollectionNameForCell(CellModel cell) => [];
 

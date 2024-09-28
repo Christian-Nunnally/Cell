@@ -15,9 +15,9 @@ namespace Cell.Execution
         private readonly CellModel _cell;
         private readonly CellSpecificCollectionReferenceInvalidator _cellSpecificCollectionReferenceInvalidator;
         private readonly CellTextChangesAtLocationNotifier _getTextChangesAtLocationNotifier;
-        private readonly PluginContext _pluginContext;
+        private readonly Context _pluginContext;
         private readonly ICollectionReference _underlyingGenericCollectionReference;
-        public CellSpecificCollectionReference(CellModel cell, ICollectionReference collectionReference, CellTextChangesAtLocationNotifier getTextChangesAtLocationNotifier, PluginContext pluginContext)
+        public CellSpecificCollectionReference(CellModel cell, ICollectionReference collectionReference, CellTextChangesAtLocationNotifier getTextChangesAtLocationNotifier, Context pluginContext)
         {
             _cell = cell;
             _pluginContext = pluginContext;

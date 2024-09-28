@@ -302,7 +302,7 @@ namespace Cell.View.Application
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(8);
+            if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(7.5);
             else BorderThickness = new Thickness(0);
         }
     }
