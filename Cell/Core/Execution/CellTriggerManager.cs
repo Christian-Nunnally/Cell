@@ -19,12 +19,11 @@ namespace Cell.Execution
         {
             _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
-            _cellTracker.CellAdded += StartMonitoringCell;
-            _cellTracker.CellRemoved += StopMonitoringCell;
+            _cellTracker.CellAdded += StartMonitoringCellForTriggerFunction;
+            _cellTracker.CellRemoved += StopMonitoringCellForTriggerFunction;
             foreach (var cell in _cellTracker.AllCells)
             {
-                // TODO: Only monitor cells that a trigger function is set on.
-                StartMonitoringCell(cell);
+                StartMonitoringCellForTriggerFunction(cell);
             }
             _pluginFunctionLoader = pluginFunctionLoader;
         }
@@ -41,13 +40,16 @@ namespace Cell.Execution
             _cellsBeingEdited.Remove(cell.ID);
         }
 
-        public void StartMonitoringCell(CellModel model)
+        public void StartMonitoringCellForTriggerFunction(CellModel model)
         {
             model.PropertyChanged += CellModelPropertyChanged;
-            _cellModelToCurrentTextValueMap.Add(model, model.Text);
+            if (!string.IsNullOrWhiteSpace(model.TriggerFunctionName))
+            {
+                _cellModelToCurrentTextValueMap.Add(model, model.Text);
+            }
         }
 
-        public void StopMonitoringCell(CellModel model)
+        public void StopMonitoringCellForTriggerFunction(CellModel model)
         {
             model.PropertyChanged -= CellModelPropertyChanged;
             _cellModelToCurrentTextValueMap.Remove(model);
@@ -55,11 +57,29 @@ namespace Cell.Execution
 
         private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(CellModel.Text)) return;
-            var cell = (CellModel)sender!;
-            var oldValue = _cellModelToCurrentTextValueMap[cell];
-            CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));
-            _cellModelToCurrentTextValueMap[cell] = cell.Text;
+            if (sender is not CellModel cell) return;
+            if (e.PropertyName == nameof(CellModel.Text))
+            {
+                if (_cellModelToCurrentTextValueMap.TryGetValue(cell, out var oldValue))
+                {
+                    CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));
+                    _cellModelToCurrentTextValueMap[cell] = cell.Text;
+                }
+            }
+            else if (e.PropertyName == nameof(CellModel.TriggerFunctionName))
+            {
+                if (cell.TriggerFunctionName == string.Empty)
+                {
+                    _cellModelToCurrentTextValueMap.Remove(cell);
+                }
+                else
+                {
+                    if (!_cellModelToCurrentTextValueMap.ContainsKey(cell))
+                    {
+                        _cellModelToCurrentTextValueMap.Add(cell, cell.Text);
+                    }
+                }
+            }    
         }
     }
 }

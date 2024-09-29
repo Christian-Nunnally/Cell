@@ -9,6 +9,9 @@ namespace Cell.Persistence
     {
         private const string SheetsSaveDirectory = "Sheets";
         private readonly PersistedDirectory _persistenceManager;
+
+        private event Action<CellModel> CellLoaded;
+
         public CellLoader(PersistedDirectory persistenceManager)
         {
             _persistenceManager = persistenceManager;
@@ -26,6 +29,7 @@ namespace Cell.Persistence
         {
             var text = _persistenceManager.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
+            CellLoaded?.Invoke(cell);
             return cell;
         }
 
@@ -34,9 +38,9 @@ namespace Cell.Persistence
             if (!_persistenceManager.DirectoryExists(SheetsSaveDirectory)) return [];
 
             var cells = new List<CellModel>();
-            foreach (var directory in _persistenceManager.GetDirectories(SheetsSaveDirectory))
+            foreach (var sheetDirectory in _persistenceManager.GetDirectories(SheetsSaveDirectory))
             {
-                foreach (var file in _persistenceManager.GetFiles(directory)) cells.Add(LoadCell(file));
+                cells.AddRange(LoadSheet(sheetDirectory));
             }
             return cells;
         }

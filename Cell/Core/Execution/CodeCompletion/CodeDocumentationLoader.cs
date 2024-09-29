@@ -37,10 +37,7 @@ namespace Cell.Core.Execution.CodeCompletion
 
         public static void LoadXmlDocumentation(Assembly assembly)
         {
-            if (loadedAssemblies.Contains(assembly))
-            {
-                return; // Already loaded
-            }
+            if (loadedAssemblies.Contains(assembly)) return;
             string directoryPath = assembly.GetDirectoryPath();
             string xmlFilePath = Path.Combine(directoryPath, assembly.GetName().Name + ".xml");
             if (File.Exists(xmlFilePath))

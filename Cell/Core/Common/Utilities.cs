@@ -6,6 +6,9 @@ using System.Windows;
 
 namespace Cell.Common
 {
+    /// <summary>
+    /// Random utilities that are used throughout the project.
+    /// </summary>
     public static partial class Utilities
     {
         public static void CopyPublicProperties(this object source, object target, string[] blacklist)
