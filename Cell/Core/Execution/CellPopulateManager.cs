@@ -23,12 +23,21 @@ namespace Cell.Execution
         private readonly Context _pluginFunctionRunContext;
         private readonly UserCollectionLoader _userCollectionLoader;
 
+        /// <summary>
+        /// Allows the populate mechanism to run. This is disabled during load to prevent uneccessary updates.
+        /// </summary>
         public bool UpdateCellsWhenANewCellIsAdded
         { 
             get => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded; 
             set => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded = value; 
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="CellPopulateManager"/>.
+        /// </summary>
+        /// <param name="cellTracker">The cell tracker to determine cells to manage.</param>
+        /// <param name="pluginFunctionLoader">The function loader used to load the populate function.</param>
+        /// <param name="userCollectionLoader">The collection loader used in the context when running populate.</param>
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader);
@@ -57,9 +66,14 @@ namespace Cell.Execution
             return _cellTextChangesAtLocationNotifier.GetLocationsSubscriberIsSubscribedTo(subscriber);
         }
 
-        public List<CellModel> GetCellsThatUsePopulateFunction(CellFunction function)
+        /// <summary>
+        /// Efficiently gets all cells that use the given function.
+        /// </summary>
+        /// <param name="function">The function to get the users of.</param>
+        /// <returns>The cells that use the given populate function.</returns>
+        public List<CellModel> GetCellsThatUsePopulateFunction(CellFunctionModel function)
         {
-            return _cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cells) ? cells : [];
+            return _cellsToUpdateWhenFunctionChanges.TryGetValue(function, out var cells) ? cells : [];
         }
 
         private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, CellFunction function)

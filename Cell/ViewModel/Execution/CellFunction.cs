@@ -63,7 +63,7 @@ namespace Cell.ViewModel.Execution
 
         public event Action<CellFunction>? DependenciesChanged;
 
-        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(this);
+        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(Model);
 
         public List<ICollectionReference> CollectionDependencies { get; set; } = [];
 

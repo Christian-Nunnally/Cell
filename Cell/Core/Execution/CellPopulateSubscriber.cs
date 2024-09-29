@@ -13,6 +13,14 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
+
+        /// <summary>
+        /// Creates a new instance of <see cref="CellPopulateSubscriber"/>.
+        /// </summary>
+        /// <param name="cell">The cell to populate when this subscriber is triggered.</param>
+        /// <param name="cellTracker">The cell tracker used in the context when running populate.</param>
+        /// <param name="userCollectionLoader">The user collection loader used in the context when running populate.</param>
+        /// <param name="pluginFunctionLoader">The function loader to load the populate function from.</param>
         public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader)
         {
             _cell = cell;
@@ -21,6 +29,9 @@ namespace Cell.Execution
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
+        /// <summary>
+        /// The action that is performed when this ISubscriber triggers.
+        /// </summary>
         public void Action()
         {
             RunPopulateForSubscriber(_cell);
@@ -45,6 +56,10 @@ namespace Cell.Execution
             }
         }
 
+        /// <summary>
+        /// Provides a user friendly string version of this subscriber.
+        /// </summary>
+        /// <returns>The user friendly string version of this subscriber.</returns>
         public override string ToString() => $"Populate subscriber for {_cell.UserFriendlyCellName}";
     }
 }

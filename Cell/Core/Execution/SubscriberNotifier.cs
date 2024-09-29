@@ -11,29 +11,56 @@
     {
         private readonly Dictionary<string, Dictionary<ISubscriber, int>> _channelToSubscriberMap = [];
         private readonly Dictionary<ISubscriber, Dictionary<string, int>> _subscriberToChannelMap = [];
+
+        /// <summary>
+        /// Event that occurs when a key is subscribed to that previously had no subscribers.
+        /// </summary>
         public event Action<string>? LastChannelUnsubscribedFrom;
 
+
+        /// <summary>
+        /// Occurs when a key is unsubscribed from and now has no subscribers.
+        /// </summary>
         public event Action<string>? NewChannelSubscribedTo;
 
+        /// <summary>
+        /// Gets all of the keys that a given subscriber is subscribed to.
+        /// </summary>
+        /// <param name="subscriber">The subscriber.</param>
+        /// <returns>A list of the keys the given subscriber is subscribed to.</returns>
         public IEnumerable<string> GetChannelsSubscriberIsSubscribedTo(ISubscriber subscriber)
         {
             return _subscriberToChannelMap.TryGetValue(subscriber, out var subscriptions) ? [.. subscriptions.Keys] : [];
         }
 
-        public IEnumerable<ISubscriber> GetSubscribersToChannel(string channel)
+        /// <summary>
+        /// Gets all of the subscribers that are currently subscribed to a given key.
+        /// </summary>
+        /// <param name="channel">The key to get subscribers of.</param>
+        /// <returns>The subscribers subscribed to the given key.</returns>
+        public IEnumerable<ISubscriber> GetSubscribersSubscribedToChannel(string channel)
         {
             return _channelToSubscriberMap.TryGetValue(channel, out var subscribers) ? [.. subscribers.Keys] : [];
         }
 
-        public void NotifySubscribers(string reference)
+        /// <summary>
+        /// Causes the Action to be performed on all subscribers that are subscribed to the given key.
+        /// </summary>
+        /// <param name="channel">The key to notify the subscribers of.</param>
+        public void NotifySubscribers(string channel)
         {
-            var subscribers = GetSubscribersToChannel(reference);
+            var subscribers = GetSubscribersSubscribedToChannel(channel);
             foreach (var subscriber in subscribers)
             {
                 subscriber.Action();
             }
         }
 
+        /// <summary>
+        /// Subscribes the given subscriber to the given key. After subscribing, the subscriber's Action will be invoked when NotifySubscribers is called with the given key.
+        /// </summary>
+        /// <param name="subscriber">The subscriber.</param>
+        /// <param name="channel">The key to subscribe to.</param>
         public void SubscribeToChannel(ISubscriber subscriber, string channel)
         {
             if (_channelToSubscriberMap.TryGetValue(channel, out var subscribers))
@@ -60,6 +87,10 @@
             }
         }
 
+        /// <summary>
+        /// Completely unsubscribes the given subscriber from the given key. The given subscribers Action will no longer be invoked when NotifySubscribers is called with any key.
+        /// </summary>
+        /// <param name="subscriber">The subscriber to unsubscribe.</param>
         public void UnsubscribeFromAllChannels(ISubscriber subscriber)
         {
             if (!_subscriberToChannelMap.TryGetValue(subscriber, out var subscriptions)) return;
