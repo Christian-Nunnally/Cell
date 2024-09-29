@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System.Reflection;
+using Cell.Common;
 
 namespace Cell.Core.Execution.CodeCompletion
 {
@@ -23,7 +24,7 @@ namespace Cell.Core.Execution.CodeCompletion
         public SemanticAnalyzer(string code, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
             var usingsCodes = string.Join("\n", usings.Select(x => $"using {x};\n"));
-            var outerContextDeclarationsCode = string.Join("\n", variableNameToTypeMapForOuterContext.Select(x => $"{x.Value.Name} {x.Key};\n"));
+            var outerContextDeclarationsCode = string.Join("\n", variableNameToTypeMapForOuterContext.Select(x => $"{x.Value.GetPrettyFullGenericTypeName()} {x.Key};\n"));
             _prefixText = $"{usingsCodes}\n{outerContextDeclarationsCode}\n";
 
             var syntaxTree = CSharpSyntaxTree.ParseText(_prefixText + code);

@@ -1,4 +1,5 @@
-﻿using Cell.Execution;
+﻿using Cell.Data;
+using Cell.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Persistence;
@@ -27,7 +28,8 @@ namespace Cell.Core.Execution.CodeCompletion
             {
                 var typeName = userCollectionLoader.GetDataTypeStringForCollection(userCollectionName);
                 var type = PluginModel.GetTypeFromString(typeName);
-                outerContextVariables.Add(userCollectionName, type);
+                var enumerableType = typeof(UserList<>).MakeGenericType(type);
+                outerContextVariables.Add(userCollectionName, enumerableType);
             }
 
             var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, CellFunction.UsingNamespaces, outerContextVariables);

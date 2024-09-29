@@ -1,5 +1,8 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Data;
+using Cell.Model;
 using Cell.Plugin.SyntaxWalkers;
+using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
@@ -11,7 +14,7 @@ namespace Cell.Core.Execution.CodeCompletion
     /// </summary>
     public static class CodeCompletionFactory
     {
-        private static readonly IList<ICompletionData> NoCompletionData = [ new CodeCompletionData("", "No completion data found", "") ];
+        private static readonly IList<ICompletionData> NoCompletionData = [ new CodeCompletionData("", "No completion data found", "", IconChar.None) ];
         private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
         private static List<ICompletionData>? _cachedGlobalCompletionData = null;
 
@@ -56,7 +59,7 @@ namespace Cell.Core.Execution.CodeCompletion
             SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);
             var typeSymbol = semanticAnalyzer.GetTypeAtPosition(carrotPosition);
             if (typeSymbol is null) return false;
-            type = GetTypeFromSymbol(typeSymbol);
+            type = TypeSymbolConverter.GetTypeFromSymbol(typeSymbol);
             return type is not null;
         }
 
@@ -79,9 +82,20 @@ namespace Cell.Core.Execution.CodeCompletion
 
         private static ICompletionData CreateCompletionDataForKeyValuePair(KeyValuePair<string, Type> nameTypePair)
         {
-            var userVisibleString = $"{nameTypePair.Key} : {nameTypePair.Value.Name}";
+            var userVisibleString = nameTypePair.Key;
             var description = nameTypePair.Value.GetDocumentation();
-            var data = new CodeCompletionData(nameTypePair.Key, userVisibleString, description);
+            var type = nameTypePair.Value;
+            var prettyTypeName = type.GetPrettyGenericTypeName();
+
+            var icon = IconChar.Globe;
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(UserList<>)) icon = IconChar.List;
+            else if (type.IsEnum) icon = IconChar.ListAlt;
+            else if (type.IsValueType) icon = IconChar.Cube;
+            else if (type.IsInterface) icon = IconChar.ObjectGroup;
+            else if (type.IsClass) icon = IconChar.ObjectGroup;
+            else if (type.IsArray) icon = IconChar.ListAlt;
+
+            var data = new CodeCompletionData(nameTypePair.Key, userVisibleString, prettyTypeName + description, icon);
             return data;
         }
 
@@ -101,7 +115,7 @@ namespace Cell.Core.Execution.CodeCompletion
             var name = info.Name;
             var userVisibleString = $"{name} : {info.GetUnderlyingType()?.Name ?? "Unable to get type name"}";
             var documentation = info.GetDocumentation();
-            return new CodeCompletionData(name, userVisibleString, documentation);
+            return new CodeCompletionData(name, userVisibleString, documentation, IconChar.Line);
         }
 
         private static Type? GetUnderlyingType(this MemberInfo member)

@@ -144,5 +144,31 @@ namespace Cell.Common
 
             targetProperty.SetValue(target, sourceProperty.GetValue(source, null), null);
         }
+
+        public static string GetPrettyGenericTypeName(this Type type)
+        {
+            if (!type.IsGenericType) return type?.FullName ??"";
+
+            var genericTypeDefinition = type.GetGenericTypeDefinition();
+            var genericArguments = type.GetGenericArguments();
+
+            var typeName = genericTypeDefinition.Name.Substring(0, genericTypeDefinition.Name.IndexOf('`'));
+            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.Name));
+
+            return $"{typeName}<{args}>";
+        }
+
+        public static string GetPrettyFullGenericTypeName(this Type type)
+        {
+            if (!type.IsGenericType) return type?.FullName ?? "";
+
+            var genericTypeDefinition = type.GetGenericTypeDefinition();
+            var genericArguments = type.GetGenericArguments();
+
+            var typeName = genericTypeDefinition.FullName.Substring(0, genericTypeDefinition.FullName.IndexOf('`'));
+            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.FullName));
+
+            return $"{typeName}<{args}>";
+        }
     }
 }
