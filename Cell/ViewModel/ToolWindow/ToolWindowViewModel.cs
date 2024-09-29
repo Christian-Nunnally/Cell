@@ -1,9 +1,22 @@
 ﻿using Cell.Common;
+using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
     public class ToolWindowViewModel : PropertyChangedBase
     {
+        public virtual double DefaultHeight { get; } = 200;
+
+        public virtual double DefaultWidth { get; } = 200;
+
+        public virtual double MinimumHeight => DefaultHeight;
+
+        public virtual double MinimumWidth => DefaultWidth;
+
+        public Action? RequestClose { get; set; }
+
+        public virtual List<CommandViewModel> ToolBarCommands => [];
+
         public virtual string ToolWindowTitle { get; set; } = "<<not set>>";
 
         public virtual void HandleBeingClosed()
@@ -14,12 +27,6 @@ namespace Cell.ViewModel.ToolWindow
         {
         }
 
-        public virtual double MinimumHeight => DefaultHeight;
-
-        public virtual double MinimumWidth => DefaultWidth;
-
-        public virtual double DefaultHeight { get; } = 200;
-
-        public virtual double DefaultWidth { get; } = 200;
+        public virtual bool HandleCloseRequested() => true;
     }
 }

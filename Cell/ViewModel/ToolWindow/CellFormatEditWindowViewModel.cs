@@ -28,6 +28,10 @@ namespace Cell.ViewModel.ToolWindow
             _cellTracker = cellTracker;
         }
 
+        public override List<CommandViewModel> ToolBarCommands => [
+    new CommandViewModel("╾╼", () => IsDetailedBorderEditingEnabled = !IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
+    ];
+
         public override double MinimumHeight => 220;
 
         public override double MinimumWidth => 260;

@@ -1,5 +1,6 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Windows;
 
 namespace Cell.View.ToolWindow
 {
@@ -11,7 +12,7 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        private void ExportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void ExportSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             var sheetName = ExportWindowViewModel.SheetNameToExport;
             ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);

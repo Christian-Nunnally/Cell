@@ -11,6 +11,11 @@ namespace Cell.ViewModel.ToolWindow
             Message = message;
             foreach (var action in actions)
             {
+                var actionWrappedWithClose = new CommandViewModel(action.Name, () =>
+                {
+                    action.Command.Execute(null);
+                    RequestClose?.Invoke();
+                });
                 DialogOptions.Add(action);
             }
         }

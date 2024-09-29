@@ -12,22 +12,11 @@ namespace Cell.View.ToolWindow
             ToolViewModel = viewModel;
             DataContext = viewModel;
         }
-
-        public Action? RequestClose { get; set; }
-
-        public virtual List<CommandViewModel> ToolBarCommands => [];
-
         public ToolWindowViewModel ToolViewModel { get; }
-
-        public virtual void HandleBeingClosed() => ToolViewModel.HandleBeingClosed();
-
-        public virtual void HandleBeingShown() => ToolViewModel.HandleBeingShown();
-
-        public virtual bool HandleCloseRequested() => true;
 
         protected void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (Keyboard.Modifiers != ModifierKeys.Shift) return;
+            if (Keyboard.Modifiers == ModifierKeys.Shift) return;
             if (e.Key == Key.Enter || e.Key == Key.Tab)
             {
                 if (sender is not TextBox textbox) return;

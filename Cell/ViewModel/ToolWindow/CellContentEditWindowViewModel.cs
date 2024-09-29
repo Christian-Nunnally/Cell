@@ -19,6 +19,10 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
         }
 
+        public override List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
+            ];
+
         public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
 
         public int Index
@@ -165,5 +169,24 @@ namespace Cell.ViewModel.ToolWindow
         public override double MinimumHeight => 200;
 
         public override double MinimumWidth => 250;
+
+        private static void IndexSelectedCells()
+        {
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.CellSelector.SelectedCells.ToList();
+            var leftmost = selectedCells.Select(x => x.Column).Min();
+            var topmost = selectedCells.Select(x => x.Row).Min();
+            var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
+            if (topLeftCell is null) return;
+            var isLinearSelection = selectedCells.Select(x => x.Column).Distinct().Count() == 1 || selectedCells.Select(x => x.Row).Distinct().Count() == 1;
+            foreach (var selectedCell in selectedCells)
+            {
+                if (selectedCell == topLeftCell) continue;
+                var distance = isLinearSelection
+                    ? (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row)
+                    : selectedCell.Row - topLeftCell.Row;
+                selectedCell.Index = topLeftCell.Index + distance;
+            }
+        }
     }
 }

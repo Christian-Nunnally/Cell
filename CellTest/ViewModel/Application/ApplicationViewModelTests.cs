@@ -90,6 +90,7 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
+        [Apartment(ApartmentState.STA)]
         public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
         {
             var testing = CreateTestInstance();

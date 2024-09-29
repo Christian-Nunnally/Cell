@@ -1,5 +1,6 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Windows;
 
 namespace Cell.View.ToolWindow
 {
@@ -11,7 +12,7 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        private void ImportSheetButtonClicked(object sender, System.Windows.RoutedEventArgs e)
+        private void ImportSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(ImportWindowViewModel.ImportingTemplateName))
             {

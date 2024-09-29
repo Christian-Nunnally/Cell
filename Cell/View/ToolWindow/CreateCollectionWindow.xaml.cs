@@ -1,4 +1,5 @@
 ﻿using Cell.ViewModel.ToolWindow;
+using System.Windows;
 
 namespace Cell.View.ToolWindow
 {
@@ -10,7 +11,7 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        private void AddCollectionButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void AddCollectionButtonClick(object sender, RoutedEventArgs e)
         {
             CreateCollectionWindowViewModel.AddCurrentCollection();
             RequestClose?.Invoke();

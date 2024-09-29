@@ -1,5 +1,6 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Windows;
 
 namespace Cell.View.ToolWindow
 {
@@ -15,7 +16,7 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(this);
         }
 
-        private void ButtonClick(object sender, System.Windows.RoutedEventArgs e)
+        private void ButtonClick(object sender, RoutedEventArgs e)
         {
             RequestClose?.Invoke();
         }
