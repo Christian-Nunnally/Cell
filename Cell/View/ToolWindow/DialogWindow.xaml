@@ -36,7 +36,6 @@
                     <Button
                         Width="125"
                         Margin="2.5"
-                        Click="ButtonClick"
                         Command="{Binding Command}"
                         Content="{Binding Name}" />
                 </DataTemplate>

@@ -12,6 +12,7 @@ namespace Cell.View.ToolWindow
             ToolViewModel = viewModel;
             DataContext = viewModel;
         }
+
         public ToolWindowViewModel ToolViewModel { get; }
 
         protected void TextBoxPreviewKeyDown(object sender, KeyEventArgs e)

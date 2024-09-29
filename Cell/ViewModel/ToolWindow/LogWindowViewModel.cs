@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using Cell.ViewModel.Application;
 using System.Text;
 
 namespace Cell.ViewModel.ToolWindow
@@ -21,6 +22,10 @@ namespace Cell.ViewModel.ToolWindow
             Logger.Instance.LogAdded -= AddLog;
             ClearBuffer();
         }
+
+        public override List<CommandViewModel> ToolBarCommands => [
+            new("Clear", ClearBuffer)
+        ];
 
         public override double MinimumHeight => 100;
 

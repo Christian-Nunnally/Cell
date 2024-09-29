@@ -27,6 +27,10 @@ namespace Cell.ViewModel.ToolWindow
             _userCollectionLoader = userCollectionLoader;
         }
 
+        public override List<CommandViewModel> ToolBarCommands => [
+    new CommandViewModel("New Collection", OpenCreateCollectionWindow),
+            ];
+
         public override double MinimumHeight => 150;
 
         public override double MinimumWidth => 300;

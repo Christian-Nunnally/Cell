@@ -75,6 +75,8 @@ namespace Cell.ViewModel.ToolWindow
 
                 _userCollectionLoader.CreateCollection(collectionName, collectionType);
             }
+
+            RequestClose?.Invoke();
         }
     }
 }

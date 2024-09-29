@@ -64,13 +64,9 @@ namespace Cell.View.ToolWindow
             ContentHeight = resizableToolWindow.ToolViewModel.DefaultHeight;
             ContentHeight = _contentHeight;
             DataContext = this;
-
-            if (ResizableToolWindow != null)
-            {
-                ResizableToolWindow.ToolBarCommands.ForEach(Commands.Add);
-                ResizableToolWindow.RequestClose = RequestClose;
-                ResizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
-            }
+            ResizableToolWindow.ToolViewModel.ToolBarCommands.ForEach(Commands.Add);
+            ResizableToolWindow.ToolViewModel.RequestClose = RequestClose;
+            ResizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
         }
 
         public void SetPositionRespectingBounds(double x, double y)
@@ -123,11 +119,11 @@ namespace Cell.View.ToolWindow
 
         private void RequestClose()
         {
-            var isAllowingClose = ResizableToolWindow?.HandleCloseRequested() ?? true;
+            var isAllowingClose = ResizableToolWindow?.ToolViewModel.HandleCloseRequested() ?? true;
             if (isAllowingClose)
             {
                 _canvas.Children.Remove(this);
-                ResizableToolWindow?.HandleBeingClosed();
+                ResizableToolWindow?.ToolViewModel.HandleBeingClosed();
             }
         }
 

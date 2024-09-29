@@ -9,9 +9,10 @@ namespace Cell.View.ToolWindow
 {
     public partial class FunctionManagerWindow : ResizableToolWindow
     {
-        private FunctionManagerWindowViewModel FunctionManagerWindowViewModel => (FunctionManagerWindowViewModel)ToolViewModel;
+        private FunctionManagerWindowViewModel _viewModel;
         public FunctionManagerWindow(FunctionManagerWindowViewModel viewModel) : base(viewModel)
         {
+            _viewModel = viewModel;
             InitializeComponent();
         }
 
@@ -36,8 +37,8 @@ namespace Cell.View.ToolWindow
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
-                if (FunctionManagerWindowViewModel.SelectedFunction == null) return;
-                var capturedFunction = FunctionManagerWindowViewModel.SelectedFunction;
+                if (_viewModel.SelectedFunction == null) return;
+                var capturedFunction = _viewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
                 var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction, cell, collectionNameToDataTypeMap);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
@@ -56,7 +57,7 @@ namespace Cell.View.ToolWindow
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
-                var selectedFunction = FunctionManagerWindowViewModel.SelectedFunction;
+                var selectedFunction = _viewModel.SelectedFunction;
                 if (selectedFunction == null) return;
                 if (cell.TriggerFunctionName == selectedFunction.Model.Name)
                 {
@@ -66,15 +67,9 @@ namespace Cell.View.ToolWindow
                 {
                     cell.PopulateFunctionName = "";
                 }
-                FunctionManagerWindowViewModel.SelectedFunction = null;
-                FunctionManagerWindowViewModel.SelectedFunction = selectedFunction;
+                _viewModel.SelectedFunction = null;
+                _viewModel.SelectedFunction = selectedFunction;
             }
         }
-
-        public override List<CommandViewModel> ToolBarCommands => 
-        [
-            new CommandViewModel("New Populate", FunctionManagerWindowViewModel.CreateNewPopulateFunction) { ToolTip = "Create a new function that returns a value" },
-            new CommandViewModel("New Trigger", FunctionManagerWindowViewModel.CreateNewTriggerFunction) { ToolTip = "Create a new function that does not return a value" },
-        ];
     }
 }

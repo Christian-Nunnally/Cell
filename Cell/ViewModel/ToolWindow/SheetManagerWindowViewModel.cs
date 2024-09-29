@@ -1,5 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Collections.Specialized;
 
 namespace Cell.ViewModel.ToolWindow
@@ -12,6 +13,30 @@ namespace Cell.ViewModel.ToolWindow
         public SheetManagerWindowViewModel(SheetTracker sheetTracker)
         {
             _sheetTracker = sheetTracker;
+        }
+
+        public override List<CommandViewModel> ToolBarCommands => [
+            new CommandViewModel("Export", OpenExportWindow),
+            new CommandViewModel("Import", OpenImportWindow),
+            new CommandViewModel("New Sheet", OpenAddNewSheetWindow)
+        ];
+
+        private void OpenExportWindow()
+        {
+            var exportWindow = new ExportWindowViewModel();
+            ApplicationViewModel.Instance.ShowToolWindow(exportWindow);
+        }
+
+        private void OpenImportWindow()
+        {
+            var importWindow = new ImportWindowViewModel();
+            ApplicationViewModel.Instance.ShowToolWindow(importWindow);
+        }
+
+        private void OpenAddNewSheetWindow()
+        {
+            var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
+            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 
         public override double MinimumHeight => 100;

@@ -41,9 +41,24 @@ namespace CellTest.Execution
         }
 
         [Fact]
-        public void PluginContextVariableWithDot_CompletionDataCreated_HasCorrectTypes()
+        public void PluginContextVariableWithDotButNoUsingProvided_CompletionDataCreated_UnableToProvideCompletionDataDueToNoUsing()
         {
             IEnumerable<string> usings = [];
+            var code = "c.";
+            var outerContext = new Dictionary<string, Type>
+            {
+                { "c", typeof(Context) }
+            };
+            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+
+            Assert.Single(completionData);
+            Assert.Single(completionData, x => x.Text == string.Empty);
+        }
+
+        [Fact]
+        public void PluginContextVariableWithDot_CompletionDataCreated_HasCorrectTypes()
+        {
+            IEnumerable<string> usings = ["Cell.Execution"];
             var code = "c.";
             var outerContext = new Dictionary<string, Type>
             {

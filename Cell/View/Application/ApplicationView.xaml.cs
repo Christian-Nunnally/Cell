@@ -76,7 +76,7 @@ namespace Cell.View.Application
             Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
 
             _toolWindowCanvas.Children.Add(toolbox);
-            resizableToolWindow.HandleBeingShown();
+            resizableToolWindow.ToolViewModel.HandleBeingShown();
         }
 
         protected override void OnInitialized(EventArgs e)

@@ -17,9 +17,10 @@ namespace Cell.ViewModel.Execution
     /// </summary>
     public partial class CellFunction : PropertyChangedBase
     {
+        private const string CompiledMethodName = "M"; 
         private const string codeFooter = "\n}}}";
         private const string codeHeader = "\n\nnamespace Plugin { public class Program { public static ";
-        private const string methodHeader = " M(Context c, CellModel cell) {\n";
+        private const string methodHeader = $" {CompiledMethodName}(Context c, CellModel cell) {{\n";
 
         /// <summary>
         /// A null function that can be used as a placeholder.
@@ -109,7 +110,7 @@ namespace Cell.ViewModel.Execution
             {
                 var compiler = new RoslynCompiler(SyntaxTree);
                 var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
-                _compiledMethod = compiled.GetMethod("PluginMethod") ?? throw new Exception("Error during compile - compiled object is null");
+                _compiledMethod = compiled.GetMethod(CompiledMethodName) ?? throw new Exception("Error during compile - compiled object is null");
                 CompileResult = new CompileResult { WasSuccess = true, ExecutionResult = "" };
                 WasCompileSuccessful = true;
             }

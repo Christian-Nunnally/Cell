@@ -14,7 +14,7 @@
             { 
                 if (value == _daysWillStayFresh) return;
                 _daysWillStayFresh = value; 
-                OnPropertyChanged(nameof(DaysWillStayFresh)); 
+                NotifyPropertyChanged(nameof(DaysWillStayFresh)); 
             }
         }
         public string Unit
@@ -24,7 +24,7 @@
             {
                 if (value == _unit) return;
                 _unit = value;
-                OnPropertyChanged(nameof(Unit));
+                NotifyPropertyChanged(nameof(Unit));
             }
         }
 
@@ -36,7 +36,7 @@
             {
                 if (value == _name) return;
                 _name = value;
-                OnPropertyChanged(nameof(Name));
+                NotifyPropertyChanged(nameof(Name));
             }
         }
 
@@ -55,19 +55,34 @@
         public string Category
         {
             get => _localCategory;
-            set { if (value == _localCategory) return; _localCategory = value; OnPropertyChanged(nameof(Category)); }
+            set 
+            { 
+                if (value == _localCategory) return;
+                _localCategory = value; 
+                NotifyPropertyChanged(nameof(Category)); 
+            }
         }
 
         public DateTime Date
         {
             get => _localDate;
-            set { if (value == _localDate) return; _localDate = value; OnPropertyChanged(nameof(Date)); }
+            set 
+            { 
+                if (value == _localDate) return;
+                _localDate = value; 
+                NotifyPropertyChanged(nameof(Date)); 
+            }
         }
 
         public string Notes
         {
             get => _localNotes;
-            set { if (value == _localNotes) return; _localNotes = value; OnPropertyChanged(nameof(Notes)); }
+            set 
+            { 
+                if (value == _localNotes) return; 
+                _localNotes = value; 
+                NotifyPropertyChanged(nameof(Notes)); 
+            }
         }
 
         override public string ToString()

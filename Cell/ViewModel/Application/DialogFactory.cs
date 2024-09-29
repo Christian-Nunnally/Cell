@@ -6,13 +6,13 @@ namespace Cell.ViewModel.Application
 {
     public static class DialogFactory
     {
-        public static Func<string, string, List<CommandViewModel>, IDialogWindow> DialogFactoryFunction { get; set; } = (title, message, actions) => new DialogWindow(new DialogWindowViewModel(title, message, actions));
+        public static Func<string, string, List<CommandViewModel>, DialogWindowViewModel> DialogFactoryFunction { get; set; } = (title, message, actions) => new DialogWindowViewModel(title, message, actions);
 
-        public static Action<IDialogWindow> ShowDialogFunction { get; set; } = dialogWindow =>
+        public static Action<DialogWindowViewModel> ShowDialogFunction { get; set; } = dialogWindow =>
             {
-                if (dialogWindow is ResizableToolWindow resizableToolWindow)
+                if (dialogWindow is DialogWindowViewModel viewModel)
                 {
-                    ApplicationViewModel.Instance.ShowToolWindow(resizableToolWindow);
+                    ApplicationViewModel.Instance.ShowToolWindow(viewModel);
                 }
             };
 

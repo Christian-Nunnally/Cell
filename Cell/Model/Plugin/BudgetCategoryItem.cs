@@ -12,43 +12,43 @@
         public double Amount
         {
             get => _localAmount;
-            set { if (value == _localAmount) return; _localAmount = value; OnPropertyChanged(nameof(Amount)); }
+            set { if (value == _localAmount) return; _localAmount = value; NotifyPropertyChanged(nameof(Amount)); }
         }
 
         public string Category
         {
             get => _localCategory;
-            set { if (value == _localCategory) return; _localCategory = value; OnPropertyChanged(nameof(Category)); }
+            set { if (value == _localCategory) return; _localCategory = value; NotifyPropertyChanged(nameof(Category)); }
         }
 
         public int PeriodLength
         {
             get => _localPeriodLength;
-            set { if (value == _localPeriodLength) return; _localPeriodLength = value; OnPropertyChanged(nameof(PeriodLength)); }
+            set { if (value == _localPeriodLength) return; _localPeriodLength = value; NotifyPropertyChanged(nameof(PeriodLength)); }
         }
 
         public string PeriodType
         {
             get => _localPeriodType;
-            set { if (value == _localPeriodType) return; _localPeriodType = value; OnPropertyChanged(nameof(PeriodType)); }
+            set { if (value == _localPeriodType) return; _localPeriodType = value; NotifyPropertyChanged(nameof(PeriodType)); }
         }
 
         public int Priority
         {
             get => _localPriority;
-            set { if (value == _localPriority) return; _localPriority = value; OnPropertyChanged(nameof(Priority)); }
+            set { if (value == _localPriority) return; _localPriority = value; NotifyPropertyChanged(nameof(Priority)); }
         }
 
         public bool Rollover
         {
             get => _localRollover;
-            set { if (value == _localRollover) return; _localRollover = value; OnPropertyChanged(nameof(Rollover)); }
+            set { if (value == _localRollover) return; _localRollover = value; NotifyPropertyChanged(nameof(Rollover)); }
         }
 
         public DateTime StartDate
         {
             get => _localStartDate;
-            set { if (value == _localStartDate) return; _localStartDate = value; OnPropertyChanged(nameof(StartDate)); }
+            set { if (value == _localStartDate) return; _localStartDate = value; NotifyPropertyChanged(nameof(StartDate)); }
         }
 
         public TimeSpan GetPeriod(DateTime forDate)

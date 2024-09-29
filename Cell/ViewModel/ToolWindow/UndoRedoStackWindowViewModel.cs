@@ -1,4 +1,5 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Common;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
@@ -18,6 +19,12 @@ namespace Cell.ViewModel.ToolWindow
         public override double DefaultHeight => 180;
 
         public override double DefaultWidth => 180;
+
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
+            new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
+        ];
 
         public override string ToolWindowTitle => "Undo/Redo Stack";
 

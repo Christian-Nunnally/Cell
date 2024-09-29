@@ -7,12 +7,12 @@ namespace Cell.View.ToolWindow
 {
     public partial class SettingsWindow : ResizableToolWindow
     {
+        private SettingsWindowViewModel _viewModel;
         public SettingsWindow(SettingsWindowViewModel viewModel) : base(viewModel)
         {
+            _viewModel = viewModel;
             InitializeComponent();
         }
-
-        private SettingsWindowViewModel SettingsWindowViewModel => (SettingsWindowViewModel)ToolViewModel;
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
@@ -22,7 +22,7 @@ namespace Cell.View.ToolWindow
 
         private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (SettingsWindowViewModel == null) return;
+            if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
 
         private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (SettingsWindowViewModel == null) return;
+            if (_viewModel == null) return;
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
@@ -51,8 +51,8 @@ namespace Cell.View.ToolWindow
 
         private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (SettingsWindowViewModel == null) return;
-            SettingsWindowViewModel.RestoreFromBackup();
+            if (_viewModel == null) return;
+            _viewModel.RestoreFromBackup();
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
@@ -67,12 +67,15 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindowViewModel);
         }
 
-        private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
+        private void ToggleAbilityToSelectCells(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
-            if (activeSheetView is null) return;
-            activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
+            var cellSelector = ApplicationViewModel.Instance.CellSelector;
+            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
+            if (cellSelector is null) return;
+            if (activeSheetViewModel is null) return;
+            cellSelector.IsSelectingEnabled = !cellSelector.IsSelectingEnabled;
+            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = cellSelector.IsSelectingEnabled;
         }
 
         private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
@@ -83,15 +86,12 @@ namespace Cell.View.ToolWindow
             activeSheetView.IsLockedToCenter = !activeSheetView.IsLockedToCenter;
         }
 
-        private void ToggleAbilityToSelectCells(object sender, RoutedEventArgs e)
+        private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            var cellSelector = ApplicationViewModel.Instance.CellSelector;
-            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
-            if (cellSelector is null) return;
-            if (activeSheetViewModel is null) return;
-            cellSelector.IsSelectingEnabled = !cellSelector.IsSelectingEnabled;
-            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = cellSelector.IsSelectingEnabled;
+            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
+            if (activeSheetView is null) return;
+            activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
 
         private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)

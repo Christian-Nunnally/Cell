@@ -3,7 +3,6 @@ using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
-using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -11,79 +10,36 @@ namespace Cell.View.ToolWindow
 {
     public partial class CodeEditorWindow : ResizableToolWindow
     {
-        private bool _isAllowingCloseWhileDirty = false;
-        private bool _isDirty = false;
+        private readonly CodeEditorWindowViewModel _viewModel;
         private CompletionWindow? completionWindow;
+        /// <summary>
+        /// Creates a new instance of the <see cref="CodeEditorWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public CodeEditorWindow(CodeEditorWindowViewModel viewModel) : base(viewModel)
         {
+            _viewModel = viewModel;
             InitializeComponent();
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
-        }
 
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("Test Code", () => CodeEditorWindowViewModel.TestCode(textEditor.Text)),
-            new CommandViewModel("Syntax", () => CodeEditorWindowViewModel.ToggleSyntaxTreePreview(textEditor.Text)),
-            new CommandViewModel("Save and Close", SaveAndClose)
-        ];
-
-        private CodeEditorWindowViewModel CodeEditorWindowViewModel => (CodeEditorWindowViewModel)ToolViewModel;
-
-        public override void HandleBeingClosed()
-        {
-            base.HandleBeingClosed();
-            CodeEditorWindowViewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
-            textEditor.TextArea.TextEntering -= OnTextEntering;
-            textEditor.TextArea.TextEntered -= OnTextEntered;
-            textEditor.TextArea.TextView.Document.TextChanged -= OnTextChanged;
-            textEditor.TextArea.PreviewKeyDown -= TextEditorPreviewKeyDown;
-        }
-
-        public override void HandleBeingShown()
-        {
-            base.HandleBeingClosed();
-            textEditor.Text = CodeEditorWindowViewModel.UserFriendlyCodeString;
-            _isDirty = false;
-            CodeEditorWindowViewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
+            _viewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             textEditor.TextArea.PreviewKeyDown += TextEditorPreviewKeyDown;
         }
 
-        private void TextEditorPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                OpenAutoCompleteWindow();
-                e.Handled = true;
-            } 
-        }
-
-        public override bool HandleCloseRequested()
-        {
-            if (!_isDirty || _isAllowingCloseWhileDirty) return true;
-            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
-            return false;
-        }
-
-        private void CloseWithoutSaving()
-        {
-            _isAllowingCloseWhileDirty = true;
-            RequestClose?.Invoke();
-        }
-
         private void CodeEditorWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CodeEditorWindowViewModel.SyntaxTreePreviewText))
+            if (e.PropertyName == nameof(_viewModel.SyntaxTreePreviewText))
             {
-                syntaxTreePreviewViewer.Text = CodeEditorWindowViewModel.SyntaxTreePreviewText;
+                syntaxTreePreviewViewer.Text = _viewModel.SyntaxTreePreviewText;
             }
-            else if (e.PropertyName == nameof(CodeEditorWindowViewModel.UserFriendlyCodeString))
+            else if (e.PropertyName == nameof(_viewModel.UserFriendlyCodeString))
             {
-                textEditor.Text = CodeEditorWindowViewModel.UserFriendlyCodeString;
-                _isDirty = false;
+                textEditor.Text = _viewModel.UserFriendlyCodeString;
+                _viewModel.IsDirty = false;
             }
         }
 
@@ -92,23 +48,20 @@ namespace Cell.View.ToolWindow
             completionWindow?.CompletionList.RequestInsertion(e);
         }
 
-        private void OnTextChanged(object? sender, EventArgs e) => _isDirty = true;
+        private void OnTextChanged(object? sender, EventArgs e)
+        {
+            _viewModel.CurrentTextInEditor = textEditor.Text;
+            _viewModel.IsDirty = true;
+        }
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
-            _isDirty = true;
+            static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e) => e.Text == ".";
             if (ShouldOpenAutoCompleteWindow(e)) OpenAutoCompleteWindow();
-
-            static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e)
-            {
-                return e.Text == ".";
-            }
         }
 
         private void OnTextEntering(object sender, TextCompositionEventArgs e)
         {
-            if (ShouldSubmitAutoCompleteResult(e)) InsertCurrentAutoCompleteResult(e);
-
             bool ShouldSubmitAutoCompleteResult(TextCompositionEventArgs e)
             {
                 var anyText = e.Text.Length != 0;
@@ -116,23 +69,26 @@ namespace Cell.View.ToolWindow
                 var isFirstChangedCharacterALetterOrDigit = char.IsLetterOrDigit(e.Text[0]);
                 return anyText && isAutoCompleteOpen && !isFirstChangedCharacterALetterOrDigit;
             }
+            if (ShouldSubmitAutoCompleteResult(e)) InsertCurrentAutoCompleteResult(e);
         }
 
         private void OpenAutoCompleteWindow()
         {
-            TextArea textArea = textEditor.TextArea;
-            var returnType = CodeEditorWindowViewModel.FunctionBeingEdited.Model.ReturnType;
-            completionWindow = CodeCompletionWindowFactory.Create(textArea, ApplicationViewModel.Instance.UserCollectionLoader);
+            var textArea = textEditor.TextArea;
+            var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
+            completionWindow = CodeCompletionWindowFactory.Create(textArea, userCollectionLoader);
             if (completionWindow is null) return;
             completionWindow.Show();
             completionWindow.Closed += delegate { completionWindow = null; };
         }
 
-        private void SaveAndClose()
+        private void TextEditorPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            CodeEditorWindowViewModel.UserFriendlyCodeString = textEditor.Text;
-            _isDirty = false;
-            RequestClose?.Invoke();
+            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                OpenAutoCompleteWindow();
+                e.Handled = true;
+            }
         }
     }
 }

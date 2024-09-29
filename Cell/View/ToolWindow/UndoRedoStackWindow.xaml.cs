@@ -1,6 +1,4 @@
-﻿using Cell.Common;
-using Cell.ViewModel.Application;
-using Cell.ViewModel.ToolWindow;
+﻿using Cell.ViewModel.ToolWindow;
 
 namespace Cell.View.ToolWindow
 {
@@ -10,11 +8,5 @@ namespace Cell.View.ToolWindow
         {
             InitializeComponent();
         }
-
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
-            new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
-        ];
     }
 }

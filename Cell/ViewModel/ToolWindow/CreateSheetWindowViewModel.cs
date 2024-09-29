@@ -61,6 +61,7 @@ namespace Cell.ViewModel.ToolWindow
             SheetFactory.CreateSheet(NewSheetName, _initialRows, _initialColumns, ApplicationViewModel.Instance.CellTracker);
             ApplicationViewModel.Instance.GoToSheet(NewSheetName);
             NewSheetName = string.Empty;
+            RequestClose?.Invoke();
         }
 
         private bool CanAddSheet()

@@ -82,7 +82,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.Version = "1";
             var migrator = new TestMigrator();
             _persistedProject.RegisterMigrator("0", "1", migrator);
-            var dialog = new TestDialogWindow();
+            var dialog = new TestDialogWindowViewModel();
 
             testing.Load();
 
@@ -90,7 +90,6 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        [Apartment(ApartmentState.STA)]
         public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
         {
             var testing = CreateTestInstance();
@@ -99,7 +98,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.Version = "1";
             var migrator = new TestMigrator();
             _persistedProject.RegisterMigrator("0", "1", migrator);
-            var _ = new TestDialogWindow(0);
+            var _ = new TestDialogWindowViewModel(0);
             Assert.False(migrator.Migrated);
 
             testing.Load();

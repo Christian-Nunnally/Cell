@@ -72,12 +72,12 @@ namespace CellTest
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             filteredCollection.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             Assert.DoesNotContain(testItem1, filteredCollection.Items);
 
             testing.Add(testItem1);
@@ -93,12 +93,12 @@ namespace CellTest
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             filteredCollection.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             Assert.DoesNotContain(testItem1, filteredCollection.Items);
 
             testing.Add(testItem1);
@@ -113,11 +113,11 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
+            var testItem1 = new TodoItem() { Priority = 1 };
             Assert.DoesNotContain(testItem1, testing.Items);
 
             testing.Add(testItem1);
@@ -130,12 +130,12 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             Assert.DoesNotContain(testItem1, testing.Items);
 
             testing.Add(testItem1);
@@ -151,14 +151,14 @@ namespace CellTest
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
             var sortFunction2 = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName + "2");
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
-            var sortCode2 = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
+            var sortCode2 = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             sortFunction2.SetUserFriendlyCode(sortCode2, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             testing.Add(testItem1);
             testing.Add(testItem2);
             Assert.Equal(testItem1, testing.Items[0]);
@@ -175,18 +175,18 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             testing.Add(testItem1);
             testing.Add(testItem2);
             Assert.Equal(testItem1, testing.Items[0]);
             Assert.Equal(testItem2, testing.Items[1]);
 
-            testItem1.Title = "3";
+            testItem1.Priority = 3;
 
             Assert.Equal(testItem2, testing.Items[0]);
             Assert.Equal(testItem1, testing.Items[1]);
@@ -197,12 +197,12 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return -int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             Assert.DoesNotContain(testItem1, testing.Items);
 
             testing.Add(testItem1);
@@ -217,12 +217,12 @@ namespace CellTest
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index].Title);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
-            var testItem1 = new TodoItem() { Title = "1" };
-            var testItem2 = new TodoItem() { Title = "2" };
+            var testItem1 = new TodoItem() { Priority = 1 };
+            var testItem2 = new TodoItem() { Priority = 2 };
             testing.Add(testItem1);
             testing.Add(testItem2);
 

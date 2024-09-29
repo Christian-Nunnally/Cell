@@ -71,7 +71,7 @@ namespace CellTest.TestUtilities
 
         public void CopyDirectory(string from, string to)
         {
-            var fromDir = GetDirectory(from);
+            var fromDir = GetDirectory(from)?.ToDictionary();
             if (fromDir == null) return;
             CreateDirectory(to);
             var toDir = GetDirectory(to);

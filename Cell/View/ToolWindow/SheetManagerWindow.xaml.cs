@@ -10,16 +10,11 @@ namespace Cell.View.ToolWindow
     {
         public SheetManagerWindow(SheetManagerWindowViewModel viewModel) : base(viewModel)
         {
+            _viewModel = viewModel;
             InitializeComponent();
         }
 
-        public override List<CommandViewModel> ToolBarCommands => [
-            new CommandViewModel("Export", new RelayCommand(x => OpenExportWindow())),
-            new CommandViewModel("Import", new RelayCommand(x => OpenImportWindow())),
-            new CommandViewModel("New Sheet", new RelayCommand(x => AddNewSheetButtonClicked()))
-        ];
-
-        private SheetManagerWindowViewModel SheetManagerWindowViewModel => (SheetManagerWindowViewModel)ToolViewModel;
+        private SheetManagerWindowViewModel _viewModel;
 
         private static void MakeSureSheetOrderingIsConsecutive()
         {
@@ -31,17 +26,11 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        private void AddNewSheetButtonClicked()
-        {
-            var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
-            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
-        }
-
         private void CopySheetButtonClicked(object sender, RoutedEventArgs e)
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             var sheetName = sheetModel.Name;
-            SheetManagerWindowViewModel.CopySheet(sheetName);
+            _viewModel.CopySheet(sheetName);
         }
 
         private void DeleteSheetButtonClicked(object sender, RoutedEventArgs e)
@@ -65,24 +54,12 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.GoToSheet(sheetModel.Name);
         }
 
-        private void OpenExportWindow()
-        {
-            var exportWindow = new ExportWindowViewModel();
-            ApplicationViewModel.Instance.ShowToolWindow(exportWindow);
-        }
-
-        private void OpenImportWindow()
-        {
-            var importWindow = new ImportWindowViewModel();
-            ApplicationViewModel.Instance.ShowToolWindow(importWindow);
-        }
-
         private void OrderSheetDownButtonClicked(object sender, RoutedEventArgs e)
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
             sheetModel.Order += 3;
-            SheetManagerWindowViewModel.RefreshSheetsList();
+            _viewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
 
@@ -91,7 +68,7 @@ namespace Cell.View.ToolWindow
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             MakeSureSheetOrderingIsConsecutive();
             sheetModel.Order -= 3;
-            SheetManagerWindowViewModel.RefreshSheetsList();
+            _viewModel.RefreshSheetsList();
             MakeSureSheetOrderingIsConsecutive();
         }
     }

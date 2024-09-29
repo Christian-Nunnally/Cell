@@ -1,13 +1,12 @@
-﻿using Cell.View.ToolWindow;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 
 namespace CellTest.TestUtilities
 {
-    public class TestDialogWindow : ResizableToolWindow, IDialogWindow
+    public class TestDialogWindowViewModel : DialogWindowViewModel
     {
         private List<CommandViewModel> _actions = [];
-        private static readonly Stack<TestDialogWindow> _instances = new();
+        private static readonly Stack<TestDialogWindowViewModel> _instances = new();
         private readonly int _selectedAction;
 
         public string ExpectedTitle { get; set; } = string.Empty;
@@ -16,29 +15,35 @@ namespace CellTest.TestUtilities
 
         public bool WasShown { get; set; } = false;
 
-        public TestDialogWindow(int selectedAction = -1) : base(new DialogWindowViewModel("", "", []))
+        public TestDialogWindowViewModel(int selectedAction = -1) : base("", "", [])
         {
             DialogFactory.DialogFactoryFunction = GetInstance;
+            DialogFactory.ShowDialogFunction = ShowDialog;
             _selectedAction = selectedAction;
             _instances.Push(this);
         }
 
-        public static TestDialogWindow GetInstance(string title, string message, List<CommandViewModel> actions)
+        public static TestDialogWindowViewModel GetInstance(string title, string message, List<CommandViewModel> actions)
         {
             if (_instances.Count == 0)
             {
-                return new TestDialogWindow();
+                return new TestDialogWindowViewModel();
             }
             var instance = _instances.Pop();
             instance._actions = actions;
 
             if (instance.ExpectedTitle != string.Empty) Assert.Equal(instance.ExpectedTitle, title);
             if (instance.ExpectedMessage != string.Empty) Assert.Equal(instance.ExpectedMessage, message);
-
             return instance;
         }
 
-        public void ShowDialog()
+        public static void ShowDialog(DialogWindowViewModel dialogWindowViewModel)
+        {
+            if (dialogWindowViewModel is not TestDialogWindowViewModel viewModel) throw new InvalidOperationException("Dialog window is not a test dialog window.");
+            viewModel.ShowDialogInstance();
+        }
+
+        public void ShowDialogInstance()
         {
             WasShown = true;
             if (_selectedAction < 0) return;

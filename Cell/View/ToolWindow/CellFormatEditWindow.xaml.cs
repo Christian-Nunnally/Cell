@@ -13,10 +13,11 @@ namespace Cell.View.ToolWindow
     {
         public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel) : base(viewModel)
         {
+            _viewModel = viewModel;
             InitializeComponent();
         }
 
-        private CellFormatEditWindowViewModel CellFormatEditWindowViewModel => (CellFormatEditWindowViewModel)ToolViewModel;
+        private CellFormatEditWindowViewModel _viewModel;
 
         public static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
         {
@@ -31,7 +32,7 @@ namespace Cell.View.ToolWindow
         {
             if (sender is not Button button) return;
             var cellTypeString = button.Content is Label label ? label.Content.ToString() : button.Content.ToString();
-            if (Enum.TryParse(cellTypeString, out CellType newType)) CellFormatEditWindowViewModel.CellType = newType;
+            if (Enum.TryParse(cellTypeString, out CellType newType)) _viewModel.CellType = newType;
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
@@ -57,130 +58,130 @@ namespace Cell.View.ToolWindow
 
         private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.AddColumnToTheLeft();
+            _viewModel.AddColumnToTheLeft();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.AddColumnToTheRight();
+            _viewModel.AddColumnToTheRight();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.AddRowAbove();
+            _viewModel.AddRowAbove();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.AddRowBelow();
+            _viewModel.AddRowBelow();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.DeleteColumns();
+            _viewModel.DeleteColumns();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.DeleteRows();
+            _viewModel.DeleteRows();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.MergeCellsAcross();
+            _viewModel.MergeCellsAcross();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.MergeCells();
+            _viewModel.MergeCells();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.MergeCellsDown();
+            _viewModel.MergeCellsDown();
             ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void SetAlignmentToBottomButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToBottomRightButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Bottom;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Bottom;
         }
 
         private void SetAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Center;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Center;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Center;
+            _viewModel.VerticalAlignment = VerticalAlignment.Center;
         }
 
         private void SetAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Stretch;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Stretch;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Stretch;
         }
 
         private void SetAlignmentToTopButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Stretch;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Left;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Left;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetAlignmentToTopRightButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.HorizontalAlignment = HorizontalAlignment.Right;
-            CellFormatEditWindowViewModel.VerticalAlignment = VerticalAlignment.Top;
+            _viewModel.HorizontalAlignment = HorizontalAlignment.Right;
+            _viewModel.VerticalAlignment = VerticalAlignment.Top;
         }
 
         private void SetTextAlignmentToCenterButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Center;
+            _viewModel.TextAlignment = TextAlignment.Center;
         }
 
         private void SetTextAlignmentToLeftButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Left;
+            _viewModel.TextAlignment = TextAlignment.Left;
         }
 
         private void SetTextAlignmentToRightButtonClick(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.TextAlignment = TextAlignment.Right;
+            _viewModel.TextAlignment = TextAlignment.Right;
         }
 
         private void UnmergeButtonClicked(object sender, RoutedEventArgs e)
         {
-            CellFormatEditWindowViewModel.UnmergeCells();
+            _viewModel.UnmergeCells();
         }
     }
 }

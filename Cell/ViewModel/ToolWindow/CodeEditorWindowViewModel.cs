@@ -14,6 +14,8 @@ namespace Cell.ViewModel.ToolWindow
         private readonly IReadOnlyDictionary<string, string> _collectionNameToDataTypeMap;
         private CompileResult _lastCompileResult;
         private string? syntaxTreePreviewText = string.Empty;
+        private bool _isAllowingCloseWhileDirty = false;
+        private bool _isDirty = false;
         public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             FunctionBeingEdited = functionToBeEdited;
@@ -22,6 +24,19 @@ namespace Cell.ViewModel.ToolWindow
 
             DisplayResult(functionToBeEdited.CompileResult);
         }
+
+        public override bool HandleCloseRequested()
+        {
+            if (!_isDirty || _isAllowingCloseWhileDirty) return true;
+            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
+            return false;
+        }
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new CommandViewModel("Test Code", () => TestCode(CurrentTextInEditor)),
+            new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)),
+            new CommandViewModel("Save and Close", SaveAndClose)
+        ];
 
         public override double MinimumHeight => 200;
 
@@ -72,6 +87,8 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         public string UserFriendlyCodeString { get => FunctionBeingEdited.GetUserFriendlyCode(CellContext, _collectionNameToDataTypeMap); set => FunctionBeingEdited.SetUserFriendlyCode(value, CellContext, _collectionNameToDataTypeMap); }
+        public bool IsDirty { get => _isDirty; internal set => _isDirty = value; }
+        public string CurrentTextInEditor { get; internal set; }
 
         public override void HandleBeingClosed()
         {
@@ -132,6 +149,19 @@ namespace Cell.ViewModel.ToolWindow
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var syntaxTree = function.SyntaxTree;
             SyntaxTreePreviewText = syntaxTree.ToString();
+        }
+
+        private void CloseWithoutSaving()
+        {
+            _isAllowingCloseWhileDirty = true;
+            RequestClose?.Invoke();
+        }
+
+        private void SaveAndClose()
+        {
+            UserFriendlyCodeString = CurrentTextInEditor;
+            _isDirty = false;
+            RequestClose?.Invoke();
         }
     }
 }
