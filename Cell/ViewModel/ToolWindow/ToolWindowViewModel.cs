@@ -17,6 +17,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public virtual List<CommandViewModel> ToolBarCommands => [];
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public virtual string ToolWindowTitle { get; set; } = "<<not set>>";
 
         public virtual void HandleBeingClosed()

@@ -14,6 +14,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public ApplicationSettings? ApplicationSettings => _applicationSettings;
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Settings";
 
         public override double DefaultHeight => 380;

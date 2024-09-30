@@ -9,6 +9,9 @@ namespace Cell.ViewModel.ToolWindow
         private readonly StringBuilder _logBufferBuilder = new();
         public string LogBuffer => _logBufferBuilder.ToString();
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Logs";
 
         public void ClearBuffer()

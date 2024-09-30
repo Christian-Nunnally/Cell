@@ -36,6 +36,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle
         {
             get

@@ -16,7 +16,7 @@ namespace Cell.ViewModel.ToolWindow
                     action.Command.Execute(null);
                     RequestClose?.Invoke();
                 });
-                DialogOptions.Add(action);
+                DialogOptions.Add(actionWrappedWithClose);
             }
         }
 

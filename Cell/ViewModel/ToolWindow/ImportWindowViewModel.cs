@@ -20,6 +20,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public bool SkipExistingCollectionsDuringImport { get; set; } = false;
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Import";
     }
 }

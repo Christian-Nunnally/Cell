@@ -486,6 +486,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle
         {
             get

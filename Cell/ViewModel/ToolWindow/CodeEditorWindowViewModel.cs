@@ -44,7 +44,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public override double DefaultHeight => 400;
 
-        public override double DefaultWidth => 400;
+        public override double DefaultWidth => 500;
 
         public CellModel? CellContext { get; private set; }
 
@@ -53,8 +53,6 @@ namespace Cell.ViewModel.ToolWindow
         public string FunctionReturnType => FunctionBeingEdited.Model.ReturnType;
 
         public bool IsTransformedSyntaxTreeViewerVisible => !string.IsNullOrWhiteSpace(SyntaxTreePreviewText);
-
-        public Action? RequestClose { get; set; }
 
         public double ResultColumnWidth => ResultString == string.Empty ? 0 : 200;
 
@@ -73,16 +71,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle
         {
             get
             {
-                // TODO: fix dirty dot
-                //var dirtyDot = _isDirty ? "*" : string.Empty;
-                var dirtyDot = false ? "*" : string.Empty;
+                var dirtyDot = _isDirty ? "*" : string.Empty;
                 var functionBeingEdited = FunctionBeingEdited.Model;
                 var cellContext = CellContext;
-                return cellContext == null ? $"Code Editor - {functionBeingEdited.Name}{dirtyDot}" : $"Code Editor - {functionBeingEdited.Name} - {ColumnCellViewModel.GetColumnName(cellContext.Column)}{cellContext.Row}";
+                var title = $"Editing `{functionBeingEdited.Name}`{dirtyDot}";
+                if (cellContext is not null) title += $" : {cellContext.UserFriendlyCellName}";
+                return title;
             }
         }
 

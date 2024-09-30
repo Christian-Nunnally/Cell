@@ -9,11 +9,13 @@ namespace Cell.Core.Execution.CodeCompletion
 {
     public static class TypeSymbolConverter
     {
-        public static Type GetTypeFromSymbol(ITypeSymbol typeSymbol)
+        public static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
         {
-            if (typeSymbol == null) throw new ArgumentNullException(nameof(typeSymbol));
-
             // Handle special cases
+            if (typeSymbol is IErrorTypeSymbol)
+            {
+                return null;
+            }
             if (typeSymbol is INamedTypeSymbol namedTypeSymbol)
             {
                 return GetNamedType(namedTypeSymbol);

@@ -26,6 +26,9 @@ namespace Cell.ViewModel.ToolWindow
             new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
         ];
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Undo/Redo Stack";
 
         public ObservableCollection<string> UndoStack { get; set; } = [];

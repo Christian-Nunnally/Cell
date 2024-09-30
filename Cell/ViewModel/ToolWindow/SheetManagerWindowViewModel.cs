@@ -53,6 +53,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public IEnumerable<SheetModel> FilteredSheets => _sheetTracker.OrderedSheets.Where(x => x.Name.Contains(SheetsListBoxFilterText)).OrderBy(x => x.Order);
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Sheet Manager";
 
         public void RefreshSheetsList()

@@ -53,7 +53,10 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public override string ToolWindowTitle => "Create New Sheet";
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
+        public override string ToolWindowTitle => "New sheet";
 
         public void AddNewSheet()
         {

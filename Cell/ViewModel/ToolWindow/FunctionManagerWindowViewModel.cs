@@ -159,6 +159,9 @@ namespace Cell.ViewModel.ToolWindow
             new CommandViewModel("New Trigger", CreateNewTriggerFunction) { ToolTip = "Create a new function that does not return a value" },
         ];
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
         public override string ToolWindowTitle => "Function Manager";
 
         public string UsersListBoxFilterText
