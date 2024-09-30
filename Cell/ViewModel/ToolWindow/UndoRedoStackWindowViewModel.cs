@@ -20,6 +20,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public override double DefaultWidth => 180;
 
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
             new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),

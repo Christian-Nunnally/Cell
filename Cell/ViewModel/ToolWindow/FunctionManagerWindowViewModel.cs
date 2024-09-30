@@ -153,6 +153,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
             new CommandViewModel("New Populate", CreateNewPopulateFunction) { ToolTip = "Create a new function that returns a value" },

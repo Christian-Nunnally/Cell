@@ -26,8 +26,12 @@ namespace Cell.ViewModel.ToolWindow
             ClearBuffer();
         }
 
-        public override List<CommandViewModel> ToolBarCommands => [
-            new("Clear", ClearBuffer)
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands => 
+        [
+            new("Clear", ClearBuffer) { ToolTip = "Clears the list of logs." }
         ];
 
         public override double MinimumHeight => 100;

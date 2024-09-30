@@ -2,7 +2,6 @@
 using Cell.Model;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types;
 using Cell.ViewModel.Execution;
 using System.ComponentModel;
 using System.Windows.Media;
@@ -31,11 +30,15 @@ namespace Cell.ViewModel.ToolWindow
             DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
             return false;
         }
+
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("Test Code", () => TestCode(CurrentTextInEditor)),
-            new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)),
-            new CommandViewModel("Save and Close", SaveAndClose)
+            new CommandViewModel("Test Code", () => TestCode(CurrentTextInEditor)) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
+            new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." },
+            new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." }
         ];
 
         public override double MinimumHeight => 200;

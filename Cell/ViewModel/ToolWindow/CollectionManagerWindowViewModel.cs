@@ -27,9 +27,13 @@ namespace Cell.ViewModel.ToolWindow
             _userCollectionLoader = userCollectionLoader;
         }
 
-        public override List<CommandViewModel> ToolBarCommands => [
-    new CommandViewModel("New Collection", OpenCreateCollectionWindow),
-            ];
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands => 
+        [
+            new CommandViewModel("New Collection", OpenCreateCollectionWindow) { ToolTip = "Opens the 'Create new collection' tool window." },
+        ];
 
         public override double MinimumHeight => 150;
 

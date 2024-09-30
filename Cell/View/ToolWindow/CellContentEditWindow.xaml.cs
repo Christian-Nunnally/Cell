@@ -8,7 +8,7 @@ namespace Cell.View.ToolWindow
     /// </summary>
     public partial class CellContentEditWindow : ResizableToolWindow
     {
-        private CellContentEditWindowViewModel _viewModel;
+        private readonly CellContentEditWindowViewModel _viewModel;
         /// <summary>
         /// Creates a new instance of the <see cref="CellContentEditWindow"/> class.
         /// </summary>
@@ -24,9 +24,9 @@ namespace Cell.View.ToolWindow
             _viewModel.EditPopulateFunction();
         }
 
-        private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
+        private void MultiUseUserInputTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
-            _viewModel.EditTriggerFunction();
+            _viewModel.SubmitMultiUseUserInputText();
         }
     }
 }

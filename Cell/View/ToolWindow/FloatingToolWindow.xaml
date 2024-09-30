@@ -32,6 +32,7 @@
                         Click="CloseButtonClicked"
                         Content="x"
                         DockPanel.Dock="Right"
+                        ToolTip="Closes this tool window."
                         Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Button
                         Width="28"
@@ -40,6 +41,7 @@
                         Click="UndockButtonClicked"
                         Content="🔒"
                         DockPanel.Dock="Right"
+                        ToolTip="Disables the ability to move and close this tool window. Click again to re-enable."
                         Visibility="{Binding IsDocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Button
                         Width="28"
@@ -48,6 +50,7 @@
                         Click="DockButtonClicked"
                         Content="🔓"
                         DockPanel.Dock="Right"
+                        ToolTip="Enables the ability to move and close this tool window. Click again to disable again."
                         Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>

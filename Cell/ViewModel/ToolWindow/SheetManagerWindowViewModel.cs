@@ -15,10 +15,14 @@ namespace Cell.ViewModel.ToolWindow
             _sheetTracker = sheetTracker;
         }
 
-        public override List<CommandViewModel> ToolBarCommands => [
-            new CommandViewModel("Export", OpenExportWindow),
-            new CommandViewModel("Import", OpenImportWindow),
-            new CommandViewModel("New Sheet", OpenAddNewSheetWindow)
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands => 
+        [
+            new CommandViewModel("Export", OpenExportWindow) { ToolTip = "Opens the export tool window." },
+            new CommandViewModel("Import", OpenImportWindow) { ToolTip = "Opens the import tool window" },
+            new CommandViewModel("New Sheet", OpenAddNewSheetWindow) { ToolTip = "Opens the create new sheet tool window." }
         ];
 
         private void OpenExportWindow()

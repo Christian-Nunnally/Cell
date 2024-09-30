@@ -1,7 +1,6 @@
 ﻿using Cell.Execution;
 using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells.Types;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -19,11 +18,13 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
         }
 
-        public override List<CommandViewModel> ToolBarCommands => [
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands => 
+        [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
-            ];
-
-        public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
+        ];
 
         public int Index
         {
@@ -38,43 +39,25 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public virtual string PopulateFunctionName
+        private string _multiUseUserInputText = string.Empty;
+        public string MultiUseUserInputText
         {
-            get => CellToDisplay.PopulateFunctionName;
+            get => _multiUseUserInputText;
             set
             {
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", value) is not null)
-                {
-                    foreach (var cell in _cellsToEdit)
-                    {
-                        ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                        cell.PopulateFunctionName = value;
-                    }
-                }
+                _multiUseUserInputText = value;
+                NotifyPropertyChanged(nameof(MultiUseUserInputText));
+                NotifyPropertyChanged(nameof(IsEditFunctionButtonVisible));
             }
         }
 
-        public IEnumerable<string> PrettyCellLocationDependencyNames => _cellPopulateManager.GetAllLocationSubscriptions(CellToDisplay).Select(x =>
+        public void SubmitMultiUseUserInputText()
         {
-            var split = x.Replace($"{CellToDisplay.SheetName}_", "").Split('_');
-            if (split.Length == 2) return $"{ColumnCellViewModel.GetColumnName(int.Parse(split[1]))}{split[0]}";
-            return $"{split[0]}_{ColumnCellViewModel.GetColumnName(int.Parse(split[2]))}{split[1]}";
-        });
-
-        public List<string> PrettyDependencyNames => [.. _cellPopulateManager.GetAllCollectionSubscriptions(CellToDisplay), .. PrettyCellLocationDependencyNames];
-
-        public string Text
-        {
-            get => CellToDisplay.Text;
-            set
-            {
-                foreach (var cell in _cellsToEdit)
-                {
-                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Text = value;
-                }
-            }
+            if (_multiUseUserInputText.StartsWith('=')) CellToDisplay.PopulateFunctionName = _multiUseUserInputText[1..].Trim();
+            else CellToDisplay.Text = _multiUseUserInputText;
         }
+
+        public bool IsEditFunctionButtonVisible => _multiUseUserInputText.StartsWith('=');
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -83,25 +66,9 @@ namespace Cell.ViewModel.ToolWindow
         {
             get
             {
-                var currentlySelectedCell = ApplicationViewModel.Instance.SheetViewModel?.SelectedCellViewModel;
+                var currentlySelectedCell = _cellsToEdit.FirstOrDefault();
                 if (currentlySelectedCell is null) return "Select a cell to edit";
-                return $"Content editor - {currentlySelectedCell.Model.GetName()}";
-            }
-        }
-
-        public virtual string TriggerFunctionName
-        {
-            get => CellToDisplay.TriggerFunctionName;
-            set
-            {
-                if (ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", value) is not null)
-                {
-                    foreach (var cell in _cellsToEdit)
-                    {
-                        ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                        cell.TriggerFunctionName = value;
-                    }
-                };
+                return $"Value editor - {currentlySelectedCell.GetName()}";
             }
         }
 
@@ -114,10 +81,10 @@ namespace Cell.ViewModel.ToolWindow
                 _cellToDisplay = value;
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
                 NotifyPropertyChanged(nameof(CellToDisplay));
-                NotifyPropertyChanged(nameof(Text));
                 NotifyPropertyChanged(nameof(Index));
-                NotifyPropertyChanged(nameof(PopulateFunctionName));
-                NotifyPropertyChanged(nameof(TriggerFunctionName));
+                NotifyPropertyChanged(nameof(ToolWindowTitle));
+                if (!string.IsNullOrEmpty(_cellToDisplay.PopulateFunctionName)) MultiUseUserInputText = $"={_cellToDisplay.PopulateFunctionName}";
+                else MultiUseUserInputText = _cellToDisplay.Text;
             }
         }
 
@@ -126,16 +93,6 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName)) CellToDisplay.PopulateFunctionName = "Untitled";
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
-            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
-            ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
-        }
-
-        public void EditTriggerFunction()
-        {
-            if (CellToDisplay == null) return;
-            if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName)) CellToDisplay.TriggerFunctionName = "Untitled";
-            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
@@ -165,13 +122,13 @@ namespace Cell.ViewModel.ToolWindow
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
         }
 
-        public override double DefaultHeight => 220;
+        public override double DefaultHeight => 90;
 
         public override double DefaultWidth => 500;
 
-        public override double MinimumHeight => 200;
+        public override double MinimumHeight => 50;
 
-        public override double MinimumWidth => 250;
+        public override double MinimumWidth => 200;
 
         private static void IndexSelectedCells()
         {

@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -14,7 +15,15 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
         }
 
-        public IEnumerable<CellModel> CellsBeingEdited => _cellsToEdit;
+        public void EditTriggerFunction()
+        {
+            if (CellToDisplay == null) return;
+            if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName)) CellToDisplay.TriggerFunctionName = "Untitled";
+            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
+            ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
+        }
 
         public override double DefaultHeight => 200;
 
@@ -32,6 +41,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged -= CellToDisplayPropertyChanged;
                 _cellToDisplay = value;
                 NotifyPropertyChanged(nameof(CellToDisplay));
+                NotifyPropertyChanged(nameof(ToolWindowTitle));
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
             }
         }
@@ -43,7 +53,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             get
             {
-                var currentlySelectedCell = CellsBeingEdited.FirstOrDefault();
+                var currentlySelectedCell = _cellsToEdit.FirstOrDefault();
                 if (currentlySelectedCell is null) return "Select a cell to edit";
                 return $"Cell settings editor - {currentlySelectedCell.GetName()}";
             }

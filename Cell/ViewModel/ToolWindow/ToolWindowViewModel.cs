@@ -15,6 +15,9 @@ namespace Cell.ViewModel.ToolWindow
 
         public Action? RequestClose { get; set; }
 
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
         public virtual List<CommandViewModel> ToolBarCommands => [];
 
         /// <summary>
