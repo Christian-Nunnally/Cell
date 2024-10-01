@@ -126,7 +126,7 @@ namespace Cell.ViewModel.ToolWindow
 
         public override double DefaultWidth => 500;
 
-        public override double MinimumHeight => 50;
+        public override double MinimumHeight => 80;
 
         public override double MinimumWidth => 200;
 

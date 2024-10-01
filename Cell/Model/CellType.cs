@@ -24,5 +24,11 @@
             CellType isSpecialType = CellType.Corner | CellType.Row | CellType.Column;
             return (value & isSpecialType) != 0;
         }
+
+        public static bool IsCollection(this CellType value)
+        {
+            CellType isSpecialType = CellType.Dropdown | CellType.List | CellType.Graph;
+            return (value & isSpecialType) != 0;
+        }
     }
 }

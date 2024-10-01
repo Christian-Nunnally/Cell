@@ -172,7 +172,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = SheetViewModelFactory.Create(sheet, CellPopulateManager, CellTracker, SheetTracker, CellSelector, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTracker, SheetTracker, CellSelector, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             _applicationView?.ShowSheetView(SheetViewModel);

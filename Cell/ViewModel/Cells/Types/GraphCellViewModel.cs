@@ -1,141 +1,107 @@
-﻿using Cell.Model;
+﻿using Cell.Common;
+using Cell.Model;
 using System.Windows;
 using System.Windows.Media;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class GraphCellViewModel : CellViewModel
+    /// <summary>
+    /// A line graph cell that displays a list of points.
+    /// </summary>
+    public class GraphCellViewModel : CollectionCellViewModel
     {
-        private readonly List<Point> _rawDataPoints = [];
-        private bool _addingPoint = false;
+        private PointCollection _dataPoints = ScaleAndCenterPoints(
+        [
+            new Point(0, 1),
+            new Point(1, 5),
+            new Point(2, 3),
+            new Point(3, 7),
+            new Point(4, 8),
+        ], 10, 10);
+        /// <summary>
+        /// Creates a new instance of <see cref="GraphCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying cell model to get and save settings to.</param>
+        /// <param name="sheet">The sheet this cell view model is being displayed on.</param>
         public GraphCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += (sender, args) =>
             {
-                if (args.PropertyName == nameof(Text))
-                {
-                    UpdatePointsFromCellText();
-                }
-
-                if (args.PropertyName == nameof(Width))
+                if (sender is not CellModel cell) return;
+                if (args.PropertyName == nameof(CellModel.Width))
                 {
                     UpdatePointsScaling();
                 }
-
-                if (args.PropertyName == nameof(Height))
+                if (args.PropertyName == nameof(CellModel.Height))
                 {
                     UpdatePointsScaling();
                 }
             };
-            UpdatePointsFromCellText();
         }
 
-        public PointCollection DataPoints { get; set; } = ScaleAndCenterPoints(
-            [
-                new Point(0, 0),
-                new Point(5, 5),
-                new Point(10, 20),
-                new Point(15, 1),
-                new Point(20, 3),
-                new Point(25, 44),
-                new Point(30, 2),
-                new Point(35, 3),
-            ], 10, 10);
-
-        public int MaxPoints
+        /// <summary>
+        /// Gets the list of points to display the correctly scaled (based on the nodes width and height) graph in the UI.
+        /// </summary>
+        public PointCollection DataPoints
         {
-            get => (int)Model.GetNumericProperty(nameof(MaxPoints));
+            get => _dataPoints;
             set
             {
-                Model.SetNumericProperty(nameof(MaxPoints), value);
-                NotifyPropertyChanged(nameof(MaxPoints));
-                NotifyPropertyChanged(nameof(MaxPointsString));
+                _dataPoints = value;
+                NotifyPropertyChanged(nameof(DataPoints));
             }
         }
 
-        public string MaxPointsString
+        /// <summary>
+        /// Updates the collection of this <see cref="CollectionCellViewModel"/> with the given items.
+        /// </summary>
+        /// <param name="items">The items to populate the collection with.</param>
+        protected override void UpdateCollection(object? items)
         {
-            get => MaxPoints.ToString();
-            set
-            {
-                if (int.TryParse(value, out var intValue))
-                {
-                    MaxPoints = intValue;
-                    NotifyPropertyChanged(nameof(MaxPoints));
-                }
-            }
+            base.UpdateCollection(items);
+            UpdatePointsScaling();
         }
 
-        public override string Text
+        private static PointCollection ScaleAndCenterPoints(List<Point> points, double targetWidth, double targetHeight)
         {
-            get => base.Text;
-            set
-            {
-                if (_addingPoint) return;
-                _addingPoint = true;
-                base.Text = value;
-                UpdatePointsFromCellText();
-                _addingPoint = false;
-            }
-        }
-
-        public static PointCollection ScaleAndCenterPoints(List<Point> points, int targetWidth, int targetHeight)
-        {
+            const int Margin = 1;
             if (points.Count == 0) return [];
+            var bounds = Utilities.GetBoundingRectangle(points);
 
-            // Find the current bounding box of the points
-            double minX = points.Min(p => p.X);
-            double minY = points.Min(p => p.Y);
-            double maxX = points.Max(p => p.X);
-            double maxY = points.Max(p => p.Y);
+            double scaleX = targetWidth / bounds.Width;
+            double scaleY = targetHeight / bounds.Height;
 
-            // Calculate scaling factors
-            double scaleX = targetWidth / (maxX - minX);
-            double scaleY = targetHeight / (maxY - minY);
-
-            // Scale and center the points
             List<Point> scaledAndCenteredPoints = [];
             foreach (var point in points)
             {
-                double scaledX = (point.X - minX) * scaleX;
-                double scaledY = (point.Y - minY) * scaleY;
-                scaledAndCenteredPoints.Add(new Point(scaledX + 1, scaledY + 1));
+                double scaledX = (point.X - bounds.X) * scaleX;
+                double scaledY = (point.Y - bounds.Y) * scaleY;
+                scaledAndCenteredPoints.Add(new Point(scaledX + Margin, scaledY + Margin));
             }
 
             return [.. scaledAndCenteredPoints];
         }
 
-        public void UpdatePointsScaling()
+        private List<Point> CreatePointsFromData()
         {
-            while (_rawDataPoints.Count > MaxPoints) _rawDataPoints.RemoveAt(0);
-
-            for (int i = 0; i < _rawDataPoints.Count; i++)
+            var points = new List<Point>();
+            var index = 0;
+            for (int i = 0; i < Collection.Count; i++)
             {
-                _rawDataPoints[i] = new Point(i, _rawDataPoints[i].Y);
-            }
-            DataPoints = ScaleAndCenterPoints(_rawDataPoints, (int)Model.Width - 10, (int)Model.Height - 10);
-            NotifyPropertyChanged(nameof(DataPoints));
-        }
-
-        private void UpdatePointsFromCellText()
-        {
-            if (!Text.Contains(',') && double.TryParse(Text, out double result))
-            {
-                _rawDataPoints.Add(new Point(_rawDataPoints.Count, -result));
-            }
-            else
-            {
-                var split = Text.Split(',');
-                _rawDataPoints.Clear();
-                foreach (var s in split)
+                if (double.TryParse(Collection[i].ToString(), out double value))
                 {
-                    if (double.TryParse(s, out double r))
-                    {
-                        _rawDataPoints.Add(new Point(_rawDataPoints.Count, -r));
-                    }
+                    points.Add(new Point(index++, -value));
                 }
             }
-            UpdatePointsScaling();
+
+            return points;
+        }
+
+        private void UpdatePointsScaling()
+        {
+            const int Margin = 5;
+            var points = CreatePointsFromData();
+            DataPoints = ScaleAndCenterPoints(points, Model.Width - Margin - Margin, Model.Height - Margin - Margin);
         }
     }
 }

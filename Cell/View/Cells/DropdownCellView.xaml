@@ -17,8 +17,8 @@
             FontSize="{Binding FontSize}"
             Foreground="{Binding ForegroundColor}"
             HighlightBrush="{Binding ContentHighlightColor}"
-            ItemsSource="{Binding DropdownOptions}"
-            SelectedItem="{Binding Text}"
+            ItemsSource="{Binding CollectionDisplayStrings}"
+            SelectedItem="{Binding SelectedItem}"
             Text="{Binding Path=Text, Mode=TwoWay}" />
     </DataTemplate>
 </ResourceDictionary>

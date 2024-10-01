@@ -13,37 +13,6 @@
     mc:Ignorable="d">
     <Grid>
         <StackPanel Height="250">
-            <StackPanel Orientation="Horizontal">
-                <Label Width="100" Content="Collection" />
-                <controls:BetterComboBox
-                    Width="100"
-                    ItemsSource="{Binding CollectionNames}"
-                    SelectedItem="{Binding CollectionName}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Width="100" Content="Max Items" />
-                <TextBox
-                    Width="100"
-                    PreviewKeyDown="TextBoxPreviewKeyDown"
-                    Text="{Binding MaxItemsString, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <Label Width="100" Content="Items" />
-                <TextBox
-                    Width="100"
-                    PreviewKeyDown="TextBoxPreviewKeyDown"
-                    Text="{Binding CommaSeperatedItems, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <Label Width="100" Content="Max Points" />
-                <TextBox
-                    Width="100"
-                    PreviewKeyDown="TextBoxPreviewKeyDown"
-                    Text="{Binding MaxPointsString, UpdateSourceTrigger=LostFocus}" />
-            </StackPanel>
-
             <CheckBox
                 Margin="5"
                 Content="Vertical Orientation"

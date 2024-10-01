@@ -93,25 +93,5 @@ namespace Cell.View.ToolWindow
             if (activeSheetView is null) return;
             activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
         }
-
-        private void TogglePopulateCellDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCellDependencies;
-        }
-
-        private void TogglePopulateCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightPopulateCollectionDependencies;
-        }
-
-        private void ToggleTriggerCellDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCellDependencies;
-        }
-
-        private void ToggleTriggerCollectionDependencyButtonClick(object sender, RoutedEventArgs e)
-        {
-            ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies = !ApplicationViewModel.Instance.ApplicationSettings.HighlightTriggerCollectionDependencies;
-        }
     }
 }

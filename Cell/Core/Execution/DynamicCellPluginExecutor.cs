@@ -13,15 +13,6 @@ namespace Cell.Execution
             Logger.Instance.Log($"{logStart} - {sheet} - {row} - {column} - {compileResult.WasSuccess} - {compileResult.ExecutionResult}");
         }
 
-        public static CompileResult RunPopulate(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, CellModel cell)
-        {
-            if (!pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
-            Log(cell.TriggerFunctionName, cell.SheetName, cell.Row, cell.Column, populateFunction.CompileResult, false);
-            var result = populateFunction.Run(pluginContext, cell);
-            result = ConvertReturnedObjectToString(result);
-            return result;
-        }
-
         public static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, string functionName)
         {
             if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
@@ -46,24 +37,6 @@ namespace Cell.Execution
             if (resultObject is null) return null;
             if (int.TryParse(resultObject.ToString(), out var resultInt)) return resultInt;
             return null;
-        }
-
-        private static CompileResult ConvertReturnedObjectToString(CompileResult compileResult)
-        {
-            if (!compileResult.WasSuccess) return compileResult;
-            if (compileResult.ReturnedObject is null) return compileResult;
-            if (compileResult.ReturnedObject is IEnumerable resultEnumerable && compileResult.ReturnedObject is not string)
-            {
-                var resultString = "";
-                foreach (var item in resultEnumerable)
-                {
-                    resultString += item?.ToString() + ",";
-                }
-                if (resultString.Length > 0) resultString = resultString[..^1];
-                compileResult.ExecutionResult = resultString;
-            }
-            compileResult.ExecutionResult = compileResult.ReturnedObject.ToString() ?? "";
-            return compileResult;
         }
     }
 }

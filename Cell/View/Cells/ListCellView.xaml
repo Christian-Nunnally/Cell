@@ -11,7 +11,7 @@
             BorderBrush="{Binding ContentBorderColor}"
             BorderThickness="{Binding ContentBorderThickness}"
             Foreground="{Binding ForegroundColor}"
-            ItemsSource="{Binding ListItems}"
+            ItemsSource="{Binding Collection}"
             SelectedItem="{Binding Text}"
             SelectedValue="{Binding SelectedItem}"
             VirtualizingPanel.IsVirtualizing="True">

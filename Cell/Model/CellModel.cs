@@ -30,6 +30,7 @@ namespace Cell.Model
         private string _text = string.Empty;
         private string _triggerFunctionName = string.Empty;
         private double _width;
+        private object? _populateResult;
 
         /// <summary>
         /// Creates a new instance of a <see cref="CellModel"/>.
@@ -78,6 +79,18 @@ namespace Cell.Model
         {
             get => _errorText;
             set { if (_errorText != value) { _errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
+        }
+
+        /// <summary>
+        /// The result of the last populate function run for this cell.
+        /// 
+        /// This value is not persisted.
+        /// </summary>
+        [JsonIgnore]
+        public object? PopulateResult
+        {
+            get => _populateResult;
+            set { if (_populateResult != value) { _populateResult = value; NotifyPropertyChanged(nameof(PopulateResult)); } }
         }
 
         /// <summary>
@@ -334,24 +347,6 @@ namespace Cell.Model
         {
             SetBackgrounds(color);
             SetBorders(color);
-        }
-
-        /// <summary>
-        /// Used by dropdown cells to set the items in the dropdown.
-        /// </summary>
-        /// <param name="objects">An enumerable list of items to display.</param>
-        public void SetItems(IEnumerable<object> objects)
-        {
-            SetStringProperty(nameof(DropdownCellViewModel.CommaSeperatedItems), string.Join(',', objects));
-        }
-
-        /// <summary>
-        /// Used by dropdown cells to set the items in the dropdown.
-        /// </summary>
-        /// <param name="commaSeperatedItems">A comma seperated string of values to display.</param>
-        public void SetItems(string commaSeperatedItems)
-        {
-            SetStringProperty(nameof(DropdownCellViewModel.CommaSeperatedItems), commaSeperatedItems);
         }
 
         /// <summary>

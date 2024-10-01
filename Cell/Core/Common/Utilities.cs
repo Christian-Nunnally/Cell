@@ -170,5 +170,21 @@ namespace Cell.Common
 
             return $"{typeName}<{args}>";
         }
+
+        /// <summary>
+        /// Returns the smallest possible rectangle that includes all points and is parellel to the xy plane.
+        /// </summary>
+        /// <param name="points">The list of points to inlcude.</param>
+        /// <returns>A rectangle that includes all of the points.</returns>
+        public static Rect GetBoundingRectangle(List<Point> points)
+        {
+            var minX = points.Min(p => p.X);
+            var minY = points.Min(p => p.Y);
+            var maxX = points.Max(p => p.X);
+            var maxY = points.Max(p => p.Y);
+            var topLeft = new Point(minX, minY);
+            var bottomRight = new Point(maxX, maxY);
+            return new Rect(topLeft, bottomRight);
+        }
     }
 }

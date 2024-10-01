@@ -120,15 +120,6 @@ namespace Cell.Execution
             _cellsToUpdateWhenFunctionChanges[function.Model].ForEach(cell => UpdateDependencySubscriptions(cell, function));
         }
 
-        private void PopulateCellsText(CellModel cell)
-        {
-            if (string.IsNullOrEmpty(cell.PopulateFunctionName)) return;
-            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, cell.Index), cell);
-            if (result.ExecutionResult == null) return;
-            if (result.WasSuccess) cell.Text = result.ExecutionResult;
-            else cell.ErrorText = result.ExecutionResult;
-        }
-
         private void RemoveFromCellsToUpdateWhenFunctionChangesMap(CellModel cell, CellFunction function)
         {
             if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
@@ -178,7 +169,10 @@ namespace Cell.Execution
         {
             if (e.PropertyName == nameof(CellFunctionModel.Code))
             {
-                _cellsToUpdateWhenFunctionChanges[(CellFunctionModel)sender!].ForEach(PopulateCellsText);
+                foreach (var cellToUpdate in _cellsToUpdateWhenFunctionChanges[(CellFunctionModel)sender!])
+                {
+                    _cellToPopulateSubscriberMap[cellToUpdate].Action();
+                }
             }
         }
 

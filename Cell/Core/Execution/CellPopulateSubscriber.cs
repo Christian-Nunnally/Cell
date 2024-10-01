@@ -1,6 +1,7 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
+using System.CodeDom.Compiler;
 
 namespace Cell.Execution
 {
@@ -42,11 +43,17 @@ namespace Cell.Execution
             // You can remove this once cells are properly unsubscribed from this when PopulateFunctionName is set to "";
             if (subscriber.PopulateFunctionName == "") return;
 
-            var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
-            var result = DynamicCellPluginExecutor.RunPopulate(_pluginFunctionLoader, pluginContext, subscriber);
+            var result = RunPopulate(subscriber);
             if (result.WasSuccess)
             {
-                if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;
+                if (subscriber.CellType.IsCollection())
+                {
+                    if (result.ReturnedObject != null) subscriber.PopulateResult = result.ReturnedObject;
+                }
+                else
+                {
+                    if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;
+                }
                 subscriber.ErrorText = string.Empty;
             }
             else
@@ -54,6 +61,17 @@ namespace Cell.Execution
                 if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;// "Error";
                 if (result.ExecutionResult != null) subscriber.ErrorText = result.ExecutionResult;
             }
+        }
+
+        private CompileResult RunPopulate(CellModel subscriber)
+        {
+            var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
+            if (!_pluginFunctionLoader.TryGetFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
+            var result = populateFunction.Run(pluginContext, subscriber);
+            if (!result.WasSuccess) return result;
+            var returnedObject = result.ReturnedObject;
+            if (returnedObject is not null) result.ExecutionResult = returnedObject.ToString() ?? "";
+            return result;
         }
 
         /// <summary>

@@ -44,30 +44,6 @@ namespace Cell.Persistence
             }
         }
 
-        public bool HighlightPopulateCellDependencies
-        {
-            get => highlightPopulateCellDependencies;
-            set { if (highlightPopulateCellDependencies != value) { highlightPopulateCellDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCellDependencies)); } }
-        }
-
-        public bool HighlightPopulateCollectionDependencies
-        {
-            get => highlightPopulateCollectionDependencies;
-            set { if (highlightPopulateCollectionDependencies != value) { highlightPopulateCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightPopulateCollectionDependencies)); } }
-        }
-
-        public bool HighlightTriggerCellDependencies
-        {
-            get => highlightTriggerCellDependencies;
-            set { if (highlightTriggerCellDependencies != value) { highlightTriggerCellDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCellDependencies)); } }
-        }
-
-        public bool HighlightTriggerCollectionDependencies
-        {
-            get => highlightTriggerCollectionDependencies;
-            set { if (highlightTriggerCollectionDependencies != value) { highlightTriggerCollectionDependencies = value; NotifyPropertyChanged(nameof(HighlightTriggerCollectionDependencies)); } }
-        }
-
         public string LastLoadedSheet
         {
             get => lastLoadedSheet;

@@ -4,41 +4,14 @@ using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class DropdownCellViewModel : CellViewModel
+    public class DropdownCellViewModel : CollectionCellViewModel
     {
         public DropdownCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
-            UpdateDropdownItems(CommaSeperatedItems);
-            model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public string CommaSeperatedItems
-        {
-            get => Model.GetStringProperty(nameof(CommaSeperatedItems));
-            set
-            {
-                Model.SetStringProperty(nameof(CommaSeperatedItems), value);
-            }
-        }
+        public override string Text { get => SelectedItem; set => base.Text = value; }
 
-        public ObservableCollection<string> DropdownOptions { get; set; } = [];
-
-        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CommaSeperatedItems))
-            {
-                UpdateDropdownItems(CommaSeperatedItems);
-            }
-        }
-
-        private void UpdateDropdownItems(string value)
-        {
-            DropdownOptions.Clear();
-            var splitValues = value.Split(",");
-            foreach (var item in splitValues.Where(s => !string.IsNullOrWhiteSpace(s)))
-            {
-                DropdownOptions.Add(item);
-            }
-        }
+        public string SelectedItem { get; set; }
     }
 }

@@ -62,13 +62,6 @@
                     ToolTip="Opens the cell format editor"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
-                    Click="OpenSpecialEditPanelButtonClick"
-                    Content="⛏️"
-                    DockPanel.Dock="Left"
-                    Style="{StaticResource TitleButtonStyle}"
-                    ToolTip="Opens the cell settings editor"
-                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <Button
                     Click="OpenTextEditPanelButtonClick"
                     Content="⌶"
                     DockPanel.Dock="Left"

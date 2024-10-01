@@ -41,7 +41,7 @@ namespace CellTest.Execution
         }
 
         [Fact]
-        public void PluginContextVariableWithDotButNoUsingProvided_CompletionDataCreated_UnableToProvideCompletionDataDueToNoUsing()
+        public void PluginContextVariableWithDotButNoUsingProvided_CompletionDataCreated_DoesNotNeedUsingsForSomeReason()
         {
             IEnumerable<string> usings = [];
             var code = "c.";
@@ -51,8 +51,23 @@ namespace CellTest.Execution
             };
             var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
 
-            Assert.Single(completionData);
-            Assert.Single(completionData, x => x.Text == string.Empty);
+            Assert.NotEmpty(completionData);
+            Assert.True(completionData.Count > 1);
+        }
+
+        [Fact]
+        public void PluginContextVariableWithDotEButNoUsingProvided_CompletionDataCreated_DoesNotNeedUsingsForSomeReason()
+        {
+            IEnumerable<string> usings = [];
+            var code = "c.E.";
+            var outerContext = new Dictionary<string, Type>
+            {
+                { "c", typeof(Context) }
+            };
+            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+
+            Assert.NotEmpty(completionData);
+            Assert.True(completionData.Count > 1);
         }
 
         [Fact]
