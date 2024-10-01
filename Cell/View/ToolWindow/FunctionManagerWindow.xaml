@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
@@ -21,12 +22,12 @@
                 <Label Content="Functions" Style="{StaticResource ListHeaderLabelStyle}" />
                 <ToggleButton
                     Width="25"
-                    Content="↚"
+                    Content="{fa:Icon Explosion}"
                     DockPanel.Dock="Right"
                     IsChecked="{Binding IncludeTriggerFunctions}" />
                 <ToggleButton
                     Width="25"
-                    Content="←"
+                    Content="{fa:Icon Fill}"
                     DockPanel.Dock="Right"
                     IsChecked="{Binding IncludePopulateFunctions}" />
                 <controls:BetterComboBox
@@ -64,7 +65,7 @@
                                 x:Name="_removeButton"
                                 HorizontalAlignment="Left"
                                 Click="DeleteFunctionButtonClicked"
-                                Content="❌"
+                                Content="{fa:Icon XMark}"
                                 Foreground="{StaticResource ErrorForegroundColor}"
                                 Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Delete this function"
@@ -74,7 +75,7 @@
                                 Padding="16,0"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
-                                FontFamily="Consolas"
+                                FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
                                 Text="{Binding Model.ReturnType}">
                                 <TextBlock.Style>
@@ -93,7 +94,7 @@
                                     Name="_nameLabel"
                                     Grid.Column="2"
                                     VerticalAlignment="Center"
-                                    FontFamily="Consolas"
+                                    FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
                                     Text="{Binding Model.Name}">
                                     <TextBlock.Style>
@@ -110,7 +111,7 @@
                                 <TextBox
                                     Name="_renameTextbox"
                                     VerticalAlignment="Center"
-                                    FontFamily="Consolas"
+                                    FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
                                     Text="{Binding Name}"
                                     Visibility="Collapsed" />
@@ -118,7 +119,7 @@
                                     x:Name="_renameButton"
                                     Margin="10,0"
                                     HorizontalAlignment="Left"
-                                    Content="🏷️"
+                                    Content="{fa:Icon PenToSquare}"
                                     Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
@@ -128,7 +129,7 @@
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                                 <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
-                                <Setter TargetName="_renameButton" Property="Content" Value="✔" />
+                                <Setter TargetName="_renameButton" Property="Content" Value="{fa:Icon Check}" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
@@ -154,7 +155,7 @@
                         Margin="5,0,0,5"
                         Content="{Binding SelectedFunctionTitleString}"
                         DockPanel.Dock="Top"
-                        FontFamily="Consolas"
+                        FontFamily="{StaticResource ProgrammingFont}"
                         Style="{StaticResource ListHeaderLabelStyle}" />
                     <DockPanel DockPanel.Dock="Top">
                         <Label Content="Users" Style="{StaticResource ListHeaderLabelStyle}" />
@@ -175,12 +176,12 @@
                         SelectedItem="{Binding SelectedUserOfTheSelectedFunction}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Height="20" HorizontalAlignment="Stretch">
+                                <Grid HorizontalAlignment="Stretch">
                                     <Button
                                         x:Name="_removeButton"
                                         HorizontalAlignment="Left"
                                         Click="RemoveFunctionReferenceFromCellButtonClick"
-                                        Content="➖"
+                                        Content="{fa:Icon Minus}"
                                         Style="{StaticResource ListItemInlineButtonStyle}"
                                         ToolTip="Makes this cell stop using the selected function"
                                         Visibility="Hidden" />
@@ -204,7 +205,7 @@
                                         Margin="0,0,20,0"
                                         HorizontalAlignment="Right"
                                         Click="GoToCellButtonClick"
-                                        Content="👁️"
+                                        Content="{StaticResource Eye}"
                                         Style="{StaticResource ListItemInlineButtonStyle}"
                                         ToolTip="Edit the selected function from the context of this cell"
                                         Visibility="Hidden" />
@@ -212,7 +213,7 @@
                                         x:Name="_editButton"
                                         HorizontalAlignment="Right"
                                         Click="EditFunctionFromCellsContextButtonClick"
-                                        Content="✏️"
+                                        Content="{fa:Icon Pen}"
                                         Style="{StaticResource ListItemInlineButtonStyle}"
                                         ToolTip="Edit the selected function from the context of this cell"
                                         Visibility="Hidden" />

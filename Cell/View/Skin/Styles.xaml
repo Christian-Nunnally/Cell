@@ -4,14 +4,18 @@
     xmlns:ae="clr-namespace:ICSharpCode.AvalonEdit.CodeCompletion;assembly=ICSharpCode.AvalonEdit"
     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
     xmlns:controls="clr-namespace:Cell.View.Controls"
-    xmlns:converters="clr-namespace:Cell.View.Converters">
+    xmlns:converters="clr-namespace:Cell.View.Converters"
+    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
+
+    <FontFamily x:Key="MainFont">Aptos Narrow</FontFamily>
+    <FontFamily x:Key="ProgrammingFont">Menlo</FontFamily>
 
     <Style TargetType="{x:Type avalonEdit:TextEditor}">
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="ScrollViewer.Background" Value="{StaticResource ControlBackground}" />
-        <Setter Property="FontFamily" Value="Consolas" />
-        <Setter Property="FontSize" Value="10pt" />
+        <Setter Property="FontFamily" Value="{StaticResource ProgrammingFont}" />
+        <Setter Property="FontSize" Value="11pt" />
         <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
     </Style>
@@ -23,7 +27,7 @@
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
-        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontFamily" Value="{StaticResource ProgrammingFont}" />
         <Setter Property="MaxWidth" Value="400" />
         <Setter Property="Width" Value="400" />
     </Style>
@@ -91,19 +95,6 @@
         <Setter Property="Width" Value="35" />
         <Setter Property="Height" Value="28" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="Consolas" />
-        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
-    </Style>
-
-    <Style
-        x:Key="TitleButtonToggleButtonStyle"
-        BasedOn="{StaticResource {x:Type ToggleButton}}"
-        TargetType="{x:Type ToggleButton}">
-        <Setter Property="Background" Value="{StaticResource CellBackground}" />
-        <Setter Property="Width" Value="35" />
-        <Setter Property="Height" Value="28" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="Consolas" />
         <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
     </Style>
 
@@ -114,7 +105,7 @@
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontFamily" Value="{StaticResource ProgrammingFont}" />
         <Setter Property="FontSize" Value="14" />
     </Style>
 
@@ -125,7 +116,7 @@
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontFamily" Value="{StaticResource ProgrammingFont}" />
         <Setter Property="FontSize" Value="9" />
     </Style>
 
@@ -136,12 +127,13 @@
         <Setter Property="Width" Value="20" />
         <Setter Property="Height" Value="20" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="FontFamily" Value="Consolas" />
+        <Setter Property="FontFamily" Value="{StaticResource ProgrammingFont}" />
         <Setter Property="FontSize" Value="9" />
     </Style>
 
     <Style TargetType="{x:Type Label}">
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
+        <Setter Property="FontFamily" Value="{StaticResource MainFont}" />
     </Style>
 
     <Style
@@ -149,7 +141,7 @@
         BasedOn="{StaticResource {x:Type Label}}"
         TargetType="{x:Type Label}">
         <Setter Property="Foreground" Value="{StaticResource SelectedBorderColor}" />
-        <Setter Property="Content" Value="🔎" />
+        <Setter Property="Content" Value="{fa:Icon MagnifyingGlass}" />
         <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
 
@@ -161,12 +153,17 @@
         <Setter Property="FontWeight" Value="Bold" />
     </Style>
 
+    <Style TargetType="{x:Type TextBlock}">
+        <Setter Property="FontFamily" Value="{StaticResource MainFont}" />
+    </Style>
+
     <Style TargetType="{x:Type TextBox}">
         <Setter Property="Background" Value="{StaticResource ControlBackground}" />
         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{StaticResource MainFont}" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Template">
             <Setter.Value>
@@ -358,8 +355,8 @@
         <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="10" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontFamily" Value="Seoge UI" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontFamily" Value="{StaticResource MainFont}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToolTip">

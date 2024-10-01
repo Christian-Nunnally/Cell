@@ -98,7 +98,7 @@ namespace Cell.ViewModel.ToolWindow
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.Border = $"{value},{currentThickness.Top},{value},{currentThickness.Bottom}";
+                    cell.Style.Border = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
@@ -126,10 +126,13 @@ namespace Cell.ViewModel.ToolWindow
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.Border = $"{value},{value},{value},{value}";
+                    cell.Style.Border = IsDetailedBorderEditingEnabled
+                        ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
+                        : $"{value},{value},{value},{value}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
@@ -209,7 +212,7 @@ namespace Cell.ViewModel.ToolWindow
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.ContentBorder = $"{value},{currentThickness.Top},{value},{currentThickness.Bottom}";
+                    cell.Style.ContentBorder = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
@@ -237,10 +240,13 @@ namespace Cell.ViewModel.ToolWindow
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.ContentBorder = $"{value},{value},{value},{value}";
+                    cell.Style.ContentBorder = IsDetailedBorderEditingEnabled
+                         ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
+                         : $"{value},{value},{value},{value}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
@@ -434,7 +440,7 @@ namespace Cell.ViewModel.ToolWindow
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.ContentMargin = $"{value},{currentThickness.Top},{value},{currentThickness.Bottom}";
+                    cell.Style.ContentMargin = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             }
@@ -462,10 +468,13 @@ namespace Cell.ViewModel.ToolWindow
             set
             {
                 ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
-                    cell.Style.ContentMargin = $"{value},{value},{value},{value}";
+                    cell.Style.ContentMargin = IsDetailedBorderEditingEnabled
+                     ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
+                     : $"{value},{value},{value},{value}";
                 }
                 ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }

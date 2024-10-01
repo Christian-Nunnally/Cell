@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
@@ -7,17 +8,15 @@ namespace Cell.ViewModel.Cells.Types
         public ProgressCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
         {
             model.PropertyChanged += ModelPropertyChanged;
+            model.Style.PropertyChanged += ModelStylePropertyChanged;
         }
 
-        public bool IsVerticalOrientation
+        private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            get => Model.GetBooleanProperty(nameof(IsVerticalOrientation));
-            set
-            {
-                Model.SetBooleanProperty(nameof(IsVerticalOrientation), value);
-                NotifyPropertyChanged(nameof(IsVerticalOrientation), nameof(ProgressBarWidth), nameof(ProgressBarHeight));
-            }
+            NotifyPropertyChanged(nameof(IsVerticalOrientation));
         }
+
+        public bool IsVerticalOrientation => Model.Style.HorizontalAlignment == System.Windows.HorizontalAlignment.Left;
 
         public double ProgressBarHeight => !IsVerticalOrientation ? Height : Model.Value * (Height - Margin.Top - Margin.Bottom - 6);
 

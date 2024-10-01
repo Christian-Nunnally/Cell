@@ -25,8 +25,14 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public override double DefaultHeight => 200;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public override double DefaultWidth => 200;
 
         public override double MinimumHeight => 100;

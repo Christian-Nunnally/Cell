@@ -5,6 +5,7 @@
     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
     xmlns:controls="clr-namespace:Cell.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:plugin="clr-namespace:Cell.Data"
@@ -49,7 +50,7 @@
                                 x:Name="_removeButton"
                                 HorizontalAlignment="Left"
                                 Click="DeleteCollectionButtonClicked"
-                                Content="❌"
+                                Content="{fa:Icon XMark}"
                                 Foreground="{StaticResource ErrorForegroundColor}"
                                 Style="{StaticResource ListItemInlineButtonStyle}"
                                 ToolTip="Delete this collection"
@@ -62,13 +63,13 @@
                                     Name="_nameLabel"
                                     Grid.Column="2"
                                     VerticalAlignment="Center"
-                                    FontFamily="Consolas"
+                                    FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
                                     Text="{Binding Model.Name}" />
                                 <TextBox
                                     Name="_renameTextbox"
                                     VerticalAlignment="Center"
-                                    FontFamily="Consolas"
+                                    FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
                                     Text="{Binding Name}"
                                     Visibility="Collapsed" />
@@ -76,7 +77,7 @@
                                     x:Name="_renameButton"
                                     Margin="10,0"
                                     HorizontalAlignment="Left"
-                                    Content="🏷️"
+                                    Content="{fa:Icon PenToSquare}"
                                     Style="{StaticResource ListItemInlineToggleButtonStyle}"
                                     ToolTip="Rename this function"
                                     Visibility="Hidden" />
@@ -86,7 +87,7 @@
                                 Margin="10,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                FontFamily="Consolas"
+                                FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="10"
                                 Text="{Binding Model.ItemTypeOrBasedOnCollectionName}" />
                             <TextBlock
@@ -94,7 +95,7 @@
                                 Margin="10,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                FontFamily="Consolas"
+                                FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
                                 Text="{Binding Items.Count}" />
                             <TextBlock
@@ -102,7 +103,7 @@
                                 Margin="10,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
-                                FontFamily="Consolas"
+                                FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
                                 Text="{Binding UsageCount}" />
                         </Grid>
@@ -110,7 +111,7 @@
                             <Trigger SourceName="_renameButton" Property="IsChecked" Value="True">
                                 <Setter TargetName="_nameLabel" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="_renameTextbox" Property="Visibility" Value="Visible" />
-                                <Setter TargetName="_renameButton" Property="Content" Value="✔" />
+                                <Setter TargetName="_renameButton" Property="Content" Value="{fa:Icon Check}" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
@@ -170,7 +171,6 @@
                             Background="{StaticResource ControlBackground}"
                             BorderBrush="{StaticResource CellBorderColor}"
                             BorderThickness="1"
-                            FontFamily="Consolas"
                             Foreground="{StaticResource ForegroundColor}"
                             SyntaxHighlighting="Json"
                             TextChanged="ItemJsonEditorTextChanged" />
@@ -243,7 +243,7 @@
                             SelectedItem="{Binding SelectedItem}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Height="20" HorizontalAlignment="Stretch">
+                                    <Grid HorizontalAlignment="Stretch">
                                         <Button
                                             x:Name="_removeButton"
                                             HorizontalAlignment="Left"

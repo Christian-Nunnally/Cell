@@ -20,8 +20,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public override double DefaultHeight => 160;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public override double DefaultWidth => 250;
 
         public override string ToolWindowTitle { get; set; }

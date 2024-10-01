@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:local="clr-namespace:Cell.View.Application"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
@@ -10,7 +11,7 @@
     Height="{Binding ApplicationWindowHeight, Mode=TwoWay}"
     d:DataContext="{d:DesignInstance Type=viewModel:ApplicationViewModel}"
     d:Height="500"
-    d:Width="500"
+    d:Width="800"
     AllowsTransparency="True"
     Background="{StaticResource CellBackground}"
     ResizeMode="CanResize"
@@ -32,59 +33,59 @@
                 <Button
                     x:Name="CloseButton"
                     Click="OnCloseButtonClicked"
-                    Content="x"
+                    Content="{fa:Icon XMark}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource TitleButtonStyle}" />
                 <Button
                     x:Name="MaxButton"
                     Click="MaximizeButtonClick"
-                    Content="☐"
+                    Content="{fa:Icon Square}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource TitleButtonStyle}" />
                 <Button
                     x:Name="MinButton"
                     Click="MinimizeButtonClick"
-                    Content="-"
+                    Content="{fa:Icon Minus}"
                     DockPanel.Dock="Right"
                     Style="{StaticResource TitleButtonStyle}" />
                 <Button
                     Click="ShowSettingsWindowButtonClick"
-                    Content="⚙️"
-                    DockPanel.Dock="Left"
+                    Content="{fa:Icon Gear}"
+                    DockPanel.Dock="Right"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Opens settings window"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="ToggleEditPanelButtonClick"
-                    Content="🛠️"
+                    Content="{fa:Icon PaintRoller}"
                     DockPanel.Dock="Left"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Opens the cell format editor"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="OpenTextEditPanelButtonClick"
-                    Content="⌶"
+                    Content="{fa:Icon Edit}"
                     DockPanel.Dock="Left"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Opens the cell content editor"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="ShowFunctionManagerButtonClick"
-                    Content="f()"
+                    Content="{fa:Icon Code}"
                     DockPanel.Dock="Left"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Manage functions"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="ShowCollectionManagerButtonClick"
-                    Content="≡"
+                    Content="{fa:Icon List}"
                     DockPanel.Dock="Left"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Manage collections"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="ShowSheetManagerButtonClick"
-                    Content="📄"
+                    Content="{fa:Icon File}"
                     DockPanel.Dock="Left"
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Manage sheets"

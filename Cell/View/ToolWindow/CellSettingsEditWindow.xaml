@@ -12,33 +12,17 @@
     d:DesignWidth="300"
     mc:Ignorable="d">
     <Grid>
-        <StackPanel Height="250">
-            <CheckBox
-                Margin="5"
-                Content="Vertical Orientation"
-                IsChecked="{Binding IsVerticalOrientation}" />
-
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button
-                        Width="35"
-                        Click="EditTriggerFunctionButtonClicked"
-                        Content="Edit" />
-                    <TextBox
-                        Width="230"
-                        PreviewKeyDown="TextBoxPreviewKeyDown"
-                        Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}" />
-                </StackPanel>
-                <TextBlock
-                    Margin="3,5,3,3"
-                    FontFamily="Consolas"
-                    Foreground="{StaticResource ForegroundColor}"
-                    Text="This function runs when text changes" />
-                <TextBlock
-                    Margin="3,0,3,3"
-                    FontFamily="Consolas"
-                    Foreground="{StaticResource ForegroundColor}"
-                    Text="or in response to interactions" />
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Width="35"
+                    Click="EditTriggerFunctionButtonClicked"
+                    Content="Edit" />
+                <TextBox
+                    Width="230"
+                    PreviewKeyDown="TextBoxPreviewKeyDown"
+                    Text="{Binding Path=TriggerFunctionName, UpdateSourceTrigger=LostFocus}"
+                    ToolTip="This function runs when text changes or in response to interactions" />
             </StackPanel>
         </StackPanel>
     </Grid>

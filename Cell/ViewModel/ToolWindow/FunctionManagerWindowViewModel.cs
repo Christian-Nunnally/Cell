@@ -24,9 +24,15 @@ namespace Cell.ViewModel.ToolWindow
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public override double DefaultHeight => 400;
 
-        public override double DefaultWidth => 550;
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultWidth => 650;
 
         public string DependenciesListBoxFilterText
         {

@@ -39,8 +39,14 @@ namespace Cell.ViewModel.ToolWindow
 
         public override double MinimumWidth => 300;
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public override double DefaultHeight => 300;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public override double DefaultWidth => 600;
 
         public string CollectionItemListBoxFilterText

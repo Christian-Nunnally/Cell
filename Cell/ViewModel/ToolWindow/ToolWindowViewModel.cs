@@ -5,8 +5,14 @@ namespace Cell.ViewModel.ToolWindow
 {
     public class ToolWindowViewModel : PropertyChangedBase
     {
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public virtual double DefaultHeight { get; } = 200;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public virtual double DefaultWidth { get; } = 200;
 
         public virtual double MinimumHeight => DefaultHeight;

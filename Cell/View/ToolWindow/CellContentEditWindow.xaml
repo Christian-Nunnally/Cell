@@ -16,8 +16,7 @@
             Height="Auto"
             MinWidth="40"
             Click="EditPopulateFunctionButtonClicked"
-            Content="f(x)"
-            FontFamily="Consolas"
+            Content="{fa:Icon Code}"
             ToolTip="Opens the code editor for the populate function this cell is using."
             Visibility="{Binding IsEditFunctionButtonVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
         <TextBox

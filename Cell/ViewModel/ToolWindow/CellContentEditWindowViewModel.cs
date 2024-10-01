@@ -7,6 +7,9 @@ using System.ComponentModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// Tool window view model for editing the content of a cell. Allows setting the text of the cell, index of the cell and set the populate function.
+    /// </summary>
     public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
         private readonly CellPopulateManager _cellPopulateManager;
@@ -57,6 +60,9 @@ namespace Cell.ViewModel.ToolWindow
             else CellToDisplay.Text = _multiUseUserInputText;
         }
 
+        /// <summary>
+        /// Gets whether the edit function button should be visible in the UI.
+        /// </summary>
         public bool IsEditFunctionButtonVisible => _multiUseUserInputText.StartsWith('=');
 
         /// <summary>
@@ -88,6 +94,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Opens the code editor for the current cells populate function.
+        /// </summary>
         public void EditPopulateFunction()
         {
             if (CellToDisplay == null) return;
@@ -122,8 +131,14 @@ namespace Cell.ViewModel.ToolWindow
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
         public override double DefaultHeight => 90;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public override double DefaultWidth => 500;
 
         public override double MinimumHeight => 80;

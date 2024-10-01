@@ -14,7 +14,7 @@
         <ListBox ItemsSource="{Binding UndoStack}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="20" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch">
                         <TextBlock Name="_nameLabel" Text="{Binding}" />
                     </Grid>
                 </DataTemplate>
