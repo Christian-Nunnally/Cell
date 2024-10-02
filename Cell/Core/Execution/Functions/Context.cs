@@ -72,9 +72,9 @@ namespace Cell.Execution
 
         public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
 
-        public CellRange GetCellRange(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCellRange(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
-
         public CellModel GetCell(string sheet, int row, int column) => _cellTracker.GetCell(sheet, row, column) ?? CellModel.Null;
+
+        public CellRange GetCellRange(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCellRange(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
 
         public CellRange GetCellRange(string sheet, int row, int column, int rowRangeEnd, int columnRangeEnd)
         {

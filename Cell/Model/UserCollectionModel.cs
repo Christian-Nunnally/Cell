@@ -4,8 +4,8 @@ namespace Cell.Model
 {
     public class UserCollectionModel : PropertyChangedBase
     {
-        private string _sortAndFilterFunctionName = string.Empty;
         private string _name = string.Empty;
+        private string _sortAndFilterFunctionName = string.Empty;
         public UserCollectionModel()
         {
         }

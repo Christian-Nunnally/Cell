@@ -12,7 +12,7 @@ namespace CellTest
     public class CellPopulateManagerTests
     {
         private TestFileIO _testFileIO;
-        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
         private CellTracker _cellTracker;
         private PluginFunctionLoader _pluginFunctionLoader;
@@ -21,11 +21,11 @@ namespace CellTest
         private CellPopulateManager CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistenceManager);
+            _persistedDirectory = new PersistedDirectory("", _testFileIO);
+            _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
-            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             return new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
         }
 
@@ -41,7 +41,7 @@ namespace CellTest
             var _ = CreateInstance();
             var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "return \"Hello world\";");
-            cell.PopulateFunctionName = function.Name;
+            cell.PopulateFunctionName = function.Model.Name;
 
             cell.Text += "1";
 
@@ -56,7 +56,7 @@ namespace CellTest
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
             function.SetUserFriendlyCode("return A2.Text;", a1, new Dictionary<string, string>());
-            a1.PopulateFunctionName = function.Name;
+            a1.PopulateFunctionName = function.Model.Name;
 
             a2.Text += "HelloWorld";
 
@@ -72,7 +72,7 @@ namespace CellTest
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return testList.Count();", cell, collectionNameToDataTypeMap);
-            cell.PopulateFunctionName = function.Name;
+            cell.PopulateFunctionName = function.Model.Name;
 
             collection.Add(new TodoItem());
 
@@ -89,7 +89,7 @@ namespace CellTest
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
-            a1.PopulateFunctionName = function.Name;
+            a1.PopulateFunctionName = function.Model.Name;
 
             a2.Text = "testList";
 
@@ -107,7 +107,7 @@ namespace CellTest
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
-            a1.PopulateFunctionName = function.Name;
+            a1.PopulateFunctionName = function.Model.Name;
             a2.Text = "testList";
             Assert.Contains("testList", testing.GetAllCollectionSubscriptions(a1));
 
@@ -126,7 +126,7 @@ namespace CellTest
             var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
-            a1.PopulateFunctionName = function.Name;
+            a1.PopulateFunctionName = function.Model.Name;
             a2.Text = "testList";
 
             _userCollectionLoader.GetCollection("testList")!.Add(new TodoItem());

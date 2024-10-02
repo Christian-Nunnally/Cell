@@ -13,14 +13,14 @@ namespace Cell.Data
         private const string TemplatesSaveDirectory = "Templates";
         private readonly CellLoader _cellLoader;
         private readonly CellTracker _cellTracker;
-        private readonly PersistedDirectory _persistenceManager;
+        private readonly PersistedDirectory _persistedDirectory;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
-        public SheetTracker(PersistedDirectory persistenceManager, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
+        public SheetTracker(PersistedDirectory persistedDirectory, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;
-            _persistenceManager = persistenceManager;
+            _persistedDirectory = persistedDirectory;
             _cellTracker = cellTracker;
             _cellLoader = cellLoader;
             _cellTracker.CellAdded += CellAddedToTracker;
@@ -73,10 +73,10 @@ namespace Cell.Data
         public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)
         {
             var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
-            if (!_persistenceManager.DirectoryExists(templatesDirectory)) return;
+            if (!_persistedDirectory.DirectoryExists(templatesDirectory)) return;
             var templatePath = Path.Combine(templatesDirectory, templateName);
             var cellsPath = Path.Combine(templatePath, "Cells");
-            if (!_persistenceManager.DirectoryExists(cellsPath)) return;
+            if (!_persistedDirectory.DirectoryExists(cellsPath)) return;
 
             var cellsToAdd = _cellLoader.LoadSheet(cellsPath);
             UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
@@ -90,7 +90,7 @@ namespace Cell.Data
 
             var collectionsBeingImported = new List<string>();
             var collectionsDirectory = Path.Combine(templatePath, "Collections");
-            foreach (var collectionDirectory in _persistenceManager.GetDirectories(collectionsDirectory))
+            foreach (var collectionDirectory in _persistedDirectory.GetDirectories(collectionsDirectory))
             {
                 var collectionName = Path.GetFileName(collectionDirectory);
                 collectionsBeingImported.Add(collectionName);
@@ -136,19 +136,6 @@ namespace Cell.Data
         {
             var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
             FixMergedCellsWithNewIdentities(cellsToAdd, oldIdToNewIdMap);
-        }
-
-        private void AddBaseCollectionsToUsedCollectionList(List<string> usedCollections)
-        {
-            for (int i = 0; i < usedCollections.Count; i++)
-            {
-                var collection = usedCollections[i];
-                var baseCollectionName = _userCollectionLoader.GetCollection(collection)?.Model.BasedOnCollectionName;
-                if (!string.IsNullOrWhiteSpace(baseCollectionName) && !usedCollections.Contains(baseCollectionName))
-                {
-                    usedCollections.Add(baseCollectionName);
-                }
-            }
         }
 
         private bool CanFunctionsBeMerged(List<CellFunctionModel> functionsBeingImported, out string reason)
@@ -213,9 +200,9 @@ namespace Cell.Data
         {
             var functionsBeingImported = new List<CellFunctionModel>();
             var functionsTemplatePath = Path.Combine(templatesDirectory, "Functions");
-            foreach (var spaceDirectory in _persistenceManager.GetDirectories(functionsTemplatePath))
+            foreach (var spaceDirectory in _persistedDirectory.GetDirectories(functionsTemplatePath))
             {
-                var paths = _persistenceManager.GetFiles(spaceDirectory);
+                var paths = _persistedDirectory.GetFiles(spaceDirectory);
                 foreach (var path in paths)
                 {
                     functionsBeingImported.Add(_pluginFunctionLoader.LoadFunction(path));

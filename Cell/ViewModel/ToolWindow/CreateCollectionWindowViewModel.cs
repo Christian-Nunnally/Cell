@@ -6,11 +6,18 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window that allows the user to create a new user collection.
+    /// </summary>
     public class CreateCollectionWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<UserCollection> _collections;
         private readonly UserCollectionLoader _userCollectionLoader;
         private bool _isBaseOnCheckBoxChecked;
+        /// <summary>
+        /// Creates a new instance of the <see cref="CreateCollectionWindowViewModel"/>.
+        /// </summary>
+        /// <param name="userCollectionLoader">The user collection loader to add the collection to.</param>
         public CreateCollectionWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -23,6 +30,21 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
+        /// Gets the names of all the collections that are options as a base collection of the new collection.
+        /// </summary>
+        public ObservableCollection<string> CollectionBaseOptions { get; set; }
+
+        /// <summary>
+        /// Gets the visibility of the collection base setting.
+        /// </summary>
+        public Visibility CollectionBaseSettingVisibility { get; private set; } = Visibility.Collapsed;
+
+        /// <summary>
+        /// Gets the visibility of the collection type setting.
+        /// </summary>
+        public Visibility CollectionTypeSettingVisibility { get; private set; } = Visibility.Visible;
+
+        /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
         public override double DefaultHeight => 250;
@@ -33,16 +55,8 @@ namespace Cell.ViewModel.ToolWindow
         public override double DefaultWidth => 350;
 
         /// <summary>
-        /// Gets the string displayed in top bar of this tool window.
+        /// Gets or sets a value indicating whether the new collection should be based on another collection.
         /// </summary>
-        public override string ToolWindowTitle => "New collection";
-
-        public ObservableCollection<string> CollectionBaseOptions { get; set; }
-
-        public Visibility CollectionBaseSettingVisibility { get; private set; } = Visibility.Collapsed;
-
-        public Visibility CollectionTypeSettingVisibility { get; private set; } = Visibility.Visible;
-
         public bool IsBaseOnCheckBoxChecked
         {
             get => _isBaseOnCheckBoxChecked; set
@@ -55,14 +69,34 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// The name of the collection the nwe collection should be a projection of, or empty if the new collection is not based on another collection.
+        /// </summary>
         public string NewCollectionBaseName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The name to give the new collection.
+        /// </summary>
         public string NewCollectionName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// A list of all the data types that can be used to create a new collection.
+        /// </summary>
         public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
 
+        /// <summary>
+        /// The data type of the items in the new collection.
+        /// </summary>
         public string SelectedItemType { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Gets the string displayed in top bar of this tool window.
+        /// </summary>
+        public override string ToolWindowTitle => "New collection";
+
+        /// <summary>
+        /// Creates a new collection with the current settings.
+        /// </summary>
         public void AddCurrentCollection()
         {
             var collectionName = NewCollectionName;

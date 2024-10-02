@@ -9,7 +9,11 @@ namespace Cell.View.ToolWindow
 {
     public partial class FunctionManagerWindow : ResizableToolWindow
     {
-        private FunctionManagerWindowViewModel _viewModel;
+        private readonly FunctionManagerWindowViewModel _viewModel;
+        /// <summary>
+        /// Creates a new instance of the <see cref="FunctionManagerWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public FunctionManagerWindow(FunctionManagerWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;
@@ -18,17 +22,17 @@ namespace Cell.View.ToolWindow
 
         private void DeleteFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is CellFunction function)
+            if (sender is Button button && button.DataContext is CellFunctionViewModel function)
             {
                 if (function.UsageCount != 0)
                 {
-                    DialogFactory.ShowDialog("Function in use", $"Cannot delete '{function.Model.Name}' because it is being used by {function.UsageCount} cells.");
+                    DialogFactory.ShowDialog("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
                     return;
                 }
 
-                DialogFactory.ShowYesNoConfirmationDialog($"Delete '{function.Model.Name}'?", "Are you sure you want to delete this function?", () =>
+                DialogFactory.ShowYesNoConfirmationDialog($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
-                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteFunction(function);
+                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteFunction(function.Function);
                 });
             }
         }
@@ -40,7 +44,7 @@ namespace Cell.View.ToolWindow
                 if (_viewModel.SelectedFunction == null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction, cell, collectionNameToDataTypeMap);
+                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToDataTypeMap);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
             }
         }
@@ -59,11 +63,11 @@ namespace Cell.View.ToolWindow
             {
                 var selectedFunction = _viewModel.SelectedFunction;
                 if (selectedFunction == null) return;
-                if (cell.TriggerFunctionName == selectedFunction.Model.Name)
+                if (cell.TriggerFunctionName == selectedFunction.Name)
                 {
                     cell.TriggerFunctionName = "";
                 }
-                else if (cell.PopulateFunctionName == selectedFunction.Model.Name)
+                else if (cell.PopulateFunctionName == selectedFunction.Name)
                 {
                     cell.PopulateFunctionName = "";
                 }

@@ -21,8 +21,8 @@ namespace Cell.ViewModel.Cells.Types
         /// <summary>
         /// Creates a new instance of <see cref="GraphCellViewModel"/>.
         /// </summary>
-        /// <param name="model">The underlying cell model to get and save settings to.</param>
-        /// <param name="sheet">The sheet this cell view model is being displayed on.</param>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
         public GraphCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += (sender, args) =>

@@ -2,6 +2,7 @@
 using Cell.Execution;
 using Cell.Model;
 using Cell.ViewModel.Application;
+using System.ComponentModel;
 using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
@@ -32,6 +33,11 @@ namespace Cell.ViewModel.Cells.Types
     public class CheckboxCellViewModel : CellViewModel
     {
         private ICommand? _checkboxCheckedCommand;
+        /// <summary>
+        /// Creates a new instance of <see cref="CheckboxCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
         public CheckboxCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
@@ -56,7 +62,7 @@ namespace Cell.ViewModel.Cells.Types
         {
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CellModel.BooleanProperties))
             {

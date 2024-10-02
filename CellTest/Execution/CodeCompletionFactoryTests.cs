@@ -110,7 +110,7 @@ namespace CellTest.Execution
             };
             var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
 
-            Assert.Empty(completionData.Where(x => x.Content.ToString().Contains(".ctor")));
+            Assert.Empty(completionData.Where(x => x.Content.ToString()!.Contains(".ctor")));
         }
 
         [Fact]

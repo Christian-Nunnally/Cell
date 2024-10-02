@@ -4,8 +4,15 @@ using System.Windows.Media;
 
 namespace Cell.View.Skin
 {
+    /// <summary>
+    /// Provides a way to apply syntax highlighting colors to an AvalonEdit text editor.
+    /// </summary>
     public static class SyntaxHighlightingColors
     {
+        /// <summary>
+        /// Sets the syntax highlighting colors for the given text editor to the cell defaults.
+        /// </summary>
+        /// <param name="editor">The editor to set.</param>
         public static void ApplySyntaxHighlightingToEditor(TextEditor editor)
         {
             var highlighting = editor.SyntaxHighlighting;

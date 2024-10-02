@@ -1,20 +1,20 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Cell.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Reflection;
-using Cell.Common;
 
 namespace Cell.Core.Execution.CodeCompletion
 {
+    /// <summary>
+    /// Runs semantic analysis on a code snippet to provide type information.
+    /// </summary>
     public class SemanticAnalyzer
     {
+        private readonly string _prefixText;
         private readonly SyntaxNode _root;
         private readonly SemanticModel _semanticModel;
-        private readonly string _prefixText;
-
-        public Dictionary<string, ITypeSymbol> NameToTypeMap { get; } = [];
-
         /// <summary>
         /// Creates a new instance of <see cref="SemanticAnalyzer"/>.
         /// </summary>
@@ -50,6 +50,16 @@ namespace Cell.Core.Execution.CodeCompletion
             AnalyzeVarDeclarations();
         }
 
+        /// <summary>
+        /// Map of variable names to thier types for all declarations found in the code snippet.
+        /// </summary>
+        public Dictionary<string, ITypeSymbol> NameToTypeMap { get; } = [];
+
+        /// <summary>
+        /// Queries the semantic model for the type of the expression at the specified text carrot position.
+        /// </summary>
+        /// <param name="position">The position in terms of characters of text.</param>
+        /// <returns>The type, if a type was able to be resolved at that location.</returns>
         public ITypeSymbol? GetTypeAtPosition(int position)
         {
             position += _prefixText.Length;
@@ -91,6 +101,7 @@ namespace Cell.Core.Execution.CodeCompletion
                 foreach (var variable in variableDeclaration.Variables)
                 {
                     if (NameToTypeMap.ContainsKey(variable.Identifier.ToString())) continue;
+                    if (typeInfo.Type == null) continue;
                     NameToTypeMap.Add(variable.Identifier.ToString(), typeInfo.Type);
                 }
             }

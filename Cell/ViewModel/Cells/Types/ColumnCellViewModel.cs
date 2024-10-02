@@ -2,9 +2,17 @@
 
 namespace Cell.ViewModel.Cells.Types
 {
+    /// <summary>
+    /// Represents a cell that displays the column name and is in the top row of the sheet.
+    /// </summary>
     public class ColumnCellViewModel : CellViewModel
     {
-        public ColumnCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
+        /// <summary>
+        /// Creates a new instance of <see cref="ColumnCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
+        public ColumnCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             NotifyPropertyChanged(nameof(Text));
             model.PropertyChanged += ModelPropertyChanged;

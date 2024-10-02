@@ -13,6 +13,9 @@ using System.Windows;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// Tool window view model for editing the format of a cell. Allows setting the background color, font, font size, font color, and more.
+    /// </summary>
     public class CellFormatEditWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
@@ -21,6 +24,12 @@ namespace Cell.ViewModel.ToolWindow
         private CellStyleModel? _cellStyleToDisplay = null;
         private CellModel _cellToDisplay = CellModel.Null;
         private bool isDetailedBorderEditingEnabled = false;
+        /// <summary>
+        /// Creates a new instance of <see cref="CellFormatEditWindowViewModel"/>
+        /// </summary>
+        /// <param name="cellsToEdit">List of cells to edit, which can change outside of the tool window and the window will adapt.</param>
+        /// <param name="cellTracker">The tracker to source cells from.</param>
+        /// <param name="pluginFunctionLoader">The function loader used to update functions when cells are deleted.</param>
         public CellFormatEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
@@ -29,17 +38,8 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
+        /// Gets or sets the cell background color of all selected cells, recording changes to the undo stack.
         /// </summary>
-        public override List<CommandViewModel> ToolBarCommands => 
-        [
-            new CommandViewModel("╾╼", () => IsDetailedBorderEditingEnabled = !IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
-        ];
-
-        public override double MinimumHeight => 220;
-
-        public override double MinimumWidth => 260;
-
         public string BackgroundColor
         {
             get => CellStyleToDisplay.BackgroundColor;
@@ -56,6 +56,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the border color of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string BorderColor
         {
             get => CellStyleToDisplay.BorderColor;
@@ -72,6 +75,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the bottom border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string BorderThicknessBottom
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Bottom.ToString();
@@ -88,6 +94,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the left border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string BorderThicknessLeft
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Left.ToString();
@@ -104,6 +113,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the right border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string BorderThicknessRight
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Right.ToString();
@@ -120,6 +132,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the top border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string BorderThicknessTop
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Top.ToString();
@@ -138,6 +153,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the cell type of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public CellType CellType
         {
             get => CellToDisplay.CellType;
@@ -154,6 +172,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content background color of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentBackgroundColor
         {
             get => CellStyleToDisplay.ContentBackgroundColor;
@@ -170,6 +191,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content border color of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentBorderColor
         {
             get => CellStyleToDisplay.ContentBorderColor;
@@ -186,6 +210,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the bottom border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentBorderThicknessBottom
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Bottom.ToString();
@@ -202,6 +229,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the left border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentBorderThicknessLeft
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Left.ToString();
@@ -218,6 +248,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the right border thickness of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentBorderThicknessRight
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Right.ToString();
@@ -234,6 +267,11 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the top border thickness of all selected cells, recording changes to the undo stack.
+        /// 
+        /// If <see cref="IsDetailedBorderEditingEnabled"/> is false, this will set the entire border.
+        /// </summary>
         public string ContentBorderThicknessTop
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Top.ToString();
@@ -252,6 +290,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content highlight color of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ContentHighlightColor
         {
             get => CellStyleToDisplay.HighlightColor;
@@ -268,6 +309,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string Font
         {
             get => CellStyleToDisplay.Font;
@@ -283,6 +327,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font size of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public double FontSize
         {
             get => CellStyleToDisplay.FontSize;
@@ -298,10 +345,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the font style to display the IsFontItalic of the cell on the format window.
+        /// </summary>
         public FontStyle FontStyleForView => IsFontItalic ? FontStyles.Italic : FontStyles.Normal;
 
+        /// <summary>
+        /// Gets the font weight to display the IsFontBold of the cell on the format window.
+        /// </summary>
         public FontWeight FontWeightForView => IsFontBold ? FontWeights.Bold : FontWeights.Normal;
 
+        /// <summary>
+        /// Gets or sets the foreground color of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string ForegroundColor
         {
             get => CellStyleToDisplay.ForegroundColor;
@@ -318,6 +374,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the height of the rows all selected cells are in, recording changes to the undo stack.
+        /// </summary>
         public double Height
         {
             get => CellToDisplay.Height;
@@ -338,6 +397,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the horizontal alignment of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public HorizontalAlignment HorizontalAlignment
         {
             get => CellStyleToDisplay.HorizontalAlignment;
@@ -353,6 +415,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether additional buttons should be displayed for editing each side of the margin and border individually.
+        /// </summary>
         public bool IsDetailedBorderEditingEnabled
         {
             get => isDetailedBorderEditingEnabled; set
@@ -363,6 +428,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font bold of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public bool IsFontBold
         {
             get => CellStyleToDisplay.Bold;
@@ -380,6 +448,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font italic of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public bool IsFontItalic
         {
             get => CellStyleToDisplay.Italic;
@@ -397,6 +468,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font strikethrough of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public bool IsFontStrikethrough
         {
             get => CellStyleToDisplay.Strikethrough;
@@ -414,6 +488,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the buttom margin of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string MarginBottom
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Bottom.ToString();
@@ -430,6 +507,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the left margin of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string MarginLeft
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Left.ToString();
@@ -446,6 +526,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the right margin of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public string MarginRight
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Right.ToString();
@@ -462,6 +545,11 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the top margin of all selected cells, recording changes to the undo stack.
+        /// 
+        /// If <see cref="IsDetailedBorderEditingEnabled"/> is false, this will set the entire margin."/>
+        /// </summary>
         public string MarginTop
         {
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Top.ToString();
@@ -480,6 +568,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the minimum height this tool window is allowed to be reized to.
+        /// </summary>
+        public override double MinimumHeight => 220;
+
+        /// <summary>
+        /// Gets the minimum width this tool window is allowed to be reized to.
+        /// </summary>
+        public override double MinimumWidth => 260;
+
+        /// <summary>
+        /// Gets or sets the text alignment of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public TextAlignment TextAlignment
         {
             get => CellStyleToDisplay.TextAlignment;
@@ -495,7 +596,18 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the text decorations to display the IsFontStrikethrough of the cell on the format window.
+        /// </summary>
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
+
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new CommandViewModel("╾╼", () => IsDetailedBorderEditingEnabled = !IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
+        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -512,6 +624,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the vertical alignment of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public VerticalAlignment VerticalAlignment
         {
             get => CellStyleToDisplay.VerticalAlignment;
@@ -527,6 +642,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the width of all selected cells, recording changes to the undo stack.
+        /// </summary>
         public double Width
         {
             get => CellToDisplay.Width;
@@ -583,8 +701,12 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Inserts a column to the left of the leftmost column of the selected cells.
+        /// </summary>
         public void AddColumnToTheLeft()
         {
+            // TODO: add ability to undo/redo column/row adds/removes.
             var leftmostColumnCell = _cellsToEdit
                 .Select(x => _cellTracker.GetCell(x.SheetName, 0, x.Column))
                 .Where(x => x is not null)
@@ -595,6 +717,9 @@ namespace Cell.ViewModel.ToolWindow
             InsertColumnAtIndex(leftmostColumnCell.SheetName, leftmostColumnCell.Column);
         }
 
+        /// <summary>
+        /// Inserts a column to the right of the rightmost column of the selected cells.
+        /// </summary>
         public void AddColumnToTheRight()
         {
             var rightmostColumnCell = _cellsToEdit
@@ -607,6 +732,9 @@ namespace Cell.ViewModel.ToolWindow
             InsertColumnAtIndex(rightmostColumnCell.SheetName, rightmostColumnCell.Column + 1);
         }
 
+        /// <summary>
+        /// Insert a row above the topmost row of the selected cells.
+        /// </summary>
         public void AddRowAbove()
         {
             var topmostRowCell = _cellsToEdit
@@ -619,6 +747,9 @@ namespace Cell.ViewModel.ToolWindow
             InsertRowAtIndex(topmostRowCell.SheetName, topmostRowCell.Row);
         }
 
+        /// <summary>
+        /// Inserts a row below the bottommost row of the selected cells.
+        /// </summary>
         public void AddRowBelow()
         {
             var bottomMostRowCell = _cellsToEdit
@@ -631,6 +762,9 @@ namespace Cell.ViewModel.ToolWindow
             InsertRowAtIndex(bottomMostRowCell.SheetName, bottomMostRowCell.Row + 1);
         }
 
+        /// <summary>
+        /// Deletes the columns that the currently selected cells are in.
+        /// </summary>
         public void DeleteColumns()
         {
             foreach (var cell in _cellsToEdit.ToList())
@@ -640,24 +774,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public void DeleteRow(CellModel rowCell)
-        {
-            if (rowCell.CellType != CellType.Row) return;
-            var cellsToDelete = _cellTracker.GetCellModelsForSheet(rowCell.SheetName).Where(x => x.Row == rowCell.Row).ToList();
-            foreach (var cell in cellsToDelete)
-            {
-                var nextCell = _cellTracker.GetCell(rowCell.SheetName, cell.Row + 1, cell.Column);
-                cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
-                _cellTracker.RemoveCell(cell);
-            }
-            IncrementRowOfAllAtOrBelow(rowCell.SheetName, rowCell.Row, -1);
-
-            foreach (var function in _pluginFunctionLoader.ObservableFunctions)
-            {
-                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowCell.SheetName, rowCell.Row, function, -1);
-            }
-        }
-
+        /// <summary>
+        /// Deletes the rows that the currently selected cells are in.
+        /// </summary>
         public void DeleteRows()
         {
             foreach (var cell in _cellsToEdit.ToList())
@@ -667,18 +786,27 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Occurs when the tool window is really being closed.
+        /// </summary>
         public override void HandleBeingClosed()
         {
             _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
             CellToDisplay = CellModel.Null;
         }
 
+        /// <summary>
+        /// Occurs when the tool window is being shown.
+        /// </summary>
         public override void HandleBeingShown()
         {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
         }
 
+        /// <summary>
+        /// Merges the selected cells into one cell, recording changes to the undo stack.
+        /// </summary>
         public void MergeCells()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
@@ -686,6 +814,9 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
+        /// <summary>
+        /// Merges the selected cells across the same row into one cell per row, recording changes to the undo stack.
+        /// </summary>
         public void MergeCellsAcross()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
@@ -699,6 +830,9 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
+        /// <summary>
+        /// Merges the selected cells down into one cell per column, recording changes to the undo stack.
+        /// </summary>
         public void MergeCellsDown()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
@@ -712,6 +846,9 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
+        /// <summary>
+        /// Unmerges the selected cells, recording changes to the undo stack.
+        /// </summary>
         public void UnmergeCells()
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
@@ -778,6 +915,24 @@ namespace Cell.ViewModel.ToolWindow
             foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(columnCell.SheetName, columnCell.Column, function, -1);
+            }
+        }
+
+        private void DeleteRow(CellModel rowCell)
+        {
+            if (rowCell.CellType != CellType.Row) return;
+            var cellsToDelete = _cellTracker.GetCellModelsForSheet(rowCell.SheetName).Where(x => x.Row == rowCell.Row).ToList();
+            foreach (var cell in cellsToDelete)
+            {
+                var nextCell = _cellTracker.GetCell(rowCell.SheetName, cell.Row + 1, cell.Column);
+                cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
+                _cellTracker.RemoveCell(cell);
+            }
+            IncrementRowOfAllAtOrBelow(rowCell.SheetName, rowCell.Row, -1);
+
+            foreach (var function in _pluginFunctionLoader.ObservableFunctions)
+            {
+                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowCell.SheetName, rowCell.Row, function, -1);
             }
         }
 

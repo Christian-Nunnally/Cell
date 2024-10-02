@@ -23,6 +23,7 @@ namespace Cell.View.ToolWindow
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
             SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
 
+            textEditor.Text = _viewModel.CurrentTextInEditor;
             _viewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;
             textEditor.TextArea.TextEntering += OnTextEntering;
             textEditor.TextArea.TextEntered += OnTextEntered;
@@ -36,10 +37,9 @@ namespace Cell.View.ToolWindow
             {
                 syntaxTreePreviewViewer.Text = _viewModel.SyntaxTreePreviewText;
             }
-            else if (e.PropertyName == nameof(_viewModel.UserFriendlyCodeString))
+            else if (e.PropertyName == nameof(_viewModel.CurrentTextInEditor))
             {
-                textEditor.Text = _viewModel.UserFriendlyCodeString;
-                _viewModel.IsDirty = false;
+                textEditor.Text = _viewModel.CurrentTextInEditor;
             }
         }
 
@@ -51,7 +51,6 @@ namespace Cell.View.ToolWindow
         private void OnTextChanged(object? sender, EventArgs e)
         {
             _viewModel.CurrentTextInEditor = textEditor.Text;
-            _viewModel.IsDirty = true;
         }
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)

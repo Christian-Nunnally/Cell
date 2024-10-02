@@ -10,12 +10,12 @@ namespace CellTest
         public void BasicLaunchTest()
         {
             //var testFileIO = new TestFileIO();
-            //var persistenceManager = new PersistenceManager("", testFileIO);
-            //var pluginFunctionLoader = new PluginFunctionLoader(persistenceManager);
+            //var persistedDirectory = new PersistenceManager("", testFileIO);
+            //var pluginFunctionLoader = new PluginFunctionLoader(persistedDirectory);
             //var cellPopulateManager = new CellPopulateManager(pluginFunctionLoader);
             //var cellTriggerManager = new CellTriggerManager(pluginFunctionLoader);
-            //var userCollectionLoader = new UserCollectionLoader(persistenceManager, cellPopulateManager);
-            //var cellLoader = new CellLoader(persistenceManager, pluginFunctionLoader, userCollectionLoader);
+            //var userCollectionLoader = new UserCollectionLoader(persistedDirectory, cellPopulateManager);
+            //var cellLoader = new CellLoader(persistedDirectory, pluginFunctionLoader, userCollectionLoader);
             //var _ = new CellTracker(cellTriggerManager, cellPopulateManager, cellLoader);
         }
     }

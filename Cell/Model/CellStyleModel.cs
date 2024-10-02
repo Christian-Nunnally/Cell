@@ -15,13 +15,13 @@ namespace Cell.Model
         private double _fontSize = 10;
         private string _foregroundColorHex = "#000000";
         private string _highlightColorHex = "#000000";
+        private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Center;
         private bool _isFontBold = false;
         private bool _isFontItalic = false;
         private bool _isFontStrikethrough = false;
         private string _margin = "0";
         private TextAlignment _textAlignment = TextAlignment.Center;
         private VerticalAlignment _verticalAlignment = VerticalAlignment.Center;
-        private HorizontalAlignment _horizontalAlignment = HorizontalAlignment.Center;
         public string BackgroundColor
         {
             get => _backgroundColorHex;

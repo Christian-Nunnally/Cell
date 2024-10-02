@@ -13,9 +13,9 @@ namespace Cell.Persistence
     {
         public const string FunctionsDirectoryName = "Functions";
         private readonly PersistedDirectory _persistanceManager;
-        public PluginFunctionLoader(PersistedDirectory persistenceManager)
+        public PluginFunctionLoader(PersistedDirectory persistedDirectory)
         {
-            _persistanceManager = persistenceManager;
+            _persistanceManager = persistedDirectory;
         }
 
         public Dictionary<string, Dictionary<string, CellFunction>> Namespaces { get; set; } = [];

@@ -15,6 +15,7 @@ namespace Cell.ViewModel.ToolWindow
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private CellModel _cellToDisplay = CellModel.Null;
+        private string _multiUseUserInputText = string.Empty;
         public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellPopulateManager cellPopulateManager)
         {
             _cellPopulateManager = cellPopulateManager;
@@ -22,12 +23,14 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
+        /// Gets the default height of this tool window when it is shown.
         /// </summary>
-        public override List<CommandViewModel> ToolBarCommands => 
-        [
-            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
-        ];
+        public override double DefaultHeight => 90;
+
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultWidth => 500;
 
         public int Index
         {
@@ -42,7 +45,21 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        private string _multiUseUserInputText = string.Empty;
+        /// <summary>
+        /// Gets whether the edit function button should be visible in the UI.
+        /// </summary>
+        public bool IsEditFunctionButtonVisible => _multiUseUserInputText.StartsWith('=');
+
+        /// <summary>
+        /// Gets the minimum height this tool window is allowed to be resized to.
+        /// </summary>
+        public override double MinimumHeight => 80;
+
+        /// <summary>
+        /// Gets the minimum width this tool window is allowed to be resized to.
+        /// </summary>
+        public override double MinimumWidth => 200;
+
         public string MultiUseUserInputText
         {
             get => _multiUseUserInputText;
@@ -54,16 +71,13 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public void SubmitMultiUseUserInputText()
-        {
-            if (_multiUseUserInputText.StartsWith('=')) CellToDisplay.PopulateFunctionName = _multiUseUserInputText[1..].Trim();
-            else CellToDisplay.Text = _multiUseUserInputText;
-        }
-
         /// <summary>
-        /// Gets whether the edit function button should be visible in the UI.
+        /// Provides a list of commands to display in the title bar of the tool window.
         /// </summary>
-        public bool IsEditFunctionButtonVisible => _multiUseUserInputText.StartsWith('=');
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
+        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -107,43 +121,29 @@ namespace Cell.ViewModel.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 
+        /// <summary>
+        /// Occurs when the tool window is really being closed.
+        /// </summary>
         public override void HandleBeingClosed()
         {
             _cellsToEdit.CollectionChanged -= CellsToEditCollectionChanged;
             CellToDisplay = CellModel.Null;
         }
 
+        /// <summary>
+        /// Occurs when the tool window is being shown.
+        /// </summary>
         public override void HandleBeingShown()
         {
             _cellsToEdit.CollectionChanged += CellsToEditCollectionChanged;
             PickDisplayedCell();
         }
 
-        private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();
-
-        private void CellToDisplayPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        public void SubmitMultiUseUserInputText()
         {
-            if (e.PropertyName == nameof(CellModel.Text)) NotifyPropertyChanged(nameof(CellModel.Text));
+            if (_multiUseUserInputText.StartsWith('=')) CellToDisplay.PopulateFunctionName = _multiUseUserInputText[1..].Trim();
+            else CellToDisplay.Text = _multiUseUserInputText;
         }
-
-        private void PickDisplayedCell()
-        {
-            CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
-        }
-
-        /// <summary>
-        /// Gets the default height of this tool window when it is shown.
-        /// </summary>
-        public override double DefaultHeight => 90;
-
-        /// <summary>
-        /// Gets the default width of this tool window when it is shown.
-        /// </summary>
-        public override double DefaultWidth => 500;
-
-        public override double MinimumHeight => 80;
-
-        public override double MinimumWidth => 200;
 
         private static void IndexSelectedCells()
         {
@@ -162,6 +162,18 @@ namespace Cell.ViewModel.ToolWindow
                     : selectedCell.Row - topLeftCell.Row;
                 selectedCell.Index = topLeftCell.Index + distance;
             }
+        }
+
+        private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();
+
+        private void CellToDisplayPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.Text)) NotifyPropertyChanged(nameof(CellModel.Text));
+        }
+
+        private void PickDisplayedCell()
+        {
+            CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
         }
     }
 }

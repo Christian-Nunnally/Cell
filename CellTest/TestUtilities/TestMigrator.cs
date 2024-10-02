@@ -11,7 +11,7 @@ namespace CellTest.TestUtilities
 
         public bool Migrated { get; private set; } = false;
 
-        public bool Migrate(PersistedDirectory persistenceManager)
+        public bool Migrate(PersistedDirectory persistedDirectory)
         {
             Migrated = true;
             return Migrated;

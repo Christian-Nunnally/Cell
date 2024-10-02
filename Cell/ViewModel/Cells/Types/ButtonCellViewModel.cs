@@ -6,9 +6,21 @@ using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class ButtonCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
+    public class ButtonCellViewModel : CellViewModel
     {
         private ICommand? _buttonClickedCommand;
+        /// <summary>
+        /// Creates a new instance of <see cref="ButtonCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
+        public ButtonCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
+        {
+        }
+
+        /// <summary>
+        /// Command binding that is run when the button of this button cell is pressed.
+        /// </summary>
         public ICommand ButtonClickedCommand
         {
             get
@@ -17,7 +29,7 @@ namespace Cell.ViewModel.Cells.Types
             }
         }
 
-        public void ButtonClicked()
+        private void ButtonClicked()
         {
             ApplicationViewModel.Instance.CellTriggerManager.CellTriggered(Model, new EditContext("Button"));
         }

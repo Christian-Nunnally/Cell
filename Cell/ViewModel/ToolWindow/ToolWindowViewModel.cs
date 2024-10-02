@@ -3,6 +3,9 @@ using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A view model for a tool window that can be shown in the main window.
+    /// </summary>
     public class ToolWindowViewModel : PropertyChangedBase
     {
         /// <summary>
@@ -15,10 +18,21 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public virtual double DefaultWidth { get; } = 200;
 
+        /// <summary>
+        /// Gets the minimum height this tool window is allowed to be reized to.
+        /// </summary>
         public virtual double MinimumHeight => DefaultHeight;
 
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
         public virtual double MinimumWidth => DefaultWidth;
 
+        /// <summary>
+        /// Function that is set by whatever is 'showing' this tool window. This tool window can call it to close itself. 
+        /// If this is called the host should call HandleCloseRequested, and if that returns true, the host should call 
+        /// HandleBeingClosed and do what it needs to to close the window.
+        /// </summary>
         public Action? RequestClose { get; set; }
 
         /// <summary>
@@ -31,14 +45,24 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public virtual string ToolWindowTitle { get; set; } = "<<not set>>";
 
+        /// <summary>
+        /// Occurs when the tool window is really being closed.
+        /// </summary>
         public virtual void HandleBeingClosed()
         {
         }
 
+        /// <summary>
+        /// Occurs when the tool window is being shown.
+        /// </summary>
         public virtual void HandleBeingShown()
         {
         }
 
+        /// <summary>
+        /// Called when the tool window requested to be closed, either from the window itself or the host showing it, and gives the tool window a change to disallow the close.
+        /// </summary>
+        /// <returns>True if the tool window is allowing itself to be closed. If false, the caller should respect it and not call HandleBeingClosed or close the window.</returns>
         public virtual bool HandleCloseRequested() => true;
     }
 }

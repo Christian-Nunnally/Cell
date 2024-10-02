@@ -8,6 +8,9 @@ using System.Text.Json;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window that allows the user to manage collections.
+    /// </summary>
     public class CollectionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly JsonSerializerOptions _jsonDeserializerOptions = new()
@@ -22,33 +25,18 @@ namespace Cell.ViewModel.ToolWindow
         private UserCollection? _selectedCollection;
         private PluginModel? _selectedItem;
         private string _selectedItemSerialized = string.Empty;
+        /// <summary>
+        /// Creates a new instance of the <see cref="CollectionManagerWindowViewModel"/>.
+        /// </summary>
+        /// <param name="userCollectionLoader">The collection loader to get the collections from.</param>
         public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
         }
 
         /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
+        /// Gets or sets the text used to filter the items in the selected collection.
         /// </summary>
-        public override List<CommandViewModel> ToolBarCommands => 
-        [
-            new CommandViewModel("New Collection", OpenCreateCollectionWindow) { ToolTip = "Opens the 'Create new collection' tool window." },
-        ];
-
-        public override double MinimumHeight => 150;
-
-        public override double MinimumWidth => 300;
-
-        /// <summary>
-        /// Gets the default height of this tool window when it is shown.
-        /// </summary>
-        public override double DefaultHeight => 300;
-
-        /// <summary>
-        /// Gets the default width of this tool window when it is shown.
-        /// </summary>
-        public override double DefaultWidth => 600;
-
         public string CollectionItemListBoxFilterText
         {
             get => _collectionItemListBoxFilterText; set
@@ -60,6 +48,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the text used to filter the collections in the collections list box.
+        /// </summary>
         public string CollectionListBoxFilterText
         {
             get => _collectionListBoxFilterText; set
@@ -71,10 +62,29 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultHeight => 300;
+
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultWidth => 600;
+
+        /// <summary>
+        /// Gets the collections that are currently being displayed in the list box to the user, filtered based on the users filter criteria.
+        /// </summary>
         public IEnumerable<UserCollection> FilteredCollections => _userCollectionLoader.ObservableCollections.Where(x => x.Name.Contains(CollectionListBoxFilterText));
 
+        /// <summary>
+        /// Gets the items in the selected collection, filtered based on the users filter criteria.
+        /// </summary>
         public IEnumerable<PluginModel> FilteredItemsInSelectedCollection => _selectedCollection?.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
 
+        /// <summary>
+        /// Gets whether the json text box for editing the selected item is visible.
+        /// </summary>
         public bool IsEditJsonTextBoxVisible
         {
             get => _isEditJsonTextBoxVisible; set
@@ -85,6 +95,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets whether the save item json button is visible.
+        /// </summary>
         public bool IsSaveItemJsonButtonVisible
         {
             get => _isSaveItemJsonButtonVisible; set
@@ -95,10 +108,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public string NewCollectionBaseName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets the minimum height this tool window is allowed to be reized to.
+        /// </summary>
+        public override double MinimumHeight => 150;
 
-        public string NewCollectionName { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets the minimum width this tool window is allowed to be reized to.
+        /// </summary>
+        public override double MinimumWidth => 300;
 
+        /// <summary>
+        /// The collection the user has selected in the collections list box.
+        /// </summary>
         public UserCollection? SelectedCollection
         {
             get => _selectedCollection; set
@@ -128,6 +150,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// The item the user has selected in the items list box.
+        /// </summary>
         public PluginModel? SelectedItem
         {
             get => _selectedItem;
@@ -142,6 +167,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// A serialized version of the selected item.
+        /// </summary>
         public string SelectedItemSerialized
         {
             get => _selectedItemSerialized;
@@ -169,31 +197,56 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new CommandViewModel("New Collection", OpenCreateCollectionWindow) { ToolTip = "Opens the 'Create new collection' tool window." },
+        ];
+
+        /// <summary>
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
         public override string ToolWindowTitle => "Collection Manager";
 
+        /// <summary>
+        /// Deletes the given collection.
+        /// </summary>
+        /// <param name="collection">The collection to delete entirely.</param>
         public void DeleteCollection(UserCollection collection)
         {
             _userCollectionLoader.DeleteCollection(collection);
         }
 
+        /// <summary>
+        /// Occurs when the tool window is really being closed.
+        /// </summary>
         public override void HandleBeingClosed()
         {
             _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
         }
 
+        /// <summary>
+        /// Occurs when the tool window is being shown.
+        /// </summary>
         public override void HandleBeingShown()
         {
             _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
+        /// <summary>
+        /// Opens the create collection tool window.
+        /// </summary>
         public void OpenCreateCollectionWindow()
         {
             var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionLoader);
             ApplicationViewModel.Instance.ShowToolWindow(createCollectionViewModel);
         }
 
+        /// <summary>
+        /// Deleted the given item from the selected collection.
+        /// </summary>
+        /// <param name="item">The item to delete from the selected collection.</param>
         public void RemoveItemFromSelectedCollection(PluginModel item)
         {
             SelectedCollection?.Remove(item);

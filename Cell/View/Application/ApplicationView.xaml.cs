@@ -1,7 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Execution;
 using Cell.Persistence;
-using Cell.Persistence.Migration;
 using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
@@ -20,6 +19,9 @@ namespace Cell.View.Application
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
         private ApplicationViewModel? _viewModel;
+        /// <summary>
+        /// Creates a new instance of the application view.
+        /// </summary>
         public ApplicationView()
         {
             InitializeComponent();
@@ -27,16 +29,15 @@ namespace Cell.View.Application
             DataContextChanged += ApplicationViewDataContextChanged;
         }
 
+        /// <summary>
+        /// Gets the active sheet view.
+        /// </summary>
         public SheetView? ActiveSheetView { get; set; }
 
-        public void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
-            {
-                UpdateToolWindowLocation();
-            }
-        }
-
+        /// <summary>
+        /// Displays the given sheet view model in the main content control.
+        /// </summary>
+        /// <param name="sheetViewModel">The sheet to open.</param>
         public void ShowSheetView(SheetViewModel sheetViewModel)
         {
             if (sheetViewModel == null) return;
@@ -49,6 +50,11 @@ namespace Cell.View.Application
             ActiveSheetView = sheetView;
         }
 
+        /// <summary>
+        /// Opens a tool window with the specified view model.
+        /// </summary>
+        /// <param name="viewModel">The tool window view model to open.</param>
+        /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
@@ -56,29 +62,10 @@ namespace Cell.View.Application
             ShowToolWindow(window, allowDuplicates);
         }
 
-        public void ShowToolWindow(ResizableToolWindow resizableToolWindow, bool allowDuplicates = false)
-        {
-            if (!allowDuplicates)
-            {
-                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
-                {
-                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
-                    {
-                        return;
-                    }
-                }
-            }
-
-            var toolbox = new FloatingToolWindow(_toolWindowCanvas);
-            toolbox.SetContent(resizableToolWindow);
-
-            Canvas.SetLeft(toolbox, (_toolWindowCanvas.ActualWidth / 2) - (toolbox.ContentWidth / 2));
-            Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
-
-            _toolWindowCanvas.Children.Add(toolbox);
-            resizableToolWindow.ToolViewModel.HandleBeingShown();
-        }
-
+        /// <summary>
+        /// Initializes the entire application once the view has loaded.
+        /// </summary>
+        /// <param name="e">Event arguments.</param>
         protected override void OnInitialized(EventArgs e)
         {
             var appDataPath = Environment.SpecialFolder.ApplicationData;
@@ -90,9 +77,6 @@ namespace Cell.View.Application
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
             var backupDirectory = new PersistedDirectory(backupPath, fileIo);
-
-            var v0ToV1Migration = new V1ToV2Migrator();
-            persistedProject.RegisterMigrator("0.0.0", "1", v0ToV1Migration);
 
             var pluginFunctionLoader = new PluginFunctionLoader(projectDirectory);
             var cellLoader = new CellLoader(projectDirectory);
@@ -140,6 +124,14 @@ namespace Cell.View.Application
         {
             if (e.OldValue is ApplicationViewModel oldViewModel) oldViewModel.PropertyChanged -= ApplicationViewModelPropertyChanged;
             if (e.NewValue is ApplicationViewModel newViewModel) newViewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
+        }
+
+        private void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
+            {
+                UpdateToolWindowLocation();
+            }
         }
 
         private void LoadProjectButtonClicked(object sender, RoutedEventArgs e)
@@ -203,7 +195,7 @@ namespace Cell.View.Application
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var settingsWindowViewModel = new SettingsWindowViewModel(_viewModel.ApplicationSettings);
+            var settingsWindowViewModel = new SettingsWindowViewModel();
             ShowToolWindow(settingsWindowViewModel);
         }
 
@@ -212,6 +204,29 @@ namespace Cell.View.Application
             if (_viewModel == null) return;
             var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker);
             ShowToolWindow(sheetManagerViewModel);
+        }
+
+        private void ShowToolWindow(ResizableToolWindow resizableToolWindow, bool allowDuplicates = false)
+        {
+            if (!allowDuplicates)
+            {
+                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
+                {
+                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
+                    {
+                        return;
+                    }
+                }
+            }
+
+            var toolbox = new FloatingToolWindow(_toolWindowCanvas);
+            toolbox.SetContent(resizableToolWindow);
+
+            Canvas.SetLeft(toolbox, (_toolWindowCanvas.ActualWidth / 2) - (toolbox.ContentWidth / 2));
+            Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
+
+            _toolWindowCanvas.Children.Add(toolbox);
+            resizableToolWindow.ToolViewModel.HandleBeingShown();
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)

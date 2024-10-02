@@ -11,41 +11,41 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid Background="{StaticResource CellBackground}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="{Binding ResultColumnWidth}" />
-        </Grid.ColumnDefinitions>
-        <avalonEdit:TextEditor
-            Name="textEditor"
-            Padding="4"
-            Background="{StaticResource CellBackground}"
-            FontSize="10pt"
-            Foreground="{StaticResource ForegroundColor}"
-            HorizontalScrollBarVisibility="Auto"
-            SyntaxHighlighting="C#"
-            VerticalScrollBarVisibility="Auto" />
-        <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <avalonEdit:TextEditor
-                Name="syntaxTreePreviewViewer"
-                Grid.Row="1"
-                Padding="4"
-                Background="{StaticResource CellBackground}"
-                FontSize="10pt"
-                Foreground="{StaticResource ForegroundColor}"
-                HorizontalScrollBarVisibility="Auto"
-                SyntaxHighlighting="C#"
-                VerticalScrollBarVisibility="Auto" />
-        </Border>
+    <DockPanel>
         <TextBox
             Grid.Column="1"
             Padding="4"
             VerticalContentAlignment="Top"
             Background="{StaticResource CellBackground}"
+            DockPanel.Dock="Bottom"
             FontFamily="{StaticResource ProgrammingFont}"
             Foreground="{Binding ResultStringColor}"
             IsReadOnly="True"
             Text="{Binding Path=ResultString}"
             TextWrapping="Wrap" />
-    </Grid>
+        <Grid Background="{StaticResource CellBackground}">
+            <avalonEdit:TextEditor
+                Name="textEditor"
+                Padding="4"
+                Background="{StaticResource CellBackground}"
+                FontSize="10pt"
+                Foreground="{StaticResource ForegroundColor}"
+                HorizontalScrollBarVisibility="Auto"
+                ShowLineNumbers="True"
+                SyntaxHighlighting="C#"
+                VerticalScrollBarVisibility="Auto" />
+            <Border Visibility="{Binding IsTransformedSyntaxTreeViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <avalonEdit:TextEditor
+                    Name="syntaxTreePreviewViewer"
+                    Grid.Row="1"
+                    Padding="4"
+                    Background="{StaticResource CellBackground}"
+                    FontSize="10pt"
+                    Foreground="{StaticResource ForegroundColor}"
+                    HorizontalScrollBarVisibility="Auto"
+                    SyntaxHighlighting="C#"
+                    VerticalScrollBarVisibility="Auto" />
+            </Border>
+        </Grid>
+    </DockPanel>
 </view:ResizableToolWindow>

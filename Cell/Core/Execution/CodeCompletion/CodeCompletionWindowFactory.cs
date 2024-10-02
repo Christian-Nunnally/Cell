@@ -24,7 +24,7 @@ namespace Cell.Core.Execution.CodeCompletion
         {
             var userCollectionNames = userCollectionLoader.CollectionNames;
             var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
-            foreach ( var userCollectionName in userCollectionNames)
+            foreach (var userCollectionName in userCollectionNames)
             {
                 var typeName = userCollectionLoader.GetDataTypeStringForCollection(userCollectionName);
                 var type = PluginModel.GetTypeFromString(typeName);

@@ -25,13 +25,12 @@ namespace Cell.Model
         private int _index = 0;
         private string _mergedWith = string.Empty;
         private string _populateFunctionName = string.Empty;
+        private object? _populateResult;
         private int _row;
         private string _sheetName = string.Empty;
         private string _text = string.Empty;
         private string _triggerFunctionName = string.Empty;
         private double _width;
-        private object? _populateResult;
-
         /// <summary>
         /// Creates a new instance of a <see cref="CellModel"/>.
         /// </summary>
@@ -79,18 +78,6 @@ namespace Cell.Model
         {
             get => _errorText;
             set { if (_errorText != value) { _errorText = value; NotifyPropertyChanged(nameof(ErrorText)); } }
-        }
-
-        /// <summary>
-        /// The result of the last populate function run for this cell.
-        /// 
-        /// This value is not persisted.
-        /// </summary>
-        [JsonIgnore]
-        public object? PopulateResult
-        {
-            get => _populateResult;
-            set { if (_populateResult != value) { _populateResult = value; NotifyPropertyChanged(nameof(PopulateResult)); } }
         }
 
         /// <summary>
@@ -165,6 +152,18 @@ namespace Cell.Model
                 _populateFunctionName = value;
                 NotifyPropertyChanged(nameof(PopulateFunctionName));
             }
+        }
+
+        /// <summary>
+        /// The result of the last populate function run for this cell.
+        /// 
+        /// This value is not persisted.
+        /// </summary>
+        [JsonIgnore]
+        public object? PopulateResult
+        {
+            get => _populateResult;
+            set { if (_populateResult != value) { _populateResult = value; NotifyPropertyChanged(nameof(PopulateResult)); } }
         }
 
         /// <summary>

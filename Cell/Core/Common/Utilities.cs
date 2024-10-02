@@ -38,6 +38,22 @@ namespace Cell.Common
             return new string(stringChars);
         }
 
+        /// <summary>
+        /// Returns the smallest possible rectangle that includes all points and is parellel to the xy plane.
+        /// </summary>
+        /// <param name="points">The list of points to inlcude.</param>
+        /// <returns>A rectangle that includes all of the points.</returns>
+        public static Rect GetBoundingRectangle(List<Point> points)
+        {
+            var minX = points.Min(p => p.X);
+            var minY = points.Min(p => p.Y);
+            var maxX = points.Max(p => p.X);
+            var maxY = points.Max(p => p.Y);
+            var topLeft = new Point(minX, minY);
+            var bottomRight = new Point(maxX, maxY);
+            return new Rect(topLeft, bottomRight);
+        }
+
         public static ulong GetHashFromString(this string read)
         {
             var hashedValue = 3074457345618258791ul;
@@ -53,6 +69,32 @@ namespace Cell.Common
         {
             var splitString = unqiueLocationString.Split('_');
             return (splitString[0], int.Parse(splitString[1]), int.Parse(splitString[2]));
+        }
+
+        public static string GetPrettyFullGenericTypeName(this Type type)
+        {
+            if (!type.IsGenericType) return type?.FullName ?? "";
+
+            var genericTypeDefinition = type.GetGenericTypeDefinition();
+            var genericArguments = type.GetGenericArguments();
+
+            var typeName = genericTypeDefinition.FullName?[..genericTypeDefinition.FullName.IndexOf('`')] ?? string.Empty;
+            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.FullName));
+
+            return $"{typeName}<{args}>";
+        }
+
+        public static string GetPrettyGenericTypeName(this Type type)
+        {
+            if (!type.IsGenericType) return type?.FullName ?? "";
+
+            var genericTypeDefinition = type.GetGenericTypeDefinition();
+            var genericArguments = type.GetGenericArguments();
+
+            var typeName = genericTypeDefinition.Name.Substring(0, genericTypeDefinition.Name.IndexOf('`'));
+            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.Name));
+
+            return $"{typeName}<{args}>";
         }
 
         public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace)
@@ -143,48 +185,6 @@ namespace Cell.Common
             if (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) return;
 
             targetProperty.SetValue(target, sourceProperty.GetValue(source, null), null);
-        }
-
-        public static string GetPrettyGenericTypeName(this Type type)
-        {
-            if (!type.IsGenericType) return type?.FullName ??"";
-
-            var genericTypeDefinition = type.GetGenericTypeDefinition();
-            var genericArguments = type.GetGenericArguments();
-
-            var typeName = genericTypeDefinition.Name.Substring(0, genericTypeDefinition.Name.IndexOf('`'));
-            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.Name));
-
-            return $"{typeName}<{args}>";
-        }
-
-        public static string GetPrettyFullGenericTypeName(this Type type)
-        {
-            if (!type.IsGenericType) return type?.FullName ?? "";
-
-            var genericTypeDefinition = type.GetGenericTypeDefinition();
-            var genericArguments = type.GetGenericArguments();
-
-            var typeName = genericTypeDefinition.FullName.Substring(0, genericTypeDefinition.FullName.IndexOf('`'));
-            var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.FullName));
-
-            return $"{typeName}<{args}>";
-        }
-
-        /// <summary>
-        /// Returns the smallest possible rectangle that includes all points and is parellel to the xy plane.
-        /// </summary>
-        /// <param name="points">The list of points to inlcude.</param>
-        /// <returns>A rectangle that includes all of the points.</returns>
-        public static Rect GetBoundingRectangle(List<Point> points)
-        {
-            var minX = points.Min(p => p.X);
-            var minY = points.Min(p => p.Y);
-            var maxX = points.Max(p => p.X);
-            var maxY = points.Max(p => p.Y);
-            var topLeft = new Point(minX, minY);
-            var bottomRight = new Point(maxX, maxY);
-            return new Rect(topLeft, bottomRight);
         }
     }
 }

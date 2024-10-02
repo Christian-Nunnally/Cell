@@ -3,6 +3,9 @@ using System.Windows.Data;
 
 namespace Cell.View.Converters
 {
+    /// <summary>
+    /// Converts an enum to a string.
+    /// </summary>
     public class EnumToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

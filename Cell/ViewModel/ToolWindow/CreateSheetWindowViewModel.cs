@@ -4,17 +4,37 @@ using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window that allows the user to create a new sheet.
+    /// </summary>
     public class CreateSheetWindowViewModel : ToolWindowViewModel
     {
         private readonly SheetTracker _sheetTracker;
         private int _initialColumns = 5;
         private int _initialRows = 5;
         private string _newSheetName = "NewSheet";
+        /// <summary>
+        /// Creates a new instance of the <see cref="CreateSheetWindowViewModel"/>.
+        /// </summary>
+        /// <param name="sheetTracker">The sheet tracker to add new sheets to.</param>
         public CreateSheetWindowViewModel(SheetTracker sheetTracker)
         {
             _sheetTracker = sheetTracker;
         }
 
+        /// <summary>
+        /// Gets the default height of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultHeight => 150;
+
+        /// <summary>
+        /// Gets the default width of this tool window when it is shown.
+        /// </summary>
+        public override double DefaultWidth => 300;
+
+        /// <summary>
+        /// The number of columns to create in the new sheet.
+        /// </summary>
         public string InitialColumns
         {
             get => _initialColumns.ToString();
@@ -28,15 +48,8 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Gets the default height of this tool window when it is shown.
+        /// The number of rows to create in the new sheet.
         /// </summary>
-        public override double DefaultHeight => 150;
-
-        /// <summary>
-        /// Gets the default width of this tool window when it is shown.
-        /// </summary>
-        public override double DefaultWidth => 300;
-
         public string InitialRows
         {
             get => _initialRows.ToString();
@@ -49,6 +62,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// The name to give the new sheet that will be created.
+        /// </summary>
         public string NewSheetName
         {
             get => _newSheetName;
@@ -64,6 +80,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override string ToolWindowTitle => "New sheet";
 
+        /// <summary>
+        /// Creates a new sheet with the current settings.
+        /// </summary>
         public void AddNewSheet()
         {
             if (!CanAddSheet()) return;

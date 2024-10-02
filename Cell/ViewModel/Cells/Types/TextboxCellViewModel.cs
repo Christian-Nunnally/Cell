@@ -4,10 +4,20 @@ using System.Windows.Controls;
 
 namespace Cell.ViewModel.Cells.Types
 {
-    public class TextboxCellViewModel(CellModel model, SheetViewModel sheetViewModel) : CellViewModel(model, sheetViewModel)
+    public class TextboxCellViewModel : CellViewModel
     {
         private static TextBox? _focusedTextBox;
+        // TODO: move to view.
         private TextBox? _textBox;
+        /// <summary>
+        /// Creates a new instance of <see cref="TextboxCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
+        public TextboxCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
+        {
+        }
+
         public override bool IsSelected
         {
             get => base.IsSelected;

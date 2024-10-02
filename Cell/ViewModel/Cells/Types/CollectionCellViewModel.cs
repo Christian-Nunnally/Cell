@@ -12,13 +12,11 @@ namespace Cell.ViewModel.Cells.Types
         /// <summary>
         /// Creates a new instance of <see cref="CollectionCellViewModel"/>.
         /// </summary>
-        /// <param name="model">The underlying cell model.</param>
-        /// <param name="sheet">The sheet this view model is displayed on.</param>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
         public CollectionCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
-
-            //throw new NotImplementedException("Should probably populate the collection here?");
         }
 
         /// <summary>

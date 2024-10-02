@@ -13,18 +13,18 @@ namespace CellTest
         private PluginFunctionLoader _pluginFunctionLoader;
         private UserCollectionLoader _userCollectionLoader;
         private TestFileIO _testFileIO;
-        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
 
         private SheetTracker CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistenceManager);
+            _persistedDirectory = new PersistedDirectory("", _testFileIO);
+            _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
-            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
-            return new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
+            return new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
         }
 
         [Fact]

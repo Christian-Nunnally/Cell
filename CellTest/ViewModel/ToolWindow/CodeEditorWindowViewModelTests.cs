@@ -13,7 +13,7 @@ namespace CellTest.ViewModel.ToolWindow
     {
         private CellTracker _cellTracker;
         private TestFileIO _testFileIO;
-        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
         private ObservableCollection<CellModel> _cellsToEdit;
         private PluginFunctionLoader _pluginFunctionLoader;
@@ -21,11 +21,11 @@ namespace CellTest.ViewModel.ToolWindow
         private CellFormatEditWindowViewModel CreateInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistenceManager);
+            _persistedDirectory = new PersistedDirectory("", _testFileIO);
+            _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
             _cellsToEdit = [];
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _pluginFunctionLoader);
         }
     }

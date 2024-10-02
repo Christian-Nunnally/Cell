@@ -9,6 +9,9 @@ using System.ComponentModel;
 
 namespace Cell.Data
 {
+    /// <summary>
+    /// A user collection is a user created collection of items that can be sorted and filtered.
+    /// </summary>
     public class UserCollection : PropertyChangedBase
     {
         private readonly Dictionary<string, int?> _cachedSortFilterResult = [];
@@ -18,6 +21,13 @@ namespace Cell.Data
         private readonly List<PluginModel> _sortedItems = [];
         private readonly UserCollectionLoader _userCollectionLoader;
         private UserCollection? _baseCollection;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserCollection"/>.
+        /// </summary>
+        /// <param name="model">The underlying collection model.</param>
+        /// <param name="userCollectionLoader">The collection loader that owns this and other visible collections.</param>
+        /// <param name="pluginFunctionLoader">The function loader to load the sort function from.</param>
+        /// <param name="cellTracker">The cell tracker to provide to the sort function context.</param>
         public UserCollection(UserCollectionModel model, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
             Model = model;
@@ -27,20 +37,44 @@ namespace Cell.Data
             _cellTracker = cellTracker;
         }
 
+        /// <summary>
+        /// Occurs when an item is added to the collection.
+        /// </summary>
         public event Action<UserCollection, PluginModel>? ItemAdded;
 
+        /// <summary>
+        /// Occurs when a property of an item in the collection changes.
+        /// </summary>
         public event Action<UserCollection, PluginModel>? ItemPropertyChanged;
 
+        /// <summary>
+        /// Occurs when an item is removed from the collection.
+        /// </summary>
         public event Action<UserCollection, PluginModel>? ItemRemoved;
 
+        /// <summary>
+        /// Occurs when the order of items in the collection changes.
+        /// </summary>
         public event Action<UserCollection>? OrderChanged;
 
+        /// <summary>
+        /// Gets whether this collection is a filtered view of another collection.
+        /// </summary>
         public bool IsFilteredView => !string.IsNullOrEmpty(Model.BasedOnCollectionName);
 
+        /// <summary>
+        /// Gets the items in this collection.
+        /// </summary>
         public List<PluginModel> Items => _sortedItems;
 
+        /// <summary>
+        /// The underlying collection model.
+        /// </summary>
         public UserCollectionModel Model { get; private set; }
 
+        /// <summary>
+        /// Gets or renames the name of this collection.
+        /// </summary>
         public string Name
         {
             set
@@ -62,15 +96,31 @@ namespace Cell.Data
             }
         }
 
+        /// <summary>
+        /// Gets the data type of items in this collection.
+        /// </summary>
         public string Type { get; internal set; } = string.Empty;
 
+        /// <summary>
+        /// Gets the number of times this collection is used in other collections or functions.
+        /// </summary>
         public int UsageCount => _pluginFunctionLoader.ObservableFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
 
+        /// <summary>
+        /// Adds an item to the collection.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
         public void Add(PluginModel item)
         {
             InsertItemWithSortAndFilter(item);
         }
 
+        /// <summary>
+        /// Starts viewing the base collection and adds all items from the base collection to this collection.
+        /// 
+        /// When an item is added to the base collection, it will be added to this collection if it passes the sort and filter function.
+        /// </summary>
+        /// <param name="baseCollection">The collection to start being a projection of.</param>
         public void BecomeViewIntoCollection(UserCollection baseCollection)
         {
             _baseCollection = baseCollection;
@@ -80,6 +130,9 @@ namespace Cell.Data
             baseCollection.Items.ForEach(InsertItemWithSortAndFilter);
         }
 
+        /// <summary>
+        /// Updates the sort and filter for all items in the collection.
+        /// </summary>
         public void RefreshSortAndFilter()
         {
             if (string.IsNullOrEmpty(Model.BasedOnCollectionName))
@@ -88,7 +141,7 @@ namespace Cell.Data
                 int i = 0;
                 foreach (var item in _sortedItems)
                 {
-                    var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName);
+                    var sortFilterResult = RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName);
                     itemsToSortResultMap.Add(item, sortFilterResult);
                     i++;
                 }
@@ -112,19 +165,16 @@ namespace Cell.Data
             }
         }
 
+        /// <summary>
+        /// Removes the item from this collection.
+        /// </summary>
+        /// <param name="item">The item to remove.</param>
         public void Remove(PluginModel item) => Remove(item.ID);
 
-        public void Remove(string id)
-        {
-            if (!_items.TryGetValue(id, out var item)) return;
-            _items.Remove(item.ID);
-            _sortedItems.Remove(item);
-            _cachedSortFilterResult.Remove(item.ID);
-            item.PropertyChanged -= PropertyChangedOnItemInCollection;
-            ItemRemoved?.Invoke(this, item);
-            _baseCollection?.Remove(item);
-        }
-
+        /// <summary>
+        /// Unlinks this collection from its base collection and removes all items from the collection.
+        /// </summary>
+        /// <param name="baseCollection">The collection to unlink from.</param>
         public void StopBeingViewIntoCollection(UserCollection baseCollection)
         {
             _baseCollection = null;
@@ -134,6 +184,24 @@ namespace Cell.Data
             {
                 Remove(Items[i]);
             }
+        }
+
+        private static int? ConvertReturnedObjectToSortFilterResult(object? resultObject)
+        {
+            if (resultObject is null) return null;
+            if (int.TryParse(resultObject.ToString(), out var resultInt)) return resultInt;
+            return null;
+        }
+
+        private static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, string functionName)
+        {
+            if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
+            var result = populateFunction.Run(pluginContext, null);
+            if (result.WasSuccess)
+            {
+                return ConvertReturnedObjectToSortFilterResult(result.ReturnedObject);
+            }
+            return 0;
         }
 
         private void BaseCollectionItemAdded(UserCollection collection, PluginModel model)
@@ -152,11 +220,11 @@ namespace Cell.Data
 
             // Not sorted yet, so just add it to the end.
             _sortedItems.Add(model);
-            var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, _sortedItems.Count - 1), Model.SortAndFilterFunctionName);
+            var sortFilterResult = RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, _sortedItems.Count - 1), Model.SortAndFilterFunctionName);
             _sortedItems.RemoveAt(_sortedItems.Count - 1);
             if (sortFilterResult != null || string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
-                var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName) ?? 0);
+                var inserter = new SortedListInserter<PluginModel>(i => RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName) ?? 0);
                 inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                 _cachedSortFilterResult.Add(model.ID, sortFilterResult);
                 _items.Add(model.ID, model);
@@ -182,7 +250,7 @@ namespace Cell.Data
             {
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
-                var sortFilterResult = DynamicCellPluginExecutor.RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, currentIndex), Model.SortAndFilterFunctionName);
+                var sortFilterResult = RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, currentIndex), Model.SortAndFilterFunctionName);
 
                 var cachedResult = _cachedSortFilterResult[model.ID];
                 if (cachedResult == sortFilterResult) return;
@@ -195,11 +263,22 @@ namespace Cell.Data
                 {
                     _cachedSortFilterResult[model.ID] = (int)sortFilterResult;
                     _sortedItems.RemoveAt(currentIndex);
-                    var inserter = new SortedListInserter<PluginModel>(i => DynamicCellPluginExecutor.RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName) ?? 0);
+                    var inserter = new SortedListInserter<PluginModel>(i => RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName) ?? 0);
                     inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                     OrderChanged?.Invoke(this);
                 }
             }
+        }
+
+        private void Remove(string id)
+        {
+            if (!_items.TryGetValue(id, out var item)) return;
+            _items.Remove(item.ID);
+            _sortedItems.Remove(item);
+            _cachedSortFilterResult.Remove(item.ID);
+            item.PropertyChanged -= PropertyChangedOnItemInCollection;
+            ItemRemoved?.Invoke(this, item);
+            _baseCollection?.Remove(item);
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

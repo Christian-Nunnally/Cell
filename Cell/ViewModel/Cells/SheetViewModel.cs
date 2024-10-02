@@ -22,9 +22,9 @@ namespace Cell.ViewModel.Cells
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly SheetTracker _sheetTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
+        private CellViewModel? _selectedCellViewModel;
         private double _sheetHeight;
         private double _sheetWidth;
-        private CellViewModel? _selectedCellViewModel;
         public SheetViewModel(
             SheetModel model,
             CellPopulateManager cellPopulateManager,
@@ -63,6 +63,8 @@ namespace Cell.ViewModel.Cells
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
         public List<CellViewModel> HighlightedCellViewModels { get; } = [];
+
+        public bool IsCellHighlightOnMouseOverEnabled { get; internal set; } = true;
 
         public PluginFunctionLoader PluginFunctionLoader => _pluginFunctionLoader;
 
@@ -113,8 +115,6 @@ namespace Cell.ViewModel.Cells
         }
 
         public UserCollectionLoader UserCollectionLoader => _userCollectionLoader;
-
-        public bool IsCellHighlightOnMouseOverEnabled { get; internal set; } = true;
 
         public CellViewModel GetCellViewModel(CellModel cellModel) => _cellModelToCellViewModelMap[cellModel];
 

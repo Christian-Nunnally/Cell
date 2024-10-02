@@ -14,7 +14,7 @@ namespace CellTest
         private const string TestCollectionName = "TestCollection";
         private const string TestSortFunctionName = "TestSortFunction";
         private static TestFileIO _testFileIO;
-        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _persistedDirectory;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
         private CellLoader _cellLoader;
@@ -25,11 +25,11 @@ namespace CellTest
         private UserCollection CreateTestInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistedDirectory("", _testFileIO);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
-            _cellLoader = new CellLoader(_persistenceManager);
+            _persistedDirectory = new PersistedDirectory("", _testFileIO);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
-            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             return _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);

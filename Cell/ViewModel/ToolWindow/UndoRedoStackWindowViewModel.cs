@@ -4,8 +4,14 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// Tool window view model for the undo/redo stack window, which displays the current undo and redo stack for the application for visualization and debugging. Also provides undo and redo button.
+    /// </summary>
     public class UndoRedoStackWindowViewModel : ToolWindowViewModel
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="UndoRedoStackWindowViewModel"/> class.
+        /// </summary>
         public UndoRedoStackWindowViewModel()
         {
             var undoRedoManager = ApplicationViewModel.GetUndoRedoManager();
@@ -40,6 +46,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override string ToolWindowTitle => "Undo/Redo Stack";
 
+        /// <summary>
+        /// Gets the list of string representations of the items in the undo stack for display in the UI.
+        /// </summary>
         public ObservableCollection<string> UndoStack { get; set; } = [];
 
         private void UpdateUndoStackForViewModel(UndoRedoManager undoRedoManager)

@@ -14,10 +14,9 @@ namespace Cell.Core.Execution.CodeCompletion
     /// </summary>
     public static class CodeCompletionFactory
     {
-        private static readonly IList<ICompletionData> NoCompletionData = [ new CodeCompletionData("", "No completion data found", "", IconChar.None) ];
         private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
+        private static readonly IList<ICompletionData> NoCompletionData = [new CodeCompletionData("", "No completion data found", "", IconChar.None)];
         private static List<ICompletionData>? _cachedGlobalCompletionData = null;
-
         /// <summary>
         /// Generates a list of completion suggestions given some code, the position of the carrot, the using statements, and any variables that are in a global scope.
         /// </summary>
@@ -36,40 +35,6 @@ namespace Cell.Core.Execution.CodeCompletion
             return TryGetCompletionDataFromTheWordBeforeTheCursor(text, carrotPosition, variableNameToTypeMapForOuterContext, out var completionData)
                 ? completionData!
                 : NoCompletionData;
-        }
-
-        private static bool TryGetCompletionDataFromTheWordBeforeTheCursor(string text, int carrotPosition, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out IList<ICompletionData>? completionData)
-        {
-            completionData = null;
-            var typeNameInFrontOfCarrot = GetVariableNamePriorToCarot(text, carrotPosition);
-            if (typeNameInFrontOfCarrot == string.Empty)
-            {
-                completionData = CreateCompletionDataForGlobalContext(variableNameToTypeMapForOuterContext);
-            }
-            else if (CellReferenceToCodeSyntaxRewriter.IsCellLocation(typeNameInFrontOfCarrot))
-            {
-                completionData = CreateCompletionDataForType(typeof(CellModel));
-            }
-            return completionData is not null;
-        }
-
-        private static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
-        {
-            type = null;
-            SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);
-            var typeSymbol = semanticAnalyzer.GetTypeAtPosition(carrotPosition);
-            if (typeSymbol is null) return false;
-            type = TypeSymbolConverter.GetTypeFromSymbol(typeSymbol);
-            return type is not null;
-        }
-
-        private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
-        {
-            var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-            var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
-            fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
-
-            return Type.GetType(fullQualifiedName);
         }
 
         private static List<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
@@ -118,6 +83,15 @@ namespace Cell.Core.Execution.CodeCompletion
             return new CodeCompletionData(name, userVisibleString, documentation, IconChar.Line);
         }
 
+        private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
+        {
+            var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+            var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
+            fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
+
+            return Type.GetType(fullQualifiedName);
+        }
+
         private static Type? GetUnderlyingType(this MemberInfo member)
         {
             ArgumentNullException.ThrowIfNull(member);
@@ -142,6 +116,31 @@ namespace Cell.Core.Execution.CodeCompletion
                 return text[offset..(carrotPosition - 1)];
             }
             return "";
+        }
+
+        private static bool TryGetCompletionDataFromTheWordBeforeTheCursor(string text, int carrotPosition, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out IList<ICompletionData>? completionData)
+        {
+            completionData = null;
+            var typeNameInFrontOfCarrot = GetVariableNamePriorToCarot(text, carrotPosition);
+            if (typeNameInFrontOfCarrot == string.Empty)
+            {
+                completionData = CreateCompletionDataForGlobalContext(variableNameToTypeMapForOuterContext);
+            }
+            else if (CellReferenceToCodeSyntaxRewriter.IsCellLocation(typeNameInFrontOfCarrot))
+            {
+                completionData = CreateCompletionDataForType(typeof(CellModel));
+            }
+            return completionData is not null;
+        }
+
+        private static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
+        {
+            type = null;
+            SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);
+            var typeSymbol = semanticAnalyzer.GetTypeAtPosition(carrotPosition);
+            if (typeSymbol is null) return false;
+            type = TypeSymbolConverter.GetTypeFromSymbol(typeSymbol);
+            return type is not null;
         }
     }
 }

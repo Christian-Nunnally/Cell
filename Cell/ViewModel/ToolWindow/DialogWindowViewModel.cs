@@ -3,8 +3,17 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window that displays a dialog with a message and a list of actions the user can take.
+    /// </summary>
     public class DialogWindowViewModel : ToolWindowViewModel
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="DialogWindowViewModel"/>.
+        /// </summary>
+        /// <param name="title">The title to display in the top bar of the dialog window.</param>
+        /// <param name="message">The message to display inside the dialog window.</param>
+        /// <param name="actions">The list of actions the user can select in the dialog.</param>
         public DialogWindowViewModel(string title, string message, List<CommandViewModel> actions)
         {
             ToolWindowTitle = title;
@@ -30,10 +39,14 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 250;
 
-        public override string ToolWindowTitle { get; set; }
-
+        /// <summary>
+        /// Gets the list of commands to display as buttons in the dialog.
+        /// </summary>
         public ObservableCollection<CommandViewModel> DialogOptions { get; set; } = [];
 
+        /// <summary>
+        /// Gets or sets the message to display in the dialog.
+        /// </summary>
         public string Message { get; set; }
     }
 }

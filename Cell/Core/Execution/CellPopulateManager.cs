@@ -22,16 +22,6 @@ namespace Cell.Execution
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly Context _pluginFunctionRunContext;
         private readonly UserCollectionLoader _userCollectionLoader;
-
-        /// <summary>
-        /// Allows the populate mechanism to run. This is disabled during load to prevent uneccessary updates.
-        /// </summary>
-        public bool UpdateCellsWhenANewCellIsAdded
-        { 
-            get => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded; 
-            set => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded = value; 
-        }
-
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateManager"/>.
         /// </summary>
@@ -54,12 +44,27 @@ namespace Cell.Execution
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
+        /// <summary>
+        /// Allows the populate mechanism to run. This is disabled during load to prevent uneccessary updates.
+        /// </summary>
+        public bool UpdateCellsWhenANewCellIsAdded { get => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded; set => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded = value; }
+
+        /// <summary>
+        /// Gets all collections the given cell is subscribed to.
+        /// </summary>
+        /// <param name="cell">The cell.</param>
+        /// <returns>A list of collection names that the cell cares about.</returns>
         public IEnumerable<string> GetAllCollectionSubscriptions(CellModel cell)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);
             return _collectionChangeNotifier.GetCollectionsSubscriberIsSubscribedTo(subscriber);
         }
 
+        /// <summary>
+        /// Gets all locations the given cell is subscribed to.
+        /// </summary>
+        /// <param name="cell">The cell.</param>
+        /// <returns>A list of location strings the the cell cares about.</returns>
         public IEnumerable<string> GetAllLocationSubscriptions(CellModel cell)
         {
             var subscriber = GetOrCreatePopulateSubscriber(cell);

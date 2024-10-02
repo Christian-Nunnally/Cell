@@ -13,6 +13,10 @@ namespace Cell.View.Cells
             InitializeComponent();
         }
 
+        private void CellTextBoxGotFocus(object sender, RoutedEventArgs e)
+        {
+        }
+
         private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
         {
             if (sender is TextBox textBox)
@@ -22,6 +26,10 @@ namespace Cell.View.Cells
                     cell.SetTextBox(textBox);
                 }
             }
+        }
+
+        private void CellTextBoxLostFocus(object sender, RoutedEventArgs e)
+        {
         }
 
         private void PreviewTextBoxKeyDownForCell(object sender, KeyEventArgs e)
@@ -51,16 +59,6 @@ namespace Cell.View.Cells
                 ApplicationViewModel.Instance.CellSelector.MoveSelectionUp();
                 e.Handled = true;
             }
-        }
-
-        private void CellTextBoxGotFocus(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void CellTextBoxLostFocus(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

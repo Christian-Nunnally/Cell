@@ -7,6 +7,9 @@ using System.Collections.Specialized;
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window view model for managing functions.
+    /// </summary>
     public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly PluginFunctionLoader _pluginFunctionLoader;
@@ -16,9 +19,13 @@ namespace Cell.ViewModel.ToolWindow
         private string _filterString = string.Empty;
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
-        private CellFunction? _selectedFunction;
+        private CellFunctionViewModel? _selectedFunction;
         private CellModel? _selectedUserOfTheSelectedFunction;
         private string _usersListBoxFilterText = string.Empty;
+        /// <summary>
+        /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
+        /// </summary>
+        /// <param name="pluginFunctionLoader">The object to get the functions from.</param>
         public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
@@ -34,6 +41,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 650;
 
+        /// <summary>
+        /// Gets the string that the user has entered to filter the selected functions dependencies list box.
+        /// </summary>
         public string DependenciesListBoxFilterText
         {
             get => _dependencciesListBoxFilterText; set
@@ -45,6 +55,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets the string that the user has entered to filter the collection of functions to functions that depend on a given collection name.
+        /// </summary>
         public string FilterCollection
         {
             get => _filterCollection; set
@@ -56,8 +69,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the list of collection names for the collection filter dropdown.
+        /// </summary>
         public ObservableCollection<string> FilterCollectionOptions { get; set; } = [];
 
+        /// <summary>
+        /// Gets the list of the selected function dependencies after the filter has been applied from the user.
+        /// </summary>
         public IEnumerable<string> FilteredDependenciesOfTheSelectedFunction
         {
             get
@@ -77,10 +96,19 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public IEnumerable<CellFunction> FilteredFunctions => _pluginFunctionLoader.ObservableFunctions.Where(IsFunctionIncludedInFilter);
+        /// <summary>
+        /// Gets the list of functions after the filter has been applied from the user.
+        /// </summary>
+        public IEnumerable<CellFunctionViewModel> FilteredFunctions => _pluginFunctionLoader.ObservableFunctions.Select(x => new CellFunctionViewModel(x)).Where(IsFunctionIncludedInFilter);
 
+        /// <summary>
+        /// Gets the list of users of the selected function after the filter has been applied from the user.
+        /// </summary>
         public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.UserFriendlyCellName.Contains(UsersListBoxFilterText)) ?? [];
 
+        /// <summary>
+        /// Gets or sets the string that the user has entered to filter the collection of functions to a given sheet name.
+        /// </summary>
         public string FilterSheet
         {
             get => _filterSheet; set
@@ -92,8 +120,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the list of sheets for the sheet filter dropdown.
+        /// </summary>
         public ObservableCollection<string> FilterSheetOptions { get; set; } = [];
 
+        /// <summary>
+        /// Gets or sets the string that the user has entered to filter the functions.
+        /// </summary>
         public string FilterString
         {
             get => _filterString; set
@@ -105,6 +139,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether populate functions should be included in the list of functions.
+        /// </summary>
         public bool IncludePopulateFunctions
         {
             get => _includePopulateFunctions; set
@@ -117,6 +154,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether trigger functions should be included in the list of functions.
+        /// </summary>
         public bool IncludeTriggerFunctions
         {
             get => _includeTriggerFunctions; set
@@ -129,11 +169,20 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Gets the minimum height this tool window is allowed to be reized to.
+        /// </summary>
         public override double MinimumHeight => 200;
 
+        /// <summary>
+        /// Gets the minimum width this tool window is allowed to be reized to.
+        /// </summary>
         public override double MinimumWidth => 200;
 
-        public CellFunction? SelectedFunction
+        /// <summary>
+        /// Gets or sets the function that is currently selected in the list box.
+        /// </summary>
+        public CellFunctionViewModel? SelectedFunction
         {
             get => _selectedFunction; set
             {
@@ -146,8 +195,14 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public string SelectedFunctionTitleString => SelectedFunction == null ? "No function selected" : SelectedFunction.Model.Name;
+        /// <summary>
+        /// Gets the string that is displayed in the title bar of the tool window to inform the user what function is selected.
+        /// </summary>
+        public string SelectedFunctionTitleString => SelectedFunction == null ? "No function selected" : SelectedFunction.Name;
 
+        /// <summary>
+        /// Gets or sets the user selected cell from the function users list.
+        /// </summary>
         public CellModel? SelectedUserOfTheSelectedFunction
         {
             get => _selectedUserOfTheSelectedFunction; set
@@ -173,6 +228,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override string ToolWindowTitle => "Function Manager";
 
+        /// <summary>
+        /// Gets or sets the string that the user has entered to filter the users of the selected function.
+        /// </summary>
         public string UsersListBoxFilterText
         {
             get => _usersListBoxFilterText; set
@@ -184,6 +242,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        /// <summary>
+        /// Creates a new populate function with a default name.
+        /// </summary>
         public void CreateNewPopulateFunction()
         {
             var index = 0;
@@ -197,6 +258,9 @@ namespace Cell.ViewModel.ToolWindow
             _pluginFunctionLoader.CreateFunction("object", newPopulateFunctionName, "return \"Hello world\";");
         }
 
+        /// <summary>
+        /// Creates a new trigger function with a default name.
+        /// </summary>
         public void CreateNewTriggerFunction()
         {
             var index = 0;
@@ -210,6 +274,9 @@ namespace Cell.ViewModel.ToolWindow
             _pluginFunctionLoader.CreateFunction("void", newTriggerFunctionName, string.Empty);
         }
 
+        /// <summary>
+        /// Occurs when the tool window is really being closed.
+        /// </summary>
         public override void HandleBeingClosed()
         {
             _pluginFunctionLoader.ObservableFunctions.CollectionChanged -= FunctionsCollectionChanged;
@@ -217,6 +284,9 @@ namespace Cell.ViewModel.ToolWindow
             FilterCollectionOptions.Clear();
         }
 
+        /// <summary>
+        /// Occurs when the tool window is being shown.
+        /// </summary>
         public override void HandleBeingShown()
         {
             _pluginFunctionLoader.ObservableFunctions.CollectionChanged += FunctionsCollectionChanged;
@@ -237,12 +307,12 @@ namespace Cell.ViewModel.ToolWindow
             NotifyPropertyChanged(nameof(FilteredFunctions));
         }
 
-        private bool IsFunctionIncludedInFilter(CellFunction function)
+        private bool IsFunctionIncludedInFilter(CellFunctionViewModel function)
         {
-            if (!function.Model.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
+            if (!function.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
             if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;
-            if (function.Model.ReturnType == "void") return IncludeTriggerFunctions;
-            if (function.Model.ReturnType == "object") return IncludePopulateFunctions;
+            if (function.ReturnType == "void") return IncludeTriggerFunctions;
+            if (function.ReturnType == "object") return IncludePopulateFunctions;
             return true;
         }
     }

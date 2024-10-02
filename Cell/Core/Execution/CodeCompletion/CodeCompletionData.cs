@@ -13,6 +13,20 @@ namespace Cell.Core.Execution.CodeCompletion
     public class CodeCompletionData : ICompletionData
     {
         private string _displayText;
+        /// <summary>
+        /// Creates a new instance of <see cref="CodeCompletionData"/>.
+        /// </summary>
+        /// <param name="replacementString">The text inserted into the document when this completion data is 'entered'.</param>
+        /// <param name="text">The text displayed in the completion list</param>
+        /// <param name="description">The description displayed when this completion is highlighted.</param>
+        /// <param name="icon">The icon displayed when this completion is highlighted.</param>
+        public CodeCompletionData(string replacementString, string text, string description, IconChar icon)
+        {
+            Image = icon.ToImageSource(ColorConstants.ForegroundColorConstantBrush, 20);
+            _displayText = text;
+            Text = replacementString;
+            Description = description;
+        }
 
         /// <summary>
         /// The UI element that will be displayed in the completion window.
@@ -38,21 +52,6 @@ namespace Cell.Core.Execution.CodeCompletion
         /// The text that will be inserted into the document when this completion data is selected.
         /// </summary>
         public string Text { get; private set; }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CodeCompletionData"/>.
-        /// </summary>
-        /// <param name="replacementString">The text inserted into the document when this completion data is 'entered'.</param>
-        /// <param name="text">The text displayed in the completion list</param>
-        /// <param name="description">The description displayed when this completion is highlighted.</param>
-        /// <param name="icon">The icon displayed when this completion is highlighted.</param>
-        public CodeCompletionData(string replacementString, string text, string description, IconChar icon)
-        {
-            Image = icon.ToImageSource(ColorConstants.ForegroundColorConstantBrush, 20);
-            _displayText = text;
-            Text = replacementString;
-            Description = description;
-        }
 
         /// <summary>
         /// Inserts the text data into the document.

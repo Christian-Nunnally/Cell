@@ -5,15 +5,15 @@ namespace Cell.ViewModel.Cells.Types
 {
     public class ProgressCellViewModel : CellViewModel
     {
-        public ProgressCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
+        /// <summary>
+        /// Creates a new instance of <see cref="ProgressCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
+        public ProgressCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
             model.Style.PropertyChanged += ModelStylePropertyChanged;
-        }
-
-        private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            NotifyPropertyChanged(nameof(IsVerticalOrientation));
         }
 
         public bool IsVerticalOrientation => Model.Style.HorizontalAlignment == System.Windows.HorizontalAlignment.Left;
@@ -40,6 +40,11 @@ namespace Cell.ViewModel.Cells.Types
                 NotifyPropertyChanged(nameof(ProgressBarWidth));
                 NotifyPropertyChanged(nameof(ProgressBarHeight));
             }
+        }
+
+        private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            NotifyPropertyChanged(nameof(IsVerticalOrientation));
         }
     }
 }

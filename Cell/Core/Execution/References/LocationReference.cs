@@ -21,7 +21,6 @@ namespace Cell.Execution.References
         /// The name of the variable that contains the cell reference in a plugin function (usually "cell").
         /// </summary>
         public const string CellReferenceVariableName = "cell";
-
         public int Column { get; set; }
 
         public int ColumnRangeEnd { get; set; }

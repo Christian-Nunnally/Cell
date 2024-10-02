@@ -189,13 +189,13 @@
                                         <TextBlock
                                             Padding="5,0"
                                             VerticalAlignment="Center"
-                                            FontFamily="Consolas"
+                                            FontFamily="{StaticResource ProgrammingFont}"
                                             Text="{Binding UserFriendlyCellName}"
                                             ToolTip="Cell name" />
                                         <TextBlock
                                             Padding="5,2"
                                             VerticalAlignment="Center"
-                                            FontFamily="Consolas"
+                                            FontFamily="{StaticResource ProgrammingFont}"
                                             FontSize="10"
                                             Text="{Binding SheetName}"
                                             ToolTip="Sheet name" />
@@ -243,7 +243,7 @@
                     <ListBox
                         Grid.Row="3"
                         Grid.Column="1"
-                        FontFamily="Consolas"
+                        FontFamily="{StaticResource ProgrammingFont}"
                         ItemsSource="{Binding FilteredDependenciesOfTheSelectedFunction}" />
                 </DockPanel>
             </Grid>

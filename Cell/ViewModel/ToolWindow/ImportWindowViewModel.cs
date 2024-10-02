@@ -2,8 +2,14 @@
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// Tool window view model for importing templates.
+    /// </summary>
     public class ImportWindowViewModel : ToolWindowViewModel
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="ImportWindowViewModel"/>.
+        /// </summary>
         public ImportWindowViewModel()
         {
         }
@@ -18,12 +24,24 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 200;
 
+        /// <summary>
+        /// The name of the template to import.
+        /// </summary>
         public string ImportingTemplateName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The name to give the new sheet that is created when importing a template.
+        /// </summary>
         public string NewSheetNameForImportedTemplates { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The list of possible templates that can be imported.
+        /// </summary>
         public IEnumerable<string> PossibleTemplates => ApplicationViewModel.Instance.PersistedProject.GetTemplateNames();
 
+        /// <summary>
+        /// Whether to skip existing collections during import.
+        /// </summary>
         public bool SkipExistingCollectionsDuringImport { get; set; } = false;
 
         /// <summary>

@@ -134,13 +134,6 @@ namespace Cell.Data
             _cellLoader.SaveCell(model);
         }
 
-        private void UpdateCellsSheetLocation(CellModel model, string previousLocation)
-        {
-            var previousSheetName = previousLocation.Split('_')[0];
-            RemoveFromCellsInSheetMap(model, previousSheetName);
-            AddToCellsInSheetMap(model);
-        }
-
         private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not CellModel model) return;
@@ -161,6 +154,13 @@ namespace Cell.Data
                 _cellsBySheetMap.Remove(sheetName);
             }
             return result;
+        }
+
+        private void UpdateCellsSheetLocation(CellModel model, string previousLocation)
+        {
+            var previousSheetName = previousLocation.Split('_')[0];
+            RemoveFromCellsInSheetMap(model, previousSheetName);
+            AddToCellsInSheetMap(model);
         }
     }
 }

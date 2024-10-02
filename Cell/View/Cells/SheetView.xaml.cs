@@ -21,11 +21,13 @@ namespace Cell.View.Cells
             InitializeComponent();
         }
 
-        private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        public bool IsLockedToCenter
         {
-            if (_panAndZoomCanvas == null) return;
-            if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
-            else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+            get => _panAndZoomCanvas?.IsLockedToCenter ?? true;
+            set
+            {
+                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsLockedToCenter = value;
+            }
         }
 
         public bool IsPanningEnabled
@@ -37,15 +39,6 @@ namespace Cell.View.Cells
                 {
                     _panAndZoomCanvas.IsPanningEnabled = value;
                 }
-            }
-        }
-
-        public bool IsLockedToCenter
-        {
-            get => _panAndZoomCanvas?.IsLockedToCenter ?? true;
-            set
-            {
-                if (_panAndZoomCanvas != null) _panAndZoomCanvas.IsLockedToCenter = value;
             }
         }
 
@@ -168,6 +161,13 @@ namespace Cell.View.Cells
             _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
             SheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
+        }
+
+        private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_panAndZoomCanvas == null) return;
+            if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
+            else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
         }
     }
 }

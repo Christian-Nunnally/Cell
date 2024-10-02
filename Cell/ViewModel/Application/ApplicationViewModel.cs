@@ -5,7 +5,6 @@ using Cell.Model;
 using Cell.Persistence;
 using Cell.View.Application;
 using Cell.View.Cells;
-using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 
@@ -20,13 +19,12 @@ namespace Cell.ViewModel.Application
         private ApplicationView? _applicationView;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
+        private Task _backupTask = Task.CompletedTask;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
-        private Task _backupTask;
-
         public ApplicationViewModel(
-            PersistedDirectory persistenceManager,
+            PersistedDirectory persistedDirectory,
             PersistedProject persistedProject,
             PluginFunctionLoader pluginFunctionLoader,
             CellLoader cellLoader,
@@ -42,7 +40,7 @@ namespace Cell.ViewModel.Application
             CellClipboard cellClipboard,
             BackupManager backupManager)
         {
-            PersistenceManager = persistenceManager;
+            PersistenceManager = persistedDirectory;
             PersistedProject = persistedProject;
             PluginFunctionLoader = pluginFunctionLoader;
             CellLoader = cellLoader;
@@ -208,9 +206,14 @@ namespace Cell.ViewModel.Application
             _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
         }
 
-        public void ShowToolWindow(ResizableToolWindow content, bool allowDuplicates = false)
+        private async Task BackupAsync()
         {
-            _applicationView?.ShowToolWindow(content, allowDuplicates);
+            await Task.Run(() =>
+            {
+                PersistedProject.IsReadOnly = true;
+                BackupManager.CreateBackup();
+                PersistedProject.IsReadOnly = false;
+            });
         }
 
         private LoadingProgressResult LoadPhase1()
@@ -229,16 +232,6 @@ namespace Cell.ViewModel.Application
             PersistedProject.SaveVersion();
             _backupTask = BackupAsync();
             return new LoadingProgressResult("Loading Collections", LoadPhase2);
-        }
-
-        private async Task BackupAsync()
-        {
-            await Task.Run(() =>
-            {
-                PersistedProject.IsReadOnly = true;
-                BackupManager.CreateBackup();
-                PersistedProject.IsReadOnly = false;
-            });
         }
 
         private LoadingProgressResult LoadPhase2()

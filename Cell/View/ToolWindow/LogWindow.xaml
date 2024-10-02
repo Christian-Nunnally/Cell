@@ -13,10 +13,9 @@
     <Grid>
         <ScrollViewer>
             <TextBlock
-                FontFamily="Consolas"
+                FontFamily="{StaticResource ProgrammingFont}"
                 Foreground="{StaticResource ForegroundColor}"
                 Text="{Binding LogBuffer}" />
-
         </ScrollViewer>
     </Grid>
 </view:ResizableToolWindow>

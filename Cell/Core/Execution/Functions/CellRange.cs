@@ -38,8 +38,8 @@ namespace Cell.Execution
         /// <exception cref="CellError">Throws if the cell is out of the range.</exception>
         public CellModel this[int key]
         {
-            get => key >= 0 && key < _cells.Count() 
-                ? _cells[key] 
+            get => key >= 0 && key < _cells.Count()
+                ? _cells[key]
                 : throw new CellError($"{key} is out of range for the cell range starting with cell {_cells.FirstOrDefault()?.UserFriendlyCellName}");
         }
     }

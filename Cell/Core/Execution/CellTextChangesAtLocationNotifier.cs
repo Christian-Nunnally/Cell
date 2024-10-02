@@ -17,9 +17,6 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly List<string> _locationsThatNeedToBeTrackedIfCellsAreAddedThere = [];
         private readonly SubscriberNotifier _subscriberNotifier = new();
-
-        public bool NotifyWhenCellIsAdded { get; set; } = true;
-
         public CellTextChangesAtLocationNotifier(CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -27,6 +24,8 @@ namespace Cell.Execution
             _subscriberNotifier.NewChannelSubscribedTo += StartListeningToCellForTextPropertyChanges;
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCellForTextPropertyChanges;
         }
+
+        public bool NotifyWhenCellIsAdded { get; set; } = true;
 
         public IEnumerable<string> GetLocationsSubscriberIsSubscribedTo(CellPopulateSubscriber subscriber)
         {

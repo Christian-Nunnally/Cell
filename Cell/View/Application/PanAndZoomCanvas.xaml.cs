@@ -1,5 +1,4 @@
-﻿using Cell.ViewModel.Application;
-using Cell.ViewModel.Cells;
+﻿using Cell.ViewModel.Cells;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,9 +10,8 @@ namespace Cell.View.Application
     {
         private readonly Dictionary<CellViewModel, FrameworkElement> _viewModelToViewMap = [];
         private Point _initialMousePosition;
-        private MatrixTransform _transform = new();
         private bool _isLockedToCenter = true;
-
+        private MatrixTransform _transform = new();
         public PanAndZoomCanvas()
         {
             InitializeComponent();
@@ -25,26 +23,7 @@ namespace Cell.View.Application
             SizeChanged += PanAndZoomCanvasSizeChanged;
         }
 
-        private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (IsLockedToCenter)
-            {
-                PanSheetToCenter();
-            }
-        }
-
-        private void PanSheetToCenter()
-        {
-            if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
-            if (ActualWidth == 0 || ActualHeight == 0) return;
-            var horizontialCenter = LaidOutWidth / 2 - ActualWidth / CurrentZoom / 2;
-            var verticalCenter = LaidOutHeight / 2 - ActualHeight / CurrentZoom / 2;
-            PanCanvasTo(horizontialCenter, verticalCenter);
-        }
-
         public double CurrentZoom { get; set; } = 1.0;
-
-        public bool IsPanningEnabled { get; set; } = true;
 
         public bool IsLockedToCenter
         {
@@ -54,15 +33,18 @@ namespace Cell.View.Application
                 PanSheetToCenter();
             }
         }
+
+        public bool IsPanningEnabled { get; set; } = true;
+
+        public double LaidOutHeight { get; internal set; }
+
+        public double LaidOutWidth { get; internal set; }
+
         public double XPan { get; private set; }
 
         public double YPan { get; private set; }
 
         public double Zoomfactor { get; set; } = 1.15;
-        
-        public double LaidOutWidth { get; internal set; }
-
-        public double LaidOutHeight { get; internal set; }
 
         public void PanCanvasTo(double x, double y)
         {
@@ -203,7 +185,24 @@ namespace Cell.View.Application
             double scaleFactor = Zoomfactor;
             if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
             if (IsPanningEnabled) ZoomCanvas(e.GetPosition(this), scaleFactor);
-            else ZoomCanvas(new Point(ActualWidth/2, ActualHeight/2), scaleFactor);
+            else ZoomCanvas(new Point(ActualWidth / 2, ActualHeight / 2), scaleFactor);
+        }
+
+        private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (IsLockedToCenter)
+            {
+                PanSheetToCenter();
+            }
+        }
+
+        private void PanSheetToCenter()
+        {
+            if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
+            if (ActualWidth == 0 || ActualHeight == 0) return;
+            var horizontialCenter = LaidOutWidth / 2 - ActualWidth / CurrentZoom / 2;
+            var verticalCenter = LaidOutHeight / 2 - ActualHeight / CurrentZoom / 2;
+            PanCanvasTo(horizontialCenter, verticalCenter);
         }
 
         private void ZoomCanvas(Point centerOfZoom, double scaleFactor)

@@ -2,8 +2,14 @@
 
 namespace Cell.ViewModel.ToolWindow
 {
+    /// <summary>
+    /// A tool window view model for exporting sheets.
+    /// </summary>
     public class ExportWindowViewModel : ToolWindowViewModel
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExportWindowViewModel"/>.
+        /// </summary>
         public ExportWindowViewModel()
         {
         }
@@ -18,8 +24,14 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 200;
 
+        /// <summary>
+        /// Gets a list of all current sheet names.
+        /// </summary>
         public IEnumerable<string> SheetNames => ApplicationViewModel.Instance.SheetTracker.OrderedSheets.Select(x => x.Name);
 
+        /// <summary>
+        /// Gets the name of the sheet to export.
+        /// </summary>
         public string SheetNameToExport { get; set; } = ApplicationViewModel.Instance.SheetTracker.OrderedSheets.Select(x => x.Name).FirstOrDefault("");
 
         /// <summary>

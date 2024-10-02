@@ -5,7 +5,6 @@ using Cell.Execution.References;
 using Cell.Execution.SyntaxWalkers.CellReferences;
 using Cell.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
-using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
@@ -17,20 +16,19 @@ namespace Cell.ViewModel.Execution
     /// </summary>
     public partial class CellFunction : PropertyChangedBase
     {
-        private const string CompiledMethodName = "M"; 
         private const string codeFooter = "\n}}}";
         private const string codeHeader = "\n\nnamespace Plugin { public class Program { public static ";
+        private const string CompiledMethodName = "M";
         private const string methodHeader = $" {CompiledMethodName}(Context c, CellModel cell) {{\n";
-
         /// <summary>
         /// A null function that can be used as a placeholder.
         /// </summary>
         public static readonly CellFunction Null = new(CellFunctionModel.Null);
-
         /// <summary>
         /// The namespaces that are available to all functions preformatted for use in code.
         /// </summary>
-        public static readonly List<string> UsingNamespaces = [
+        public static readonly List<string> UsingNamespaces =
+        [
             "System",
             "System.Linq",
             "System.Collections",
@@ -40,8 +38,7 @@ namespace Cell.ViewModel.Execution
             "Cell.ViewModel",
             "Cell.Execution",
             "Cell.ViewModel.Cells.Types",
-            ];
-
+        ];
         /// <summary>
         /// The namespaces that are available to all functions preformatted for use in code.
         /// </summary>
@@ -49,7 +46,6 @@ namespace Cell.ViewModel.Execution
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
         private bool _wasCompileSuccessful;
-
         /// <summary>
         /// Creates a new instance of <see cref="CellFunction"/>
         /// </summary>
@@ -61,10 +57,14 @@ namespace Cell.ViewModel.Execution
             AttemptToRecompileMethod();
         }
 
+        /// <summary>
+        /// Occurs when the dependencies of the function have changed and anyone using the function needs to recompute thier dependencies.
+        /// </summary>
         public event Action<CellFunction>? DependenciesChanged;
 
-        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(Model);
-
+        /// <summary>
+        /// Gets a list of all of the collection this function depends on.
+        /// </summary>
         public List<ICollectionReference> CollectionDependencies { get; set; } = [];
 
         public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
@@ -77,24 +77,11 @@ namespace Cell.ViewModel.Execution
 
         public CellFunctionModel Model { get; set; }
 
-        public string Name
-        {
-            get { return Model.Name; }
-            set
-            {
-                if (Model.Name == value) return;
-                var oldName = Model.Name;
-                Model.Name = value;
-                NotifyPropertyChanged(nameof(Name));
-                DialogFactory.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{Model.Name}' instead?", () => RefactorCellsFunctionUseage(oldName, Model.Name));
-            }
-        }
-
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
-        public int UsageCount => CellsThatUseFunction.Count;
+        private string FullCode => UsingNamespacesString + codeHeader + Model.ReturnType + methodHeader + Model.Code + codeFooter;
 
-        public bool WasCompileSuccessful
+        private bool WasCompileSuccessful
         {
             get => _wasCompileSuccessful; set
             {
@@ -104,56 +91,6 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        public MethodInfo? Compile()
-        {
-            try
-            {
-                var compiler = new RoslynCompiler(SyntaxTree);
-                var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
-                _compiledMethod = compiled.GetMethod(CompiledMethodName) ?? throw new Exception("Error during compile - compiled object is null");
-                CompileResult = new CompileResult { WasSuccess = true, ExecutionResult = "" };
-                WasCompileSuccessful = true;
-            }
-            catch (Exception e)
-            {
-                CompileResult = new CompileResult { WasSuccess = false, ExecutionResult = e.Message };
-                WasCompileSuccessful = false;
-            }
-            return _compiledMethod;
-        }
-
-        public string FullCode => UsingNamespacesString + codeHeader + Model.ReturnType + methodHeader + Model.Code + codeFooter;
-
-        public void ExtractDependencies()
-        {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
-            SyntaxNode? root = syntaxTree.GetRoot();
-            try
-            {
-                ExtractCellLocationReferences(root);
-                ExtractAndTransformCollectionReferences(root);
-            }
-            catch (CellError)
-            {
-                return;
-            }
-            catch (InvalidCastException)
-            {
-                return;
-            }
-            SyntaxTree = root.SyntaxTree;
-            _fingerprintOfProcessedDependencies = Model.Fingerprint;
-            DependenciesChanged?.Invoke(this);
-        }
-
-        public SemanticModel GetSemanticModel()
-        {
-            var compilation = CSharpCompilation.Create("PluginAssembly")
-                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
-                .AddSyntaxTrees(SyntaxTree);
-            return compilation.GetSemanticModel(SyntaxTree);
-        }
-
         public string GetUserFriendlyCode(CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformTo(Model.Code);
@@ -161,7 +98,7 @@ namespace Cell.ViewModel.Execution
             return intermediateCode.Replace("_Range_", "..");
         }
 
-        public CompileResult Run(Context pluginContext, CellModel cell)
+        public CompileResult Run(Context pluginContext, CellModel? cell)
         {
             var method = CompiledMethod;
             if (!CompileResult.WasSuccess) return CompileResult;
@@ -182,15 +119,6 @@ namespace Cell.ViewModel.Execution
             Model.Code = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformFrom(intermediateCode);
         }
 
-        private static void RefactorCellsFunctionUseage(string oldName, string newName)
-        {
-            foreach (var cells in ApplicationViewModel.Instance.CellTracker.AllCells)
-            {
-                if (cells.PopulateFunctionName == oldName) cells.PopulateFunctionName = newName;
-                if (cells.TriggerFunctionName == oldName) cells.TriggerFunctionName = newName;
-            }
-        }
-
         private void AttemptToRecompileMethod()
         {
             _compiledMethod = null;
@@ -198,13 +126,22 @@ namespace Cell.ViewModel.Execution
             if (_fingerprintOfProcessedDependencies == Model.Fingerprint) Compile();
         }
 
-        private void ExtractAndTransformCollectionReferences(SyntaxNode? root)
+        private MethodInfo? Compile()
         {
-            CollectionDependencies.Clear();
-            var walker = new CollectionReferenceSyntaxWalker();
-            walker.Visit(root);
-            var foundCollectionReferences = walker.CollectionReferences;
-            CollectionDependencies.AddRange(foundCollectionReferences.Distinct());
+            try
+            {
+                var compiler = new RoslynCompiler(SyntaxTree);
+                var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
+                _compiledMethod = compiled.GetMethod(CompiledMethodName) ?? throw new Exception("Error during compile - compiled object is null");
+                CompileResult = new CompileResult { WasSuccess = true, ExecutionResult = "" };
+                WasCompileSuccessful = true;
+            }
+            catch (Exception e)
+            {
+                CompileResult = new CompileResult { WasSuccess = false, ExecutionResult = e.Message };
+                WasCompileSuccessful = false;
+            }
+            return _compiledMethod;
         }
 
         private void ExtractCellLocationReferences(SyntaxNode? root)
@@ -216,6 +153,37 @@ namespace Cell.ViewModel.Execution
             LocationDependencies.AddRange(foundDependencies);
         }
 
+        private void ExtractCollectionReferences(SyntaxNode? root)
+        {
+            CollectionDependencies.Clear();
+            var walker = new CollectionReferenceSyntaxWalker();
+            walker.Visit(root);
+            var foundCollectionReferences = walker.CollectionReferences;
+            CollectionDependencies.AddRange(foundCollectionReferences.Distinct());
+        }
+
+        private void ExtractDependencies()
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(FullCode);
+            SyntaxNode? root = syntaxTree.GetRoot();
+            try
+            {
+                ExtractCellLocationReferences(root);
+                ExtractCollectionReferences(root);
+            }
+            catch (CellError e)
+            {
+                Logger.Instance.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
+            }
+            catch (InvalidCastException e)
+            {
+                Logger.Instance.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
+            }
+            SyntaxTree = root.SyntaxTree;
+            _fingerprintOfProcessedDependencies = Model.Fingerprint;
+            DependenciesChanged?.Invoke(this);
+        }
+
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CellFunctionModel.Code))
@@ -224,13 +192,11 @@ namespace Cell.ViewModel.Execution
             }
         }
 
-        private CompileResult RunUnsafe(Context pluginContext, CellModel cell, MethodInfo? method)
+        private CompileResult RunUnsafe(Context pluginContext, CellModel? cell, MethodInfo? method) => new()
         {
-            var result = new CompileResult { WasSuccess = true, ExecutionResult = "Success" };
-            // TODO: Do I actually need to check the return type here?
-            if (Model.ReturnType != "void") result.ReturnedObject = method?.Invoke(null, [pluginContext, cell]);
-            else method?.Invoke(null, [pluginContext, cell]);
-            return result;
-        }
+            WasSuccess = true,
+            ExecutionResult = "Success",
+            ReturnedObject = method?.Invoke(null, [pluginContext, cell])
+        };
     }
 }

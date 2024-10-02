@@ -16,14 +16,13 @@ namespace Cell.Persistence
     {
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
+        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _persistanceManager;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private bool _hasGenerateDataTypeForCollectionMapChanged;
-
-        public UserCollectionLoader(PersistedDirectory persistenceManager, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
+        public UserCollectionLoader(PersistedDirectory persistedDirectory, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
-            _persistanceManager = persistenceManager;
+            _persistanceManager = persistedDirectory;
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
         }

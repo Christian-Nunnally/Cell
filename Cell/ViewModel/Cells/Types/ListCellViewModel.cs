@@ -4,7 +4,12 @@ namespace Cell.ViewModel.Cells.Types
 {
     public class ListCellViewModel : CollectionCellViewModel
     {
-        public ListCellViewModel(CellModel model, SheetViewModel sheetViewModel) : base(model, sheetViewModel)
+        /// <summary>
+        /// Creates a new instance of <see cref="ListCellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The underlying model for this cell.</param>
+        /// <param name="sheet">The sheet this cell is visible on.</param>
+        public ListCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
         }
 

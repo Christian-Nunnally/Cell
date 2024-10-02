@@ -1,7 +1,6 @@
 ﻿using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
-using System.CodeDom.Compiler;
 
 namespace Cell.Execution
 {
@@ -14,7 +13,6 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
-
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateSubscriber"/>.
         /// </summary>
@@ -36,6 +34,23 @@ namespace Cell.Execution
         public void Action()
         {
             RunPopulateForSubscriber(_cell);
+        }
+
+        /// <summary>
+        /// Provides a user friendly string version of this subscriber.
+        /// </summary>
+        /// <returns>The user friendly string version of this subscriber.</returns>
+        public override string ToString() => $"Populate subscriber for {_cell.UserFriendlyCellName}";
+
+        private CompileResult RunPopulate(CellModel subscriber)
+        {
+            var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
+            if (!_pluginFunctionLoader.TryGetFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
+            var result = populateFunction.Run(pluginContext, subscriber);
+            if (!result.WasSuccess) return result;
+            var returnedObject = result.ReturnedObject;
+            if (returnedObject is not null) result.ExecutionResult = returnedObject.ToString() ?? "";
+            return result;
         }
 
         private void RunPopulateForSubscriber(CellModel subscriber)
@@ -62,22 +77,5 @@ namespace Cell.Execution
                 if (result.ExecutionResult != null) subscriber.ErrorText = result.ExecutionResult;
             }
         }
-
-        private CompileResult RunPopulate(CellModel subscriber)
-        {
-            var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
-            if (!_pluginFunctionLoader.TryGetFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
-            var result = populateFunction.Run(pluginContext, subscriber);
-            if (!result.WasSuccess) return result;
-            var returnedObject = result.ReturnedObject;
-            if (returnedObject is not null) result.ExecutionResult = returnedObject.ToString() ?? "";
-            return result;
-        }
-
-        /// <summary>
-        /// Provides a user friendly string version of this subscriber.
-        /// </summary>
-        /// <returns>The user friendly string version of this subscriber.</returns>
-        public override string ToString() => $"Populate subscriber for {_cell.UserFriendlyCellName}";
     }
 }

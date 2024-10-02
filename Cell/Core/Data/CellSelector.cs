@@ -10,11 +10,14 @@ namespace Cell.Data
     {
         private readonly CellTracker _cellTracker;
         private bool _isSelectingEnabled = true;
-
         /// <summary>
-        /// Gets an observable collection of the currently selected cells.
+        /// Creates a new instance of <see cref="CellSelector"/>.
         /// </summary>
-        public ObservableCollection<CellModel> SelectedCells { get; } = [];
+        /// <param name="cellTracker">The cell tracker used as the source of cells for this selector.</param>
+        public CellSelector(CellTracker cellTracker)
+        {
+            _cellTracker = cellTracker;
+        }
 
         /// <summary>
         /// Gets or sets whether cells can be selected with this selector.
@@ -29,40 +32,9 @@ namespace Cell.Data
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="CellSelector"/>.
+        /// Gets an observable collection of the currently selected cells.
         /// </summary>
-        /// <param name="cellTracker">The cell tracker used as the source of cells for this selector.</param>
-        public CellSelector(CellTracker cellTracker)
-        {
-            _cellTracker = cellTracker;
-        }
-
-        /// <summary>
-        /// Adds a cell to the selection.
-        /// </summary>
-        /// <param name="cell">The cell to add.</param>
-        public void SelectCell(CellModel cell)
-        {
-            if (!IsSelectingEnabled) return;
-            SelectedCells.Add(cell);
-        }
-
-        /// <summary>
-        /// Removes all cells from the selection.
-        /// </summary>
-        public void UnselectAllCells()
-        {
-            foreach (var cell in SelectedCells.ToList()) UnselectCell(cell);
-        }
-
-        /// <summary>
-        /// Removes a cell from the selection.
-        /// </summary>
-        /// <param name="cell">The cell to remove.</param>
-        public void UnselectCell(CellModel cell)
-        {
-            SelectedCells.Remove(cell);
-        }
+        public ObservableCollection<CellModel> SelectedCells { get; } = [];
 
         /// <summary>
         /// Moves the selection by unselecting the current selection and selecting the cell at the specified offset from the current selection.
@@ -102,5 +74,32 @@ namespace Cell.Data
         /// Moves the selection up by unselecting the current selection and selecting the cell above the current selection.
         /// </summary>
         public void MoveSelectionUp() => MoveSelection(0, -1);
+
+        /// <summary>
+        /// Adds a cell to the selection.
+        /// </summary>
+        /// <param name="cell">The cell to add.</param>
+        public void SelectCell(CellModel cell)
+        {
+            if (!IsSelectingEnabled) return;
+            SelectedCells.Add(cell);
+        }
+
+        /// <summary>
+        /// Removes all cells from the selection.
+        /// </summary>
+        public void UnselectAllCells()
+        {
+            foreach (var cell in SelectedCells.ToList()) UnselectCell(cell);
+        }
+
+        /// <summary>
+        /// Removes a cell from the selection.
+        /// </summary>
+        /// <param name="cell">The cell to remove.</param>
+        public void UnselectCell(CellModel cell)
+        {
+            SelectedCells.Remove(cell);
+        }
     }
 }

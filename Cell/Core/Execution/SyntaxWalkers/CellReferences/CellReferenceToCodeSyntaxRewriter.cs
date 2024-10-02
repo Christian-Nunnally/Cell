@@ -15,6 +15,9 @@ namespace Cell.Plugin.SyntaxWalkers
             return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
         }
 
+        [GeneratedRegex(@"^[A-Z]+[0-9]+$")]
+        public static partial Regex IsCellLocationString();
+
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -97,9 +100,6 @@ namespace Cell.Plugin.SyntaxWalkers
 
         [GeneratedRegex(@"\d+$")]
         private static partial Regex GetRowFromCellLocationString();
-
-        [GeneratedRegex(@"^[A-Z]+[0-9]+$")]
-        public static partial Regex IsCellLocationString();
 
         private static bool IsRelativitySymbol(string symbol) => symbol == "R" || symbol == "C" || symbol == "B";
 

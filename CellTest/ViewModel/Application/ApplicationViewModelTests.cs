@@ -11,7 +11,7 @@ namespace CellTest.ViewModel.Application
     public class ApplicationViewModelTests
     {
         private static TestFileIO _testFileIO;
-        private PersistedDirectory _persistenceManager;
+        private PersistedDirectory _persistedDirectory;
         private PersistedDirectory _backupDirectory;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
@@ -32,24 +32,24 @@ namespace CellTest.ViewModel.Application
         private ApplicationViewModel CreateTestInstance()
         {
             _testFileIO = new TestFileIO();
-            _persistenceManager = new PersistedDirectory("", _testFileIO);
+            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);
-            _persistedProject = new PersistedProject(_persistenceManager);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistenceManager);
-            _cellLoader = new CellLoader(_persistenceManager);
+            _persistedProject = new PersistedProject(_persistedDirectory);
+            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
-            _userCollectionLoader = new UserCollectionLoader(_persistenceManager, _pluginFunctionLoader, _cellTracker);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _sheetTracker = new SheetTracker(_persistenceManager, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _backupManager = new BackupManager(_persistenceManager, _backupDirectory);
+            _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
             _applicationSettings = new ApplicationSettings();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(_sheetTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            return new ApplicationViewModel(_persistenceManager, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            return new ApplicationViewModel(_persistedDirectory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]

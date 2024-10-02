@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using System.ComponentModel;
@@ -6,7 +7,7 @@ using System.ComponentModel;
 namespace Cell.Execution
 {
     /// <summary>
-    /// Responsible for executing the OnEdit function of a cell when the value changes.
+    /// Responsible for executing the trigger function of a cell when the value changes.
     /// </summary>
     public class CellTriggerManager
     {
@@ -15,6 +16,12 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
+        /// <summary>
+        /// Creates a new instance of the <see cref="CellTriggerManager"/> class.
+        /// </summary>
+        /// <param name="cellTracker">The cell tracker to monitor the cells within.</param>
+        /// <param name="pluginFunctionLoader">The plugin function loader to get trigger functions from.</param>
+        /// <param name="userCollectionLoader">The collection loader to provide to triggers context.</param>
         public CellTriggerManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -28,31 +35,18 @@ namespace Cell.Execution
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
+        /// <summary>
+        /// Signals that a cells trigger function should be executed with the given context.
+        /// </summary>
+        /// <param name="cell">The triggering cell.</param>
+        /// <param name="editContext">The triggers context.</param>
         public void CellTriggered(CellModel cell, EditContext editContext)
         {
-            if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName) || _cellsBeingEdited.ContainsKey(cell.ID)) return;
+            if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName)) return;
+            if (_cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);
-            var result = DynamicCellPluginExecutor.RunTrigger(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, cell.Index) { E = editContext }, cell);
-            if (!result.WasSuccess)
-            {
-                cell.ErrorText = result.ExecutionResult ?? "error message is null";
-            }
+            CellTriggeredHandler(cell);
             _cellsBeingEdited.Remove(cell.ID);
-        }
-
-        public void StartMonitoringCellForTriggerFunction(CellModel model)
-        {
-            model.PropertyChanged += CellModelPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(model.TriggerFunctionName))
-            {
-                _cellModelToCurrentTextValueMap.Add(model, model.Text);
-            }
-        }
-
-        public void StopMonitoringCellForTriggerFunction(CellModel model)
-        {
-            model.PropertyChanged -= CellModelPropertyChanged;
-            _cellModelToCurrentTextValueMap.Remove(model);
         }
 
         private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -79,7 +73,32 @@ namespace Cell.Execution
                         _cellModelToCurrentTextValueMap.Add(cell, cell.Text);
                     }
                 }
-            }    
+            }
+        }
+
+        private void CellTriggeredHandler(CellModel cell)
+        {
+            if (!_pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
+            var context = new Context(_cellTracker, _userCollectionLoader, cell.Index);
+            var result = triggerFunction.Run(context, cell);
+            if (result.WasSuccess) return;
+            Logger.Instance.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");
+            cell.ErrorText = result.ExecutionResult ?? "error";
+        }
+
+        private void StartMonitoringCellForTriggerFunction(CellModel model)
+        {
+            model.PropertyChanged += CellModelPropertyChanged;
+            if (!string.IsNullOrWhiteSpace(model.TriggerFunctionName))
+            {
+                _cellModelToCurrentTextValueMap.Add(model, model.Text);
+            }
+        }
+
+        private void StopMonitoringCellForTriggerFunction(CellModel model)
+        {
+            model.PropertyChanged -= CellModelPropertyChanged;
+            _cellModelToCurrentTextValueMap.Remove(model);
         }
     }
 }

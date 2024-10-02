@@ -11,12 +11,10 @@
     {
         private readonly Dictionary<string, Dictionary<ISubscriber, int>> _channelToSubscriberMap = [];
         private readonly Dictionary<ISubscriber, Dictionary<string, int>> _subscriberToChannelMap = [];
-
         /// <summary>
         /// Event that occurs when a key is subscribed to that previously had no subscribers.
         /// </summary>
         public event Action<string>? LastChannelUnsubscribedFrom;
-
 
         /// <summary>
         /// Occurs when a key is unsubscribed from and now has no subscribers.

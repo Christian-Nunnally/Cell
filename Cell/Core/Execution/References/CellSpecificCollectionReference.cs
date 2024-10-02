@@ -17,6 +17,13 @@ namespace Cell.Execution
         private readonly CellTextChangesAtLocationNotifier _getTextChangesAtLocationNotifier;
         private readonly Context _pluginContext;
         private readonly ICollectionReference _underlyingGenericCollectionReference;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CellSpecificCollectionReference"/>.
+        /// </summary>
+        /// <param name="cell">The specific cell.</param>
+        /// <param name="collectionReference">The reference to make more specific.</param>
+        /// <param name="getTextChangesAtLocationNotifier">A notifier to subscribe to dependencies that update this reference.</param>
+        /// <param name="pluginContext">The plugin context used when executing the resolve function.</param>
         public CellSpecificCollectionReference(CellModel cell, ICollectionReference collectionReference, CellTextChangesAtLocationNotifier getTextChangesAtLocationNotifier, Context pluginContext)
         {
             _cell = cell;
@@ -32,6 +39,10 @@ namespace Cell.Execution
 
         public CellModel Cell => _cell;
 
+        /// <summary>
+        /// Gets the name of the collection this reference is currently referring to.
+        /// </summary>
+        /// <returns>The resolved collection name.</returns>
         public string GetCollectionName()
         {
             return _underlyingGenericCollectionReference.GetCollectionName(_cell, _pluginContext);
