@@ -11,6 +11,13 @@ namespace Cell.Common
     /// </summary>
     public static partial class Utilities
     {
+        /// <summary>
+        /// Copies all public properties from the source object to the target object. Excludes properties in the blacklist.
+        /// </summary>
+        /// <param name="source">The object to copy from.</param>
+        /// <param name="target">The object to copy to.</param>
+        /// <param name="blacklist">The list of property names that should not be updated.</param>
+        /// <exception cref="CellError"></exception>
         public static void CopyPublicProperties(this object source, object target, string[] blacklist)
         {
             var targetType = target?.GetType() ?? throw new CellError("source objects is null");
@@ -23,18 +30,21 @@ namespace Cell.Common
             }
         }
 
+        /// <summary>
+        /// Generates a random string of the given length.
+        /// </summary>
+        /// <param name="length">The length of string to generate.</param>
+        /// <returns>The random string of the given length.</returns>
         public static string GenerateUnqiueId(int length)
         {
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var stringChars = new char[length];
             var random = new Random();
-
-            for (int i = 0; i < stringChars.Length; i++)
+            for (int i = 0; i < length; i++)
             {
                 var randomNumberInRange = random.Next(chars.Length);
                 stringChars[i] = chars[randomNumberInRange];
             }
-
             return new string(stringChars);
         }
 
@@ -54,12 +64,17 @@ namespace Cell.Common
             return new Rect(topLeft, bottomRight);
         }
 
-        public static ulong GetHashFromString(this string read)
+        /// <summary>
+        /// Generates a hash from the given string.
+        /// </summary>
+        /// <param name="text">The string to get the hash from.</param>
+        /// <returns></returns>
+        public static ulong GetHashFromString(this string text)
         {
             var hashedValue = 3074457345618258791ul;
-            for (int i = 0; i < read.Length; i++)
+            for (int i = 0; i < text.Length; i++)
             {
-                hashedValue += read[i];
+                hashedValue += text[i];
                 hashedValue *= 3074457345618258799ul;
             }
             return hashedValue;
@@ -105,9 +120,9 @@ namespace Cell.Common
                       .ToArray();
         }
 
-        public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
+        //public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
 
-        public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.SheetName, model.Row, model.Column);
+        //public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.Location.SheetName, model.Location.Row, model.Location.Column);
 
         [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
         public static partial Regex IsHexidecimalColorCode();

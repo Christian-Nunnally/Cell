@@ -37,7 +37,8 @@ namespace CellTest
         public void NoCells_CellAddedToTracker_SheetCreatedWithNameOfCellsSheet()
         {
             var testing = CreateInstance();
-            var cell = new CellModel() { SheetName = "Sheet1" };
+            var cell = new CellModel();
+            cell.Location.SheetName = "Sheet1";
 
             _cellTracker.AddCell(cell, false);
 
@@ -48,7 +49,8 @@ namespace CellTest
         public void NoCells_CellAddedToTracker_SheetDirectoryCreatedWithNameOfCellsSheet()
         {
             var _ = CreateInstance();
-            var cell = new CellModel() { SheetName = "Sheet1" };
+            var cell = new CellModel();
+            cell.Location.SheetName = "Sheet1";
 
             _cellTracker.AddCell(cell, true);
 
@@ -59,7 +61,8 @@ namespace CellTest
         public void SingleCell_CellRemovedFromTracker_Sheet1NoLongerExists()
         {
             var testing = CreateInstance();
-            var cell = new CellModel() { SheetName = "Sheet1" };
+            var cell = new CellModel();
+            cell.Location.SheetName = "Sheet1";
             _cellTracker.AddCell(cell, false);
             Assert.Equal("Sheet1", testing.Sheets[0].Name);
 
@@ -71,8 +74,9 @@ namespace CellTest
         [Fact]
         public void SingleCellSaved_CellRemovedFromTracker_Sheet1DirectoryNoLongerExists()
         {
-            var testing = CreateInstance();
-            var cell = new CellModel() { SheetName = "Sheet1" };
+            var _ = CreateInstance();
+            var cell = new CellModel();
+            cell.Location.SheetName = "Sheet1";
             _cellTracker.AddCell(cell, true);
             Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheets", "Sheet1")));
 

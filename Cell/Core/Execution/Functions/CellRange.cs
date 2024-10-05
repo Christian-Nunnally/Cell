@@ -40,7 +40,7 @@ namespace Cell.Execution
         {
             get => key >= 0 && key < _cells.Count()
                 ? _cells[key]
-                : throw new CellError($"{key} is out of range for the cell range starting with cell {_cells.FirstOrDefault()?.UserFriendlyCellName}");
+                : throw new CellError($"{key} is out of range for the cell range starting with cell {_cells.FirstOrDefault()?.Location.UserFriendlyLocationString}");
         }
     }
 }

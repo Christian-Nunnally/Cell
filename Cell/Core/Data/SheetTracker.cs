@@ -45,7 +45,7 @@ namespace Cell.Data
             var copiedCells = _cellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
             foreach (var copiedCell in copiedCells)
             {
-                copiedCell.SheetName = "";
+                copiedCell.Location.SheetName = "";
             }
 
             return copiedCells;
@@ -129,7 +129,7 @@ namespace Cell.Data
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
             _cellTracker.RenameSheet(oldSheetName, newSheetName);
-            _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.SheetName = newSheetName);
+            _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.Location.SheetName = newSheetName);
         }
 
         public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
@@ -159,10 +159,10 @@ namespace Cell.Data
 
         private void CellAddedToTracker(CellModel model)
         {
-            var sheet = Sheets.FirstOrDefault(x => x.Name == model.SheetName);
+            var sheet = Sheets.FirstOrDefault(x => x.Name == model.Location.SheetName);
             if (sheet == null)
             {
-                sheet = new SheetModel(model.SheetName);
+                sheet = new SheetModel(model.Location.SheetName);
                 Sheets.Add(sheet);
             }
 
@@ -176,7 +176,7 @@ namespace Cell.Data
 
         private void CellRemovedFromTracker(CellModel model)
         {
-            var sheet = Sheets.First(x => x.Name == model.SheetName);
+            var sheet = Sheets.First(x => x.Name == model.Location.SheetName);
             sheet.Cells.Remove(model);
             if (sheet.Cells.Count == 0)
             {
@@ -219,7 +219,7 @@ namespace Cell.Data
                 var newId = Guid.NewGuid().ToString();
                 oldIdToNewIdMap[cell.ID] = newId;
                 cell.ID = newId;
-                cell.SheetName = sheetName;
+                cell.Location.SheetName = sheetName;
             }
             return oldIdToNewIdMap;
         }

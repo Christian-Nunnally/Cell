@@ -15,10 +15,10 @@ namespace Cell.ViewModel.Cells.Types
 
         public object? SelectedItem
         {
-            get => Model.GetStringProperty(nameof(SelectedItem));
+            get => Model.GetCustomProperty(nameof(SelectedItem));
             set
             {
-                Model.SetStringProperty(nameof(SelectedItem), value?.ToString() ?? "");
+                Model.SetCustomProperty(nameof(SelectedItem), value?.ToString() ?? "");
                 NotifyPropertyChanged(nameof(SelectedItem));
             }
         }

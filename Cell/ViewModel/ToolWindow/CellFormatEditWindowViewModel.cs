@@ -387,7 +387,7 @@ namespace Cell.ViewModel.ToolWindow
                 ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
                 foreach (var cell in _cellsToEdit)
                 {
-                    var rowCell = _cellTracker.GetCell(cell.SheetName, cell.Row, 0);
+                    var rowCell = _cellTracker.GetCell(cell.Location.SheetName, cell.Location.Row, 0);
                     if (rowCell is null) continue;
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(rowCell);
                     rowCell.Height = value;
@@ -620,7 +620,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (currentlySelectedCell is null) return "Select a cell to edit";
                 if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel) return "Edit default cell format";
                 if (currentlySelectedCell == ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel) return "Edit default row.column cell format";
-                return $"Format editor - {currentlySelectedCell.GetName()}";
+                return $"Format editor - {currentlySelectedCell.Location.UserFriendlyLocationString}";
             }
         }
 
@@ -656,7 +656,7 @@ namespace Cell.ViewModel.ToolWindow
                 foreach (var cell in _cellsToEdit)
                 {
                     if (cell.Width == value) continue;
-                    var columnCell = _cellTracker.GetCell(cell.SheetName, 0, cell.Column);
+                    var columnCell = _cellTracker.GetCell(cell.Location.SheetName, 0, cell.Location.Column);
                     if (columnCell is null) continue;
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(columnCell);
                     columnCell.Width = value;
@@ -708,13 +708,13 @@ namespace Cell.ViewModel.ToolWindow
         {
             // TODO: add ability to undo/redo column/row adds/removes.
             var leftmostColumnCell = _cellsToEdit
-                .Select(x => _cellTracker.GetCell(x.SheetName, 0, x.Column))
+                .Select(x => _cellTracker.GetCell(x.Location.SheetName, 0, x.Location.Column))
                 .Where(x => x is not null)
                 .Distinct()
-                .OrderBy(x => x?.Column ?? 0)
+                .OrderBy(x => x?.Location.Column ?? 0)
                 .FirstOrDefault();
             if (leftmostColumnCell == null) return;
-            InsertColumnAtIndex(leftmostColumnCell.SheetName, leftmostColumnCell.Column);
+            InsertColumnAtIndex(leftmostColumnCell.Location.SheetName, leftmostColumnCell.Location.Column);
         }
 
         /// <summary>
@@ -723,13 +723,13 @@ namespace Cell.ViewModel.ToolWindow
         public void AddColumnToTheRight()
         {
             var rightmostColumnCell = _cellsToEdit
-                .Select(x => _cellTracker.GetCell(x.SheetName, 0, x.Column))
+                .Select(x => _cellTracker.GetCell(x.Location.SheetName, 0, x.Location.Column))
                 .Where(x => x is not null)
                 .Distinct()
-                .OrderByDescending(x => x?.Column ?? 0)
+                .OrderByDescending(x => x?.Location.Column ?? 0)
                 .FirstOrDefault();
             if (rightmostColumnCell == null) return;
-            InsertColumnAtIndex(rightmostColumnCell.SheetName, rightmostColumnCell.Column + 1);
+            InsertColumnAtIndex(rightmostColumnCell.Location.SheetName, rightmostColumnCell.Location.Column + 1);
         }
 
         /// <summary>
@@ -738,13 +738,13 @@ namespace Cell.ViewModel.ToolWindow
         public void AddRowAbove()
         {
             var topmostRowCell = _cellsToEdit
-                .Select(x => _cellTracker.GetCell(x.SheetName, x.Row, 0))
+                .Select(x => _cellTracker.GetCell(x.Location.SheetName, x.Location.Row, 0))
                 .Where(x => x is not null)
                 .Distinct()
-                .OrderBy(x => x?.Row ?? 0)
+                .OrderBy(x => x?.Location.Row ?? 0)
                 .FirstOrDefault();
             if (topmostRowCell == null) return;
-            InsertRowAtIndex(topmostRowCell.SheetName, topmostRowCell.Row);
+            InsertRowAtIndex(topmostRowCell.Location.SheetName, topmostRowCell.Location.Row);
         }
 
         /// <summary>
@@ -753,13 +753,13 @@ namespace Cell.ViewModel.ToolWindow
         public void AddRowBelow()
         {
             var bottomMostRowCell = _cellsToEdit
-                .Select(x => _cellTracker.GetCell(x.SheetName, x.Row, 0))
+                .Select(x => _cellTracker.GetCell(x.Location.SheetName, x.Location.Row, 0))
                 .Where(x => x is not null)
                 .Distinct()
-                .OrderByDescending(x => x?.Row ?? 0)
+                .OrderByDescending(x => x?.Location.Row ?? 0)
                 .FirstOrDefault();
             if (bottomMostRowCell == null) return;
-            InsertRowAtIndex(bottomMostRowCell.SheetName, bottomMostRowCell.Row + 1);
+            InsertRowAtIndex(bottomMostRowCell.Location.SheetName, bottomMostRowCell.Location.Row + 1);
         }
 
         /// <summary>
@@ -769,7 +769,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             foreach (var cell in _cellsToEdit.ToList())
             {
-                var columnCell = _cellTracker.GetCell(cell.SheetName, 0, cell.Column);
+                var columnCell = _cellTracker.GetCell(cell.Location.SheetName, 0, cell.Location.Column);
                 if (columnCell is not null) DeleteColumn(columnCell);
             }
         }
@@ -781,7 +781,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             foreach (var cell in _cellsToEdit.ToList())
             {
-                var rowCell = _cellTracker.GetCell(cell.SheetName, cell.Row, 0);
+                var rowCell = _cellTracker.GetCell(cell.Location.SheetName, cell.Location.Row, 0);
                 if (rowCell is not null) DeleteRow(rowCell);
             }
         }
@@ -821,10 +821,10 @@ namespace Cell.ViewModel.ToolWindow
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             var selectedCells = _cellsToEdit.ToList();
-            var rows = selectedCells?.Select(x => x.Row).Distinct().ToList() ?? [];
+            var rows = selectedCells?.Select(x => x.Location.Row).Distinct().ToList() ?? [];
             foreach (var row in rows)
             {
-                var cellsToMerge = selectedCells?.Where(x => x.Row == row).ToList() ?? [];
+                var cellsToMerge = selectedCells?.Where(x => x.Location.Row == row).ToList() ?? [];
                 MergeCells(cellsToMerge);
             }
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
@@ -837,10 +837,10 @@ namespace Cell.ViewModel.ToolWindow
         {
             ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             var selectedCells = _cellsToEdit.ToList();
-            var columns = selectedCells?.Select(x => x.Column).Distinct().ToList() ?? [];
+            var columns = selectedCells?.Select(x => x.Location.Column).Distinct().ToList() ?? [];
             foreach (var column in columns)
             {
-                var cellsToMerge = selectedCells?.Where(x => x.Column == column).ToList();
+                var cellsToMerge = selectedCells?.Where(x => x.Location.Column == column).ToList();
                 MergeCells(cellsToMerge ?? []);
             }
             ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
@@ -903,42 +903,44 @@ namespace Cell.ViewModel.ToolWindow
         private void DeleteColumn(CellModel columnCell)
         {
             if (columnCell.CellType != CellType.Column) return;
-            var cellsToDelete = _cellTracker.GetCellModelsForSheet(columnCell.SheetName).Where(x => x.Column == columnCell.Column).ToList();
+            var location = columnCell.Location;
+            var cellsToDelete = _cellTracker.GetCellModelsForSheet(columnCell.Location.SheetName).Where(x => x.Location.Column == location.Column).ToList();
             foreach (var cell in cellsToDelete)
             {
-                var nextCell = _cellTracker.GetCell(columnCell.SheetName, cell.Row, cell.Column + 1);
+                var nextCell = _cellTracker.GetCell(columnCell.Location.SheetName, cell.Location.Row, cell.Location.Column + 1);
                 cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
                 _cellTracker.RemoveCell(cell);
             }
-            IncrementColumnOfAllAtOrToTheRightOf(columnCell.SheetName, columnCell.Column, -1);
+            IncrementColumnOfAllAtOrToTheRightOf(columnCell.Location.SheetName, location.Column, -1);
 
             foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
-                IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(columnCell.SheetName, columnCell.Column, function, -1);
+                IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(location.SheetName, location.Column, function, -1);
             }
         }
 
         private void DeleteRow(CellModel rowCell)
         {
             if (rowCell.CellType != CellType.Row) return;
-            var cellsToDelete = _cellTracker.GetCellModelsForSheet(rowCell.SheetName).Where(x => x.Row == rowCell.Row).ToList();
+            var location = rowCell.Location;
+            var cellsToDelete = _cellTracker.GetCellModelsForSheet(rowCell.Location.SheetName).Where(x => x.Location.Row == location.Row).ToList();
             foreach (var cell in cellsToDelete)
             {
-                var nextCell = _cellTracker.GetCell(rowCell.SheetName, cell.Row + 1, cell.Column);
+                var nextCell = _cellTracker.GetCell(rowCell.Location.SheetName, cell.Location.Row + 1, cell.Location.Column);
                 cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
                 _cellTracker.RemoveCell(cell);
             }
-            IncrementRowOfAllAtOrBelow(rowCell.SheetName, rowCell.Row, -1);
+            IncrementRowOfAllAtOrBelow(rowCell.Location.SheetName, location.Row, -1);
 
             foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
-                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowCell.SheetName, rowCell.Row, function, -1);
+                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(location.SheetName, location.Row, function, -1);
             }
         }
 
-        private List<CellModel> GetAllCellsAtOrBelow(string sheetName, int row) => _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.Row >= row).ToList();
+        private List<CellModel> GetAllCellsAtOrBelow(string sheetName, int row) => _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.Location.Row >= row).ToList();
 
-        private List<CellModel> GetAllCellsAtOrToTheRightOf(string sheetName, int column) => _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.Column >= column).ToList();
+        private List<CellModel> GetAllCellsAtOrToTheRightOf(string sheetName, int column) => _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.Location.Column >= column).ToList();
 
         private List<CellModel> GetCellsInRectangle(int startRow, int startColumn, int endRow, int endColumn, string sheetName)
         {
@@ -957,7 +959,7 @@ namespace Cell.ViewModel.ToolWindow
         private void IncrementColumnOfAllAtOrToTheRightOf(string sheetName, int column, int amount = 1)
         {
             var cells = GetAllCellsAtOrToTheRightOf(sheetName, column);
-            foreach (var cell in cells) cell.Column += amount;
+            foreach (var cell in cells) cell.Location.Column += amount;
         }
 
         private void IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(string sheetName, int columnIndex, CellFunction function, int incrementAmount)
@@ -976,7 +978,7 @@ namespace Cell.ViewModel.ToolWindow
         private void IncrementRowOfAllAtOrBelow(string sheetName, int row, int amount = 1)
         {
             var cells = GetAllCellsAtOrBelow(sheetName, row);
-            foreach (var cell in cells) cell.Row += amount;
+            foreach (var cell in cells) cell.Location.Row += amount;
         }
 
         private void IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(string sheetName, int rowIndex, CellFunction function, int incrementAmount)
@@ -999,7 +1001,7 @@ namespace Cell.ViewModel.ToolWindow
 
             CellModelFactory.Create(0, index, CellType.Column, sheetName, _cellTracker);
 
-            var rowIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Row).Select(x => x.Row).ToList();
+            var rowIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Row).Select(x => x.Location.Row).ToList();
             foreach (var rowIndex in rowIndexs)
             {
                 var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, sheetName, _cellTracker);
@@ -1021,7 +1023,7 @@ namespace Cell.ViewModel.ToolWindow
 
             var rowModel = CellModelFactory.Create(newRowIndex, 0, CellType.Row, sheetName, _cellTracker);
 
-            var columnIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Column).Select(x => x.Column).ToList();
+            var columnIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Column).Select(x => x.Location.Column).ToList();
             foreach (var columnIndex in columnIndexs)
             {
                 var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, sheetName, _cellTracker);
@@ -1033,24 +1035,24 @@ namespace Cell.ViewModel.ToolWindow
 
             foreach (var function in _pluginFunctionLoader.ObservableFunctions)
             {
-                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowModel.SheetName, rowModel.Row, function, 1);
+                IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowModel.Location.SheetName, rowModel.Location.Row, function, 1);
             }
         }
 
         private void MergeCells(IEnumerable<CellModel> cells)
         {
             if (cells.Count() < 2) return;
-            var leftmost = cells.Select(x => x.Column).Min();
-            var topmost = cells.Select(x => x.Row).Min();
-            var rightmost = cells.Select(x => x.Column).Max();
-            var bottommost = cells.Select(x => x.Row).Max();
+            var leftmost = cells.Select(x => x.Location.Column).Min();
+            var topmost = cells.Select(x => x.Location.Row).Min();
+            var rightmost = cells.Select(x => x.Location.Column).Max();
+            var bottommost = cells.Select(x => x.Location.Row).Max();
 
-            var topLeftCell = cells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
+            var topLeftCell = cells.FirstOrDefault(x => x.Location.Row == topmost && x.Location.Column == leftmost);
             if (topLeftCell is null) return;
-            var bottomRightCell = cells.FirstOrDefault(x => x.Row == bottommost && x.Column == rightmost);
+            var bottomRightCell = cells.FirstOrDefault(x => x.Location.Row == bottommost && x.Location.Column == rightmost);
             if (bottomRightCell is null) return;
 
-            var sheetName = topLeftCell.SheetName;
+            var sheetName = topLeftCell.Location.SheetName;
             var cellsToMerge = GetCellsInRectangle(topmost, leftmost, bottommost, rightmost, sheetName);
             if (cellsToMerge.Count(cell => cell.IsMerged()) <= 1)
             {
@@ -1067,7 +1069,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void UnmergeCell(CellModel mergeParent)
         {
-            var mergedCells = _cellTracker.GetCellModelsForSheet(mergeParent.SheetName).Where(x => x.IsMergedWith(mergeParent));
+            var mergedCells = _cellTracker.GetCellModelsForSheet(mergeParent.Location.SheetName).Where(x => x.IsMergedWith(mergeParent));
             foreach (var cell in mergedCells)
             {
                 if (mergeParent == cell) continue;

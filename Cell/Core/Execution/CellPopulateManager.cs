@@ -155,10 +155,10 @@ namespace Cell.Execution
         private void ResolveLocationDependenciesForCell(CellModel cell, CellFunction function)
         {
             UnsubscribeFromAllLocationUpdates(cell);
-            var thisLocation = Utilities.GetUnqiueLocationString(cell.SheetName, cell.Row, cell.Column);
+            var thisLocation = cell.Location.LocationString;
             foreach (var locationDependency in function.LocationDependencies)
             {
-                var locations = locationDependency.ResolveLocations(cell);
+                var locations = locationDependency.ResolveLocations(cell.Location);
                 foreach (var location in locations)
                 {
                     if (thisLocation == location) continue;
@@ -271,7 +271,7 @@ namespace Cell.Execution
 
         private void UpdateDependencySubscriptions(CellModel cell, CellFunction function)
         {
-            if (string.IsNullOrWhiteSpace(cell.SheetName)) return;
+            if (string.IsNullOrWhiteSpace(cell.Location.SheetName)) return;
             var _ = function.CompiledMethod;
 
             UntrackCollectionReferences(cell);

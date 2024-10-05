@@ -156,7 +156,7 @@
                             Width="50"
                             Margin="5,0,0,0"
                             Click="EditSortAndFilterFunctionButtonClick"
-                            Content="Edit"
+                            Content="{fa:Icon Edit}"
                             DockPanel.Dock="Right" />
                         <TextBox
                             Height="25"
@@ -248,7 +248,7 @@
                                             x:Name="_removeButton"
                                             HorizontalAlignment="Left"
                                             Click="RemoveItemFromCollectionClick"
-                                            Content="❌"
+                                            Content="{fa:Icon XMark}"
                                             Foreground="{StaticResource ErrorForegroundColor}"
                                             Style="{StaticResource ListItemInlineButtonStyle}"
                                             ToolTip="Remove this item from the collection (will delete if not stored in another collection)"

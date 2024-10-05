@@ -83,7 +83,6 @@ namespace Cell.Execution
             var result = triggerFunction.Run(context, cell);
             if (result.WasSuccess) return;
             Logger.Instance.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");
-            cell.ErrorText = result.ExecutionResult ?? "error";
         }
 
         private void StartMonitoringCellForTriggerFunction(CellModel model)

@@ -7,9 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace Cell.Plugin.SyntaxWalkers
 {
-    public partial class CellReferenceToCodeSyntaxRewriter(CellModel cell) : CSharpSyntaxRewriter
+    public partial class CellReferenceToCodeSyntaxRewriter(CellLocationModel location) : CSharpSyntaxRewriter
     {
-        private readonly CellModel _cell = cell;
+        private readonly CellLocationModel _location = location;
         public static bool IsCellLocation(string input)
         {
             return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
@@ -107,9 +107,9 @@ namespace Cell.Plugin.SyntaxWalkers
         {
             return relativitySymbol switch
             {
-                "" => $", cell.Row + {rowOffset - _cell.Row}, cell.Column + {columnOffset - _cell.Column}",
-                "C" => $", cell.Row + {rowOffset - _cell.Row}, {columnOffset}",
-                "R" => $", {rowOffset}, cell.Column + {columnOffset - _cell.Column}",
+                "" => $", cell.Row + {rowOffset - _location.Row}, cell.Column + {columnOffset - _location.Column}",
+                "C" => $", cell.Row + {rowOffset - _location.Row}, {columnOffset}",
+                "R" => $", {rowOffset}, cell.Column + {columnOffset - _location.Column}",
                 "B" => $", {rowOffset}, {columnOffset}",
                 _ => throw new InvalidOperationException("Only 'B', 'C', 'R' and '' are valid relativity types for a cell reference"),
             };

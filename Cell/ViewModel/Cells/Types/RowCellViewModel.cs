@@ -15,7 +15,7 @@ namespace Cell.ViewModel.Cells.Types
         public RowCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             NotifyPropertyChanged(nameof(Text));
-            model.PropertyChanged += ModelPropertyChanged;
+            model.Location.PropertyChanged += ModelPropertyChanged;
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace Cell.ViewModel.Cells.Types
 
         private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.Row)) NotifyPropertyChanged(nameof(Text));
+            if (e.PropertyName == nameof(CellLocationModel.Row)) NotifyPropertyChanged(nameof(Text));
         }
     }
 }

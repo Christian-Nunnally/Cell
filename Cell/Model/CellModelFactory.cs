@@ -15,16 +15,14 @@ namespace Cell.Model
             return JsonSerializer.Deserialize<CellModel>(serialized) ?? throw new CellError("Unable to copy model");
         }
 
-        public static CellModel Create(int row, int column, CellType type, string sheet)
+        public static CellModel Create(CellType type, CellLocationModel location)
         {
             var newCell = new CellModel
             {
                 Width = DefaultCellWidth,
                 Height = DefaultCellHeight,
                 CellType = type,
-                SheetName = sheet,
-                Row = row,
-                Column = column,
+                Location = location,
             };
             if (type.IsSpecial())
             {
@@ -39,7 +37,13 @@ namespace Cell.Model
 
         public static CellModel Create(int row, int column, CellType type, string sheet, CellTracker trackerToTrackCellWith)
         {
-            var newCell = Create(row, column, type, sheet);
+            var location = new CellLocationModel
+            {
+                Row = row,
+                Column = column,
+                SheetName = sheet,
+            };
+            var newCell = Create(type, location);
             trackerToTrackCellWith.AddCell(newCell);
             return newCell;
         }

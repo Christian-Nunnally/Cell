@@ -104,7 +104,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the list of users of the selected function after the filter has been applied from the user.
         /// </summary>
-        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.UserFriendlyCellName.Contains(UsersListBoxFilterText)) ?? [];
+        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.Location.UserFriendlyLocationString.Contains(UsersListBoxFilterText)) ?? [];
 
         /// <summary>
         /// Gets or sets the string that the user has entered to filter the collection of functions to a given sheet name.
@@ -310,7 +310,7 @@ namespace Cell.ViewModel.ToolWindow
         private bool IsFunctionIncludedInFilter(CellFunctionViewModel function)
         {
             if (!function.Name.Contains(_filterString, StringComparison.CurrentCultureIgnoreCase)) return false;
-            if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.SheetName == _filterSheet)) return false;
+            if (_filterSheet != "All" && !function.CellsThatUseFunction.Any(x => x.Location.SheetName == _filterSheet)) return false;
             if (function.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.ReturnType == "object") return IncludePopulateFunctions;
             return true;

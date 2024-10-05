@@ -70,11 +70,11 @@ namespace Cell.Execution
         /// </summary>
         public int Index { get; set; } = 0;
 
-        public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.SheetName, row, column);
+        public CellModel GetCell(CellModel cellForSheet, int row, int column) => GetCell(cellForSheet.Location.SheetName, row, column);
 
         public CellModel GetCell(string sheet, int row, int column) => _cellTracker.GetCell(sheet, row, column) ?? CellModel.Null;
 
-        public CellRange GetCellRange(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCellRange(cellForSheet.SheetName, row, column, rowRangeEnd, columnRangeEnd);
+        public CellRange GetCellRange(CellModel cellForSheet, int row, int column, int rowRangeEnd, int columnRangeEnd) => GetCellRange(cellForSheet.Location.SheetName, row, column, rowRangeEnd, columnRangeEnd);
 
         public CellRange GetCellRange(string sheet, int row, int column, int rowRangeEnd, int columnRangeEnd)
         {
@@ -97,7 +97,7 @@ namespace Cell.Execution
 
         public void GoToCell(CellModel cell)
         {
-            ApplicationViewModel.Instance.GoToSheet(cell.SheetName);
+            ApplicationViewModel.Instance.GoToSheet(cell.Location.SheetName);
             ApplicationViewModel.Instance.GoToCell(cell);
         }
 
@@ -108,7 +108,7 @@ namespace Cell.Execution
 
         public void ShowDialog(string text)
         {
-            var title = Cell?.UserFriendlyCellName ?? "Function";
+            var title = Cell?.Location.UserFriendlyLocationString ?? "Function";
             DialogFactory.ShowDialog(title, text);
         }
     }

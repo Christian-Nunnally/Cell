@@ -88,7 +88,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 var currentlySelectedCell = _cellsToEdit.FirstOrDefault();
                 if (currentlySelectedCell is null) return "Select a cell to edit";
-                return $"Value editor - {currentlySelectedCell.GetName()}";
+                return $"Value editor - {currentlySelectedCell.Location.UserFriendlyLocationString}";
             }
         }
 
@@ -149,17 +149,17 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var selectedCells = ApplicationViewModel.Instance.SheetViewModel.CellSelector.SelectedCells.ToList();
-            var leftmost = selectedCells.Select(x => x.Column).Min();
-            var topmost = selectedCells.Select(x => x.Row).Min();
-            var topLeftCell = selectedCells.FirstOrDefault(x => x.Row == topmost && x.Column == leftmost);
+            var leftmost = selectedCells.Select(x => x.Location.Column).Min();
+            var topmost = selectedCells.Select(x => x.Location.Row).Min();
+            var topLeftCell = selectedCells.FirstOrDefault(x => x.Location.Row == topmost && x.Location.Column == leftmost);
             if (topLeftCell is null) return;
-            var isLinearSelection = selectedCells.Select(x => x.Column).Distinct().Count() == 1 || selectedCells.Select(x => x.Row).Distinct().Count() == 1;
+            var isLinearSelection = selectedCells.Select(x => x.Location.Column).Distinct().Count() == 1 || selectedCells.Select(x => x.Location.Row).Distinct().Count() == 1;
             foreach (var selectedCell in selectedCells)
             {
                 if (selectedCell == topLeftCell) continue;
                 var distance = isLinearSelection
-                    ? (selectedCell.Column - topLeftCell.Column) + (selectedCell.Row - topLeftCell.Row)
-                    : selectedCell.Row - topLeftCell.Row;
+                    ? (selectedCell.Location.Column - topLeftCell.Location.Column) + (selectedCell.Location.Row - topLeftCell.Location.Row)
+                    : selectedCell.Location.Row - topLeftCell.Location.Row;
                 selectedCell.Index = topLeftCell.Index + distance;
             }
         }

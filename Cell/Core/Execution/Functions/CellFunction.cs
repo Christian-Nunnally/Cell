@@ -94,7 +94,7 @@ namespace Cell.ViewModel.Execution
         public string GetUserFriendlyCode(CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformTo(Model.Code);
-            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformTo(intermediateCode);
+            if (cell != null) intermediateCode = new CellLocationReferenceSyntaxTransformer(cell.Location).TransformTo(intermediateCode);
             return intermediateCode.Replace("_Range_", "..");
         }
 
@@ -115,7 +115,7 @@ namespace Cell.ViewModel.Execution
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
-            if (cell != null) intermediateCode = new CellReferenceSyntaxTransformer(cell).TransformFrom(intermediateCode);
+            if (cell != null) intermediateCode = new CellLocationReferenceSyntaxTransformer(cell.Location).TransformFrom(intermediateCode);
             Model.Code = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformFrom(intermediateCode);
         }
 

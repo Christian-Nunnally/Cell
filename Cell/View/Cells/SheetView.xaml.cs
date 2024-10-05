@@ -83,7 +83,7 @@ namespace Cell.View.Cells
                     {
                         if (cell.Model.CellType == CellType.Row)
                         {
-                            foreach (var rowCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Row == cell.Model.Row))
+                            foreach (var rowCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Location.Row == cell.Model.Location.Row))
                             {
                                 if (rowCell == cell.Model) continue;
                                 SheetViewModel.CellSelector.SelectCell(rowCell);
@@ -92,7 +92,7 @@ namespace Cell.View.Cells
                         }
                         else if (cell.Model.CellType == CellType.Column)
                         {
-                            foreach (var columnCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Column == cell.Model.Column))
+                            foreach (var columnCell in SheetViewModel.CellTracker.GetCellModelsForSheet(SheetViewModel.SheetName).Where(x => x.Location.Column == cell.Model.Location.Column))
                             {
                                 if (columnCell == cell.Model) continue;
                                 SheetViewModel.CellSelector.SelectCell(columnCell);

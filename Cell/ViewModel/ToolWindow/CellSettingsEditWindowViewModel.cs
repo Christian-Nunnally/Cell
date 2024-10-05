@@ -68,7 +68,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 var currentlySelectedCell = _cellsToEdit.FirstOrDefault();
                 if (currentlySelectedCell is null) return "Select a cell to edit";
-                return $"Cell settings editor - {currentlySelectedCell.GetName()}";
+                return $"Cell settings editor - {currentlySelectedCell.Location.UserFriendlyLocationString}";
             }
         }
 

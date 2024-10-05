@@ -9,7 +9,7 @@ namespace Cell.Persistence
         private const string VersionFileName = "version";
         private readonly PersistedDirectory _projectDirectory;
         private readonly Dictionary<string, IMigrator> _registeredMigrators = [];
-        public string Version = "1";
+        public string Version = "2";
         public PersistedProject(PersistedDirectory projectDirectory)
         {
             _projectDirectory = projectDirectory;

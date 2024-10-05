@@ -54,8 +54,10 @@ namespace CellTest.ViewModel.ToolWindow
         public void TwoCellsInSameColumn_MergeCellsDown_BothCellsMerged()
         {
             var testing = CreateInstance();
-            var cell = new CellModel() { Row = 0 };
-            var cell2 = new CellModel() { Row = 1 };
+            var cell = new CellModel();
+            cell.Location.Row = 0;
+            var cell2 = new CellModel();
+            cell2.Location.Row = 1;
             _cellTracker.AddCell(cell, false);
             _cellTracker.AddCell(cell2, false);
             _cellsToEdit.Add(cell);
@@ -71,10 +73,18 @@ namespace CellTest.ViewModel.ToolWindow
         public void TwoCellsInSameColumnAndTwoInOtherColumn_MergeCellsDown_TwoMergeParentsCreated()
         {
             var testing = CreateInstance();
-            var cell = new CellModel() { Row = 0, Column = 0 };
-            var cell2 = new CellModel() { Row = 1, Column = 0 };
-            var cell3 = new CellModel() { Row = 0, Column = 1 };
-            var cell4 = new CellModel() { Row = 1, Column = 1 };
+            var cell = new CellModel();
+            cell.Location.Row = 0;
+            cell.Location.Column = 0;
+            var cell2 = new CellModel();
+            cell.Location.Row = 1;
+            cell.Location.Column = 0;
+            var cell3 = new CellModel();
+            cell.Location.Row = 0;
+            cell.Location.Column = 1;
+            var cell4 = new CellModel();
+            cell.Location.Row = 1;
+            cell.Location.Column = 1;
             _cellTracker.AddCell(cell, false);
             _cellTracker.AddCell(cell2, false);
             _cellTracker.AddCell(cell3, false);

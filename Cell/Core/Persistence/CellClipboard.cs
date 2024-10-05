@@ -100,11 +100,9 @@ namespace Cell.Persistence
             _undoRedoManager.RecordStateIfRecording(cellToReplace);
             List<string> blacklist = [
                 nameof(CellModel.ID),
-                nameof(CellModel.SheetName),
+                nameof(CellModel.Location),
                 nameof(CellModel.Width),
                 nameof(CellModel.Height),
-                nameof(CellModel.Row),
-                nameof(CellModel.Column),
                 nameof(CellModel.MergedWith),
                 nameof(CellModel.Value),
                 nameof(CellModel.Date),
@@ -126,9 +124,9 @@ namespace Cell.Persistence
 
         private bool TryGetCellToReplace(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)
         {
-            var newRow = pasteIntoCell.Row + cellToPaste.Row - centerOfCopy.Row;
-            var newColumn = pasteIntoCell.Column + cellToPaste.Column - centerOfCopy.Column;
-            cellToReplace = _cellTracker.GetCell(pasteIntoCell.SheetName, newRow, newColumn);
+            var newRow = pasteIntoCell.Location.Row + cellToPaste.Location.Row - centerOfCopy.Location.Row;
+            var newColumn = pasteIntoCell.Location.Column + cellToPaste.Location.Column - centerOfCopy.Location.Column;
+            cellToReplace = _cellTracker.GetCell(pasteIntoCell.Location.SheetName, newRow, newColumn);
             if (cellToReplace is null) return false;
             if (cellToReplace.CellType.IsSpecial()) return false;
             return true;

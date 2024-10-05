@@ -44,7 +44,7 @@ namespace Cell.Execution
 
         private void CellAdded(CellModel addedCell)
         {
-            var locationString = addedCell.GetUnqiueLocationString();
+            var locationString = addedCell.Location.LocationString;
             if (_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString))
             {
                 StartListeningToCellForTextPropertyChanges(locationString);
@@ -54,7 +54,7 @@ namespace Cell.Execution
 
         private void CellRemoved(CellModel removedCell)
         {
-            StopListeningToCellForTextPropertyChanges(removedCell.GetUnqiueLocationString());
+            StopListeningToCellForTextPropertyChanges(removedCell.Location.LocationString);
         }
 
         private void StartListeningToCellForTextPropertyChanges(string locationString)
@@ -64,10 +64,18 @@ namespace Cell.Execution
             if (cell is not null)
             {
                 cell.PropertyChanged += TrackedCellPropertyChanged;
+                cell.Location.PropertyChanged += CellLocationChanged;
                 // Ensure anyone already listening to this location is updated because now a cell exists here.
                 if (NotifyWhenCellIsAdded) _subscriberNotifier.NotifySubscribers(locationString);
             }
             else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
+        }
+
+        private void CellLocationChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var cellModel = _cellTracker.GetCell((sender as CellLocationModel)!)!;
+            cellModel.PropertyChanged -= TrackedCellPropertyChanged;
+            cellModel.Location.PropertyChanged -= CellLocationChanged;
         }
 
         private void StopListeningToCellForTextPropertyChanges(string locationString)
@@ -82,20 +90,8 @@ namespace Cell.Execution
             var cell = (CellModel)sender!;
             if (e.PropertyName == nameof(CellModel.Text))
             {
-                var locationString = cell.GetUnqiueLocationString();
+                var locationString = cell.Location.LocationString;
                 _subscriberNotifier.NotifySubscribers(locationString);
-            }
-            else if (e.PropertyName == nameof(CellModel.Row))
-            {
-                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
-            }
-            else if (e.PropertyName == nameof(CellModel.Column))
-            {
-                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
-            }
-            else if (e.PropertyName == nameof(CellModel.SheetName))
-            {
-                (sender as CellModel)!.PropertyChanged -= TrackedCellPropertyChanged;
             }
         }
     }

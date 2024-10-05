@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Common;
+using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 
@@ -40,7 +41,7 @@ namespace Cell.Execution
         /// Provides a user friendly string version of this subscriber.
         /// </summary>
         /// <returns>The user friendly string version of this subscriber.</returns>
-        public override string ToString() => $"Populate subscriber for {_cell.UserFriendlyCellName}";
+        public override string ToString() => $"Populate subscriber for {_cell.Location.UserFriendlyLocationString}";
 
         private CompileResult RunPopulate(CellModel subscriber)
         {
@@ -69,12 +70,11 @@ namespace Cell.Execution
                 {
                     if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;
                 }
-                subscriber.ErrorText = string.Empty;
             }
             else
             {
                 if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;// "Error";
-                if (result.ExecutionResult != null) subscriber.ErrorText = result.ExecutionResult;
+                if (result.ExecutionResult != null) Logger.Instance.Log(result.ExecutionResult);
             }
         }
     }

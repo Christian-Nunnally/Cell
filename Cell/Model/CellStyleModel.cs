@@ -1,4 +1,5 @@
 ﻿using Cell.Common;
+using System.Text.Json.Serialization;
 using System.Windows;
 
 namespace Cell.Model
@@ -34,6 +35,9 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(BackgroundColor));
             }
         }
+
+        [JsonIgnore]
+        public CellModel? CellModel { get; internal set; }
 
         public bool Bold
         {
@@ -221,25 +225,29 @@ namespace Cell.Model
             }
         }
 
-        public void CopyTo(CellStyleModel styleToRestoreInto)
+        /// <summary>
+        /// Copies the values of this style into another style.
+        /// </summary>
+        /// <param name="otherStyle">The style to copy in to.</param>
+        public void CopyTo(CellStyleModel otherStyle)
         {
-            styleToRestoreInto.Font = Font;
-            styleToRestoreInto.FontSize = FontSize;
-            styleToRestoreInto.Bold = Bold;
-            styleToRestoreInto.Italic = Italic;
-            styleToRestoreInto.Strikethrough = Strikethrough;
-            styleToRestoreInto.HorizontalAlignment = HorizontalAlignment;
-            styleToRestoreInto.VerticalAlignment = VerticalAlignment;
-            styleToRestoreInto.TextAlignment = TextAlignment;
-            styleToRestoreInto.Border = Border;
-            styleToRestoreInto.ContentBorder = ContentBorder;
-            styleToRestoreInto.ContentMargin = ContentMargin;
-            styleToRestoreInto.BackgroundColor = BackgroundColor;
-            styleToRestoreInto.ContentBackgroundColor = ContentBackgroundColor;
-            styleToRestoreInto.ForegroundColor = ForegroundColor;
-            styleToRestoreInto.BorderColor = BorderColor;
-            styleToRestoreInto.ContentBorderColor = ContentBorderColor;
-            styleToRestoreInto.HighlightColor = HighlightColor;
+            otherStyle.Font = Font;
+            otherStyle.FontSize = FontSize;
+            otherStyle.Bold = Bold;
+            otherStyle.Italic = Italic;
+            otherStyle.Strikethrough = Strikethrough;
+            otherStyle.HorizontalAlignment = HorizontalAlignment;
+            otherStyle.VerticalAlignment = VerticalAlignment;
+            otherStyle.TextAlignment = TextAlignment;
+            otherStyle.Border = Border;
+            otherStyle.ContentBorder = ContentBorder;
+            otherStyle.ContentMargin = ContentMargin;
+            otherStyle.BackgroundColor = BackgroundColor;
+            otherStyle.ContentBackgroundColor = ContentBackgroundColor;
+            otherStyle.ForegroundColor = ForegroundColor;
+            otherStyle.BorderColor = BorderColor;
+            otherStyle.ContentBorderColor = ContentBorderColor;
+            otherStyle.HighlightColor = HighlightColor;
         }
     }
 }

@@ -130,7 +130,7 @@ namespace Cell.ViewModel.ToolWindow
                 var functionBeingEdited = FunctionBeingEdited.Model;
                 var cellContext = CellContext;
                 var title = $"Editing `{functionBeingEdited.Name}`{dirtyDot}";
-                if (cellContext is not null) title += $" : {cellContext.UserFriendlyCellName}";
+                if (cellContext is not null) title += $" : {cellContext.Location.UserFriendlyLocationString}";
                 return title;
             }
         }

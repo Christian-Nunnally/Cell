@@ -14,14 +14,17 @@ namespace Cell.Data
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<CellModel, string> _cellsToLocation = [];
+        
         /// <summary>
         /// Occurs when a cell is added to the tracker.
         /// </summary>
         public Action<CellModel>? CellAdded;
+
         /// <summary>
         /// Occurs when a cell is removed from the tracker.
         /// </summary>
         public Action<CellModel>? CellRemoved;
+        
         /// <summary>
         /// Creates a new instance of <see cref="CellTracker"/>.
         /// </summary>
@@ -45,7 +48,7 @@ namespace Cell.Data
         {
             AddToCellsInSheetMap(cellModel);
             AddCellToCellByLocationMap(cellModel);
-            _cellsToLocation.Add(cellModel, cellModel.GetUnqiueLocationString());
+            _cellsToLocation.Add(cellModel, cellModel.Location.LocationString);
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
             CellAdded?.Invoke(cellModel);
@@ -55,11 +58,18 @@ namespace Cell.Data
         /// <summary>
         /// Efficently gets a cell by its location, or null if no cell exists at that location.
         /// </summary>
+        /// <param name="cellLocationModel">The location to get the cell from.</param>
+        /// <returns>The cell, or null if no cell exists at the given location.</returns>
+        public CellModel? GetCell(CellLocationModel cellLocationModel) => GetCell(cellLocationModel.SheetName, cellLocationModel.Row, cellLocationModel.Column);
+
+        /// <summary>
+        /// Efficently gets a cell by its location, or null if no cell exists at that location.
+        /// </summary>
         /// <param name="sheet">The sheet to look for the cell in.</param>
         /// <param name="row">The row to look for the cell in.</param>
         /// <param name="column">The column to look for the cell in.</param>
         /// <returns>The cell, or null if no cell exists at the given location.</returns>
-        public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(Utilities.GetUnqiueLocationString(sheet, row, column), out var list) ? list.FirstOrDefault() : null;
+        public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(new CellLocationModel(sheet, row, column).LocationString, out var list) ? list.FirstOrDefault() : null;
 
         /// <summary>
         /// Gets all the cells with a given sheet name.
@@ -78,8 +88,9 @@ namespace Cell.Data
         public void RemoveCell(CellModel cellModel)
         {
             cellModel.PropertyChanged -= CellModelPropertyChanged;
+            cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
             cellModel.Style.PropertyChanged -= CellModelStylePropertyChanged;
-            RemoveFromCellsInSheetMap(cellModel, cellModel.SheetName);
+            RemoveFromCellsInSheetMap(cellModel, cellModel.Location.SheetName);
             _cellLoader.DeleteCell(cellModel);
             _cellsToLocation.Remove(cellModel);
             RemoveFromCellsByLocationMap(cellModel);
@@ -98,51 +109,54 @@ namespace Cell.Data
 
         private void AddCellToCellByLocationMap(CellModel cellModel)
         {
-            if (_cellsByLocation.TryGetValue(cellModel.GetUnqiueLocationString(), out var cellsAtLocation))
+            if (_cellsByLocation.TryGetValue(cellModel.Location.LocationString, out var cellsAtLocation))
             {
                 cellsAtLocation.Add(cellModel);
             }
-            else _cellsByLocation.Add(cellModel.GetUnqiueLocationString(), [cellModel]);
+            else _cellsByLocation.Add(cellModel.Location.LocationString, [cellModel]);
         }
 
         private void AddToCellsInSheetMap(CellModel model)
         {
-            if (_cellsBySheetMap.TryGetValue(model.SheetName, out var cellMap))
+            if (_cellsBySheetMap.TryGetValue(model.Location.SheetName, out var cellMap))
             {
                 cellMap.Add(model.ID, model);
             }
             else
             {
-                _cellsBySheetMap.Add(model.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
+                _cellsBySheetMap.Add(model.Location.SheetName, new Dictionary<string, CellModel> { { model.ID, model } });
             }
+        }
+
+        private void CellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var location = (CellLocationModel)sender!;
+            var model = location.CellModel ?? throw new CellError("This property changed handler should be unsubscribed when the cells style object is switched.");
+            var previousLocation = _cellsToLocation[model];
+            _cellsByLocation[previousLocation].Remove(model);
+            _cellsToLocation[model] = model.Location.LocationString;
+            AddCellToCellByLocationMap(model);
+            if (e.PropertyName == nameof(CellModel.Location.SheetName))
+            {
+                UpdateCellsSheetLocation(model, previousLocation);
+            }
+            _cellLoader.SaveCell(model);
         }
 
         private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not CellModel model) return;
-            if (e.PropertyName == nameof(CellModel.Row) || e.PropertyName == nameof(CellModel.Column) || e.PropertyName == nameof(CellModel.SheetName))
-            {
-                var previousLocation = _cellsToLocation[model];
-                _cellsByLocation[previousLocation].Remove(model);
-                _cellsToLocation[model] = model.GetUnqiueLocationString();
-                AddCellToCellByLocationMap(model);
-                if (e.PropertyName == nameof(CellModel.SheetName))
-                {
-                    UpdateCellsSheetLocation(model, previousLocation);
-                }
-            }
-            _cellLoader.SaveCell(model);
+            _cellLoader.SaveCell((CellModel)sender!);
         }
 
         private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not CellModel model) return;
-            _cellLoader.SaveCell(model);
+            var style = (CellStyleModel)sender!;
+            _cellLoader.SaveCell(style.CellModel ?? throw new CellError("This property changed handler should be unsubscribed when the cells style object is switched."));
         }
 
         private bool RemoveFromCellsByLocationMap(CellModel cellModel)
         {
-            return _cellsByLocation[cellModel.GetUnqiueLocationString()].Remove(cellModel);
+            return _cellsByLocation[cellModel.Location.LocationString].Remove(cellModel);
         }
 
         private bool RemoveFromCellsInSheetMap(CellModel model, string sheetName)

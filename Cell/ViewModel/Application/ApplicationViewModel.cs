@@ -152,7 +152,7 @@ namespace Cell.ViewModel.Application
 
         public void GoToCell(CellModel cellModel)
         {
-            GoToSheet(cellModel.SheetName);
+            GoToSheet(cellModel.Location.SheetName);
             var cell = SheetViewModel?.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
             if (cell is not null) ActiveSheetView?.PanCanvasTo(cell.X, cell.Y);
         }

@@ -15,7 +15,7 @@ namespace Cell.ViewModel.Cells.Types
         public ColumnCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             NotifyPropertyChanged(nameof(Text));
-            model.PropertyChanged += ModelPropertyChanged;
+            model.Location.PropertyChanged += ModelLocationPropertyChanged;
         }
 
         public override string Text { get => GetColumnName(Column); set => base.Text = value; }
@@ -46,9 +46,9 @@ namespace Cell.ViewModel.Cells.Types
             return columnName;
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ModelLocationPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.Column)) NotifyPropertyChanged(nameof(Text));
+            if (e.PropertyName == nameof(CellLocationModel.Column)) NotifyPropertyChanged(nameof(Text));
         }
     }
 }

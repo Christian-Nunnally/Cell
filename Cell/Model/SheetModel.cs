@@ -30,13 +30,13 @@ namespace Cell.Model
 
         public bool IsVisibleInTopBar
         {
-            get => CornerCell?.GetBooleanProperty("IsVisibleInTopBar", true) ?? true;
+            get => CornerCell?.Properties.GetBooleanProperty("IsVisibleInTopBar", true) ?? true;
             set
             {
                 if (CornerCell is not null)
                 {
                     if (value == IsVisibleInTopBar) return;
-                    CornerCell.SetBooleanProperty("IsVisibleInTopBar", value);
+                    CornerCell.Properties.SetBooleanProperty("IsVisibleInTopBar", value);
                     NotifyPropertyChanged(nameof(IsVisibleInTopBar));
                 }
             }
@@ -57,13 +57,13 @@ namespace Cell.Model
 
         public int Order
         {
-            get => (int)(CornerCell?.GetNumericProperty("SheetOrder") ?? 0);
+            get => (int)(CornerCell?.Properties.GetNumericProperty("SheetOrder") ?? 0);
             set
             {
                 if (CornerCell is not null)
                 {
                     if (value == Order) return;
-                    CornerCell.SetNumericProperty("SheetOrder", value);
+                    CornerCell.Properties.SetNumericProperty("SheetOrder", value);
                     NotifyPropertyChanged(nameof(Order));
                 }
             }

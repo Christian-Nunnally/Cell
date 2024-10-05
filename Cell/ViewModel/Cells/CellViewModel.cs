@@ -117,8 +117,8 @@ namespace Cell.ViewModel.Cells
 
         public virtual int Column
         {
-            get => _model.Column;
-            set { _model.Column = value; }
+            get => _model.Location.Column;
+            set { _model.Location.Column = value; }
         }
 
         public virtual SolidColorBrush ContentBackgroundColor
@@ -316,8 +316,8 @@ namespace Cell.ViewModel.Cells
 
         public virtual int Row
         {
-            get => _model.Row;
-            set { _model.Row = value; }
+            get => _model.Location.Row;
+            set { _model.Location.Row = value; }
         }
 
         public virtual SolidColorBrush SelectionBorderColor

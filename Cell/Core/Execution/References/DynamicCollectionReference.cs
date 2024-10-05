@@ -26,7 +26,7 @@ namespace Cell.Execution.References
 
         public IEnumerable<string> GetLocationsThatWillInvalidateCollectionNameForCell(CellModel cell)
         {
-            return _calculateCollectionNameFunction.LocationDependencies.SelectMany(x => x.ResolveLocations(cell));
+            return _calculateCollectionNameFunction.LocationDependencies.SelectMany(x => x.ResolveLocations(cell.Location));
         }
 
         /// <summary>

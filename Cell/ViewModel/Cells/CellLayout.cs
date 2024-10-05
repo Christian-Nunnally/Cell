@@ -46,11 +46,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentRow = cell.Row;
-            var currentCell = _cellTracker.GetCell(cell.Model.SheetName, currentRow, cell.Column);
+            var currentCell = _cellTracker.GetCell(cell.Model.Location.SheetName, currentRow, cell.Column);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += _cellTracker.GetCell(cell.Model.SheetName, currentRow, 0)?.Height ?? 0;
-                currentCell = _cellTracker.GetCell(cell.Model.SheetName, ++currentRow, cell.Column);
+                result += _cellTracker.GetCell(cell.Model.Location.SheetName, currentRow, 0)?.Height ?? 0;
+                currentCell = _cellTracker.GetCell(cell.Model.Location.SheetName, ++currentRow, cell.Column);
             }
             return result;
         }
@@ -62,11 +62,11 @@ namespace Cell.ViewModel
 
             var result = 0.0;
             var currentColumn = cell.Column;
-            var currentCell = _cellTracker.GetCell(cell.Model.SheetName, cell.Row, currentColumn);
+            var currentCell = _cellTracker.GetCell(cell.Model.Location.SheetName, cell.Row, currentColumn);
             while (currentCell?.MergedWith == cell.ID)
             {
-                result += _cellTracker.GetCell(cell.Model.SheetName, 0, currentColumn)?.Width ?? 0;
-                currentCell = _cellTracker.GetCell(cell.Model.SheetName, cell.Row, ++currentColumn);
+                result += _cellTracker.GetCell(cell.Model.Location.SheetName, 0, currentColumn)?.Width ?? 0;
+                currentCell = _cellTracker.GetCell(cell.Model.Location.SheetName, cell.Row, ++currentColumn);
             }
             return result;
         }

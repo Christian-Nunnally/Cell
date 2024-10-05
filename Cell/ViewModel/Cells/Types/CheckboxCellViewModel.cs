@@ -1,38 +1,52 @@
-﻿using Cell.Common;
-using Cell.Execution;
+﻿using Cell.Execution;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using System.ComponentModel;
-using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
 {
+    /// <summary>
+    /// Extensions for <see cref="CheckboxCellViewModel"/>.
+    /// </summary>
     public static class CheckboxCellModelExtensions
     {
-        public static void Check(this CellModel model)
+        /// <summary>
+        /// Sets the custom IsChecked property to true for this cell.
+        /// </summary>
+        /// <param name="cell">The cell to set the property on.</param>
+        public static void Check(this CellModel cell) => cell.Check(true);
+
+        /// <summary>
+        /// Sets the custom IsChecked property to the given value for this cell.
+        /// </summary>
+        /// <param name="cell">The cell to set the property on.</param>
+        /// <param name="check">True or false</param>
+        public static void Check(this CellModel cell, bool check)
         {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), true);
+            cell.Properties.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
         }
 
-        public static void Check(this CellModel model, bool check)
+        /// <summary>
+        /// Gets whether the custom IsChecked property for this cell is true.
+        /// </summary>
+        /// <param name="cell">The cell to set the property on.</param>
+        public static bool IsChecked(this CellModel cell)
         {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
+            return cell.Properties.GetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked));
         }
 
-        public static bool IsChecked(this CellModel model)
-        {
-            return model.GetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked));
-        }
-
-        public static void Uncheck(this CellModel model)
-        {
-            model.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), false);
-        }
+        /// <summary>
+        /// Sets the custom IsChecked property to false for this cell.
+        /// </summary>
+        /// <param name="cell">The cell to set the property on.</param>
+        public static void Uncheck(this CellModel cell) => cell.Check(false);
     }
 
+    /// <summary>
+    /// View model for a cell that contains a checkbox.
+    /// </summary>
     public class CheckboxCellViewModel : CellViewModel
     {
-        private ICommand? _checkboxCheckedCommand;
         /// <summary>
         /// Creates a new instance of <see cref="CheckboxCellViewModel"/>.
         /// </summary>
@@ -43,28 +57,24 @@ namespace Cell.ViewModel.Cells.Types
             model.PropertyChanged += ModelPropertyChanged;
         }
 
-        public ICommand CheckboxCheckedCommand => _checkboxCheckedCommand ??= new RelayCommand(x => CheckboxChecked());
-
+        /// <summary>
+        /// Gets or sets whether the checkbox is checked.
+        /// </summary>
         public bool IsChecked
         {
-            get => Model.GetBooleanProperty(nameof(IsChecked));
+            get => Model.IsChecked();
             set
             {
                 var oldValue = IsChecked;
                 if (oldValue == value) return;
-                Model.SetBooleanProperty(nameof(IsChecked), value);
-                NotifyPropertyChanged(nameof(IsChecked));
+                Model.Check(value);
                 ApplicationViewModel.Instance.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(IsChecked), oldValue, value));
             }
         }
 
-        public static void CheckboxChecked()
-        {
-        }
-
         private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.BooleanProperties))
+            if (e.PropertyName == nameof(CellModel.Properties))
             {
                 NotifyPropertyChanged(nameof(IsChecked));
             }

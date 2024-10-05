@@ -183,7 +183,7 @@ namespace Cell.ViewModel.ToolWindow
                     var item = JsonSerializer.Deserialize<PluginModel>(stringToDeserialize);
                     if (item != null && _selectedItem != null)
                     {
-                        item.CopyPublicProperties(_selectedItem, ["ID"]);
+                        item.CopyPublicProperties(_selectedItem, [nameof(PluginModel.ID)]);
                         IsSaveItemJsonButtonVisible = false;
                         _selectedItemSerialized = value.StartsWith('{') ? value[1..^1].Trim().Replace("\n  ", "\n") : value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));

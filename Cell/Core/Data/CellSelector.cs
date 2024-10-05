@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 
 namespace Cell.Data
@@ -45,14 +46,28 @@ namespace Cell.Data
         {
             if (!SelectedCells.Any()) return;
             var singleSelectedCell = SelectedCells.First();
-            if (columnOffset > 0) columnOffset += singleSelectedCell.CellsMergedToRight();
-            if (rowOffset > 0) rowOffset += singleSelectedCell.CellsMergedBelow();
-            var row = singleSelectedCell.Row + rowOffset;
-            var column = singleSelectedCell.Column + columnOffset;
-            var cellToSelect = _cellTracker.GetCell(singleSelectedCell.SheetName, row, column);
+            if (columnOffset > 0) columnOffset += CountCellsMergedToRight(singleSelectedCell);
+            if (rowOffset > 0) rowOffset += CountCellsMergedBelow(singleSelectedCell);
+            var row = singleSelectedCell.Location.Row + rowOffset;
+            var column = singleSelectedCell.Location.Column + columnOffset;
+            var cellToSelect = _cellTracker.GetCell(singleSelectedCell.Location.SheetName, row, column);
             if (cellToSelect is null) return;
             UnselectAllCells();
             SelectCell(cellToSelect);
+        }
+
+        private int CountCellsMergedBelow(CellModel model)
+        {
+            var count = 0;
+            while (model.IsMerged() && (_cellTracker.GetCell(model.Location.WithRowOffset(1 + count))?.IsMergedWith(model) ?? false)) count++;
+            return count;
+        }
+
+        private int CountCellsMergedToRight(CellModel model)
+        {
+            var count = 0;
+            while (model.IsMerged() && (_cellTracker.GetCell(model.Location.WithColumnOffset(1 + count))?.IsMergedWith(model) ?? false)) count++;
+            return count;
         }
 
         /// <summary>

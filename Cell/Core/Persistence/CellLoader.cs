@@ -27,7 +27,7 @@ namespace Cell.Persistence
         /// <param name="cellModel"></param>
         public void DeleteCell(CellModel cellModel)
         {
-            var cellDirectory = Path.Combine(SheetsSaveDirectory, cellModel.SheetName);
+            var cellDirectory = Path.Combine(SheetsSaveDirectory, cellModel.Location.SheetName);
             var cellPath = Path.Combine(cellDirectory, cellModel.ID);
             _persistedDirectory.DeleteFile(cellPath);
             if (!_persistedDirectory.GetFiles(cellDirectory).Any()) _persistedDirectory.DeleteDirectory(cellDirectory);
@@ -79,7 +79,7 @@ namespace Cell.Persistence
         /// <param name="cell">The cell to save.</param>
         public void SaveCell(CellModel cell)
         {
-            var directory = Path.Combine(SheetsSaveDirectory, cell.SheetName);
+            var directory = Path.Combine(SheetsSaveDirectory, cell.Location.SheetName);
             SaveCell(directory, cell);
         }
 
