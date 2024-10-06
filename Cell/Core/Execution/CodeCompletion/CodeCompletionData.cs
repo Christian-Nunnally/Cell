@@ -12,7 +12,7 @@ namespace Cell.Core.Execution.CodeCompletion
     /// </summary>
     public class CodeCompletionData : ICompletionData
     {
-        private string _displayText;
+        private readonly string _displayText;
         /// <summary>
         /// Creates a new instance of <see cref="CodeCompletionData"/>.
         /// </summary>

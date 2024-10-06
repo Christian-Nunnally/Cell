@@ -1,10 +1,22 @@
 ﻿namespace Cell.Data
 {
+    /// <summary>
+    /// Inserts an item into a list in a sorted order.
+    /// </summary>
+    /// <typeparam name="T">The type of item to sort/insert.</typeparam>
+    /// <param name="getSortValue">The sort function.</param>
     public class SortedListInserter<T>(Func<int, int?> getSortValue)
     {
         private readonly Func<int, int?> _getSortValue = getSortValue ?? throw new ArgumentNullException(nameof(getSortValue));
+        /// <summary>
+        /// Inserts the item into the list in a sorted order, using binary search and the provided sort function.
+        /// </summary>
+        /// <param name="list">The list to insert into.</param>
+        /// <param name="newItem">The item to insert.</param>
+        /// <param name="newItemCompareValue">The comparison result of the item.</param>
         public void InsertSorted(List<T> list, T newItem, int newItemCompareValue)
         {
+            // TODO: find newItemCompareValue from inside this functiion?
             int index = BinarySearchIndex(list, newItemCompareValue);
             list.Insert(index, newItem);
         }

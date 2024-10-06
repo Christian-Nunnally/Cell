@@ -6,6 +6,9 @@ using System.Windows.Input;
 
 namespace Cell.ViewModel.Cells.Types
 {
+    /// <summary>
+    /// A view model for a cell that displays a button.
+    /// </summary>
     public class ButtonCellViewModel : CellViewModel
     {
         private ICommand? _buttonClickedCommand;

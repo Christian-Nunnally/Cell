@@ -1,5 +1,4 @@
-﻿using Cell.Model;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -80,12 +79,22 @@ namespace Cell.Common
             return hashedValue;
         }
 
+        /// <summary>
+        /// Gets the location parts from a unqiue location string.
+        /// </summary>
+        /// <param name="unqiueLocationString">The location string.</param>
+        /// <returns>The parts of the location broken apart.</returns>
         public static (string SheetName, int Row, int Column) GetLocationFromUnqiueLocationString(string unqiueLocationString)
         {
             var splitString = unqiueLocationString.Split('_');
             return (splitString[0], int.Parse(splitString[1]), int.Parse(splitString[2]));
         }
 
+        /// <summary>
+        /// Gets the pretty full name of the type, including the generic arguments and the fulle name references.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The string name of the type.</returns>
         public static string GetPrettyFullGenericTypeName(this Type type)
         {
             if (!type.IsGenericType) return type?.FullName ?? "";
@@ -99,6 +108,11 @@ namespace Cell.Common
             return $"{typeName}<{args}>";
         }
 
+        /// <summary>
+        /// Gets the pretty name of the type, including the generic arguments.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>The string name of the type.</returns>
         public static string GetPrettyGenericTypeName(this Type type)
         {
             if (!type.IsGenericType) return type?.FullName ?? "";
@@ -106,12 +120,18 @@ namespace Cell.Common
             var genericTypeDefinition = type.GetGenericTypeDefinition();
             var genericArguments = type.GetGenericArguments();
 
-            var typeName = genericTypeDefinition.Name.Substring(0, genericTypeDefinition.Name.IndexOf('`'));
+            var typeName = genericTypeDefinition.Name[..genericTypeDefinition.Name.IndexOf('`')];
             var args = string.Join(", ", Array.ConvertAll(genericArguments, arg => arg.Name));
 
             return $"{typeName}<{args}>";
         }
 
+        /// <summary>
+        /// Gets all the types in the given namespace from the given assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <param name="nameSpace">The fully qualified name of the namespace.</param>
+        /// <returns></returns>
         public static Type[] GetTypesInNamespace(Assembly assembly, string nameSpace)
         {
             return
@@ -127,6 +147,11 @@ namespace Cell.Common
         [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
         public static partial Regex IsHexidecimalColorCode();
 
+        /// <summary>
+        /// Takes a string like "2,3,4,5" or "3,1" or "1" and returns a thickness object.
+        /// </summary>
+        /// <param name="stringThickness">The string thickness.</param>
+        /// <returns>A thickness object.</returns>
         public static Thickness ParseStringIntoThickness(string stringThickness)
         {
             var split = stringThickness.Split(',');
@@ -148,6 +173,12 @@ namespace Cell.Common
             return new Thickness(left, top, right, bottom);
         }
 
+        /// <summary>
+        /// Tries to parse a string like "2,3,4,5" or "3,1" or "1" into a thickness object.
+        /// </summary>
+        /// <param name="stringThickness">The string thickness.</param>
+        /// <param name="thickness">The resulting thickness object.</param>
+        /// <returns>True if the string was a valid thickness object.</returns>
         public static bool TryParseStringIntoThickness(string stringThickness, [MaybeNullWhen(false)] out Thickness thickness)
         {
             var split = stringThickness.Split(',');

@@ -18,8 +18,14 @@ namespace Cell.ViewModel.Cells.Types
         {
         }
 
-        public string SelectedItem { get; set; }
+        /// <summary>
+        /// The selected item binding for the dropdown.
+        /// </summary>
+        public string SelectedItem { get; set; } = string.Empty;
 
+        /// <summary>
+        /// What is displayed in the dropdown.
+        /// </summary>
         public override string Text { get => SelectedItem; set => base.Text = value; }
     }
 }

@@ -83,14 +83,14 @@ namespace Cell.Core.Execution.CodeCompletion
             return new CodeCompletionData(name, userVisibleString, documentation, IconChar.Line);
         }
 
-        private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
-        {
-            var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-            var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
-            fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
+        //private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
+        //{
+        //    var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
+        //    var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
+        //    fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
 
-            return Type.GetType(fullQualifiedName);
-        }
+        //    return Type.GetType(fullQualifiedName);
+        //}
 
         private static Type? GetUnderlyingType(this MemberInfo member)
         {

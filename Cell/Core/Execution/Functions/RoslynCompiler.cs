@@ -1,23 +1,21 @@
 ﻿using Cell.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
 namespace Cell.Execution
 {
+    /// <summary>
+    /// A compiler that uses Roslyn to compile C# code into executable types.
+    /// </summary>
     public class RoslynCompiler
     {
         private static readonly CSharpCompilationOptions _compilationOptions = new(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, optimizationLevel: OptimizationLevel.Release);
-        private readonly CSharpCompilation _compilation;
         private readonly string _typeName = "Plugin.Program";
         private static List<PortableExecutableReference>? _portableExecutableReferences;
-        public RoslynCompiler(SyntaxTree syntax)
-        {
-            _compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], PortableExecutableReferences, _compilationOptions);
-        }
-
         private static List<PortableExecutableReference> PortableExecutableReferences => _portableExecutableReferences ??=
         [
             GetRuntimeMetadataReference(),
@@ -30,31 +28,38 @@ namespace Cell.Execution
             GetCollectionsReference()
         ];
 
-        public Type Compile()
+        /// <summary>
+        /// Compiles the syntax tree into an assembly and returns the type with the name "Plugin.Program".
+        /// </summary>
+        /// <param name="syntax">The syntax tree to compile.</param>
+        /// <returns>The compiled type.</returns>
+        /// <exception cref="Exception">If the compilation fails.</exception>
+        public Type Compile(SyntaxTree syntax)
         {
-            using var ms = new MemoryStream();
-            var result = _compilation.Emit(ms);
-            if (!result.Success)
-            {
-                var compilationErrors = result.Diagnostics.Where(diagnostic =>
-                        diagnostic.IsWarningAsError ||
-                        diagnostic.Severity == DiagnosticSeverity.Error)
-                    .ToList();
-                if (compilationErrors.Count != 0)
-                {
-                    var firstError = compilationErrors.First();
-                    var errorNumber = firstError.Id;
-                    var errorDescription = firstError.GetMessage();
-                    var firstErrorMessage = $"{errorNumber}: {errorDescription};";
-                    var exception = new Exception($"Compilation failed, first error is: {firstErrorMessage}");
-                    compilationErrors.ForEach(e => { if (!exception.Data.Contains(e.Id)) exception.Data.Add(e.Id, e.GetMessage()); });
-                    throw exception;
-                }
-            }
-            ms.Seek(0, SeekOrigin.Begin);
+            using var memoryStream = new MemoryStream();
+            var compilation = CSharpCompilation.Create(Guid.NewGuid().ToString(), [syntax], PortableExecutableReferences, _compilationOptions);
+            var result = compilation.Emit(memoryStream);
+            CheckForErrors(result);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-            var generatedAssembly = AssemblyLoadContext.Default.LoadFromStream(ms) ?? throw new Exception("Could not load generated assembly");
+            var generatedAssembly = AssemblyLoadContext.Default.LoadFromStream(memoryStream) ?? throw new Exception("Could not load generated assembly");
             return generatedAssembly.GetType(_typeName) ?? throw new Exception($"Unable to get type '{_typeName}' from assembly");
+        }
+
+        private static void CheckForErrors(EmitResult result)
+        {
+            static bool IsConsideredError(Diagnostic d) => d.IsWarningAsError || d.Severity == DiagnosticSeverity.Error;
+            
+            if (result.Success) return;
+            var compilationErrors = result.Diagnostics.Where(IsConsideredError).ToList();
+            if (compilationErrors.Count == 0) return;
+            var firstError = compilationErrors.First();
+            var errorNumber = firstError.Id;
+            var errorDescription = firstError.GetMessage();
+            var firstErrorMessage = $"{errorNumber}: {errorDescription};";
+            var exception = new Exception($"Compilation failed, first error is: {firstErrorMessage}");
+            compilationErrors.ForEach(e => { if (!exception.Data.Contains(e.Id)) exception.Data.Add(e.Id, e.GetMessage()); });
+            throw exception;
         }
 
         private static PortableExecutableReference GetCollectionsReference()

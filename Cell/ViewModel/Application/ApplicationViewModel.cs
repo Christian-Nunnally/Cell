@@ -242,7 +242,7 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase3()
         {
-            PluginFunctionLoader.LoadPlugins();
+            PluginFunctionLoader.LoadCellFunctions();
             return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
         }
 

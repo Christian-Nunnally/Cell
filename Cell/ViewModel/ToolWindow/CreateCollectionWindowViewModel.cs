@@ -21,7 +21,7 @@ namespace Cell.ViewModel.ToolWindow
         public CreateCollectionWindowViewModel(UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
-            _collections = _userCollectionLoader.ObservableCollections;
+            _collections = _userCollectionLoader.UserCollections;
             CollectionBaseOptions = new ObservableCollection<string>(_collections.Select(x => x.Name))
             {
                 "---"

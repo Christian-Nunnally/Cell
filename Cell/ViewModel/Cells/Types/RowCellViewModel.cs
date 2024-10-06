@@ -19,23 +19,6 @@ namespace Cell.ViewModel.Cells.Types
         }
 
         /// <summary>
-        /// The height of the row.
-        /// </summary>
-        public override double Height
-        {
-            get => base.Height;
-            set
-            {
-                const int MinHeight = 5;
-                const int MaxHeight = 2000;
-                value = Math.Min(MaxHeight, Math.Max(MinHeight, value));
-                if (base.Height == value) return;
-                base.Height = value;
-                _sheetViewModel.UpdateLayout();
-            }
-        }
-
-        /// <summary>
         /// Gets the text that should be displayed for the cell. For row cells this is the row number.
         /// </summary>
         public override string Text { get => Row.ToString(); set => base.Text = value; }

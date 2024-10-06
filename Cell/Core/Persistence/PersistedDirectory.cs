@@ -99,6 +99,11 @@ namespace Cell.Persistence
             return directories.Select(x => x[(_rootPath.Length + extraChar)..]);
         }
 
+        /// <summary>
+        /// Gets the list of names of files in the given path inside this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="path">The path to the directory to list files within.</param>
+        /// <returns>A list of file names.</returns>
         public IEnumerable<string> GetFiles(string path)
         {
             var fullPath = GetFullPath(path);
@@ -107,11 +112,22 @@ namespace Cell.Persistence
             return fullPaths.Select(x => x[(_rootPath.Length + extraChar)..]);
         }
 
+        /// <summary>
+        /// Gets the full path of a file or directory outside of this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="additionalPath">The path within this directory to get the full path of.</param>
+        /// <returns>The full path, which if using a real file system should start with the drive letter.</returns>
         public string GetFullPath(string additionalPath = "")
         {
             return Path.Combine(_rootPath, additionalPath);
         }
 
+        /// <summary>
+        /// Loads the contents of a file from this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="path">The path to load.</param>
+        /// <returns>The contents of the file, or null if the file does not exist.</returns>
+        /// <exception cref="CellError">If the given path is not a valid path format.</exception>
         public string? LoadFile(string path)
         {
             if (path.StartsWith("//") || path.StartsWith('\\')) throw new CellError("Invalid path");
@@ -120,6 +136,11 @@ namespace Cell.Persistence
             return _fileIO.ReadFile(fullPath);
         }
 
+        /// <summary>
+        /// Moves a directory from one location to another within this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="from">The relative to path.</param>
+        /// <param name="to">The relative from path.</param>
         public void MoveDirectory(string from, string to)
         {
             CheckIsReadOnly();
@@ -128,6 +149,11 @@ namespace Cell.Persistence
             _fileIO.MoveDirectory(fullFrom, fullTo);
         }
 
+        /// <summary>
+        /// Writes the given content to a file in this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="path">The path to write to.</param>
+        /// <param name="content">The content to write into the file.</param>
         public void SaveFile(string path, string content)
         {
             CheckIsReadOnly();
@@ -135,6 +161,12 @@ namespace Cell.Persistence
             _fileIO.WriteFile(fullPath, content);
         }
 
+        /// <summary>
+        /// Takes a zipped directory and unzips it into the given toPath in the given to <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="to">The directory to put the unzipped folder into.</param>
+        /// <param name="fromPathZip">The directory where the zip is in this directory.</param>
+        /// <param name="toPath">The directory to put the unzipped folder into.</param>
         public void UnzipTo(PersistedDirectory to, string fromPathZip = "", string toPath = "")
         {
             var fullFrom = GetFullPath(fromPathZip);

@@ -8,6 +8,9 @@ using System.IO;
 
 namespace Cell.Data
 {
+    /// <summary>
+    /// The tracker for all the sheets in a project.
+    /// </summary>
     public class SheetTracker
     {
         private const string TemplatesSaveDirectory = "Templates";
@@ -16,6 +19,14 @@ namespace Cell.Data
         private readonly PersistedDirectory _persistedDirectory;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
+        /// <summary>
+        /// Creates a new instance of <see cref="SheetTracker"/>.
+        /// </summary>
+        /// <param name="persistedDirectory">The project directory.</param>
+        /// <param name="cellLoader">The cell loader used during import/export.</param>
+        /// <param name="cellTracker">The cell tracker used to get the cells in the sheet.</param>
+        /// <param name="pluginFunctionLoader">The function loader used for importing/exporting functions.</param>
+        /// <param name="userCollectionLoader">The collection loader used for importing/exporting collections.</param>
         public SheetTracker(PersistedDirectory persistedDirectory, CellLoader cellLoader, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
             _userCollectionLoader = userCollectionLoader;
@@ -28,10 +39,20 @@ namespace Cell.Data
             Sheets.CollectionChanged += SheetsCollectionChanged;
         }
 
+        /// <summary>
+        /// The sheets in the project, ordered by their order.
+        /// </summary>
         public ObservableCollection<SheetModel> OrderedSheets { get; } = [];
 
+        /// <summary>
+        /// The sheets in the project.
+        /// </summary>
         public ObservableCollection<SheetModel> Sheets { get; } = [];
 
+        /// <summary>
+        /// Adds the list of cells to the project.
+        /// </summary>
+        /// <param name="cellsToAdd">The cells to add.</param>
         public void AddAndSaveCells(IEnumerable<CellModel> cellsToAdd)
         {
             foreach (var cell in cellsToAdd)
@@ -40,6 +61,11 @@ namespace Cell.Data
             }
         }
 
+        /// <summary>
+        /// Copies all cells from one sheet and nullifies thier names to facilitate copying them to a new sheet.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to copy the cells of.</param>
+        /// <returns>A List of copied cells.</returns>
         public List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
         {
             var copiedCells = _cellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
@@ -51,6 +77,10 @@ namespace Cell.Data
             return copiedCells;
         }
 
+        /// <summary>
+        /// Exports a sheet to the projects template directory.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to export.</param>
         public void ExportSheetTemplate(string sheetName)
         {
             var copiedCells = CreateUntrackedCopiesOfCellsInSheet(sheetName);
@@ -70,6 +100,12 @@ namespace Cell.Data
             var usedCollections = populateAndTriggerFunctions.SelectMany(f => f.CollectionDependencies).Distinct().ToList();
         }
 
+        /// <summary>
+        /// Imports a sheet from the projects template directory into the live project.
+        /// </summary>
+        /// <param name="templateName">The template name to import.</param>
+        /// <param name="sheetName">The name of the sheet to import.</param>
+        /// <param name="skipExistingCollectionsDuringImport">Whether to skip importing collections whos name already exists in the project.</param>
         public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)
         {
             var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
@@ -115,23 +151,33 @@ namespace Cell.Data
             foreach (var functionModel in functionsBeingImported)
             {
                 var function = new CellFunction(functionModel);
-                _pluginFunctionLoader.AddPluginFunctionToNamespace(functionModel.ReturnType, function);
-                _pluginFunctionLoader.SavePluginFunction("", functionModel.ReturnType, functionModel);
+                _pluginFunctionLoader.AddCellFunctionToNamespace(functionModel.ReturnType, function);
+                _pluginFunctionLoader.SaveCellFunction("", functionModel.ReturnType, functionModel);
             }
 
-            foreach (var collectionName in collectionsBeingImportedWithoutConflicts)
-            {
-                var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
-                _userCollectionLoader.ImportCollection(collectionDirectory, collectionName);
-            }
+            //foreach (var collectionName in collectionsBeingImportedWithoutConflicts)
+            //{
+                //var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
+                //_userCollectionLoader.ImportCollection(collectionDirectory, collectionName);
+            //}
         }
 
+        /// <summary>
+        /// Renames a sheet.
+        /// </summary>
+        /// <param name="oldSheetName">The old sheet name.</param>
+        /// <param name="newSheetName">The new sheet name.</param>
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
             _cellTracker.RenameSheet(oldSheetName, newSheetName);
             _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.Location.SheetName = newSheetName);
         }
 
+        /// <summary>
+        /// Gives cells new IDs and updates merged cells with the new IDs to facilitate copying existing cells from a sheet.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to give all the cell.</param>
+        /// <param name="cellsToAdd">The cells to give now IDs.</param>
         public void UpdateIdentitiesOfCellsForNewSheet(string sheetName, IEnumerable<CellModel> cellsToAdd)
         {
             var oldIdToNewIdMap = GiveCellsNewUniqueIndentities(sheetName, cellsToAdd);
@@ -153,7 +199,7 @@ namespace Cell.Data
 
             CellFunction? GetExistingFunction(CellFunctionModel function)
             {
-                return _pluginFunctionLoader.ObservableFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
+                return _pluginFunctionLoader.CellFunctions.FirstOrDefault(x => x.Model.Name == function.Name);
             }
         }
 

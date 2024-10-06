@@ -75,7 +75,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the collections that are currently being displayed in the list box to the user, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<UserCollection> FilteredCollections => _userCollectionLoader.ObservableCollections.Where(x => x.Name.Contains(CollectionListBoxFilterText));
+        public IEnumerable<UserCollection> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Name.Contains(CollectionListBoxFilterText));
 
         /// <summary>
         /// Gets the items in the selected collection, filtered based on the users filter criteria.
@@ -223,7 +223,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingClosed()
         {
-            _userCollectionLoader.ObservableCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
+            _userCollectionLoader.UserCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
-            _userCollectionLoader.ObservableCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
+            _userCollectionLoader.UserCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace Cell.ViewModel.ToolWindow
         internal bool CanDeleteCollection(UserCollection collection, out string reason)
         {
             reason = string.Empty;
-            var conflictingBase = _userCollectionLoader.ObservableCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
+            var conflictingBase = _userCollectionLoader.UserCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
             if (conflictingBase != null) reason = $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.";
             return reason == string.Empty;
         }

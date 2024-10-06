@@ -8,9 +8,22 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Cell.Execution.SyntaxWalkers.UserCollections
 {
+    /// <summary>
+    /// Traverses the syntax tree and collects all collection references.
+    /// </summary>
     public partial class CollectionReferenceSyntaxWalker : CSharpSyntaxWalker
     {
+        /// <summary>
+        /// The collection references found in the syntax tree.
+        /// </summary>
         public readonly List<ICollectionReference> CollectionReferences = [];
+
+        /// <summary>
+        /// Attempts to get a collection reference from a syntax node, if the syntax node represents a valid collection reference.
+        /// </summary>
+        /// <param name="node">The sytntax node to check.</param>
+        /// <param name="collectionReference">The resulting collection reference, if any.</param>
+        /// <returns>True if the syntax node was a collection reference.</returns>
         public static bool TryGetCollectionReferenceFromNode(SyntaxNode? node, [MaybeNullWhen(false)] out ICollectionReference collectionReference)
         {
             collectionReference = ConstantCollectionReference.Null;
@@ -38,6 +51,10 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
             return true;
         }
 
+        /// <summary>
+        /// Represents a <see cref="CSharpSyntaxVisitor"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
+        /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order.
+        /// </summary>
         public override void Visit(SyntaxNode? node)
         {
             base.Visit(node);

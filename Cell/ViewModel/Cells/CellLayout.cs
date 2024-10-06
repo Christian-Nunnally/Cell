@@ -4,6 +4,9 @@ using Cell.ViewModel.Cells.Types;
 
 namespace Cell.ViewModel
 {
+    /// <summary>
+    /// Layouts the cells in a sheet.
+    /// </summary>
     public class CellLayout
     {
         private readonly bool _canLayout = true;
@@ -12,6 +15,11 @@ namespace Cell.ViewModel
         private readonly List<CellViewModel> _columns;
         private readonly CellViewModel? _corner;
         private readonly List<CellViewModel> _rows;
+        /// <summary>
+        /// Creates a new instance of <see cref="CellLayout"/>.
+        /// </summary>
+        /// <param name="cells">The cell view models to perform a layout on.</param>
+        /// <param name="cellTracker">The cell tracker to get cell models from.</param>
         public CellLayout(IEnumerable<CellViewModel> cells, CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -27,10 +35,19 @@ namespace Cell.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets the total height of all cells after layout.
+        /// </summary>
         public double LayoutHeight { get; private set; }
 
+        /// <summary>
+        /// Gets the total width of all cells after layout.
+        /// </summary>
         public double LayoutWidth { get; private set; }
 
+        /// <summary>
+        /// Performs the layout of the cells.
+        /// </summary>
         public void UpdateLayout()
         {
             if (!_canLayout) return;

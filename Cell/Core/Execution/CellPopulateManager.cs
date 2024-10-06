@@ -1,5 +1,4 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Data;
 using Cell.Model;
 using Cell.Persistence;
 using Cell.ViewModel.Execution;
@@ -108,7 +107,7 @@ namespace Cell.Execution
         private void CollectionNameChangedInCellsCollectionDependencies(CellSpecificCollectionReference reference)
         {
             if (string.IsNullOrWhiteSpace(reference.Cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(reference.Cell, function);
         }
 
@@ -185,7 +184,7 @@ namespace Cell.Execution
         {
             cell.PropertyChanged += CellPropertyChanged;
             if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
@@ -197,7 +196,7 @@ namespace Cell.Execution
             UnsubscribeFromAllLocationUpdates(cell);
             cell.PropertyChanged -= CellPropertyChanged;
             if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             _cellToPopulateFunctionNameMap.Remove(cell);
             RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
@@ -205,7 +204,7 @@ namespace Cell.Execution
 
         private void SubscribeCellToFunctionChanges(CellModel cell)
         {
-            if (!_pluginFunctionLoader.TryGetFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
@@ -240,7 +239,7 @@ namespace Cell.Execution
         {
             if (!_cellToPopulateFunctionNameMap.TryGetValue(cell, out var oldFunctionName)) return;
             _cellToPopulateFunctionNameMap.Remove(cell);
-            if (!_pluginFunctionLoader.TryGetFunction("object", oldFunctionName, out var oldFunction)) return;
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", oldFunctionName, out var oldFunction)) return;
             RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, oldFunction);
         }
 
@@ -272,8 +271,7 @@ namespace Cell.Execution
         private void UpdateDependencySubscriptions(CellModel cell, CellFunction function)
         {
             if (string.IsNullOrWhiteSpace(cell.Location.SheetName)) return;
-            var _ = function.CompiledMethod;
-
+            function.Compile();
             UntrackCollectionReferences(cell);
             ResolveLocationDependenciesForCell(cell, function);
             ResolveCollectionDependenciesForCell(cell, function);

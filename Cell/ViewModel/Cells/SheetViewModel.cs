@@ -11,8 +11,14 @@ using System.Windows.Media;
 
 namespace Cell.ViewModel.Cells
 {
+    /// <summary>
+    /// A view model for a sheet in the application.
+    /// </summary>
     public class SheetViewModel : PropertyChangedBase
     {
+        /// <summary>
+        /// A null sheet that can be used as a placeholder.
+        /// </summary>
         public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!, null!);
         private readonly ApplicationSettings _applicationSettings;
         private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];

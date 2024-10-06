@@ -7,9 +7,19 @@ using System.Text.RegularExpressions;
 
 namespace Cell.Plugin.SyntaxWalkers
 {
+    /// <summary>
+    /// A syntax rewriter that converts cell references like "A5" to code like "c.GetCell(...)".
+    /// </summary>
+    /// <param name="location"></param>
     public partial class CellReferenceToCodeSyntaxRewriter(CellLocationModel location) : CSharpSyntaxRewriter
     {
         private readonly CellLocationModel _location = location;
+
+        /// <summary>
+        /// Gets whether the input is a cell location string, like "B6".
+        /// </summary>
+        /// <param name="input">The input string to test.</param>
+        /// <returns>True if the string represents a cell location.</returns>
         public static bool IsCellLocation(string input)
         {
             return !string.IsNullOrWhiteSpace(input) && IsCellLocationString().IsMatch(input);
@@ -18,6 +28,10 @@ namespace Cell.Plugin.SyntaxWalkers
         [GeneratedRegex(@"^[A-Z]+[0-9]+$")]
         public static partial Regex IsCellLocationString();
 
+        /// <summary>
+        /// Represents a <see cref="CSharpSyntaxRewriter"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
+        /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order,
+        /// </summary>
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);

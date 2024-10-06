@@ -20,6 +20,7 @@ namespace Cell.ViewModel.Execution
         private const string codeHeader = "\n\nnamespace Plugin { public class Program { public static ";
         private const string CompiledMethodName = "M";
         private const string methodHeader = $" {CompiledMethodName}(Context c, CellModel cell) {{\n";
+        private readonly static RoslynCompiler _compiler = new();
         /// <summary>
         /// A null function that can be used as a placeholder.
         /// </summary>
@@ -45,6 +46,7 @@ namespace Cell.ViewModel.Execution
         public static readonly string UsingNamespacesString = string.Join('\n', UsingNamespaces.Select(x => $"using {x};"));
         private MethodInfo? _compiledMethod;
         private ulong _fingerprintOfProcessedDependencies;
+        private ulong _fingerprintOfCompiledMethod;
         private bool _wasCompileSuccessful;
         /// <summary>
         /// Creates a new instance of <see cref="CellFunction"/>
@@ -67,16 +69,29 @@ namespace Cell.ViewModel.Execution
         /// </summary>
         public List<ICollectionReference> CollectionDependencies { get; set; } = [];
 
-        public MethodInfo? CompiledMethod => _compiledMethod ?? Compile();
-
+        /// <summary>
+        /// Gets the result of the last compile.
+        /// </summary>
         public CompileResult CompileResult { get; private set; }
 
+        /// <summary>
+        /// Gets a list of everything this function references.
+        /// </summary>
         public IEnumerable<IReferenceFromCell> Dependencies => ((IEnumerable<IReferenceFromCell>)LocationDependencies).Concat(CollectionDependencies);
 
+        /// <summary>
+        /// Gets a list of all of the location references function has.
+        /// </summary>
         public List<LocationReference> LocationDependencies { get; set; } = [];
 
+        /// <summary>
+        /// The persisted model for this function.
+        /// </summary>
         public CellFunctionModel Model { get; set; }
 
+        /// <summary>
+        /// The syntax tree of the code for this function.
+        /// </summary>
         public SyntaxTree SyntaxTree { get; set; } = CSharpSyntaxTree.ParseText("");
 
         private string FullCode => UsingNamespacesString + codeHeader + Model.ReturnType + methodHeader + Model.Code + codeFooter;
@@ -91,6 +106,12 @@ namespace Cell.ViewModel.Execution
             }
         }
 
+        /// <summary>
+        /// Gets the user friendly code for this function, which uses collection names like "myCollection." for collections and symbols like "A1" for cells.
+        /// </summary>
+        /// <param name="cell">The cell to resolve references for to make the code user friendly.</param>
+        /// <param name="collectionNameToDataTypeMap">The map of collections to thier types.</param>
+        /// <returns></returns>
         public string GetUserFriendlyCode(CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformTo(Model.Code);
@@ -98,13 +119,19 @@ namespace Cell.ViewModel.Execution
             return intermediateCode.Replace("_Range_", "..");
         }
 
+        /// <summary>
+        /// Runs the function with the given context and cell.
+        /// </summary>
+        /// <param name="pluginContext">The context to give to this function.</param>
+        /// <param name="cell">The cell to run this function from (this becomes the 'cell' reference inside the function).</param>
+        /// <returns>The result of the function.</returns>
         public CompileResult Run(Context pluginContext, CellModel? cell)
         {
-            var method = CompiledMethod;
+            Compile();
             if (!CompileResult.WasSuccess) return CompileResult;
             try
             {
-                return RunUnsafe(pluginContext, cell, method);
+                return RunUnsafe(pluginContext, cell, _compiledMethod);
             }
             catch (Exception e)
             {
@@ -112,6 +139,12 @@ namespace Cell.ViewModel.Execution
             }
         }
 
+        /// <summary>
+        /// Sets the code of this function from a user friendly code string, which uses collection names like "myCollection." for collections and symbols like "A1" for cells.
+        /// </summary>
+        /// <param name="userFriendlyCode">The user friendly code.</param>
+        /// <param name="cell">The cell the user is editing this code from.</param>
+        /// <param name="collectionNameToDataTypeMap">The list of all valid collections and thier items data types.</param>
         public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
@@ -126,22 +159,27 @@ namespace Cell.ViewModel.Execution
             if (_fingerprintOfProcessedDependencies == Model.Fingerprint) Compile();
         }
 
-        private MethodInfo? Compile()
+        /// <summary>
+        /// Compiles the function if needed.
+        /// </summary>
+        public void Compile()
         {
-            try
+            if (_fingerprintOfCompiledMethod != Model.Fingerprint)
             {
-                var compiler = new RoslynCompiler(SyntaxTree);
-                var compiled = compiler.Compile() ?? throw new Exception("Error during compile - compiled object is null");
-                _compiledMethod = compiled.GetMethod(CompiledMethodName) ?? throw new Exception("Error during compile - compiled object is null");
-                CompileResult = new CompileResult { WasSuccess = true, ExecutionResult = "" };
-                WasCompileSuccessful = true;
+                try
+                {
+                    var compiled = _compiler.Compile(SyntaxTree) ?? throw new Exception("Error during compile - compiled object is null");
+                    _compiledMethod = compiled.GetMethod(CompiledMethodName) ?? throw new Exception("Error during compile - compiled object is null");
+                    CompileResult = new CompileResult { WasSuccess = true, ExecutionResult = "" };
+                    WasCompileSuccessful = true;
+                    _fingerprintOfCompiledMethod = Model.Fingerprint;
+                }
+                catch (Exception e)
+                {
+                    CompileResult = new CompileResult { WasSuccess = false, ExecutionResult = e.Message };
+                    WasCompileSuccessful = false;
+                }
             }
-            catch (Exception e)
-            {
-                CompileResult = new CompileResult { WasSuccess = false, ExecutionResult = e.Message };
-                WasCompileSuccessful = false;
-            }
-            return _compiledMethod;
         }
 
         private void ExtractCellLocationReferences(SyntaxNode? root)

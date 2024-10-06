@@ -4,17 +4,17 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Cell.Execution.SyntaxWalkers.UserCollections
 {
+    /// <summary>
+    /// Traverse the syntax tree and replace user collection references with the appropriate code.
+    /// </summary>
+    /// <param name="collectionNameToDataTypeMap"></param>
     public class CollectionReferenceToCodeSyntaxRewriter(IReadOnlyDictionary<string, string> collectionNameToDataTypeMap) : CSharpSyntaxRewriter
     {
-        public readonly List<string> CollectionReferences = [];
         private readonly IReadOnlyDictionary<string, string> _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
-        public CompileResult Result { get; private set; } = new CompileResult { WasSuccess = true };
-
-        public bool IsCollectionName(string input)
-        {
-            return !string.IsNullOrWhiteSpace(input) && _collectionNameToDataTypeMap.ContainsKey(input);
-        }
-
+        /// <summary>
+        /// Represents a <see cref="CSharpSyntaxVisitor"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
+        /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order.
+        /// </summary>
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
@@ -24,14 +24,17 @@ namespace Cell.Execution.SyntaxWalkers.UserCollections
                 var variableName = identifierSyntax.Identifier.ToString();
                 if (IsCollectionName(variableName))
                 {
-                    CollectionReferences.Add(variableName);
                     var dataType = _collectionNameToDataTypeMap[variableName];
-                    if (string.IsNullOrWhiteSpace(dataType)) Result = new CompileResult { WasSuccess = false, ExecutionResult = $"Datatype for Collection {variableName} does not exist or cells have not loaded yet." };
                     var code = $"c.GetUserList<{dataType}>(\"{variableName}\")";
                     return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, code);
                 }
             }
             return node;
+        }
+
+        private bool IsCollectionName(string input)
+        {
+            return !string.IsNullOrWhiteSpace(input) && _collectionNameToDataTypeMap.ContainsKey(input);
         }
     }
 }

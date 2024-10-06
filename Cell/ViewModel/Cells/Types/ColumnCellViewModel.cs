@@ -18,21 +18,16 @@ namespace Cell.ViewModel.Cells.Types
             model.Location.PropertyChanged += ModelLocationPropertyChanged;
         }
 
+        /// <summary>
+        /// Gets the column name of the cell, like A for the first column, B for the second, etc.
+        /// </summary>
         public override string Text { get => GetColumnName(Column); set => base.Text = value; }
 
-        public override double Width
-        {
-            get => base.Width;
-            set
-            {
-                if (value < 5) return;
-                if (value > 500) return;
-                if (base.Width == value) return;
-                base.Width = value;
-                _sheetViewModel.UpdateLayout();
-            }
-        }
-
+        /// <summary>
+        /// Gets the column name of the cell, like A for the first column, B for the second, etc.
+        /// </summary>
+        /// <param name="columnNumber">The number index of the column.</param>
+        /// <returns>The user friendly name of the column.</returns>
         public static string GetColumnName(int columnNumber)
         {
             if (columnNumber < 1) return "=";

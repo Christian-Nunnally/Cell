@@ -3,6 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace Cell.Model
 {
+    /// <summary>
+    /// A model for a sheet, which is a collection of cells. Not actually persisted to disk, instead is uses the corner cell models custom properties to store the information about the sheet, such as it's ordering.
+    /// </summary>
     public class SheetModel : PropertyChangedBase
     {
         public static readonly SheetModel Null = new("");
@@ -69,11 +72,16 @@ namespace Cell.Model
             }
         }
 
-        public static bool IsValidSheetName(string sheetName)
+        /// <summary>
+        /// Checks a string to see if it is a valid sheet name. Invalid sheet names are those that are empty, longer than 60 characters, or contain characters other than letters, numbers, and spaces.
+        /// </summary>
+        /// <param name="stringToTest">The string to test.</param>
+        /// <returns>True if the string is a valid sheet name.</returns>
+        public static bool IsValidSheetName(string stringToTest)
         {
-            if (string.IsNullOrWhiteSpace(sheetName)) return false;
-            if (sheetName.Length > 60) return false;
-            if (!sheetName.All("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789 ".Contains)) return false;
+            if (string.IsNullOrWhiteSpace(stringToTest)) return false;
+            if (stringToTest.Length > 60) return false;
+            if (!stringToTest.All("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789 ".Contains)) return false;
             return true;
         }
     }

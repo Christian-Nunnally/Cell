@@ -104,7 +104,7 @@ namespace Cell.Data
         /// <summary>
         /// Gets the number of times this collection is used in other collections or functions.
         /// </summary>
-        public int UsageCount => _pluginFunctionLoader.ObservableFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
+        public int UsageCount => _pluginFunctionLoader.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
 
         /// <summary>
         /// Adds an item to the collection.
@@ -195,7 +195,7 @@ namespace Cell.Data
 
         private static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, string functionName)
         {
-            if (!pluginFunctionLoader.TryGetFunction("object", functionName, out var populateFunction)) return 0;
+            if (!pluginFunctionLoader.TryGetCellFunction("object", functionName, out var populateFunction)) return 0;
             var result = populateFunction.Run(pluginContext, null);
             if (result.WasSuccess)
             {

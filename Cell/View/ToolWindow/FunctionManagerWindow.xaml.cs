@@ -32,7 +32,7 @@ namespace Cell.View.ToolWindow
 
                 DialogFactory.ShowYesNoConfirmationDialog($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
-                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteFunction(function.Function);
+                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteCellFunction(function.Function);
                 });
             }
         }

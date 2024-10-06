@@ -17,6 +17,10 @@ namespace Cell.Execution
         private readonly CellTracker _cellTracker;
         private readonly List<string> _locationsThatNeedToBeTrackedIfCellsAreAddedThere = [];
         private readonly SubscriberNotifier _subscriberNotifier = new();
+        /// <summary>
+        /// Creates a new instance of <see cref="CellTextChangesAtLocationNotifier"/>.
+        /// </summary>
+        /// <param name="cellTracker">The cell tracker to track the cells of.</param>
         public CellTextChangesAtLocationNotifier(CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
@@ -25,18 +29,35 @@ namespace Cell.Execution
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCellForTextPropertyChanges;
         }
 
+        /// <summary>
+        /// Gets or sets whether subscribers should be notified when a cell is added at a location they are subscribed to. Essentially disables this notifier.
+        /// </summary>
         public bool NotifyWhenCellIsAdded { get; set; } = true;
 
+        /// <summary>
+        /// Gets all of the locations that a subscriber is subscribed to.
+        /// </summary>
+        /// <param name="subscriber">The subscriber.</param>
+        /// <returns>A list of location strings.</returns>
         public IEnumerable<string> GetLocationsSubscriberIsSubscribedTo(CellPopulateSubscriber subscriber)
         {
             return _subscriberNotifier.GetChannelsSubscriberIsSubscribedTo(subscriber);
         }
 
+        /// <summary>
+        /// Subscribes the given subscriber to the given location. After subscribing, the subscriber's Action will be invoked when NotifySubscribers is called with the given location.
+        /// </summary>
+        /// <param name="subscriber">The subscriber.</param>
+        /// <param name="locationString">The location string.</param>
         public void SubscribeToUpdatesAtLocation(ISubscriber subscriber, string locationString)
         {
             _subscriberNotifier.SubscribeToChannel(subscriber, locationString);
         }
 
+        /// <summary>
+        /// Unsubscribes the given subscriber from all locations it has previously subscribed to.
+        /// </summary>
+        /// <param name="subscriber">The subscriber to unsubscribe.</param>
         public void UnsubscribeFromAllLocations(ISubscriber subscriber)
         {
             _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
@@ -50,6 +71,13 @@ namespace Cell.Execution
                 StartListeningToCellForTextPropertyChanges(locationString);
                 _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Remove(locationString);
             }
+        }
+
+        private void CellLocationChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var cellModel = _cellTracker.GetCell((sender as CellLocationModel)!)!;
+            cellModel.PropertyChanged -= TrackedCellPropertyChanged;
+            cellModel.Location.PropertyChanged -= CellLocationChanged;
         }
 
         private void CellRemoved(CellModel removedCell)
@@ -69,13 +97,6 @@ namespace Cell.Execution
                 if (NotifyWhenCellIsAdded) _subscriberNotifier.NotifySubscribers(locationString);
             }
             else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
-        }
-
-        private void CellLocationChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var cellModel = _cellTracker.GetCell((sender as CellLocationModel)!)!;
-            cellModel.PropertyChanged -= TrackedCellPropertyChanged;
-            cellModel.Location.PropertyChanged -= CellLocationChanged;
         }
 
         private void StopListeningToCellForTextPropertyChanges(string locationString)

@@ -40,7 +40,7 @@ namespace CellTest
         {
             var _ = CreateInstance();
             var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld", "return \"Hello world\";");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld", "return \"Hello world\";");
             cell.PopulateFunctionName = function.Model.Name;
 
             cell.Text += "1";
@@ -54,7 +54,7 @@ namespace CellTest
             var _ = CreateInstance();
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld");
             function.SetUserFriendlyCode("return A2.Text;", a1, new Dictionary<string, string>());
             a1.PopulateFunctionName = function.Model.Name;
 
@@ -69,7 +69,7 @@ namespace CellTest
             var _ = CreateInstance();
             var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
             var collection = _userCollectionLoader.CreateCollection("testList", nameof(TodoItem));
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return testList.Count();", cell, collectionNameToDataTypeMap);
             cell.PopulateFunctionName = function.Model.Name;
@@ -86,7 +86,7 @@ namespace CellTest
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
             var collection = _userCollectionLoader.CreateCollection("testList", "TodoItem");
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
             a1.PopulateFunctionName = function.Model.Name;
@@ -104,7 +104,7 @@ namespace CellTest
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
             var collection = _userCollectionLoader.CreateCollection("testList", nameof(TodoItem));
             var collection2 = _userCollectionLoader.CreateCollection("testList2", nameof(TodoItem));
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
             a1.PopulateFunctionName = function.Model.Name;
@@ -123,7 +123,7 @@ namespace CellTest
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
             var collection = _userCollectionLoader.CreateCollection("testList", nameof(TodoItem));
-            var function = _pluginFunctionLoader.CreateFunction("object", "testHelloWorld");
+            var function = _pluginFunctionLoader.CreateCellFunction("object", "testHelloWorld");
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
             function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
             a1.PopulateFunctionName = function.Model.Name;

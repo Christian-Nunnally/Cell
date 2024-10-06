@@ -45,7 +45,7 @@ namespace Cell.Execution
             if (string.IsNullOrWhiteSpace(cell.TriggerFunctionName)) return;
             if (_cellsBeingEdited.ContainsKey(cell.ID)) return;
             _cellsBeingEdited.Add(cell.ID, cell);
-            CellTriggeredHandler(cell);
+            CellTriggeredHandler(cell, editContext);
             _cellsBeingEdited.Remove(cell.ID);
         }
 
@@ -76,10 +76,13 @@ namespace Cell.Execution
             }
         }
 
-        private void CellTriggeredHandler(CellModel cell)
+        private void CellTriggeredHandler(CellModel cell, EditContext editContext)
         {
-            if (!_pluginFunctionLoader.TryGetFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
-            var context = new Context(_cellTracker, _userCollectionLoader, cell.Index);
+            if (!_pluginFunctionLoader.TryGetCellFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
+            var context = new Context(_cellTracker, _userCollectionLoader, cell.Index)
+            {
+                E = editContext
+            };
             var result = triggerFunction.Run(context, cell);
             if (result.WasSuccess) return;
             Logger.Instance.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");

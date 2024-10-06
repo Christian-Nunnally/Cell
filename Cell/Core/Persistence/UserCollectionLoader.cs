@@ -12,25 +12,47 @@ using System.Text.Json;
 
 namespace Cell.Persistence
 {
+    /// <summary>
+    /// Loads and saves user collections from a project.
+    /// </summary>
     public class UserCollectionLoader
     {
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
-        private readonly PersistedDirectory _persistanceManager;
+        private readonly PersistedDirectory _persistedDirectory;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
+        /// <summary>
+        /// Creates a new instance of <see cref="UserCollectionLoader"/>.
+        /// </summary>
+        /// <param name="persistedDirectory">The project directory.</param>
+        /// <param name="pluginFunctionLoader">The plugin function loader used to get sort functions for collections.</param>
+        /// <param name="cellTracker">The cell tracker that needs to be provided to sort functions.</param>
         public UserCollectionLoader(PersistedDirectory persistedDirectory, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
         {
-            _persistanceManager = persistedDirectory;
+            _persistedDirectory = persistedDirectory;
             _pluginFunctionLoader = pluginFunctionLoader;
             _cellTracker = cellTracker;
         }
 
+        /// <summary>
+        /// Gets just the names of all loaded collections.
+        /// </summary>
         public IEnumerable<string> CollectionNames => _collections.Keys;
 
-        public ObservableCollection<UserCollection> ObservableCollections { get; private set; } = [];
+        /// <summary>
+        /// Gets all loaded collections.
+        /// </summary>
+        public ObservableCollection<UserCollection> UserCollections { get; private set; } = [];
 
+        /// <summary>
+        /// Creates a new collection.
+        /// </summary>
+        /// <param name="collectionName">The name of the new collection.</param>
+        /// <param name="itemTypeName">The data type of the items in the collection.</param>
+        /// <param name="baseCollectionName">The name of the collection this collection should be a projection of, if any.</param>
+        /// <returns>The new collection.</returns>
         public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName = "")
         {
             var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
@@ -41,14 +63,23 @@ namespace Cell.Persistence
             return collection;
         }
 
+        /// <summary>
+        /// Deletes a collection from disk.
+        /// </summary>
+        /// <param name="collection">The collection to delete.</param>
         public void DeleteCollection(UserCollection collection)
         {
             UnlinkFromBaseCollection(collection);
             StopTrackingCollection(collection);
             var directory = Path.Combine("Collections", collection.Name);
-            _persistanceManager.DeleteDirectory(directory);
+            _persistedDirectory.DeleteDirectory(directory);
         }
 
+        /// <summary>
+        /// Gets a collection by name.
+        /// </summary>
+        /// <param name="name">The name of the collection to get.</param>
+        /// <returns>The collection if it exists, or null.</returns>
         public UserCollection? GetCollection(string name)
         {
             if (name == string.Empty) return null;
@@ -56,24 +87,26 @@ namespace Cell.Persistence
             return null;
         }
 
+        /// <summary>
+        /// Gets the data type string for a collection.
+        /// </summary>
+        /// <param name="collection">The collection name to get the data type of its items from.</param>
+        /// <returns>The data type name of the items in the collection with the given name.</returns>
         public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "object";
 
-        public void ImportCollection(string collectionDirectory, string collectionName)
-        {
-            var toDirectory = Path.Combine("Collections", collectionName);
-            _persistanceManager.CopyDirectory(collectionDirectory, toDirectory);
-        }
-
+        /// <summary>
+        /// Makes sure all collections are linked to their base collections.
+        /// </summary>
         public void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
-            foreach (var collection in ObservableCollections)
+            foreach (var collection in UserCollections)
             {
                 collection.RefreshSortAndFilter();
             }
-            while (loadedCollections.Count != ObservableCollections.Count)
+            while (loadedCollections.Count != UserCollections.Count)
             {
-                foreach (var collection in ObservableCollections)
+                foreach (var collection in UserCollections)
                 {
                     if (loadedCollections.Contains(collection.Name)) continue;
                     var basedOnCollectionName = collection.Model.BasedOnCollectionName;
@@ -86,16 +119,24 @@ namespace Cell.Persistence
             }
         }
 
+        /// <summary>
+        /// Loads all collections from disk.
+        /// </summary>
         public void LoadCollections()
         {
             var collectionsDirectory = Path.Combine("Collections");
-            if (!_persistanceManager.DirectoryExists(collectionsDirectory)) return;
-            foreach (var directory in _persistanceManager.GetDirectories(collectionsDirectory))
+            if (!_persistedDirectory.DirectoryExists(collectionsDirectory)) return;
+            foreach (var directory in _persistedDirectory.GetDirectories(collectionsDirectory))
             {
                 LoadCollection(directory);
             }
         }
 
+        /// <summary>
+        /// Does the necessary work after a collection has been renamed.
+        /// </summary>
+        /// <param name="oldName">The old collection name.</param>
+        /// <param name="newName">The new collection name.</param>
         public void ProcessCollectionRename(string oldName, string newName)
         {
             if (!_collections.TryGetValue(oldName, out var collection)) return;
@@ -104,10 +145,10 @@ namespace Cell.Persistence
             _collections.Add(newName, collection);
             var oldDirectory = Path.Combine("Collections", oldName);
             var newDirectory = Path.Combine("Collections", newName);
-            _persistanceManager.MoveDirectory(oldDirectory, newDirectory);
+            _persistedDirectory.MoveDirectory(oldDirectory, newDirectory);
 
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in _pluginFunctionLoader.ObservableFunctions)
+            foreach (var function in _pluginFunctionLoader.CellFunctions)
             {
                 if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
                 {
@@ -133,7 +174,7 @@ namespace Cell.Persistence
         private void DeleteItem(string collectionName, string idToRemove)
         {
             var path = Path.Combine("Collections", collectionName, "Items", idToRemove);
-            _persistanceManager.DeleteFile(path);
+            _persistedDirectory.DeleteFile(path);
         }
 
         private void EnsureLinkedToBaseCollection(UserCollection collection)
@@ -148,20 +189,20 @@ namespace Cell.Persistence
         private void LoadCollection(string directory)
         {
             var path = Path.Combine(directory, "collection");
-            var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
+            var text = _persistedDirectory.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
             var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             var itemsDirectory = Path.Combine(directory, "Items");
-            var paths = !_persistanceManager.DirectoryExists(itemsDirectory)
+            var paths = !_persistedDirectory.DirectoryExists(itemsDirectory)
                 ? []
-                : _persistanceManager.GetFiles(itemsDirectory);
+                : _persistedDirectory.GetFiles(itemsDirectory);
             paths.Select(LoadItem).ToList().ForEach(collection.Add);
             StartTrackingCollection(collection);
         }
 
         private PluginModel LoadItem(string path)
         {
-            var text = _persistanceManager.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}");
+            var text = _persistedDirectory.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}");
             return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
         }
 
@@ -175,14 +216,14 @@ namespace Cell.Persistence
         {
             var path = Path.Combine("Collections", model.Name, "collection");
             var serializedModel = JsonSerializer.Serialize(model);
-            _persistanceManager.SaveFile(path, serializedModel);
+            _persistedDirectory.SaveFile(path, serializedModel);
         }
 
         private void SaveItem(string collectionName, string id, PluginModel model)
         {
             var path = Path.Combine("Collections", collectionName, "Items", id);
             var serializedModel = JsonSerializer.Serialize(model);
-            _persistanceManager.SaveFile(path, serializedModel);
+            _persistedDirectory.SaveFile(path, serializedModel);
         }
 
         private void StartTrackingCollection(UserCollection userCollection)
@@ -192,7 +233,7 @@ namespace Cell.Persistence
             userCollection.ItemPropertyChanged += UserCollectionItemChanged;
             userCollection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
             _collections.Add(userCollection.Name, userCollection);
-            ObservableCollections.Add(userCollection);
+            UserCollections.Add(userCollection);
             _hasGenerateDataTypeForCollectionMapChanged = true;
         }
 
@@ -203,7 +244,7 @@ namespace Cell.Persistence
             userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
             userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
             _collections.Remove(userCollection.Name);
-            ObservableCollections.Remove(userCollection);
+            UserCollections.Remove(userCollection);
             _hasGenerateDataTypeForCollectionMapChanged = true;
         }
 

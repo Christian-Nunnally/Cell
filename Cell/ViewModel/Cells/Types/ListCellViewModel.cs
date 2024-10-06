@@ -2,6 +2,9 @@
 
 namespace Cell.ViewModel.Cells.Types
 {
+    /// <summary>
+    /// A view model for a cell that displays a list of items.
+    /// </summary>
     public class ListCellViewModel : CollectionCellViewModel
     {
         /// <summary>
@@ -15,10 +18,10 @@ namespace Cell.ViewModel.Cells.Types
 
         public object? SelectedItem
         {
-            get => Model.GetCustomProperty(nameof(SelectedItem));
+            get => Model.Properties[nameof(SelectedItem)];
             set
             {
-                Model.SetCustomProperty(nameof(SelectedItem), value?.ToString() ?? "");
+                Model.Properties[nameof(SelectedItem)] = value?.ToString() ?? "";
                 NotifyPropertyChanged(nameof(SelectedItem));
             }
         }

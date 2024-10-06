@@ -46,7 +46,7 @@ namespace Cell.Execution
         private CompileResult RunPopulate(CellModel subscriber)
         {
             var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
-            if (!_pluginFunctionLoader.TryGetFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
+            if (!_pluginFunctionLoader.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
             var result = populateFunction.Run(pluginContext, subscriber);
             if (!result.WasSuccess) return result;
             var returnedObject = result.ReturnedObject;

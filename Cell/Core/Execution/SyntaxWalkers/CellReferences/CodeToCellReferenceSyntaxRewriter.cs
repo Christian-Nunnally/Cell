@@ -6,9 +6,17 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Cell.Execution.SyntaxWalkers.CellReferences
 {
+    /// <summary>
+    /// Syntax rewriter that converts code cell references like "c.GetCell().;" to user friendly cell references like "A1.".
+    /// </summary>
+    /// <param name="location">The location to resolve relative location references based on.</param>
     public partial class CodeToCellReferenceSyntaxRewriter(CellLocationModel location) : CSharpSyntaxRewriter
     {
         private readonly CellLocationModel _location = location;
+        /// <summary>
+        /// Represents a <see cref="CSharpSyntaxRewriter"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
+        /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order,
+        /// </summary>
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
