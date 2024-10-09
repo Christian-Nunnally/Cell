@@ -15,7 +15,6 @@ namespace Cell.Data
     {
         private const string TemplatesSaveDirectory = "Templates";
         private readonly CellLoader _cellLoader;
-        private readonly CellTracker _cellTracker;
         private readonly PersistedDirectory _persistedDirectory;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
@@ -32,12 +31,17 @@ namespace Cell.Data
             _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;
             _persistedDirectory = persistedDirectory;
-            _cellTracker = cellTracker;
+            CellTracker = cellTracker;
             _cellLoader = cellLoader;
-            _cellTracker.CellAdded += CellAddedToTracker;
-            _cellTracker.CellRemoved += CellRemovedFromTracker;
+            cellTracker.CellAdded += CellAddedToTracker;
+            cellTracker.CellRemoved += CellRemovedFromTracker;
             Sheets.CollectionChanged += SheetsCollectionChanged;
         }
+
+        /// <summary>
+        /// The cell tracker used to get and create cells in the sheet.
+        /// </summary>
+        public CellTracker CellTracker { get; }
 
         /// <summary>
         /// The sheets in the project, ordered by their order.
@@ -57,7 +61,7 @@ namespace Cell.Data
         {
             foreach (var cell in cellsToAdd)
             {
-                _cellTracker.AddCell(cell, saveAfterAdding: true);
+                CellTracker.AddCell(cell, saveAfterAdding: true);
             }
         }
 
@@ -68,7 +72,7 @@ namespace Cell.Data
         /// <returns>A List of copied cells.</returns>
         public List<CellModel> CreateUntrackedCopiesOfCellsInSheet(string sheetName)
         {
-            var copiedCells = _cellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
+            var copiedCells = CellTracker.GetCellModelsForSheet(sheetName).Select(c => c.Copy()).ToList();
             foreach (var copiedCell in copiedCells)
             {
                 copiedCell.Location.SheetName = "";
@@ -154,12 +158,6 @@ namespace Cell.Data
                 _pluginFunctionLoader.AddCellFunctionToNamespace(functionModel.ReturnType, function);
                 _pluginFunctionLoader.SaveCellFunction("", functionModel.ReturnType, functionModel);
             }
-
-            //foreach (var collectionName in collectionsBeingImportedWithoutConflicts)
-            //{
-                //var collectionDirectory = Path.Combine(templatePath, "Collections", collectionName);
-                //_userCollectionLoader.ImportCollection(collectionDirectory, collectionName);
-            //}
         }
 
         /// <summary>
@@ -169,8 +167,8 @@ namespace Cell.Data
         /// <param name="newSheetName">The new sheet name.</param>
         public void RenameSheet(string oldSheetName, string newSheetName)
         {
-            _cellTracker.RenameSheet(oldSheetName, newSheetName);
-            _cellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.Location.SheetName = newSheetName);
+            CellTracker.RenameSheet(oldSheetName, newSheetName);
+            CellTracker.GetCellModelsForSheet(oldSheetName).ForEach(x => x.Location.SheetName = newSheetName);
         }
 
         /// <summary>
@@ -288,6 +286,7 @@ namespace Cell.Data
             }
             if (e.PropertyName == nameof(SheetModel.Name))
             {
+                /// Move this to the spot that's changing the name.
                 RenameSheet(sheetModel.OldName, sheetModel.Name);
                 sheetModel.OldName = sheetModel.Name;
             }

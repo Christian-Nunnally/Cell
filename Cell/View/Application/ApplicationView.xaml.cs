@@ -85,7 +85,7 @@ namespace Cell.View.Application
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
-            var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
+            _titleBarSheetNavigationView.DataContext = new TitleBarSheetNavigationViewModel(sheetTracker);
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
             var undoRedoManager = new UndoRedoManager(cellTracker);
             var textClipboard = new TextClipboard();
@@ -94,7 +94,6 @@ namespace Cell.View.Application
             var cellSelector = new CellSelector(cellTracker);
 
             _viewModel = new ApplicationViewModel(
-                projectDirectory,
                 persistedProject,
                 pluginFunctionLoader,
                 cellLoader,
@@ -104,7 +103,6 @@ namespace Cell.View.Application
                 cellTriggerManager,
                 sheetTracker,
                 cellSelector,
-                titleBarSheetNavigationViewModel,
                 applicationSettings,
                 undoRedoManager,
                 cellClipboard,
@@ -246,71 +244,78 @@ namespace Cell.View.Application
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (_viewModel == null) return;
             if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
             if (e.IsDown && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
                 if (e.Key == Key.C)
                 {
-                    _viewModel?.CopySelectedCells((Keyboard.Modifiers & ModifierKeys.Shift) == 0);
+                    _viewModel.CopySelectedCells((Keyboard.Modifiers & ModifierKeys.Shift) == 0);
                     e.Handled = true;
                 }
                 else if (e.Key == Key.V)
                 {
-                    _viewModel?.PasteCopiedCells();
+                    _viewModel.PasteCopiedCells();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Z)
                 {
-                    _viewModel?.UndoRedoManager.Undo();
+                    _viewModel.UndoRedoManager.Undo();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Y)
                 {
-                    _viewModel?.UndoRedoManager.Redo();
+                    _viewModel.UndoRedoManager.Redo();
                     e.Handled = true;
                 }
             }
             else if (e.Key == Key.Tab)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.CellSelector.MoveSelectionLeft();
-                else _viewModel?.CellSelector.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector.MoveSelectionLeft();
+                else _viewModel.CellSelector.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel?.CellSelector.MoveSelectionUp();
-                else _viewModel?.CellSelector.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector.MoveSelectionUp();
+                else _viewModel.CellSelector.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                _viewModel?.CellSelector.MoveSelectionUp();
+                _viewModel.CellSelector.MoveSelectionUp();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                _viewModel?.CellSelector.MoveSelectionDown();
+                _viewModel.CellSelector.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                _viewModel?.CellSelector.MoveSelectionLeft();
+                _viewModel.CellSelector.MoveSelectionLeft();
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                _viewModel?.CellSelector.MoveSelectionRight();
+                _viewModel.CellSelector.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)
             {
-                if (_viewModel?.SheetViewModel?.SelectedCellViewModel == null) return;
-                _viewModel.SheetViewModel.SelectedCellViewModel.Text = "";
+                var selectedCells = _viewModel.CellSelector.SelectedCells;
+                _viewModel.UndoRedoManager.StartRecordingUndoState();
+                foreach (var cell in selectedCells)
+                {
+                    _viewModel.UndoRedoManager.RecordStateIfRecording(cell);
+                    cell.Text = "";
+                }
+                _viewModel.UndoRedoManager.FinishRecordingUndoState();
                 e.Handled = true;
             }
             else if (e.Key == Key.Escape)
             {
-                _viewModel?.SheetViewModel?.CellSelector.UnselectAllCells();
+                _viewModel.SheetViewModel?.CellSelector.UnselectAllCells();
                 e.Handled = true;
             }
         }

@@ -7,13 +7,17 @@ namespace Cell.View.ToolWindow
 {
     public partial class SheetManagerWindow : ResizableToolWindow
     {
+        /// <summary>
+        /// The tool window view for managing all sheets in a project.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public SheetManagerWindow(SheetManagerWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;
             InitializeComponent();
         }
 
-        private SheetManagerWindowViewModel _viewModel;
+        private readonly SheetManagerWindowViewModel _viewModel;
 
         private static void MakeSureSheetOrderingIsConsecutive()
         {

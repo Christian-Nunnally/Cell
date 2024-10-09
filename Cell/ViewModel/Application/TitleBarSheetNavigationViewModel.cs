@@ -5,36 +5,24 @@ using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.Application
 {
+    /// <summary>
+    /// A view model for the title bar sheet navigation, which allows the user to navigate between sheets from the title bar.
+    /// </summary>
     public class TitleBarSheetNavigationViewModel : PropertyChangedBase
     {
         private readonly SheetTracker _sheetTracker;
-        private bool _isAddingSheet;
-        private string _newSheetName = string.Empty;
+        /// <summary>
+        /// Creates a new instance of <see cref="TitleBarSheetNavigationViewModel"/>.
+        /// </summary>
+        /// <param name="sheetTracker">The sheet tracker to get sheets from.</param>
         public TitleBarSheetNavigationViewModel(SheetTracker sheetTracker)
         {
             _sheetTracker = sheetTracker;
         }
 
-        public bool IsAddingSheet
-        {
-            get => _isAddingSheet;
-            set
-            {
-                _isAddingSheet = value;
-                NotifyPropertyChanged(nameof(IsAddingSheet));
-            }
-        }
-
-        public string NewSheetName
-        {
-            get => _newSheetName;
-            set
-            {
-                _newSheetName = value;
-                NotifyPropertyChanged(nameof(NewSheetName));
-            }
-        }
-
+        /// <summary>
+        /// Gets the user visible collection of sheets.
+        /// </summary>
         public ObservableCollection<SheetModel> OrderedSheets => _sheetTracker.OrderedSheets;
     }
 }

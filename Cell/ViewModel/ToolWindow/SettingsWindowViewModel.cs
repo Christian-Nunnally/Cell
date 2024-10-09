@@ -65,5 +65,21 @@ namespace Cell.ViewModel.ToolWindow
                 App.Current.Shutdown();
             }
         }
+
+        internal void OpenEditorForDefaultCellFormat()
+        {
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+        }
+
+        internal void OpenEditorForDefaultRowAndColumnCellFormat()
+        {
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+        }
     }
 }

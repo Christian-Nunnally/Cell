@@ -1,7 +1,11 @@
 ﻿using Cell.Model;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
+    /// <summary>
+    /// A cell view model for a cell that displays a date.
+    /// </summary>
     public class DateCellViewModel : CellViewModel
     {
         /// <summary>
@@ -14,17 +18,19 @@ namespace Cell.ViewModel.Cells.Types
             model.PropertyChanged += ModelPropertyChanged;
         }
 
+        /// <summary>
+        /// Parses the text of the cell as a date for binding to a date picker.
+        /// </summary>
         public DateTime SelectedDate
         {
             get => DateTime.TryParse(Text, out var date) ? date : DateTime.Now;
             set
             {
                 Text = value.ToString("yyyy-MM-dd");
-                NotifyPropertyChanged(nameof(SelectedDate));
             }
         }
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CellModel.Text))
             {

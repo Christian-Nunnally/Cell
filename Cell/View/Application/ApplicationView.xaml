@@ -93,7 +93,7 @@
             </DockPanel>
             <Grid Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <local:TitleBarSheetNavigation
-                    DataContext="{Binding TitleBarSheetNavigationViewModel}"
+                    x:Name="_titleBarSheetNavigationView"
                     DockPanel.Dock="Bottom"
                     WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>

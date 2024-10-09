@@ -8,17 +8,7 @@
         private string _localNotes = string.Empty;
         private string _name = "";
         private string _unit = string.Empty;
-        //private string _name = 0;
-        //public string Name
-        //{
-        //    get => _unit;
-        //    set
-        //    {
-        //        if (value == _name) return;
-        //        _name = value;
-        //        OnPropertyChanged(nameof(Name));
-        //    }
-        //}
+
         public string Category
         {
             get => _localCategory;

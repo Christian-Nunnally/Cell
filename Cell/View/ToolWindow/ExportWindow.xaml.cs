@@ -6,7 +6,12 @@ namespace Cell.View.ToolWindow
 {
     public partial class ExportWindow : ResizableToolWindow
     {
-        private ExportWindowViewModel _viewModel;
+        private readonly ExportWindowViewModel _viewModel;
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="ExportWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public ExportWindow(ExportWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;

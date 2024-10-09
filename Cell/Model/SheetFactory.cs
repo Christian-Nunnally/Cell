@@ -34,5 +34,10 @@ namespace Cell.Model
                 }
             }
         }
+
+        internal static void CreateSheet(string newSheetName, int initialRows, int initialColumns, object cellTracker)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -6,7 +6,11 @@ namespace Cell.View.ToolWindow
 {
     public partial class ImportWindow : ResizableToolWindow
     {
-        private ImportWindowViewModel _viewModel;
+        private readonly ImportWindowViewModel _viewModel;
+        /// <summary>
+        /// Creates a new instance of the <see cref="ImportWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public ImportWindow(ImportWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;

@@ -13,7 +13,7 @@ namespace CellTest
     {
         private const string TestCollectionName = "TestCollection";
         private const string TestSortFunctionName = "TestSortFunction";
-        private static TestFileIO _testFileIO;
+        private static DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
@@ -24,7 +24,7 @@ namespace CellTest
 
         private UserCollection CreateTestInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _cellLoader = new CellLoader(_persistedDirectory);

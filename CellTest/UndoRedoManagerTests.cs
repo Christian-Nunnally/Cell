@@ -16,7 +16,7 @@ namespace CellTest
 
         private UndoRedoManager GetInstance()
         {
-            _persistanceManager = new PersistedDirectory("", new TestFileIO());
+            _persistanceManager = new PersistedDirectory("", new DictionaryFileIO());
             _cellLoader = new CellLoader(_persistanceManager);
             _cellTracker = new CellTracker(_cellLoader);
             return new UndoRedoManager(_cellTracker);

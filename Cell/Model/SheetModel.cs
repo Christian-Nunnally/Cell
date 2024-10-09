@@ -8,10 +8,22 @@ namespace Cell.Model
     /// </summary>
     public class SheetModel : PropertyChangedBase
     {
+        /// <summary>
+        /// A null sheet model that can be used as a placeholder.
+        /// </summary>
         public static readonly SheetModel Null = new("");
+
+        /// <summary>
+        /// The name of the sheet before it was changed.
+        /// </summary>
         public string OldName;
         private CellModel? _cornerCell;
         private string _name = string.Empty;
+        /// <summary>
+        /// Creates a new instance of <see cref="SheetModel"/>.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet.</param>
+        /// <exception cref="ArgumentException">If the name is invalid.</exception>
         public SheetModel(string sheetName)
         {
             Name = sheetName;
@@ -19,8 +31,14 @@ namespace Cell.Model
             OldName = sheetName;
         }
 
+        /// <summary>
+        /// The cells in this sheet.
+        /// </summary>
         public ObservableCollection<CellModel> Cells { get; set; } = [];
 
+        /// <summary>
+        /// The corner cell of the sheet. This cell is used to store the sheet's properties.
+        /// </summary>
         public CellModel? CornerCell
         {
             get => _cornerCell;
@@ -31,6 +49,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Whether or not the sheet name is visible in the top bar.
+        /// </summary>
         public bool IsVisibleInTopBar
         {
             get => CornerCell?.Properties.GetBooleanProperty("IsVisibleInTopBar", true) ?? true;
@@ -45,6 +66,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the name of the sheet.
+        /// </summary>
         public string Name
         {
             get => _name;
@@ -58,6 +82,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the order of the sheet. Sheets can be ordered by this value in various places.
+        /// </summary>
         public int Order
         {
             get => (int)(CornerCell?.Properties.GetNumericProperty("SheetOrder") ?? 0);

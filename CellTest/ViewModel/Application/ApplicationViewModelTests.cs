@@ -10,7 +10,7 @@ namespace CellTest.ViewModel.Application
 {
     public class ApplicationViewModelTests
     {
-        private static TestFileIO _testFileIO;
+        private static DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private PersistedDirectory _backupDirectory;
         private UserCollectionLoader _userCollectionLoader;
@@ -20,7 +20,6 @@ namespace CellTest.ViewModel.Application
         private PluginFunctionLoader _pluginFunctionLoader;
         private CellTracker _cellTracker;
         private SheetTracker _sheetTracker;
-        private TitleBarSheetNavigationViewModel _titleBarSheetNavigationViewModel;
         private ApplicationSettings _applicationSettings;
         private UndoRedoManager _undoRedoManager;
         private ITextClipboard _textClipboard;
@@ -31,7 +30,7 @@ namespace CellTest.ViewModel.Application
 
         private ApplicationViewModel CreateTestInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);
             _persistedProject = new PersistedProject(_persistedDirectory);
@@ -46,10 +45,9 @@ namespace CellTest.ViewModel.Application
             _cellSelector = new CellSelector(_cellTracker);
             _applicationSettings = new ApplicationSettings();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
-            _titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(_sheetTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            return new ApplicationViewModel(_persistedDirectory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _titleBarSheetNavigationViewModel, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            return new ApplicationViewModel(_persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]

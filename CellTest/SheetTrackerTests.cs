@@ -12,13 +12,13 @@ namespace CellTest
         private CellTracker _cellTracker;
         private PluginFunctionLoader _pluginFunctionLoader;
         private UserCollectionLoader _userCollectionLoader;
-        private TestFileIO _testFileIO;
+        private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
 
         private SheetTracker CreateInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);

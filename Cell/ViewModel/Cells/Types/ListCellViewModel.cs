@@ -16,7 +16,7 @@ namespace Cell.ViewModel.Cells.Types
         {
         }
 
-        public object? SelectedItem
+        public string SelectedItem
         {
             get => Model.Properties[nameof(SelectedItem)];
             set

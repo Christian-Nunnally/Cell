@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
@@ -16,12 +17,25 @@ namespace Cell.ViewModel.Cells.Types
         /// <param name="sheet">The sheet this cell is visible on.</param>
         public DropdownCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
+            Model.PropertyChanged += ModelPropertyChanged;
+        }
+
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.Text))
+            {
+                NotifyPropertyChanged(nameof(SelectedItem));
+            }
         }
 
         /// <summary>
         /// The selected item binding for the dropdown.
         /// </summary>
-        public string SelectedItem { get; set; } = string.Empty;
+        public string SelectedItem
+        {
+            get => Text;
+            set => Text = value;
+        }
 
         /// <summary>
         /// What is displayed in the dropdown.

@@ -7,6 +7,10 @@ namespace Cell.View.ToolWindow
     {
         private readonly CellSettingsEditWindowViewModel _viewModel;
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="CellSettingsEditWindow"/> class.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public CellSettingsEditWindow(CellSettingsEditWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;

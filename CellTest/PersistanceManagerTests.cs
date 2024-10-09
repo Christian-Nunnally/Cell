@@ -8,7 +8,7 @@ namespace CellTest
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = new PersistedDirectory("", new TestFileIO());
+            var _ = new PersistedDirectory("", new DictionaryFileIO());
         }
     }
 }

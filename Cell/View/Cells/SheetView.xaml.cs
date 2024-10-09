@@ -15,12 +15,19 @@ namespace Cell.View.Cells
         private PanAndZoomCanvas? _panAndZoomCanvas;
         private bool _selectingCells = false;
         private CellViewModel? _selectionStart;
+        /// <summary>
+        /// Creates a new instance of <see cref="SheetView"/>.
+        /// </summary>
+        /// <param name="sheetViewModel">The view model for this view.</param>
         public SheetView(SheetViewModel sheetViewModel)
         {
             DataContext = sheetViewModel;
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Gets or sets whether the canvas is locked to the center of the screen. which results in it snapping to the center when the window size changes.
+        /// </summary>
         public bool IsLockedToCenter
         {
             get => _panAndZoomCanvas?.IsLockedToCenter ?? true;
@@ -30,6 +37,9 @@ namespace Cell.View.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether panning is enabled on the canvas.
+        /// </summary>
         public bool IsPanningEnabled
         {
             get => _panAndZoomCanvas?.IsPanningEnabled ?? false;
@@ -42,16 +52,19 @@ namespace Cell.View.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the view model for the sheet.
+        /// </summary>
         public SheetViewModel SheetViewModel => DataContext as SheetViewModel ?? SheetViewModel.NullSheet;
 
+        /// <summary>
+        /// Pans the canvas to the specified location.
+        /// </summary>
+        /// <param name="x">The x sheet coordinate to pan to.</param>
+        /// <param name="y">The y sheet coordinate to pan to.</param>
         public void PanCanvasTo(double x, double y)
         {
             _panAndZoomCanvas?.PanCanvasTo(x, y);
-        }
-
-        public void ZoomCanvasTo(Point point, double zoom)
-        {
-            _panAndZoomCanvas?.ZoomCanvasTo(point, zoom);
         }
 
         private bool CanSelectCell(CellModel? cell)

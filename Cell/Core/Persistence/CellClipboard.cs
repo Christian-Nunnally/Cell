@@ -44,33 +44,40 @@ namespace Cell.Persistence
         /// <summary>
         /// Attempts to paste the copied cells into the selected cells.
         /// </summary>
-        /// <param name="pasteIntoCellStart">The cell to consider as top left when pasting multiple cells.</param>
         /// <param name="selectedCells"></param>
-        public void PasteIntoCells(CellModel pasteIntoCellStart, IEnumerable<CellModel> selectedCells)
+        public void PasteIntoCells(IEnumerable<CellModel> selectedCells)
         {
-            // TODO: do I need pasteIntoCellStart?
-            IEnumerable<CellModel>? clipboard = null;
+            var highestCellRow = selectedCells.Max(x => x.Location.Row);
+            var cellsInHighestRow = selectedCells.Where(x => x.Location.Row == highestCellRow);
+            var leftmostColumnInTopMostRow = cellsInHighestRow.Min(x => x.Location.Column);
+            var pasteIntoCellStart = cellsInHighestRow.First(x => x.Location.Column == leftmostColumnInTopMostRow);
+
+            if (!TryGetCellsFromClipboard(out var cells)) return;
+            var centerOfCopy = cells!.First();
+
+            if (cells!.Count() == 1) PasteTheOneCopiedCellIntoAllSelectedCells(selectedCells, cells!);
+            else PasteEachCopiedCellInRespectingOffsetFromStart(pasteIntoCellStart, cells!, centerOfCopy);
+        }
+
+        private bool TryGetCellsFromClipboard(out IEnumerable<CellModel>? cells)
+        {
+            cells = [];
             if (_textClipboard.ContainsText())
             {
                 try
                 {
                     if (JsonSerializer.Deserialize(_textClipboard.GetText(), typeof(List<CellModel>)) is List<CellModel> cellsFromClipboard)
                     {
-                        clipboard = cellsFromClipboard;
+                        cells = cellsFromClipboard;
                     }
                 }
                 catch
                 {
                     _copyTextOnly = true;
-                    clipboard = [new CellModel { Text = _textClipboard.GetText() }];
+                    cells = [new CellModel { Text = _textClipboard.GetText() }];
                 }
             }
-            if (clipboard is null) return;
-            if (!clipboard.Any()) return;
-            var centerOfCopy = clipboard.First();
-
-            if (clipboard.Count() == 1) PasteTheOneCopiedCellIntoAllSelectedCells(selectedCells, clipboard);
-            else PasteEachCopiedCellInRespectingOffsetFromStart(pasteIntoCellStart, clipboard, centerOfCopy);
+            return cells.Any();
         }
 
         private void PasteCopiedCell(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)

@@ -12,7 +12,7 @@ namespace CellTest.ViewModel.Cell.Types
 {
     public class CornerCellViewModelTests
     {
-        private TestFileIO _testFileIO;
+        private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
         private CellTracker _cellTracker;
@@ -25,10 +25,11 @@ namespace CellTest.ViewModel.Cell.Types
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
         private CellSelector _cellSelector;
+        private CellTriggerManager _cellTriggerManager;
 
         private CornerCellViewModel CreateInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
@@ -39,7 +40,8 @@ namespace CellTest.ViewModel.Cell.Types
             _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new CornerCellViewModel(_cellModel, _sheetViewModel);
         }

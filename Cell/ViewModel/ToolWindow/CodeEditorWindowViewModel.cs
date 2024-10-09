@@ -135,12 +135,6 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        private string UserFriendlyCodeString
-        { 
-            get => FunctionBeingEdited.GetUserFriendlyCode(CellContext, _collectionNameToDataTypeMap); 
-            set => FunctionBeingEdited.SetUserFriendlyCode(value, CellContext, _collectionNameToDataTypeMap); 
-        }
-
         /// <summary>
         /// Occurs when the tool window is really being closed.
         /// </summary>

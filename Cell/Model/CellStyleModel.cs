@@ -4,6 +4,9 @@ using System.Windows;
 
 namespace Cell.Model
 {
+    /// <summary>
+    /// The model for the style of a cell.
+    /// </summary>
     public class CellStyleModel : PropertyChangedBase
     {
         private string _backgroundColorHex = "#000000";
@@ -23,6 +26,9 @@ namespace Cell.Model
         private string _margin = "0";
         private TextAlignment _textAlignment = TextAlignment.Center;
         private VerticalAlignment _verticalAlignment = VerticalAlignment.Center;
+        /// <summary>
+        /// Gets or sets the background color of the cell.
+        /// </summary>
         public string BackgroundColor
         {
             get => _backgroundColorHex;
@@ -36,9 +42,15 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets the cell model that this style is applied to.
+        /// </summary>
         [JsonIgnore]
         public CellModel? CellModel { get; internal set; }
 
+        /// <summary>
+        /// Gets or sets whether the font is bold.
+        /// </summary>
         public bool Bold
         {
             get => _isFontBold;
@@ -50,6 +62,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the border thickness of the cell.
+        /// </summary>
         public string Border
         {
             get { return _borderThickness; }
@@ -61,6 +76,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the background color of the border of the cell
+        /// </summary>
         public string BorderColor
         {
             get => _borderColorHex;
@@ -74,6 +92,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the background color of the content of the cell.
+        /// </summary>
         public string ContentBackgroundColor
         {
             get => _contentBackgroundColorHex;
@@ -87,6 +108,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the thickness of the border of the content of the cell.
+        /// </summary>
         public string ContentBorder
         {
             get => _contentBorderThickness;
@@ -98,6 +122,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color of the border of the content of the cell.
+        /// </summary>
         public string ContentBorderColor
         {
             get => _contentBorderColorHex;
@@ -111,6 +138,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the margin of the content of the cell.
+        /// </summary>
         public string ContentMargin
         {
             get => _margin;
@@ -122,6 +152,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font of the cell.
+        /// </summary>
         public string Font
         {
             get => _font;
@@ -133,6 +166,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font size of the cell.
+        /// </summary>
         public double FontSize
         {
             get => _fontSize;
@@ -144,6 +180,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color of the foreground of the cell.
+        /// </summary>
         public string ForegroundColor
         {
             get => _foregroundColorHex;
@@ -157,6 +196,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color of the mouse over highlight of the cell.
+        /// </summary>
         public string HighlightColor
         {
             get => _highlightColorHex;
@@ -170,6 +212,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the horizontal alignment of the content of the cell.
+        /// </summary>
         public HorizontalAlignment HorizontalAlignment
         {
             get => _horizontalAlignment;
@@ -181,6 +226,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether the font is italic.
+        /// </summary>
         public bool Italic
         {
             get => _isFontItalic;
@@ -192,6 +240,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the strikethrough property of the font.
+        /// </summary>
         public bool Strikethrough
         {
             get => _isFontStrikethrough;
@@ -203,6 +254,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the text alignment of the cell.
+        /// </summary>
         public TextAlignment TextAlignment
         {
             get => _textAlignment;
@@ -214,6 +268,9 @@ namespace Cell.Model
             }
         }
 
+        /// <summary>
+        /// Gets or sets the vertical alignment of the cell.
+        /// </summary>
         public VerticalAlignment VerticalAlignment
         {
             get => _verticalAlignment;

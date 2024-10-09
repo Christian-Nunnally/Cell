@@ -8,10 +8,17 @@ namespace Cell.View.Application
 {
     public partial class PanAndZoomCanvas : Canvas
     {
+        private const double _zoomfactor = 1.15;
         private readonly Dictionary<CellViewModel, FrameworkElement> _viewModelToViewMap = [];
+        private double _currentZoom = 1.0;
         private Point _initialMousePosition;
         private bool _isLockedToCenter = true;
         private MatrixTransform _transform = new();
+        private double _xPan;
+        private double _yPan;
+        /// <summary>
+        /// Creates a new instance of the <see cref="PanAndZoomCanvas"/>.
+        /// </summary>
         public PanAndZoomCanvas()
         {
             InitializeComponent();
@@ -23,8 +30,9 @@ namespace Cell.View.Application
             SizeChanged += PanAndZoomCanvasSizeChanged;
         }
 
-        public double CurrentZoom { get; set; } = 1.0;
-
+        /// <summary>
+        /// Gets or sets a value indicating whether the canvas chuldren should automatically pan to be centered in the view.
+        /// </summary>
         public bool IsLockedToCenter
         {
             get => _isLockedToCenter; set
@@ -34,31 +42,38 @@ namespace Cell.View.Application
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether panning the canvas is allowed.
+        /// </summary>
         public bool IsPanningEnabled { get; set; } = true;
 
+        /// <summary>
+        /// Gets the height of the canvas after it has been laid out.
+        /// </summary>
         public double LaidOutHeight { get; internal set; }
 
+        /// <summary>
+        /// Gets the width of the canvas after it has been laid out.
+        /// </summary>
         public double LaidOutWidth { get; internal set; }
 
-        public double XPan { get; private set; }
-
-        public double YPan { get; private set; }
-
-        public double Zoomfactor { get; set; } = 1.15;
-
+        /// <summary>
+        /// Pan the canvas to the specified coordinates.
+        /// </summary>
+        /// <param name="x">The x coordinate.</param>
+        /// <param name="y">The y coordinate.</param>
         public void PanCanvasTo(double x, double y)
         {
-            XPan = -x;
-            YPan = -y;
+            _xPan = -x;
+            _yPan = -y;
             ArrangeItemsForPanAndZoom();
         }
 
-        public void ZoomCanvasTo(Point centerOfZoom, double zoom)
-        {
-            double scaleFactor = zoom / CurrentZoom;
-            ZoomCanvas(centerOfZoom, scaleFactor);
-        }
-
+        /// <summary>
+        /// Occurs when the visual children of a <see cref="PanAndZoomCanvas"/> change.
+        /// </summary>
+        /// <param name="visualAdded">The added visual if any.</param>
+        /// <param name="visualRemoved">The removed visual if any.</param>
         protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved)
         {
             if (visualAdded != null)
@@ -75,8 +90,8 @@ namespace Cell.View.Application
                         double x = cellViewModel.X;
                         double y = cellViewModel.Y;
 
-                        double sx = x * CurrentZoom;
-                        double sy = y * CurrentZoom;
+                        double sx = x * _currentZoom;
+                        double sy = y * _currentZoom;
 
                         SetLeft(element, sx);
                         SetTop(element, sy);
@@ -100,10 +115,10 @@ namespace Cell.View.Application
         private void ArrangeItemsForPanAndZoom()
         {
             _transform = new MatrixTransform();
-            var translate = new TranslateTransform(XPan, YPan);
+            var translate = new TranslateTransform(_xPan, _yPan);
             _transform.Matrix = translate.Value * _transform.Matrix;
             Matrix scaleMatrix = _transform.Matrix;
-            scaleMatrix.ScaleAt(CurrentZoom, CurrentZoom, 0, 0);
+            scaleMatrix.ScaleAt(_currentZoom, _currentZoom, 0, 0);
             _transform.Matrix = scaleMatrix;
             foreach (UIElement child in Children)
             {
@@ -111,8 +126,8 @@ namespace Cell.View.Application
                 {
                     if (element.DataContext is CellViewModel cellViewModel)
                     {
-                        double sx = cellViewModel.X * CurrentZoom;
-                        double sy = cellViewModel.Y * CurrentZoom;
+                        double sx = cellViewModel.X * _currentZoom;
+                        double sy = cellViewModel.Y * _currentZoom;
                         SetLeft(child, sx);
                         SetTop(child, sy);
                         element.RenderTransform = _transform;
@@ -133,14 +148,14 @@ namespace Cell.View.Application
                         {
                             element.RenderTransform = _transform;
                             double x = cellViewModel.X;
-                            double sx = x * CurrentZoom;
+                            double sx = x * _currentZoom;
                             SetLeft(element, sx);
                         }
                         else if (e.PropertyName == nameof(CellViewModel.Y))
                         {
                             element.RenderTransform = _transform;
                             double y = cellViewModel.Y;
-                            double sy = y * CurrentZoom;
+                            double sy = y * _currentZoom;
                             SetTop(element, sy);
                         }
                     }
@@ -182,7 +197,7 @@ namespace Cell.View.Application
 
         private void OnPanAndZoomCanvasMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            double scaleFactor = Zoomfactor;
+            double scaleFactor = _zoomfactor;
             if (e.Delta < 0) scaleFactor = 1.0f / scaleFactor;
             if (IsPanningEnabled) ZoomCanvas(e.GetPosition(this), scaleFactor);
             else ZoomCanvas(new Point(ActualWidth / 2, ActualHeight / 2), scaleFactor);
@@ -200,14 +215,14 @@ namespace Cell.View.Application
         {
             if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
             if (ActualWidth == 0 || ActualHeight == 0) return;
-            var horizontialCenter = LaidOutWidth / 2 - ActualWidth / CurrentZoom / 2;
-            var verticalCenter = LaidOutHeight / 2 - ActualHeight / CurrentZoom / 2;
+            var horizontialCenter = LaidOutWidth / 2 - ActualWidth / _currentZoom / 2;
+            var verticalCenter = LaidOutHeight / 2 - ActualHeight / _currentZoom / 2;
             PanCanvasTo(horizontialCenter, verticalCenter);
         }
 
         private void ZoomCanvas(Point centerOfZoom, double scaleFactor)
         {
-            CurrentZoom *= scaleFactor;
+            _currentZoom *= scaleFactor;
             Matrix scaleMatrix = _transform.Matrix;
             scaleMatrix.ScaleAt(scaleFactor, scaleFactor, centerOfZoom.X, centerOfZoom.Y);
             _transform.Matrix = scaleMatrix;
@@ -221,8 +236,8 @@ namespace Cell.View.Application
                         double x = cellViewModel.X;
                         double y = cellViewModel.Y;
 
-                        double sx = x * CurrentZoom;
-                        double sy = y * CurrentZoom;
+                        double sx = x * _currentZoom;
+                        double sy = y * _currentZoom;
 
                         SetLeft(child, sx);
                         SetTop(child, sy);

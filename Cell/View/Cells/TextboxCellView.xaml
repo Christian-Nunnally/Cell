@@ -18,7 +18,6 @@
             FontSize="{Binding FontSize}"
             GotFocus="CellTextBoxGotFocus"
             Loaded="CellTextBoxLoaded"
-            LostFocus="CellTextBoxLostFocus"
             PreviewKeyDown="PreviewTextBoxKeyDownForCell"
             Text="{Binding Path=Text, Mode=TwoWay}" />
     </DataTemplate>

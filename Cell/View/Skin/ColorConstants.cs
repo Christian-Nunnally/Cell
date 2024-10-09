@@ -3,6 +3,9 @@ using System.Windows.Media;
 
 namespace Cell.View.Skin
 {
+    /// <summary>
+    /// Colors used in the application.
+    /// </summary>
     public class ColorConstants
     {
         public const string AccentColorConstantHex = "#007acc";

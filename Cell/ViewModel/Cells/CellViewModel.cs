@@ -7,9 +7,15 @@ using System.Windows.Media;
 
 namespace Cell.ViewModel.Cells
 {
+    /// <summary>
+    /// The base class for all cell view models.
+    /// </summary>
     public abstract class CellViewModel : PropertyChangedBase
     {
         private readonly CellModel _model;
+        /// <summary>
+        /// The sheet view model that this cell view model belongs to.
+        /// </summary>
         protected SheetViewModel _sheetViewModel;
         private SolidColorBrush _backgroundColor = new();
         private SolidColorBrush _borderColor = new();
@@ -26,6 +32,11 @@ namespace Cell.ViewModel.Cells
         private SolidColorBrush _selectionColor = ColorAdjuster.ConvertHexStringToBrush("#ffff0000");
         private double _x;
         private double _y;
+        /// <summary>
+        /// Creates a new instance of <see cref="CellViewModel"/>.
+        /// </summary>
+        /// <param name="model">The cells model.</param>
+        /// <param name="sheet">The sheet this cell is owned by.</param>
         public CellViewModel(CellModel model, SheetViewModel sheet)
         {
             _sheetViewModel = sheet;
@@ -270,6 +281,9 @@ namespace Cell.ViewModel.Cells
 
         public virtual string ID { get => _model.ID; }
 
+        /// <summary>
+        /// Gets or sets the index of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual int Index
         {
             get => _model.Index;
@@ -281,6 +295,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the cell is highlighted and records the state if undo redo is recording.
+        /// </summary>
         public virtual bool IsHighlighted
         {
             get => _isHighlighted;
@@ -292,6 +309,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the cell is selected.
+        /// </summary>
         public virtual bool IsSelected
         {
             get => _isSelected;
@@ -303,6 +323,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the thickness margin of the cell for the view.
+        /// </summary>
         public virtual Thickness Margin
         {
             get => _margin; private set
@@ -312,10 +335,17 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the model for the cell.
+        /// </summary>
         public CellModel Model => _model;
 
+        /// <summary>
+        /// Gets or sets the row of the cell.
+        /// </summary>
         public virtual int Row
         {
+            // TODO: record state if undo redo is recording
             get => _model.Location.Row;
             set { _model.Location.Row = value; }
         }

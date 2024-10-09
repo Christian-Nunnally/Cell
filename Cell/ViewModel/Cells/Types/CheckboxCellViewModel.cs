@@ -1,6 +1,5 @@
 ﻿using Cell.Execution;
 using Cell.Model;
-using Cell.ViewModel.Application;
 using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
@@ -68,7 +67,7 @@ namespace Cell.ViewModel.Cells.Types
                 var oldValue = IsChecked;
                 if (oldValue == value) return;
                 Model.Check(value);
-                ApplicationViewModel.Instance.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(IsChecked), oldValue, value));
+                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(IsChecked), oldValue, value));
             }
         }
 

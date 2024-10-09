@@ -10,6 +10,9 @@ namespace Cell.View.Application
     /// </summary>
     public partial class TitleBarSheetNavigation : UserControl
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="TitleBarSheetNavigation"/>.
+        /// </summary>
         public TitleBarSheetNavigation()
         {
             InitializeComponent();

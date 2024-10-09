@@ -97,5 +97,11 @@ namespace Cell.Persistence
         {
             _projectDirectory.SaveFile(VersionFileName, Version);
         }
+
+        /// <summary>
+        /// Gets the root path for this project;
+        /// </summary>
+        /// <returns>The full path to the project directory.</returns>
+        internal string GetRootPath() => _projectDirectory.GetFullPath();
     }
 }

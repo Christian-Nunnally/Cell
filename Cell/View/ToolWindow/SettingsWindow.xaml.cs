@@ -7,7 +7,11 @@ namespace Cell.View.ToolWindow
 {
     public partial class SettingsWindow : ResizableToolWindow
     {
-        private SettingsWindowViewModel _viewModel;
+        private readonly SettingsWindowViewModel _viewModel;
+        /// <summary>
+        /// Creates a new instance of <see cref="SettingsWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public SettingsWindow(SettingsWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;
@@ -23,24 +27,18 @@ namespace Cell.View.ToolWindow
         private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+            _viewModel.OpenEditorForDefaultCellFormat();
         }
 
         private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
-            ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
+            _viewModel.OpenEditorForDefaultRowAndColumnCellFormat();
         }
 
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.PersistenceManager.GetFullPath();
+            ApplicationViewModel.Instance.PersistedProject.GetRootPath();
         }
 
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)

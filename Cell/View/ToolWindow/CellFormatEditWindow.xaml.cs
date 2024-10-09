@@ -11,15 +11,19 @@ namespace Cell.View.ToolWindow
 {
     public partial class CellFormatEditWindow : ResizableToolWindow
     {
+        /// <summary>
+        /// Creates a new instance of the <see cref="CellFormatEditWindow"/> class.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public CellFormatEditWindow(CellFormatEditWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;
             InitializeComponent();
         }
 
-        private CellFormatEditWindowViewModel _viewModel;
+        private readonly CellFormatEditWindowViewModel _viewModel;
 
-        public static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
+        private static void AddColorsToColorPicker(ObservableCollection<ColorItem> availableColors, List<string> colors, float brightnessFactor)
         {
             foreach (var color in colors)
             {

@@ -5,7 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DesignHeight="450"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
+    d:DataContext="{d:DesignInstance Type=viewModel:TitleBarSheetNavigationViewModel}"
+    d:DesignHeight="50"
     d:DesignWidth="800"
     WindowChrome.IsHitTestVisibleInChrome="True"
     mc:Ignorable="d">

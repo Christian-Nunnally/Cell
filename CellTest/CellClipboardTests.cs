@@ -12,14 +12,14 @@ namespace CellTest
     {
         private CellTracker _cellTracker;
         private UndoRedoManager _undoRedoManager;
-        private TestFileIO _testFileIO;
+        private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
         private TestTextClipboard _textClipboard;
 
         private CellClipboard CreateInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
@@ -43,7 +43,7 @@ namespace CellTest
             testing.CopyCells([cellToCopy], false);
             Assert.NotEqual(cellToCopy.Text, cellToPasteInto.Text);
 
-            testing.PasteIntoCells(cellToPasteInto, [cellToPasteInto]);
+            testing.PasteIntoCells([cellToPasteInto]);
 
             Assert.Equal(cellToCopy.Text, cellToPasteInto.Text);
         }
@@ -58,7 +58,7 @@ namespace CellTest
             testing.CopyCells([cellToCopy], false);
             Assert.NotEqual(cellToCopy.Style.FontSize, cellToPasteInto.Style.FontSize);
 
-            testing.PasteIntoCells(cellToPasteInto, [cellToPasteInto]);
+            testing.PasteIntoCells([cellToPasteInto]);
 
             Assert.Equal(cellToCopy.Style.FontSize, cellToPasteInto.Style.FontSize);
         }
@@ -72,7 +72,7 @@ namespace CellTest
             var cellToPasteInto = new CellModel();
             Assert.NotEqual(expectedText, cellToPasteInto.Text);
 
-            testing.PasteIntoCells(cellToPasteInto, [cellToPasteInto]);
+            testing.PasteIntoCells([cellToPasteInto]);
 
             Assert.Equal(expectedText, cellToPasteInto.Text);
         }

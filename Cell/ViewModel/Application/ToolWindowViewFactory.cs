@@ -4,8 +4,17 @@ using Cell.ViewModel.ToolWindow;
 
 namespace Cell.ViewModel.Application
 {
+    /// <summary>
+    /// Factory for creating tool window views for thier view models.
+    /// </summary>
     public class ToolWindowViewFactory
     {
+        /// <summary>
+        /// Creates a new instance of a tool window view for the given view model.
+        /// </summary>
+        /// <param name="viewModel">The view model to create the view for.</param>
+        /// <returns>The newly constructed view.</returns>
+        /// <exception cref="CellError">If the view doesn't exist for the given type.</exception>
         public static ResizableToolWindow Create(PropertyChangedBase viewModel)
         {
             return viewModel switch

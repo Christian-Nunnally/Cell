@@ -1,5 +1,6 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells.Types;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,6 +9,12 @@ namespace Cell.View.Cells
 {
     public partial class TextboxCellView : ResourceDictionary
     {
+        private static TextBox? _focusedTextBox;
+        private TextBox? _textbox;
+
+        /// <summary>
+        /// The view for a textbox cell.
+        /// </summary>
         public TextboxCellView()
         {
             InitializeComponent();
@@ -19,17 +26,38 @@ namespace Cell.View.Cells
 
         private void CellTextBoxLoaded(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox)
+            if (sender is TextBox textbox)
             {
-                if (textBox.DataContext is TextboxCellViewModel cell)
+                _textbox = textbox;
+                if (textbox.DataContext is TextboxCellViewModel cell)
                 {
-                    cell.SetTextBox(textBox);
+                    cell.PropertyChanged += CellViewModelPropertyChanged;
                 }
             }
         }
 
-        private void CellTextBoxLostFocus(object sender, RoutedEventArgs e)
+        private void CellViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (_textbox is null) return;
+            if (e.PropertyName != nameof(TextboxCellViewModel.IsSelected)) return;
+            if (sender is not TextboxCellViewModel textboxViewModel) return;
+            if (!textboxViewModel.IsSelected) return;
+            if (textboxViewModel.GetNumberOfSelectedCells() < 2)
+            {
+                _textbox.Focus();
+                _textbox.SelectAll();
+                _focusedTextBox = _textbox;
+            }
+            else
+            {
+                if (_focusedTextBox != null)
+                {
+                    _focusedTextBox.SelectionStart = _textbox.Text.Length; // Move caret to end
+                    _focusedTextBox.SelectionLength = 0; // Deselect all text
+                    Window.GetWindow(_focusedTextBox).Focus();
+                    _focusedTextBox = null;
+                }
+            }
         }
 
         private void PreviewTextBoxKeyDownForCell(object sender, KeyEventArgs e)

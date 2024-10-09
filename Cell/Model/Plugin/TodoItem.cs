@@ -82,6 +82,10 @@ namespace Cell.Model.Plugin
             set { if (value != _title) { _title = value; NotifyPropertyChanged(nameof(Title)); } }
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="TodoItem"/> with the exact same properties.
+        /// </summary>
+        /// <returns>The new todo item.</returns>
         public override object Clone()
         {
             return new TodoItem
@@ -100,6 +104,10 @@ namespace Cell.Model.Plugin
             };
         }
 
+        /// <summary>
+        /// Converts the todo item to a string.
+        /// </summary>
+        /// <returns>The string representation of the todo item.</returns>
         override public string ToString()
         {
             return $"{(IsComplete ? "✅" : "❎")} {Title}";

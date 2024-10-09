@@ -50,7 +50,7 @@ namespace Cell.ViewModel.Execution
                 var oldName = _model.Name;
                 _model.Name = value;
                 NotifyPropertyChanged(nameof(Name));
-                DialogFactory.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(oldName, value));
+                DialogFactory.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(ApplicationViewModel.Instance.CellTracker.AllCells, oldName, value));
             }
         }
 
@@ -64,12 +64,12 @@ namespace Cell.ViewModel.Execution
         /// </summary>
         public int UsageCount => CellsThatUseFunction.Count;
 
-        private static void RefactorCellsFunctionUseage(string oldName, string newName)
+        private static void RefactorCellsFunctionUseage(IEnumerable<CellModel> cells, string oldName, string newName)
         {
-            foreach (var cells in ApplicationViewModel.Instance.CellTracker.AllCells)
+            foreach (var cell in cells)
             {
-                if (cells.PopulateFunctionName == oldName) cells.PopulateFunctionName = newName;
-                if (cells.TriggerFunctionName == oldName) cells.TriggerFunctionName = newName;
+                if (cell.PopulateFunctionName == oldName) cell.PopulateFunctionName = newName;
+                if (cell.TriggerFunctionName == oldName) cell.TriggerFunctionName = newName;
             }
         }
     }

@@ -11,7 +11,11 @@ namespace Cell.View.ToolWindow
 {
     public partial class CollectionManagerWindow : ResizableToolWindow
     {
-        private CollectionManagerWindowViewModel _viewModel;
+        private readonly CollectionManagerWindowViewModel _viewModel;
+        /// <summary>
+        /// Creates a new instance of the <see cref="CollectionManagerWindow"/>.
+        /// </summary>
+        /// <param name="viewModel">The view model for this view.</param>
         public CollectionManagerWindow(CollectionManagerWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;

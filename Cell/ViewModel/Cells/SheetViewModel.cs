@@ -7,7 +7,6 @@ using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows.Media;
 
 namespace Cell.ViewModel.Cells
 {
@@ -19,21 +18,32 @@ namespace Cell.ViewModel.Cells
         /// <summary>
         /// A null sheet that can be used as a placeholder.
         /// </summary>
-        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!, null!);
+        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!, null!, null!);
         private readonly ApplicationSettings _applicationSettings;
         private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];
         private readonly CellPopulateManager _cellPopulateManager;
+        private readonly CellTriggerManager _cellTriggerManager;
         private readonly CellTracker _cellTracker;
         private readonly SheetModel _model;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
-        private readonly SheetTracker _sheetTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
-        private CellViewModel? _selectedCellViewModel;
         private double _sheetHeight;
         private double _sheetWidth;
+        /// <summary>
+        /// Creates a new instance of <see cref="SheetViewModel"/>.
+        /// </summary>
+        /// <param name="model">The sheet model for this sheet.</param>
+        /// <param name="cellPopulateManager">The cell populate manager used to run populate functions on cells.</param>
+        /// <param name="cellTriggerManager">The cell trigger manager used to run trigger functions on cells.</param>
+        /// <param name="cellTracker">The cell tracker used to get cells for this sheet.</param>
+        /// <param name="sheetTracker">The sheet tracker that contains this sheet and all the other sheets in the application.</param>
+        /// <param name="cellSelector">The cell selector used to select cells on the sheet.</param>
+        /// <param name="userCollectionLoader">The user collection loader used to get user collections during function executions</param>
+        /// <param name="applicationSettings">The global application settings object.</param>
+        /// <param name="pluginFunctionLoader">A plugin function loader used to get cell functions from the application.</param>
         public SheetViewModel(
             SheetModel model,
             CellPopulateManager cellPopulateManager,
+            CellTriggerManager cellTriggerManager,
             CellTracker cellTracker,
             SheetTracker sheetTracker,
             CellSelector cellSelector,
@@ -43,12 +53,11 @@ namespace Cell.ViewModel.Cells
         {
             _pluginFunctionLoader = pluginFunctionLoader;
             _applicationSettings = applicationSettings;
-            _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
-            _sheetTracker = sheetTracker;
             CellSelector = cellSelector;
-            if (cellSelector != null) cellSelector.SelectedCells.CollectionChanged += SelectedCellsChanged;
+            cellSelector.SelectedCells.CollectionChanged += SelectedCellsChanged;
             _cellPopulateManager = cellPopulateManager;
+            _cellTriggerManager = cellTriggerManager;
             _model = model;
             _model.Cells.CollectionChanged += CellsCollectionChanged;
             foreach (var cell in _model.Cells)
@@ -58,42 +67,44 @@ namespace Cell.ViewModel.Cells
             UpdateLayout();
         }
 
-        public ApplicationSettings ApplicationSettings => _applicationSettings;
-
+        /// <summary>
+        /// The populate manager used to run populate functions on cells.
+        /// </summary>
         public CellPopulateManager CellPopulateManager => _cellPopulateManager;
 
+        /// <summary>
+        /// The cell trigger manager used to run trigger functions on cells.
+        /// </summary>
+        public CellTriggerManager CellTriggerManager => _cellTriggerManager;
+
+        /// <summary>
+        /// The cell selector used to select cells on the sheet.
+        /// </summary>
         public CellSelector CellSelector { get; private set; }
 
+        /// <summary>
+        /// The cell tracker used to get cells for this sheet.
+        /// </summary>
         public CellTracker CellTracker => _cellTracker;
 
+        /// <summary>
+        /// The collection of cell view models for this sheet.
+        /// </summary>
         public ObservableCollection<CellViewModel> CellViewModels { get; set; } = [];
 
+        /// <summary>
+        /// The collection of cell view models that are currently highlighted.
+        /// </summary>
         public List<CellViewModel> HighlightedCellViewModels { get; } = [];
 
+        /// <summary>
+        /// Enables or disables the cell highlight on mouse over feature.
+        /// </summary>
         public bool IsCellHighlightOnMouseOverEnabled { get; internal set; } = true;
 
-        public PluginFunctionLoader PluginFunctionLoader => _pluginFunctionLoader;
-
-        public CellViewModel? SelectedCellViewModel
-        {
-            get => _selectedCellViewModel;
-            set
-            {
-                if (_selectedCellViewModel is not null)
-                {
-                    _selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 100));
-                    _selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 175));
-                }
-                _selectedCellViewModel = value;
-                if (_selectedCellViewModel is not null)
-                {
-                    _selectedCellViewModel.SelectionColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 100));
-                    _selectedCellViewModel.SelectionBorderColor = new SolidColorBrush(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(_selectedCellViewModel.BackgroundColorHex), 175));
-                }
-                NotifyPropertyChanged(nameof(SelectedCellViewModel));
-            }
-        }
-
+        /// <summary>
+        /// The height of all the cells on the sheet combined.
+        /// </summary>
         public double SheetHeight
         {
             get => _sheetHeight;
@@ -105,10 +116,14 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the name of the sheet.
+        /// </summary>
         public string SheetName => _model.Name;
 
-        public SheetTracker SheetTracker => _sheetTracker;
-
+        /// <summary>
+        /// The width of all the cells on the sheet combined.
+        /// </summary>
         public double SheetWidth
         {
             get => _sheetWidth;
@@ -120,16 +135,21 @@ namespace Cell.ViewModel.Cells
             }
         }
 
-        public UserCollectionLoader UserCollectionLoader => _userCollectionLoader;
-
-        public CellViewModel GetCellViewModel(CellModel cellModel) => _cellModelToCellViewModelMap[cellModel];
-
+        /// <summary>
+        /// Highlights the given cell with the given color.
+        /// </summary>
+        /// <param name="cellToHighlight">The cell to highlight.</param>
+        /// <param name="color">The color to highlight the cell with.</param>
         public void HighlightCell(CellViewModel cellToHighlight, string color)
         {
             cellToHighlight.HighlightCell(color);
             HighlightedCellViewModels.Add(cellToHighlight);
         }
 
+        /// <summary>
+        /// Deletes the given cell view model and creates a new one based on the models new type.
+        /// </summary>
+        /// <param name="cellViewModel">The view model to replace.</param>
         public void ReinstantiateCellsViewModel(CellViewModel cellViewModel)
         {
             RemoveCellViewModel(cellViewModel.Model);
@@ -137,12 +157,18 @@ namespace Cell.ViewModel.Cells
             UpdateLayout();
         }
 
+        /// <summary>
+        /// Removes all highlights from cells on the sheet.
+        /// </summary>
         public void UnhighlightAllCells()
         {
             foreach (var cellToUnHighlight in HighlightedCellViewModels) cellToUnHighlight.UnhighlightCell();
             HighlightedCellViewModels.Clear();
         }
 
+        /// <summary>
+        /// Recalculates the layout of the cells on the sheet.
+        /// </summary>
         public void UpdateLayout()
         {
             var layout = new CellLayout(CellViewModels, _cellTracker);
@@ -228,15 +254,8 @@ namespace Cell.ViewModel.Cells
             }
             else if (e.Action == NotifyCollectionChangedAction.Reset)
             {
-                foreach (var cell in CellViewModels.ToList()) UnselectCellViewModel(cell);
+                foreach (var cell in CellViewModels.ToList()) cell.IsSelected = false;
             }
-        }
-
-        private void UnselectCellViewModel(CellViewModel cell)
-        {
-            if (!cell.IsSelected) return;
-            cell.IsSelected = false;
-            if (SelectedCellViewModel == cell) SelectedCellViewModel = null;
         }
     }
 }

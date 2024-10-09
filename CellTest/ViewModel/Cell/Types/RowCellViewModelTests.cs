@@ -12,13 +12,14 @@ namespace CellTest.ViewModel.Cell.Types
 {
     public class RowCellViewModelTests
     {
-        private TestFileIO _testFileIO;
+        private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
         private CellTracker _cellTracker;
         private PluginFunctionLoader _pluginFunctionLoader;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
+        private CellTriggerManager _cellTriggerManager;
         private SheetModel _sheetModel;
         private SheetTracker _sheetTracker;
         private ApplicationSettings _applicationSettings;
@@ -28,18 +29,19 @@ namespace CellTest.ViewModel.Cell.Types
 
         private RowCellViewModel CreateInstance()
         {
-            _testFileIO = new TestFileIO();
+            _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
             _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new RowCellViewModel(_cellModel, _sheetViewModel);
         }

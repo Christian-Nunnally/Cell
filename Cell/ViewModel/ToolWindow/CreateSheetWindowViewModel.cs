@@ -86,7 +86,7 @@ namespace Cell.ViewModel.ToolWindow
         public void AddNewSheet()
         {
             if (!CanAddSheet()) return;
-            SheetFactory.CreateSheet(NewSheetName, _initialRows, _initialColumns, ApplicationViewModel.Instance.CellTracker);
+            SheetFactory.CreateSheet(NewSheetName, _initialRows, _initialColumns, _sheetTracker.CellTracker);
             ApplicationViewModel.Instance.GoToSheet(NewSheetName);
             NewSheetName = string.Empty;
             RequestClose?.Invoke();
