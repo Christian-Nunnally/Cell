@@ -1,5 +1,4 @@
-﻿using Cell.Execution;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -12,13 +11,15 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
-        private readonly CellPopulateManager _cellPopulateManager;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private CellModel _cellToDisplay = CellModel.Null;
         private string _multiUseUserInputText = string.Empty;
-        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellPopulateManager cellPopulateManager)
+        /// <summary>
+        /// Creates a new instance of the <see cref="CellContentEditWindowViewModel"/> class.
+        /// </summary>
+        /// <param name="cellsToEdit">The dynamic list of cells being edited by this tool window.</param>
+        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit)
         {
-            _cellPopulateManager = cellPopulateManager;
             _cellsToEdit = cellsToEdit;
         }
 
@@ -32,6 +33,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 500;
 
+        /// <summary>
+        /// Gets or sets the index of the cells being edited, recording the state to the undo/redo manager is recording.
+        /// </summary>
         public int Index
         {
             get => CellToDisplay.Index;
@@ -60,6 +64,11 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double MinimumWidth => 200;
 
+        /// <summary>
+        /// Gets or sets the text that the user has input into the content editor text box.
+        /// 
+        /// This might be normal text or a function name. If it is a function name it should start with an equals sign.
+        /// </summary>
         public string MultiUseUserInputText
         {
             get => _multiUseUserInputText;
@@ -139,6 +148,9 @@ namespace Cell.ViewModel.ToolWindow
             PickDisplayedCell();
         }
 
+        /// <summary>
+        /// Caused the cells to update their text to the value in the <see cref="MultiUseUserInputText"/> property, or the populate function if the text starts with an equals sign.
+        /// </summary>
         public void SubmitMultiUseUserInputText()
         {
             if (_multiUseUserInputText.StartsWith('=')) CellToDisplay.PopulateFunctionName = _multiUseUserInputText[1..].Trim();

@@ -75,6 +75,56 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
+        private static void EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(CellModel cellModel, CellModel? firstNeighbor, CellModel? secondNeighbor, CellTracker cellTracker)
+        {
+            var isThereAFirstNeighbor = firstNeighbor is not null && !firstNeighbor.CellType.IsSpecial();
+            var isThereASecondNeighbor = secondNeighbor is not null && !secondNeighbor.CellType.IsSpecial();
+
+            if (!isThereAFirstNeighbor && !isThereASecondNeighbor) return;
+            if (isThereAFirstNeighbor && !isThereASecondNeighbor) cellModel.Index = firstNeighbor!.Index + 1;
+            else if (isThereASecondNeighbor) FixIndexOfCellsAfterAddedCell(cellModel, secondNeighbor!, cellTracker);
+        }
+
+        private static void EnsureIndexStaysCumulativeWhenRemoving(CellModel removingCell, CellModel? nextCell, CellTracker cellTracker)
+        {
+            if (nextCell is null) return;
+            if (nextCell.CellType.IsSpecial()) return;
+            else FixIndexOfCellsAfterRemovingCell(removingCell, nextCell, cellTracker);
+        }
+
+        private static void FixIndexOfCellsAfterAddedCell(CellModel addedCell, CellModel nextCell, CellTracker cellTracker)
+        {
+            var xDifference = nextCell.Location.Column - addedCell.Location.Column;
+            var yDifference = nextCell.Location.Row - addedCell.Location.Row;
+            if (xDifference > 1 || yDifference > 1 || xDifference < 0 || yDifference < 0) throw new CellError("FixIndexOfCellsAfterAddedCell must be called with cells that are next to each other, and added cell must above or to the right of next cell");
+
+            addedCell.Index = nextCell.Index;
+            var searchingCell = nextCell;
+            int i = nextCell.Index;
+            while (searchingCell != null && searchingCell.Index == i)
+            {
+                searchingCell.Index++;
+                i++;
+                searchingCell = cellTracker.GetCell(nextCell.Location.SheetName, searchingCell.Location.Row + yDifference, searchingCell.Location.Column + xDifference);
+            }
+        }
+
+        private static void FixIndexOfCellsAfterRemovingCell(CellModel removedCell, CellModel nextCell, CellTracker cellTracker)
+        {
+            var xDifference = nextCell.Location.Column - removedCell.Location.Column;
+            var yDifference = nextCell.Location.Row - removedCell.Location.Row;
+            if (xDifference > 1 || yDifference > 1 || xDifference < 0 || yDifference < 0) throw new CellError("FixIndexOfCellsAfterRemovingCell must be called with cells that are next to each other, and added cell must above or to the right of next cell");
+
+            var searchingCell = nextCell;
+            int i = removedCell.Index + 1;
+            while (searchingCell != null && searchingCell.Index == i)
+            {
+                searchingCell.Index--;
+                i++;
+                searchingCell = cellTracker.GetCell(nextCell.Location.SheetName, searchingCell.Location.Row + yDifference, searchingCell.Location.Column + xDifference);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the bottom border thickness of all selected cells, recording changes to the undo stack.
         /// </summary>
@@ -908,7 +958,7 @@ namespace Cell.ViewModel.ToolWindow
             foreach (var cell in cellsToDelete)
             {
                 var nextCell = _cellTracker.GetCell(columnCell.Location.SheetName, cell.Location.Row, cell.Location.Column + 1);
-                cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
+                EnsureIndexStaysCumulativeWhenRemoving(cell, nextCell, _cellTracker);
                 _cellTracker.RemoveCell(cell);
             }
             IncrementColumnOfAllAtOrToTheRightOf(columnCell.Location.SheetName, location.Column, -1);
@@ -927,7 +977,7 @@ namespace Cell.ViewModel.ToolWindow
             foreach (var cell in cellsToDelete)
             {
                 var nextCell = _cellTracker.GetCell(rowCell.Location.SheetName, cell.Location.Row + 1, cell.Location.Column);
-                cell.EnsureIndexStaysCumulativeWhenRemoving(nextCell, _cellTracker);
+                EnsureIndexStaysCumulativeWhenRemoving(cell, nextCell, _cellTracker);
                 _cellTracker.RemoveCell(cell);
             }
             IncrementRowOfAllAtOrBelow(rowCell.Location.SheetName, location.Row, -1);
@@ -966,10 +1016,10 @@ namespace Cell.ViewModel.ToolWindow
         {
             var refactorer = new CellReferenceRefactorRewriter(x =>
             {
-                if (x.SheetName != sheetName) return x;
-                if (x.IsColumnRelative) return x;
-                if (x.Column >= columnIndex) x.Column += 1;
-                if (x.IsRange && x.ColumnRangeEnd + 1 >= columnIndex) x.ColumnRangeEnd += incrementAmount;
+                if (x.SheetReference.Value != sheetName) return x;
+                if (x.ColumnReference.IsRelative) return x;
+                if (x.ColumnReference.Value >= columnIndex) x.ColumnReference.Value += 1;
+                if (x.IsRange && x.ColumnRangeEndReference.Value + 1 >= columnIndex) x.ColumnRangeEndReference.Value += incrementAmount;
                 return x;
             });
             function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
@@ -986,10 +1036,10 @@ namespace Cell.ViewModel.ToolWindow
             // TODO: record this in undo stack.
             var refactorer = new CellReferenceRefactorRewriter(x =>
             {
-                if (x.SheetName != sheetName) return x;
-                if (x.IsRowRelative) return x;
-                if (x.Row >= rowIndex) x.Row += 1;
-                if (x.IsRange && x.RowRangeEnd + 1 >= rowIndex) x.RowRangeEnd += incrementAmount;
+                if (x.SheetReference.Value != sheetName) return x;
+                if (x.RowReference.IsRelative) return x;
+                if (x.RowReference.Value >= rowIndex) x.RowReference.Value += 1;
+                if (x.IsRange && x.RowRangeEndReference.Value + 1 >= rowIndex) x.RowRangeEndReference.Value+= incrementAmount;
                 return x;
             });
             function.Model.Code = refactorer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
@@ -1004,11 +1054,11 @@ namespace Cell.ViewModel.ToolWindow
             var rowIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Row).Select(x => x.Location.Row).ToList();
             foreach (var rowIndex in rowIndexs)
             {
-                var cellModel = CellModelFactory.Create(rowIndex, index, CellType.Label, sheetName, _cellTracker);
+                var cell = CellModelFactory.Create(rowIndex, index, CellType.Label, sheetName, _cellTracker);
                 var firstNeighbor = _cellTracker.GetCell(sheetName, rowIndex, index - 1);
                 var secondNeighbor = _cellTracker.GetCell(sheetName, rowIndex, index + 1);
-                cellModel.MergeCellIntoCellsIfTheyWereMerged(firstNeighbor, secondNeighbor);
-                cellModel.EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(firstNeighbor, secondNeighbor, _cellTracker);
+                MergeCellIntoCellsIfTheyWereMerged(cell, firstNeighbor, secondNeighbor);
+                EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
             foreach (var function in _pluginFunctionLoader.CellFunctions)
@@ -1026,17 +1076,23 @@ namespace Cell.ViewModel.ToolWindow
             var columnIndexs = _cellTracker.GetCellModelsForSheet(sheetName).Where(x => x.CellType == CellType.Column).Select(x => x.Location.Column).ToList();
             foreach (var columnIndex in columnIndexs)
             {
-                var cellModel = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, sheetName, _cellTracker);
+                var cell = CellModelFactory.Create(newRowIndex, columnIndex, CellType.Label, sheetName, _cellTracker);
                 var firstNeighbor = _cellTracker.GetCell(sheetName, newRowIndex - 1, columnIndex);
                 var secondNeighbor = _cellTracker.GetCell(sheetName, newRowIndex + 1, columnIndex);
-                cellModel.MergeCellIntoCellsIfTheyWereMerged(firstNeighbor, secondNeighbor);
-                cellModel.EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(firstNeighbor, secondNeighbor, _cellTracker);
+                MergeCellIntoCellsIfTheyWereMerged(cell, firstNeighbor, secondNeighbor);
+                EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
             foreach (var function in _pluginFunctionLoader.CellFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowModel.Location.SheetName, rowModel.Location.Row, function, 1);
             }
+        }
+
+        private static void MergeCellIntoCellsIfTheyWereMerged(CellModel cellToMerge, CellModel? firstCell, CellModel? secondCell)
+        {
+            if (firstCell == null || secondCell == null) return;
+            if (firstCell.IsMergedWith(secondCell)) cellToMerge.MergedWith = firstCell.MergedWith;
         }
 
         private void MergeCells(IEnumerable<CellModel> cells)

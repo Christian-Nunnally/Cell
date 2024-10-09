@@ -171,7 +171,7 @@ namespace Cell.View.Application
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.CellPopulateManager);
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
             ShowToolWindow(cellContentEditWindowViewModel);
         }
 

@@ -55,7 +55,12 @@ namespace Cell.Persistence
         /// <returns>The new collection.</returns>
         public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName = "")
         {
-            var model = new UserCollectionModel(collectionName, itemTypeName, baseCollectionName);
+            var model = new UserCollectionModel
+            {
+                Name = collectionName,
+                ItemTypeName = itemTypeName,
+                BasedOnCollectionName = baseCollectionName
+            };
             var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
             StartTrackingCollection(collection);
             SaveCollection(collection);

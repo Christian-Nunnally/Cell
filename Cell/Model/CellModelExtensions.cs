@@ -1,6 +1,4 @@
-﻿using Cell.Common;
-using Cell.Data;
-
+﻿
 namespace Cell.Model
 {
     /// <summary>
@@ -8,67 +6,28 @@ namespace Cell.Model
     /// </summary>
     public static class CellModelExtensions
     {
-        public static void EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(this CellModel cellModel, CellModel? firstNeighbor, CellModel? secondNeighbor, CellTracker cellTracker)
-        {
-            var isThereAFirstNeighbor = firstNeighbor is not null && !firstNeighbor.CellType.IsSpecial();
-            var isThereASecondNeighbor = secondNeighbor is not null && !secondNeighbor.CellType.IsSpecial();
+        /// <summary>
+        /// Determines if the cell is merged with a cell.
+        /// </summary>
+        /// <param name="cell">The cell to see if it is a merged cell.</param>
+        /// <returns>True if the cell is merged with any other cells.</returns>
+        public static bool IsMerged(this CellModel cell) => !string.IsNullOrWhiteSpace(cell.MergedWith);
 
-            if (!isThereAFirstNeighbor && !isThereASecondNeighbor) return;
-            if (isThereAFirstNeighbor && !isThereASecondNeighbor) cellModel.Index = firstNeighbor!.Index + 1;
-            else if (isThereASecondNeighbor) FixIndexOfCellsAfterAddedCell(cellModel, secondNeighbor!, cellTracker);
-        }
+        /// <summary>
+        /// Determines if the cell is the parent of a group of merged cells. This is the cell that is displayed, and the other cells are hidden.
+        /// </summary>
+        /// <param name="cell">The cell to check.</param>
+        /// <returns>True if the cell is the merge parent.</returns>
+        public static bool IsMergedParent(this CellModel cell) => cell.MergedWith == cell.ID;
 
-        public static void EnsureIndexStaysCumulativeWhenRemoving(this CellModel removingCell, CellModel? nextCell, CellTracker cellTracker)
-        {
-            if (nextCell is null) return;
-            if (nextCell.CellType.IsSpecial()) return;
-            else FixIndexOfCellsAfterRemovingCell(removingCell, nextCell, cellTracker);
-        }
+        /// <summary>
+        /// Determines if the cell is merged with another cell.
+        /// </summary>
+        /// <param name="cell">The first cell.</param>
+        /// <param name="other">The second cell.</param>
+        /// <returns>True if the two cells are merged.</returns>
+        public static bool IsMergedWith(this CellModel cell, CellModel other) => cell.IsMerged() && cell.MergedWith == other.MergedWith;
 
-        public static bool IsMerged(this CellModel model) => !string.IsNullOrWhiteSpace(model.MergedWith);
-
-        public static bool IsMergedParent(this CellModel model) => model.MergedWith == model.ID;
-
-        public static bool IsMergedWith(this CellModel model, CellModel other) => model.IsMerged() && model.MergedWith == other.MergedWith;
-
-        public static void MergeCellIntoCellsIfTheyWereMerged(this CellModel cellToMerge, CellModel? firstCell, CellModel? secondCell)
-        {
-            if (firstCell == null || secondCell == null) return;
-            if (firstCell.IsMergedWith(secondCell)) cellToMerge.MergedWith = firstCell.MergedWith;
-        }
-
-        private static void FixIndexOfCellsAfterAddedCell(CellModel addedCell, CellModel nextCell, CellTracker cellTracker)
-        {
-            var xDifference = nextCell.Location.Column - addedCell.Location.Column;
-            var yDifference = nextCell.Location.Row - addedCell.Location.Row;
-            if (xDifference > 1 || yDifference > 1 || xDifference < 0 || yDifference < 0) throw new CellError("FixIndexOfCellsAfterAddedCell must be called with cells that are next to each other, and added cell must above or to the right of next cell");
-
-            addedCell.Index = nextCell.Index;
-            var searchingCell = nextCell;
-            int i = nextCell.Index;
-            while (searchingCell != null && searchingCell.Index == i)
-            {
-                searchingCell.Index++;
-                i++;
-                searchingCell = cellTracker.GetCell(nextCell.Location.SheetName, searchingCell.Location.Row + yDifference, searchingCell.Location.Column + xDifference);
-            }
-        }
-
-        private static void FixIndexOfCellsAfterRemovingCell(CellModel removedCell, CellModel nextCell, CellTracker cellTracker)
-        {
-            var xDifference = nextCell.Location.Column - removedCell.Location.Column;
-            var yDifference = nextCell.Location.Row - removedCell.Location.Row;
-            if (xDifference > 1 || yDifference > 1 || xDifference < 0 || yDifference < 0) throw new CellError("FixIndexOfCellsAfterRemovingCell must be called with cells that are next to each other, and added cell must above or to the right of next cell");
-
-            var searchingCell = nextCell;
-            int i = removedCell.Index + 1;
-            while (searchingCell != null && searchingCell.Index == i)
-            {
-                searchingCell.Index--;
-                i++;
-                searchingCell = cellTracker.GetCell(nextCell.Location.SheetName, searchingCell.Location.Row + yDifference, searchingCell.Location.Column + xDifference);
-            }
-        }
 
         /// <summary>
         /// Sets both the border and the content border of the cell to the same color.

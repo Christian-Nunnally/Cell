@@ -57,6 +57,9 @@ namespace Cell.ViewModel.Cells
             model.Style.PropertyChanged += ModelStylePropertyChanged;
         }
 
+        /// <summary>
+        /// Gets or sets the background color of the cell.
+        /// </summary>
         public virtual SolidColorBrush BackgroundColor
         {
             get => _backgroundColor;
@@ -67,6 +70,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the background color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string BackgroundColorHex
         {
             get => _model.Style.BackgroundColor;
@@ -82,6 +88,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the border color of the cell.
+        /// </summary>
         public virtual SolidColorBrush BorderColor
         {
             get => _borderColor;
@@ -92,6 +101,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the border color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string BorderColorHex
         {
             get => _model.Style.BorderColor;
@@ -105,6 +117,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the border thickness of the cell.
+        /// </summary>
         public virtual Thickness BorderThickness
         {
             get => _borderThickness;
@@ -115,6 +130,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the cell type of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual CellType CellType
         {
             get => _model.CellType;
@@ -126,12 +144,18 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the column of the cell.
+        /// </summary>
         public virtual int Column
         {
             get => _model.Location.Column;
             set { _model.Location.Column = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the content background color of the cell.
+        /// </summary>
         public virtual SolidColorBrush ContentBackgroundColor
         {
             get => _contentBackgroundColor;
@@ -142,6 +166,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content background color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string ContentBackgroundColorHex
         {
             get => _model.Style.ContentBackgroundColor;
@@ -155,6 +182,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content border color of the cell.
+        /// </summary>
         public virtual SolidColorBrush ContentBorderColor
         {
             get => _contentBorderColor;
@@ -166,6 +196,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content border color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string ContentBorderColorHex
         {
             get => _model.Style.ContentBorderColor;
@@ -179,6 +212,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content border thickness of the cell used by the view binding.
+        /// </summary>
         public virtual Thickness ContentBorderThickness
         {
             get => _contentBorderThickness; private set
@@ -188,6 +224,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content highlight color of the cell used by the view binding.
+        /// </summary>
         public virtual SolidColorBrush ContentHighlightColor
         {
             get => _contentHighlightColor;
@@ -198,17 +237,24 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the content highlight color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string ContentHighlightColorHex
         {
             get => _model.Style.HighlightColor;
             set
             {
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.HighlightColor = value;
                 ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual string Font
         {
             get => _model.Style.Font;
@@ -220,6 +266,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the font size of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual double FontSize
         {
             get => _model.Style.FontSize;
@@ -231,10 +280,19 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the font style for the view used by the view binding.
+        /// </summary>
         public FontStyle FontStyleForView => _model.Style.Italic ? FontStyles.Italic : FontStyles.Normal;
 
+        /// <summary>
+        /// Gets the font weight for the view used by the view binding.
+        /// </summary>
         public FontWeight FontWeightForView => _model.Style.Bold ? FontWeights.Bold : FontWeights.Normal;
 
+        /// <summary>
+        /// Gets or sets the foreground color brush of the cell used by the view binding.
+        /// </summary>
         public virtual SolidColorBrush ForegroundColor
         {
             get => _foregroundColor;
@@ -245,6 +303,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the foreground color of the cell as a hexidecimal string and records the state if undo redo is recording.
+        /// </summary>
         public virtual string ForegroundColorHex
         {
             get => _model.Style.ForegroundColor;
@@ -257,15 +318,18 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the height of the cell.
+        /// </summary>
         public virtual double Height
         {
             get => _model.Height;
-            set
-            {
-                _model.Height = value;
-            }
+            set => _model.Height = value;
         }
 
+        /// <summary>
+        /// Gets or sets the horizontal alignment of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual HorizontalAlignment HorizontalAlignmentForView
         {
             get => _model.Style.HorizontalAlignment;
@@ -277,8 +341,14 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the horizontal alignment for the view center used by the view binding.
+        /// </summary>
         public virtual HorizontalAlignment HorizontalAlignmentForViewCenter => HorizontalAlignmentForView == HorizontalAlignment.Stretch ? HorizontalAlignment.Center : HorizontalAlignmentForView;
 
+        /// <summary>
+        /// Gets the ID of the cell.
+        /// </summary>
         public virtual string ID { get => _model.ID; }
 
         /// <summary>
@@ -350,6 +420,9 @@ namespace Cell.ViewModel.Cells
             set { _model.Location.Row = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the color brush of the cell selection border used by the view binding.
+        /// </summary>
         public virtual SolidColorBrush SelectionBorderColor
         {
             get => _selectionBorderColor;
@@ -361,6 +434,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the color brush of the cell selection fill used by the view binding.
+        /// </summary>
         public virtual SolidColorBrush SelectionColor
         {
             get => _selectionColor;
@@ -372,10 +448,19 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the selection border should be shown.
+        /// </summary>
         public virtual bool ShouldShowSelectionBorder => IsSelected || IsHighlighted;
 
+        /// <summary>
+        /// Gets a value indicating whether the selection fill should be shown.
+        /// </summary>
         public virtual bool ShouldShowSelectionFill => IsSelected || IsHighlighted;
 
+        /// <summary>
+        /// Gets or sets the text of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual string Text
         {
             get => _model.Text;
@@ -386,6 +471,9 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets or sets the text alignment of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual TextAlignment TextAlignmentForView
         {
             get => _model.Style.TextAlignment;
@@ -397,8 +485,14 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the text decorations for the view used by the view binding.
+        /// </summary>
         public TextDecorationCollection? TextDecorationsForView => _model.Style.Strikethrough ? TextDecorations.Strikethrough : null;
 
+        /// <summary>
+        /// Gets or sets the vertical alignment of the cell and records the state if undo redo is recording.
+        /// </summary>
         public virtual VerticalAlignment VerticalAlignmentForView
         {
             get => _model.Style.VerticalAlignment;
@@ -411,26 +505,42 @@ namespace Cell.ViewModel.Cells
             }
         }
 
+        /// <summary>
+        /// Gets the vertical alignment for the view center used by the view binding.
+        /// </summary>
         public virtual VerticalAlignment VerticalAlignmentForViewCenter => VerticalAlignmentForView == VerticalAlignment.Stretch ? VerticalAlignment.Center : VerticalAlignmentForView;
 
+        /// <summary>
+        /// Gets or sets the width of the cell.
+        /// </summary>
         public virtual double Width
         {
             get => _model.Width;
-            set { _model.Width = value; }
+            set => _model.Width = value;
         }
 
+        /// <summary>
+        /// Gets or sets the x position of the cell.
+        /// </summary>
         public virtual double X
         {
             get => _x;
             set { _x = value; NotifyPropertyChanged(nameof(X)); }
         }
 
+        /// <summary>
+        /// Gets or sets the y position of the cell.
+        /// </summary>
         public virtual double Y
         {
             get => _y;
             set { _y = value; NotifyPropertyChanged(nameof(Y)); }
         }
 
+        /// <summary>
+        /// Sets the background color of the cell to the given color and the is highlighted property to true.
+        /// </summary>
+        /// <param name="color">The color to highlight with.</param>
         public void HighlightCell(string color)
         {
             SelectionColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
@@ -439,6 +549,9 @@ namespace Cell.ViewModel.Cells
             NotifyPropertyChanged(nameof(BackgroundColor));
         }
 
+        /// <summary>
+        /// Removes the highlight from the cell.
+        /// </summary>
         public void UnhighlightCell()
         {
             SelectionColor = new(ColorAdjuster.GetHighlightColor((Color)ColorConverter.ConvertFromString(BackgroundColorHex), 50));
@@ -446,6 +559,11 @@ namespace Cell.ViewModel.Cells
             IsHighlighted = false;
         }
 
+        /// <summary>
+        /// Updates the border thickness of the cell with the given string border thickness.
+        /// </summary>
+        /// <param name="stringBorderThickness">The string thickness, like '1,2,3,4' or '2,3' or '1'</param>
+        /// <returns>True if the given string was a valid thickness.</returns>
         public bool UpdateBorderThickness(string stringBorderThickness)
         {
             if (Utilities.TryParseStringIntoThickness(stringBorderThickness, out var thickness))
@@ -456,6 +574,11 @@ namespace Cell.ViewModel.Cells
             return false;
         }
 
+        /// <summary>
+        /// Updates the content border thickness of the cell with the given string content border thickness.
+        /// </summary>
+        /// <param name="stringContentBorderThickness">The string thickness, like '1,2,3,4' or '2,3' or '1'</param>
+        /// <returns>True if the given string was a valid thickness.</returns>
         public bool UpdateContentBorderThickness(string stringContentBorderThickness)
         {
             if (Utilities.TryParseStringIntoThickness(stringContentBorderThickness, out var thickness))
@@ -467,6 +590,11 @@ namespace Cell.ViewModel.Cells
             return false;
         }
 
+        /// <summary>
+        /// Attempts to update the margin of the cell with the given string margin.
+        /// </summary>
+        /// <param name="stringMargin">The string margin, like '1,2,3,4' or '2,3' or '1'</param>
+        /// <returns>True if the given string was a valid margin.</returns>
         public bool UpdateMargin(string stringMargin)
         {
             if (Utilities.TryParseStringIntoThickness(stringMargin, out var thickness))

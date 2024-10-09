@@ -35,8 +35,14 @@ namespace Cell.Execution
             ListenToLocationsThatChangeTheReferencedCollection();
         }
 
+        /// <summary>
+        /// Occurs when the collection name might have changed.
+        /// </summary>
         public event Action<CellSpecificCollectionReference>? CollectionNameChanged;
 
+        /// <summary>
+        /// The cell this reference is specified to.
+        /// </summary>
         public CellModel Cell => _cell;
 
         /// <summary>

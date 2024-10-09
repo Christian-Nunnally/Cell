@@ -20,29 +20,38 @@ namespace Cell.Execution.References
         /// The name of the variable that contains the cell reference in a plugin function (usually "cell").
         /// </summary>
         public const string CellReferenceVariableName = "cell";
-        public int Column { get; set; }
 
-        public int ColumnRangeEnd { get; set; }
+        /// <summary>
+        /// The column of the reference, or starting column of a range.
+        /// </summary>
+        public CellRelativeValue<int> ColumnReference { get; set; } = new(0);
 
-        public bool IsColumnRelative { get; set; }
+        /// <summary>
+        /// The row of the reference, or starting row of a range.
+        /// </summary>
+        public CellRelativeValue<int> RowReference { get; set; } = new(0);
 
-        public bool IsColumnRelativeRangeEnd { get; set; }
+        /// <summary>
+        /// The end column of a range location reference.
+        /// </summary>
+        public CellRelativeValue<int> ColumnRangeEndReference { get; set; } = new(0);
 
+        /// <summary>
+        /// The end row of a range location reference.
+        /// </summary>
+        public CellRelativeValue<int> RowRangeEndReference { get; set; } = new(0);
+
+        /// <summary>
+        /// The sheet reference of the location.
+        /// </summary>
+        public CellRelativeValue<string> SheetReference { get; set; } = new("");
+
+        /// <summary>
+        /// Gets or sets whether this reference is a range and should have a range end set.
+        /// </summary>
         public bool IsRange { get; set; }
 
-        public bool IsRowRelative { get; set; }
-
-        public bool IsRowRelativeRangeEnd { get; set; }
-
-        public bool IsSheetRelative { get; set; }
-
-        public int Row { get; set; }
-
-        public int RowRangeEnd { get; set; }
-
-        public string SheetName { get; set; } = "";
-
-        private string SheetArgument => IsSheetRelative ? CellReferenceVariableName : $"\"{SheetName}\"";
+        private string SheetArgument => SheetReference.IsRelative ? CellReferenceVariableName : $"\"{SheetReference.Value}\"";
 
         /// <summary>
         /// Attempts to convert a <see cref="SyntaxNode"/> into a <see cref="LocationReference"/>.
@@ -58,27 +67,27 @@ namespace Cell.Execution.References
             if (!DoesNodeMatchCellReferenceSyntax(node, out var arguments)) return false;
             var sheetName = arguments[0].ToString();
             if (sheetName != CellReferenceVariableName && sheetName.StartsWith('"') && sheetName.EndsWith('"')) sheetName = sheetName[1..^1];
-            if (sheetName == CellReferenceVariableName) cellReference.IsSheetRelative = true;
-            else cellReference.SheetName = sheetName;
+            if (sheetName == CellReferenceVariableName) cellReference.SheetReference.IsRelative = true;
+            else cellReference.SheetReference.Value = sheetName;
 
             if (!TryParsePositionFromArgument(arguments[1], "Row", out var position, out var isRelative)) return false;
-            cellReference.Row = position;
-            cellReference.IsRowRelative = isRelative;
+            cellReference.RowReference.Value = position;
+            cellReference.RowReference.IsRelative = isRelative;
 
             if (!TryParsePositionFromArgument(arguments[2], "Column", out position, out isRelative)) return false;
-            cellReference.Column = position;
-            cellReference.IsColumnRelative = isRelative;
+            cellReference.ColumnReference.Value = position;
+            cellReference.ColumnReference.IsRelative = isRelative;
 
             if (arguments.Count == 5)
             {
                 cellReference.IsRange = true;
                 if (!TryParsePositionFromArgument(arguments[3], "Row", out position, out isRelative)) return false;
-                cellReference.RowRangeEnd = position;
-                cellReference.IsRowRelativeRangeEnd = isRelative;
+                cellReference.RowRangeEndReference.Value = position;
+                cellReference.RowRangeEndReference.IsRelative = isRelative;
 
                 if (!TryParsePositionFromArgument(arguments[4], "Column", out position, out isRelative)) return false;
-                cellReference.ColumnRangeEnd = position;
-                cellReference.IsColumnRelativeRangeEnd = isRelative;
+                cellReference.ColumnRangeEndReference.Value = position;
+                cellReference.ColumnRangeEndReference.IsRelative = isRelative;
             }
             return true;
         }
@@ -90,10 +99,10 @@ namespace Cell.Execution.References
         public string CreateCodeForReference()
         {
             string cellLocationArguments = SheetArgument;
-            cellLocationArguments += CreateRowColumnArgumentSyntax(IsRowRelative, Row, IsColumnRelative, Column);
+            cellLocationArguments += CreateRowColumnArgumentSyntax(RowReference.IsRelative, RowReference.Value, ColumnReference.IsRelative, ColumnReference.Value);
             if (IsRange)
             {
-                cellLocationArguments += CreateRowColumnArgumentSyntax(IsRowRelativeRangeEnd, RowRangeEnd, IsColumnRelativeRangeEnd, ColumnRangeEnd);
+                cellLocationArguments += CreateRowColumnArgumentSyntax(RowRangeEndReference.IsRelative, RowRangeEndReference.Value, ColumnRangeEndReference.IsRelative, ColumnRangeEndReference.Value);
                 return $"{Context.PluginContextArgumentName}.{nameof(Context.GetCellRange)}({cellLocationArguments})";
             }
             return $"{Context.PluginContextArgumentName}.{nameof(Context.GetCell)}({cellLocationArguments})";
@@ -106,7 +115,7 @@ namespace Cell.Execution.References
         /// <returns>A list of location strings representing the locations this reference resolves to for the given cell.</returns>
         public IEnumerable<string> ResolveLocations(CellLocationModel location)
         {
-            var sheetName = string.IsNullOrWhiteSpace(SheetName) ? location.SheetName : SheetName;
+            var sheetName = string.IsNullOrWhiteSpace(SheetReference.Value) ? location.SheetName : SheetReference.Value;
             var row = ResolveRow(location);
             var column = ResolveColumn(location);
             var locations = new List<string>();
@@ -200,12 +209,12 @@ namespace Cell.Execution.References
             return true;
         }
 
-        private int ResolveColumn(CellLocationModel location) => IsColumnRelative ? Column + location.Column : Column;
+        private int ResolveColumn(CellLocationModel location) => ColumnReference.IsRelative ? ColumnReference.Value + location.Column : ColumnReference.Value;
 
-        private int ResolveColumnRangeEnd(CellLocationModel location) => IsColumnRelativeRangeEnd ? ColumnRangeEnd + location.Column : ColumnRangeEnd;
+        private int ResolveColumnRangeEnd(CellLocationModel location) => ColumnRangeEndReference.IsRelative ? ColumnRangeEndReference.Value + location.Column : ColumnRangeEndReference.Value;
 
-        private int ResolveRow(CellLocationModel location) => IsRowRelative ? Row + location.Row : Row;
+        private int ResolveRow(CellLocationModel location) => RowReference.IsRelative ? RowReference.Value + location.Row : RowReference.Value;
 
-        private int ResolveRowRangeEnd(CellLocationModel location) => IsRowRelativeRangeEnd ? RowRangeEnd + location.Row : RowRangeEnd;
+        private int ResolveRowRangeEnd(CellLocationModel location) => RowRangeEndReference.IsRelative ? RowRangeEndReference.Value + location.Row : RowRangeEndReference.Value;
     }
 }

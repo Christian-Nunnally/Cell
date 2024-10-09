@@ -4,17 +4,33 @@ using Cell.ViewModel.Execution;
 
 namespace Cell.Execution.References
 {
+    /// <summary>
+    /// Represents a reference to a collection that is calculated dynamically.
+    /// </summary>
     public class DynamicCollectionReference : ICollectionReference
     {
         private readonly CellFunction _calculateCollectionNameFunction;
+        /// <summary>
+        /// Creates a new instance of <see cref="DynamicCollectionReference"/>.
+        /// </summary>
+        /// <param name="calculateCollectionNameFunction">The function that returns the collection this reference referrs to.</param>
         public DynamicCollectionReference(CellFunction calculateCollectionNameFunction)
         {
             _calculateCollectionNameFunction = calculateCollectionNameFunction;
             _calculateCollectionNameFunction.DependenciesChanged += CalculateCollectionNameFunctionDependenciesChanged;
         }
 
+        /// <summary>
+        /// Occurs when values have changes at locations that will result in the function returning a different collection name.
+        /// </summary>
         public event Action? LocationsThatWillInvalidateCollectionNameForCellHaveChanged;
 
+        /// <summary>
+        /// Gets the name of the collection this reference is currently referring to.
+        /// </summary>
+        /// <param name="cell">The cell used to resolve the reference.</param>
+        /// <param name="pluginFunctionRunContext">The context used when running the function.</param>
+        /// <returns>The collection name this reference is currently referring to for that cell.</returns>
         public string GetCollectionName(CellModel cell, Context pluginFunctionRunContext)
         {
             pluginFunctionRunContext.Cell = cell;
@@ -24,6 +40,11 @@ namespace Cell.Execution.References
             return string.Empty;
         }
 
+        /// <summary>
+        /// Gets the locations that will invalidate the collection name for a particular cell.
+        /// </summary>
+        /// <param name="cell">The cell.</param>
+        /// <returns>The list of location this specific cell should watch for changes on, and if they do change that cell needs to recalculate this collection dependency.</returns>
         public IEnumerable<string> GetLocationsThatWillInvalidateCollectionNameForCell(CellModel cell)
         {
             return _calculateCollectionNameFunction.LocationDependencies.SelectMany(x => x.ResolveLocations(cell.Location));

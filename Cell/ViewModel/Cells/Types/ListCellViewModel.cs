@@ -16,14 +16,13 @@ namespace Cell.ViewModel.Cells.Types
         {
         }
 
+        /// <summary>
+        /// The selected item binding for the list.
+        /// </summary>
         public string SelectedItem
         {
-            get => Model.Properties[nameof(SelectedItem)];
-            set
-            {
-                Model.Properties[nameof(SelectedItem)] = value?.ToString() ?? "";
-                NotifyPropertyChanged(nameof(SelectedItem));
-            }
+            get => Text;
+            set => Text = value;
         }
     }
 }

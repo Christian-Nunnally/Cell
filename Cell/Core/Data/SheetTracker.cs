@@ -4,6 +4,7 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 
 namespace Cell.Data
@@ -277,18 +278,11 @@ namespace Cell.Data
             }
         }
 
-        private void SheetPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void SheetPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is not SheetModel sheetModel) return;
             if (e.PropertyName == nameof(SheetModel.Order))
             {
                 RefreshOrderedSheetsList();
-            }
-            if (e.PropertyName == nameof(SheetModel.Name))
-            {
-                /// Move this to the spot that's changing the name.
-                RenameSheet(sheetModel.OldName, sheetModel.Name);
-                sheetModel.OldName = sheetModel.Name;
             }
         }
 
