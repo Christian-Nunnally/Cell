@@ -43,22 +43,20 @@ namespace Cell.Execution
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
             Cell = cell;
-            Index = cell.Index;
         }
 
-        // TODO: Somehow always use the cells index because this is confusing. It's currently used to hack efficent sorting in but there is a better way.
         /// <summary>
-        /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell index, but not a real cell.
+        /// Creates a new instance of the <see cref="Context"/> class for getting the result of a sort function.
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        /// <param name="index">The context index.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int index)
+        /// <param name="sortIndex">Index used to sort.</param>
+        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int sortIndex)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
             Cell = null;
-            Index = index;
+            SortIndex = sortIndex;
         }
 
         /// <summary>
@@ -68,11 +66,8 @@ namespace Cell.Execution
         /// </summary>
         public CellModel? Cell
         {
-            get => _cell; set
-            {
-                _cell = value;
-                if (_cell is not null) Index = _cell.Index;
-            }
+            get => _cell;
+            set => _cell = value;
         }
 
         /// <summary>
@@ -81,11 +76,14 @@ namespace Cell.Execution
         public EditContext E { get; set; } = new EditContext("");
 
         /// <summary>
-        /// The 'index' of the cell that the function is running in, or the index of the object being sorted by this function. 
-        /// 
-        /// It is perferred to use `c.index` in functions instead of `cell.Index`, even though they will be the same for non sort functions.
+        /// The 'index' of the cell that the function is running in.
         /// </summary>
-        public int Index { get; set; } = 0;
+        public int Index => Cell?.Index ?? 0;
+
+        /// <summary>
+        /// The index of the object being sorted by this function call. This is used in sort and filter functions like `return list[c.SortIndex].SortProperty;`
+        /// </summary>
+        public int SortIndex { get; set; } = 0;
 
         /// <summary>
         /// Gets a cell from the given sheet, at the given row and column.

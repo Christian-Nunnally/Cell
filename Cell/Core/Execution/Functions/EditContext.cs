@@ -1,8 +1,6 @@
 ﻿namespace Cell.Execution
 {
     /// <summary>
-    /// TODO: maybe get rid of this in favor of just having more handler functions?
-    /// 
     /// Provides information about an edit operation that happened in a cell.
     /// </summary>
     public class EditContext

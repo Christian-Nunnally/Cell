@@ -197,7 +197,7 @@ namespace Cell.Model
         }
 
         /// <summary>
-        /// The location of the cell in a sheet.
+        /// The location of the cell in the application.
         /// </summary>
         public CellLocationModel Location
         {

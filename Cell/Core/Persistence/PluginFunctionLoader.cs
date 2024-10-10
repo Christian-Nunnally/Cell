@@ -151,6 +151,8 @@ namespace Cell.Persistence
         /// <returns>True if the function exists.</returns>
         public bool TryGetCellFunction(string space, string name, [MaybeNullWhen(false)] out CellFunction function)
         {
+            function = null;
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(space)) return false;
             if (Namespaces.TryGetValue(space, out var namespaceFunctions))
             {
                 if (namespaceFunctions.TryGetValue(name, out var value))
@@ -159,7 +161,6 @@ namespace Cell.Persistence
                     return true;
                 }
             }
-            function = null;
             return false;
         }
 

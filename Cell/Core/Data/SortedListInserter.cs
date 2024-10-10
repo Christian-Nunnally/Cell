@@ -16,7 +16,6 @@
         /// <param name="newItemCompareValue">The comparison result of the item.</param>
         public void InsertSorted(List<T> list, T newItem, int newItemCompareValue)
         {
-            // TODO: find newItemCompareValue from inside this functiion?
             int index = BinarySearchIndex(list, newItemCompareValue);
             list.Insert(index, newItem);
         }

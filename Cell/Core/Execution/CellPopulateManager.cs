@@ -166,7 +166,8 @@ namespace Cell.Execution
             }
 
             // Because this cell has a populate function, always listen to changes to itself.
-            SubscribeToUpdatesAtLocation(cell, thisLocation);
+            // jk, this doesn't make sense for collection cells. idk yet if it makes sense for other cells.
+            //SubscribeToUpdatesAtLocation(cell, thisLocation);
         }
 
         private void RunPopulateWhenCodeChanges(object? sender, PropertyChangedEventArgs e)

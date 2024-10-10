@@ -415,7 +415,6 @@ namespace Cell.ViewModel.Cells
         /// </summary>
         public virtual int Row
         {
-            // TODO: record state if undo redo is recording
             get => _model.Location.Row;
             set { _model.Location.Row = value; }
         }

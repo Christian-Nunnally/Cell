@@ -56,9 +56,6 @@ namespace Cell.Execution
 
         private void RunPopulateForSubscriber(CellModel subscriber)
         {
-            // You can remove this once cells are properly unsubscribed from this when PopulateFunctionName is set to "";
-            if (subscriber.PopulateFunctionName == "") return;
-
             var result = RunPopulate(subscriber);
             if (result.WasSuccess)
             {
@@ -73,8 +70,7 @@ namespace Cell.Execution
             }
             else
             {
-                if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;// "Error";
-                if (result.ExecutionResult != null) Logger.Instance.Log(result.ExecutionResult);
+                subscriber.Text = result.ExecutionResult ?? "Execution result was null";
             }
         }
     }
