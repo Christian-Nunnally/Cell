@@ -254,7 +254,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, _cellTriggerManager, CellTracker, SheetTracker, CellSelector, UserCollectionLoader, ApplicationSettings, PluginFunctionLoader);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, _cellTriggerManager, CellTracker, CellSelector, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             _applicationView?.ShowSheetView(SheetViewModel);
@@ -376,6 +376,7 @@ namespace Cell.ViewModel.Application
         {
             BackupManager.CreateBackup("PreMigration");
             PersistedProject.Migrate();
+            _isProjectLoading = false;
             DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
         }
     }

@@ -21,8 +21,6 @@ namespace CellTest.ViewModel.Cell.Types
         private CellPopulateManager _cellPopulateManager;
         private CellTriggerManager _cellTriggerManager;
         private SheetModel _sheetModel;
-        private SheetTracker _sheetTracker;
-        private ApplicationSettings _applicationSettings;
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
         private CellSelector _cellSelector;
@@ -38,10 +36,8 @@ namespace CellTest.ViewModel.Cell.Types
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
-            _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _sheetTracker, _cellSelector, _userCollectionLoader, _applicationSettings, _pluginFunctionLoader);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new LabelCellViewModel(_cellModel, _sheetViewModel);
         }

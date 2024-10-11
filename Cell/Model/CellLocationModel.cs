@@ -7,6 +7,7 @@ namespace Cell.Model
     /// <summary>
     /// Represents the location of a cell in a sheet, with a row and column number plus the name of the sheet.
     /// </summary>
+    [Serializable]
     public class CellLocationModel : PropertyChangedBase
     {
         private int _row = 0;
@@ -35,7 +36,7 @@ namespace Cell.Model
             get => _column;
             set
             {
-                if (_column == value)
+                if (_column == value) return;
                 _column = value;
                 NotifyPropertyChanged(nameof(Column));
             }
@@ -65,6 +66,9 @@ namespace Cell.Model
         /// </summary>
         public string UserFriendlyLocationString => $"{ColumnCellViewModel.GetColumnName(Column)}{Row}";
 
+        /// <summary>
+        /// The <see cref="CellModel"/> that this location is associated with.
+        /// </summary>
         [JsonIgnore]
         public CellModel? CellModel { get; internal set; }
 

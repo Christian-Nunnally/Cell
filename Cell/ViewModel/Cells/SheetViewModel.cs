@@ -18,8 +18,7 @@ namespace Cell.ViewModel.Cells
         /// <summary>
         /// A null sheet that can be used as a placeholder.
         /// </summary>
-        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, null!, null!, null!, null!, null!);
-        private readonly ApplicationSettings _applicationSettings;
+        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, CellSelector.Null, null!);
         private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellTriggerManager _cellTriggerManager;
@@ -35,24 +34,17 @@ namespace Cell.ViewModel.Cells
         /// <param name="cellPopulateManager">The cell populate manager used to run populate functions on cells.</param>
         /// <param name="cellTriggerManager">The cell trigger manager used to run trigger functions on cells.</param>
         /// <param name="cellTracker">The cell tracker used to get cells for this sheet.</param>
-        /// <param name="sheetTracker">The sheet tracker that contains this sheet and all the other sheets in the application.</param>
         /// <param name="cellSelector">The cell selector used to select cells on the sheet.</param>
-        /// <param name="userCollectionLoader">The user collection loader used to get user collections during function executions</param>
-        /// <param name="applicationSettings">The global application settings object.</param>
         /// <param name="pluginFunctionLoader">A plugin function loader used to get cell functions from the application.</param>
         public SheetViewModel(
             SheetModel model,
             CellPopulateManager cellPopulateManager,
             CellTriggerManager cellTriggerManager,
             CellTracker cellTracker,
-            SheetTracker sheetTracker,
             CellSelector cellSelector,
-            UserCollectionLoader userCollectionLoader,
-            ApplicationSettings applicationSettings,
             PluginFunctionLoader pluginFunctionLoader)
         {
             _pluginFunctionLoader = pluginFunctionLoader;
-            _applicationSettings = applicationSettings;
             _cellTracker = cellTracker;
             CellSelector = cellSelector;
             cellSelector.SelectedCells.CollectionChanged += SelectedCellsChanged;

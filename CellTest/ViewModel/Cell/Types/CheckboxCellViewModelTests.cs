@@ -10,7 +10,7 @@ using CellTest.TestUtilities;
 
 namespace CellTest.ViewModel.Cell.Types
 {
-    public class RowCellViewModelTests
+    public class CheckboxCellViewModelTests
     {
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
@@ -21,13 +21,11 @@ namespace CellTest.ViewModel.Cell.Types
         private CellPopulateManager _cellPopulateManager;
         private CellTriggerManager _cellTriggerManager;
         private SheetModel _sheetModel;
-        private SheetTracker _sheetTracker;
-        private ApplicationSettings _applicationSettings;
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
         private CellSelector _cellSelector;
 
-        private RowCellViewModel CreateInstance()
+        private CheckboxCellViewModel CreateInstance()
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
@@ -38,12 +36,10 @@ namespace CellTest.ViewModel.Cell.Types
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
-            _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
             _cellModel = new CellModel();
-            return new RowCellViewModel(_cellModel, _sheetViewModel);
+            return new CheckboxCellViewModel(_cellModel, _sheetViewModel);
         }
 
 
@@ -59,20 +55,9 @@ namespace CellTest.ViewModel.Cell.Types
             var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
-            _cellModel.Text = "wololo";
+            testing.IsChecked = true;
 
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.Text));
-        }
-
-        [Fact]
-        public void SimpleTest_ModelFontSizeChanged_ViewModelFontSizeChangedNotified()
-        {
-            var testing = CreateInstance();
-            var propertyChangedTester = new PropertyChangedTester(testing);
-
-            _cellModel.Style.FontSize = 20;
-
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.FontSize));
+            propertyChangedTester.AssertPropertyChanged(nameof(testing.IsChecked));
         }
     }
 }

@@ -37,6 +37,11 @@ namespace Cell.Data
         public ObservableCollection<CellModel> SelectedCells { get; } = [];
 
         /// <summary>
+        /// A null cell selector.
+        /// </summary>
+        public readonly static CellSelector Null = new (null!);
+
+        /// <summary>
         /// Moves the selection by unselecting the current selection and selecting the cell at the specified offset from the current selection.
         /// </summary>
         /// <param name="columnOffset">How many columns the selection should move by. Can be negative to move left.</param>

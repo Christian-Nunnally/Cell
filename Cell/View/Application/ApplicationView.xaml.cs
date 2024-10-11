@@ -1,4 +1,5 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Persistence.Migration;
+using Cell.Data;
 using Cell.Execution;
 using Cell.Persistence;
 using Cell.View.Cells;
@@ -76,6 +77,7 @@ namespace Cell.View.Application
             var fileIo = new FileIO();
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
+            persistedProject.RegisterMigrator("1", "2", new Migration());
             var backupDirectory = new PersistedDirectory(backupPath, fileIo);
 
             var pluginFunctionLoader = new PluginFunctionLoader(projectDirectory);

@@ -36,10 +36,5 @@ namespace Cell.ViewModel.Cells.Types
             get => Text;
             set => Text = value;
         }
-
-        /// <summary>
-        /// What is displayed in the dropdown.
-        /// </summary>
-        public override string Text { get => SelectedItem; set => base.Text = value; }
     }
 }
