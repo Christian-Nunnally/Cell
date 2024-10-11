@@ -70,21 +70,21 @@ namespace CellTest.ViewModel.ToolWindow
         }
 
         [Fact]
-        public void TwoCellsInSameColumnAndTwoInOtherColumn_MergeCellsDown_TwoMergeParentsCreated()
+        public void TwoByTwoGridOfCellsWithAllSelected_MergeCellsDown_TwoMergeParentsCreated()
         {
             var testing = CreateInstance();
             var cell = new CellModel();
             cell.Location.Row = 0;
             cell.Location.Column = 0;
             var cell2 = new CellModel();
-            cell.Location.Row = 1;
-            cell.Location.Column = 0;
+            cell2.Location.Row = 1;
+            cell2.Location.Column = 0;
             var cell3 = new CellModel();
-            cell.Location.Row = 0;
-            cell.Location.Column = 1;
+            cell3.Location.Row = 0;
+            cell3.Location.Column = 1;
             var cell4 = new CellModel();
-            cell.Location.Row = 1;
-            cell.Location.Column = 1;
+            cell4.Location.Row = 1;
+            cell4.Location.Column = 1;
             _cellTracker.AddCell(cell, false);
             _cellTracker.AddCell(cell2, false);
             _cellTracker.AddCell(cell3, false);

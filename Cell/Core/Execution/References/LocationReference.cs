@@ -198,7 +198,7 @@ namespace Cell.Execution.References
             if (argumentSyntax.Expression is BinaryExpressionSyntax binaryExpression && binaryExpression.Left is MemberAccessExpressionSyntax memberAccessExpression)
             {
                 var cellAccessString = memberAccessExpression.ToString();
-                if (cellAccessString == $"{CellReferenceVariableName}.{rowOrColumn}")
+                if (cellAccessString == $"{CellReferenceVariableName}.{nameof(CellModel.Location)}.{rowOrColumn}")
                 {
                     row = binaryExpression.Right.ToString();
                     isRelative = true;

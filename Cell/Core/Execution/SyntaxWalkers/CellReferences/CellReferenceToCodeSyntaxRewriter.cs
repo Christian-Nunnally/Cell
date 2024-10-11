@@ -121,9 +121,9 @@ namespace Cell.Plugin.SyntaxWalkers
         {
             return relativitySymbol switch
             {
-                "" => $", cell.Row + {rowOffset - _location.Row}, cell.Column + {columnOffset - _location.Column}",
-                "C" => $", cell.Row + {rowOffset - _location.Row}, {columnOffset}",
-                "R" => $", {rowOffset}, cell.Column + {columnOffset - _location.Column}",
+                "" => $", cell.Location.Row + {rowOffset - _location.Row}, cell.Location.Column + {columnOffset - _location.Column}",
+                "C" => $", cell.Location.Row + {rowOffset - _location.Row}, {columnOffset}",
+                "R" => $", {rowOffset}, cell.Location.Column + {columnOffset - _location.Column}",
                 "B" => $", {rowOffset}, {columnOffset}",
                 _ => throw new InvalidOperationException("Only 'B', 'C', 'R' and '' are valid relativity types for a cell reference"),
             };

@@ -141,6 +141,7 @@ namespace Cell.Execution
         private void ResolveCollectionDependenciesForCell(CellModel cell, CellFunction function)
         {
             UnsubscribeFromAllCollectionUpdates(cell);
+            function.Compile();
             foreach (var collectionReference in function.CollectionDependencies)
             {
                 var cellSpecificCollectionReference = new CellSpecificCollectionReference(cell, collectionReference, _cellTextChangesAtLocationNotifier, _pluginFunctionRunContext);
@@ -153,6 +154,7 @@ namespace Cell.Execution
 
         private void ResolveLocationDependenciesForCell(CellModel cell, CellFunction function)
         {
+            function.Compile();
             UnsubscribeFromAllLocationUpdates(cell);
             var thisLocation = cell.Location.LocationString;
             foreach (var locationDependency in function.LocationDependencies)
@@ -165,9 +167,7 @@ namespace Cell.Execution
                 }
             }
 
-            // Because this cell has a populate function, always listen to changes to itself.
-            // jk, this doesn't make sense for collection cells. idk yet if it makes sense for other cells.
-            //SubscribeToUpdatesAtLocation(cell, thisLocation);
+            SubscribeToUpdatesAtLocation(cell, thisLocation);
         }
 
         private void RunPopulateWhenCodeChanges(object? sender, PropertyChangedEventArgs e)

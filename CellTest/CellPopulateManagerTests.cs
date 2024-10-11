@@ -36,7 +36,7 @@ namespace CellTest
         }
 
         [Fact]
-        public void CellWithPopulateFunction_CellTextChanged_PopulateFunctionRunsToSetTheTextToItsResult()
+        public void LabelCellWithPopulateFunction_CellTextChanged_PopulateFunctionRunsToSetTheTextToItsResult()
         {
             var _ = CreateInstance();
             var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);

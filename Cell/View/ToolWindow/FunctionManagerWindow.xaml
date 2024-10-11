@@ -77,7 +77,7 @@
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
-                                Text="{Binding Model.ReturnType}">
+                                Text="{Binding ReturnType}">
                                 <TextBlock.Style>
                                     <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="{x:Type TextBlock}">
                                         <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
@@ -96,7 +96,7 @@
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
-                                    Text="{Binding Model.Name}">
+                                    Text="{Binding Name}">
                                     <TextBlock.Style>
                                         <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="{x:Type TextBlock}">
                                             <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />

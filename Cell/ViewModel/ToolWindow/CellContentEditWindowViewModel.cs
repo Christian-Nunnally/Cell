@@ -86,7 +86,14 @@ namespace Cell.ViewModel.ToolWindow
         public override List<CommandViewModel> ToolBarCommands =>
         [
             new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
+            new CommandViewModel("Functions", OpenCellFunctions) { ToolTip = "Opens editor for advanced cell settings." },
         ];
+
+        private void OpenCellFunctions()
+        {
+            var createSheetWindowViewModel = new CellSettingsEditWindowViewModel(_cellsToEdit);
+            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
+        }
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

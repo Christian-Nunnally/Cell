@@ -22,7 +22,7 @@ namespace Cell.ViewModel.Cells.Types
         /// <param name="check">True or false</param>
         public static void Check(this CellModel cell, bool check)
         {
-            cell.Properties.SetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked), check);
+            cell.Text = check.ToString();
         }
 
         /// <summary>
@@ -31,7 +31,8 @@ namespace Cell.ViewModel.Cells.Types
         /// <param name="cell">The cell to set the property on.</param>
         public static bool IsChecked(this CellModel cell)
         {
-            return cell.Properties.GetBooleanProperty(nameof(CheckboxCellViewModel.IsChecked));
+            if (bool.TryParse(cell.Text, out var isChecked)) return isChecked;
+            return false;
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace Cell.ViewModel.Cells.Types
 
         private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellModel.Properties))
+            if (e.PropertyName == nameof(CellModel.Text))
             {
                 NotifyPropertyChanged(nameof(IsChecked));
             }

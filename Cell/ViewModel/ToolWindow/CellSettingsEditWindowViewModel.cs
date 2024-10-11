@@ -35,6 +35,7 @@ namespace Cell.ViewModel.ToolWindow
                 _cellToDisplay = value;
                 NotifyPropertyChanged(nameof(CellToDisplay));
                 NotifyPropertyChanged(nameof(ToolWindowTitle));
+                NotifyPropertyChanged(nameof(TriggerFunctionName));
                 if (_cellToDisplay != CellModel.Null) _cellToDisplay.PropertyChanged += CellToDisplayPropertyChanged;
             }
         }
@@ -107,11 +108,33 @@ namespace Cell.ViewModel.ToolWindow
 
         private void CellToDisplayPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(CellModel.TriggerFunctionName))
+            {
+                NotifyPropertyChanged(nameof(TriggerFunctionName));
+            }
         }
 
         private void PickDisplayedCell()
         {
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
+        }
+
+        /// <summary>
+        /// Gets or sets the all the trigger function name of all cells that are being edited.
+        /// </summary>
+        public string TriggerFunctionName
+        {
+            get => CellToDisplay.TriggerFunctionName;
+            set
+            {
+                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                foreach (var cell in _cellsToEdit)
+                {
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
+                    cell.TriggerFunctionName = value;
+                }
+                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
+            }
         }
     }
 }
