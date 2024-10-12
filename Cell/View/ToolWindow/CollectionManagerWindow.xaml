@@ -28,7 +28,7 @@
                         Padding="24,0,0,0"
                         PreviewKeyDown="TextBoxPreviewKeyDown"
                         Text="{Binding CollectionListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label Style="{StaticResource FilterIconLabelStyle}" />
+                    <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
                 </Grid>
             </DockPanel>
             <ListBox
@@ -234,7 +234,7 @@
                                     Padding="24,0,0,0"
                                     PreviewKeyDown="TextBoxPreviewKeyDown"
                                     Text="{Binding CollectionItemListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
-                                <Label Style="{StaticResource FilterIconLabelStyle}" />
+                                <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
                             </Grid>
                         </DockPanel>
                         <ListBox

@@ -19,7 +19,7 @@
                     Padding="24,0,0,0"
                     PreviewKeyDown="TextBoxPreviewKeyDown"
                     Text="{Binding SheetsListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
-                <Label Style="{StaticResource FilterIconLabelStyle}" />
+                <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
             </Grid>
         </DockPanel>
         <ListBox

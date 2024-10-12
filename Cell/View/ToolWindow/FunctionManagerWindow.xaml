@@ -32,7 +32,7 @@
                     IsChecked="{Binding IncludePopulateFunctions}" />
                 <controls:BetterComboBox
                     Grid.Column="3"
-                    Width="200"
+                    Width="160"
                     Height="25"
                     BorderThickness="1"
                     DockPanel.Dock="Right"
@@ -48,7 +48,7 @@
                         Padding="24,0,0,0"
                         PreviewKeyDown="TextBoxPreviewKeyDown"
                         Text="{Binding FilterString, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label Style="{StaticResource FilterIconLabelStyle}" />
+                    <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
                 </Grid>
             </DockPanel>
 
@@ -164,7 +164,7 @@
                                 Padding="24,0,0,0"
                                 PreviewKeyDown="TextBoxPreviewKeyDown"
                                 Text="{Binding UsersListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
-                            <Label Style="{StaticResource FilterIconLabelStyle}" />
+                            <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
                         </Grid>
                     </DockPanel>
                     <ListBox
@@ -237,7 +237,7 @@
                                 Padding="24,0,0,0"
                                 PreviewKeyDown="TextBoxPreviewKeyDown"
                                 Text="{Binding DependenciesListBoxFilterText, UpdateSourceTrigger=PropertyChanged}" />
-                            <Label Style="{StaticResource FilterIconLabelStyle}" />
+                            <Label Content="{fa:Icon MagnifyingGlass}" Style="{StaticResource FilterIconLabelStyle}" />
                         </Grid>
                     </DockPanel>
                     <ListBox

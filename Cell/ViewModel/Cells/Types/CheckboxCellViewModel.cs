@@ -67,8 +67,8 @@ namespace Cell.ViewModel.Cells.Types
             {
                 var oldValue = IsChecked;
                 if (oldValue == value) return;
-                Model.Check(value);
                 _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(IsChecked), oldValue, value));
+                Model.Check(value);
             }
         }
 

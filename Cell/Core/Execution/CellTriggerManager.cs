@@ -56,7 +56,6 @@ namespace Cell.Execution
             {
                 if (_cellModelToCurrentTextValueMap.TryGetValue(cell, out var oldValue))
                 {
-                    CellTriggered(cell, new EditContext(nameof(CellModel.Text), oldValue, cell.Text));
                     _cellModelToCurrentTextValueMap[cell] = cell.Text;
                 }
             }

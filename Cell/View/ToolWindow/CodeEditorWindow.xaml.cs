@@ -37,10 +37,6 @@ namespace Cell.View.ToolWindow
             {
                 syntaxTreePreviewViewer.Text = _viewModel.SyntaxTreePreviewText;
             }
-            else if (e.PropertyName == nameof(_viewModel.CurrentTextInEditor))
-            {
-                textEditor.Text = _viewModel.CurrentTextInEditor;
-            }
         }
 
         private void InsertCurrentAutoCompleteResult(TextCompositionEventArgs e)

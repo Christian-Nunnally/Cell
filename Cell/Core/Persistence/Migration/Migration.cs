@@ -22,7 +22,27 @@ namespace Cell.Core.Persistence.Migration
                     persistedDirectory.SaveFile(cell, JsonSerializer.Serialize(migratedCell));
                 }
             }
+
+            var namespaces = persistedDirectory.GetDirectories("Functions");
+            foreach (var space in namespaces)
+            {
+                var functions = persistedDirectory.GetFiles(space);
+                foreach (var function in functions)
+                {
+                    var functionModel = JsonSerializer.Deserialize<CellFunctionModel>(persistedDirectory.LoadFile(function) ?? throw new CellError());
+                    if (functionModel is null) continue;
+                    var migratedFunction = MigrateFunction(functionModel);
+                    persistedDirectory.SaveFile(function, JsonSerializer.Serialize(migratedFunction));
+                }
+            }
+
             return true;
+        }
+
+        private CellFunctionModel MigrateFunction(CellFunctionModel functionModel)
+        {
+            functionModel.Code = functionModel.Code.Replace("cell.Row", "cell.Location.Row").Replace("cell.Column", "cell.Location.Column");
+            return functionModel;
         }
 
         private CellModel MigrateCell(CellModelOld cellModel)
