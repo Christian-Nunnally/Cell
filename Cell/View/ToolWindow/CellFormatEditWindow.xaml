@@ -196,29 +196,25 @@
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}"
-                Style="{StaticResource TestColorPicker}" />
+                SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}" />
             <xctk:ColorPicker
                 Margin="15"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}"
-                Style="{StaticResource TestColorPicker}" />
+                SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}" />
             <xctk:ColorPicker
                 Margin="45"
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}"
-                Style="{StaticResource TestColorPicker}" />
+                SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}" />
             <xctk:ColorPicker
                 Margin="60"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding ContentBackgroundColor, Converter={StaticResource HexToColorConverter}}"
-                Style="{StaticResource TestColorPicker}" />
+                SelectedColor="{Binding ContentBackgroundColor, Converter={StaticResource HexToColorConverter}}" />
             <Grid Margin="40">
                 <ToggleButton
                     x:Name="TextFormattingTogglePopupButton"

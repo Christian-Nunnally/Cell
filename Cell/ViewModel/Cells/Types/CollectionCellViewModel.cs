@@ -23,12 +23,12 @@ namespace Cell.ViewModel.Cells.Types
         }
 
         /// <summary>
-        /// Gets the list of string that should be shown in this cells dropdown in the UI.
+        /// Gets the list of strings that should be shown in this cells UI.
         /// </summary>
         public List<object> Collection { get; set; } = [];
 
         /// <summary>
-        /// Gets the list of string that should be shown in this cells dropdown in the UI.
+        /// Gets the list of strings that should be shown in this cells UI.
         /// </summary>
         public List<string> CollectionDisplayStrings => Collection.Select(x => x?.ToString() ?? "").ToList();
 

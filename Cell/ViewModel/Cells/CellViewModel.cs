@@ -666,6 +666,18 @@ namespace Cell.ViewModel.Cells
             {
                 NotifyPropertyChanged(nameof(TextDecorationsForView));
             }
+            else if (e.PropertyName == nameof(CellStyleModel.HorizontalAlignment))
+            {
+                NotifyPropertyChanged(nameof(HorizontalAlignmentForView), nameof(HorizontalAlignmentForViewCenter));
+            }
+            else if (e.PropertyName == nameof(CellStyleModel.VerticalAlignment))
+            {
+                NotifyPropertyChanged(nameof(VerticalAlignmentForView), nameof(VerticalAlignmentForViewCenter));
+            }
+            else if (e.PropertyName == nameof(CellStyleModel.TextAlignment))
+            {
+                NotifyPropertyChanged(nameof(TextAlignmentForView));
+            }
             else if (e.PropertyName != null)
             {
                 NotifyPropertyChanged(e.PropertyName);

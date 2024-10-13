@@ -6,12 +6,11 @@
         <ListBox
             x:Name="CellListBox"
             Margin="{Binding Margin}"
-            HorizontalContentAlignment="{Binding HorizontalAlignmentForView}"
             Background="{Binding ContentBackgroundColor}"
             BorderBrush="{Binding ContentBorderColor}"
             BorderThickness="{Binding ContentBorderThickness}"
             Foreground="{Binding ForegroundColor}"
-            ItemsSource="{Binding Collection}"
+            ItemsSource="{Binding CollectionDisplayStrings}"
             SelectedItem="{Binding Text}"
             SelectedValue="{Binding SelectedItem}"
             VirtualizingPanel.IsVirtualizing="True">
@@ -20,8 +19,8 @@
                     <Label
                         Margin="3"
                         Padding="0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top"
+                        HorizontalAlignment="{Binding DataContext.HorizontalAlignmentForView, ElementName=CellListBox}"
+                        VerticalAlignment="{Binding DataContext.VerticalAlignmentForView, ElementName=CellListBox}"
                         Content="{Binding}"
                         FontFamily="{Binding DataContext.Font, ElementName=CellListBox}"
                         FontSize="{Binding DataContext.FontSize, ElementName=CellListBox}"
