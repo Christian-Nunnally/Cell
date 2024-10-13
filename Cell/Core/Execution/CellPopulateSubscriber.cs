@@ -1,9 +1,8 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// When something this subscriber subscribes to publishes, this class runs the given cells populate function and sets it's text to the result.

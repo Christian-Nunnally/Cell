@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 
-namespace Cell.Common
+namespace Cell.Core.Common
 {
     /// <summary>
     /// Random utilities that are used throughout the project.

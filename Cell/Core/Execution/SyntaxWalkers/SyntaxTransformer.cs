@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers
+namespace Cell.Core.Execution.SyntaxWalkers
 {
     /// <summary>
     /// A transformer that can transform a syntax tree between two different syntax trees.

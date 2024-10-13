@@ -1,8 +1,8 @@
-﻿using Cell.Execution.References;
+﻿using Cell.Core.Execution.References;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers.UserCollections
+namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 {
     /// <summary>
     /// Traverse the syntax tree and replace references like c.GetUserList() with just the name of the collection.

@@ -1,7 +1,5 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
-using Cell.Persistence;
-using Cell.Persistence.Migration;
 using System.Text.Json;
 
 namespace Cell.Core.Persistence.Migration
@@ -41,7 +39,10 @@ namespace Cell.Core.Persistence.Migration
 
         private CellFunctionModel MigrateFunction(CellFunctionModel functionModel)
         {
-            functionModel.Code = functionModel.Code.Replace("cell.Row", "cell.Location.Row").Replace("cell.Column", "cell.Location.Column");
+            functionModel.Code = functionModel.Code
+                .Replace("cell.Row", "cell.Location.Row")
+                .Replace("cell.Column", "cell.Location.Column")
+                .Replace("Cell.Execution", "Cell.Core.Execution");
             return functionModel;
         }
 

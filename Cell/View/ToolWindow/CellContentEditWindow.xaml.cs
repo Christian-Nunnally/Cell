@@ -36,7 +36,7 @@ namespace Cell.View.ToolWindow
 
         private void AutoIndexButtonClicked(object sender, RoutedEventArgs e)
         {
-            _viewModel.IndexSelectedCells();
+            _viewModel.AutoIndexSelectedCells();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

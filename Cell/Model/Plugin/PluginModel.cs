@@ -1,4 +1,4 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using System.Reflection;
 using System.Text.Json.Serialization;
 

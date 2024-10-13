@@ -1,6 +1,6 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using System.Collections.ObjectModel;
 using System.Windows;
 

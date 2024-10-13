@@ -1,8 +1,8 @@
-﻿using Cell.Execution.References;
+﻿using Cell.Core.Execution.References;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers.CellReferences
+namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
 {
     /// <summary>
     /// A syntax rewriter that traverses a syntax tree and refactors cell references found in the tree with a given refactor function.

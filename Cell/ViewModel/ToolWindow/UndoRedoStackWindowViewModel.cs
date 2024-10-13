@@ -1,4 +1,4 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 

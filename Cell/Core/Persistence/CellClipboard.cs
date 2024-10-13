@@ -1,11 +1,11 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// A class that handles holding on to copied cells and knows how to paste them intelligently into other cells.

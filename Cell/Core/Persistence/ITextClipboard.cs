@@ -1,4 +1,4 @@
-﻿namespace Cell.Persistence
+﻿namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Interface for a text based clipboard that can store a single string.

@@ -1,7 +1,7 @@
-﻿using Cell.Common;
-using Cell.Data;
-using Cell.Execution.References;
-using Cell.Execution.SyntaxWalkers.UserCollections;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
+using Cell.Core.Execution.References;
+using Cell.Core.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,7 +10,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Loads and saves user collections from a project.

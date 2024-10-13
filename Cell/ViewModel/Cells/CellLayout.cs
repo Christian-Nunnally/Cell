@@ -1,4 +1,4 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 

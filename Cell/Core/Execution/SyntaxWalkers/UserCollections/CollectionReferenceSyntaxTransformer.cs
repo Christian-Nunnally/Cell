@@ -1,4 +1,4 @@
-﻿namespace Cell.Execution.SyntaxWalkers.UserCollections
+﻿namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 {
     /// <summary>
     /// A transformer that can transform a syntax tree between using user friendly collection references, and code only collection references.

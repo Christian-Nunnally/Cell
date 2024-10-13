@@ -1,4 +1,4 @@
-﻿using Cell.Execution;
+﻿using Cell.Core.Execution;
 using Cell.Model;
 using System.Collections;
 using System.ComponentModel;
@@ -18,7 +18,7 @@ namespace Cell.ViewModel.Cells.Types
         public CollectionCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
-            sheet.CellPopulateManager.RunPopulateForCell(model);
+            if (!string.IsNullOrEmpty(model.PopulateFunctionName)) sheet.CellPopulateManager.RunPopulateForCell(model);
             NotifyPropertyChanged(nameof(SelectedItem));
         }
 
@@ -62,7 +62,7 @@ namespace Cell.ViewModel.Cells.Types
             {
                 var oldValue = Model.Text;
                 if (oldValue == value) return;
-                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(Text), oldValue, value));
+                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(SelectedItem), oldValue, value));
                 Model.Text = value;
             }
         }

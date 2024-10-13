@@ -1,4 +1,5 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Model;
 using Cell.ViewModel.Application;

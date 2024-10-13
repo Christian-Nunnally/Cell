@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Allows for file IO operations with the real file system.

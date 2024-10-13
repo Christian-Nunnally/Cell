@@ -1,8 +1,8 @@
-﻿using Cell.Data;
-using Cell.Execution;
+﻿using Cell.Core.Data;
+using Cell.Core.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using CellTest.TestUtilities;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

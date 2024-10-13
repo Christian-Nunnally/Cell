@@ -1,4 +1,4 @@
-﻿namespace Cell.Execution
+﻿namespace Cell.Core.Execution
 {
     /// <summary>
     /// Provides information about an edit operation that happened in a cell.

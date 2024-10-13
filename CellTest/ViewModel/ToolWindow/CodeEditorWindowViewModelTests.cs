@@ -1,6 +1,6 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 using System.Collections.ObjectModel;

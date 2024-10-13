@@ -1,10 +1,10 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using System.ComponentModel;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Responsible for executing the trigger function of a cell when the value changes.

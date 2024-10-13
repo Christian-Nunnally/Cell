@@ -1,7 +1,7 @@
-﻿using Cell.Persistence.Migration;
+﻿using Cell.Core.Persistence.Migration;
 using System.IO;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// A persisted directory that specifically represents the directory of a project.

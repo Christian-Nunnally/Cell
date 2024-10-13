@@ -1,9 +1,9 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using System.ComponentModel;
 
-namespace Cell.Data
+namespace Cell.Core.Data
 {
     /// <summary>
     /// Contains all cells in the entire application. When a cell is tracked, it is automatically saved to the loader when it changes allows all other parts of the application to access it from this tracker.

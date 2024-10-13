@@ -1,7 +1,7 @@
-﻿using Cell.Execution.References;
+﻿using Cell.Core.Execution.References;
 using Cell.Model;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Represents a reference to a collection from a specific cell.

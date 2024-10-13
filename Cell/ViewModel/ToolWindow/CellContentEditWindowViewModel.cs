@@ -1,6 +1,6 @@
-﻿using Cell.Model;
+﻿using Cell.Core.Execution.Functions;
+using Cell.Model;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -218,7 +218,10 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public void IndexSelectedCells()
+        /// <summary>
+        /// Automatically indexes the selected cells based on the top left cell, incrementing by one for each cell to the right and down.
+        /// </summary>
+        public void AutoIndexSelectedCells()
         {
             var selectedCells = _cellsToEdit.ToList();
             var leftmost = selectedCells.Select(x => x.Location.Column).Min();

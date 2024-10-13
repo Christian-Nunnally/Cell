@@ -1,8 +1,8 @@
-﻿using Cell.Common;
-using Cell.Data;
-using Cell.Execution;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
+using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;

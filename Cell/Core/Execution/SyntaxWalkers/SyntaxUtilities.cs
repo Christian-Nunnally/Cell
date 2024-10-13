@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers
+namespace Cell.Core.Execution.SyntaxWalkers
 {
     /// <summary>
     /// A utility class for working with syntax nodes.

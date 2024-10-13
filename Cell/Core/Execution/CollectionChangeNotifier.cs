@@ -1,8 +1,8 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Notifies subscribers when a collection or its contents have been updated.

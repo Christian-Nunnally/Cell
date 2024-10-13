@@ -1,10 +1,10 @@
-﻿using Cell.Execution.References;
+﻿using Cell.Core.Execution.References;
 using Cell.Model;
 using Cell.ViewModel.Cells.Types;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers.CellReferences
+namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
 {
     /// <summary>
     /// Syntax rewriter that converts code cell references like "c.GetCell().;" to user friendly cell references like "A1.".

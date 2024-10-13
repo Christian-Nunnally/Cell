@@ -1,11 +1,11 @@
-﻿using Cell.Data;
-using Cell.Execution;
+﻿using Cell.Core.Data;
+using Cell.Core.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
-using Cell.ViewModel.Execution;
+using Cell.Core.Persistence;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
+using Cell.Core.Execution.Functions;
 
 namespace Cell.Core.Execution.CodeCompletion
 {

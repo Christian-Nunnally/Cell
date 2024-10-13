@@ -1,8 +1,8 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
 using System.Collections;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Represents a range of cells that can be indexed.

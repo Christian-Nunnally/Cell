@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Cell.Execution.SyntaxWalkers.UserCollections
+namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 {
     /// <summary>
     /// A syntax rewriter that renames a collection references like c.GetUserList("name") to c.GetUserList("newName").

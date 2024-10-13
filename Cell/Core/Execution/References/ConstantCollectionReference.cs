@@ -1,6 +1,6 @@
 ﻿using Cell.Model;
 
-namespace Cell.Execution.References
+namespace Cell.Core.Execution.References
 {
     /// <summary>
     /// Represents a reference to a collection that does not change.

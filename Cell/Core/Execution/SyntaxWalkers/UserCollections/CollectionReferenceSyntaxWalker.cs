@@ -1,12 +1,12 @@
-﻿using Cell.Execution.References;
+﻿using Cell.Core.Execution.Functions;
+using Cell.Core.Execution.References;
 using Cell.Model;
-using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Cell.Execution.SyntaxWalkers.UserCollections
+namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 {
     /// <summary>
     /// Traverses the syntax tree and collects all collection references.

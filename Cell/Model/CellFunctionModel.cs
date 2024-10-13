@@ -1,4 +1,4 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 
 namespace Cell.Model
 {

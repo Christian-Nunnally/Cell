@@ -1,4 +1,4 @@
-﻿namespace Cell.Execution
+﻿namespace Cell.Core.Execution
 {
     /// <summary>
     /// Maintains subscriptions to 'Channels' which are arbitrary strings. When a channel is published to, all subscribers to that channel have thier actions invoked.

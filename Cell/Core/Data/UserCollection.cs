@@ -1,13 +1,13 @@
-﻿using Cell.Common;
-using Cell.Execution;
-using Cell.Execution.References;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution;
+using Cell.Core.Execution.References;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using System.ComponentModel;
 
-namespace Cell.Data
+namespace Cell.Core.Data
 {
     /// <summary>
     /// A user collection is a user created collection of items that can be sorted and filtered.

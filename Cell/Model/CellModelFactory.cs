@@ -1,5 +1,5 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.ViewModel.Application;
 using System.Text.Json;
 

@@ -1,13 +1,13 @@
 ﻿using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using Cell.Core.Execution.Functions;
 
-namespace Cell.Data
+namespace Cell.Core.Data
 {
     /// <summary>
     /// The tracker for all the sheets in a project.

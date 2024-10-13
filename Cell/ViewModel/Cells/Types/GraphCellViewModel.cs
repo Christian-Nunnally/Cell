@@ -1,4 +1,4 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
 using System.Windows;
 using System.Windows.Media;

@@ -1,15 +1,15 @@
-﻿using Cell.Common;
-using Cell.Data;
-using Cell.Execution.SyntaxWalkers.CellReferences;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
+using Cell.Core.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Execution;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
+using Cell.Core.Execution.Functions;
 
 namespace Cell.ViewModel.ToolWindow
 {

@@ -1,33 +1,32 @@
-﻿using Cell.Data;
-using Cell.Execution;
+﻿using Cell.Core.Data;
+using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using CellTest.TestUtilities;
 using Cell.ViewModel.Cells.Types;
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace CellTest.ViewModel.Cell.Types
 {
     public class DropdownCellViewModelTests
     {
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
-        private CellTracker _cellTracker;
-        private PluginFunctionLoader _pluginFunctionLoader;
-        private UserCollectionLoader _userCollectionLoader;
-        private CellPopulateManager _cellPopulateManager;
-        private SheetModel _sheetModel;
-        private SheetTracker _sheetTracker;
-        private ApplicationSettings _applicationSettings;
-        private SheetViewModel _sheetViewModel;
-        private CellModel _cellModel;
-        private CellSelector _cellSelector;
-        private CellTriggerManager _cellTriggerManager;
+        private readonly DictionaryFileIO _testFileIO;
+        private readonly PersistedDirectory _persistedDirectory;
+        private readonly CellLoader _cellLoader;
+        private readonly CellTracker _cellTracker;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly CellPopulateManager _cellPopulateManager;
+        private readonly SheetModel _sheetModel;
+        private readonly SheetTracker _sheetTracker;
+        private readonly ApplicationSettings _applicationSettings;
+        private readonly SheetViewModel _sheetViewModel;
+        private readonly CellModel _cellModel;
+        private readonly CellSelector _cellSelector;
+        private readonly CellTriggerManager _cellTriggerManager;
+        private readonly DropdownCellViewModel _testing;
 
-        private DropdownCellViewModel CreateInstance()
+        public DropdownCellViewModelTests()
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
@@ -44,27 +43,45 @@ namespace CellTest.ViewModel.Cell.Types
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
             _cellModel = new CellModel() { CellType = CellType.Dropdown };
             _cellTracker.AddCell(_cellModel);
-            return new DropdownCellViewModel(_cellModel, _sheetViewModel);
+            _testing = new DropdownCellViewModel(_cellModel, _sheetViewModel);
         }
 
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = CreateInstance();
         }
 
         [Fact]
         public void NoPopulateSet_PopulateFunctionSetToExistingFunction_DropdownItemsSetToFunctionResult()
         {
-            var testing = CreateInstance();
             _pluginFunctionLoader.CreateCellFunction("object", "TestFunction", "return new List<string> { \"Test1\", \"Test2\", \"Test3\" };");
-            Assert.Empty(testing.CollectionDisplayStrings);
+            Assert.Empty(_testing.CollectionDisplayStrings);
 
             _cellModel.PopulateFunctionName = "TestFunction";
 
-            Assert.Equal(3, testing.CollectionDisplayStrings.Count);
+            Assert.Equal(3, _testing.CollectionDisplayStrings.Count);
+        }
+
+        [Fact]
+        public void SelectedItemNotSet_SelectedItemSet_CellTextSetToSelectedItem()
+        {
+            Assert.Equal("", _testing.Text);
+
+            _testing.SelectedItem = "Test";
+
+            Assert.Equal("Test", _testing.Text);
+        }
+
+        [Fact]
+        public void SelectedItemChanged_TriggerFunctionTriggered()
+        {
+            var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
+            _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
+            _cellModel.TriggerFunctionName = "testTrigger";
+
+            _testing.SelectedItem = "Test";
+
+            Assert.True(assertionDialog.WasShown);
         }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

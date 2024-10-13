@@ -1,7 +1,7 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using System.IO;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Wraps a single root directory and provides methods for interacting with the contents of that directory.

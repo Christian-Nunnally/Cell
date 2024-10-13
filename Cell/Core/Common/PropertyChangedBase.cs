@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Cell.Common
+namespace Cell.Core.Common
 {
     /// <summary>
     /// Base class for all classes that need to notify when a property changes.

@@ -1,7 +1,7 @@
-﻿using Cell.Data;
-using Cell.Execution;
+﻿using Cell.Core.Data;
+using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;

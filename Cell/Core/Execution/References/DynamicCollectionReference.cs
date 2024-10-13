@@ -1,8 +1,8 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
-using Cell.ViewModel.Execution;
 
-namespace Cell.Execution.References
+namespace Cell.Core.Execution.References
 {
     /// <summary>
     /// Represents a reference to a collection that is calculated dynamically.

@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {

@@ -1,13 +1,13 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
-using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Tracks and loads plugin functions.

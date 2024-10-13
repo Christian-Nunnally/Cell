@@ -1,8 +1,8 @@
-﻿using Cell.Execution;
+﻿using Cell.Core.Execution;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
-using Cell.ViewModel.Execution;
 using System.ComponentModel;
 using System.Windows.Media;
 

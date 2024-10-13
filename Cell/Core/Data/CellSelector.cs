@@ -1,7 +1,7 @@
 ﻿using Cell.Model;
 using System.Collections.ObjectModel;
 
-namespace Cell.Data
+namespace Cell.Core.Data
 {
     /// <summary>
     /// Class that allows cells to be selected, the selection to be manipulated, and the selected cells to be retrieved.

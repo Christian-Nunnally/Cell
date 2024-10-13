@@ -1,4 +1,4 @@
-﻿namespace Cell.Data
+﻿namespace Cell.Core.Data
 {
     /// <summary>
     /// Inserts an item into a list in a sorted order.

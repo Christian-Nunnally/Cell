@@ -1,4 +1,4 @@
-﻿namespace Cell.Execution
+﻿namespace Cell.Core.Execution
 {
     /// <summary>
     /// A result of a compile or execution of code.

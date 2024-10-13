@@ -1,7 +1,7 @@
 ﻿using Cell.Core.Persistence.Migration;
-using Cell.Data;
-using Cell.Execution;
-using Cell.Persistence;
+using Cell.Core.Data;
+using Cell.Core.Execution;
+using Cell.Core.Persistence;
 using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Cell.Execution.References
+namespace Cell.Core.Execution.References
 {
     /// <summary>
     /// A class that represents a reference to a location or range represented by two locations.

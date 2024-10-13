@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// A clipboard that can store text using the real system clipboard.

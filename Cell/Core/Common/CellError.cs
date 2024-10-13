@@ -1,4 +1,4 @@
-﻿namespace Cell.Common
+﻿namespace Cell.Core.Common
 {
     /// <summary>
     /// An exception that is thrown from the Cell application.

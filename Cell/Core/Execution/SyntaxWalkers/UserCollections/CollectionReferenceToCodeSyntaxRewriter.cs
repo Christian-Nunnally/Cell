@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Cell.Execution.SyntaxWalkers.UserCollections
+namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 {
     /// <summary>
     /// Traverse the syntax tree and replace user collection references with the appropriate code.

@@ -1,4 +1,4 @@
-﻿using Cell.Execution.SyntaxWalkers;
+﻿using Cell.Core.Execution.SyntaxWalkers;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

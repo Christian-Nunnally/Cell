@@ -208,7 +208,7 @@ namespace Cell.View.Application
             if (IsLockedToCenter) PanSheetToCenter();
         }
 
-        public void PanSheetToCenter()
+        private void PanSheetToCenter()
         {
             if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
             if (ActualWidth == 0 || ActualHeight == 0) return;

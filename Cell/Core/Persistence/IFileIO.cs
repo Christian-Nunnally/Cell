@@ -1,4 +1,4 @@
-﻿namespace Cell.Persistence
+﻿namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Interface for file IO operations.

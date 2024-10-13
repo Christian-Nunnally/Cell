@@ -1,5 +1,5 @@
-﻿using Cell.Common;
-using Cell.Execution;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution;
 using Cell.Model;
 using System.Windows.Input;
 

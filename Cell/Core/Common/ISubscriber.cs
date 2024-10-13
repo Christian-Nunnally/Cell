@@ -1,4 +1,4 @@
-﻿namespace Cell.Execution
+﻿namespace Cell.Core.Execution
 {
     /// <summary>
     /// An object can that subscribe to some noficiation mechanism, which can invoke the action on this subscriber.

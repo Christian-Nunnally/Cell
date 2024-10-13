@@ -1,15 +1,13 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Core.Execution.References;
-using Cell.Execution;
-using Cell.Execution.References;
-using Cell.Execution.SyntaxWalkers.CellReferences;
-using Cell.Execution.SyntaxWalkers.UserCollections;
+using Cell.Core.Execution.SyntaxWalkers.CellReferences;
+using Cell.Core.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
-namespace Cell.ViewModel.Execution
+namespace Cell.Core.Execution.Functions
 {
     /// <summary>
     /// Encapsulates a <see cref="CellFunctionModel"/> and gives it the ability to compile and run.
@@ -37,7 +35,7 @@ namespace Cell.ViewModel.Execution
             "Cell.Model",
             "Cell.Model.Plugin",
             "Cell.ViewModel",
-            "Cell.Execution",
+            "Cell.Core.Execution",
             "Cell.ViewModel.Cells.Types",
         ];
         /// <summary>

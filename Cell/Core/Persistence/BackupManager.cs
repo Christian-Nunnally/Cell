@@ -1,4 +1,4 @@
-﻿namespace Cell.Persistence
+﻿namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Captures and restores backups of a project directory.

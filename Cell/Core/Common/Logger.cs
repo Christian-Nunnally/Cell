@@ -1,4 +1,4 @@
-﻿namespace Cell.Common
+﻿namespace Cell.Core.Common
 {
     /// <summary>
     /// Class that allows anyone to log messages to it.

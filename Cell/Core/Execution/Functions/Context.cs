@@ -1,10 +1,10 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Provides contextual information to a function, such as what the old value of a cell was before the function triggered.

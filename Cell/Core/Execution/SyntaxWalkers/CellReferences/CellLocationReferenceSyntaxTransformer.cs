@@ -1,7 +1,7 @@
 ﻿using Cell.Model;
 using Cell.Plugin.SyntaxWalkers;
 
-namespace Cell.Execution.SyntaxWalkers.CellReferences
+namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
 {
     /// <summary>
     /// A transformer that can transform a syntax tree between using user friendly cell references, and code only cell references.

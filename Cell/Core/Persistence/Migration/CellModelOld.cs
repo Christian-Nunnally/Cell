@@ -1,4 +1,4 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
 using Cell.ViewModel.Cells.Types;
 using System.ComponentModel;

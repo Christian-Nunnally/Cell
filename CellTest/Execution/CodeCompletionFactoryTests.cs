@@ -1,5 +1,5 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
-using Cell.Execution;
+using Cell.Core.Execution;
 using Cell.Model;
 
 namespace CellTest.Execution

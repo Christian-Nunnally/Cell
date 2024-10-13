@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace Cell.Common
+namespace Cell.Core.Common
 {
     /// <summary>
     /// A simple command that can be disabled remotely with a CanExecute predicate.

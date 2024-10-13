@@ -1,4 +1,4 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;

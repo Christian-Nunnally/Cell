@@ -1,10 +1,10 @@
-﻿using Cell.Data;
+﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Persistence;
-using Cell.ViewModel.Execution;
+using Cell.Core.Persistence;
 using System.ComponentModel;
+using Cell.Core.Execution.Functions;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// Responsible for running other cells GetText functions when cells or collections they reference are updated.

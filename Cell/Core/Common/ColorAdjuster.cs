@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Media;
 
-namespace Cell.Common
+namespace Cell.Core.Common
 {
     /// <summary>
     /// Contains helpers for converting and manipulating colors.

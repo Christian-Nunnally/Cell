@@ -1,5 +1,5 @@
-﻿using Cell.Persistence;
-using Cell.Persistence.Migration;
+﻿using Cell.Core.Persistence;
+using Cell.Core.Persistence.Migration;
 
 namespace CellTest.TestUtilities
 {

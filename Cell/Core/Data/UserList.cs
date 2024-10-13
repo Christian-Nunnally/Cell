@@ -1,8 +1,8 @@
 ﻿using Cell.Model.Plugin;
-using Cell.Persistence;
+using Cell.Core.Persistence;
 using System.Collections;
 
-namespace Cell.Data
+namespace Cell.Core.Data
 {
     /// <summary>
     /// A user created list of items that can be used from a cell function.
@@ -14,7 +14,7 @@ namespace Cell.Data
         private readonly UserCollectionLoader _userCollectionLoader;
         private UserCollection? _internalUserCollection;
 
-        private UserCollection? UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName);
+        private UserCollection? UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName ?? "");
 
         private UserList(string collectionName, UserCollectionLoader userCollectionLoader)
         {

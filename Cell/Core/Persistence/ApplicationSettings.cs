@@ -1,9 +1,9 @@
-﻿using Cell.Common;
+﻿using Cell.Core.Common;
 using Cell.Model;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Persistence
+namespace Cell.Core.Persistence
 {
     /// <summary>
     /// Persists application settings.

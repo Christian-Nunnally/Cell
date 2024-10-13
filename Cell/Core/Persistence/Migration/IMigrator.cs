@@ -1,4 +1,4 @@
-﻿namespace Cell.Persistence.Migration
+﻿namespace Cell.Core.Persistence.Migration
 {
     /// <summary>
     /// Interface for a migrator that can migrate a directory from one version to another.

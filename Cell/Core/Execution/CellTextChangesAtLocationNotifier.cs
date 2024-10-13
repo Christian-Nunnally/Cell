@@ -1,9 +1,9 @@
-﻿using Cell.Common;
-using Cell.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Model;
 using System.ComponentModel;
 
-namespace Cell.Execution
+namespace Cell.Core.Execution
 {
     /// <summary>
     /// ISubscriber's can use this class to subscribe to cell text changes at a specific location, without worrying about what cell is at that location or how the value is actually changing.
