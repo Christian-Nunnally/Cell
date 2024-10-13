@@ -75,14 +75,12 @@
                             Foreground="{TemplateBinding Foreground}"
                             IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                             Template="{StaticResource ComboBoxToggleButton}" />
-                        <ContentPresenter
+                        <Label
                             Name="ContentSite"
                             Margin="0,0,20,0"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                            Content="{TemplateBinding SelectionBoxItem}"
-                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                            Content="{TemplateBinding SelectedValue}"
                             IsHitTestVisible="False" />
                         <Popup Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}">
                             <Grid

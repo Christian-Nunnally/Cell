@@ -63,17 +63,19 @@ namespace Cell.Plugin.SyntaxWalkers
                 var rangeIndex = cellReference.ToList().IndexOf("Range");
                 var isRangeReference = rangeIndex >= 0;
                 var rangeArguments = "";
+                var functionName = "GetCell";
                 if (isRangeReference)
                 {
                     var endOfRangePartOfCellReference = cellReference[(rangeIndex + 1)..];
                     rangeArguments = GetArgumentStringFromCellReference(endOfRangePartOfCellReference);
                     if (string.IsNullOrEmpty(rangeArguments)) return node;
                     cellReference = cellReference[..rangeIndex];
+                    functionName = "GetCellRange";
                 }
 
                 string cellLocationArguments = GetArgumentStringFromCellReference(cellReference);
                 if (string.IsNullOrEmpty(cellLocationArguments)) return node;
-                var code = $"c.GetCell({sheetName}{cellLocationArguments}{rangeArguments})";
+                var code = $"c.{functionName}({sheetName}{cellLocationArguments}{rangeArguments})";
                 return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, code);
             }
             return node;

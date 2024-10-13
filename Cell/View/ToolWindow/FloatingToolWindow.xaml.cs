@@ -104,11 +104,6 @@ namespace Cell.View.ToolWindow
         {
             var boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ActualWidth, x));
             var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
-            if (_resizableToolWindow != null)
-            {
-                boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - _resizableToolWindow.ToolViewModel.MinimumWidth, x));
-                boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - _resizableToolWindow.ToolViewModel.MinimumHeight, y));
-            }
             Canvas.SetLeft(this, boundedX);
             Canvas.SetTop(this, boundedY);
         }
@@ -116,15 +111,8 @@ namespace Cell.View.ToolWindow
         /// <summary>
         /// Ensures the tool window is sized to fit entirely within the canvas it is displayed on by moving it. Will resize the tool window as a last resort.
         /// </summary>
-        public void UpdateSizeAndPositionRespectingBounds()
+        public void HandleOwningCanvasSizeChanged()
         {
-            if (_resizableToolWindow != null)
-            {
-                var width = _resizableToolWindow.ToolViewModel.DefaultWidth;
-                var height = _resizableToolWindow.ToolViewModel.DefaultHeight;
-                SetSizeWhileRespectingBounds(width, height);
-            }
-
             var x = Canvas.GetLeft(this);
             var y = Canvas.GetTop(this);
             SetPositionRespectingBounds(x, y);

@@ -25,6 +25,11 @@ namespace CellTest.ViewModel.Cell.Types
         private CellModel _cellModel;
         private CellSelector _cellSelector;
 
+        public CheckboxCellViewModelTests()
+        {
+            
+        }
+
         private CheckboxCellViewModel CreateInstance()
         {
             _testFileIO = new DictionaryFileIO();
@@ -50,14 +55,57 @@ namespace CellTest.ViewModel.Cell.Types
         }
 
         [Fact]
-        public void SimpleTest_ModelTextChanged_ViewModelTextChangedNotified()
+        public void IsCheckedSetFalse_IsCheckedSetTrue_ViewModelIsCheckedChangedNotified()
         {
             var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
+            Assert.False(testing.IsChecked);
 
             testing.IsChecked = true;
 
             propertyChangedTester.AssertPropertyChanged(nameof(testing.IsChecked));
+        }
+
+        [Fact]
+        public void ModelTextSetToFalse_ModelTextChanged_ViewModelIsCheckedChangedNotified()
+        {
+            var testing = CreateInstance();
+            var propertyChangedTester = new PropertyChangedTester(testing);
+            Assert.False(testing.IsChecked);
+
+            _cellModel.Check(true);
+
+            propertyChangedTester.AssertPropertyChanged(nameof(testing.IsChecked));
+        }
+
+        [Fact]
+        public void ModelTextSetToFalse_ModelTextChanged_TriggerFunctionNotTriggered()
+        {
+            var testing = CreateInstance();
+
+            var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
+            _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
+            _cellModel.TriggerFunctionName = "testTrigger";
+            Assert.False(testing.IsChecked);
+
+            _cellModel.Check(true);
+
+            Assert.False(assertionDialog.WasShown);
+        }
+
+        [Fact]
+        public void ModelTextSetToFalse_IsCheckedSetToTrueOnViewModel_TriggerFunctionTriggered()
+        {
+            var testing = CreateInstance();
+
+            var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
+            _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
+            _cellModel.TriggerFunctionName = "testTrigger";
+            Assert.False(testing.IsChecked);
+
+            testing.IsChecked = true;
+
+            Assert.True(assertionDialog.WasShown);
         }
     }
 }

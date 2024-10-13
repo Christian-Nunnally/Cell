@@ -1,4 +1,6 @@
-﻿using Cell.Model;
+﻿using Cell.Execution;
+using Cell.Model;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells.Types
 {
@@ -7,6 +9,7 @@ namespace Cell.ViewModel.Cells.Types
     /// </summary>
     public class TextboxCellViewModel : CellViewModel
     {
+
         /// <summary>
         /// Creates a new instance of <see cref="TextboxCellViewModel"/>.
         /// </summary>
@@ -14,6 +17,15 @@ namespace Cell.ViewModel.Cells.Types
         /// <param name="sheet">The sheet this cell is visible on.</param>
         public TextboxCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
+            Model.PropertyChanged += ModelPropertyChanged;
+        }
+
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Text))
+            {
+                NotifyPropertyChanged(nameof(TextboxText));
+            }
         }
 
         /// <summary>
@@ -21,5 +33,20 @@ namespace Cell.ViewModel.Cells.Types
         /// </summary>
         /// <returns>The number of cells selected by the owning sheets selector.</returns>
         public int GetNumberOfSelectedCells() => _sheetViewModel.CellSelector.SelectedCells.Count;
+
+        /// <summary>
+        /// Gets or sets the text in the user editable text box.
+        /// </summary>
+        public string TextboxText
+        {
+            get => Text;
+            set
+            {
+                var oldValue = Text;
+                if (oldValue == value) return;
+                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(Text), oldValue, value));
+                Text = value;
+            }
+        }
     }
 }

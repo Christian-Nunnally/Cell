@@ -158,11 +158,6 @@ namespace Cell.Model
         }
 
         /// <summary>
-        /// Gets the text of the selected item in a list cell.
-        /// </summary>
-        public string SelectedItem => Properties[nameof(ListCellViewModel.SelectedItem)];
-
-        /// <summary>
         /// A dictionary of string properties that can be set on the cell.
         /// 
         /// You can set a string property by calling `cell.SetStringProperty("key", value)` where "key" is whatever you want to name the string and `value` is the string you want to store.

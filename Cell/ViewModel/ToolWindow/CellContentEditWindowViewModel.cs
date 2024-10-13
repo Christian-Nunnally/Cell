@@ -1,5 +1,6 @@
 ﻿using Cell.Model;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -85,15 +86,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("Auto-Index", IndexSelectedCells) { ToolTip = "Sets the index of selected cells in an incrementing fashion (0, 1, 2...). Will work horizontially if only one row is selected." },
-            new CommandViewModel("Functions", OpenCellFunctions) { ToolTip = "Opens editor for advanced cell settings." },
         ];
-
-        private void OpenCellFunctions()
-        {
-            var createSheetWindowViewModel = new CellSettingsEditWindowViewModel(_cellsToEdit);
-            ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
-        }
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -119,6 +112,7 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(CellToDisplay));
                 NotifyPropertyChanged(nameof(Index));
                 NotifyPropertyChanged(nameof(ToolWindowTitle));
+                NotifyPropertyChanged(nameof(TriggerFunctionNameTextboxText));
                 if (!string.IsNullOrEmpty(_cellToDisplay.PopulateFunctionName)) MultiUseUserInputText = $"={_cellToDisplay.PopulateFunctionName}";
                 else MultiUseUserInputText = _cellToDisplay.Text;
             }
@@ -130,8 +124,49 @@ namespace Cell.ViewModel.ToolWindow
         public void EditPopulateFunction()
         {
             if (CellToDisplay == null) return;
-            if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName)) CellToDisplay.PopulateFunctionName = "Untitled";
+            if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName))
+            {
+                DialogFactory.ShowDialog("No function name to edit", "Set the name of the function before editing it.");
+                return;
+            }
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
+            EditFunction(function);
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the trigger function the editing cells should use and records to the undo stack.
+        /// </summary>
+        public string TriggerFunctionNameTextboxText
+        {
+            get => CellToDisplay.TriggerFunctionName;
+            set
+            {
+                foreach (var cell in _cellsToEdit)
+                {
+                    ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
+                    cell.TriggerFunctionName = value;
+                }
+                NotifyPropertyChanged(nameof(TriggerFunctionNameTextboxText));
+            }
+        }
+
+        /// <summary>
+        /// Opens the code editor for the current cells populate function.
+        /// </summary>
+        public void EditTriggerFunction()
+        {
+            if (CellToDisplay == null) return;
+            if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName))
+            {
+                DialogFactory.ShowDialog("No function name to edit", "Set the name of the function before editing it.");
+                return;
+            }
+            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
+            EditFunction(function);
+        }
+
+        private void EditFunction(CellFunction function)
+        {
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
@@ -160,14 +195,32 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void SubmitMultiUseUserInputText()
         {
-            if (_multiUseUserInputText.StartsWith('=')) CellToDisplay.PopulateFunctionName = _multiUseUserInputText[1..].Trim();
-            else CellToDisplay.Text = _multiUseUserInputText;
+            if (_multiUseUserInputText.StartsWith('=')) SetCellsPopulateFunctionFromMultiUseEditBox();
+            else SetCellsTextFromMultiUseEditBox();
         }
 
-        private static void IndexSelectedCells()
+        private void SetCellsTextFromMultiUseEditBox()
         {
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
-            var selectedCells = ApplicationViewModel.Instance.SheetViewModel.CellSelector.SelectedCells.ToList();
+            foreach (var cell in _cellsToEdit)
+            {
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
+                cell.Text = _multiUseUserInputText;
+            }
+        }
+
+        private void SetCellsPopulateFunctionFromMultiUseEditBox()
+        {
+            var functionName = _multiUseUserInputText[1..].Trim();
+            foreach (var cell in _cellsToEdit)
+            {
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
+                cell.PopulateFunctionName = functionName;
+            }
+        }
+
+        public void IndexSelectedCells()
+        {
+            var selectedCells = _cellsToEdit.ToList();
             var leftmost = selectedCells.Select(x => x.Location.Column).Min();
             var topmost = selectedCells.Select(x => x.Location.Row).Min();
             var topLeftCell = selectedCells.FirstOrDefault(x => x.Location.Row == topmost && x.Location.Column == leftmost);

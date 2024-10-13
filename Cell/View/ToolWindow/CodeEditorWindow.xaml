@@ -26,7 +26,6 @@
         <Grid Background="{StaticResource CellBackground}">
             <avalonEdit:TextEditor
                 Name="textEditor"
-                Padding="4"
                 Background="{StaticResource CellBackground}"
                 FontSize="10pt"
                 Foreground="{StaticResource ForegroundColor}"

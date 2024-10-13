@@ -6,6 +6,7 @@
     xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:local="clr-namespace:Cell.View.Application"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolWindowView="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
     Width="{Binding ApplicationWindowWidth, Mode=TwoWay}"
     Height="{Binding ApplicationWindowHeight, Mode=TwoWay}"
@@ -108,15 +109,21 @@
                 DockPanel.Dock="Top"
                 FontSize="16"
                 Visibility="{Binding IsProjectLoaded, Converter={StaticResource InverseBooleanToVisibilityConverter}}" />
-            <Grid>
-                <Label
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Content="No open cells"
-                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <ContentControl x:Name="_sheetViewContentControl" />
-                <Canvas x:Name="_toolWindowCanvas" />
-            </Grid>
+            <DockPanel>
+                <toolWindowView:CellContentEditWindow
+                    x:Name="_cellContentEditWindow"
+                    DockPanel.Dock="Top"
+                    Visibility="{Binding IsCellContentEditWindowVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Grid>
+                    <Label
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Content="No open cells"
+                        Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ContentControl x:Name="_sheetViewContentControl" />
+                    <Canvas x:Name="_toolWindowCanvas" />
+                </Grid>
+            </DockPanel>
         </Grid>
     </DockPanel>
 </Window>

@@ -80,6 +80,12 @@ namespace Cell.Execution
             return _cellsToUpdateWhenFunctionChanges.TryGetValue(function, out var cells) ? cells : [];
         }
 
+        internal void RunPopulateForCell(CellModel model)
+        {
+            var subscriber = GetOrCreatePopulateSubscriber(model);
+            subscriber.Action();
+        }
+
         private void AddToCellsToUpdateWhenFunctionChangesMap(CellModel cell, CellFunction function)
         {
             if (_cellsToUpdateWhenFunctionChanges.TryGetValue(function.Model, out var cellList))
@@ -101,6 +107,9 @@ namespace Cell.Execution
             {
                 UnsubscribeCellFromFunctionChanges(cell);
                 SubscribeCellToFunctionChanges(cell);
+
+                var subscriber = GetOrCreatePopulateSubscriber(cell);
+                subscriber.Action();
             }
         }
 

@@ -205,13 +205,10 @@ namespace Cell.View.Application
 
         private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (IsLockedToCenter)
-            {
-                PanSheetToCenter();
-            }
+            if (IsLockedToCenter) PanSheetToCenter();
         }
 
-        private void PanSheetToCenter()
+        public void PanSheetToCenter()
         {
             if (LaidOutWidth == 0 || LaidOutHeight == 0) return;
             if (ActualWidth == 0 || ActualHeight == 0) return;

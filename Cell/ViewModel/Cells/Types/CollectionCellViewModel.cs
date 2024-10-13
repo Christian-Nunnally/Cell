@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Execution;
+using Cell.Model;
 using System.Collections;
 using System.ComponentModel;
 
@@ -17,6 +18,8 @@ namespace Cell.ViewModel.Cells.Types
         public CollectionCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
+            sheet.CellPopulateManager.RunPopulateForCell(model);
+            NotifyPropertyChanged(nameof(SelectedItem));
         }
 
         /// <summary>
@@ -47,6 +50,21 @@ namespace Cell.ViewModel.Cells.Types
             else Collection.Add(items);
             NotifyPropertyChanged(nameof(Collection));
             NotifyPropertyChanged(nameof(CollectionDisplayStrings));
+        }
+
+        /// <summary>
+        /// Gets or sets the text in the user editable text box.
+        /// </summary>
+        public string SelectedItem
+        {
+            get => Text;
+            set
+            {
+                var oldValue = Model.Text;
+                if (oldValue == value) return;
+                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(Text), oldValue, value));
+                Model.Text = value;
+            }
         }
 
         private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

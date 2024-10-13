@@ -50,5 +50,10 @@ namespace CellTest.TestUtilities
             if (_selectedAction >= _actions.Count) throw new IndexOutOfRangeException("Selected action index is out of range.");
             _actions[_selectedAction].Command.Execute(null);
         }
+
+        public static void AssertAllDialogsShown()
+        {
+            Assert.Empty(_instances);
+        }
     }
 }

@@ -24,9 +24,24 @@ namespace Cell.View.ToolWindow
             _viewModel.EditPopulateFunction();
         }
 
+        private void EditTriggerFunctionButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.EditTriggerFunction();
+        }
+
         private void MultiUseUserInputTextBoxLostFocus(object sender, RoutedEventArgs e)
         {
             _viewModel.SubmitMultiUseUserInputText();
+        }
+
+        private void AutoIndexButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.IndexSelectedCells();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

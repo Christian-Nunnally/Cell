@@ -15,14 +15,5 @@ namespace Cell.ViewModel.Cells.Types
         public ListCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
         }
-
-        /// <summary>
-        /// The selected item binding for the list.
-        /// </summary>
-        public string SelectedItem
-        {
-            get => Text;
-            set => Text = value;
-        }
     }
 }

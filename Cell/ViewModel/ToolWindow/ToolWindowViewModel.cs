@@ -44,6 +44,7 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
         public virtual string ToolWindowTitle { get; set; } = "<<not set>>";
+        public bool IsAnchoredLeft { get; internal set; }
 
         /// <summary>
         /// Occurs when the tool window is really being closed.

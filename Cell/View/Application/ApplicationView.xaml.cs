@@ -163,13 +163,6 @@ namespace Cell.View.Application
             System.Windows.Application.Current.Shutdown();
         }
 
-        private void OpenSpecialEditPanelButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel == null) return;
-            var cellSettingsEditWindowViewModel = new CellSettingsEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
-            ShowToolWindow(cellSettingsEditWindowViewModel);
-        }
-
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
@@ -240,7 +233,7 @@ namespace Cell.View.Application
         {
             foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
             {
-                toolWindow.UpdateSizeAndPositionRespectingBounds();
+                toolWindow.HandleOwningCanvasSizeChanged();
             }
         }
 

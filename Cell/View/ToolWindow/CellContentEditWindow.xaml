@@ -15,6 +15,13 @@
         <Button
             Height="Auto"
             MinWidth="40"
+            Click="AutoIndexButtonClicked"
+            Content="Auto"
+            DockPanel.Dock="Right"
+            ToolTip="Opens the code editor for the populate function this cell is using." />
+        <Button
+            Height="Auto"
+            MinWidth="40"
             Click="EditPopulateFunctionButtonClicked"
             Content="{fa:Icon Code}"
             ToolTip="Opens the code editor for the populate function this cell is using."
@@ -27,12 +34,25 @@
             Text="{Binding Path=Index, UpdateSourceTrigger=LostFocus}"
             ToolTip="The 'index' of this cell. This number is read from functions using cell.Index and is used to uniquify the functions output for this cell." />
         <TextBox
+            Height="Auto"
+            MinWidth="40"
+            DockPanel.Dock="Right"
+            FontFamily="{StaticResource ProgrammingFont}"
+            Text="{Binding TriggerFunctionNameTextboxText, UpdateSourceTrigger=LostFocus}" />
+        <Button
+            Height="Auto"
+            MinWidth="40"
+            Click="EditTriggerFunctionButtonClicked"
+            Content="{fa:Icon Bolt}"
+            DockPanel.Dock="Right"
+            ToolTip="Opens the code editor for the populate function this cell is using." />
+        <TextBox
             Padding="4"
             AcceptsReturn="True"
             FontSize="15"
             LostFocus="MultiUseUserInputTextBoxLostFocus"
             PreviewKeyDown="TextBoxPreviewKeyDown"
-            Text="{Binding Path=MultiUseUserInputText, UpdateSourceTrigger=PropertyChanged}"
+            Text="{Binding MultiUseUserInputText, UpdateSourceTrigger=PropertyChanged}"
             ToolTip="Sets a cells text. To compute the text using a function, type '=' and then the function name, like '=MyFunction'" />
     </DockPanel>
 </view:ResizableToolWindow>

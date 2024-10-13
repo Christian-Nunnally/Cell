@@ -23,7 +23,6 @@ namespace Cell.ViewModel.Application
                 CreateSheetWindowViewModel convertedViewModel => new CreateSheetWindow(convertedViewModel),
                 CellContentEditWindowViewModel convertedViewModel => new CellContentEditWindow(convertedViewModel),
                 CellFormatEditWindowViewModel convertedViewModel => new CellFormatEditWindow(convertedViewModel),
-                CellSettingsEditWindowViewModel convertedViewModel => new CellSettingsEditWindow(convertedViewModel),
                 CollectionManagerWindowViewModel convertedViewModel => new CollectionManagerWindow(convertedViewModel),
                 ExportWindowViewModel convertedViewModel => new ExportWindow(convertedViewModel),
                 FunctionManagerWindowViewModel convertedViewModel => new FunctionManagerWindow(convertedViewModel),
