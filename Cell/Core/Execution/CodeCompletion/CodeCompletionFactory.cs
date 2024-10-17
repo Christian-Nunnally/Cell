@@ -1,11 +1,13 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Plugin.SyntaxWalkers;
 using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
 namespace Cell.Core.Execution.CodeCompletion
@@ -38,7 +40,35 @@ namespace Cell.Core.Execution.CodeCompletion
                 : NoCompletionData;
         }
 
-        public static Dictionary<string, Type> CreateStandardCellFunctionGlobalVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap)
+        public static IList<ICompletionData> CreateCompletionDataForCellFunction(string code, int carrotPosition, IEnumerable<string> usings, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, CellModel? cellContext)
+        {
+            Dictionary<string, Type> outerContextVariables = CreateOuterContextVariablesForFunction(code, collectionNameToDataTypeMap, cellContext);
+            return CreateCompletionData(code, carrotPosition, usings, outerContextVariables);
+        }
+
+        public static Dictionary<string, Type> CreateOuterContextVariablesForFunction(string code, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, CellModel? cellContext)
+        {
+            var outerContextVariables = CreateStandardCellFunctionGlobalVariableTypeMap(collectionNameToDataTypeMap);
+
+            var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(cellContext.Location);
+            var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(cellContext.Location);
+            var cellReferenceFinder = new CellReferenceSyntaxWalker();
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var root = syntaxTree.GetRoot();
+            root = cellReferenceToCodeSyntaxRewriter.Visit(root);
+            cellReferenceFinder.Visit(root);
+            foreach (var cellReference in cellReferenceFinder.LocationReferences)
+            {
+                if (cellContext is null) break;
+                var type = cellReference.IsRange ? typeof(CellRange) : typeof(CellModel);
+                var name = codeToCellReferenceSyntaxRewriter.GetUserFriendlyCellReferenceText(cellReference);
+                outerContextVariables.Add(name, type);
+            }
+
+            return outerContextVariables;
+        }
+
+        private static Dictionary<string, Type> CreateStandardCellFunctionGlobalVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap)
         {
             var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
             foreach (var (userCollectionName, typeName) in collectionNameTypeMap)

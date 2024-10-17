@@ -1,7 +1,5 @@
-﻿using Cell.Core.Persistence;
-using ICSharpCode.AvalonEdit.CodeCompletion;
+﻿using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
-using Cell.Core.Execution.Functions;
 
 namespace Cell.Core.Execution.CodeCompletion
 {
@@ -14,12 +12,10 @@ namespace Cell.Core.Execution.CodeCompletion
         /// Creates a new completion window for the given text area.
         /// </summary>
         /// <param name="textArea">The text area to complete the text for.</param>
-        /// <param name="userCollectionLoader">The collection manager used to resolve collection references and types.</param>
+        /// <param name="completionData">The completion data to put in the window.</param>
         /// <returns>A CompletionWindow, populated with results.</returns>
-        public static CompletionWindow? Create(TextArea textArea, UserCollectionLoader userCollectionLoader)
+        public static CompletionWindow? Create(TextArea textArea, IEnumerable<ICompletionData> completionData)
         {
-            var outerContextVariables = CodeCompletionFactory.CreateStandardCellFunctionGlobalVariableTypeMap(userCollectionLoader.GenerateDataTypeForCollectionMap());
-            var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, CellFunction.UsingNamespaces, outerContextVariables);
             var completionWindow = new CompletionWindow(textArea);
             var data = completionWindow.CompletionList.CompletionData;
             foreach (var item in completionData)

@@ -127,5 +127,29 @@ namespace CellTest.Execution
             Assert.NotEmpty(completionData);
             Assert.Single(completionData, x => x.Text == nameof(CellStyleModel.BackgroundColor));
         }
+
+        [Fact]
+        public void CellReferenceToA1_CompletionDataCreated_ContainsCellStyleProperty()
+        {
+            IEnumerable<string> usings = ["Cell.Model"];
+            var code = "A1.";
+
+            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, []);
+
+            Assert.NotEmpty(completionData);
+            Assert.Single(completionData, x => x.Text == nameof(CellModel.Style));
+        }
+
+        [Fact]
+        public void CellReferenceToA1Text_CompletionDataCreated_ContainsStringProperties()
+        {
+            IEnumerable<string> usings = ["Cell.Model"];
+            var code = "A1.Text.";
+
+            var completionData = CodeCompletionFactory.CreateCompletionDataForCellFunction(code, code.Length, usings, new Dictionary<string, string>(), new CellModel());
+
+            Assert.NotEmpty(completionData);
+            Assert.Single(completionData, x => x.Text == "Length");
+        }
     }
 }

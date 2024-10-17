@@ -4,6 +4,7 @@ using Cell.Core.Execution.Functions;
 using Cell.Model;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.ComponentModel;
 using System.Windows.Media;
 
@@ -227,12 +228,17 @@ namespace Cell.ViewModel.ToolWindow
 
         internal void CaretPositionChanged(int offset)
         {
-            var outerContextVariables = CodeCompletionFactory.CreateStandardCellFunctionGlobalVariableTypeMap(_collectionNameToDataTypeMap);
+            var outerContextVariables = CodeCompletionFactory.CreateOuterContextVariablesForFunction(CurrentTextInEditor, _collectionNameToDataTypeMap, CellContext);
             if (CodeCompletionFactory.TryGetTypeUsingSemanticAnalyzer(CurrentTextInEditor, offset, CellFunction.UsingNamespaces, outerContextVariables, out var type))
             {
                 ResultString = type?.Name ?? "Unknown type";
                 NotifyPropertyChanged(nameof(ResultString));
             }
+        }
+
+        internal IList<ICompletionData> CreateAutoCompleteSuggestions(string code, int offset)
+        {
+            return CodeCompletionFactory.CreateCompletionDataForCellFunction(code, offset, CellFunction.UsingNamespaces, _collectionNameToDataTypeMap, CellContext);
         }
     }
 }

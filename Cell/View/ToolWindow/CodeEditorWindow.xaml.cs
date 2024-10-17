@@ -77,7 +77,10 @@ namespace Cell.View.ToolWindow
         {
             var textArea = textEditor.TextArea;
             var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
-            completionWindow = CodeCompletionWindowFactory.Create(textArea, userCollectionLoader);
+
+            var suggestions = _viewModel.CreateAutoCompleteSuggestions(textEditor.Text, textEditor.TextArea.Caret.Offset);
+
+            completionWindow = CodeCompletionWindowFactory.Create(textArea, suggestions);
             if (completionWindow is null) return;
             completionWindow.Show();
             completionWindow.Closed += delegate { completionWindow = null; };
