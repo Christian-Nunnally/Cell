@@ -64,6 +64,19 @@ namespace Cell.View.Application
         }
 
         /// <summary>
+        /// Opens a tool window with the specified view model.
+        /// </summary>
+        /// <param name="viewModel">The tool window view model to open.</param>
+        /// <param name="dock">The side to dock to.</param>
+        /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
+        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        {
+            var window = ToolWindowViewFactory.Create(viewModel);
+            if (window is null) return;
+            DockToolWindow(window, dock, allowDuplicates);
+        }
+
+        /// <summary>
         /// Initializes the entire application once the view has loaded.
         /// </summary>
         /// <param name="e">Event arguments.</param>
@@ -167,7 +180,8 @@ namespace Cell.View.Application
         {
             if (_viewModel == null) return;
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
-            ShowToolWindow(cellContentEditWindowViewModel);
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+            else ShowToolWindow(cellContentEditWindowViewModel);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
@@ -219,6 +233,26 @@ namespace Cell.View.Application
             Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
 
             _toolWindowCanvas.Children.Add(toolbox);
+            resizableToolWindow.ToolViewModel.HandleBeingShown();
+        }
+
+        private void DockToolWindow(ResizableToolWindow resizableToolWindow, Dock dockSide, bool allowDuplicates = false)
+        {
+            if (!allowDuplicates)
+            {
+                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
+                {
+                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
+                    {
+                        return;
+                    }
+                }
+            }
+
+
+            DockPanel.SetDock(resizableToolWindow, dockSide);
+
+            _toolWindowDockPanel.Children.Add(resizableToolWindow);
             resizableToolWindow.ToolViewModel.HandleBeingShown();
         }
 

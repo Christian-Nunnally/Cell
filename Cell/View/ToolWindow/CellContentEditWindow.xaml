@@ -35,7 +35,8 @@
             ToolTip="The 'index' of this cell. This number is read from functions using cell.Index and is used to uniquify the functions output for this cell." />
         <TextBox
             Height="Auto"
-            MinWidth="40"
+            MinWidth="100"
+            Padding="5"
             DockPanel.Dock="Right"
             FontFamily="{StaticResource ProgrammingFont}"
             Text="{Binding TriggerFunctionNameTextboxText, UpdateSourceTrigger=LostFocus}" />
@@ -47,7 +48,7 @@
             DockPanel.Dock="Right"
             ToolTip="Opens the code editor for the populate function this cell is using." />
         <TextBox
-            Padding="4"
+            Padding="5"
             AcceptsReturn="True"
             FontSize="15"
             LostFocus="MultiUseUserInputTextBoxLostFocus"

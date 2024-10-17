@@ -154,7 +154,6 @@ namespace Cell.View.Cells
                     }
                     else
                     {
-                        SheetViewModel.UnhighlightAllCells();
                         if (SheetViewModel.IsCellHighlightOnMouseOverEnabled) SheetViewModel.HighlightCell(cell, "#33333333");
                     }
                 }
@@ -174,6 +173,7 @@ namespace Cell.View.Cells
             _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
             SheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
+            _panAndZoomCanvas.EnsureCenteredIfLocked();
         }
 
         private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -181,6 +181,22 @@ namespace Cell.View.Cells
             if (_panAndZoomCanvas == null) return;
             if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+        }
+
+        private void CellMouseEnter(object sender, MouseEventArgs e)
+        {
+            if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
+            {
+                //SheetViewModel.UnhighlightAllCells();
+            }
+        }
+
+        private void CellMouseLeave(object sender, MouseEventArgs e)
+        {
+            if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
+            {
+                SheetViewModel.UnhighlightAllCells();
+            }
         }
     }
 }

@@ -117,6 +117,7 @@
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <ContentControl x:Name="_sheetViewContentControl" />
                 <Canvas x:Name="_toolWindowCanvas" />
+                <DockPanel x:Name="_toolWindowDockPanel" LastChildFill="False" />
             </Grid>
         </Grid>
     </DockPanel>

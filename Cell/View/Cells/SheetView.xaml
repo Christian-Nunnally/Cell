@@ -53,6 +53,8 @@
                                 Width="{Binding Width}"
                                 Height="{Binding Height}"
                                 Background="{Binding BackgroundColor}"
+                                MouseEnter="CellMouseEnter"
+                                MouseLeave="CellMouseLeave"
                                 PreviewMouseDown="CellPreviewMouseDown"
                                 PreviewMouseMove="CellPreviewMouseMove"
                                 PreviewMouseUp="CellPreviewMouseUp"

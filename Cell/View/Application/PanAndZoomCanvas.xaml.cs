@@ -31,7 +31,7 @@ namespace Cell.View.Application
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the canvas chuldren should automatically pan to be centered in the view.
+        /// Gets or sets a value indicating whether the canvas children should automatically pan to be centered in the view.
         /// </summary>
         public bool IsLockedToCenter
         {
@@ -204,6 +204,11 @@ namespace Cell.View.Application
         }
 
         private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            EnsureCenteredIfLocked();
+        }
+
+        public void EnsureCenteredIfLocked()
         {
             if (IsLockedToCenter) PanSheetToCenter();
         }

@@ -32,12 +32,12 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
-        public override double DefaultHeight => 160;
+        public override double DefaultHeight => 150;
 
         /// <summary>
         /// Gets the default width of this tool window when it is shown.
         /// </summary>
-        public override double DefaultWidth => 280;
+        public override double DefaultWidth => 300;
 
         /// <summary>
         /// Gets the list of commands to display as buttons in the dialog.
