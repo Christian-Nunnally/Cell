@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
 
-namespace CellTest.Execution
+namespace CellTest.Core.Execution
 {
     public class SemanticAnalyzerTests
     {

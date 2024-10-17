@@ -1,7 +1,7 @@
 ﻿using Cell.Core.Execution.Functions;
 using Cell.Model;
 
-namespace CellTest.Execution
+namespace CellTest.Core.Execution
 {
     public class FunctionViewModelTests
     {

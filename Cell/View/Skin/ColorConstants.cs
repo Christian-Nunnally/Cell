@@ -27,6 +27,6 @@ namespace Cell.View.Skin
         public static readonly Color SelectedColorConstant = ColorAdjuster.ConvertHexStringToColor(SelectedColorConstantHex);
         public static readonly Color ToolWindowHeaderColorConstant = ColorAdjuster.ConvertHexStringToColor(ToolWindowHeaderColorConstantHex);
 
-        public static SolidColorBrush ForegroundColorConstantBrush = new SolidColorBrush(ForegroundColorConstant);
+        public static SolidColorBrush ForegroundColorConstantBrush = new (ForegroundColorConstant);
     }
 }

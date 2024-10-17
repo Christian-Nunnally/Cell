@@ -30,7 +30,7 @@ namespace Cell.Core.Execution.CodeCompletion
         /// <returns></returns>
         public static IList<ICompletionData> CreateCompletionData(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
-            if (TryGetTypeUsingSemanticAnalyzer(text, carrotPosition, usings, variableNameToTypeMapForOuterContext, out var type))
+            if (TryGetTypeAtTextPositionUsingSemanticAnalyzer(text, carrotPosition, usings, variableNameToTypeMapForOuterContext, out var type))
             {
                 return CreateCompletionDataForType(type!);
             }
@@ -40,15 +40,32 @@ namespace Cell.Core.Execution.CodeCompletion
                 : NoCompletionData;
         }
 
+        /// <summary>
+        /// Creates a list of completion suggestions for a cell function, which are normal suggestions from the code context in addition to the cell and context variables. This also handles cell references, like A1.
+        /// </summary>
+        /// <param name="code">The code to get suggestions for.</param>
+        /// <param name="carrotPosition">The position of the editing carot.</param>
+        /// <param name="usings">The usings statements to get type information during semantic analysis.</param>
+        /// <param name="collectionNameToDataTypeMap">A map from collection name to the data type of the objects in that collection.</param>
+        /// <param name="cellContext">The context cell to use for relative location references.</param>
+        /// <returns>A list of completion suggestions.</returns>
         public static IList<ICompletionData> CreateCompletionDataForCellFunction(string code, int carrotPosition, IEnumerable<string> usings, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, CellModel? cellContext)
         {
             Dictionary<string, Type> outerContextVariables = CreateOuterContextVariablesForFunction(code, collectionNameToDataTypeMap, cellContext);
             return CreateCompletionData(code, carrotPosition, usings, outerContextVariables);
         }
 
+        /// <summary>
+        /// Generates a list of variables and thier types that are in the outer context of a function, including the cell and context variables, plus any cell references.
+        /// </summary>
+        /// <param name="code">The code look for cell references in.</param>
+        /// <param name="collectionNameToDataTypeMap">A map of collection names and the data type of the items in them.</param>
+        /// <param name="cellContext">The context cell to use when resolving location references.</param>
+        /// <returns>A map from variable name to variable type.</returns>
         public static Dictionary<string, Type> CreateOuterContextVariablesForFunction(string code, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, CellModel? cellContext)
         {
             var outerContextVariables = CreateStandardCellFunctionGlobalVariableTypeMap(collectionNameToDataTypeMap);
+            if (cellContext == null) return outerContextVariables;
 
             var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(cellContext.Location);
             var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(cellContext.Location);
@@ -168,7 +185,16 @@ namespace Cell.Core.Execution.CodeCompletion
             return completionData is not null;
         }
 
-        public static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
+        /// <summary>
+        /// Attempts to get the type at a given position in the code using semantic analysis.
+        /// </summary>
+        /// <param name="text">The code to look through.</param>
+        /// <param name="carrotPosition">The index in the code to attempt to get the type from.</param>
+        /// <param name="usings">The using statements to help resolve types.</param>
+        /// <param name="variableNameToTypeMapForOuterContext">Additional name to type map to resolve additional stuff.</param>
+        /// <param name="type">The type, if it was able to be resolved.</param>
+        /// <returns>True if the type was able to be resolved.</returns>
+        public static bool TryGetTypeAtTextPositionUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
         {
             type = null;
             SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);

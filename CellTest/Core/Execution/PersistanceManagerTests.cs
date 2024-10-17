@@ -1,7 +1,7 @@
 using Cell.Core.Persistence;
 using CellTest.TestUtilities;
 
-namespace CellTest
+namespace CellTest.Core.Execution
 {
     public class PersistanceManagerTests
     {

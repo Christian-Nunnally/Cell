@@ -14,6 +14,71 @@ namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
     {
         private readonly CellLocationModel _location = location;
         /// <summary>
+        /// Converts a <see cref="LocationReference"/> to a user friendly cell reference like "A1" or "B_H5" or "SheetName_C_AA56".
+        /// </summary>
+        /// <param name="locationReference">The location reference to convert.</param>
+        /// <returns>The user friendly cell reference like "A1".</returns>
+        public string GetUserFriendlyCellReferenceText(LocationReference locationReference)
+        {
+            var sheetPrefix = string.IsNullOrEmpty(locationReference.SheetReference.Value) ? string.Empty : $"{locationReference.SheetReference.Value}_";
+
+            string? relativitySymbol = null;
+            if (!locationReference.RowReference.IsRelative && !locationReference.ColumnReference.IsRelative)
+            {
+                relativitySymbol = "B_";
+            }
+            if (!locationReference.RowReference.IsRelative)
+            {
+                relativitySymbol ??= "R_";
+            }
+            else
+            {
+                locationReference.RowReference.Value += _location.Row;
+            }
+            if (!locationReference.ColumnReference.IsRelative)
+            {
+                relativitySymbol ??= "C_";
+            }
+            else
+            {
+                locationReference.ColumnReference.Value += _location.Column;
+            }
+            relativitySymbol ??= string.Empty;
+
+            string rangePart = string.Empty;
+            string? rangeRelativitySymbol = null;
+            if (locationReference.IsRange)
+            {
+                if (!locationReference.RowRangeEndReference.IsRelative && !locationReference.ColumnRangeEndReference.IsRelative)
+                {
+                    rangeRelativitySymbol = "B_";
+                }
+                if (!locationReference.RowRangeEndReference.IsRelative)
+                {
+                    rangeRelativitySymbol ??= "R_";
+                }
+                else
+                {
+                    locationReference.RowRangeEndReference.Value += _location.Row;
+                }
+                if (!locationReference.ColumnRangeEndReference.IsRelative)
+                {
+                    rangeRelativitySymbol ??= "C_";
+                }
+                else
+                {
+                    locationReference.ColumnRangeEndReference.Value += _location.Column;
+                }
+                rangeRelativitySymbol ??= string.Empty;
+
+                rangePart = $"_Range_{rangeRelativitySymbol}{ColumnCellViewModel.GetColumnName(locationReference.ColumnRangeEndReference.Value)}{locationReference.RowRangeEndReference.Value}";
+            }
+
+            var cellLocation = $"{sheetPrefix}{relativitySymbol}{ColumnCellViewModel.GetColumnName(locationReference.ColumnReference.Value)}{locationReference.RowReference.Value}{rangePart}";
+            return cellLocation;
+        }
+
+        /// <summary>
         /// Represents a <see cref="CSharpSyntaxRewriter"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
         /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order,
         /// </summary>
@@ -26,66 +91,6 @@ namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
                 return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, cellLocation);
             }
             return node;
-        }
-
-        public string GetUserFriendlyCellReferenceText(LocationReference cellReference)
-        {
-            var sheetPrefix = string.IsNullOrEmpty(cellReference.SheetReference.Value) ? string.Empty : $"{cellReference.SheetReference.Value}_";
-
-            string? relativitySymbol = null;
-            if (!cellReference.RowReference.IsRelative && !cellReference.ColumnReference.IsRelative)
-            {
-                relativitySymbol = "B_";
-            }
-            if (!cellReference.RowReference.IsRelative)
-            {
-                relativitySymbol ??= "R_";
-            }
-            else
-            {
-                cellReference.RowReference.Value += _location.Row;
-            }
-            if (!cellReference.ColumnReference.IsRelative)
-            {
-                relativitySymbol ??= "C_";
-            }
-            else
-            {
-                cellReference.ColumnReference.Value += _location.Column;
-            }
-            relativitySymbol ??= string.Empty;
-
-            string rangePart = string.Empty;
-            string? rangeRelativitySymbol = null;
-            if (cellReference.IsRange)
-            {
-                if (!cellReference.RowRangeEndReference.IsRelative && !cellReference.ColumnRangeEndReference.IsRelative)
-                {
-                    rangeRelativitySymbol = "B_";
-                }
-                if (!cellReference.RowRangeEndReference.IsRelative)
-                {
-                    rangeRelativitySymbol ??= "R_";
-                }
-                else
-                {
-                    cellReference.RowRangeEndReference.Value += _location.Row;
-                }
-                if (!cellReference.ColumnRangeEndReference.IsRelative)
-                {
-                    rangeRelativitySymbol ??= "C_";
-                }
-                else
-                {
-                    cellReference.ColumnRangeEndReference.Value += _location.Column;
-                }
-                rangeRelativitySymbol ??= string.Empty;
-
-                rangePart = $"_Range_{rangeRelativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.ColumnRangeEndReference.Value)}{cellReference.RowRangeEndReference.Value}";
-            }
-
-            var cellLocation = $"{sheetPrefix}{relativitySymbol}{ColumnCellViewModel.GetColumnName(cellReference.ColumnReference.Value)}{cellReference.RowReference.Value}{rangePart}";
-            return cellLocation;
         }
     }
 }

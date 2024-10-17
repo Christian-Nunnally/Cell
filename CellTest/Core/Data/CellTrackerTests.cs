@@ -2,7 +2,7 @@ using Cell.Core.Data;
 using Cell.Core.Execution;
 using Cell.Core.Persistence;
 
-namespace CellTest
+namespace CellTest.Core.Data
 {
     public class CellTrackerTests
     {

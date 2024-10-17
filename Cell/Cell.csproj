@@ -12,7 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Page Remove="View\Application\App.xaml" />
     <Page Remove="View\Skin\Colors.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ApplicationDefinition Include="View\Application\App.xaml" />
   </ItemGroup>
 
   <ItemGroup>

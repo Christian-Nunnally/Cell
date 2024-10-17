@@ -229,7 +229,7 @@ namespace Cell.ViewModel.ToolWindow
         internal void CaretPositionChanged(int offset)
         {
             var outerContextVariables = CodeCompletionFactory.CreateOuterContextVariablesForFunction(CurrentTextInEditor, _collectionNameToDataTypeMap, CellContext);
-            if (CodeCompletionFactory.TryGetTypeUsingSemanticAnalyzer(CurrentTextInEditor, offset, CellFunction.UsingNamespaces, outerContextVariables, out var type))
+            if (CodeCompletionFactory.TryGetTypeAtTextPositionUsingSemanticAnalyzer(CurrentTextInEditor, offset, CellFunction.UsingNamespaces, outerContextVariables, out var type))
             {
                 ResultString = type?.Name ?? "Unknown type";
                 NotifyPropertyChanged(nameof(ResultString));

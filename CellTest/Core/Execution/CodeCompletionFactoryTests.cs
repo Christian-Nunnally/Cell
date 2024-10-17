@@ -2,7 +2,7 @@
 using Cell.Core.Execution;
 using Cell.Model;
 
-namespace CellTest.Execution
+namespace CellTest.Core.Execution
 {
     public class CodeCompletionFactoryTests
     {

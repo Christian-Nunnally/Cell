@@ -51,6 +51,8 @@ namespace Cell.Core.Data
             _cellsToLocation.Add(cellModel, cellModel.Location.LocationString);
 
             cellModel.PropertyChanged += CellModelPropertyChanged;
+            cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
+            cellModel.Style.PropertyChanged += CellModelStylePropertyChanged;
             CellAdded?.Invoke(cellModel);
             if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
@@ -88,7 +90,7 @@ namespace Cell.Core.Data
         public void RemoveCell(CellModel cellModel)
         {
             cellModel.PropertyChanged -= CellModelPropertyChanged;
-            cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
+            cellModel.Location.PropertyChanged -= CellLocationPropertyChanged;
             cellModel.Style.PropertyChanged -= CellModelStylePropertyChanged;
             RemoveFromCellsInSheetMap(cellModel, cellModel.Location.SheetName);
             _cellLoader.DeleteCell(cellModel);

@@ -1,7 +1,4 @@
-﻿
-using CellTest.TestUtilities;
-
-namespace CellTest
+﻿namespace CellTest.TestUtilities
 {
     public class TestFileIOTest
     {

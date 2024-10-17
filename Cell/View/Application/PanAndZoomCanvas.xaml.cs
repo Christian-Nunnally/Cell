@@ -58,6 +58,14 @@ namespace Cell.View.Application
         public double LaidOutWidth { get; internal set; }
 
         /// <summary>
+        /// Attempts to center the canvas if it is configured to lock to the center when the window resizes.
+        /// </summary>
+        public void EnsureCenteredIfLocked()
+        {
+            if (IsLockedToCenter) PanSheetToCenter();
+        }
+
+        /// <summary>
         /// Pan the canvas to the specified coordinates.
         /// </summary>
         /// <param name="x">The x coordinate.</param>
@@ -206,11 +214,6 @@ namespace Cell.View.Application
         private void PanAndZoomCanvasSizeChanged(object sender, SizeChangedEventArgs e)
         {
             EnsureCenteredIfLocked();
-        }
-
-        public void EnsureCenteredIfLocked()
-        {
-            if (IsLockedToCenter) PanSheetToCenter();
         }
 
         private void PanSheetToCenter()
