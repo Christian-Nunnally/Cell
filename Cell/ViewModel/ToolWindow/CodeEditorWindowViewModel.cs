@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Execution;
+using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
 using Cell.View.Skin;
@@ -222,6 +223,16 @@ namespace Cell.ViewModel.ToolWindow
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var syntaxTree = function.SyntaxTree;
             SyntaxTreePreviewText = syntaxTree.ToString();
+        }
+
+        internal void CaretPositionChanged(int offset)
+        {
+            var outerContextVariables = CodeCompletionFactory.CreateStandardCellFunctionGlobalVariableTypeMap(_collectionNameToDataTypeMap);
+            if (CodeCompletionFactory.TryGetTypeUsingSemanticAnalyzer(CurrentTextInEditor, offset, CellFunction.UsingNamespaces, outerContextVariables, out var type))
+            {
+                ResultString = type?.Name ?? "Unknown type";
+                NotifyPropertyChanged(nameof(ResultString));
+            }
         }
     }
 }

@@ -29,6 +29,12 @@ namespace Cell.View.ToolWindow
             textEditor.TextArea.TextEntered += OnTextEntered;
             textEditor.TextArea.TextView.Document.TextChanged += OnTextChanged;
             textEditor.TextArea.PreviewKeyDown += TextEditorPreviewKeyDown;
+            textEditor.TextArea.Caret.PositionChanged += TextEditorCaretPositionChanged;
+        }
+
+        private void TextEditorCaretPositionChanged(object? sender, EventArgs e)
+        {
+            _viewModel.CaretPositionChanged(textEditor.TextArea.Caret.Offset);
         }
 
         private void CodeEditorWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

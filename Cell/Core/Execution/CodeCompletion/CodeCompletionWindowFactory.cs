@@ -1,8 +1,4 @@
-﻿using Cell.Core.Data;
-using Cell.Core.Execution;
-using Cell.Model;
-using Cell.Model.Plugin;
-using Cell.Core.Persistence;
+﻿using Cell.Core.Persistence;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using Cell.Core.Execution.Functions;
@@ -22,16 +18,7 @@ namespace Cell.Core.Execution.CodeCompletion
         /// <returns>A CompletionWindow, populated with results.</returns>
         public static CompletionWindow? Create(TextArea textArea, UserCollectionLoader userCollectionLoader)
         {
-            var userCollectionNames = userCollectionLoader.CollectionNames;
-            var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
-            foreach (var userCollectionName in userCollectionNames)
-            {
-                var typeName = userCollectionLoader.GetDataTypeStringForCollection(userCollectionName);
-                var type = PluginModel.GetTypeFromString(typeName);
-                var enumerableType = typeof(UserList<>).MakeGenericType(type);
-                outerContextVariables.Add(userCollectionName, enumerableType);
-            }
-
+            var outerContextVariables = CodeCompletionFactory.CreateStandardCellFunctionGlobalVariableTypeMap(userCollectionLoader.GenerateDataTypeForCollectionMap());
             var completionData = CodeCompletionFactory.CreateCompletionData(textArea.Document.Text, textArea.Caret.Offset, CellFunction.UsingNamespaces, outerContextVariables);
             var completionWindow = new CompletionWindow(textArea);
             var data = completionWindow.CompletionList.CompletionData;

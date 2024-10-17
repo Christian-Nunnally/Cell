@@ -51,7 +51,7 @@ namespace Cell.Core.Execution.CodeCompletion
             if (typeArguments == null) return null;
             var typeName = namedTypeSymbol.ToDisplayString();
             typeName = TypeSymbolNameToReflectionTypeName(typeName);
-            var type = Type.GetType(typeName) ?? throw new InvalidOperationException("Unable to find named type.");
+            var type = Type.GetType(typeName) ?? throw new InvalidOperationException($"Unable to find named type '{typeName}'.");
 
             return type.IsGenericType ? type.MakeGenericType(typeArguments) : type;
         }
@@ -66,6 +66,9 @@ namespace Cell.Core.Execution.CodeCompletion
                 var genericTypeArgumentsCount = genericTypeArguments.Length;
                 return $"{genericTypeName}`{genericTypeArgumentsCount}";
             }
+            if (typeName == "string") return "System.String";
+            if (typeName == "bool") return "System.Boolean";
+            if (typeName == "int") return "System.Int32";
             return typeName;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
 using Cell.Model;
+using Cell.Model.Plugin;
 using Cell.Plugin.SyntaxWalkers;
 using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -35,6 +36,19 @@ namespace Cell.Core.Execution.CodeCompletion
             return TryGetCompletionDataFromTheWordBeforeTheCursor(text, carrotPosition, variableNameToTypeMapForOuterContext, out var completionData)
                 ? completionData!
                 : NoCompletionData;
+        }
+
+        public static Dictionary<string, Type> CreateStandardCellFunctionGlobalVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap)
+        {
+            var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
+            foreach (var (userCollectionName, typeName) in collectionNameTypeMap)
+            {
+                var type = PluginModel.GetTypeFromString(typeName);
+                var enumerableType = typeof(UserList<>).MakeGenericType(type);
+                outerContextVariables.Add(userCollectionName, enumerableType);
+            }
+
+            return outerContextVariables;
         }
 
         private static List<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
@@ -83,15 +97,6 @@ namespace Cell.Core.Execution.CodeCompletion
             return new CodeCompletionData(name, userVisibleString, documentation, IconChar.Line);
         }
 
-        //private static Type? GetTypeFromSymbol(ITypeSymbol typeSymbol)
-        //{
-        //    var symbolDisplayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
-        //    var fullQualifiedName = typeSymbol.ToDisplayString(symbolDisplayFormat);
-        //    fullQualifiedName = fullQualifiedName + "," + typeSymbol.ContainingAssembly;
-
-        //    return Type.GetType(fullQualifiedName);
-        //}
-
         private static Type? GetUnderlyingType(this MemberInfo member)
         {
             ArgumentNullException.ThrowIfNull(member);
@@ -133,7 +138,7 @@ namespace Cell.Core.Execution.CodeCompletion
             return completionData is not null;
         }
 
-        private static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
+        public static bool TryGetTypeUsingSemanticAnalyzer(string text, int carrotPosition, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext, out Type? type)
         {
             type = null;
             SemanticAnalyzer semanticAnalyzer = new(text, usings, variableNameToTypeMapForOuterContext);
