@@ -79,6 +79,7 @@ namespace Cell.Core.Execution.CodeCompletion
                 if (cellContext is null) break;
                 var type = cellReference.IsRange ? typeof(CellRange) : typeof(CellModel);
                 var name = codeToCellReferenceSyntaxRewriter.GetUserFriendlyCellReferenceText(cellReference);
+                if (outerContextVariables.ContainsKey(name)) continue;
                 outerContextVariables.Add(name, type);
             }
 
@@ -154,6 +155,7 @@ namespace Cell.Core.Execution.CodeCompletion
                 MemberTypes.Method => ((MethodInfo)member).ReturnType,
                 MemberTypes.Property => ((PropertyInfo)member).PropertyType,
                 MemberTypes.Constructor => ((ConstructorInfo)member).DeclaringType,
+                MemberTypes.NestedType => ((System.Reflection.TypeInfo)member).BaseType,
                 _ => throw new ArgumentException("Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"),
             };
         }

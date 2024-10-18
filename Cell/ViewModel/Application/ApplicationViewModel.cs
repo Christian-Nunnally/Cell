@@ -7,6 +7,7 @@ using Cell.View.Application;
 using Cell.View.Cells;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
+using System.Windows.Controls;
 
 namespace Cell.ViewModel.Application
 {
@@ -304,6 +305,11 @@ namespace Cell.ViewModel.Application
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
             _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
+        }
+
+        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        {
+            _applicationView?.DockToolWindow(viewModel, dock, allowDuplicates);
         }
 
         private async Task BackupAsync()

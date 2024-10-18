@@ -116,7 +116,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("Test Code", () => TestCode(CurrentTextInEditor)) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
+            new CommandViewModel("Test Code", () => TestCode()) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
             new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." },
             new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." }
         ];
@@ -166,12 +166,21 @@ namespace Cell.ViewModel.ToolWindow
             return false;
         }
 
-        private void TestCode(string code)
+        /// <summary>
+        /// Runs the code using copied user lists or cells so that thew actual project is not affected. Displays the result in the status box.
+        /// </summary>
+        public void TestCode()
         {
+            // Transform c.GetCell() to c.GetCellCopy (where the context tracks the copy)
+
+            // Transform c.GetUserList<>(); to c.GetUserListCopy() (where the context tracks the copy)
+
+            // Set the user friendly code but provide the function name to the transformers;
+
             if (CellContext is null) return;
             var model = new CellFunctionModel("testtesttest", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model);
-            function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
+            function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
             var pluginContext = new Context(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
             var result = function.Run(pluginContext, CellContext);
             DisplayResult(result);

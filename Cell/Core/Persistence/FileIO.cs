@@ -144,5 +144,14 @@ namespace Cell.Core.Persistence
                 Directory.CreateDirectory(directory.Replace(from, to));
             }
         }
+
+        /// <summary>
+        /// Creates a directory at the given path.
+        /// </summary>
+        /// <param name="path">The path to the directory to create.</param>
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
     }
 }

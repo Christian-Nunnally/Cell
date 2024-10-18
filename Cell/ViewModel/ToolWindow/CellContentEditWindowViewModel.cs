@@ -4,6 +4,8 @@ using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -169,7 +171,9 @@ namespace Cell.ViewModel.ToolWindow
         {
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
-            ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
+
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Left, true);
+            else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 
         /// <summary>

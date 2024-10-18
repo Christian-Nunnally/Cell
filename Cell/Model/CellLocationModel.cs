@@ -52,7 +52,7 @@ namespace Cell.Model
             {
                 if (_sheetName == value) return;
                 _sheetName = value;
-                NotifyPropertyChanged(nameof(Column));
+                NotifyPropertyChanged(nameof(SheetName));
             }
         }
 

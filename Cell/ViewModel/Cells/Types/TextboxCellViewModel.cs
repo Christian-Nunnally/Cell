@@ -44,7 +44,7 @@ namespace Cell.ViewModel.Cells.Types
             {
                 var oldValue = Text;
                 if (oldValue == value) return;
-                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(Text), oldValue, value));
+                _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(Text), value, oldValue));
                 Text = value;
             }
         }

@@ -26,7 +26,13 @@ namespace Cell.Core.Persistence
         public PersistedProject(PersistedDirectory projectDirectory)
         {
             _projectDirectory = projectDirectory;
+            CollectionsDirectory = _projectDirectory.FromDirectory("Collections");
         }
+
+        /// <summary>
+        /// The directory where collections are stored within the project directory.
+        /// </summary>
+        public PersistedDirectory CollectionsDirectory { get; private set; }
 
         /// <summary>
         /// Gets or sets whether this directory can be written to from this <see cref="PersistedProject"/>.

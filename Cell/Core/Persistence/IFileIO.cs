@@ -79,5 +79,11 @@
         /// <param name="path">The path to the directory to zip.</param>
         /// <param name="zipPath">The path to the zip file that will be created.</param>
         void ZipDirectory(string path, string zipPath);
+
+        /// <summary>
+        /// Creates a directory at the given path.
+        /// </summary>
+        /// <param name="path">The path to the directory to create.</param>
+        void CreateDirectory(string path);
     }
 }

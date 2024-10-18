@@ -224,6 +224,7 @@ namespace Cell.Core.Data
             _sortedItems.RemoveAt(_sortedItems.Count - 1);
             if (sortFilterResult != null || string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
+                // TODO: Get context from last executed function or something. test functions will get real cells if this is called because of a test collection
                 var inserter = new SortedListInserter<PluginModel>(i => RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, i), Model.SortAndFilterFunctionName) ?? 0);
                 inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
                 _cachedSortFilterResult.Add(model.ID, sortFilterResult);

@@ -96,7 +96,7 @@ namespace Cell.View.Application
             var pluginFunctionLoader = new PluginFunctionLoader(projectDirectory);
             var cellLoader = new CellLoader(projectDirectory);
             var cellTracker = new CellTracker(cellLoader);
-            var userCollectionLoader = new UserCollectionLoader(projectDirectory, pluginFunctionLoader, cellTracker);
+            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);

@@ -11,6 +11,11 @@ namespace CellTest.TestUtilities
             _testFileSystem.CopyDirectory(from, to);
         }
 
+        public void CreateDirectory(string path)
+        {
+            _testFileSystem.CreateDirectory(path);
+        }
+
         public void DeleteDirectory(string path)
         {
             _testFileSystem.DeleteDirectory(path);

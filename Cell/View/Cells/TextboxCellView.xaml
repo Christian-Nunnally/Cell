@@ -19,6 +19,6 @@
             GotFocus="CellTextBoxGotFocus"
             Loaded="CellTextBoxLoaded"
             PreviewKeyDown="PreviewTextBoxKeyDownForCell"
-            Text="{Binding Path=Text, Mode=TwoWay}" />
+            Text="{Binding Path=TextboxText, Mode=TwoWay}" />
     </DataTemplate>
 </ResourceDictionary>

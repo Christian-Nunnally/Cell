@@ -19,6 +19,7 @@ namespace Cell.Core.Persistence
         {
             _rootPath = rootPath;
             _fileIO = fileIO;
+            _fileIO.CreateDirectory(rootPath);
         }
 
         /// <summary>
@@ -90,7 +91,7 @@ namespace Cell.Core.Persistence
         /// </summary>
         /// <param name="path">The path to get the directories inside of.</param>
         /// <returns>A list of paths to directories.</returns>
-        public IEnumerable<string> GetDirectories(string path)
+        public IEnumerable<string> GetDirectories(string path = "")
         {
             var fullPath = GetFullPath(path);
             if (!DirectoryExists(fullPath)) return [];
@@ -199,6 +200,11 @@ namespace Cell.Core.Persistence
             var fullTo = to.GetFullPath(toPathZip);
             var zipPath = fullTo + ".zip";
             _fileIO.ZipDirectory(fullFrom, zipPath);
+        }
+
+        internal PersistedDirectory FromDirectory(string directoryName)
+        {
+            return new PersistedDirectory(Path.Combine(_rootPath, directoryName), _fileIO);
         }
 
         private void CheckIsReadOnly()

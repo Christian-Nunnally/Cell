@@ -3,17 +3,19 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using Cell.Core.Execution.Functions;
+using Cell.Core.Common;
 
-namespace Cell.Core.Execution
+namespace Cell.Core.Execution.Functions
 {
     /// <summary>
     /// Provides contextual information to a function, such as what the old value of a cell was before the function triggered.
     /// 
     /// Also provides access to functions that allow you to do things, such as get a cell, show a dialog, or go to a cell.
     /// </summary>
-    public class Context : IContext
+    public class TestingContext : IContext
     {
+        private readonly Dictionary<string, CellModel> _copiedCellsForTestingMap = [];
+
         /// <summary>
         /// The name of the argument that contains the context object in a plugin function (usually "c").
         /// </summary>
@@ -26,7 +28,7 @@ namespace Cell.Core.Execution
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
+        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
@@ -39,11 +41,11 @@ namespace Cell.Core.Execution
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
         /// <param name="cell">The context cell.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
+        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
-            Cell = cell;
+            Cell = cell.Copy();
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace Cell.Core.Execution
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
         /// <param name="sortIndex">Index used to sort.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int sortIndex)
+        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int sortIndex)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
@@ -102,7 +104,14 @@ namespace Cell.Core.Execution
         /// <param name="row">The row the cell is at.</param>
         /// <param name="column">The column the cell is at.</param>
         /// <returns>The found cell, or a null cell if no real cell exists there.</returns>
-        public CellModel GetCell(string sheet, int row, int column) => _cellTracker.GetCell(sheet, row, column) ?? CellModel.Null;
+        public CellModel GetCell(string sheet, int row, int column)
+        {
+            var locationModel = new CellLocationModel(sheet, row, column);
+            if (_copiedCellsForTestingMap.TryGetValue(locationModel.LocationString, out var cell)) return cell;
+            cell = _cellTracker.GetCell(sheet, row, column)?.Copy() ?? CellModel.Null;
+            _copiedCellsForTestingMap.Add(locationModel.LocationString, cell);
+            return cell;
+        }
 
         /// <summary>
         /// Gets a range of cells from the given sheet, starting at the given row and column, and ending at the given row and column.
@@ -146,6 +155,7 @@ namespace Cell.Core.Execution
         /// <returns>The user collection with the given name.</returns>
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
+            throw new NotImplementedException();
             return UserList<T>.GetOrCreate(collection, _userCollectionLoader);
         }
 
@@ -155,8 +165,8 @@ namespace Cell.Core.Execution
         /// <param name="cell">The cell to move to.</param>
         public void GoToCell(CellModel cell)
         {
-            ApplicationViewModel.Instance.GoToSheet(cell.Location.SheetName);
-            ApplicationViewModel.Instance.GoToCell(cell);
+            Logger.Instance.Log($"Pretending to go to sheet '{cell.Location.SheetName}'");
+            Logger.Instance.Log($"Pretending to go to cell '{cell.Location.UserFriendlyLocationString}'");
         }
 
         /// <summary>
@@ -165,7 +175,7 @@ namespace Cell.Core.Execution
         /// <param name="sheetName">The name of the sheet to open.</param>
         public void GoToSheet(string sheetName)
         {
-            ApplicationViewModel.Instance.GoToSheet(sheetName);
+            Logger.Instance.Log($"Pretending to go to sheet '{sheetName}'");
         }
 
         /// <summary>

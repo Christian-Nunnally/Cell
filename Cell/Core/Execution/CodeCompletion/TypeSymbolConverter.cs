@@ -51,6 +51,7 @@ namespace Cell.Core.Execution.CodeCompletion
             if (typeArguments == null) return null;
             var typeName = namedTypeSymbol.ToDisplayString();
             typeName = TypeSymbolNameToReflectionTypeName(typeName);
+            if (typeName == "void") return null;
             var type = Type.GetType(typeName) ?? throw new InvalidOperationException($"Unable to find named type '{typeName}'.");
 
             return type.IsGenericType ? type.MakeGenericType(typeArguments) : type;
@@ -69,6 +70,7 @@ namespace Cell.Core.Execution.CodeCompletion
             if (typeName == "string") return "System.String";
             if (typeName == "bool") return "System.Boolean";
             if (typeName == "int") return "System.Int32";
+            if (typeName == "object") return "System.Object";
             return typeName;
         }
     }
