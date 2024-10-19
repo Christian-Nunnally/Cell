@@ -14,15 +14,14 @@ namespace Cell.Core.Persistence
     /// </summary>
     public class PluginFunctionLoader
     {
-        private const string FunctionsDirectoryName = "Functions";
-        private readonly PersistedDirectory _persistanceManager;
+        private readonly PersistedDirectory _functionsDirectory;
         /// <summary>
         /// Creates a new instance of the <see cref="PluginFunctionLoader"/> class.
         /// </summary>
-        /// <param name="persistedDirectory">The project directory to load the functions from.</param>
-        public PluginFunctionLoader(PersistedDirectory persistedDirectory)
+        /// <param name="functionsDirectory">A directory to load and store functions to.</param>
+        public PluginFunctionLoader(PersistedDirectory functionsDirectory)
         {
-            _persistanceManager = persistedDirectory;
+            _functionsDirectory = functionsDirectory;
         }
 
         /// <summary>
@@ -60,7 +59,7 @@ namespace Cell.Core.Persistence
             var model = new CellFunctionModel(name, code, space);
             var function = new CellFunction(model);
             AddCellFunctionToNamespace(space, function);
-            SaveCellFunction("", space, function.Model);
+            SaveCellFunction(space, function.Model);
             return function;
         }
 
@@ -77,8 +76,8 @@ namespace Cell.Core.Persistence
                 CellFunctions.Remove(function);
 
                 if (string.IsNullOrEmpty(function.Model.Name)) return;
-                var path = Path.Combine(FunctionsDirectoryName, function.Model.ReturnType, function.Model.Name);
-                _persistanceManager.DeleteFile(path);
+                var path = Path.Combine(function.Model.ReturnType, function.Model.Name);
+                _functionsDirectory.DeleteFile(path);
             }
         }
 
@@ -99,18 +98,15 @@ namespace Cell.Core.Persistence
         /// </summary>
         public void LoadCellFunctions()
         {
-            if (_persistanceManager.DirectoryExists(FunctionsDirectoryName))
+            foreach (var namespacePath in _functionsDirectory.GetDirectories())
             {
-                foreach (var namespacePath in _persistanceManager.GetDirectories(FunctionsDirectoryName))
+                foreach (var file in _functionsDirectory.GetFiles(namespacePath))
                 {
-                    foreach (var file in _persistanceManager.GetFiles(namespacePath))
-                    {
-                        CellFunctionModel? model = LoadFunction(file);
-                        if (model == null) continue;
-                        var function = new CellFunction(model);
-                        var space = Path.GetFileName(namespacePath);
-                        AddCellFunctionToNamespace(space, function);
-                    }
+                    CellFunctionModel? model = LoadFunction(file);
+                    if (model == null) continue;
+                    var function = new CellFunction(model);
+                    var space = Path.GetFileName(namespacePath);
+                    AddCellFunctionToNamespace(space, function);
                 }
             }
         }
@@ -123,23 +119,21 @@ namespace Cell.Core.Persistence
         /// <exception cref="CellError">If the function was not able to be loaded.</exception>
         public CellFunctionModel LoadFunction(string file)
         {
-            var text = _persistanceManager.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
+            var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
             return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
         }
 
         /// <summary>
         /// Saves a cell function to the directory.
         /// </summary>
-        /// <param name="directory">The relative path to save to.</param>
         /// <param name="space">The namespace to save the function in.</param>
         /// <param name="function">The function to save.</param>
-        public void SaveCellFunction(string directory, string space, CellFunctionModel function)
+        public void SaveCellFunction(string space, CellFunctionModel function)
         {
             if (string.IsNullOrWhiteSpace(function.Name)) return;
-            directory = string.IsNullOrEmpty(directory) ? Path.Combine(FunctionsDirectoryName, space) : Path.Combine(directory, FunctionsDirectoryName, space);
-            var path = Path.Combine(directory, function.Name);
+            var path = Path.Combine(space, function.Name);
             var serializedContent = JsonSerializer.Serialize(function);
-            _persistanceManager.SaveFile(path, serializedContent);
+            _functionsDirectory.SaveFile(path, serializedContent);
         }
 
         /// <summary>
@@ -167,7 +161,7 @@ namespace Cell.Core.Persistence
         private void OnCellFunctionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var function = (CellFunctionModel)sender!;
-            SaveCellFunction("", function.ReturnType, function);
+            SaveCellFunction(function.ReturnType, function);
         }
     }
 }

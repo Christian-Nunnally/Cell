@@ -6,8 +6,6 @@ using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
 namespace CellTest.ViewModel.Cell.Types
 {
     public class CheckboxCellViewModelTests
@@ -24,14 +22,11 @@ namespace CellTest.ViewModel.Cell.Types
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
         private CellSelector _cellSelector;
+        private CheckboxCellViewModel _testing;
 
         public CheckboxCellViewModelTests()
         {
-            
-        }
-
-        private CheckboxCellViewModel CreateInstance()
-        {
+            TestDialogWindowViewModel.Reset();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
@@ -44,49 +39,44 @@ namespace CellTest.ViewModel.Cell.Types
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
             _cellModel = new CellModel();
-            return new CheckboxCellViewModel(_cellModel, _sheetViewModel);
+            _testing = new CheckboxCellViewModel(_cellModel, _sheetViewModel);
         }
 
 
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = CreateInstance();
         }
 
         [Fact]
         public void IsCheckedSetFalse_IsCheckedSetTrue_ViewModelIsCheckedChangedNotified()
         {
-            var testing = CreateInstance();
-            var propertyChangedTester = new PropertyChangedTester(testing);
-            Assert.False(testing.IsChecked);
+            var propertyChangedTester = new PropertyChangedTester(_testing);
+            Assert.False(_testing.IsChecked);
 
-            testing.IsChecked = true;
+            _testing.IsChecked = true;
 
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.IsChecked));
+            propertyChangedTester.AssertPropertyChanged(nameof(_testing.IsChecked));
         }
 
         [Fact]
         public void ModelTextSetToFalse_ModelTextChanged_ViewModelIsCheckedChangedNotified()
         {
-            var testing = CreateInstance();
-            var propertyChangedTester = new PropertyChangedTester(testing);
-            Assert.False(testing.IsChecked);
+            var propertyChangedTester = new PropertyChangedTester(_testing);
+            Assert.False(_testing.IsChecked);
 
             _cellModel.Check(true);
 
-            propertyChangedTester.AssertPropertyChanged(nameof(testing.IsChecked));
+            propertyChangedTester.AssertPropertyChanged(nameof(_testing.IsChecked));
         }
 
         [Fact]
         public void ModelTextSetToFalse_ModelTextChanged_TriggerFunctionNotTriggered()
         {
-            var testing = CreateInstance();
-
             var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
             _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
             _cellModel.TriggerFunctionName = "testTrigger";
-            Assert.False(testing.IsChecked);
+            Assert.False(_testing.IsChecked);
 
             _cellModel.Check(true);
 
@@ -96,18 +86,14 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void ModelTextSetToFalse_IsCheckedSetToTrueOnViewModel_TriggerFunctionTriggered()
         {
-            var testing = CreateInstance();
-
             var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
             _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
             _cellModel.TriggerFunctionName = "testTrigger";
-            Assert.False(testing.IsChecked);
+            Assert.False(_testing.IsChecked);
 
-            testing.IsChecked = true;
+            _testing.IsChecked = true;
 
             Assert.True(assertionDialog.WasShown);
         }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

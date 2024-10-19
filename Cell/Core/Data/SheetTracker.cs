@@ -157,7 +157,7 @@ namespace Cell.Core.Data
             {
                 var function = new CellFunction(functionModel);
                 _pluginFunctionLoader.AddCellFunctionToNamespace(functionModel.ReturnType, function);
-                _pluginFunctionLoader.SaveCellFunction("", functionModel.ReturnType, functionModel);
+                _pluginFunctionLoader.SaveCellFunction(functionModel.ReturnType, functionModel);
             }
         }
 

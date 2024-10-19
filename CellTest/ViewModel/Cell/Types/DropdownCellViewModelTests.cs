@@ -28,6 +28,7 @@ namespace CellTest.ViewModel.Cell.Types
 
         public DropdownCellViewModelTests()
         {
+            TestDialogWindowViewModel.Reset();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);

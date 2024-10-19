@@ -8,10 +8,6 @@ namespace Cell.Core.Persistence
     /// </summary>
     public class PersistedProject
     {
-        /// <summary>
-        /// The relative directory where templates are stored within the project directory.
-        /// </summary>
-        public const string TemplateDirectory = "Templates";
         private const string VersionFileName = "version";
         private readonly PersistedDirectory _projectDirectory;
         private readonly Dictionary<string, IMigrator> _registeredMigrators = [];
@@ -27,12 +23,30 @@ namespace Cell.Core.Persistence
         {
             _projectDirectory = projectDirectory;
             CollectionsDirectory = _projectDirectory.FromDirectory("Collections");
+            FunctionsDirectory = _projectDirectory.FromDirectory("Functions");
+            TemplatesDirectory = _projectDirectory.FromDirectory("Templates");
+            SheetsDirectory = _projectDirectory.FromDirectory("Sheets");
         }
 
         /// <summary>
         /// The directory where collections are stored within the project directory.
         /// </summary>
         public PersistedDirectory CollectionsDirectory { get; private set; }
+
+        /// <summary>
+        /// The directory where functions are stored within the project directory.
+        /// </summary>
+        public PersistedDirectory FunctionsDirectory { get; private set; }
+
+        /// <summary>
+        /// The directory where templates are stored within the project directory.
+        /// </summary>
+        public PersistedDirectory TemplatesDirectory { get; private set; }
+
+        /// <summary>
+        /// The directory where sheets are stored within the project directory.
+        /// </summary>
+        public PersistedDirectory SheetsDirectory { get; private set; }
 
         /// <summary>
         /// Gets or sets whether this directory can be written to from this <see cref="PersistedProject"/>.
@@ -51,8 +65,7 @@ namespace Cell.Core.Persistence
         /// <returns>A list of template names.</returns>
         public IEnumerable<string> GetTemplateNames()
         {
-            if (!_projectDirectory.DirectoryExists(TemplateDirectory)) return [];
-            return _projectDirectory.GetDirectories(TemplateDirectory).Select(Path.GetFileName).OfType<string>();
+            return TemplatesDirectory.GetDirectories().Select(Path.GetFileName).OfType<string>();
         }
 
         /// <summary>

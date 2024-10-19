@@ -30,6 +30,7 @@ namespace CellTest.ViewModel.Application
 
         private ApplicationViewModel CreateTestInstance()
         {
+            TestDialogWindowViewModel.Reset();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);

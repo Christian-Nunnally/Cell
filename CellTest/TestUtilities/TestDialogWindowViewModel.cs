@@ -55,5 +55,10 @@ namespace CellTest.TestUtilities
         {
             Assert.Empty(_instances);
         }
+
+        internal static void Reset()
+        {
+            _instances.Clear();
+        }
     }
 }

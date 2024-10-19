@@ -93,8 +93,8 @@ namespace Cell.View.Application
             persistedProject.RegisterMigrator("1", "2", new Migration());
             var backupDirectory = new PersistedDirectory(backupPath, fileIo);
 
-            var pluginFunctionLoader = new PluginFunctionLoader(projectDirectory);
-            var cellLoader = new CellLoader(projectDirectory);
+            var pluginFunctionLoader = new PluginFunctionLoader(persistedProject.FunctionsDirectory);
+            var cellLoader = new CellLoader(persistedProject.SheetsDirectory);
             var cellTracker = new CellTracker(cellLoader);
             var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);

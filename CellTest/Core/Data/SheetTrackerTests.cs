@@ -54,7 +54,7 @@ namespace CellTest.Core.Data
 
             _cellTracker.AddCell(cell, true);
 
-            Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheets", "Sheet1")));
+            Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheet1")));
         }
 
         [Fact]
@@ -78,11 +78,11 @@ namespace CellTest.Core.Data
             var cell = new CellModel();
             cell.Location.SheetName = "Sheet1";
             _cellTracker.AddCell(cell, true);
-            Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheets", "Sheet1")));
+            Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheet1")));
 
             _cellTracker.RemoveCell(cell);
 
-            Assert.False(_testFileIO.DirectoryExists(Path.Combine("Sheets", "Sheet1")));
+            Assert.False(_testFileIO.DirectoryExists(Path.Combine("Sheet1")));
         }
 
     }

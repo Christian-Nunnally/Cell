@@ -10,15 +10,14 @@ namespace Cell.Core.Persistence
     /// </summary>
     public class CellLoader
     {
-        private const string SheetsSaveDirectory = "Sheets";
-        private readonly PersistedDirectory _persistedDirectory;
+        private readonly PersistedDirectory _sheetsDirectory;
         /// <summary>
         /// Creates a new instance of <see cref="CellLoader"/>.
         /// </summary>
-        /// <param name="persistedDirectory">The project directory to save the cells into.</param>
-        public CellLoader(PersistedDirectory persistedDirectory)
+        /// <param name="sheetsDirectory">The project directory to save the cells into.</param>
+        public CellLoader(PersistedDirectory sheetsDirectory)
         {
-            _persistedDirectory = persistedDirectory;
+            _sheetsDirectory = sheetsDirectory;
         }
 
         /// <summary>
@@ -27,10 +26,10 @@ namespace Cell.Core.Persistence
         /// <param name="cellModel"></param>
         public void DeleteCell(CellModel cellModel)
         {
-            var cellDirectory = Path.Combine(SheetsSaveDirectory, cellModel.Location.SheetName);
-            var cellPath = Path.Combine(cellDirectory, cellModel.ID);
-            _persistedDirectory.DeleteFile(cellPath);
-            if (!_persistedDirectory.GetFiles(cellDirectory).Any()) _persistedDirectory.DeleteDirectory(cellDirectory);
+            var cellDirectory = cellModel.Location.SheetName;
+            var cellPath = Path.Combine(cellModel.Location.SheetName, cellModel.ID);
+            _sheetsDirectory.DeleteFile(cellPath);
+            if (!_sheetsDirectory.GetFiles(cellDirectory).Any()) _sheetsDirectory.DeleteDirectory(cellDirectory);
         }
 
         /// <summary>
@@ -39,10 +38,8 @@ namespace Cell.Core.Persistence
         /// <returns>All loaded cells.</returns>
         public IEnumerable<CellModel> LoadCells()
         {
-            if (!_persistedDirectory.DirectoryExists(SheetsSaveDirectory)) return [];
-
             var cells = new List<CellModel>();
-            foreach (var sheetDirectory in _persistedDirectory.GetDirectories(SheetsSaveDirectory))
+            foreach (var sheetDirectory in _sheetsDirectory.GetDirectories())
             {
                 cells.AddRange(LoadSheet(sheetDirectory));
             }
@@ -57,7 +54,7 @@ namespace Cell.Core.Persistence
         public IEnumerable<CellModel> LoadSheet(string sheet)
         {
             var result = new List<CellModel>();
-            foreach (var file in _persistedDirectory.GetFiles(sheet)) result.Add(LoadCell(file));
+            foreach (var file in _sheetsDirectory.GetFiles(sheet)) result.Add(LoadCell(file));
             return result;
         }
 
@@ -68,9 +65,7 @@ namespace Cell.Core.Persistence
         /// <param name="newName">The new sheet name.</param>
         public void RenameSheet(string oldName, string newName)
         {
-            var oldDirectory = Path.Combine(SheetsSaveDirectory, oldName);
-            var newDirectory = Path.Combine(SheetsSaveDirectory, newName);
-            _persistedDirectory.MoveDirectory(oldDirectory, newDirectory);
+            _sheetsDirectory.MoveDirectory(oldName, newName);
         }
 
         /// <summary>
@@ -79,8 +74,7 @@ namespace Cell.Core.Persistence
         /// <param name="cell">The cell to save.</param>
         public void SaveCell(CellModel cell)
         {
-            var directory = Path.Combine(SheetsSaveDirectory, cell.Location.SheetName);
-            SaveCell(directory, cell);
+            SaveCell(cell.Location.SheetName, cell);
         }
 
         /// <summary>
@@ -92,12 +86,12 @@ namespace Cell.Core.Persistence
         {
             var serialized = JsonSerializer.Serialize(cell);
             var path = Path.Combine(directory, cell.ID);
-            _persistedDirectory.SaveFile(path, serialized);
+            _sheetsDirectory.SaveFile(path, serialized);
         }
 
         private CellModel LoadCell(string file)
         {
-            var text = _persistedDirectory.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
+            var text = _sheetsDirectory.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
             return cell;
         }
