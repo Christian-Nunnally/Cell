@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Core.Execution.Functions;
+using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
@@ -26,11 +27,11 @@ namespace Cell.View.ToolWindow
             {
                 if (function.UsageCount != 0)
                 {
-                    DialogFactory.ShowDialog("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
+                    ApplicationViewModel.Instance.DialogFactory.Show("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
                     return;
                 }
 
-                DialogFactory.ShowYesNoConfirmationDialog($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
+                ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
                     ApplicationViewModel.Instance.PluginFunctionLoader.DeleteCellFunction(function.Function);
                 });
@@ -44,7 +45,8 @@ namespace Cell.View.ToolWindow
                 if (_viewModel.SelectedFunction == null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToDataTypeMap);
+                var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, new DialogFactory(), cell);
+                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToDataTypeMap, testingContext);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
             }
         }

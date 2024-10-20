@@ -1,6 +1,5 @@
 ﻿using Cell.Model;
 using Cell.Core.Persistence;
-using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -113,52 +112,52 @@ namespace Cell.Core.Data
         /// <param name="skipExistingCollectionsDuringImport">Whether to skip importing collections whos name already exists in the project.</param>
         public void ImportSheetTemplate(string templateName, string sheetName, bool skipExistingCollectionsDuringImport)
         {
-            var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
-            if (!_persistedDirectory.DirectoryExists(templatesDirectory)) return;
-            var templatePath = Path.Combine(templatesDirectory, templateName);
-            var cellsPath = Path.Combine(templatePath, "Cells");
-            if (!_persistedDirectory.DirectoryExists(cellsPath)) return;
+            //var templatesDirectory = Path.Combine(TemplatesSaveDirectory);
+            //if (!_persistedDirectory.DirectoryExists(templatesDirectory)) return;
+            //var templatePath = Path.Combine(templatesDirectory, templateName);
+            //var cellsPath = Path.Combine(templatePath, "Cells");
+            //if (!_persistedDirectory.DirectoryExists(cellsPath)) return;
 
-            var cellsToAdd = _cellLoader.LoadSheet(cellsPath);
-            UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
+            //var cellsToAdd = _cellLoader.LoadSheet(cellsPath);
+            //UpdateIdentitiesOfCellsForNewSheet(sheetName, cellsToAdd);
 
-            var functionsBeingImported = GetFunctionsFromTemplate(templatePath);
-            if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
-            {
-                DialogFactory.ShowDialog("Import canceled", reason);
-                return;
-            }
+            //var functionsBeingImported = GetFunctionsFromTemplate(templatePath);
+            //if (!CanFunctionsBeMerged(functionsBeingImported, out var reason))
+            //{
+            //    DialogFactory.ShowDialog("Import canceled", reason);
+            //    return;
+            //}
 
-            var collectionsBeingImported = new List<string>();
-            var collectionsDirectory = Path.Combine(templatePath, "Collections");
-            foreach (var collectionDirectory in _persistedDirectory.GetDirectories(collectionsDirectory))
-            {
-                var collectionName = Path.GetFileName(collectionDirectory);
-                collectionsBeingImported.Add(collectionName);
-            }
+            //var collectionsBeingImported = new List<string>();
+            //var collectionsDirectory = Path.Combine(templatePath, "Collections");
+            //foreach (var collectionDirectory in _persistedDirectory.GetDirectories(collectionsDirectory))
+            //{
+            //    var collectionName = Path.GetFileName(collectionDirectory);
+            //    collectionsBeingImported.Add(collectionName);
+            //}
 
-            var collectionsBeingImportedWithoutConflicts = new List<string>();
-            foreach (var collectionBeingImported in collectionsBeingImported)
-            {
-                if (!_userCollectionLoader.CollectionNames.Contains(collectionBeingImported))
-                {
-                    collectionsBeingImportedWithoutConflicts.Add(collectionBeingImported);
-                }
-                else if (!skipExistingCollectionsDuringImport)
-                {
-                    DialogFactory.ShowDialog("Import canceled", $"A collection with the name '{collectionBeingImported}' already exists. Please rename that collection before importing or enable 'Skip Existing Collections'.");
-                    return;
-                }
-            }
+            //var collectionsBeingImportedWithoutConflicts = new List<string>();
+            //foreach (var collectionBeingImported in collectionsBeingImported)
+            //{
+            //    if (!_userCollectionLoader.CollectionNames.Contains(collectionBeingImported))
+            //    {
+            //        collectionsBeingImportedWithoutConflicts.Add(collectionBeingImported);
+            //    }
+            //    else if (!skipExistingCollectionsDuringImport)
+            //    {
+            //        DialogFactory.ShowDialog("Import canceled", $"A collection with the name '{collectionBeingImported}' already exists. Please rename that collection before importing or enable 'Skip Existing Collections'.");
+            //        return;
+            //    }
+            //}
 
-            AddAndSaveCells(cellsToAdd);
+            //AddAndSaveCells(cellsToAdd);
 
-            foreach (var functionModel in functionsBeingImported)
-            {
-                var function = new CellFunction(functionModel);
-                _pluginFunctionLoader.AddCellFunctionToNamespace(functionModel.ReturnType, function);
-                _pluginFunctionLoader.SaveCellFunction(functionModel.ReturnType, functionModel);
-            }
+            //foreach (var functionModel in functionsBeingImported)
+            //{
+            //    var function = new CellFunction(functionModel);
+            //    _pluginFunctionLoader.AddCellFunctionToNamespace(functionModel.ReturnType, function);
+            //    _pluginFunctionLoader.SaveCellFunction(functionModel.ReturnType, functionModel);
+            //}
         }
 
         /// <summary>

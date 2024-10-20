@@ -10,6 +10,7 @@ namespace CellTest.ViewModel.Application
 {
     public class ApplicationViewModelTests
     {
+        private TestDialogFactory _testDialogFactory;
         private static DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private PersistedDirectory _backupDirectory;
@@ -30,7 +31,7 @@ namespace CellTest.ViewModel.Application
 
         private ApplicationViewModel CreateTestInstance()
         {
-            TestDialogWindowViewModel.Reset();
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);
@@ -39,7 +40,7 @@ namespace CellTest.ViewModel.Application
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
@@ -48,7 +49,7 @@ namespace CellTest.ViewModel.Application
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            return new ApplicationViewModel(_persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            return new ApplicationViewModel(_testDialogFactory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]
@@ -81,7 +82,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.Version = "1";
             var migrator = new TestMigrator();
             _persistedProject.RegisterMigrator("0", "1", migrator);
-            var dialog = new TestDialogWindowViewModel();
+            var dialog = _testDialogFactory.Expect();
 
             testing.Load();
 
@@ -97,7 +98,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.Version = "1";
             var migrator = new TestMigrator();
             _persistedProject.RegisterMigrator("0", "1", migrator);
-            var _ = new TestDialogWindowViewModel(0);
+            _testDialogFactory.Expect(0);
             Assert.False(migrator.Migrated);
 
             testing.Load();

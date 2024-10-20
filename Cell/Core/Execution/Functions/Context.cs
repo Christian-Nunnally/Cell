@@ -3,9 +3,8 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using Cell.Core.Execution.Functions;
 
-namespace Cell.Core.Execution
+namespace Cell.Core.Execution.Functions
 {
     /// <summary>
     /// Provides contextual information to a function, such as what the old value of a cell was before the function triggered.
@@ -20,44 +19,22 @@ namespace Cell.Core.Execution
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private CellModel? _cell;
-        /// <summary>
-        /// Creates a new instance of the <see cref="Context"/> class with the cell context set to null.
-        /// </summary>
-        /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
-        /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
-        {
-            _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
-            Cell = null;
-        }
+        private readonly DialogFactoryBase _dialogFactory;
+        private CellModel _cell;
 
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
+        /// <param name="dialogFactory">The dialog factory used to show dialogs from cell functions.</param>
         /// <param name="cell">The context cell.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
+        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactory, CellModel cell)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
-            Cell = cell;
-        }
-
-        /// <summary>
-        /// Creates a new instance of the <see cref="Context"/> class for getting the result of a sort function.
-        /// </summary>
-        /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
-        /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        /// <param name="sortIndex">Index used to sort.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int sortIndex)
-        {
-            _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
-            Cell = null;
-            SortIndex = sortIndex;
+            _dialogFactory = dialogFactory;
+            _cell = cell;
         }
 
         /// <summary>
@@ -65,7 +42,7 @@ namespace Cell.Core.Execution
         /// 
         /// To get other cells use the cell reference format like `A1`, or use the `GetCell` function.
         /// </summary>
-        public CellModel? Cell
+        public CellModel Cell
         {
             get => _cell;
             set => _cell = value;
@@ -80,11 +57,6 @@ namespace Cell.Core.Execution
         /// The 'index' of the cell that the function is running in.
         /// </summary>
         public int Index => Cell?.Index ?? 0;
-
-        /// <summary>
-        /// The index of the object being sorted by this function call. This is used in sort and filter functions like `return list[c.SortIndex].SortProperty;`
-        /// </summary>
-        public int SortIndex { get; set; } = 0;
 
         /// <summary>
         /// Gets a cell from the given sheet, at the given row and column.
@@ -175,7 +147,7 @@ namespace Cell.Core.Execution
         public void ShowDialog(string text)
         {
             var title = Cell?.Location.UserFriendlyLocationString ?? "Function";
-            DialogFactory.ShowDialog(title, text);
+            _dialogFactory.Show(title, text);
         }
     }
 }

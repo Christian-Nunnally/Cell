@@ -17,7 +17,7 @@ namespace Cell.Core.Execution.Functions
         private const string codeFooter = "\n}}}";
         private const string codeHeader = "\n\nnamespace Plugin { public class Program { public static ";
         private const string CompiledMethodName = "M";
-        private const string methodHeader = $" {CompiledMethodName}(Context c, CellModel cell) {{\n";
+        private const string methodHeader = $" {CompiledMethodName}(IContext c, CellModel cell) {{\n";
         private readonly static RoslynCompiler _compiler = new();
         /// <summary>
         /// A null function that can be used as a placeholder.
@@ -26,7 +26,7 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// The namespaces that are available to all functions preformatted for use in code.
         /// </summary>
-        public static readonly List<string> UsingNamespaces =
+        public static List<string> UsingNamespaces =
         [
             "System",
             "System.Linq",
@@ -35,7 +35,7 @@ namespace Cell.Core.Execution.Functions
             "Cell.Model",
             "Cell.Model.Plugin",
             "Cell.ViewModel",
-            "Cell.Core.Execution",
+            "Cell.Core.Execution.Functions",
             "Cell.ViewModel.Cells.Types",
         ];
         /// <summary>
@@ -123,7 +123,7 @@ namespace Cell.Core.Execution.Functions
         /// <param name="pluginContext">The context to give to this function.</param>
         /// <param name="cell">The cell to run this function from (this becomes the 'cell' reference inside the function).</param>
         /// <returns>The result of the function.</returns>
-        public CompileResult Run(Context pluginContext, CellModel? cell)
+        public CompileResult Run(IContext pluginContext, CellModel? cell)
         {
             Compile();
             if (!CompileResult.WasSuccess) return CompileResult;
@@ -228,7 +228,7 @@ namespace Cell.Core.Execution.Functions
             }
         }
 
-        private CompileResult RunUnsafe(Context pluginContext, CellModel? cell, MethodInfo? method) => new()
+        private CompileResult RunUnsafe(IContext pluginContext, CellModel? cell, MethodInfo? method) => new()
         {
             WasSuccess = true,
             ExecutionResult = "Success",

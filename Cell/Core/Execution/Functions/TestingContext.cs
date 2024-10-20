@@ -22,44 +22,21 @@ namespace Cell.Core.Execution.Functions
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly DialogFactoryBase _dialogFactory;
         private CellModel? _cell;
-        /// <summary>
-        /// Creates a new instance of the <see cref="Context"/> class with the cell context set to null.
-        /// </summary>
-        /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
-        /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader)
-        {
-            _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
-            Cell = null;
-        }
-
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
+        /// <param name="dialogFactory">The dialog factory used to show dialogs from cell functions.</param>
         /// <param name="cell">The context cell.</param>
-        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, CellModel cell)
+        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactory, CellModel cell)
         {
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
-            Cell = cell.Copy();
-        }
-
-        /// <summary>
-        /// Creates a new instance of the <see cref="Context"/> class for getting the result of a sort function.
-        /// </summary>
-        /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
-        /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        /// <param name="sortIndex">Index used to sort.</param>
-        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, int sortIndex)
-        {
-            _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
-            Cell = null;
-            SortIndex = sortIndex;
+            _dialogFactory = dialogFactory;
+            _cell = cell;
         }
 
         /// <summary>
@@ -185,7 +162,7 @@ namespace Cell.Core.Execution.Functions
         public void ShowDialog(string text)
         {
             var title = Cell?.Location.UserFriendlyLocationString ?? "Function";
-            DialogFactory.ShowDialog(title, text);
+            Logger.Instance.Log($"Pretending to show dialog '{title}' : '{text}'");
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Cell.Core.Data;
 using Cell.Model;
 using Cell.Core.Persistence;
+using Cell.ViewModel.Application;
+using Cell.Core.Execution.Functions;
 
 namespace Cell.Core.Execution
 {
@@ -44,7 +46,7 @@ namespace Cell.Core.Execution
 
         private CompileResult RunPopulate(CellModel subscriber)
         {
-            var pluginContext = new Context(_cellTracker, _userCollectionLoader, subscriber);
+            var pluginContext = new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), subscriber);
             if (!_pluginFunctionLoader.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
             var result = populateFunction.Run(pluginContext, subscriber);
             if (!result.WasSuccess) return result;

@@ -51,7 +51,7 @@ namespace Cell.ViewModel.Execution
                 var oldName = _model.Name;
                 _model.Name = value;
                 NotifyPropertyChanged(nameof(Name));
-                DialogFactory.ShowYesNoConfirmationDialog("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(ApplicationViewModel.Instance.CellTracker.AllCells, oldName, value));
+                ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(ApplicationViewModel.Instance.CellTracker.AllCells, oldName, value));
             }
         }
 

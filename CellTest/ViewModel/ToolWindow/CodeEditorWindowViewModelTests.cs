@@ -5,6 +5,8 @@ using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 using System.Collections.ObjectModel;
 using Cell.Core.Execution.Functions;
+using Cell.ViewModel.Application;
+using Cell.Core.Common;
 
 namespace CellTest.ViewModel.ToolWindow
 {
@@ -18,19 +20,23 @@ namespace CellTest.ViewModel.ToolWindow
         private PluginFunctionLoader _pluginFunctionLoader;
         private CellFunction _functionBeingEdited;
         private CellModel _cellContext;
+        private UserCollectionLoader _userCollectionLoader;
         private CodeEditorWindowViewModel _testing;
 
         public CodeEditorWindowViewModelTests()
         {
+            //CellFunction.UsingNamespaces.Add(")
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
             _cellsToEdit = [];
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _functionBeingEdited = _pluginFunctionLoader.CreateCellFunction("Test", "TestFunction");
+            _functionBeingEdited = _pluginFunctionLoader.CreateCellFunction("void", "TestFunction");
             _cellContext = new CellModel();
-            _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, new Dictionary<string, string>());
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
+            var testingContext = new TestingContext(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellContext);
+            _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, new Dictionary<string, string>(), testingContext);
         }
 
         [Fact]
@@ -49,12 +55,22 @@ namespace CellTest.ViewModel.ToolWindow
         }
 
         [Fact]
-        public void TestSetInEditor_TestCodeRun_()
+        public void TestSetInEditor_TestCodeRuns()
         {
             _testing.CurrentTextInEditor = "Test";
             Assert.Equal("Test", _testing.CurrentTextInEditor);
 
             _testing.TestCode();
+        }
+
+        [Fact]
+        public void CodeToShowDialog_TestCode_LogShowsTestResults()
+        {
+            _testing.CurrentTextInEditor = "c.ShowDialog(\"test\");";
+
+            _testing.TestCode();
+
+            Assert.Contains("Pretending to show dialog", Logger.Instance.Logs.Single());
         }
     }
 }

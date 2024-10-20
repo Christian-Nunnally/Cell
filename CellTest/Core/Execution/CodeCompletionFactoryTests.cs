@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
-using Cell.Core.Execution;
 using Cell.Model;
+using Cell.Core.Execution.Functions;
 
 namespace CellTest.Core.Execution
 {

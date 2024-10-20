@@ -13,6 +13,7 @@ namespace CellTest.Core.Data
     {
         private const string TestCollectionName = "TestCollection";
         private const string TestSortFunctionName = "TestSortFunction";
+        private TestDialogFactory _testDialogFactory;
         private static DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private UserCollectionLoader _userCollectionLoader;
@@ -24,13 +25,14 @@ namespace CellTest.Core.Data
 
         private UserCollection CreateTestInstance()
         {
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             return _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
@@ -72,7 +74,7 @@ namespace CellTest.Core.Data
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return -{TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             filteredCollection.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -93,7 +95,7 @@ namespace CellTest.Core.Data
             var testing = CreateTestInstance();
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             filteredCollection.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -113,7 +115,7 @@ namespace CellTest.Core.Data
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -130,7 +132,7 @@ namespace CellTest.Core.Data
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -151,8 +153,8 @@ namespace CellTest.Core.Data
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
             var sortFunction2 = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName + "2");
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
-            var sortCode2 = $"return -{TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
+            var sortCode2 = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             sortFunction2.SetUserFriendlyCode(sortCode2, CellModel.Null, collectionNameToDataTypeMap);
@@ -175,7 +177,7 @@ namespace CellTest.Core.Data
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -197,7 +199,7 @@ namespace CellTest.Core.Data
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return -{TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;
@@ -217,7 +219,7 @@ namespace CellTest.Core.Data
         {
             var testing = CreateTestInstance();
             var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return {TestCollectionName}[c.SortIndex].Priority;";
+            var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
             testing.Model.SortAndFilterFunctionName = TestSortFunctionName;

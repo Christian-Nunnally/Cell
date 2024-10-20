@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution;
 using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
@@ -27,13 +28,15 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         /// <param name="functionToBeEdited">The function to be edited.</param>
         /// <param name="cellContextFromWhichTheFunctionIsBeingEdited">The cell context from which the function is ceing edited.</param>
-        /// <param name="collectionNameToDataTypeMap"></param>
-        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
+        /// <param name="collectionNameToDataTypeMap">A map from collection names to thier data types for code completion stuff.</param>
+        /// <param name="contextToTestWith">The context used when testing the code.</param>
+        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, IContext contextToTestWith)
         {
             FunctionBeingEdited = functionToBeEdited;
             _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToDataTypeMap);
             _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
+            _contextToTestWith = contextToTestWith;
 
             DisplayResult(functionToBeEdited.CompileResult);
         }
@@ -42,6 +45,8 @@ namespace Cell.ViewModel.ToolWindow
         /// The cell context the function is currently being edited from.
         /// </summary>
         public CellModel? CellContext { get; private set; }
+
+        private readonly IContext _contextToTestWith;
 
         /// <summary>
         /// Gets the current text in the editor.
@@ -162,7 +167,7 @@ namespace Cell.ViewModel.ToolWindow
         public override bool HandleCloseRequested()
         {
             if (!_isDirty || _isAllowingCloseWhileDirty) return true;
-            DialogFactory.ShowYesNoConfirmationDialog("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
+            ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
             return false;
         }
 
@@ -171,18 +176,12 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void TestCode()
         {
-            // Transform c.GetCell() to c.GetCellCopy (where the context tracks the copy)
-
-            // Transform c.GetUserList<>(); to c.GetUserListCopy() (where the context tracks the copy)
-
-            // Set the user friendly code but provide the function name to the transformers;
-
             if (CellContext is null) return;
             var model = new CellFunctionModel("testtesttest", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
-            var pluginContext = new Context(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellContext.Index);
-            var result = function.Run(pluginContext, CellContext);
+            var result = function.Run(_contextToTestWith, CellContext);
+
             DisplayResult(result);
         }
 
@@ -203,6 +202,10 @@ namespace Cell.ViewModel.ToolWindow
             _lastCompileResult = result;
             ResultString = result.ExecutionResult ?? "";
             ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
+            if (!result.WasSuccess)
+            {
+                Logger.Instance.Log($"Error occured in function during test: {ResultString}");
+            }
             if (result.ReturnedObject is not null) ResultString = result.ReturnedObject.ToString();
             NotifyPropertyChanged(nameof(ResultString));
             NotifyPropertyChanged(nameof(ResultStringColor));

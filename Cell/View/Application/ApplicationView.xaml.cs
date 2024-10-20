@@ -20,6 +20,7 @@ namespace Cell.View.Application
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
         private ApplicationViewModel? _viewModel;
+
         /// <summary>
         /// Creates a new instance of the application view.
         /// </summary>
@@ -97,7 +98,8 @@ namespace Cell.View.Application
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory);
             var cellTracker = new CellTracker(cellLoader);
             var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
-            var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var dialogFactory = new DialogFactory();
+            var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
             var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
             _titleBarSheetNavigationView.DataContext = new TitleBarSheetNavigationViewModel(sheetTracker);
@@ -109,6 +111,7 @@ namespace Cell.View.Application
             var cellSelector = new CellSelector(cellTracker);
 
             _viewModel = new ApplicationViewModel(
+                dialogFactory,
                 persistedProject,
                 pluginFunctionLoader,
                 cellLoader,
@@ -209,7 +212,7 @@ namespace Cell.View.Application
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker);
+            var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker, ApplicationViewModel.Instance.DialogFactory);
             ShowToolWindow(sheetManagerViewModel);
         }
 

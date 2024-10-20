@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution.References;
+﻿using Cell.Core.Execution.Functions;
+using Cell.Core.Execution.References;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -157,7 +158,7 @@ namespace Cell.Core.Execution.References
         private static string CreateArgumentSyntax(bool isRelative, string rowOrColumn, int row)
         {
             return isRelative
-                ? $", {CellReferenceVariableName}.{rowOrColumn} + {row}"
+                ? $", {CellReferenceVariableName}.Location.{rowOrColumn} + {row}"
                 : $", {row}";
         }
 

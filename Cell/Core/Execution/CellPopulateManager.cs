@@ -3,6 +3,7 @@ using Cell.Model;
 using Cell.Core.Persistence;
 using System.ComponentModel;
 using Cell.Core.Execution.Functions;
+using Cell.ViewModel.Application;
 
 namespace Cell.Core.Execution
 {
@@ -29,7 +30,7 @@ namespace Cell.Core.Execution
         /// <param name="userCollectionLoader">The collection loader used in the context when running populate.</param>
         public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
         {
-            _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader);
+            _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader, new DialogFactory(), CellModel.Null);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
             _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionLoader);
             _userCollectionLoader = userCollectionLoader;

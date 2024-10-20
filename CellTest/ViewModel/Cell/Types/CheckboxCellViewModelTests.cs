@@ -5,28 +5,30 @@ using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
+using Cell.Core.Common;
 
 namespace CellTest.ViewModel.Cell.Types
 {
     public class CheckboxCellViewModelTests
     {
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
-        private CellTracker _cellTracker;
-        private PluginFunctionLoader _pluginFunctionLoader;
-        private UserCollectionLoader _userCollectionLoader;
-        private CellPopulateManager _cellPopulateManager;
-        private CellTriggerManager _cellTriggerManager;
-        private SheetModel _sheetModel;
-        private SheetViewModel _sheetViewModel;
-        private CellModel _cellModel;
-        private CellSelector _cellSelector;
-        private CheckboxCellViewModel _testing;
+        private readonly TestDialogFactory _testDialogFactory;
+        private readonly DictionaryFileIO _testFileIO;
+        private readonly PersistedDirectory _persistedDirectory;
+        private readonly CellLoader _cellLoader;
+        private readonly CellTracker _cellTracker;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly CellPopulateManager _cellPopulateManager;
+        private readonly CellTriggerManager _cellTriggerManager;
+        private readonly SheetModel _sheetModel;
+        private readonly SheetViewModel _sheetViewModel;
+        private readonly CellModel _cellModel;
+        private readonly CellSelector _cellSelector;
+        private readonly CheckboxCellViewModel _testing;
 
         public CheckboxCellViewModelTests()
         {
-            TestDialogWindowViewModel.Reset();
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
@@ -34,7 +36,7 @@ namespace CellTest.ViewModel.Cell.Types
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
@@ -73,7 +75,7 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void ModelTextSetToFalse_ModelTextChanged_TriggerFunctionNotTriggered()
         {
-            var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
+            var assertionDialog = _testDialogFactory.Expect("passed");
             _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
             _cellModel.TriggerFunctionName = "testTrigger";
             Assert.False(_testing.IsChecked);
@@ -86,13 +88,14 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void ModelTextSetToFalse_IsCheckedSetToTrueOnViewModel_TriggerFunctionTriggered()
         {
-            var assertionDialog = new TestDialogWindowViewModel() { ExpectedMessage = "passed" };
+            var assertionDialog = _testDialogFactory.Expect("passed");
             _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
             _cellModel.TriggerFunctionName = "testTrigger";
             Assert.False(_testing.IsChecked);
 
             _testing.IsChecked = true;
 
+            Assert.Empty(Logger.Instance.Logs);
             Assert.True(assertionDialog.WasShown);
         }
     }

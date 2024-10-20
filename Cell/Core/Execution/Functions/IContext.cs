@@ -22,11 +22,6 @@ namespace Cell.Core.Execution.Functions
         public int Index { get; }
 
         /// <summary>
-        /// The index of the object being sorted by this function call. This is used in sort and filter functions like `return list[c.SortIndex].SortProperty;`
-        /// </summary>
-        public int SortIndex { get; set; }
-
-        /// <summary>
         /// Gets a cell from the given sheet, at the given row and column.
         /// </summary>
         /// <param name="cellForSheet">The cell whos sheet should be searched for the returned cell.</param>

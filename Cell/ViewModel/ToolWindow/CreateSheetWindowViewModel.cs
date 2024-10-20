@@ -10,6 +10,7 @@ namespace Cell.ViewModel.ToolWindow
     public class CreateSheetWindowViewModel : ToolWindowViewModel
     {
         private readonly SheetTracker _sheetTracker;
+        private readonly DialogFactoryBase _dialogFactory;
         private int _initialColumns = 5;
         private int _initialRows = 5;
         private string _newSheetName = "NewSheet";
@@ -17,9 +18,11 @@ namespace Cell.ViewModel.ToolWindow
         /// Creates a new instance of the <see cref="CreateSheetWindowViewModel"/>.
         /// </summary>
         /// <param name="sheetTracker">The sheet tracker to add new sheets to.</param>
-        public CreateSheetWindowViewModel(SheetTracker sheetTracker)
+        /// <param name="dialogFactory">A factory for showing dialogs.</param>
+        public CreateSheetWindowViewModel(SheetTracker sheetTracker, DialogFactoryBase dialogFactory)
         {
             _sheetTracker = sheetTracker;
+            _dialogFactory = dialogFactory;
         }
 
         /// <summary>
@@ -94,8 +97,8 @@ namespace Cell.ViewModel.ToolWindow
 
         private bool CanAddSheet()
         {
-            if (_sheetTracker.Sheets.Any(x => x.Name == NewSheetName)) DialogFactory.ShowDialog("Sheet already exists", $"Cannot create a sheet named {NewSheetName} because one already exists with that name.");
-            else if (string.IsNullOrEmpty(NewSheetName)) DialogFactory.ShowDialog("Sheet name can not be empty", $"New sheet name can not be empty.");
+            if (_sheetTracker.Sheets.Any(x => x.Name == NewSheetName)) _dialogFactory.Show("Sheet already exists", $"Cannot create a sheet named {NewSheetName} because one already exists with that name.");
+            else if (string.IsNullOrEmpty(NewSheetName)) _dialogFactory.Show("Sheet name can not be empty", $"New sheet name can not be empty.");
             else return true;
             return false;
         }

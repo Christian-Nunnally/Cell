@@ -21,7 +21,7 @@ namespace Cell.View.ToolWindow
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
             ApplicationViewModel.Instance.BackupManager.CreateBackup();
-            DialogFactory.ShowDialog("Backup created", "Backup created successfully.");
+            ApplicationViewModel.Instance.DialogFactory.Show("Backup created", "Backup created successfully.");
         }
 
         private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
@@ -44,7 +44,7 @@ namespace Cell.View.ToolWindow
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             //var printDialog = new PrintDialog();
-            DialogFactory.ShowDialog("Under construction", "Not quite ready :)");
+            ApplicationViewModel.Instance.DialogFactory.Show("Under construction", "Not quite ready :)");
         }
 
         private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)

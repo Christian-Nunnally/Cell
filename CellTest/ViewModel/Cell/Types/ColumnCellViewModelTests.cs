@@ -12,6 +12,7 @@ namespace CellTest.ViewModel.Cell.Types
 {
     public class ColumnCellViewModelTests
     {
+        private TestDialogFactory _testDialogFactory;
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
@@ -29,6 +30,7 @@ namespace CellTest.ViewModel.Cell.Types
 
         private ColumnCellViewModel CreateInstance()
         {
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
@@ -36,7 +38,7 @@ namespace CellTest.ViewModel.Cell.Types
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _sheetModel = new SheetModel("sheet");
             _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _applicationSettings = new ApplicationSettings();

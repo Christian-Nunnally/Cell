@@ -35,6 +35,7 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
         /// </summary>
+        /// <param name="dialogFactory">A factory for creating and showing dialogs.</param>
         /// <param name="persistedProject">The project to load in the application.</param>
         /// <param name="pluginFunctionLoader">The function loader for functions.</param>
         /// <param name="cellLoader">The cell loader for loading cells.</param>
@@ -49,6 +50,7 @@ namespace Cell.ViewModel.Application
         /// <param name="cellClipboard">The clipboard to copy and paste with.</param>
         /// <param name="backupManager">The backup manager to backup the project with.</param>
         public ApplicationViewModel(
+            DialogFactoryBase dialogFactory,
             PersistedProject persistedProject,
             PluginFunctionLoader pluginFunctionLoader,
             CellLoader cellLoader,
@@ -63,6 +65,7 @@ namespace Cell.ViewModel.Application
             CellClipboard cellClipboard,
             BackupManager backupManager)
         {
+            DialogFactory = dialogFactory;
             PersistedProject = persistedProject;
             PluginFunctionLoader = pluginFunctionLoader;
             _cellLoader = cellLoader;
@@ -97,6 +100,11 @@ namespace Cell.ViewModel.Application
         /// Gets the persisted application settings for the application.
         /// </summary>
         public ApplicationSettings ApplicationSettings { get; private set; }
+
+        /// <summary>
+        /// A factory for showing dialogs.
+        /// </summary>
+        public DialogFactoryBase DialogFactory { get; set; }
 
         /// <summary>
         /// Gets or sets the height of the application window.
@@ -307,6 +315,12 @@ namespace Cell.ViewModel.Application
             _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
         }
 
+        /// <summary>
+        /// Shows the given tool window in the main dock panel.
+        /// </summary>
+        /// <param name="viewModel">The view model for the view to display.</param>
+        /// <param name="dock">The side to put the window on.</param>
+        /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
         {
             _applicationView?.DockToolWindow(viewModel, dock, allowDuplicates);
@@ -327,7 +341,7 @@ namespace Cell.ViewModel.Application
             if (PersistedProject.NeedsMigration())
             {
                 if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
-                DialogFactory.ShowYesNoConfirmationDialog(
+                DialogFactory.ShowYesNo(
                     "Version Mismatch",
                     $"The version of your project is outdated. would you like to migrate it?",
                     MigrateProject,
@@ -383,7 +397,7 @@ namespace Cell.ViewModel.Application
             BackupManager.CreateBackup("PreMigration");
             PersistedProject.Migrate();
             _isProjectLoading = false;
-            DialogFactory.ShowDialog("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
+            DialogFactory.Show("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
         }
     }
 }

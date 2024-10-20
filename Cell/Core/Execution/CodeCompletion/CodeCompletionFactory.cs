@@ -1,5 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
 using Cell.Model.Plugin;

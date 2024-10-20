@@ -12,6 +12,7 @@ namespace CellTest.ViewModel.Cell.Types
 {
     public class CornerCellViewModelTests
     {
+        private TestDialogFactory _testDialogFactory;
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellLoader _cellLoader;
@@ -29,6 +30,7 @@ namespace CellTest.ViewModel.Cell.Types
 
         private CornerCellViewModel CreateInstance()
         {
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
@@ -40,7 +42,7 @@ namespace CellTest.ViewModel.Cell.Types
             _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
             _cellModel = new CellModel();
             return new CornerCellViewModel(_cellModel, _sheetViewModel);

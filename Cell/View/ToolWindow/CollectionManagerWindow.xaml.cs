@@ -1,4 +1,6 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Execution.Functions;
+using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
@@ -38,13 +40,13 @@ namespace Cell.View.ToolWindow
             if (sender is not Button button || button.DataContext is not UserCollection collection) return;
             if (!_viewModel.CanDeleteCollection(collection, out var reason))
             {
-                DialogFactory.ShowDialog("Unable to delete collection", $"Cannot delete '{collection.Model.Name}' because {reason}");
+                ApplicationViewModel.Instance.DialogFactory.Show("Unable to delete collection", $"Cannot delete '{collection.Model.Name}' because {reason}");
                 return;
             }
-            DialogFactory.ShowYesNoConfirmationDialog($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
+            ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
             {
                 if (collection.Items.Count == 0) _viewModel.DeleteCollection(collection);
-                else DialogFactory.ShowYesNoConfirmationDialog($"Are you sure?", "Are you sure? This will delete all items in the collection", () => _viewModel.DeleteCollection(collection));
+                else ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Are you sure?", "Are you sure? This will delete all items in the collection", () => _viewModel.DeleteCollection(collection));
             });
         }
 
@@ -55,7 +57,8 @@ namespace Cell.View.ToolWindow
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
 
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, new DialogFactory(), CellModel.Null);
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
 

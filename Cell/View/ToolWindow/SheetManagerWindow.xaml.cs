@@ -41,11 +41,11 @@ namespace Cell.View.ToolWindow
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
             if (ApplicationViewModel.Instance.SheetViewModel?.SheetName == sheetModel.Name)
             {
-                DialogFactory.ShowDialog("Cannot delete active sheet", "This sheet cannot be deleted because it is open, switch to another sheet and then try again.");
+                ApplicationViewModel.Instance.DialogFactory.Show("Cannot delete active sheet", "This sheet cannot be deleted because it is open, switch to another sheet and then try again.");
                 return;
             }
 
-            DialogFactory.ShowYesNoConfirmationDialog("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
+            ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
             {
                 ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));
             });

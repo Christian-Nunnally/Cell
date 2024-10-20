@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;

@@ -11,14 +11,17 @@ namespace Cell.ViewModel.ToolWindow
     public class SheetManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly SheetTracker _sheetTracker;
+        private readonly DialogFactoryBase _dialogFactory;
         private string _sheetsListBoxFilterText = string.Empty;
         /// <summary>
         /// Creates a new instance of the <see cref="SheetManagerWindowViewModel"/>.
         /// </summary>
         /// <param name="sheetTracker">The tracker to get cells from.</param>
-        public SheetManagerWindowViewModel(SheetTracker sheetTracker)
+        /// <param name="dialogFactory">A factory for showing dialogs.</param>
+        public SheetManagerWindowViewModel(SheetTracker sheetTracker, DialogFactoryBase dialogFactory)
         {
             _sheetTracker = sheetTracker;
+            _dialogFactory = dialogFactory;
         }
 
         /// <summary>
@@ -120,7 +123,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void OpenAddNewSheetWindow()
         {
-            var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker);
+            var createSheetWindowViewModel = new CreateSheetWindowViewModel(_sheetTracker, _dialogFactory);
             ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 

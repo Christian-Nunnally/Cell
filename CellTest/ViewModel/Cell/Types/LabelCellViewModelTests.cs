@@ -5,6 +5,7 @@ using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
+using Cell.ViewModel.Application;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -24,9 +25,11 @@ namespace CellTest.ViewModel.Cell.Types
         private SheetViewModel _sheetViewModel;
         private CellModel _cellModel;
         private CellSelector _cellSelector;
+        private DialogFactoryBase _testDialogFactory;
 
         private LabelCellViewModel CreateInstance()
         {
+            _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
@@ -34,7 +37,7 @@ namespace CellTest.ViewModel.Cell.Types
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);

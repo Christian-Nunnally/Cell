@@ -128,7 +128,7 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName))
             {
-                DialogFactory.ShowDialog("No function name to edit", "Set the name of the function before editing it.");
+                ApplicationViewModel.Instance.DialogFactory.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
@@ -160,7 +160,7 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName))
             {
-                DialogFactory.ShowDialog("No function name to edit", "Set the name of the function before editing it.");
+                ApplicationViewModel.Instance.DialogFactory.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
@@ -170,7 +170,8 @@ namespace Cell.ViewModel.ToolWindow
         private void EditFunction(CellFunction function)
         {
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, new DialogFactory(), CellToDisplay);
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
 
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Left, true);
             else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
