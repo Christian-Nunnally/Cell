@@ -8,7 +8,7 @@
     xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:plugin="clr-namespace:Cell.Core.Data"
+    xmlns:plugin="clr-namespace:Cell.ViewModel.Data"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
     xmlns:viewModel="clr-namespace:Cell.ViewModel.ToolWindow"
     d:DataContext="{d:DesignInstance Type=viewModel:CollectionManagerWindowViewModel}"
@@ -38,7 +38,7 @@
                 SelectedItem="{Binding SelectedCollection}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Grid HorizontalAlignment="Stretch" d:DataContext="{d:DesignInstance Type=plugin:UserCollection}">
+                        <Grid HorizontalAlignment="Stretch" d:DataContext="{d:DesignInstance Type=plugin:UserCollectionListItemViewModel}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="20" />
                                 <ColumnDefinition Width="1*" />
@@ -65,7 +65,7 @@
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
-                                    Text="{Binding Model.Name}" />
+                                    Text="{Binding Name}" />
                                 <TextBox
                                     Name="_renameTextbox"
                                     VerticalAlignment="Center"
@@ -89,7 +89,7 @@
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="10"
-                                Text="{Binding Model.ItemTypeOrBasedOnCollectionName}" />
+                                Text="{Binding Collection.Model.ItemTypeOrBasedOnCollectionName}" />
                             <TextBlock
                                 Grid.Column="3"
                                 Margin="10,0"
@@ -97,7 +97,7 @@
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
-                                Text="{Binding Items.Count}" />
+                                Text="{Binding Collection.Items.Count}" />
                             <TextBlock
                                 Grid.Column="4"
                                 Margin="10,0"
@@ -161,7 +161,7 @@
                         <TextBox
                             Height="25"
                             PreviewKeyDown="TextBoxPreviewKeyDown"
-                            Text="{Binding SelectedCollection.Model.SortAndFilterFunctionName}" />
+                            Text="{Binding SelectedCollection.Collection.Model.SortAndFilterFunctionName}" />
                     </DockPanel>
                     <Grid DockPanel.Dock="Bottom" Visibility="{Binding IsEditJsonTextBoxVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <avalonEdit:TextEditor

@@ -31,10 +31,10 @@ namespace Cell.Core.Execution.References
         /// <param name="cell">The cell used to resolve the reference.</param>
         /// <param name="pluginFunctionRunContext">The context used when running the function.</param>
         /// <returns>The collection name this reference is currently referring to for that cell.</returns>
-        public string GetCollectionName(CellModel cell, Context pluginFunctionRunContext)
+        public string GetCollectionName(CellModel cell, IContext pluginFunctionRunContext)
         {
-            pluginFunctionRunContext.Cell = cell;
-            var result = _calculateCollectionNameFunction.Run(pluginFunctionRunContext, cell);
+            pluginFunctionRunContext.ContextCell = cell;
+            var result = _calculateCollectionNameFunction.Run(pluginFunctionRunContext);
             if (result.WasSuccess && result.ReturnedObject is not null) return result.ReturnedObject.ToString() ?? "";
             Logger.Instance.Log($"Error calculating collection name from function {_calculateCollectionNameFunction}: {result.ExecutionResult}");
             return string.Empty;

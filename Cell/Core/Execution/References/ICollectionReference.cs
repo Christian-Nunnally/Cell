@@ -19,7 +19,7 @@ namespace Cell.Core.Execution.References
         /// <param name="cell">The cell used to resolve the reference.</param>
         /// <param name="pluginFunctionRunContext">The context used when running the function.</param>
         /// <returns>The collection name this reference is currently referring to for that cell.</returns>
-        string GetCollectionName(CellModel cell, Context pluginFunctionRunContext);
+        string GetCollectionName(CellModel cell, IContext pluginFunctionRunContext);
 
         /// <summary>
         /// Gets the locations that will invalidate the collection name for a particular cell.

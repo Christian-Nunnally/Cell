@@ -26,7 +26,7 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// The namespaces that are available to all functions preformatted for use in code.
         /// </summary>
-        public static List<string> UsingNamespaces =
+        public readonly static List<string> UsingNamespaces =
         [
             "System",
             "System.Linq",
@@ -121,15 +121,14 @@ namespace Cell.Core.Execution.Functions
         /// Runs the function with the given context and cell.
         /// </summary>
         /// <param name="pluginContext">The context to give to this function.</param>
-        /// <param name="cell">The cell to run this function from (this becomes the 'cell' reference inside the function).</param>
         /// <returns>The result of the function.</returns>
-        public CompileResult Run(IContext pluginContext, CellModel? cell)
+        public CompileResult Run(IContext pluginContext)
         {
             Compile();
             if (!CompileResult.WasSuccess) return CompileResult;
             try
             {
-                return RunUnsafe(pluginContext, cell, _compiledMethod);
+                return RunUnsafe(pluginContext, _compiledMethod);
             }
             catch (Exception e)
             {
@@ -228,11 +227,11 @@ namespace Cell.Core.Execution.Functions
             }
         }
 
-        private CompileResult RunUnsafe(IContext pluginContext, CellModel? cell, MethodInfo? method) => new()
+        private CompileResult RunUnsafe(IContext pluginContext, MethodInfo? method) => new()
         {
             WasSuccess = true,
             ExecutionResult = "Success",
-            ReturnedObject = method?.Invoke(null, [pluginContext, cell])
+            ReturnedObject = method?.Invoke(null, [pluginContext, pluginContext.ContextCell])
         };
     }
 }

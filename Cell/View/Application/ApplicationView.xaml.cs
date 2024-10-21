@@ -190,7 +190,7 @@ namespace Cell.View.Application
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader);
+            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.PluginFunctionLoader);
             ShowToolWindow(collectionManagerViewModel);
         }
 

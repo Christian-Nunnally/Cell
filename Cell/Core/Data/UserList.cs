@@ -16,21 +16,16 @@ namespace Cell.Core.Data
 
         private UserCollection? UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName ?? "");
 
-        private UserList(string collectionName, UserCollectionLoader userCollectionLoader)
-        {
-            _collectionName = collectionName;
-            _userCollectionLoader = userCollectionLoader;
-        }
-
         /// <summary>
-        /// Gets or creates a user list with the given collection name.
+        /// Gets or creates wrapper that loads a list from the given loader and provides an interface for it.
         /// </summary>
         /// <param name="collectionName">The name of the collection to get if it exists or create if it doesn't.</param>
         /// <param name="userCollectionLoader">The loader to look for existing collections in.</param>
-        /// <returns></returns>
-        public static UserList<T> GetOrCreate(string collectionName, UserCollectionLoader userCollectionLoader)
+        /// <returns>The wrapping list object.</returns>
+        public UserList(string collectionName, UserCollectionLoader userCollectionLoader)
         {
-            return new UserList<T>(collectionName, userCollectionLoader);
+            _collectionName = collectionName;
+            _userCollectionLoader = userCollectionLoader;
         }
 
         /// <summary>

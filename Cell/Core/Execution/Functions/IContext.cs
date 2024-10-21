@@ -22,6 +22,11 @@ namespace Cell.Core.Execution.Functions
         public int Index { get; }
 
         /// <summary>
+        /// The current cell that the function is running 'in'. This is the same cell that you can access by typing `cell.`.
+        /// </summary>
+        public CellModel ContextCell { get; set; }
+
+        /// <summary>
         /// Gets a cell from the given sheet, at the given row and column.
         /// </summary>
         /// <param name="cellForSheet">The cell whos sheet should be searched for the returned cell.</param>

@@ -1,9 +1,7 @@
 ﻿using Cell.Core.Common;
-using Cell.Core.Execution.References;
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
-using Cell.ViewModel.Application;
 using System.ComponentModel;
 using Cell.Core.Execution.Functions;
 
@@ -16,26 +14,24 @@ namespace Cell.Core.Data
     {
         private readonly CellModel _cellModelToInjectIndexIntoSortFunction = new();
         private readonly Dictionary<string, int?> _cachedSortFilterResult = [];
-        private readonly CellTracker _cellTracker;
+        private readonly IContext _sortFunctionContext;
         private readonly Dictionary<string, PluginModel> _items = [];
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly List<PluginModel> _sortedItems = [];
-        private readonly UserCollectionLoader _userCollectionLoader;
         private UserCollection? _baseCollection;
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCollection"/>.
         /// </summary>
         /// <param name="model">The underlying collection model.</param>
-        /// <param name="userCollectionLoader">The collection loader that owns this and other visible collections.</param>
         /// <param name="pluginFunctionLoader">The function loader to load the sort function from.</param>
-        /// <param name="cellTracker">The cell tracker to provide to the sort function context.</param>
-        public UserCollection(UserCollectionModel model, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
+        /// <param name="sortFunctionContext">The cell tracker to provide to the sort function context.</param>
+        public UserCollection(UserCollectionModel model, PluginFunctionLoader pluginFunctionLoader, IContext sortFunctionContext)
         {
+            sortFunctionContext.ContextCell = _cellModelToInjectIndexIntoSortFunction;
             Model = model;
             Model.PropertyChanged += UserCollectionModelPropertyChanged;
-            _userCollectionLoader = userCollectionLoader;
             _pluginFunctionLoader = pluginFunctionLoader;
-            _cellTracker = cellTracker;
+            _sortFunctionContext = sortFunctionContext;
         }
 
         /// <summary>
@@ -74,38 +70,9 @@ namespace Cell.Core.Data
         public UserCollectionModel Model { get; private set; }
 
         /// <summary>
-        /// Gets or renames the name of this collection.
-        /// </summary>
-        public string Name
-        {
-            set
-            {
-                if (Model.Name == value) return;
-                var oldName = Model.Name;
-                var newName = value;
-                ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
-                {
-                    _userCollectionLoader.ProcessCollectionRename(oldName, newName);
-                    Model.Name = newName;
-                    NotifyPropertyChanged(nameof(Name));
-                });
-            }
-
-            get
-            {
-                return Model.Name;
-            }
-        }
-
-        /// <summary>
         /// Gets the data type of items in this collection.
         /// </summary>
         public string Type { get; internal set; } = string.Empty;
-
-        /// <summary>
-        /// Gets the number of times this collection is used in other collections or functions.
-        /// </summary>
-        public int UsageCount => _pluginFunctionLoader.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == _baseCollection?.Name));
 
         /// <summary>
         /// Adds an item to the collection.
@@ -142,10 +109,8 @@ namespace Cell.Core.Data
                 int i = 0;
                 foreach (var item in _sortedItems)
                 {
-                    _cellModelToInjectIndexIntoSortFunction.Index = i;
-                    var sortFilterResult = RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellModelToInjectIndexIntoSortFunction), Model.SortAndFilterFunctionName);
+                    var sortFilterResult = RunSortFilter(i++);
                     itemsToSortResultMap.Add(item, sortFilterResult);
-                    i++;
                 }
 
                 i = 0;
@@ -195,10 +160,11 @@ namespace Cell.Core.Data
             return null;
         }
 
-        private static int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, Context pluginContext, string functionName)
+        private int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, IContext pluginContext, string functionName, int indexToGetResultFor)
         {
+            _cellModelToInjectIndexIntoSortFunction.Index = indexToGetResultFor;
             if (!pluginFunctionLoader.TryGetCellFunction("object", functionName, out var populateFunction)) return 0;
-            var result = populateFunction.Run(pluginContext, null);
+            var result = populateFunction.Run(pluginContext);
             if (result.WasSuccess)
             {
                 return ConvertReturnedObjectToSortFilterResult(result.ReturnedObject);
@@ -219,22 +185,23 @@ namespace Cell.Core.Data
         private void InsertItemWithSortAndFilter(PluginModel model)
         {
             if (_items.ContainsKey(model.ID)) return;
-
-            // Not sorted yet, so just add it to the end.
-            _sortedItems.Add(model);
-            _cellModelToInjectIndexIntoSortFunction.Index = _sortedItems.Count - 1;
-            var sortFilterResult = RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellModelToInjectIndexIntoSortFunction), Model.SortAndFilterFunctionName);
-            _sortedItems.RemoveAt(_sortedItems.Count - 1);
+            int? sortFilterResult = GetSortFilterResultFromItemNotInList(model);
             if (sortFilterResult != null || string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
-                // TODO: Get context from last executed function or something. test functions will get real cells if this is called because of a test collection
-
                 InsertSorted(model, sortFilterResult);
                 _cachedSortFilterResult.Add(model.ID, sortFilterResult);
                 _items.Add(model.ID, model);
                 model.PropertyChanged += PropertyChangedOnItemInCollection;
                 ItemAdded?.Invoke(this, model);
             }
+        }
+
+        private int? GetSortFilterResultFromItemNotInList(PluginModel model)
+        {
+            _sortedItems.Add(model);
+            var sortFilterResult = RunSortFilter(_sortedItems.Count - 1);
+            _sortedItems.RemoveAt(_sortedItems.Count - 1);
+            return sortFilterResult;
         }
 
         private void InsertSorted(PluginModel model, int? sortFilterResult)
@@ -245,8 +212,7 @@ namespace Cell.Core.Data
 
         private int? RunSortFilter(int i)
         {
-            _cellModelToInjectIndexIntoSortFunction.Index = i;
-            return RunSortFilter(_pluginFunctionLoader, new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellModelToInjectIndexIntoSortFunction), Model.SortAndFilterFunctionName) ?? 0;
+            return RunSortFilter(_pluginFunctionLoader, _sortFunctionContext, Model.SortAndFilterFunctionName, i) ?? 0;
         }
 
         private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)
@@ -266,9 +232,7 @@ namespace Cell.Core.Data
             {
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
-                _cellModelToInjectIndexIntoSortFunction.Index = currentIndex;
-                var runContext = new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellModelToInjectIndexIntoSortFunction);
-                var sortFilterResult = RunSortFilter(_pluginFunctionLoader, runContext, Model.SortAndFilterFunctionName);
+                var sortFilterResult = RunSortFilter(currentIndex);
 
                 var cachedResult = _cachedSortFilterResult[model.ID];
                 if (cachedResult == sortFilterResult) return;

@@ -51,17 +51,17 @@ namespace Cell.Core.Execution
 
         private void ItemAddedToUserCollection(UserCollection collection, PluginModel model)
         {
-            NotifyCollectionUpdated(collection.Name);
+            NotifyCollectionUpdated(collection.Model.Name);
         }
 
         private void ItemPropertyChangedInUserCollection(UserCollection collection, PluginModel model)
         {
-            NotifyCollectionUpdated(collection.Name);
+            NotifyCollectionUpdated(collection.Model.Name);
         }
 
         private void ItemRemovedFromUserCollection(UserCollection collection, PluginModel model)
         {
-            NotifyCollectionUpdated(collection.Name);
+            NotifyCollectionUpdated(collection.Model.Name);
         }
 
         private void NotifyCollectionUpdated(string userCollectionName)

@@ -22,7 +22,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             _userCollectionLoader = userCollectionLoader;
             _collections = _userCollectionLoader.UserCollections;
-            CollectionBaseOptions = new ObservableCollection<string>(_collections.Select(x => x.Name))
+            CollectionBaseOptions = new ObservableCollection<string>(_collections.Select(x => x.Model.Name))
             {
                 "---"
             };
@@ -101,17 +101,17 @@ namespace Cell.ViewModel.ToolWindow
         {
             var collectionName = NewCollectionName;
             if (string.IsNullOrEmpty(collectionName)) return;
-            if (_collections.Any(x => x.Name == collectionName)) return;
+            if (_collections.Any(x => x.Model.Name == collectionName)) return;
 
             if (IsBaseOnCheckBoxChecked)
             {
                 var basedOnCollection = NewCollectionBaseName;
                 if (string.IsNullOrEmpty(basedOnCollection)) return;
 
-                var baseCollection = _collections.FirstOrDefault(x => x.Name == basedOnCollection);
+                var baseCollection = _collections.FirstOrDefault(x => x.Model.Name == basedOnCollection);
                 if (baseCollection == null) return;
 
-                _userCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Name);
+                _userCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
             }
             else
             {

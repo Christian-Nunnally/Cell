@@ -48,7 +48,7 @@ namespace Cell.Core.Execution
         {
             var pluginContext = new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), subscriber);
             if (!_pluginFunctionLoader.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
-            var result = populateFunction.Run(pluginContext, subscriber);
+            var result = populateFunction.Run(pluginContext);
             if (!result.WasSuccess) return result;
             var returnedObject = result.ReturnedObject;
             if (returnedObject is not null) result.ExecutionResult = returnedObject.ToString() ?? "";

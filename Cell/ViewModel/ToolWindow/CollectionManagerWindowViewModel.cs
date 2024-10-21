@@ -5,6 +5,7 @@ using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using System.Collections.Specialized;
 using System.Text.Json;
+using Cell.ViewModel.Data;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -22,15 +23,19 @@ namespace Cell.ViewModel.ToolWindow
         private string _collectionListBoxFilterText = string.Empty;
         private bool _isEditJsonTextBoxVisible;
         private bool _isSaveItemJsonButtonVisible;
-        private UserCollection? _selectedCollection;
+        private UserCollectionListItemViewModel? _selectedCollection;
         private PluginModel? _selectedItem;
         private string _selectedItemSerialized = string.Empty;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+
         /// <summary>
         /// Creates a new instance of the <see cref="CollectionManagerWindowViewModel"/>.
         /// </summary>
         /// <param name="userCollectionLoader">The collection loader to get the collections from.</param>
-        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader)
+        /// <param name="pluginFunctionLoader">The plugin function loader used to determine what functions are using what collections and display it to the user.</param>
+        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader)
         {
+            _pluginFunctionLoader = pluginFunctionLoader;
             _userCollectionLoader = userCollectionLoader;
         }
 
@@ -75,12 +80,12 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the collections that are currently being displayed in the list box to the user, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<UserCollection> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Name.Contains(CollectionListBoxFilterText));
+        public IEnumerable<UserCollectionListItemViewModel> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Model.Name.Contains(CollectionListBoxFilterText)).Select(x => new UserCollectionListItemViewModel(x, _pluginFunctionLoader, _userCollectionLoader));
 
         /// <summary>
         /// Gets the items in the selected collection, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<PluginModel> FilteredItemsInSelectedCollection => _selectedCollection?.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
+        public IEnumerable<PluginModel> FilteredItemsInSelectedCollection => _selectedCollection?.Collection.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
 
         /// <summary>
         /// Gets whether the json text box for editing the selected item is visible.
@@ -121,17 +126,17 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// The collection the user has selected in the collections list box.
         /// </summary>
-        public UserCollection? SelectedCollection
+        public UserCollectionListItemViewModel? SelectedCollection
         {
             get => _selectedCollection; set
             {
                 if (_selectedCollection == value) return;
                 if (_selectedCollection != null)
                 {
-                    _selectedCollection.ItemAdded -= SelectedCollectionChanged;
-                    _selectedCollection.ItemRemoved -= SelectedCollectionChanged;
-                    _selectedCollection.ItemPropertyChanged -= SelectedCollectionChanged;
-                    _selectedCollection.OrderChanged -= SelectedCollectionOrderChanged;
+                    _selectedCollection.Collection.ItemAdded -= SelectedCollectionChanged;
+                    _selectedCollection.Collection.ItemRemoved -= SelectedCollectionChanged;
+                    _selectedCollection.Collection.ItemPropertyChanged -= SelectedCollectionChanged;
+                    _selectedCollection.Collection.OrderChanged -= SelectedCollectionOrderChanged;
                 }
 
                 _selectedCollection = value;
@@ -139,10 +144,10 @@ namespace Cell.ViewModel.ToolWindow
 
                 if (_selectedCollection != null)
                 {
-                    _selectedCollection.ItemAdded += SelectedCollectionChanged;
-                    _selectedCollection.ItemRemoved += SelectedCollectionChanged;
-                    _selectedCollection.ItemPropertyChanged += SelectedCollectionChanged;
-                    _selectedCollection.OrderChanged += SelectedCollectionOrderChanged;
+                    _selectedCollection.Collection.ItemAdded += SelectedCollectionChanged;
+                    _selectedCollection.Collection.ItemRemoved += SelectedCollectionChanged;
+                    _selectedCollection.Collection.ItemPropertyChanged += SelectedCollectionChanged;
+                    _selectedCollection.Collection.OrderChanged += SelectedCollectionOrderChanged;
                 }
                 NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
                 NotifyPropertyChanged(nameof(SelectedCollection));
@@ -249,14 +254,14 @@ namespace Cell.ViewModel.ToolWindow
         /// <param name="item">The item to delete from the selected collection.</param>
         public void RemoveItemFromSelectedCollection(PluginModel item)
         {
-            SelectedCollection?.Remove(item);
+            SelectedCollection?.Collection.Remove(item);
         }
 
         internal bool CanDeleteCollection(UserCollection collection, out string reason)
         {
             reason = string.Empty;
-            var conflictingBase = _userCollectionLoader.UserCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Name);
-            if (conflictingBase != null) reason = $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Name}'.";
+            var conflictingBase = _userCollectionLoader.UserCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Model.Name);
+            if (conflictingBase != null) reason = $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Model.Name}'.";
             return reason == string.Empty;
         }
 

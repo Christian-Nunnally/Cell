@@ -2,7 +2,6 @@
 using Cell.Core.Data;
 using Cell.Model;
 using Cell.Core.Persistence;
-using System.ComponentModel;
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.Functions;
 
@@ -13,7 +12,6 @@ namespace Cell.Core.Execution
     /// </summary>
     public class CellTriggerManager
     {
-        private readonly Dictionary<CellModel, string> _cellModelToCurrentTextValueMap = [];
         private readonly Dictionary<string, CellModel> _cellsBeingEdited = [];
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
@@ -31,13 +29,7 @@ namespace Cell.Core.Execution
         {
             _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
-            _cellTracker.CellAdded += StartMonitoringCellForTriggerFunction;
-            _cellTracker.CellRemoved += StopMonitoringCellForTriggerFunction;
             _dialogFactoryForTriggers = dialogFactoryForTriggers;
-            foreach (var cell in _cellTracker.AllCells)
-            {
-                StartMonitoringCellForTriggerFunction(cell);
-            }
             _pluginFunctionLoader = pluginFunctionLoader;
         }
 
@@ -55,32 +47,6 @@ namespace Cell.Core.Execution
             _cellsBeingEdited.Remove(cell.ID);
         }
 
-        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (sender is not CellModel cell) return;
-            if (e.PropertyName == nameof(CellModel.Text))
-            {
-                if (_cellModelToCurrentTextValueMap.TryGetValue(cell, out var oldValue))
-                {
-                    _cellModelToCurrentTextValueMap[cell] = cell.Text;
-                }
-            }
-            else if (e.PropertyName == nameof(CellModel.TriggerFunctionName))
-            {
-                if (cell.TriggerFunctionName == string.Empty)
-                {
-                    _cellModelToCurrentTextValueMap.Remove(cell);
-                }
-                else
-                {
-                    if (!_cellModelToCurrentTextValueMap.ContainsKey(cell))
-                    {
-                        _cellModelToCurrentTextValueMap.Add(cell, cell.Text);
-                    }
-                }
-            }
-        }
-
         private void CellTriggeredHandler(CellModel cell, EditContext editContext)
         {
             if (!_pluginFunctionLoader.TryGetCellFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
@@ -88,24 +54,9 @@ namespace Cell.Core.Execution
             {
                 E = editContext
             };
-            var result = triggerFunction.Run(context, cell);
+            var result = triggerFunction.Run(context);
             if (result.WasSuccess) return;
             Logger.Instance.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");
-        }
-
-        private void StartMonitoringCellForTriggerFunction(CellModel model)
-        {
-            model.PropertyChanged += CellModelPropertyChanged;
-            if (!string.IsNullOrWhiteSpace(model.TriggerFunctionName))
-            {
-                _cellModelToCurrentTextValueMap.Add(model, model.Text);
-            }
-        }
-
-        private void StopMonitoringCellForTriggerFunction(CellModel model)
-        {
-            model.PropertyChanged -= CellModelPropertyChanged;
-            _cellModelToCurrentTextValueMap.Remove(model);
         }
     }
 }

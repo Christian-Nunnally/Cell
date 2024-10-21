@@ -52,7 +52,7 @@ namespace Cell.View.ToolWindow
 
         private void EditSortAndFilterFunctionButtonClick(object sender, RoutedEventArgs e)
         {
-            var functionName = _viewModel.SelectedCollection?.Model.SortAndFilterFunctionName;
+            var functionName = _viewModel.SelectedCollection?.Collection.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
 

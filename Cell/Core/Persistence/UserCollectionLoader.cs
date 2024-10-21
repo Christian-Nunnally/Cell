@@ -1,9 +1,11 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Core.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
 using Cell.Model.Plugin;
+using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +23,7 @@ namespace Cell.Core.Persistence
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _collectionsDirectory;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        protected readonly PluginFunctionLoader _pluginFunctionLoader;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
@@ -61,7 +63,8 @@ namespace Cell.Core.Persistence
                 ItemTypeName = itemTypeName,
                 BasedOnCollectionName = baseCollectionName
             };
-            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
+            var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
+            var collection = new UserCollection(model, _pluginFunctionLoader, sortContext);
             StartTrackingCollection(collection);
             SaveCollection(collection);
             EnsureLinkedToBaseCollection(collection);
@@ -76,7 +79,7 @@ namespace Cell.Core.Persistence
         {
             UnlinkFromBaseCollection(collection);
             StopTrackingCollection(collection);
-            _collectionsDirectory.DeleteDirectory(collection.Name);
+            _collectionsDirectory.DeleteDirectory(collection.Model.Name);
         }
 
         /// <summary>
@@ -84,7 +87,7 @@ namespace Cell.Core.Persistence
         /// </summary>
         /// <param name="name">The name of the collection to get.</param>
         /// <returns>The collection if it exists, or null.</returns>
-        public UserCollection? GetCollection(string name)
+        public virtual UserCollection? GetCollection(string name)
         {
             if (name == string.Empty) return null;
             if (_collections.TryGetValue(name, out UserCollection? value)) return value;
@@ -112,11 +115,11 @@ namespace Cell.Core.Persistence
             {
                 foreach (var collection in UserCollections)
                 {
-                    if (loadedCollections.Contains(collection.Name)) continue;
+                    if (loadedCollections.Contains(collection.Model.Name)) continue;
                     var basedOnCollectionName = collection.Model.BasedOnCollectionName;
                     if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
                     {
-                        loadedCollections.Add(collection.Name);
+                        loadedCollections.Add(collection.Model.Name);
                         EnsureLinkedToBaseCollection(collection);
                     }
                 }
@@ -191,7 +194,8 @@ namespace Cell.Core.Persistence
             var path = Path.Combine(directory, "collection");
             var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
-            var collection = new UserCollection(model, this, _pluginFunctionLoader, _cellTracker);
+            var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
+            var collection = new UserCollection(model, _pluginFunctionLoader, sortContext);
             var itemsDirectory = Path.Combine(directory, "Items");
             var paths = !_collectionsDirectory.DirectoryExists(itemsDirectory)
                 ? []
@@ -209,7 +213,7 @@ namespace Cell.Core.Persistence
         private void SaveCollection(UserCollection collection)
         {
             SaveCollectionSettings(collection.Model);
-            foreach (var item in collection.Items) SaveItem(collection.Name, item.ID, item);
+            foreach (var item in collection.Items) SaveItem(collection.Model.Name, item.ID, item);
         }
 
         private void SaveCollectionSettings(UserCollectionModel model)
@@ -232,7 +236,7 @@ namespace Cell.Core.Persistence
             userCollection.ItemRemoved += UserCollectionItemRemoved;
             userCollection.ItemPropertyChanged += UserCollectionItemChanged;
             userCollection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
-            _collections.Add(userCollection.Name, userCollection);
+            _collections.Add(userCollection.Model.Name, userCollection);
             UserCollections.Add(userCollection);
             _hasGenerateDataTypeForCollectionMapChanged = true;
         }
@@ -243,7 +247,7 @@ namespace Cell.Core.Persistence
             userCollection.ItemRemoved -= UserCollectionItemRemoved;
             userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
             userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
-            _collections.Remove(userCollection.Name);
+            _collections.Remove(userCollection.Model.Name);
             UserCollections.Remove(userCollection);
             _hasGenerateDataTypeForCollectionMapChanged = true;
         }
@@ -260,19 +264,19 @@ namespace Cell.Core.Persistence
         private void UserCollectionItemAdded(UserCollection collection, PluginModel model)
         {
             if (collection.IsFilteredView) return;
-            SaveItem(collection.Name, model.ID, model);
+            SaveItem(collection.Model.Name, model.ID, model);
         }
 
         private void UserCollectionItemChanged(UserCollection collection, PluginModel model)
         {
             if (collection.IsFilteredView) return;
-            SaveItem(collection.Name, model.ID, model);
+            SaveItem(collection.Model.Name, model.ID, model);
         }
 
         private void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
         {
             if (collection.IsFilteredView) return;
-            DeleteItem(collection.Name, model.ID);
+            DeleteItem(collection.Model.Name, model.ID);
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

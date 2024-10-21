@@ -3,6 +3,7 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
+using System.Collections;
 
 namespace Cell.Core.Execution.Functions
 {
@@ -20,7 +21,6 @@ namespace Cell.Core.Execution.Functions
         private readonly CellTracker _cellTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly DialogFactoryBase _dialogFactory;
-        private CellModel _cell;
 
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
@@ -34,18 +34,7 @@ namespace Cell.Core.Execution.Functions
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
             _dialogFactory = dialogFactory;
-            _cell = cell;
-        }
-
-        /// <summary>
-        /// The current cell that the function is running 'in'. This is the same cell that you can access by typing `cell.`.
-        /// 
-        /// To get other cells use the cell reference format like `A1`, or use the `GetCell` function.
-        /// </summary>
-        public CellModel Cell
-        {
-            get => _cell;
-            set => _cell = value;
+            ContextCell = cell;
         }
 
         /// <summary>
@@ -56,7 +45,14 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// The 'index' of the cell that the function is running in.
         /// </summary>
-        public int Index => Cell?.Index ?? 0;
+        public int Index => ContextCell?.Index ?? 0;
+
+        /// <summary>
+        /// The current cell that the function is running 'in'. This is the same cell that you can access by typing `cell.`.
+        /// 
+        /// To get other cells use the cell reference format like `A1`, or use the `GetCell` function.
+        /// </summary>
+        public CellModel ContextCell { get; set; }
 
         /// <summary>
         /// Gets a cell from the given sheet, at the given row and column.
@@ -118,7 +114,7 @@ namespace Cell.Core.Execution.Functions
         /// <returns>The user collection with the given name.</returns>
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
-            return UserList<T>.GetOrCreate(collection, _userCollectionLoader);
+            return new UserList<T>(collection, _userCollectionLoader);
         }
 
         /// <summary>
@@ -146,7 +142,7 @@ namespace Cell.Core.Execution.Functions
         /// <param name="text">The text to show in the dialog window.</param>
         public void ShowDialog(string text)
         {
-            var title = Cell?.Location.UserFriendlyLocationString ?? "Function";
+            var title = ContextCell?.Location.UserFriendlyLocationString ?? "Function";
             _dialogFactory.Show(title, text);
         }
     }

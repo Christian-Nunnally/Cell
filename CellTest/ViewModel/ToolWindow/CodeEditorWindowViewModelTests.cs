@@ -25,7 +25,6 @@ namespace CellTest.ViewModel.ToolWindow
 
         public CodeEditorWindowViewModelTests()
         {
-            //CellFunction.UsingNamespaces.Add(")
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);

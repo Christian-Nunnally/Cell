@@ -37,7 +37,7 @@ namespace Cell.Core.Execution.References
         /// <param name="cell">The cell used to help resolve relative references.</param>
         /// <param name="pluginFunctionRunContext">The context used if a function needs to be run to resolve the name.</param>
         /// <returns>The name of the referenced collection.</returns>
-        public string GetCollectionName(CellModel cell, Context pluginFunctionRunContext) => ConstantCollectionName;
+        public string GetCollectionName(CellModel cell, IContext pluginFunctionRunContext) => ConstantCollectionName;
 
         /// <summary>
         /// Will always return an empty collection because this reference does not change.

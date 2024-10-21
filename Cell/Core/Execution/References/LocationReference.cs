@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Execution.Functions;
-using Cell.Core.Execution.References;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

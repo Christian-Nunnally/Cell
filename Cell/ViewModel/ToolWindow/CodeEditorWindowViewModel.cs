@@ -180,7 +180,7 @@ namespace Cell.ViewModel.ToolWindow
             var model = new CellFunctionModel("testtesttest", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
-            var result = function.Run(_contextToTestWith, CellContext);
+            var result = function.Run(_contextToTestWith);
 
             DisplayResult(result);
         }
