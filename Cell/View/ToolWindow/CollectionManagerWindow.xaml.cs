@@ -57,7 +57,7 @@ namespace Cell.View.ToolWindow
             var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
 
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, new DialogFactory(), CellModel.Null);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellModel.Null, ApplicationViewModel.Instance.PluginFunctionLoader);
             var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }

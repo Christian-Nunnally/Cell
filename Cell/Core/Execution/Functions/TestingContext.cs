@@ -2,7 +2,6 @@
 using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
-using Cell.ViewModel.Application;
 using Cell.Core.Common;
 
 namespace Cell.Core.Execution.Functions
@@ -21,21 +20,19 @@ namespace Cell.Core.Execution.Functions
         /// </summary>
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly DialogFactoryBase _dialogFactory;
+        private readonly IUserCollectionProvider _userCollectionProviderThatMirrorsRealProvider;
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
-        /// <param name="dialogFactory">The dialog factory used to show dialogs from cell functions.</param>
         /// <param name="cell">The context cell.</param>
-        public TestingContext(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactory, CellModel cell)
+        /// <param name="pluginFunctionLoader">The function loader for loading sort functions for read only collections.</param>
+        public TestingContext(CellTracker cellTracker, IUserCollectionProvider userCollectionLoader, CellModel cell, PluginFunctionLoader pluginFunctionLoader)
         {
             _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
-            _dialogFactory = dialogFactory;
-            ContextCell = cell;
+            _userCollectionProviderThatMirrorsRealProvider = new ReadOnlyUserCollectionLoader(userCollectionLoader, pluginFunctionLoader, this);
+            ContextCell = cell.Copy();
         }
 
         /// <summary>
@@ -47,11 +44,6 @@ namespace Cell.Core.Execution.Functions
         /// The 'index' of the cell that the function is running in.
         /// </summary>
         public int Index => ContextCell?.Index ?? 0;
-
-        /// <summary>
-        /// The index of the object being sorted by this function call. This is used in sort and filter functions like `return list[c.SortIndex].SortProperty;`
-        /// </summary>
-        public int SortIndex { get; set; } = 0;
 
         /// <summary>
         /// The current cell that the function is running 'in'. This is the same cell that you can access by typing `cell.`.
@@ -125,7 +117,7 @@ namespace Cell.Core.Execution.Functions
         /// <returns>The user collection with the given name.</returns>
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
-            return new UserList<T>(collection, _userCollectionLoader);
+            return new UserList<T>(collection, _userCollectionProviderThatMirrorsRealProvider);
         }
 
         /// <summary>

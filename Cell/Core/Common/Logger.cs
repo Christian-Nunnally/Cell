@@ -39,5 +39,13 @@
                 _logsQueue.Dequeue();
             }
         }
+
+        /// <summary>
+        /// Clears all logs.
+        /// </summary>
+        public void Clear()
+        {
+            _logsQueue.Clear();
+        }
     }
 }

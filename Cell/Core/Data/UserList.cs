@@ -1,5 +1,4 @@
 ﻿using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using System.Collections;
 
 namespace Cell.Core.Data
@@ -11,7 +10,7 @@ namespace Cell.Core.Data
     public class UserList<T> : IEnumerable<T> where T : PluginModel, new()
     {
         private readonly string _collectionName;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly IUserCollectionProvider _userCollectionLoader;
         private UserCollection? _internalUserCollection;
 
         private UserCollection? UserCollection => _internalUserCollection ??= _userCollectionLoader.GetCollection(_collectionName ?? "");
@@ -22,7 +21,7 @@ namespace Cell.Core.Data
         /// <param name="collectionName">The name of the collection to get if it exists or create if it doesn't.</param>
         /// <param name="userCollectionLoader">The loader to look for existing collections in.</param>
         /// <returns>The wrapping list object.</returns>
-        public UserList(string collectionName, UserCollectionLoader userCollectionLoader)
+        public UserList(string collectionName, IUserCollectionProvider userCollectionLoader)
         {
             _collectionName = collectionName;
             _userCollectionLoader = userCollectionLoader;

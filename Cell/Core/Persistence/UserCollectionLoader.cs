@@ -17,13 +17,13 @@ namespace Cell.Core.Persistence
     /// <summary>
     /// Loads and saves user collections from a project.
     /// </summary>
-    public class UserCollectionLoader
+    public class UserCollectionLoader : IUserCollectionProvider
     {
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _collectionsDirectory;
-        protected readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.

@@ -3,39 +3,40 @@ using Cell.Model;
 using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
-using System.Collections.ObjectModel;
 using Cell.Core.Execution.Functions;
-using Cell.ViewModel.Application;
 using Cell.Core.Common;
+using Cell.Model.Plugin;
 
 namespace CellTest.ViewModel.ToolWindow
 {
     public class CodeEditorWindowViewModelTests
     {
-        private CellTracker _cellTracker;
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
-        private ObservableCollection<CellModel> _cellsToEdit;
-        private PluginFunctionLoader _pluginFunctionLoader;
-        private CellFunction _functionBeingEdited;
-        private CellModel _cellContext;
-        private UserCollectionLoader _userCollectionLoader;
-        private CodeEditorWindowViewModel _testing;
+        private readonly CellTracker _cellTracker;
+        private readonly DictionaryFileIO _testFileIO;
+        private readonly PersistedDirectory _persistedDirectory;
+        private readonly CellLoader _cellLoader;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly CellFunction _functionBeingEdited;
+        private readonly CellModel _cellContext;
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly CodeEditorWindowViewModel _testing;
+        private readonly TestingContext _testingContext;
+        private readonly Dictionary<string, string> _collectionNameMap;
 
         public CodeEditorWindowViewModelTests()
         {
+            Logger.Instance.Clear();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellLoader = new CellLoader(_persistedDirectory);
             _cellTracker = new CellTracker(_cellLoader);
-            _cellsToEdit = [];
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _functionBeingEdited = _pluginFunctionLoader.CreateCellFunction("void", "TestFunction");
             _cellContext = new CellModel();
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            var testingContext = new TestingContext(_cellTracker, _userCollectionLoader, new DialogFactory(), _cellContext);
-            _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, new Dictionary<string, string>(), testingContext);
+            _testingContext = new TestingContext(_cellTracker, _userCollectionLoader, _cellContext, _pluginFunctionLoader);
+            _collectionNameMap = [];
+            _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, _collectionNameMap, _testingContext);
         }
 
         [Fact]
@@ -70,6 +71,47 @@ namespace CellTest.ViewModel.ToolWindow
             _testing.TestCode();
 
             Assert.Contains("Pretending to show dialog", Logger.Instance.Logs.Single());
+        }
+
+        [Fact]
+        public void CollectionExistsWithOneItemAndTestCodeGetsItem_TestCode_LogShowsDialogContainedItemTitle()
+        {
+            var realCollection = _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            _collectionNameMap.Add("TestCollection", "TodoItem");
+            var todoItem = new TodoItem
+            {
+                Title = "test passed"
+            };
+            realCollection.Add(todoItem);
+            _testing.CurrentTextInEditor = "c.ShowDialog(TestCollection.First().Title);";
+
+            _testing.TestCode();
+
+            Assert.Contains("test passed", Logger.Instance.Logs.Single());
+        }
+
+        [Fact]
+        public void CodeAddsItemToUserCollection_TestCode_ItemAddedInTest()
+        {
+            _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            _collectionNameMap.Add("TestCollection", "TodoItem");
+            _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
+
+            _testing.TestCode();
+
+            Assert.Contains("test passed", Logger.Instance.Logs.Single());
+        }
+
+        [Fact]
+        public void CodeAddsItemToUserCollection_TestCode_ItemNotAddedInRealCollection()
+        {
+            var realCollection = _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            _collectionNameMap.Add("TestCollection", "TodoItem");
+            _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
+
+            _testing.TestCode();
+
+            Assert.Empty(realCollection.Items);
         }
     }
 }
