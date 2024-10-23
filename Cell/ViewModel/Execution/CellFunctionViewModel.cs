@@ -3,6 +3,7 @@ using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Model;
 using Cell.ViewModel.Application;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Execution
 {
@@ -21,6 +22,17 @@ namespace Cell.ViewModel.Execution
         {
             _model = function.Model;
             _function = function;
+            _function.PropertyChanged += FunctionPropertyChanged;
+        }
+
+        ~CellFunctionViewModel()
+        {
+            _function.PropertyChanged -= FunctionPropertyChanged;
+        }
+
+        private void FunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellFunction.CompileResult)) NotifyPropertyChanged(nameof(WasLastCompileSuccesful));
         }
 
         /// <summary>
@@ -64,6 +76,11 @@ namespace Cell.ViewModel.Execution
         /// Gets the number of cells that use this function.
         /// </summary>
         public int UsageCount => CellsThatUseFunction.Count;
+
+        /// <summary>
+        /// Get whether the last time this function was compiled it returned no errors.
+        /// </summary>
+        public bool WasLastCompileSuccesful => Function.CompileResult.WasSuccess;
 
         private static void RefactorCellsFunctionUseage(IEnumerable<CellModel> cells, string oldName, string newName)
         {

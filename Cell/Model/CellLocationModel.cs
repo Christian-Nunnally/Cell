@@ -102,6 +102,11 @@ namespace Cell.Model
             otherLocation.Column = Column;
             otherLocation.SheetName = SheetName;
         }
+
+        public override string ToString()
+        {
+            return $"{SheetName}-{UserFriendlyLocationString}";
+        }
     }
 
     /// <summary>

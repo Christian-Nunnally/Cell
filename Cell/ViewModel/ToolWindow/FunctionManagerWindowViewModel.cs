@@ -104,7 +104,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the list of users of the selected function after the filter has been applied from the user.
         /// </summary>
-        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.Location.UserFriendlyLocationString.Contains(UsersListBoxFilterText)) ?? [];
+        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.Location.ToString().Contains(UsersListBoxFilterText)) ?? [];
 
         /// <summary>
         /// Gets or sets the string that the user has entered to filter the collection of functions to a given sheet name.

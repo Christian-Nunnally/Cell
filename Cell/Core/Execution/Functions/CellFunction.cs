@@ -176,6 +176,7 @@ namespace Cell.Core.Execution.Functions
                     CompileResult = new CompileResult { WasSuccess = false, ExecutionResult = e.Message };
                     WasCompileSuccessful = false;
                 }
+                NotifyPropertyChanged(nameof(CompileResult));
             }
         }
 
