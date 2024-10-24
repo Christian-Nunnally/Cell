@@ -1,14 +1,9 @@
-﻿using Cell.Core.Persistence.Migration;
-using Cell.Core.Data;
-using Cell.Core.Execution;
-using Cell.Core.Persistence;
-using Cell.View.Cells;
+﻿using Cell.View.Cells;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.Editing;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,16 +14,19 @@ namespace Cell.View.Application
     public partial class ApplicationView : Window
     {
         private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
-        private ApplicationViewModel? _viewModel;
+        private readonly ApplicationViewModel _viewModel;
 
         /// <summary>
         /// Creates a new instance of the application view.
         /// </summary>
-        public ApplicationView()
+        public ApplicationView(ApplicationViewModel viewModel)
         {
+            DataContext = viewModel;
+            _viewModel = viewModel;
+            viewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
             InitializeComponent();
-            if (DataContext is ApplicationViewModel viewModel) viewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
-            DataContextChanged += ApplicationViewDataContextChanged;
+            _titleBarSheetNavigationView.DataContext = new TitleBarSheetNavigationViewModel(_viewModel.SheetTracker);
+            viewModel.AttachToView(this);
         }
 
         /// <summary>
@@ -77,71 +75,10 @@ namespace Cell.View.Application
             DockToolWindow(window, dock, allowDuplicates);
         }
 
-        /// <summary>
-        /// Initializes the entire application once the view has loaded.
-        /// </summary>
-        /// <param name="e">Event arguments.</param>
-        protected override void OnInitialized(EventArgs e)
-        {
-            var appDataPath = Environment.SpecialFolder.ApplicationData;
-            var appDataRoot = Environment.GetFolderPath(appDataPath);
-            var appPersistanceRoot = Path.Combine(appDataRoot, "LGF");
-            var savePath = Path.Combine(appPersistanceRoot, "Cell");
-            var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
-            var fileIo = new FileIO();
-            var projectDirectory = new PersistedDirectory(savePath, fileIo);
-            var persistedProject = new PersistedProject(projectDirectory);
-            persistedProject.RegisterMigrator("1", "2", new Migration());
-            var backupDirectory = new PersistedDirectory(backupPath, fileIo);
-
-            var pluginFunctionLoader = new PluginFunctionLoader(persistedProject.FunctionsDirectory);
-            var cellLoader = new CellLoader(persistedProject.SheetsDirectory);
-            var cellTracker = new CellTracker(cellLoader);
-            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
-            var dialogFactory = new DialogFactory();
-            var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
-            var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
-            var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
-            _titleBarSheetNavigationView.DataContext = new TitleBarSheetNavigationViewModel(sheetTracker);
-            var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
-            var undoRedoManager = new UndoRedoManager(cellTracker);
-            var textClipboard = new TextClipboard();
-            var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
-            var backupManager = new BackupManager(projectDirectory, backupDirectory);
-            var cellSelector = new CellSelector(cellTracker);
-
-            _viewModel = new ApplicationViewModel(
-                dialogFactory,
-                persistedProject,
-                pluginFunctionLoader,
-                cellLoader,
-                cellTracker,
-                userCollectionLoader,
-                cellPopulateManager,
-                cellTriggerManager,
-                sheetTracker,
-                cellSelector,
-                applicationSettings,
-                undoRedoManager,
-                cellClipboard,
-                backupManager);
-            ApplicationViewModel.Instance = _viewModel;
-            _viewModel.AttachToView(this);
-            base.OnInitialized(e);
-
-            OpenContentEditBarDocked();
-        }
-
         private void AdjustWindowSize()
         {
             if (WindowState == WindowState.Maximized) WindowState = WindowState.Normal;
             else WindowState = WindowState.Maximized;
-        }
-
-        private void ApplicationViewDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (e.OldValue is ApplicationViewModel oldViewModel) oldViewModel.PropertyChanged -= ApplicationViewModelPropertyChanged;
-            if (e.NewValue is ApplicationViewModel newViewModel) newViewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
         }
 
         private void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -187,13 +124,6 @@ namespace Cell.View.Application
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else ShowToolWindow(cellContentEditWindowViewModel);
-        }
-
-        private void OpenContentEditBarDocked()
-        {
-            if (_viewModel == null) return;
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
-            DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)

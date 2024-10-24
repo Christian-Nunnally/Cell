@@ -38,7 +38,7 @@ namespace Cell.View.ToolWindow
 
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.PersistedProject.GetRootPath();
+            ApplicationViewModel.Instance.PersistedProject?.GetRootPath();
         }
 
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)

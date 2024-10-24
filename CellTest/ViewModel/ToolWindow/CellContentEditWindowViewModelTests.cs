@@ -131,5 +131,21 @@ namespace CellTest.ViewModel.ToolWindow
 
             Assert.Equal("Hello world", cellBeingEdited.Text);
         }
+
+        [Fact]
+        public void TriggerFunctionSet_TriggerFunctionChangedToEmptyString_TriggerFunctionEmptied()
+        {
+            var function = _pluginFunctionLoader.CreateCellFunction("void", "Test", "");
+            var cellBeingEdited = new CellModel();
+            _cellsToEdit.Add(cellBeingEdited);
+            _testing.HandleBeingShown();
+            _testing.TriggerFunctionNameTextboxText = "Test";
+            Assert.NotEmpty(cellBeingEdited.TriggerFunctionName);
+
+            _testing.TriggerFunctionNameTextboxText = "";
+
+            Assert.Empty(cellBeingEdited.TriggerFunctionName);
+            Assert.Empty(_testing.TriggerFunctionNameTextboxText);
+        }
     }
 }

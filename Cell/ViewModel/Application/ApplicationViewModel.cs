@@ -167,9 +167,9 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// Gets the persisted project for the application, which is used to save and load the project.
+        /// Gets or sets the persisted project for the application, which is used to save and load the project.
         /// </summary>
-        public PersistedProject PersistedProject { get; private set; }
+        public PersistedProject? PersistedProject { get; set; }
 
         /// <summary>
         /// Gets the plugin function loader for the application, which loads and stores all plugin functions.
@@ -328,6 +328,7 @@ namespace Cell.ViewModel.Application
 
         private async Task BackupAsync()
         {
+            if (PersistedProject == null) return;
             await Task.Run(() =>
             {
                 PersistedProject.IsReadOnly = true;
