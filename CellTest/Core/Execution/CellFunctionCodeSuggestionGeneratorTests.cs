@@ -1,15 +1,22 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
 using Cell.Model;
-using Cell.Core.Execution.Functions;
+using System.Diagnostics;
 
 namespace CellTest.Core.Execution
 {
-    public class CodeCompletionFactoryTests
+    public class CellFunctionCodeSuggestionGeneratorTests
     {
+        private CellFunctionCodeSuggestionGenerator _testing;
+        private readonly CellModel _contextCell;
+        public CellFunctionCodeSuggestionGeneratorTests()
+        {
+            _contextCell = new CellModel();
+            _testing = new CellFunctionCodeSuggestionGenerator([], _contextCell);
+        }
+
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = CodeCompletionFactory.CreateCompletionData("", 0, [], []);
         }
 
         [Fact]
@@ -17,11 +24,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.Single(completionData, x => x.Text == $"c");
         }
@@ -31,11 +37,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData.First().Description.ToString()!);
         }
@@ -45,11 +50,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "c.";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData);
             Assert.True(completionData.Count > 1);
@@ -60,11 +64,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "c.E.";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData);
             Assert.True(completionData.Count > 1);
@@ -75,11 +78,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = ["Cell.Execution"];
             var code = "c.";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.Single(completionData, x => x.Text == "E");
         }
@@ -89,11 +91,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "c.";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.Empty(completionData.Where(x => x.Text.Contains("get_")));
             Assert.Empty(completionData.Where(x => x.Text.Contains("get_")));
@@ -104,11 +105,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             var code = "c.";
-            var outerContext = new Dictionary<string, Type>
-            {
-                { "c", typeof(Context) }
-            };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.Empty(completionData.Where(x => x.Content.ToString()!.Contains(".ctor")));
         }
@@ -122,7 +122,10 @@ namespace CellTest.Core.Execution
             {
                 { "cell", typeof(CellModel) }
             };
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, outerContext);
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData);
             Assert.Single(completionData, x => x.Text == nameof(CellStyleModel.BackgroundColor));
@@ -133,8 +136,10 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.";
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
 
-            var completionData = CodeCompletionFactory.CreateCompletionData(code, code.Length, usings, []);
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData);
             Assert.Single(completionData, x => x.Text == nameof(CellModel.Style));
@@ -145,11 +150,31 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.Text.";
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
 
-            var completionData = CodeCompletionFactory.CreateCompletionDataForCellFunction(code, code.Length, usings, new Dictionary<string, string>(), new CellModel());
+            var completionData = _testing.CreateCompletionData(code.Length);
 
             Assert.NotEmpty(completionData);
             Assert.Single(completionData, x => x.Text == "Length");
+        }
+
+        [Fact]
+        public void Performance()
+        {
+            IEnumerable<string> usings = ["Cell.Model"];
+            var code = "A1.Text.";
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, new Dictionary<string, string>());
+            for (int i = 0; i < 100; i++)
+            {
+                _testing.CreateCompletionData(code.Length);
+            }
+            stopwatch.Stop();
+            Assert.True(stopwatch.Elapsed.TotalSeconds < 1);
         }
     }
 }

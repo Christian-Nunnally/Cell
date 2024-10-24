@@ -7,13 +7,13 @@ namespace CellTest.Core.Execution
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = new SemanticAnalyzer("", [], []);
+            var _ = new SemanticAnalyzer([]);
         }
 
         [Fact]
         public void NoCode_NoTypesInMap()
         {
-            var testing = new SemanticAnalyzer("", [], []);
+            var testing = new SemanticAnalyzer([]);
 
             Assert.Empty(testing.NameToTypeMap);
         }
@@ -21,7 +21,8 @@ namespace CellTest.Core.Execution
         [Fact]
         public void IntDeclarationInFunctionInClass_PopulatesNameToTypeMap()
         {
-            var testing = new SemanticAnalyzer("class tempClass { public void temp() { int i = 0; } }", ["System"], []);
+            var testing = new SemanticAnalyzer(["System"]);
+            testing.UpdateCode("class tempClass { public void temp() { int i = 0; } }", []);
 
             Assert.Single(testing.NameToTypeMap, x => x.Key == "i" && x.Value.Name == "Int32");
         }
@@ -29,7 +30,8 @@ namespace CellTest.Core.Execution
         [Fact]
         public void SimpleIntDeclarationUsingVar_PopulatesNameToTypeMap()
         {
-            var testing = new SemanticAnalyzer("var i = 0;", [], []);
+            var testing = new SemanticAnalyzer([]);
+            testing.UpdateCode("var i = 0;", []);
 
             Assert.Single(testing.NameToTypeMap, x => x.Key == "i" && x.Value.Name == "Int32");
         }

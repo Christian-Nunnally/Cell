@@ -12,41 +12,46 @@ namespace Cell.Core.Execution.CodeCompletion
     /// </summary>
     public class SemanticAnalyzer
     {
-        private readonly string _prefixText;
-        private readonly SyntaxNode _root;
-        private readonly SemanticModel _semanticModel;
+        private string _prefixText = string.Empty;
+        private SyntaxNode _root;
+        private readonly IEnumerable<PortableExecutableReference> _references;
+        private SemanticModel _semanticModel;
+        private readonly string _usingsCodes;
+
         /// <summary>
         /// Creates a new instance of <see cref="SemanticAnalyzer"/>.
         /// </summary>
-        /// <param name="code">The code to analyze.</param>
         /// <param name="usings">Additional namespaces to provide information about types not declared in 'code'.</param>
-        /// <param name="variableNameToTypeMapForOuterContext">Map of variable names to thier types to resolve references to names not resolved normally, like global variables.</param>
-        public SemanticAnalyzer(string code, IEnumerable<string> usings, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
+        public SemanticAnalyzer(IEnumerable<string> usings)
         {
-            var usingsCodes = string.Join("\n", usings.Select(x => $"using {x};\n"));
-            var outerContextDeclarationsCode = string.Join("\n", variableNameToTypeMapForOuterContext.Select(x => $"{x.Value.GetPrettyFullGenericTypeName()} {x.Key};\n"));
-            _prefixText = $"{usingsCodes}\n{outerContextDeclarationsCode}\n";
-
-            var syntaxTree = CSharpSyntaxTree.ParseText(_prefixText + code);
-            _root = syntaxTree.GetRoot();
+            _usingsCodes = string.Join("\n", usings.Select(x => $"using {x};\n"));
 
             var currentDomain = AppDomain.CurrentDomain;
             var currentLoadedAssemblies = currentDomain.GetAssemblies();
             static bool IsValidAssembly(Assembly a) => !a.IsDynamic && !string.IsNullOrEmpty(a.Location);
-            var references = currentLoadedAssemblies
+            _references = currentLoadedAssemblies
                 .Where(IsValidAssembly)
                 .Select(x => x.Location)
                 .Select(x => MetadataReference.CreateFromFile(x));
-
-            var compilation = CSharpCompilation.Create("Analysis", [syntaxTree], references);
-            foreach (var d in compilation.GetDiagnostics())
-            {
-                Console.WriteLine(CSharpDiagnosticFormatter.Instance.Format(d));
-            }
-
-            // Get semantic model
+            var syntaxTree = CSharpSyntaxTree.ParseText("");
+            _root = syntaxTree.GetRoot();
+            var compilation = CSharpCompilation.Create("Analysis", [syntaxTree], _references);
             _semanticModel = compilation.GetSemanticModel(syntaxTree);
+        }
 
+        /// <summary>
+        /// Updates the semantic model based on the new code string.
+        /// </summary>
+        /// <param name="code">The new code to analyze.</param>
+        /// <param name="variableNameToTypeMapForOuterContext">Map of variable names to thier types to resolve references to names not resolved normally, like global variables.</param>
+        public void UpdateCode(string code, Dictionary<string, Type> variableNameToTypeMapForOuterContext)
+        {
+            var outerContextDeclarationsCode = string.Join("\n", variableNameToTypeMapForOuterContext.Select(x => $"{x.Value.GetPrettyFullGenericTypeName()} {x.Key};\n"));
+            _prefixText = $"{_usingsCodes}\n{outerContextDeclarationsCode}\n";
+            var syntaxTree = CSharpSyntaxTree.ParseText(_prefixText + code);
+            _root = syntaxTree.GetRoot();
+            var compilation = CSharpCompilation.Create("Analysis", [syntaxTree], _references);
+            _semanticModel = compilation.GetSemanticModel(syntaxTree);
             AnalyzeVarDeclarations();
         }
 

@@ -22,6 +22,7 @@ namespace Cell.ViewModel.ToolWindow
         private CompileResult _lastCompileResult;
         private string? syntaxTreePreviewText = string.Empty;
         private string _currentTextInEditor;
+        private readonly CellFunctionCodeSuggestionGenerator _cellFunctionCodeSuggestionGenerator;
 
         /// <summary>
         /// Creates a new instance of <see cref="CodeEditorWindowViewModel"/>.
@@ -32,8 +33,10 @@ namespace Cell.ViewModel.ToolWindow
         /// <param name="contextToTestWith">The context used when testing the code.</param>
         public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, IContext contextToTestWith)
         {
+            _cellFunctionCodeSuggestionGenerator = new CellFunctionCodeSuggestionGenerator(CellFunction.UsingNamespaces, cellContextFromWhichTheFunctionIsBeingEdited);
             FunctionBeingEdited = functionToBeEdited;
             _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToDataTypeMap);
+            _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, collectionNameToDataTypeMap);
             _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
             _contextToTestWith = contextToTestWith;
@@ -58,6 +61,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 _currentTextInEditor = value;
                 _isDirty = true;
+                _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, _collectionNameToDataTypeMap);
                 NotifyPropertyChanged(nameof(CurrentTextInEditor));
             }
         }
@@ -240,17 +244,28 @@ namespace Cell.ViewModel.ToolWindow
 
         internal void CaretPositionChanged(int offset)
         {
-            var outerContextVariables = CodeCompletionFactory.CreateOuterContextVariablesForFunction(CurrentTextInEditor, _collectionNameToDataTypeMap, CellContext);
-            if (CodeCompletionFactory.TryGetTypeAtTextPositionUsingSemanticAnalyzer(CurrentTextInEditor, offset, CellFunction.UsingNamespaces, outerContextVariables, out var type))
+            if (_cellFunctionCodeSuggestionGenerator.TryGetTypeAtTextPositionUsingSemanticAnalyzer(offset, out var type))
             {
                 ResultString = type?.Name ?? "Unknown type";
-                NotifyPropertyChanged(nameof(ResultString));
             }
+            else if (offset > 0 && _cellFunctionCodeSuggestionGenerator.TryGetTypeAtTextPositionUsingSemanticAnalyzer(offset - 1, out type))
+            {
+                ResultString = type?.Name ?? "Unknown type";
+            }
+            else if (!_lastCompileResult.WasSuccess)
+            {
+                ResultString = _lastCompileResult.ExecutionResult ?? "";
+            }
+            else
+            {
+                ResultString = string.Empty;
+            }
+            NotifyPropertyChanged(nameof(ResultString));
         }
 
-        internal IList<ICompletionData> CreateAutoCompleteSuggestions(string code, int offset)
+        internal IList<ICompletionData> CreateAutoCompleteSuggestions(int offset)
         {
-            return CodeCompletionFactory.CreateCompletionDataForCellFunction(code, offset, CellFunction.UsingNamespaces, _collectionNameToDataTypeMap, CellContext);
+            return _cellFunctionCodeSuggestionGenerator.CreateCompletionData(offset);
         }
     }
 }

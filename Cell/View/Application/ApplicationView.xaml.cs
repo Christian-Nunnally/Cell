@@ -128,6 +128,8 @@ namespace Cell.View.Application
             ApplicationViewModel.Instance = _viewModel;
             _viewModel.AttachToView(this);
             base.OnInitialized(e);
+
+            OpenContentEditBarDocked();
         }
 
         private void AdjustWindowSize()
@@ -185,6 +187,13 @@ namespace Cell.View.Application
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else ShowToolWindow(cellContentEditWindowViewModel);
+        }
+
+        private void OpenContentEditBarDocked()
+        {
+            if (_viewModel == null) return;
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
+            DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
