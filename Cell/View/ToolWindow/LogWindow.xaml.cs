@@ -1,4 +1,5 @@
 ﻿using Cell.ViewModel.ToolWindow;
+using System.ComponentModel;
 
 namespace Cell.View.ToolWindow
 {
@@ -11,6 +12,16 @@ namespace Cell.View.ToolWindow
         public LogWindow(LogWindowViewModel viewModel) : base(viewModel)
         {
             InitializeComponent();
+            viewModel.PropertyChanged += LogWindowViewModelPropertyChanged;
+            _logScrollViewer.ScrollToBottom();
+        }
+
+        private void LogWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(LogWindowViewModel.LogBuffer))
+            {
+                _logScrollViewer.ScrollToBottom();
+            }
         }
     }
 }

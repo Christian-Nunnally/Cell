@@ -11,17 +11,13 @@ using System.Windows.Controls;
 
 namespace Cell
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         protected override async void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-
             var stopWatch = new System.Diagnostics.Stopwatch();
             stopWatch.Start();
+
             var appDataPath = Environment.SpecialFolder.ApplicationData;
             var appDataRoot = Environment.GetFolderPath(appDataPath);
             var appPersistanceRoot = Path.Combine(appDataRoot, "LGF");
@@ -40,15 +36,13 @@ namespace Cell
             var dialogFactory = new DialogFactory();
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
-            var sheetTracker = new SheetTracker(projectDirectory, cellLoader, cellTracker, pluginFunctionLoader, userCollectionLoader);
+            var sheetTracker = new SheetTracker(cellTracker);
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
             var undoRedoManager = new UndoRedoManager(cellTracker);
             var textClipboard = new TextClipboard();
-            var cellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
-            var backupManager = new BackupManager(projectDirectory, backupDirectory);
             var cellSelector = new CellSelector(cellTracker);
 
-            var viewModel = new ApplicationViewModel(
+            var applicationViewModel = new ApplicationViewModel(
                 dialogFactory,
                 persistedProject,
                 pluginFunctionLoader,
@@ -60,18 +54,21 @@ namespace Cell
                 sheetTracker,
                 cellSelector,
                 applicationSettings,
-                undoRedoManager,
-                cellClipboard,
-                backupManager);
-            ApplicationViewModel.Instance = viewModel;
+                undoRedoManager);
 
-            var applicationView = new ApplicationView(viewModel);
+            var applicationView = new ApplicationView(applicationViewModel);
             stopWatch.Stop();
             var x = stopWatch.ElapsedMilliseconds;
+            Console.WriteLine(x);
             applicationView.Show();
 
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(viewModel.CellSelector.SelectedCells);
-            viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+            applicationViewModel.InitializeView();
+            applicationViewModel.BackupManager = new BackupManager(projectDirectory, backupDirectory);
+            applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
+            applicationViewModel.InitializeProject(persistedProject);
+
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells);
+            applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
         }
     }
 }

@@ -39,6 +39,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="View\ToolWindow\DockedToolWindowContainer.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\ToolWindow\ResizableToolWindow.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>

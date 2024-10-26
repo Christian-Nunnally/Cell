@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="Cell.View.ToolWindow.FloatingToolWindow"
+    x:Class="Cell.View.ToolWindow.DockedToolWindowContainer"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -22,36 +22,24 @@
                 BorderThickness="1"
                 DockPanel.Dock="Top">
                 <DockPanel
-                    Height="28"
+                    Height="14"
                     Background="{StaticResource ToolWindowHeaderColor}"
-                    LastChildFill="False">
-                    <Label Content="{Binding ToolWindowTitle}" DockPanel.Dock="Left" />
+                    LastChildFill="False"
+                    MouseDown="ResizerRectangleMouseDown"
+                    MouseMove="ResizerRectangleMouseMove"
+                    MouseUp="ResizerRectangleMouseUp">
+                    <Label
+                        Padding="5,1"
+                        Content="{Binding ToolWindowTitle}"
+                        DockPanel.Dock="Left" />
                     <Button
-                        Width="28"
-                        Height="28"
+                        Width="14"
+                        Height="14"
                         BorderThickness="0"
                         Click="CloseButtonClicked"
                         Content="{fa:Icon XMark}"
                         DockPanel.Dock="Right"
                         ToolTip="Closes this tool window."
-                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <Button
-                        Width="28"
-                        Height="28"
-                        BorderThickness="0"
-                        Click="UndockButtonClicked"
-                        Content="{fa:Icon Lock}"
-                        DockPanel.Dock="Right"
-                        ToolTip="Disables the ability to move and close this tool window. Click again to re-enable."
-                        Visibility="{Binding IsDocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <Button
-                        Width="28"
-                        Height="28"
-                        BorderThickness="0"
-                        Click="DockButtonClicked"
-                        Content="{fa:Icon LockOpen}"
-                        DockPanel.Dock="Right"
-                        ToolTip="Enables the ability to move and close this tool window. Click again to disable again."
                         Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
@@ -63,7 +51,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button
-                                    Height="28"
+                                    Height="14"
                                     VerticalAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     BorderThickness="0"
@@ -76,30 +64,27 @@
                     </ItemsControl>
                 </DockPanel>
             </Border>
-            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,2,2">
-                <ContentControl x:Name="ContentHost" Margin="10" />
+            <Rectangle
+                Height="2"
+                DockPanel.Dock="Bottom"
+                MouseDown="ResizerRectangleMouseDown"
+                MouseMove="ResizerRectangleMouseMove"
+                MouseUp="ResizerRectangleMouseUp"
+                Visibility="{Binding IsBottomRightResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,2,0">
+                <ContentControl x:Name="ContentHost" Margin="4" />
             </Border>
         </DockPanel>
-        <Rectangle
-            Width="10"
-            Height="10"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            MouseDown="ResizerRectangleMouseDown"
-            MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp"
-            RadiusX="5"
-            RadiusY="5">
-            <Rectangle.Style>
-                <Style TargetType="Rectangle">
-                    <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Fill" Value="{StaticResource AccentColor}" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Rectangle.Style>
-        </Rectangle>
     </Grid>
 </UserControl>

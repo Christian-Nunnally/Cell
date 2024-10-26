@@ -19,7 +19,6 @@
             Background="{StaticResource CellBackground}"
             DockPanel.Dock="Bottom"
             FontFamily="{StaticResource ProgrammingFont}"
-            Foreground="{Binding ResultStringColor}"
             IsReadOnly="True"
             Text="{Binding Path=ResultString}"
             TextWrapping="Wrap" />

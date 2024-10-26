@@ -14,8 +14,8 @@ namespace Cell.View.Application
         private Point _initialMousePosition;
         private bool _isLockedToCenter = true;
         private MatrixTransform _transform = new();
-        private double _xPan;
-        private double _yPan;
+        public double XPan { get; set; }
+        public double YPan { get; set; }
         /// <summary>
         /// Creates a new instance of the <see cref="PanAndZoomCanvas"/>.
         /// </summary>
@@ -72,8 +72,8 @@ namespace Cell.View.Application
         /// <param name="y">The y coordinate.</param>
         public void PanCanvasTo(double x, double y)
         {
-            _xPan = -x;
-            _yPan = -y;
+            XPan = -x;
+            YPan = -y;
             ArrangeItemsForPanAndZoom();
         }
 
@@ -123,7 +123,7 @@ namespace Cell.View.Application
         private void ArrangeItemsForPanAndZoom()
         {
             _transform = new MatrixTransform();
-            var translate = new TranslateTransform(_xPan, _yPan);
+            var translate = new TranslateTransform(XPan, YPan);
             _transform.Matrix = translate.Value * _transform.Matrix;
             Matrix scaleMatrix = _transform.Matrix;
             scaleMatrix.ScaleAt(_currentZoom, _currentZoom, 0, 0);

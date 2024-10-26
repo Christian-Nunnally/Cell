@@ -48,6 +48,11 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void RestoreFromBackup()
         {
+            if (ApplicationViewModel.Instance.BackupManager is null)
+            {
+                ApplicationViewModel.Instance.DialogFactory.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
+                return;
+            }
             var backup = ApplicationViewModel.Instance.BackupManager.GetBackups().FirstOrDefault();
             if (backup == null) return;
             ApplicationViewModel.Instance.BackupManager.CreateBackup("PreRestore");

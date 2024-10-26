@@ -4,6 +4,8 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.Editing;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,9 +26,73 @@ namespace Cell.View.Application
             DataContext = viewModel;
             _viewModel = viewModel;
             viewModel.PropertyChanged += ApplicationViewModelPropertyChanged;
+            viewModel.OpenToolWindowViewModels.CollectionChanged += OpenToolWindowViewModelsCollectionChanged;
+            viewModel.MoveToolWindowToTop += MoveToolWindowToTop;
             InitializeComponent();
-            _titleBarSheetNavigationView.DataContext = new TitleBarSheetNavigationViewModel(_viewModel.SheetTracker);
-            viewModel.AttachToView(this);
+        }
+
+        private void MoveToolWindowToTop(ToolWindowViewModel toolWindow)
+        {
+            foreach (var floatingContainer in _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>())
+            {
+                if (floatingContainer.ToolWindowContent?.ToolViewModel == toolWindow)
+                {
+                    _toolWindowCanvas.Children.Remove(floatingContainer);
+                    _toolWindowCanvas.Children.Add(floatingContainer);
+                    return;
+                }
+            }
+        }
+
+        private void OpenToolWindowViewModelsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    if (item is ToolWindowViewModel toolWindowViewModel)
+                    {
+                        if (toolWindowViewModel.IsDocked)
+                        {
+                            ShowToolWindowInDockedContainer(toolWindowViewModel, toolWindowViewModel.Dock);
+                        }
+                        else
+                        {
+                            ShowToolWindowInFloatingContainer(toolWindowViewModel);
+                        }
+                    }
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is not null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    if (item is ToolWindowViewModel toolWindowViewModel)
+                    {
+                        RemoveToolWindowFromView(toolWindowViewModel);
+                    }
+                }
+            }
+        }
+
+        private void RemoveToolWindowFromView(ToolWindowViewModel toolWindowViewModel)
+        {
+            foreach (var dockedContainer in _toolWindowDockPanel.Children.OfType<DockedToolWindowContainer>())
+            {
+                if (dockedContainer.ToolWindowContent?.ToolViewModel == toolWindowViewModel)
+                {
+                    _toolWindowDockPanel.Children.Remove(dockedContainer);
+                    return;
+                }
+            }
+            foreach (var floatingContainer in _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>())
+            {
+                if (floatingContainer.ToolWindowContent?.ToolViewModel == toolWindowViewModel)
+                {
+                    _toolWindowCanvas.Children.Remove(floatingContainer);
+                    return;
+                }
+            }
         }
 
         /// <summary>
@@ -34,11 +100,7 @@ namespace Cell.View.Application
         /// </summary>
         public SheetView? ActiveSheetView { get; set; }
 
-        /// <summary>
-        /// Displays the given sheet view model in the main content control.
-        /// </summary>
-        /// <param name="sheetViewModel">The sheet to open.</param>
-        public void ShowSheetView(SheetViewModel sheetViewModel)
+        private void ShowSheetView(SheetViewModel? sheetViewModel)
         {
             if (sheetViewModel == null) return;
             if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
@@ -55,11 +117,12 @@ namespace Cell.View.Application
         /// </summary>
         /// <param name="viewModel">The tool window view model to open.</param>
         /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
-        public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
+        private void ShowToolWindowInFloatingContainer(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
-            ShowToolWindow(window, allowDuplicates);
+            if (!allowDuplicates && IsWindowOfTypeOpen(window.GetType())) return;
+            OpenToolWindowInFloatingContainer(window);
         }
 
         /// <summary>
@@ -68,11 +131,12 @@ namespace Cell.View.Application
         /// <param name="viewModel">The tool window view model to open.</param>
         /// <param name="dock">The side to dock to.</param>
         /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
-        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        public void ShowToolWindowInDockedContainer(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
-            DockToolWindow(window, dock, allowDuplicates);
+            if (!allowDuplicates && IsWindowOfTypeOpen(window.GetType())) return;
+            ShowToolWindowInDockedContainer(window, dock);
         }
 
         private void AdjustWindowSize()
@@ -81,11 +145,15 @@ namespace Cell.View.Application
             else WindowState = WindowState.Maximized;
         }
 
-        private void ApplicationViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ApplicationViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
             {
                 UpdateToolWindowLocation();
+            }
+            else if (e.PropertyName == nameof(ApplicationViewModel.SheetViewModel))
+            {
+                ShowSheetView(_viewModel.SheetViewModel);
             }
         }
 
@@ -122,15 +190,15 @@ namespace Cell.View.Application
         {
             if (_viewModel == null) return;
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
-            else ShowToolWindow(cellContentEditWindowViewModel);
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+            else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
             var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.PluginFunctionLoader);
-            ShowToolWindow(collectionManagerViewModel);
+            _viewModel.ShowToolWindow(collectionManagerViewModel);
         }
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
@@ -138,76 +206,72 @@ namespace Cell.View.Application
             if (_viewModel == null) return;
             var functionLoader = _viewModel.PluginFunctionLoader;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
-            ShowToolWindow(functionManagerViewModel);
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(functionManagerViewModel, Dock.Right);
+            else _viewModel.ShowToolWindow(functionManagerViewModel);
         }
 
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
             var settingsWindowViewModel = new SettingsWindowViewModel();
-            ShowToolWindow(settingsWindowViewModel);
+            _viewModel.ShowToolWindow(settingsWindowViewModel);
         }
 
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
             var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker, ApplicationViewModel.Instance.DialogFactory);
-            ShowToolWindow(sheetManagerViewModel);
+            _viewModel.ShowToolWindow(sheetManagerViewModel);
         }
 
-        private void ShowToolWindow(ResizableToolWindow resizableToolWindow, bool allowDuplicates = false)
+        private void OpenToolWindowInFloatingContainer(ResizableToolWindow resizableToolWindow)
         {
-            if (!allowDuplicates)
-            {
-                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
-                {
-                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
-                    {
-                        return;
-                    }
-                }
-            }
-
-            var toolbox = new FloatingToolWindow(_toolWindowCanvas);
-            toolbox.SetContent(resizableToolWindow);
-
-            Canvas.SetLeft(toolbox, (_toolWindowCanvas.ActualWidth / 2) - (toolbox.ContentWidth / 2));
-            Canvas.SetTop(toolbox, (_toolWindowCanvas.ActualHeight / 2) - (toolbox.ContentHeight / 2));
-
+            var toolbox = new FloatingToolWindowContainer(_viewModel);
+            if (resizableToolWindow.ToolViewModel.X < 0) resizableToolWindow.ToolViewModel.X = (_toolWindowCanvas.ActualWidth / 2) - (resizableToolWindow.ToolViewModel.DefaultWidth / 2);
+            if (resizableToolWindow.ToolViewModel.Y < 0) resizableToolWindow.ToolViewModel.Y = (_toolWindowCanvas.ActualHeight / 2) - (resizableToolWindow.ToolViewModel.DefaultHeight / 2);
+            toolbox.ToolWindowContent = resizableToolWindow;
             _toolWindowCanvas.Children.Add(toolbox);
-            resizableToolWindow.ToolViewModel.HandleBeingShown();
         }
 
-        private void DockToolWindow(ResizableToolWindow resizableToolWindow, Dock dockSide, bool allowDuplicates = false)
+        private bool IsWindowOfTypeOpen(Type type)
         {
-            if (!allowDuplicates)
+            foreach (var floatingToolWindow in _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>())
             {
-                foreach (var floatingToolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
+                if (floatingToolWindow.ContentHost.Content.GetType() == type)
                 {
-                    if (floatingToolWindow.ContentHost.Content.GetType() == resizableToolWindow.GetType())
-                    {
-                        return;
-                    }
+                    return true;
                 }
             }
+            foreach (var dockedToolWindow in _toolWindowDockPanel.Children.OfType<DockedToolWindowContainer>())
+            {
+                if (dockedToolWindow.ContentHost.Content.GetType() == type)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-
-            DockPanel.SetDock(resizableToolWindow, dockSide);
-
-            _toolWindowDockPanel.Children.Add(resizableToolWindow);
-            resizableToolWindow.ToolViewModel.HandleBeingShown();
+        private void ShowToolWindowInDockedContainer(ResizableToolWindow resizableToolWindow, Dock dockSide)
+        {
+            var toolbox = new DockedToolWindowContainer(_viewModel)
+            {
+                ToolWindowContent = resizableToolWindow
+            };
+            DockPanel.SetDock(toolbox, dockSide);
+            _toolWindowDockPanel.Children.Insert(0, toolbox);
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel?.SheetViewModel == null) return;
             var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
-            ShowToolWindow(viewModel);
+            _viewModel.ShowToolWindow(viewModel);
         }
 
         private void UpdateToolWindowLocation()
         {
-            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindow>())
+            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindowContainer>())
             {
                 toolWindow.HandleOwningCanvasSizeChanged();
             }

@@ -20,7 +20,7 @@ namespace Cell.ViewModel.ToolWindow
         private bool _isAllowingCloseWhileDirty = false;
         private bool _isDirty = false;
         private CompileResult _lastCompileResult;
-        private string? syntaxTreePreviewText = string.Empty;
+        private string _syntaxTreePreviewText = string.Empty;
         private string _currentTextInEditor;
         private readonly CellFunctionCodeSuggestionGenerator _cellFunctionCodeSuggestionGenerator;
 
@@ -102,19 +102,15 @@ namespace Cell.ViewModel.ToolWindow
         public string? ResultString { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets the color the results string should be displayed in.
-        /// </summary>
-        public SolidColorBrush ResultStringColor => _lastCompileResult.WasSuccess ? new SolidColorBrush(ColorConstants.ForegroundColorConstant) : new SolidColorBrush(ColorConstants.ErrorForegroundColorConstant);
-
-        /// <summary>
         /// Gets the syntax tree preview text to be displayed in the UI when the user requests to see the syntax tree.
         /// </summary>
-        public string? SyntaxTreePreviewText
+        public string SyntaxTreePreviewText
         {
-            get => syntaxTreePreviewText; set
+            get => _syntaxTreePreviewText; 
+            set
             {
-                if (syntaxTreePreviewText == value) return;
-                syntaxTreePreviewText = value;
+                if (_syntaxTreePreviewText == value) return;
+                _syntaxTreePreviewText = value;
                 NotifyPropertyChanged(nameof(SyntaxTreePreviewText));
                 NotifyPropertyChanged(nameof(IsTransformedSyntaxTreeViewerVisible));
             }
@@ -125,10 +121,18 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("Test Code", () => TestCode()) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
+            new CommandViewModel("Test Code", TestCodeAndOpenLogWindow) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
             new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." },
             new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." }
         ];
+
+        private void TestCodeAndOpenLogWindow()
+        {
+            Logger.Instance.Clear();
+            TestCode();
+            var logWindowViewModel = new LogWindowViewModel();
+            ApplicationViewModel.Instance.ShowToolWindow(logWindowViewModel);
+        }
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -180,19 +184,30 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void TestCode()
         {
-            if (CellContext is null) return;
-            var model = new CellFunctionModel("testtesttest", string.Empty, FunctionBeingEdited.Model.ReturnType);
+            if (CellContext is null)
+            {
+                Logger.Instance.Log($"Unable to test sort/filter functions for now :(");
+                return;
+            }
+
+            var model = new CellFunctionModel("test", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
             var result = function.Run(_contextToTestWith);
-
-            DisplayResult(result);
+            if (!result.WasSuccess)
+            {
+                Logger.Instance.Log($"Error occured in function during test: {result.ExecutionResult}");
+                return;
+            }
+            _lastCompileResult = result;
+            Logger.Instance.Log($"Test run complete!");
+            Logger.Instance.Log($"Result: '{result.ReturnedObject?.ToString() ?? "<null>"}'");
         }
 
         private void ToggleSyntaxTreePreview(string code)
         {
             if (IsTransformedSyntaxTreeViewerVisible) HideSyntaxTreePreview();
-            ShowSyntaxTreePreview(code);
+            else ShowSyntaxTreePreview(code);
         }
 
         private void CloseWithoutSaving()
@@ -212,7 +227,6 @@ namespace Cell.ViewModel.ToolWindow
             }
             if (result.ReturnedObject is not null) ResultString = result.ReturnedObject.ToString();
             NotifyPropertyChanged(nameof(ResultString));
-            NotifyPropertyChanged(nameof(ResultStringColor));
         }
 
         private void HideSyntaxTreePreview()

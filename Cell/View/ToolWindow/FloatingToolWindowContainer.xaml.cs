@@ -5,12 +5,13 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Cell.View.ToolWindow
 {
-    public partial class FloatingToolWindow : UserControl, INotifyPropertyChanged
+    public partial class FloatingToolWindowContainer : UserControl, INotifyPropertyChanged
     {
-        private readonly Canvas _canvas;
+        private readonly ApplicationViewModel _applicationViewModel;
         private double _contentHeight;
         private double _contentWidth;
         private bool _isDocked;
@@ -18,13 +19,42 @@ namespace Cell.View.ToolWindow
         private Point _resizingStartPosition;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="FloatingToolWindow"/>.
+        /// Creates a new instance of the <see cref="FloatingToolWindowContainer"/>.
         /// </summary>
-        /// <param name="canvas">The canvas the tool window is being displayed on.</param>
-        public FloatingToolWindow(Canvas canvas)
+        /// <param name="applicationViewModel">The application view model that owns this <see cref="FloatingToolWindowContainer"/>.</param>
+        public FloatingToolWindowContainer(ApplicationViewModel applicationViewModel)
         {
             InitializeComponent();
-            _canvas = canvas;
+            _applicationViewModel = applicationViewModel;
+        }
+
+        /// <summary>
+        /// Gets or sets the content displated within this tool window container.
+        /// </summary>
+        public ResizableToolWindow? ToolWindowContent
+        {
+            get => _resizableToolWindow; set
+            {
+                if (_resizableToolWindow != null && _toolWindowViewModel is not null)
+                {
+                    Commands.Clear();
+                    _toolWindowViewModel.PropertyChanged -= ToolViewModelPropertyChanged;
+                }
+                _resizableToolWindow = value;
+                if (_resizableToolWindow != null && _toolWindowViewModel is not null)
+                {
+                    ContentHost.Content = _resizableToolWindow;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowContent)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
+                    ContentWidth = _toolWindowViewModel.DefaultWidth;
+                    ContentHeight = _toolWindowViewModel.DefaultHeight;
+                    SetCanvasLeft();
+                    SetCanvasTop();
+                    DataContext = this;
+                    _toolWindowViewModel.ToolBarCommands.ForEach(Commands.Add);
+                    _toolWindowViewModel.PropertyChanged += ToolViewModelPropertyChanged;
+                }
+            }
         }
 
         /// <summary>
@@ -76,36 +106,18 @@ namespace Cell.View.ToolWindow
 
         private ResizableToolWindow? _resizableToolWindow;
 
+        private ToolWindowViewModel? _toolWindowViewModel => _resizableToolWindow?.ToolViewModel;
+
         /// <summary>
         /// Gets the title string for the tool window.
         /// </summary>
         public string ToolWindowTitle => _resizableToolWindow?.ToolViewModel.ToolWindowTitle ?? "";
 
-        /// <summary>
-        /// Sets the content of this floating tool window.
-        /// </summary>
-        /// <param name="resizableToolWindow">The content that goes inside the tool window border.</param>
-        public void SetContent(ResizableToolWindow resizableToolWindow)
-        {
-            ContentHost.Content = resizableToolWindow;
-            _resizableToolWindow = resizableToolWindow;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(_resizableToolWindow)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-            ContentWidth = resizableToolWindow.ToolViewModel.DefaultWidth;
-            ContentHeight = resizableToolWindow.ToolViewModel.DefaultHeight;
-            ContentHeight = _contentHeight;
-            DataContext = this;
-            _resizableToolWindow.ToolViewModel.ToolBarCommands.ForEach(Commands.Add);
-            _resizableToolWindow.ToolViewModel.RequestClose = RequestClose;
-            _resizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
-        }
-
         private void SetPositionRespectingBounds(double x, double y)
         {
-            var boundedX = Math.Max(0, Math.Min(_canvas.ActualWidth - ActualWidth, x));
-            var boundedY = Math.Max(0, Math.Min(_canvas.ActualHeight - ActualHeight, y));
-            Canvas.SetLeft(this, boundedX);
-            Canvas.SetTop(this, boundedY);
+            if (_toolWindowViewModel == null) return;
+            _toolWindowViewModel.X = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowWidth - ActualWidth, x));
+            _toolWindowViewModel.Y = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowHeight - ActualHeight, y));
         }
 
         /// <summary>
@@ -113,16 +125,15 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public void HandleOwningCanvasSizeChanged()
         {
-            var x = Canvas.GetLeft(this);
-            var y = Canvas.GetTop(this);
-            SetPositionRespectingBounds(x, y);
+            if (_toolWindowViewModel == null) return;
+            SetPositionRespectingBounds(_toolWindowViewModel.X, _toolWindowViewModel.Y);
         }
 
         private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
 
         private void CloseButtonClicked(object sender, RoutedEventArgs e)
         {
-            RequestClose();
+            _resizableToolWindow?.ToolViewModel?.RequestClose?.Invoke();
         }
 
         private void DockButtonClicked(object sender, RoutedEventArgs e)
@@ -132,20 +143,11 @@ namespace Cell.View.ToolWindow
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
 
-        private void MoveToolboxToFrontOfCanvas(FloatingToolWindow toolbox)
+        private void MoveToolboxToFrontOfCanvas(FloatingToolWindowContainer toolbox)
         {
-            if (_canvas.Children[^1] == toolbox) return;
-            _canvas.Children.Remove(toolbox);
-            _canvas.Children.Add(toolbox);
-        }
-
-        private void RequestClose()
-        {
-            var isAllowingClose = _resizableToolWindow?.ToolViewModel.HandleCloseRequested() ?? true;
-            if (isAllowingClose)
+            if (toolbox._toolWindowViewModel is not null)
             {
-                _canvas.Children.Remove(this);
-                _resizableToolWindow?.ToolViewModel.HandleBeingClosed();
+                _applicationViewModel.MoveWindowToTop(toolbox._toolWindowViewModel);
             }
         }
 
@@ -185,8 +187,8 @@ namespace Cell.View.ToolWindow
 
         private void SetSizeWhileRespectingBounds(double desiredWidth, double desiredHeight)
         {
-            var boundedWidth = Math.Max(50, Math.Min(_canvas.ActualWidth - Canvas.GetLeft(this), desiredWidth));
-            var boundedHeight = Math.Max(50, Math.Min(_canvas.ActualHeight - Canvas.GetTop(this), desiredHeight));
+            var boundedWidth = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowWidth- Canvas.GetLeft(this), desiredWidth));
+            var boundedHeight = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowHeight - Canvas.GetTop(this), desiredHeight));
             ContentWidth = boundedWidth;
             ContentHeight = boundedHeight;
         }
@@ -194,10 +196,12 @@ namespace Cell.View.ToolWindow
         private void ToolboxMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (sender is FloatingToolWindow toolbox)
+            if (sender is FloatingToolWindowContainer toolbox)
             {
+                DependencyObject parent = VisualTreeHelper.GetParent(toolbox);
+                if (parent is not Canvas canvas) return;
                 MoveToolboxToFrontOfCanvas(toolbox);
-                var offset = e.GetPosition(_canvas);
+                var offset = e.GetPosition(canvas);
                 offset.X -= Canvas.GetLeft(toolbox);
                 offset.Y -= Canvas.GetTop(toolbox);
                 toolbox.Tag = offset;
@@ -207,7 +211,7 @@ namespace Cell.View.ToolWindow
 
         private void ToolboxMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (sender is FloatingToolWindow toolbox)
+            if (sender is FloatingToolWindowContainer toolbox)
             {
                 toolbox.ReleaseMouseCapture();
             }
@@ -216,9 +220,11 @@ namespace Cell.View.ToolWindow
         private void ToolboxMouseMove(object sender, MouseEventArgs e)
         {
             if (_isDocked) return;
-            if (sender is FloatingToolWindow toolbox && toolbox.IsMouseCaptured)
+            if (sender is FloatingToolWindowContainer toolbox && toolbox.IsMouseCaptured)
             {
-                var position = e.GetPosition(_canvas);
+                DependencyObject parent = VisualTreeHelper.GetParent(toolbox);
+                if (parent is not Canvas canvas) return;
+                var position = e.GetPosition(canvas);
                 var offset = (Point)toolbox.Tag;
 
                 var desiredX = position.X - offset.X;
@@ -229,8 +235,23 @@ namespace Cell.View.ToolWindow
 
         private void ToolViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ToolWindowViewModel.ToolWindowTitle)) PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
+            switch (e.PropertyName)
+            {
+                case nameof(ToolWindowViewModel.ToolWindowTitle):
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
+                    break;
+                case nameof(ToolWindowViewModel.X):
+                    SetCanvasLeft();
+                    break;
+                case nameof(ToolWindowViewModel.Y):
+                    SetCanvasTop();
+                    break;
+            }
         }
+
+        private void SetCanvasTop() => Canvas.SetTop(this, _resizableToolWindow?.ToolViewModel.Y ?? 0);
+
+        private void SetCanvasLeft() => Canvas.SetLeft(this, _resizableToolWindow?.ToolViewModel.X ?? 0);
 
         private void UndockButtonClicked(object sender, RoutedEventArgs e)
         {

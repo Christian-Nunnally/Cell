@@ -120,7 +120,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void PopulateFunctionExists_PopulateFunctionSet_CellTextSetToPopulateResult()
         {
-            var function = _pluginFunctionLoader.CreateCellFunction("object", "Test", "return \"Hello world\";");
+            var _ = _pluginFunctionLoader.CreateCellFunction("object", "Test", "return \"Hello world\";");
             var cellBeingEdited = new CellModel();
             _cellTracker.AddCell(cellBeingEdited, false);
             _cellsToEdit.Add(cellBeingEdited);
@@ -135,7 +135,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void TriggerFunctionSet_TriggerFunctionChangedToEmptyString_TriggerFunctionEmptied()
         {
-            var function = _pluginFunctionLoader.CreateCellFunction("void", "Test", "");
+            var _ = _pluginFunctionLoader.CreateCellFunction("void", "Test", "");
             var cellBeingEdited = new CellModel();
             _cellsToEdit.Add(cellBeingEdited);
             _testing.HandleBeingShown();

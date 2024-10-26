@@ -94,7 +94,7 @@
             </DockPanel>
             <Grid Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <local:TitleBarSheetNavigation
-                    x:Name="_titleBarSheetNavigationView"
+                    DataContext="{Binding TitleBarSheetNavigationViewModel}"
                     DockPanel.Dock="Bottom"
                     WindowChrome.IsHitTestVisibleInChrome="True" />
             </Grid>
@@ -115,9 +115,11 @@
                     VerticalAlignment="Center"
                     Content="No open cells"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <ContentControl x:Name="_sheetViewContentControl" />
+                <DockPanel x:Name="_toolWindowDockPanel">
+
+                    <ContentControl x:Name="_sheetViewContentControl" />
+                </DockPanel>
                 <Canvas x:Name="_toolWindowCanvas" />
-                <DockPanel x:Name="_toolWindowDockPanel" LastChildFill="False" />
             </Grid>
         </Grid>
     </DockPanel>

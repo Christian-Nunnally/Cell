@@ -39,7 +39,7 @@ namespace CellTest.ViewModel.Cell.Types
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
-            _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _sheetTracker = new SheetTracker(_cellTracker);
             _applicationSettings = new ApplicationSettings();
             _cellSelector = new CellSelector(_cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);

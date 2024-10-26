@@ -181,6 +181,22 @@ namespace Cell.View.Cells
             if (_panAndZoomCanvas == null) return;
             if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+            if (e.PropertyName == nameof(SheetViewModel.PanX))
+            {
+                _panAndZoomCanvas?.PanCanvasTo(SheetViewModel.PanX, _panAndZoomCanvas.YPan);
+            }
+            else if (e.PropertyName == nameof(SheetViewModel.PanY))
+            {
+                _panAndZoomCanvas?.PanCanvasTo(_panAndZoomCanvas.XPan, SheetViewModel.PanY);
+            }
+            else if (e.PropertyName == nameof(SheetViewModel.IsPanningEnabled))
+            {
+                _panAndZoomCanvas.IsPanningEnabled = SheetViewModel.IsPanningEnabled;
+            }
+            else if (e.PropertyName == nameof(SheetViewModel.IsPanningEnabled))
+            {
+                _panAndZoomCanvas.IsLockedToCenter = SheetViewModel.IsLockedToCenter;
+            }
         }
 
         private void CellMouseEnter(object sender, MouseEventArgs e)

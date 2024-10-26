@@ -20,9 +20,7 @@ namespace Cell.View.ToolWindow
 
         private void ExportSheetButtonClicked(object sender, RoutedEventArgs e)
         {
-            var sheetName = _viewModel.SheetNameToExport;
-            ApplicationViewModel.Instance.SheetTracker.ExportSheetTemplate(sheetName);
-            ApplicationViewModel.Instance.DialogFactory.Show("Sheet exported", $"The sheet has been exported to the default export location as a template.");
+            ApplicationViewModel.Instance.DialogFactory.Show("Not finished :)", $"Not finished :)");
         }
     }
 }

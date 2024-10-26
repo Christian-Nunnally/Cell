@@ -20,6 +20,11 @@ namespace Cell.View.ToolWindow
 
         private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (ApplicationViewModel.Instance.BackupManager is null)
+            {
+                ApplicationViewModel.Instance.DialogFactory.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
+                return;
+            }
             ApplicationViewModel.Instance.BackupManager.CreateBackup();
             ApplicationViewModel.Instance.DialogFactory.Show("Backup created", "Backup created successfully.");
         }
@@ -79,17 +84,15 @@ namespace Cell.View.ToolWindow
         private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
-            if (activeSheetView is null) return;
-            activeSheetView.IsLockedToCenter = !activeSheetView.IsLockedToCenter;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter = !ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter;
         }
 
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            var activeSheetView = ApplicationViewModel.Instance.ActiveSheetView;
-            if (activeSheetView is null) return;
-            activeSheetView.IsPanningEnabled = !activeSheetView.IsPanningEnabled;
+            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled = !ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled;
         }
     }
 }

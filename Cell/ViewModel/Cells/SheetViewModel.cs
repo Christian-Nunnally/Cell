@@ -27,6 +27,10 @@ namespace Cell.ViewModel.Cells
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private double _sheetHeight;
         private double _sheetWidth;
+        private double _panX;
+        private double _panY;
+        private bool _isPanningEnabled;
+        private bool _isLockedToCenter;
         /// <summary>
         /// Creates a new instance of <see cref="SheetViewModel"/>.
         /// </summary>
@@ -95,6 +99,34 @@ namespace Cell.ViewModel.Cells
         public bool IsCellHighlightOnMouseOverEnabled { get; internal set; } = true;
 
         /// <summary>
+        /// The amount to pan the sheet on the x axis.
+        /// </summary>
+        public double PanX
+        {
+            get => _panX;
+            set
+            {
+                if (_panX == value) return;
+                _panX = value;
+                NotifyPropertyChanged(nameof(PanX));
+            }
+        }
+
+        /// <summary>
+        /// The amount to pan the sheet on the y axis.
+        /// </summary>
+        public double PanY
+        {
+            get => _panY;
+            set
+            {
+                if (_panY == value) return;
+                _panY = value;
+                NotifyPropertyChanged(nameof(PanY));
+            }
+        }
+
+        /// <summary>
         /// The height of all the cells on the sheet combined.
         /// </summary>
         public double SheetHeight
@@ -105,6 +137,34 @@ namespace Cell.ViewModel.Cells
                 if (_sheetHeight == value) return;
                 _sheetHeight = value;
                 NotifyPropertyChanged(nameof(SheetHeight));
+            }
+        }
+
+        /// <summary>
+        /// Gets whether panning is enabled on the canvas.
+        /// </summary>
+        public bool IsPanningEnabled
+        {
+            get => _isPanningEnabled;
+            set
+            {
+                if (_isPanningEnabled == value) return;
+                _isPanningEnabled = value;
+                NotifyPropertyChanged(nameof(IsPanningEnabled));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the canvas is locked to the center of the screen. which results in it snapping to the center when the window size changes.
+        /// </summary>
+        public bool IsLockedToCenter
+        {
+            get => _isLockedToCenter;
+            set
+            {
+                if (_isLockedToCenter == value) return;
+                _isLockedToCenter = value;
+                NotifyPropertyChanged(nameof(IsLockedToCenter));
             }
         }
 

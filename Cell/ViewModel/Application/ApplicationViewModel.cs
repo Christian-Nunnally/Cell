@@ -3,11 +3,10 @@ using Cell.Core.Data;
 using Cell.Core.Execution;
 using Cell.Model;
 using Cell.Core.Persistence;
-using Cell.View.Application;
-using Cell.View.Cells;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
+using System.Collections.ObjectModel;
 
 namespace Cell.ViewModel.Application
 {
@@ -20,12 +19,10 @@ namespace Cell.ViewModel.Application
         /// Error message shown when a migration is needed but no migrator is available.
         /// </summary>
         public const string NoMigratorForVersionError = "Unable to load version";
-        private readonly CellClipboard _cellClipboard;
         private readonly CellLoader _cellLoader;
         private readonly CellTriggerManager _cellTriggerManager;
         private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
         private static ApplicationViewModel? _instance;
-        private ApplicationView? _applicationView;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
         private Task _backupTask = Task.CompletedTask;
@@ -47,8 +44,6 @@ namespace Cell.ViewModel.Application
         /// <param name="cellSelector">The cell selector for handling cell selection.</param>
         /// <param name="applicationSettings">The application settings that get persisted to disk.</param>
         /// <param name="undoRedoManager">The undo redo manager for the application.</param>
-        /// <param name="cellClipboard">The clipboard to copy and paste with.</param>
-        /// <param name="backupManager">The backup manager to backup the project with.</param>
         public ApplicationViewModel(
             DialogFactoryBase dialogFactory,
             PersistedProject persistedProject,
@@ -61,9 +56,7 @@ namespace Cell.ViewModel.Application
             SheetTracker sheetTracker,
             CellSelector cellSelector,
             ApplicationSettings applicationSettings,
-            UndoRedoManager undoRedoManager,
-            CellClipboard cellClipboard,
-            BackupManager backupManager)
+            UndoRedoManager undoRedoManager)
         {
             DialogFactory = dialogFactory;
             PersistedProject = persistedProject;
@@ -77,8 +70,7 @@ namespace Cell.ViewModel.Application
             CellSelector = cellSelector;
             ApplicationSettings = applicationSettings;
             UndoRedoManager = undoRedoManager;
-            _cellClipboard = cellClipboard;
-            BackupManager = backupManager;
+            Instance = this;
         }
 
         /// <summary>
@@ -92,19 +84,21 @@ namespace Cell.ViewModel.Application
         public static ApplicationViewModel? SafeInstance => _instance;
 
         /// <summary>
-        /// Gets the active sheet view in the application.
-        /// </summary>
-        public SheetView? ActiveSheetView => _applicationView?.ActiveSheetView;
-
-        /// <summary>
         /// Gets the persisted application settings for the application.
         /// </summary>
         public ApplicationSettings ApplicationSettings { get; private set; }
+
+        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
 
         /// <summary>
         /// A factory for showing dialogs.
         /// </summary>
         public DialogFactoryBase DialogFactory { get; set; }
+
+        /// <summary>
+        /// Enables copy and paste though this clipboard.
+        /// </summary>
+        public CellClipboard? CellClipboard { get; set; }
 
         /// <summary>
         /// Gets or sets the height of the application window.
@@ -132,10 +126,17 @@ namespace Cell.ViewModel.Application
             }
         }
 
+        public event Action<ToolWindowViewModel> MoveToolWindowToTop;
+
+        public void MoveWindowToTop(ToolWindowViewModel toolWindow)
+        {
+            MoveToolWindowToTop?.Invoke(toolWindow);
+        }
+
         /// <summary>
         /// Gets the backup manager for the application, which is used to create backups of the project.
         /// </summary>
-        public BackupManager BackupManager { get; private set; }
+        public BackupManager? BackupManager { get; set; }
 
         /// <summary>
         /// Gets the populator for the application, which is used to auto populate cells in the application.
@@ -201,6 +202,11 @@ namespace Cell.ViewModel.Application
         public UndoRedoManager UndoRedoManager { get; private set; }
 
         /// <summary>
+        /// Gets the observable collection of open tool windows in the application.
+        /// </summary>
+        public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
+
+        /// <summary>
         /// Gets the user collection loader for the application, which loads and stores all user collections.
         /// </summary>
         public UserCollectionLoader UserCollectionLoader { get; private set; }
@@ -216,23 +222,17 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// Connects the application view to the view model, which should always have a 1 to 1 relationship.
-        /// </summary>
-        /// <param name="applicationView">The view for this view model.</param>
-        public void AttachToView(ApplicationView applicationView)
-        {
-            _applicationView = applicationView;
-            _applicationView.DataContext = this;
-        }
-
-        /// <summary>
         /// Copies the selected cells to the clipboard.
         /// </summary>
         /// <param name="copyTextOnly">Whether to only copy the text of the cells.</param>
         public void CopySelectedCells(bool copyTextOnly)
         {
+            if (CellClipboard is null)
+            {
+                
+            }
             if (SheetViewModel == null) return;
-            _cellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
+            CellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
         /// <summary>
@@ -242,8 +242,11 @@ namespace Cell.ViewModel.Application
         public void GoToCell(CellModel cellModel)
         {
             GoToSheet(cellModel.Location.SheetName);
-            var cell = SheetViewModel?.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
-            if (cell is not null) ActiveSheetView?.PanCanvasTo(cell.X, cell.Y);
+            if (SheetViewModel is null) return;
+            var cell = SheetViewModel.CellViewModels.FirstOrDefault(x => x.Model.ID == cellModel.ID);
+            if (cell is null) return;
+            SheetViewModel.PanX = cell.X;
+            SheetViewModel.PanY = cell.Y;
         }
 
         /// <summary>
@@ -266,7 +269,6 @@ namespace Cell.ViewModel.Application
                 SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, _cellTriggerManager, CellTracker, CellSelector, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
-            _applicationView?.ShowSheetView(SheetViewModel);
             ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
@@ -300,7 +302,7 @@ namespace Cell.ViewModel.Application
         {
             if (SheetViewModel == null) return;
             UndoRedoManager.StartRecordingUndoState();
-            _cellClipboard.PasteIntoCells(SheetViewModel.CellSelector.SelectedCells);
+            CellClipboard?.PasteIntoCells(SheetViewModel.CellSelector.SelectedCells);
             SheetViewModel.UpdateLayout();
             UndoRedoManager.FinishRecordingUndoState();
         }
@@ -312,7 +314,16 @@ namespace Cell.ViewModel.Application
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
-            _applicationView?.ShowToolWindow(viewModel, allowDuplicates);
+            var existingWindowOfSameType = OpenToolWindowViewModels.FirstOrDefault(x => viewModel.GetType() == x.GetType());
+            if (existingWindowOfSameType is not null)
+            {
+                OpenToolWindowViewModels.Remove(existingWindowOfSameType);
+                OpenToolWindowViewModels.Add(existingWindowOfSameType);
+                if (!allowDuplicates) return;
+            }
+            viewModel.RequestClose = () => RequestClose(viewModel);
+            viewModel.HandleBeingShown();
+            OpenToolWindowViewModels.Add(viewModel);
         }
 
         /// <summary>
@@ -323,7 +334,21 @@ namespace Cell.ViewModel.Application
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
         {
-            _applicationView?.DockToolWindow(viewModel, dock, allowDuplicates);
+            if (!allowDuplicates && OpenToolWindowViewModels.Any(x => viewModel.GetType() == x.GetType())) return;
+            viewModel.Dock = dock;
+            viewModel.IsDocked = true;
+            viewModel.RequestClose = () => RequestClose(viewModel);
+            viewModel.HandleBeingShown();
+            OpenToolWindowViewModels.Add(viewModel);
+        }
+
+        private void RequestClose(ToolWindowViewModel viewModel)
+        {
+            var isAllowingClose = viewModel.HandleCloseRequested();
+            if (isAllowingClose)
+            {
+                RemoveToolWindow(viewModel);
+            }
         }
 
         private async Task BackupAsync()
@@ -332,13 +357,14 @@ namespace Cell.ViewModel.Application
             await Task.Run(() =>
             {
                 PersistedProject.IsReadOnly = true;
-                BackupManager.CreateBackup();
+                BackupManager!.CreateBackup();
                 PersistedProject.IsReadOnly = false;
             });
         }
 
         private LoadingProgressResult LoadPhase1()
         {
+            if (BackupManager is null) return new LoadingProgressResult(false, "Backup manager not initialized yet, try loading again.");
             if (PersistedProject.NeedsMigration())
             {
                 if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
@@ -399,6 +425,22 @@ namespace Cell.ViewModel.Application
             PersistedProject.Migrate();
             _isProjectLoading = false;
             DialogFactory.Show("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
+        }
+
+        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
+        {
+            OpenToolWindowViewModels.Remove(toolWindowViewModel);
+            toolWindowViewModel.HandleBeingClosed();
+        }
+
+        internal void InitializeView()
+        {
+            TitleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(SheetTracker);
+            NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
+        }
+
+        internal void InitializeProject(PersistedProject persistedProject)
+        {
         }
     }
 }

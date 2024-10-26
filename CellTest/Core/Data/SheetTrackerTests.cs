@@ -24,7 +24,7 @@ namespace CellTest.Core.Data
             _cellTracker = new CellTracker(_cellLoader);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            return new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            return new SheetTracker(_cellTracker);
         }
 
         [Fact]

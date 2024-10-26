@@ -11,8 +11,9 @@
     d:DesignWidth="300"
     mc:Ignorable="d">
     <Grid>
-        <ScrollViewer>
+        <ScrollViewer x:Name="_logScrollViewer">
             <TextBlock
+                IsManipulationEnabled="True"
                 FontFamily="{StaticResource ProgrammingFont}"
                 Foreground="{StaticResource ForegroundColor}"
                 Text="{Binding LogBuffer}" />

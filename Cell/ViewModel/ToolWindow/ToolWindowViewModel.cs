@@ -1,5 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.ViewModel.Application;
+using System.Windows.Controls;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -8,6 +9,19 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class ToolWindowViewModel : PropertyChangedBase
     {
+        private double x = -1;
+        private double y = -1;
+
+        /// <summary>
+        /// Whether or not this tool window is currently docked in the main window or floating in its own border.
+        /// </summary>
+        public virtual bool IsDocked { get; set; } = false;
+
+        /// <summary>
+        /// What side of the main window this tool window should be docked to.
+        /// </summary>
+        public virtual Dock Dock { get; set; } = Dock.Top;
+
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
@@ -17,6 +31,34 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the default width of this tool window when it is shown.
         /// </summary>
         public virtual double DefaultWidth { get; } = 200;
+
+        /// <summary>
+        /// Gets the X position of this tool window. Ignored if docked.
+        /// </summary>
+        public virtual double X
+        {
+            get => x; 
+            set
+            {
+                if (value == y) return;
+                x = value;
+                NotifyPropertyChanged(nameof(X));
+            }
+        }
+
+        /// <summary>
+        /// Gets the Y position of this tool window. Ignored if docked.
+        /// </summary>
+        public virtual double Y
+        {
+            get => y; 
+            set
+            {
+                if (value == y) return;
+                y = value;
+                NotifyPropertyChanged(nameof(Y));
+            }
+        }
 
         /// <summary>
         /// Gets the minimum height this tool window is allowed to be reized to.

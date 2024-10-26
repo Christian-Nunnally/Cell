@@ -20,7 +20,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 var oldName = _model.Name;
                 _model.Name = value;
-                ApplicationViewModel.Instance.SheetTracker.RenameSheet(oldName, _model.Name);
+                ApplicationViewModel.Instance.CellTracker.RenameSheet(oldName, _model.Name);
             }
         }
 

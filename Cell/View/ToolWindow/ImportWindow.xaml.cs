@@ -31,7 +31,7 @@ namespace Cell.View.ToolWindow
             }
             var templateName = _viewModel.ImportingTemplateName;
             var sheetName = _viewModel.NewSheetNameForImportedTemplates;
-            ApplicationViewModel.Instance.SheetTracker.ImportSheetTemplate(templateName, sheetName, _viewModel.SkipExistingCollectionsDuringImport);
+            ApplicationViewModel.Instance.DialogFactory.Show("Not finished :)", $"Not finished :)");
         }
     }
 }

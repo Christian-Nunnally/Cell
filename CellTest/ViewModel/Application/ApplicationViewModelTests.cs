@@ -6,30 +6,30 @@ using CellTest.TestUtilities;
 
 namespace CellTest.ViewModel.Application
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 {
     public class ApplicationViewModelTests
     {
-        private TestDialogFactory _testDialogFactory;
-        private static DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private PersistedDirectory _backupDirectory;
-        private UserCollectionLoader _userCollectionLoader;
-        private CellPopulateManager _cellPopulateManager;
-        private CellLoader _cellLoader;
-        private CellTriggerManager _cellTriggerManager;
-        private PluginFunctionLoader _pluginFunctionLoader;
-        private CellTracker _cellTracker;
-        private SheetTracker _sheetTracker;
-        private ApplicationSettings _applicationSettings;
-        private UndoRedoManager _undoRedoManager;
-        private ITextClipboard _textClipboard;
-        private CellClipboard _cellClipboard;
-        private BackupManager _backupManager;
-        private CellSelector _cellSelector;
-        private PersistedProject _persistedProject;
+        private readonly TestDialogFactory _testDialogFactory;
+        private readonly DictionaryFileIO _testFileIO;
+        private readonly PersistedDirectory _persistedDirectory;
+        private readonly PersistedDirectory _backupDirectory;
+        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly CellPopulateManager _cellPopulateManager;
+        private readonly CellLoader _cellLoader;
+        private readonly CellTriggerManager _cellTriggerManager;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly CellTracker _cellTracker;
+        private readonly SheetTracker _sheetTracker;
+        private readonly ApplicationSettings _applicationSettings;
+        private readonly UndoRedoManager _undoRedoManager;
+        private readonly ITextClipboard _textClipboard;
+        private readonly CellClipboard _cellClipboard;
+        private readonly BackupManager _backupManager;
+        private readonly CellSelector _cellSelector;
+        private readonly PersistedProject _persistedProject;
+        private readonly ApplicationViewModel _testing;
 
-        private ApplicationViewModel CreateTestInstance()
+        public ApplicationViewModelTests()
         {
             _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
@@ -42,32 +42,30 @@ namespace CellTest.ViewModel.Application
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _sheetTracker = new SheetTracker(_persistedDirectory, _cellLoader, _cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _sheetTracker = new SheetTracker(_cellTracker);
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
             _applicationSettings = new ApplicationSettings();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            return new ApplicationViewModel(_testDialogFactory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            _testing = new ApplicationViewModel(_testDialogFactory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
         }
 
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = CreateTestInstance();
         }
 
         [Fact]
         public void UpgradeRequired_LoadStarted_FailsWithoutMigrator()
         {
-            var testing = CreateTestInstance();
             _persistedProject.Version = "0";
             Assert.NotEqual("1", _persistedProject.Version);
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
 
-            var result = testing.Load();
+            var result = _testing.Load();
 
             Assert.False(result.Success);
             Assert.Equal(ApplicationViewModel.NoMigratorForVersionError, result.Message);
@@ -76,7 +74,6 @@ namespace CellTest.ViewModel.Application
         [Fact]
         public void MigratorExists_LoadStarted_PromptsUserToMigrate()
         {
-            var testing = CreateTestInstance();
             _persistedProject.Version = "0";
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
@@ -84,7 +81,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.RegisterMigrator("0", "1", migrator);
             var dialog = _testDialogFactory.Expect();
 
-            testing.Load();
+            _testing.Load();
 
             Assert.True(dialog.WasShown);
         }
@@ -92,7 +89,6 @@ namespace CellTest.ViewModel.Application
         [Fact]
         public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
         {
-            var testing = CreateTestInstance();
             _persistedProject.Version = "0";
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
@@ -101,11 +97,92 @@ namespace CellTest.ViewModel.Application
             _testDialogFactory.Expect(0);
             Assert.False(migrator.Migrated);
 
-            testing.Load();
+            _testing.Load();
 
             Assert.True(migrator.Migrated);
         }
+
+        [Fact]
+        public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Empty(_testing.OpenToolWindowViewModels);
+
+            _testing.ShowToolWindow(testToolWindow);
+
+            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        }
+
+        [Fact]
+        public void ShowToolWindow_RequestCloseFunctionSet()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Null(testToolWindow.RequestClose);
+
+            _testing.ShowToolWindow(testToolWindow);
+
+            Assert.NotNull(testToolWindow.RequestClose);
+        }
+
+        [Fact]
+        public void ShowToolWindow_ShowHandlerCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Empty(_testing.OpenToolWindowViewModels);
+
+            _testing.ShowToolWindow(testToolWindow);
+
+            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        }
+
+        [Fact]
+        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowRemainsOpen()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = false;
+
+            testToolWindow.RequestClose!.Invoke();
+
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        }
+
+        [Fact]
+        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowClosedHandleNotCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = false;
+
+            testToolWindow.RequestClose!.Invoke();
+
+            Assert.False(testToolWindow.WasHandleBeingClosedCalled);
+        }
+
+        [Fact]
+        public void ToolWindowAllowingClose_RequestCloseFunctionCalled_ToolWindowClosed()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = true;
+
+            testToolWindow.RequestClose!.Invoke();
+
+            Assert.Empty(_testing.OpenToolWindowViewModels);
+        }
+
+        [Fact]
+        public void ToolWindowOpened_WasHandleBeingShownCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.False(testToolWindow.WasHandleBeingShownCalled);
+            
+            _testing.ShowToolWindow(testToolWindow);
+
+            Assert.True(testToolWindow.WasHandleBeingShownCalled);
+        }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

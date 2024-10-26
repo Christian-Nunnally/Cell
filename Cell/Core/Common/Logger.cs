@@ -8,7 +8,6 @@
         private const int MaxRetainedLogs = 1000;
         private readonly Queue<string> _logsQueue = new();
         private static Logger? _instance;
-        private int LogNumber = 0;
         /// <summary>
         /// Occurs when a new log is added.
         /// </summary>
@@ -30,7 +29,7 @@
         /// <param name="message">The message to log.</param>
         public void Log(string message)
         {
-            var log = $"{DateTime.Now:HH:mm:ss} {LogNumber++:0000}: {message}";
+            var log = $"[{DateTime.Now:HH:mm:ss}] {message}";
             Console.WriteLine(log);
             LogAdded?.Invoke(log);
             _logsQueue.Enqueue(log);

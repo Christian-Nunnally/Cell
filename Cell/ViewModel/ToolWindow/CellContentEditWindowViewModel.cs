@@ -29,7 +29,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
-        public override double DefaultHeight => 90;
+        public override double DefaultHeight => 60;
 
         /// <summary>
         /// Gets the default width of this tool window when it is shown.
@@ -60,7 +60,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the minimum height this tool window is allowed to be resized to.
         /// </summary>
-        public override double MinimumHeight => 80;
+        public override double MinimumHeight => 60;
 
         /// <summary>
         /// Gets the minimum width this tool window is allowed to be resized to.
@@ -173,7 +173,7 @@ namespace Cell.ViewModel.ToolWindow
             var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellToDisplay, ApplicationViewModel.Instance.PluginFunctionLoader);
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
 
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Left, true);
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
             else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 

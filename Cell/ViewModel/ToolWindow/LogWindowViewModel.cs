@@ -80,7 +80,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void AddLog(string log)
         {
-            _logBufferBuilder.Insert(0, log + "\n");
+            _logBufferBuilder.AppendLine(log);
             if (_logBufferBuilder.Length > 10000)
             {
                 _logBufferBuilder.Remove(_logBufferBuilder.Length - 1000, 1000);
