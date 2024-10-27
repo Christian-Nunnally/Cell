@@ -12,6 +12,7 @@ namespace Cell.View.ToolWindow
     {
         private readonly CodeEditorWindowViewModel _viewModel;
         private CompletionWindow? completionWindow;
+        private int _carotPosition;
         /// <summary>
         /// Creates a new instance of the <see cref="CodeEditorWindow"/>.
         /// </summary>
@@ -34,7 +35,7 @@ namespace Cell.View.ToolWindow
 
         private void TextEditorCaretPositionChanged(object? sender, EventArgs e)
         {
-            _viewModel.CaretPositionChanged(textEditor.TextArea.Caret.Offset);
+            _carotPosition = textEditor.TextArea.Caret.Offset;
         }
 
         private void CodeEditorWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -92,6 +93,10 @@ namespace Cell.View.ToolWindow
             {
                 OpenAutoCompleteWindow();
                 e.Handled = true;
+            }
+            else if (e.Key == Key.OemQuestion)
+            {
+                _viewModel.ShowContextHelpAtCarot(_carotPosition);
             }
         }
     }

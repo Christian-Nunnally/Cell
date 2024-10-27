@@ -1,6 +1,4 @@
-﻿using Cell.Core.Common;
-using Cell.Model;
-using Cell.Core.Persistence;
+﻿using Cell.Model;
 using System.ComponentModel;
 
 namespace Cell.Core.Data
@@ -10,7 +8,6 @@ namespace Cell.Core.Data
     /// </summary>
     public class CellTracker
     {
-        private readonly CellLoader _cellLoader;
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<CellModel, string> _cellsToLocation = [];
@@ -26,35 +23,22 @@ namespace Cell.Core.Data
         public Action<CellModel>? CellRemoved;
         
         /// <summary>
-        /// Creates a new instance of <see cref="CellTracker"/>.
-        /// </summary>
-        /// <param name="cellLoader">The cell loader used to provide cells to this tracker. The tracker will also inform the loader to delete cells when needed.</param>
-        public CellTracker(CellLoader cellLoader)
-        {
-            _cellLoader = cellLoader;
-        }
-
-        /// <summary>
         /// Gets all currently tracked cells.
         /// </summary>
         public IEnumerable<CellModel> AllCells => _cellsToLocation.Keys;
 
         /// <summary>
-        /// Adds a new cell to the tracker. This will also inform the loader to save the cell if <paramref name="saveAfterAdding"/> is true.
+        /// Adds a new cell to the tracker.
         /// </summary>
         /// <param name="cellModel">The new cell to start tracking.</param>
-        /// <param name="saveAfterAdding">Whether to save this cell to the loader.</param>
-        public void AddCell(CellModel cellModel, bool saveAfterAdding = true)
+        public void AddCell(CellModel cellModel)
         {
             AddToCellsInSheetMap(cellModel);
             AddCellToCellByLocationMap(cellModel);
             _cellsToLocation.Add(cellModel, cellModel.Location.LocationString);
 
-            cellModel.PropertyChanged += CellModelPropertyChanged;
             cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
-            cellModel.Style.PropertyChanged += CellModelStylePropertyChanged;
             CellAdded?.Invoke(cellModel);
-            if (saveAfterAdding) _cellLoader.SaveCell(cellModel);
         }
 
         /// <summary>
@@ -89,24 +73,11 @@ namespace Cell.Core.Data
         /// <param name="cellModel">The cell to delete.</param>
         public void RemoveCell(CellModel cellModel)
         {
-            cellModel.PropertyChanged -= CellModelPropertyChanged;
             cellModel.Location.PropertyChanged -= CellLocationPropertyChanged;
-            cellModel.Style.PropertyChanged -= CellModelStylePropertyChanged;
             RemoveFromCellsInSheetMap(cellModel, cellModel.Location.SheetName);
-            _cellLoader.DeleteCell(cellModel);
             _cellsToLocation.Remove(cellModel);
             RemoveFromCellsByLocationMap(cellModel);
             CellRemoved?.Invoke(cellModel);
-        }
-
-        /// <summary>
-        /// Renames a sheet by saving the cells in the new sheet and deleting the old sheet.
-        /// </summary>
-        /// <param name="oldSheetName">The sheet to rename.</param>
-        /// <param name="newSheetName">The new name to give the sheet.</param>
-        public void RenameSheet(string oldSheetName, string newSheetName)
-        {
-            _cellLoader.RenameSheet(oldSheetName, newSheetName);
         }
 
         private void AddCellToCellByLocationMap(CellModel cellModel)
@@ -133,7 +104,7 @@ namespace Cell.Core.Data
         private void CellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var location = (CellLocationModel)sender!;
-            var model = location.CellModel ?? throw new CellError("This property changed handler should be unsubscribed when the cells style object is switched.");
+            var model = location.CellModel!;
             var previousLocation = _cellsToLocation[model];
             _cellsByLocation[previousLocation].Remove(model);
             _cellsToLocation[model] = model.Location.LocationString;
@@ -142,18 +113,6 @@ namespace Cell.Core.Data
             {
                 UpdateCellsSheetLocation(model, previousLocation);
             }
-            _cellLoader.SaveCell(model);
-        }
-
-        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            _cellLoader.SaveCell((CellModel)sender!);
-        }
-
-        private void CellModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var style = (CellStyleModel)sender!;
-            _cellLoader.SaveCell(style.CellModel ?? throw new CellError("This property changed handler should be unsubscribed when the cells style object is switched."));
         }
 
         private bool RemoveFromCellsByLocationMap(CellModel cellModel)

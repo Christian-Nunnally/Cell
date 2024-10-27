@@ -38,10 +38,5 @@ namespace Cell.View.ToolWindow
         {
             _viewModel.AutoIndexSelectedCells();
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

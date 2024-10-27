@@ -3,11 +3,9 @@ using Cell.Core.Execution;
 using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
-using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.ComponentModel;
-using System.Windows.Media;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -40,8 +38,6 @@ namespace Cell.ViewModel.ToolWindow
             _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
             _contextToTestWith = contextToTestWith;
-
-            DisplayResult(functionToBeEdited.CompileResult);
         }
 
         /// <summary>
@@ -63,6 +59,7 @@ namespace Cell.ViewModel.ToolWindow
                 _isDirty = true;
                 _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, _collectionNameToDataTypeMap);
                 NotifyPropertyChanged(nameof(CurrentTextInEditor));
+                NotifyPropertyChanged(nameof(ToolWindowTitle));
             }
         }
 
@@ -97,11 +94,6 @@ namespace Cell.ViewModel.ToolWindow
         public override double MinimumWidth => 200;
 
         /// <summary>
-        /// Gets or sets the result of the last compile and run of the function that is displayed in the UI.
-        /// </summary>
-        public string? ResultString { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets the syntax tree preview text to be displayed in the UI when the user requests to see the syntax tree.
         /// </summary>
         public string SyntaxTreePreviewText
@@ -121,8 +113,9 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("Test Code", TestCodeAndOpenLogWindow) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
+            new CommandViewModel("Test", TestCodeAndOpenLogWindow) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
             new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." },
+            new CommandViewModel("Save", Save) { ToolTip = "Saves the current code in the editor into the function being edited." },
             new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." }
         ];
 
@@ -216,19 +209,6 @@ namespace Cell.ViewModel.ToolWindow
             RequestClose?.Invoke();
         }
 
-        private void DisplayResult(CompileResult result)
-        {
-            _lastCompileResult = result;
-            ResultString = result.ExecutionResult ?? "";
-            ResultString = ResultString.Replace("Compilation failed, first error is", "Error");
-            if (!result.WasSuccess)
-            {
-                Logger.Instance.Log($"Error occured in function during test: {ResultString}");
-            }
-            if (result.ReturnedObject is not null) ResultString = result.ReturnedObject.ToString();
-            NotifyPropertyChanged(nameof(ResultString));
-        }
-
         private void HideSyntaxTreePreview()
         {
             SyntaxTreePreviewText = string.Empty;
@@ -241,9 +221,15 @@ namespace Cell.ViewModel.ToolWindow
 
         private void SaveAndClose()
         {
+            Save();
+            RequestClose?.Invoke();
+        }
+
+        private void Save()
+        {
             FunctionBeingEdited.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
             _isDirty = false;
-            RequestClose?.Invoke();
+            NotifyPropertyChanged(nameof(ToolWindowTitle));
         }
 
         private void ShowSyntaxTreePreview(string code)
@@ -256,25 +242,26 @@ namespace Cell.ViewModel.ToolWindow
             SyntaxTreePreviewText = syntaxTree.ToString();
         }
 
-        internal void CaretPositionChanged(int offset)
+        internal void ShowContextHelpAtCarot(int offset)
         {
+            string contextHelp;
             if (_cellFunctionCodeSuggestionGenerator.TryGetTypeAtTextPositionUsingSemanticAnalyzer(offset, out var type))
             {
-                ResultString = type?.Name ?? "Unknown type";
+                contextHelp = type?.Name ?? "Unknown type";
             }
             else if (offset > 0 && _cellFunctionCodeSuggestionGenerator.TryGetTypeAtTextPositionUsingSemanticAnalyzer(offset - 1, out type))
             {
-                ResultString = type?.Name ?? "Unknown type";
+                contextHelp = type?.Name ?? "Unknown type";
             }
             else if (!_lastCompileResult.WasSuccess)
             {
-                ResultString = _lastCompileResult.ExecutionResult ?? "";
+                contextHelp = _lastCompileResult.ExecutionResult ?? "";
             }
             else
             {
-                ResultString = string.Empty;
+                contextHelp = string.Empty;
             }
-            NotifyPropertyChanged(nameof(ResultString));
+            Logger.Instance.Log($"Info at carot positon {offset}: '{contextHelp}'");
         }
 
         internal IList<ICompletionData> CreateAutoCompleteSuggestions(int offset)

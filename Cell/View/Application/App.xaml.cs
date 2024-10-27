@@ -15,57 +15,49 @@ namespace Cell
     {
         protected override async void OnStartup(StartupEventArgs e)
         {
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            stopWatch.Start();
+            var applicationViewModel = new ApplicationViewModel();
+            var applicationView = new ApplicationView(applicationViewModel);
+            applicationView.Show();
 
+            var dialogFactory = new DialogFactory();
+            applicationViewModel.DialogFactory = dialogFactory;
             var appDataPath = Environment.SpecialFolder.ApplicationData;
             var appDataRoot = Environment.GetFolderPath(appDataPath);
             var appPersistanceRoot = Path.Combine(appDataRoot, "LGF");
             var savePath = Path.Combine(appPersistanceRoot, "Cell");
-            var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
             var fileIo = new FileIO();
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
-            persistedProject.RegisterMigrator("1", "2", new Migration());
-            var backupDirectory = new PersistedDirectory(backupPath, fileIo);
-
+            applicationViewModel.PersistedProject = persistedProject;
             var pluginFunctionLoader = new PluginFunctionLoader(persistedProject.FunctionsDirectory);
-            var cellLoader = new CellLoader(persistedProject.SheetsDirectory);
-            var cellTracker = new CellTracker(cellLoader);
+            applicationViewModel.PluginFunctionLoader = pluginFunctionLoader;
+            var cellTracker = new CellTracker();
+            applicationViewModel.CellTracker = cellTracker;
             var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
-            var dialogFactory = new DialogFactory();
+            applicationViewModel.UserCollectionLoader = userCollectionLoader;
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
+            applicationViewModel.CellTriggerManager = cellTriggerManager;
             var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            applicationViewModel.CellPopulateManager = cellPopulateManager;
             var sheetTracker = new SheetTracker(cellTracker);
+            applicationViewModel.SheetTracker = sheetTracker;
+            var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
+            applicationViewModel.CellLoader = cellLoader;
+            var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
+            applicationViewModel.TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
-            var undoRedoManager = new UndoRedoManager(cellTracker);
-            var textClipboard = new TextClipboard();
-            var cellSelector = new CellSelector(cellTracker);
-
-            var applicationViewModel = new ApplicationViewModel(
-                dialogFactory,
-                persistedProject,
-                pluginFunctionLoader,
-                cellLoader,
-                cellTracker,
-                userCollectionLoader,
-                cellPopulateManager,
-                cellTriggerManager,
-                sheetTracker,
-                cellSelector,
-                applicationSettings,
-                undoRedoManager);
-
-            var applicationView = new ApplicationView(applicationViewModel);
-            stopWatch.Stop();
-            var x = stopWatch.ElapsedMilliseconds;
-            Console.WriteLine(x);
-            applicationView.Show();
-
-            applicationViewModel.InitializeView();
+            applicationViewModel.ApplicationSettings = applicationSettings;
+            var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
+            var backupDirectory = new PersistedDirectory(backupPath, fileIo);
             applicationViewModel.BackupManager = new BackupManager(projectDirectory, backupDirectory);
+            var undoRedoManager = new UndoRedoManager(cellTracker);
+            applicationViewModel.UndoRedoManager = undoRedoManager;
+            var textClipboard = new TextClipboard();
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
-            applicationViewModel.InitializeProject(persistedProject);
+            var cellSelector = new CellSelector(cellTracker);
+            applicationViewModel.CellSelector = cellSelector;
+
+            persistedProject.RegisterMigrator("1", "2", new Migration());
 
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);

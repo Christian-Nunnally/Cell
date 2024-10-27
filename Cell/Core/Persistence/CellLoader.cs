@@ -1,5 +1,7 @@
 ﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Model;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
@@ -10,14 +12,53 @@ namespace Cell.Core.Persistence
     /// </summary>
     public class CellLoader
     {
+        private bool _isSavingAddedCells = true;
         private readonly PersistedDirectory _sheetsDirectory;
+        private readonly CellTracker _cellTracker;
+
         /// <summary>
         /// Creates a new instance of <see cref="CellLoader"/>.
         /// </summary>
         /// <param name="sheetsDirectory">The project directory to save the cells into.</param>
-        public CellLoader(PersistedDirectory sheetsDirectory)
+        /// <param name="cellTracker">Tracker to add loaded cells to.</param>
+        public CellLoader(PersistedDirectory sheetsDirectory, CellTracker cellTracker)
         {
             _sheetsDirectory = sheetsDirectory;
+            _cellTracker = cellTracker;
+            cellTracker.CellAdded += CellAddedToTracker;
+            cellTracker.CellRemoved += CellRemovedFromTracker;
+        }
+
+        private void CellRemovedFromTracker(CellModel cell)
+        {
+            DeleteCell(cell);
+        }
+
+        private void CellAddedToTracker(CellModel cell)
+        {
+            cell.PropertyChanged += TrackedCellPropertyChanged;
+            cell.Location.PropertyChanged -= TrackedCellLocationPropertyChanged;
+            cell.Style.PropertyChanged -= TrackedCellStylePropertyChanged;
+
+            if (_isSavingAddedCells) SaveCell(cell);
+        }
+
+        private void TrackedCellStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var style = (CellStyleModel)sender!;
+            SaveCell(style.CellModel!);
+        }
+
+        private void TrackedCellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var style = (CellLocationModel)sender!;
+            SaveCell(style.CellModel!);
+        }
+
+        private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var cell = (CellModel)sender!;
+            SaveCell(cell);
         }
 
         /// <summary>
@@ -36,14 +77,12 @@ namespace Cell.Core.Persistence
         /// Loads all cells from the project.
         /// </summary>
         /// <returns>All loaded cells.</returns>
-        public IEnumerable<CellModel> LoadCells()
+        public void LoadCells()
         {
-            var cells = new List<CellModel>();
             foreach (var sheetDirectory in _sheetsDirectory.GetDirectories())
             {
-                cells.AddRange(LoadSheet(sheetDirectory));
+                LoadSheet(sheetDirectory);
             }
-            return cells;
         }
 
         /// <summary>
@@ -51,11 +90,11 @@ namespace Cell.Core.Persistence
         /// </summary>
         /// <param name="sheet">The name of the sheet to load all cells from.</param>
         /// <returns>All the loaded cells.</returns>
-        public IEnumerable<CellModel> LoadSheet(string sheet)
+        public void LoadSheet(string sheet)
         {
-            var result = new List<CellModel>();
-            foreach (var file in _sheetsDirectory.GetFiles(sheet)) result.Add(LoadCell(file));
-            return result;
+            _isSavingAddedCells = false;
+            foreach (var file in _sheetsDirectory.GetFiles(sheet)) LoadCell(file);
+            _isSavingAddedCells = true;
         }
 
         /// <summary>
@@ -89,11 +128,11 @@ namespace Cell.Core.Persistence
             _sheetsDirectory.SaveFile(path, serialized);
         }
 
-        private CellModel LoadCell(string file)
+        private void LoadCell(string file)
         {
             var text = _sheetsDirectory.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
-            return cell;
+            _cellTracker.AddCell(cell);
         }
     }
 }

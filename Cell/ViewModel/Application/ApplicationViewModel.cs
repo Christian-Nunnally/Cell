@@ -19,8 +19,8 @@ namespace Cell.ViewModel.Application
         /// Error message shown when a migration is needed but no migrator is available.
         /// </summary>
         public const string NoMigratorForVersionError = "Unable to load version";
-        private readonly CellLoader _cellLoader;
-        private readonly CellTriggerManager _cellTriggerManager;
+        public CellLoader? CellLoader;
+        public CellTriggerManager? CellTriggerManager;
         private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
         private static ApplicationViewModel? _instance;
         private double _applicationWindowHeight = 1300;
@@ -29,47 +29,13 @@ namespace Cell.ViewModel.Application
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
+        private TitleBarSheetNavigationViewModel? titleBarSheetNavigationViewModel;
+
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
         /// </summary>
-        /// <param name="dialogFactory">A factory for creating and showing dialogs.</param>
-        /// <param name="persistedProject">The project to load in the application.</param>
-        /// <param name="pluginFunctionLoader">The function loader for functions.</param>
-        /// <param name="cellLoader">The cell loader for loading cells.</param>
-        /// <param name="cellTracker">The cell tracker for storing cells.</param>
-        /// <param name="userCollectionLoader">The collection loader for user collections.</param>
-        /// <param name="cellPopulateManager">The populate manager for populate functions.</param>
-        /// <param name="cellTriggerManager">The trigger manager for trigger functions.</param>
-        /// <param name="sheetTracker">The sheet tracker for handling sheets.</param>
-        /// <param name="cellSelector">The cell selector for handling cell selection.</param>
-        /// <param name="applicationSettings">The application settings that get persisted to disk.</param>
-        /// <param name="undoRedoManager">The undo redo manager for the application.</param>
-        public ApplicationViewModel(
-            DialogFactoryBase dialogFactory,
-            PersistedProject persistedProject,
-            PluginFunctionLoader pluginFunctionLoader,
-            CellLoader cellLoader,
-            CellTracker cellTracker,
-            UserCollectionLoader userCollectionLoader,
-            CellPopulateManager cellPopulateManager,
-            CellTriggerManager cellTriggerManager,
-            SheetTracker sheetTracker,
-            CellSelector cellSelector,
-            ApplicationSettings applicationSettings,
-            UndoRedoManager undoRedoManager)
+        public ApplicationViewModel()
         {
-            DialogFactory = dialogFactory;
-            PersistedProject = persistedProject;
-            PluginFunctionLoader = pluginFunctionLoader;
-            _cellLoader = cellLoader;
-            CellTracker = cellTracker;
-            UserCollectionLoader = userCollectionLoader;
-            CellPopulateManager = cellPopulateManager;
-            _cellTriggerManager = cellTriggerManager;
-            SheetTracker = sheetTracker;
-            CellSelector = cellSelector;
-            ApplicationSettings = applicationSettings;
-            UndoRedoManager = undoRedoManager;
             Instance = this;
         }
 
@@ -86,14 +52,25 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the persisted application settings for the application.
         /// </summary>
-        public ApplicationSettings ApplicationSettings { get; private set; }
+        public ApplicationSettings? ApplicationSettings { get; set; }
 
-        public TitleBarSheetNavigationViewModel TitleBarSheetNavigationViewModel { get; private set; }
+        /// <summary>
+        /// Gets or sets the view model for the title bar sheet navigation.
+        /// </summary>
+        public TitleBarSheetNavigationViewModel? TitleBarSheetNavigationViewModel
+        {
+            get => titleBarSheetNavigationViewModel; set
+            {
+                if (titleBarSheetNavigationViewModel == value) return;
+                titleBarSheetNavigationViewModel = value;
+                NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
+            }
+        }
 
         /// <summary>
         /// A factory for showing dialogs.
         /// </summary>
-        public DialogFactoryBase DialogFactory { get; set; }
+        public DialogFactoryBase? DialogFactory { get; set; }
 
         /// <summary>
         /// Enables copy and paste though this clipboard.
@@ -126,7 +103,7 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public event Action<ToolWindowViewModel> MoveToolWindowToTop;
+        public event Action<ToolWindowViewModel>? MoveToolWindowToTop;
 
         public void MoveWindowToTop(ToolWindowViewModel toolWindow)
         {
@@ -141,17 +118,17 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the populator for the application, which is used to auto populate cells in the application.
         /// </summary>
-        public CellPopulateManager CellPopulateManager { get; private set; }
+        public CellPopulateManager? CellPopulateManager { get; set; }
 
         /// <summary>
         /// The cell selector for the application, which is used to select cells in the application.
         /// </summary>
-        public CellSelector CellSelector { get; private set; }
+        public CellSelector? CellSelector { get; set; }
 
         /// <summary>
         /// The cell tracker for the application, which is used to store all of the cells in the application.
         /// </summary>
-        public CellTracker CellTracker { get; private set; }
+        public CellTracker? CellTracker { get; set; }
 
         /// <summary>
         /// Gets or sets whether a project is currently loaded and ready to be interacted with.
@@ -175,12 +152,12 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the plugin function loader for the application, which loads and stores all plugin functions.
         /// </summary>
-        public PluginFunctionLoader PluginFunctionLoader { get; private set; }
+        public PluginFunctionLoader? PluginFunctionLoader { get; set; }
 
         /// <summary>
         /// Gets the sheet tracker for the application, which is used to store all of the sheets in the application.
         /// </summary>
-        public SheetTracker SheetTracker { get; private set; }
+        public SheetTracker? SheetTracker { get; set; }
 
         /// <summary>
         /// Gets or sets the current sheet view model that is being displayed in the application.
@@ -199,7 +176,7 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the application wide undo redo manager.
         /// </summary>
-        public UndoRedoManager UndoRedoManager { get; private set; }
+        public UndoRedoManager? UndoRedoManager { get; set; }
 
         /// <summary>
         /// Gets the observable collection of open tool windows in the application.
@@ -209,7 +186,7 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the user collection loader for the application, which loads and stores all user collections.
         /// </summary>
-        public UserCollectionLoader UserCollectionLoader { get; private set; }
+        public UserCollectionLoader? UserCollectionLoader { get; set; }
 
         /// <summary>
         /// Gets the application wide undo redo manager.
@@ -266,7 +243,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, _cellTriggerManager, CellTracker, CellSelector, PluginFunctionLoader);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, PluginFunctionLoader);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             ApplicationSettings.LastLoadedSheet = sheetName;
@@ -301,10 +278,10 @@ namespace Cell.ViewModel.Application
         public void PasteCopiedCells()
         {
             if (SheetViewModel == null) return;
-            UndoRedoManager.StartRecordingUndoState();
+            UndoRedoManager?.StartRecordingUndoState();
             CellClipboard?.PasteIntoCells(SheetViewModel.CellSelector.SelectedCells);
             SheetViewModel.UpdateLayout();
-            UndoRedoManager.FinishRecordingUndoState();
+            UndoRedoManager?.FinishRecordingUndoState();
         }
 
         /// <summary>
@@ -402,11 +379,7 @@ namespace Cell.ViewModel.Application
         private LoadingProgressResult LoadPhase5()
         {
             CellPopulateManager.UpdateCellsWhenANewCellIsAdded = false;
-            var cells = _cellLoader.LoadCells();
-            foreach (var cell in cells)
-            {
-                CellTracker.AddCell(cell, false);
-            }
+            CellLoader.LoadCells();
             CellPopulateManager.UpdateCellsWhenANewCellIsAdded = true;
             return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
         }
@@ -431,16 +404,6 @@ namespace Cell.ViewModel.Application
         {
             OpenToolWindowViewModels.Remove(toolWindowViewModel);
             toolWindowViewModel.HandleBeingClosed();
-        }
-
-        internal void InitializeView()
-        {
-            TitleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(SheetTracker);
-            NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
-        }
-
-        internal void InitializeProject(PersistedProject persistedProject)
-        {
         }
     }
 }

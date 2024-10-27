@@ -26,7 +26,7 @@
     <DockPanel x:Name="RootWindow" PreviewKeyDown="WindowPreviewKeyDown">
         <Grid DockPanel.Dock="Top">
             <DockPanel
-                x:Name="TitleBar"
+                x:Name="_titleBarDockPanel"
                 Height="28"
                 Background="{StaticResource CellBackground}"
                 DockPanel.Dock="Top"
@@ -116,7 +116,6 @@
                     Content="No open cells"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <DockPanel x:Name="_toolWindowDockPanel">
-
                     <ContentControl x:Name="_sheetViewContentControl" />
                 </DockPanel>
                 <Canvas x:Name="_toolWindowCanvas" />

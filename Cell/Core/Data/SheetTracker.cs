@@ -45,7 +45,7 @@ namespace Cell.Core.Data
         {
             foreach (var cell in cellsToAdd)
             {
-                CellTracker.AddCell(cell, saveAfterAdding: true);
+                CellTracker.AddCell(cell);
             }
         }
 
