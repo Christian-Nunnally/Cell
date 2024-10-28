@@ -6,6 +6,9 @@ using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.Data
 {
+    /// <summary>
+    /// A view model for a user collection that is displayed in a list.
+    /// </summary>
     public class UserCollectionListItemViewModel : PropertyChangedBase
     {
         public UserCollectionListItemViewModel(UserCollection underlyingCollection, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)

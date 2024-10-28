@@ -1,6 +1,8 @@
 ﻿using Cell.Core.Common;
 using System.Windows.Media;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Cell.View.Skin
 {
     /// <summary>
@@ -30,3 +32,5 @@ namespace Cell.View.Skin
         public static SolidColorBrush ForegroundColorConstantBrush = new (ForegroundColorConstant);
     }
 }
+
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

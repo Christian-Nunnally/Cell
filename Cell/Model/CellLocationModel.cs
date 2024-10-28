@@ -103,6 +103,10 @@ namespace Cell.Model
             otherLocation.SheetName = SheetName;
         }
 
+        /// <summary>
+        /// Creates a string representation of the location.
+        /// </summary>
+        /// <returns>A string representation of the location.</returns>
         public override string ToString()
         {
             return $"{SheetName}-{UserFriendlyLocationString}";

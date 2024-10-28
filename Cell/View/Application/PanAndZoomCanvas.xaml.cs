@@ -14,7 +14,13 @@ namespace Cell.View.Application
         private Point _initialMousePosition;
         private bool _isLockedToCenter = true;
         private MatrixTransform _transform = new();
+        /// <summary>
+        /// Gets or sets the x pan zoom level of the canvas.
+        /// </summary>
         public double XPan { get; set; }
+        /// <summary>
+        /// Gets or sets the y pan zoom level of the canvas.
+        /// </summary>
         public double YPan { get; set; }
         /// <summary>
         /// Creates a new instance of the <see cref="PanAndZoomCanvas"/>.
