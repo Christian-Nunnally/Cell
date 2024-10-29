@@ -12,17 +12,11 @@ namespace CellTest.Core.Persistence
     {
         private CellTracker _cellTracker;
         private UndoRedoManager _undoRedoManager;
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
         private TestTextClipboard _textClipboard;
 
         private CellClipboard CreateInstance()
         {
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _textClipboard = new TestTextClipboard();
             return new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);

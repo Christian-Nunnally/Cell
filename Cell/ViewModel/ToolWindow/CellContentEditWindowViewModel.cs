@@ -1,6 +1,9 @@
-﻿using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Execution.CodeCompletion;
+using Cell.Core.Execution.Functions;
+using Cell.Core.Persistence;
 using Cell.Model;
 using Cell.ViewModel.Application;
+using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -15,15 +18,18 @@ namespace Cell.ViewModel.ToolWindow
     public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
+        private readonly PluginFunctionLoader _pluginFunctionLoader;
         private CellModel _cellToDisplay = CellModel.Null;
         private string _multiUseUserInputText = string.Empty;
         /// <summary>
         /// Creates a new instance of the <see cref="CellContentEditWindowViewModel"/> class.
         /// </summary>
         /// <param name="cellsToEdit">The dynamic list of cells being edited by this tool window.</param>
-        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit)
+        /// <param name="pluginFunctionLoader">The function loader to get populate and trigger functions from.</param>
+        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, PluginFunctionLoader pluginFunctionLoader)
         {
             _cellsToEdit = cellsToEdit;
+            _pluginFunctionLoader = pluginFunctionLoader;
         }
 
         /// <summary>
@@ -77,6 +83,7 @@ namespace Cell.ViewModel.ToolWindow
             get => _multiUseUserInputText;
             set
             {
+                if (value == _multiUseUserInputText) return;
                 _multiUseUserInputText = value;
                 NotifyPropertyChanged(nameof(MultiUseUserInputText));
                 NotifyPropertyChanged(nameof(IsEditFunctionButtonVisible));
@@ -128,10 +135,10 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName))
             {
-                ApplicationViewModel.Instance.DialogFactory.Show("No function name to edit", "Set the name of the function before editing it.");
+                ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
-            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
+            var function = _pluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
             EditFunction(function);
         }
 
@@ -160,17 +167,20 @@ namespace Cell.ViewModel.ToolWindow
             if (CellToDisplay == null) return;
             if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName))
             {
-                ApplicationViewModel.Instance.DialogFactory.Show("No function name to edit", "Set the name of the function before editing it.");
+                ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
-            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
+            var function = _pluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
             EditFunction(function);
         }
 
         private void EditFunction(CellFunction function)
         {
-            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellToDisplay, ApplicationViewModel.Instance.PluginFunctionLoader);
+            if (ApplicationViewModel.Instance.CellTracker == null) return;
+            var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
+            if (userCollectionLoader is null) return;
+            var collectionNameToDataTypeMap = userCollectionLoader.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionLoader, CellToDisplay, _pluginFunctionLoader);
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
@@ -254,6 +264,17 @@ namespace Cell.ViewModel.ToolWindow
         private void PickDisplayedCell()
         {
             CellToDisplay = _cellsToEdit.Count > 0 ? _cellsToEdit[0] : CellModel.Null;
+        }
+
+        internal IEnumerable<ICompletionData> GetPopulateFunctionSuggestions()
+        {
+            var suggestions = new List<ICompletionData>();
+            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            {
+                if (function.Model.ReturnType == "void") continue;
+                suggestions.Add(new CodeCompletionData(function.Model.Name, function.Model.Name, function.Model.Description, FontAwesome.Sharp.IconChar.Code));
+            }
+            return suggestions;
         }
     }
 }

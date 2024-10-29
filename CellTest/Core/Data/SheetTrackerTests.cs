@@ -10,20 +10,15 @@ namespace CellTest.Core.Data
     public class SheetTrackerTests
     {
         private CellTracker _cellTracker;
-        private PluginFunctionLoader _pluginFunctionLoader;
-        private UserCollectionLoader _userCollectionLoader;
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
 
         private SheetTracker CreateInstance()
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
+            _cellTracker = new CellTracker();
+            var _ = new CellLoader(_persistedDirectory, _cellTracker);
             return new SheetTracker(_cellTracker);
         }
 
@@ -40,7 +35,7 @@ namespace CellTest.Core.Data
             var cell = new CellModel();
             cell.Location.SheetName = "Sheet1";
 
-            _cellTracker.AddCell(cell, false);
+            _cellTracker.AddCell(cell);
 
             Assert.Equal("Sheet1", testing.Sheets[0].Name);
         }
@@ -52,7 +47,7 @@ namespace CellTest.Core.Data
             var cell = new CellModel();
             cell.Location.SheetName = "Sheet1";
 
-            _cellTracker.AddCell(cell, true);
+            _cellTracker.AddCell(cell);
 
             Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheet1")));
         }
@@ -63,7 +58,7 @@ namespace CellTest.Core.Data
             var testing = CreateInstance();
             var cell = new CellModel();
             cell.Location.SheetName = "Sheet1";
-            _cellTracker.AddCell(cell, false);
+            _cellTracker.AddCell(cell);
             Assert.Equal("Sheet1", testing.Sheets[0].Name);
 
             _cellTracker.RemoveCell(cell);
@@ -77,7 +72,7 @@ namespace CellTest.Core.Data
             var _ = CreateInstance();
             var cell = new CellModel();
             cell.Location.SheetName = "Sheet1";
-            _cellTracker.AddCell(cell, true);
+            _cellTracker.AddCell(cell);
             Assert.True(_testFileIO.DirectoryExists(Path.Combine("Sheet1")));
 
             _cellTracker.RemoveCell(cell);

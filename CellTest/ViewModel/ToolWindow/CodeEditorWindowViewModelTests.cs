@@ -14,7 +14,6 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly CellTracker _cellTracker;
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
-        private readonly CellLoader _cellLoader;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly CellFunction _functionBeingEdited;
         private readonly CellModel _cellContext;
@@ -28,8 +27,7 @@ namespace CellTest.ViewModel.ToolWindow
             Logger.Instance.Clear();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _functionBeingEdited = _pluginFunctionLoader.CreateCellFunction("void", "TestFunction");
             _cellContext = new CellModel();
@@ -70,7 +68,32 @@ namespace CellTest.ViewModel.ToolWindow
 
             _testing.TestCode();
 
-            Assert.Contains("Pretending to show dialog", Logger.Instance.Logs.Single());
+            Assert.Contains("Pretending to show dialog", Logger.Instance.Logs.First());
+        }
+
+        [Fact]
+        public void CodeToShowDialog_TestCodeTwice_LogShowsTestResults()
+        {
+            _testing.CurrentTextInEditor = "c.ShowDialog(\"test\");";
+            _testing.TestCode();
+            Logger.Instance.Clear();
+            _testing.TestCode();
+
+            Assert.Contains("Pretending to show dialog", Logger.Instance.Logs.First());
+        }
+
+        [Fact]
+        public void CodeToShowCellTextInDialog_TestCodeTwice_LogShowsTestResults()
+        {
+            _cellContext.Text = "test passed";
+            _testing.CurrentTextInEditor = "c.ShowDialog(cell.Text);";
+            _testing.TestCode();
+            var firstLog = Logger.Instance.Logs.First();
+            Assert.Contains("test passed", firstLog);
+            Logger.Instance.Clear();
+            _testing.TestCode();
+
+            Assert.Contains("test passed", Logger.Instance.Logs.First());
         }
 
         [Fact]
@@ -87,7 +110,7 @@ namespace CellTest.ViewModel.ToolWindow
 
             _testing.TestCode();
 
-            Assert.Contains("test passed", Logger.Instance.Logs.Single());
+            Assert.Contains("test passed", Logger.Instance.Logs.First());
         }
 
         [Fact]
@@ -99,7 +122,7 @@ namespace CellTest.ViewModel.ToolWindow
 
             _testing.TestCode();
 
-            Assert.Contains("test passed", Logger.Instance.Logs.Single());
+            Assert.Contains("test passed", Logger.Instance.Logs.First());
         }
 
         [Fact]

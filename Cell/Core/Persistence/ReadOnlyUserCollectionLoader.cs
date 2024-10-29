@@ -57,5 +57,13 @@ namespace Cell.Core.Persistence
 
             return readOnlyCollection;
         }
+
+        /// <summary>
+        /// Resets the loader, clearing all cached collections and resetting things to the underlying collection loaders lists.
+        /// </summary>
+        public void Reset()
+        {
+            _readOnlyUserCollectionMap.Clear();
+        }
     }
 }

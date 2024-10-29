@@ -3,6 +3,7 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.Core.Common;
+using Cell.ViewModel.Cells.Types;
 
 namespace Cell.Core.Execution.Functions
 {
@@ -14,13 +15,9 @@ namespace Cell.Core.Execution.Functions
     public class TestingContext : IContext
     {
         private readonly Dictionary<string, CellModel> _copiedCellsForTestingMap = [];
-
-        /// <summary>
-        /// The name of the argument that contains the context object in a plugin function (usually "c").
-        /// </summary>
-        public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
-        private readonly IUserCollectionProvider _userCollectionProviderThatMirrorsRealProvider;
+        private readonly CellModel _originalContextCell;
+        private readonly ReadOnlyUserCollectionLoader _userCollectionProviderThatMirrorsRealProvider;
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
         /// </summary>
@@ -32,6 +29,7 @@ namespace Cell.Core.Execution.Functions
         {
             _cellTracker = cellTracker;
             _userCollectionProviderThatMirrorsRealProvider = new ReadOnlyUserCollectionLoader(userCollectionLoader, pluginFunctionLoader, this);
+            _originalContextCell = cell;
             ContextCell = cell.Copy();
         }
 
@@ -68,6 +66,7 @@ namespace Cell.Core.Execution.Functions
         /// <returns>The found cell, or a null cell if no real cell exists there.</returns>
         public CellModel GetCell(string sheet, int row, int column)
         {
+            Logger.Instance.Log($"Pretending to get cell at {sheet} - {ColumnCellViewModel.GetColumnName(column)}{row}");
             var locationModel = new CellLocationModel(sheet, row, column);
             if (_copiedCellsForTestingMap.TryGetValue(locationModel.LocationString, out var cell)) return cell;
             cell = _cellTracker.GetCell(sheet, row, column)?.Copy() ?? CellModel.Null;
@@ -147,6 +146,16 @@ namespace Cell.Core.Execution.Functions
         {
             var title = ContextCell?.Location.UserFriendlyLocationString ?? "Function";
             Logger.Instance.Log($"Pretending to show dialog '{title}' : '{text}'");
+        }
+
+        /// <summary>
+        /// Resets the state of this test context to its starting configuration.
+        /// </summary>
+        public void Reset()
+        {
+            _copiedCellsForTestingMap.Clear();
+            _userCollectionProviderThatMirrorsRealProvider.Reset();
+            ContextCell = _originalContextCell.Copy();
         }
     }
 }

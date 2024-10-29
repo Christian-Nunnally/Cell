@@ -37,8 +37,8 @@ namespace CellTest.ViewModel.Application
             _backupDirectory = new PersistedDirectory("", _testFileIO);
             _persistedProject = new PersistedProject(_persistedDirectory);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
+            _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
@@ -49,7 +49,23 @@ namespace CellTest.ViewModel.Application
             _undoRedoManager = new UndoRedoManager(_cellTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
-            _testing = new ApplicationViewModel(_testDialogFactory, _persistedProject, _pluginFunctionLoader, _cellLoader, _cellTracker, _userCollectionLoader, _cellPopulateManager, _cellTriggerManager, _sheetTracker, _cellSelector, _applicationSettings, _undoRedoManager, _cellClipboard, _backupManager);
+            _testing = new ApplicationViewModel
+            {
+                PluginFunctionLoader = _pluginFunctionLoader,
+                CellTracker = _cellTracker,
+                CellLoader = _cellLoader,
+                UserCollectionLoader = _userCollectionLoader,
+                CellPopulateManager = _cellPopulateManager,
+                CellTriggerManager = _cellTriggerManager,
+                SheetTracker = _sheetTracker,
+                BackupManager = _backupManager,
+                UndoRedoManager = _undoRedoManager,
+                CellClipboard = _cellClipboard,
+                CellSelector = _cellSelector,
+                DialogFactory = _testDialogFactory,
+                PersistedProject = _persistedProject,
+                ApplicationSettings = _applicationSettings
+            };
         }
 
         [Fact]

@@ -168,7 +168,7 @@ namespace Cell.ViewModel.ToolWindow
         public override bool HandleCloseRequested()
         {
             if (!_isDirty || _isAllowingCloseWhileDirty) return true;
-            ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
+            ApplicationViewModel.Instance.DialogFactory?.ShowYesNo("Save Changes", "Do you want to save your changes?", SaveAndClose, CloseWithoutSaving);
             return false;
         }
 
@@ -186,6 +186,7 @@ namespace Cell.ViewModel.ToolWindow
             var model = new CellFunctionModel("test", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
+            if (_contextToTestWith is TestingContext testingContext) testingContext.Reset();
             var result = function.Run(_contextToTestWith);
             if (!result.WasSuccess)
             {

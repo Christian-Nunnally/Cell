@@ -14,13 +14,11 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly TestDialogFactory _testDialogFactory;
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
-        private readonly CellLoader _cellLoader;
         private readonly CellTracker _cellTracker;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly SheetModel _sheetModel;
-        private readonly SheetTracker _sheetTracker;
         private readonly SheetViewModel _sheetViewModel;
         private readonly CellModel _cellModel;
         private readonly CellSelector _cellSelector;
@@ -32,13 +30,11 @@ namespace CellTest.ViewModel.Cell.Types
             _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
-            _sheetTracker = new SheetTracker(_cellTracker);
             _cellSelector = new CellSelector(_cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);

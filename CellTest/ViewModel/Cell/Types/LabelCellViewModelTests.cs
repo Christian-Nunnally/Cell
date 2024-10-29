@@ -15,7 +15,6 @@ namespace CellTest.ViewModel.Cell.Types
     {
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
         private CellTracker _cellTracker;
         private PluginFunctionLoader _pluginFunctionLoader;
         private UserCollectionLoader _userCollectionLoader;
@@ -32,8 +31,7 @@ namespace CellTest.ViewModel.Cell.Types
             _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);

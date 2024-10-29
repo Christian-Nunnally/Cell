@@ -13,6 +13,10 @@ namespace Cell
 {
     public partial class App : Application
     {
+        /// <summary>
+        /// The entry point for the entire application.
+        /// </summary>
+        /// <param name="e">Start up event arguments.</param>
         protected override async void OnStartup(StartupEventArgs e)
         {
             var applicationViewModel = new ApplicationViewModel();
@@ -59,7 +63,7 @@ namespace Cell
 
             persistedProject.RegisterMigrator("1", "2", new Migration());
 
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells);
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells, pluginFunctionLoader);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
         }
     }

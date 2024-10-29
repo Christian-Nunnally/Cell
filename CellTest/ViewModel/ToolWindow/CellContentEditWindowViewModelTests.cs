@@ -13,25 +13,22 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly CellTracker _cellTracker;
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
-        private readonly CellLoader _cellLoader;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private readonly UserCollectionLoader _userCollectionLoader;
-        private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellContentEditWindowViewModel _testing;
 
         public CellContentEditWindowViewModelTests()
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _cellsToEdit = [];
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             // Enables populate tests.
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _testing = new CellContentEditWindowViewModel(_cellsToEdit);
+            var _ = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _testing = new CellContentEditWindowViewModel(_cellsToEdit, _pluginFunctionLoader);
         }
 
         [Fact]
@@ -122,7 +119,7 @@ namespace CellTest.ViewModel.ToolWindow
         {
             var _ = _pluginFunctionLoader.CreateCellFunction("object", "Test", "return \"Hello world\";");
             var cellBeingEdited = new CellModel();
-            _cellTracker.AddCell(cellBeingEdited, false);
+            _cellTracker.AddCell(cellBeingEdited);
             _cellsToEdit.Add(cellBeingEdited);
             _testing.HandleBeingShown();
 

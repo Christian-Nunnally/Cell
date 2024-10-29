@@ -11,7 +11,7 @@ namespace Cell.View.ToolWindow
     public partial class CodeEditorWindow : ResizableToolWindow
     {
         private readonly CodeEditorWindowViewModel _viewModel;
-        private CompletionWindow? completionWindow;
+        private CompletionWindow? _completionWindow;
         private int _carotPosition;
         /// <summary>
         /// Creates a new instance of the <see cref="CodeEditorWindow"/>.
@@ -48,7 +48,7 @@ namespace Cell.View.ToolWindow
 
         private void InsertCurrentAutoCompleteResult(TextCompositionEventArgs e)
         {
-            completionWindow?.CompletionList.RequestInsertion(e);
+            _completionWindow?.CompletionList.RequestInsertion(e);
         }
 
         private void OnTextChanged(object? sender, EventArgs e)
@@ -67,7 +67,7 @@ namespace Cell.View.ToolWindow
             bool ShouldSubmitAutoCompleteResult(TextCompositionEventArgs e)
             {
                 var anyText = e.Text.Length != 0;
-                var isAutoCompleteOpen = completionWindow is not null;
+                var isAutoCompleteOpen = _completionWindow is not null;
                 var isFirstChangedCharacterALetterOrDigit = char.IsLetterOrDigit(e.Text[0]);
                 return anyText && isAutoCompleteOpen && !isFirstChangedCharacterALetterOrDigit;
             }
@@ -79,12 +79,12 @@ namespace Cell.View.ToolWindow
             var textArea = textEditor.TextArea;
             var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
 
-            var suggestions = _viewModel.CreateAutoCompleteSuggestions(textEditor.TextArea.Caret.Offset);
+            var suggestions = _viewModel.CreateAutoCompleteSuggestions(textArea.Caret.Offset);
 
-            completionWindow = CodeCompletionWindowFactory.Create(textArea, suggestions);
-            if (completionWindow is null) return;
-            completionWindow.Show();
-            completionWindow.Closed += delegate { completionWindow = null; };
+            _completionWindow = CodeCompletionWindowFactory.Create(textArea, suggestions);
+            if (_completionWindow is null) return;
+            _completionWindow.Show();
+            _completionWindow.Closed += delegate { _completionWindow = null; };
         }
 
         private void TextEditorPreviewKeyDown(object sender, KeyEventArgs e)

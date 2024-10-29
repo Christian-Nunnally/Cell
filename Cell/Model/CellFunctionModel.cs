@@ -82,5 +82,7 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(ReturnType));
             }
         }
+
+        public string Description { get; internal set; }
     }
 }

@@ -22,8 +22,8 @@ namespace CellTest.Core.Execution
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
+            _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
             return new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);

@@ -1,8 +1,6 @@
 ﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using CellTest.TestUtilities;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -11,14 +9,10 @@ namespace CellTest.Core.Persistence
     public class UndoRedoManagerTests
     {
         private CellTracker _cellTracker;
-        private PersistedDirectory _persistanceManager;
-        private CellLoader _cellLoader;
 
         private UndoRedoManager GetInstance()
         {
-            _persistanceManager = new PersistedDirectory("", new DictionaryFileIO());
-            _cellLoader = new CellLoader(_persistanceManager);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             return new UndoRedoManager(_cellTracker);
         }
 

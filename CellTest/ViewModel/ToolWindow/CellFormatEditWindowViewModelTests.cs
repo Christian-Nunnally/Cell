@@ -14,7 +14,6 @@ namespace CellTest.ViewModel.ToolWindow
         private CellTracker _cellTracker;
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
-        private CellLoader _cellLoader;
         private ObservableCollection<CellModel> _cellsToEdit;
         private PluginFunctionLoader _pluginFunctionLoader;
 
@@ -22,8 +21,7 @@ namespace CellTest.ViewModel.ToolWindow
         {
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _cellLoader = new CellLoader(_persistedDirectory);
-            _cellTracker = new CellTracker(_cellLoader);
+            _cellTracker = new CellTracker();
             _cellsToEdit = [];
             _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
             return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _pluginFunctionLoader);
@@ -58,8 +56,8 @@ namespace CellTest.ViewModel.ToolWindow
             cell.Location.Row = 0;
             var cell2 = new CellModel();
             cell2.Location.Row = 1;
-            _cellTracker.AddCell(cell, false);
-            _cellTracker.AddCell(cell2, false);
+            _cellTracker.AddCell(cell);
+            _cellTracker.AddCell(cell2);
             _cellsToEdit.Add(cell);
             _cellsToEdit.Add(cell2);
 
@@ -85,10 +83,10 @@ namespace CellTest.ViewModel.ToolWindow
             var cell4 = new CellModel();
             cell4.Location.Row = 1;
             cell4.Location.Column = 1;
-            _cellTracker.AddCell(cell, false);
-            _cellTracker.AddCell(cell2, false);
-            _cellTracker.AddCell(cell3, false);
-            _cellTracker.AddCell(cell4, false);
+            _cellTracker.AddCell(cell);
+            _cellTracker.AddCell(cell2);
+            _cellTracker.AddCell(cell3);
+            _cellTracker.AddCell(cell4);
             _cellsToEdit.Add(cell);
             _cellsToEdit.Add(cell2);
             _cellsToEdit.Add(cell3);

@@ -188,8 +188,10 @@ namespace Cell.View.Application
 
         private void OpenTextEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells);
+            if (_viewModel is null) return;
+            if (_viewModel.CellSelector is null) return;
+            if (_viewModel.PluginFunctionLoader is null) return;
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.PluginFunctionLoader);
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
         }
@@ -197,6 +199,8 @@ namespace Cell.View.Application
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
+            if (_viewModel.UserCollectionLoader is null) return;
+            if (_viewModel.PluginFunctionLoader is null) return;
             var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.PluginFunctionLoader);
             _viewModel.ShowToolWindow(collectionManagerViewModel);
         }
@@ -205,6 +209,7 @@ namespace Cell.View.Application
         {
             if (_viewModel == null) return;
             var functionLoader = _viewModel.PluginFunctionLoader;
+            if (functionLoader is null) return;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(functionManagerViewModel, Dock.Right);
             else _viewModel.ShowToolWindow(functionManagerViewModel);
@@ -220,7 +225,9 @@ namespace Cell.View.Application
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker, ApplicationViewModel.Instance.DialogFactory);
+            if (_viewModel.SheetTracker is null) return;
+            if (_viewModel.DialogFactory is null) return;
+            var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker, _viewModel.DialogFactory);
             _viewModel.ShowToolWindow(sheetManagerViewModel);
         }
 
@@ -265,6 +272,8 @@ namespace Cell.View.Application
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel?.SheetViewModel == null) return;
+            if (_viewModel.CellTracker is null) return;
+            if (_viewModel.PluginFunctionLoader is null) return;
             var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
             _viewModel.ShowToolWindow(viewModel);
         }
@@ -295,57 +304,57 @@ namespace Cell.View.Application
                 }
                 else if (e.Key == Key.Z)
                 {
-                    _viewModel.UndoRedoManager.Undo();
+                    _viewModel.UndoRedoManager?.Undo();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Y)
                 {
-                    _viewModel.UndoRedoManager.Redo();
+                    _viewModel.UndoRedoManager?.Redo();
                     e.Handled = true;
                 }
             }
             else if (e.Key == Key.Tab)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector.MoveSelectionLeft();
-                else _viewModel.CellSelector.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector?.MoveSelectionLeft();
+                else _viewModel.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector.MoveSelectionUp();
-                else _viewModel.CellSelector.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector?.MoveSelectionUp();
+                else _viewModel.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                _viewModel.CellSelector.MoveSelectionUp();
+                _viewModel.CellSelector?.MoveSelectionUp();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                _viewModel.CellSelector.MoveSelectionDown();
+                _viewModel.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                _viewModel.CellSelector.MoveSelectionLeft();
+                _viewModel.CellSelector?.MoveSelectionLeft();
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                _viewModel.CellSelector.MoveSelectionRight();
+                _viewModel.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)
             {
-                var selectedCells = _viewModel.CellSelector.SelectedCells;
-                _viewModel.UndoRedoManager.StartRecordingUndoState();
+                var selectedCells = _viewModel.CellSelector?.SelectedCells ?? [];
+                _viewModel.UndoRedoManager?.StartRecordingUndoState();
                 foreach (var cell in selectedCells)
                 {
-                    _viewModel.UndoRedoManager.RecordStateIfRecording(cell);
+                    _viewModel.UndoRedoManager?.RecordStateIfRecording(cell);
                     cell.Text = "";
                 }
-                _viewModel.UndoRedoManager.FinishRecordingUndoState();
+                _viewModel.UndoRedoManager?.FinishRecordingUndoState();
                 e.Handled = true;
             }
             else if (e.Key == Key.Escape)

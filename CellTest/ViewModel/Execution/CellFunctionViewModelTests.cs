@@ -3,7 +3,7 @@ using CellTest.TestUtilities;
 using Cell.ViewModel.Execution;
 using Cell.Core.Execution.Functions;
 
-namespace CellTest.ViewModel.ToolWindow
+namespace CellTest.ViewModel.Execution
 {
     public class CellFunctionViewModelTests
     {
