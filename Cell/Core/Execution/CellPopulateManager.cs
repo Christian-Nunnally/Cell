@@ -38,17 +38,12 @@ namespace Cell.Core.Execution
             _cellTracker = cellTracker;
             _cellTracker.CellAdded += StartMonitoringCellForChanges;
             _cellTracker.CellRemoved += StopMonitoringCellForChanges;
+            _pluginFunctionLoader = pluginFunctionLoader;
             foreach (var cell in _cellTracker.AllCells)
             {
                 StartMonitoringCellForChanges(cell);
             }
-            _pluginFunctionLoader = pluginFunctionLoader;
         }
-
-        /// <summary>
-        /// Allows the populate mechanism to run. This is disabled during load to prevent uneccessary updates.
-        /// </summary>
-        public bool UpdateCellsWhenANewCellIsAdded { get => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded; set => _cellTextChangesAtLocationNotifier.NotifyWhenCellIsAdded = value; }
 
         /// <summary>
         /// Gets all collections the given cell is subscribed to.
@@ -159,6 +154,10 @@ namespace Cell.Core.Execution
                 TrackCollectionReference(cell, cellSpecificCollectionReference);
 
                 var collectionName = cellSpecificCollectionReference.GetCollectionName();
+                if (string.IsNullOrWhiteSpace(collectionName))
+                {
+                    throw new InvalidOperationException(collectionName + " is not a valid collection name.");
+                }
                 SubscribeToCollectionUpdates(cellSpecificCollectionReference.Cell, collectionName);
             }
         }

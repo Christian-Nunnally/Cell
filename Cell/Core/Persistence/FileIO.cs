@@ -102,6 +102,16 @@ namespace Cell.Core.Persistence
         }
 
         /// <summary>
+        /// Reads the contents of a file.
+        /// </summary>
+        /// <param name="path">The path of the file.</param>
+        /// <returns>The contents of the file.</returns>
+        public Task<string> ReadFileAsync(string path)
+        {
+            return File.ReadAllTextAsync(path);
+        }
+
+        /// <summary>
         /// Writes the given text to a file. Will overwrite existing file.
         /// </summary>
         /// <param name="path">The path of the file to write.</param>

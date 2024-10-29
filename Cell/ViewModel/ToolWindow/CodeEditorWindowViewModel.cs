@@ -34,7 +34,7 @@ namespace Cell.ViewModel.ToolWindow
             _cellFunctionCodeSuggestionGenerator = new CellFunctionCodeSuggestionGenerator(CellFunction.UsingNamespaces, cellContextFromWhichTheFunctionIsBeingEdited);
             FunctionBeingEdited = functionToBeEdited;
             _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToDataTypeMap);
-            _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, collectionNameToDataTypeMap);
+            _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, functionToBeEdited.Model.ReturnType, collectionNameToDataTypeMap);
             _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
             _contextToTestWith = contextToTestWith;
@@ -57,7 +57,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 _currentTextInEditor = value;
                 _isDirty = true;
-                _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, _collectionNameToDataTypeMap);
+                _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, FunctionBeingEdited.Model.ReturnType, _collectionNameToDataTypeMap);
                 NotifyPropertyChanged(nameof(CurrentTextInEditor));
                 NotifyPropertyChanged(nameof(ToolWindowTitle));
             }

@@ -9,6 +9,7 @@ using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Drawing;
 using System.Reflection;
 
 namespace Cell.Core.Execution.CodeCompletion
@@ -18,13 +19,14 @@ namespace Cell.Core.Execution.CodeCompletion
     /// </summary>
     public class CellFunctionCodeSuggestionGenerator
     {
-        private readonly static Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
-        private static readonly IList<ICompletionData> NoCompletionData = [new CodeCompletionData("", "No completion data found", "", IconChar.None)];
-        private static List<ICompletionData>? _cachedGlobalCompletionData = null;
+        private readonly Dictionary<Type, IList<ICompletionData>> _cachedCompletionData = [];
+        private readonly IList<ICompletionData> NoCompletionData = [new CodeCompletionData("", "No completion data found", "", IconChar.None)];
+        private List<ICompletionData>? _cachedGlobalCompletionData = null;
         private readonly CellModel? _cellContext;
         private readonly SemanticAnalyzer _semanticAnalyzer;
         private string _currentUserCodeText = string.Empty;
         private Dictionary<string, Type> _computedOuterContextVariables = [];
+        private string _returnType;
 
         /// <summary>
         /// Creates a new instance of <see cref="CellFunctionCodeSuggestionGenerator"/>.
@@ -35,17 +37,23 @@ namespace Cell.Core.Execution.CodeCompletion
         {
             _semanticAnalyzer = new SemanticAnalyzer(usings);
             _cellContext = cellContext;
+            _computedOuterContextVariables = CreateOuterContextVariablesForFunction();
+            _returnType = "void";
         }
 
         /// <summary>
-        /// 
+        /// Updates the code and return type to analyze for code completion suggestions.
         /// </summary>
-        /// <param name="code"></param>
-        /// <param name="variableNameToTypeMapForOuterContext">A dictionary of variable names and thier type to be considered as valid even if they are not declared in the given code.</param>
-        public void UpdateCode(string code, IReadOnlyDictionary<string, string> variableNameToTypeMapForOuterContext)
+        /// <param name="code">The code to analyze for code completion suggestions.</param>
+        /// <param name="returnType">The return type of the code for additional suggestion support.</param>
+        /// <param name="collectionNameToTypeMap">A dictionary of variable names and thier type to be considered as valid even if they are not declared in the given code.</param>
+        public void UpdateCode(string code, string returnType, IReadOnlyDictionary<string, string> collectionNameToTypeMap)
         {
             _currentUserCodeText = code;
-            _computedOuterContextVariables = CreateOuterContextVariablesForFunction(code, variableNameToTypeMapForOuterContext);
+            _computedOuterContextVariables = CreateOuterContextVariablesForFunction();
+            AddCollectionTypesToVariableTypeMap(collectionNameToTypeMap, _computedOuterContextVariables);
+            AddCellReferencesToVariableTypeMap(code, _computedOuterContextVariables);
+            _returnType = returnType;
             _semanticAnalyzer.UpdateCode(code, _computedOuterContextVariables);
         }
 
@@ -66,17 +74,16 @@ namespace Cell.Core.Execution.CodeCompletion
                 : NoCompletionData;
         }
 
-        /// <summary>
-        /// Generates a list of variables and thier types that are in the outer context of a function, including the cell and context variables, plus any cell references.
-        /// </summary>
-        /// <param name="code">The code look for cell references in.</param>
-        /// <param name="collectionNameToDataTypeMap">A map of collection names and the data type of the items in them.</param>
-        /// <returns>A map from variable name to variable type.</returns>
-        public Dictionary<string, Type> CreateOuterContextVariablesForFunction(string code, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
+        private Dictionary<string, Type> CreateOuterContextVariablesForFunction()
         {
-            var outerContextVariables = CreateStandardCellFunctionGlobalVariableTypeMap(collectionNameToDataTypeMap);
-            if (_cellContext == null) return outerContextVariables;
+            var variableTypeMap = new Dictionary<string, Type>();
+            AddStandardCellFunctionToVariableToTypeMap(variableTypeMap);
+            return variableTypeMap;
+        }
 
+        private void AddCellReferencesToVariableTypeMap(string code, Dictionary<string, Type> variableTypeMap)
+        {
+            if (_cellContext == null) return;
             var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(_cellContext.Location);
             var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(_cellContext.Location);
             var cellReferenceFinder = new CellReferenceSyntaxWalker();
@@ -89,24 +96,25 @@ namespace Cell.Core.Execution.CodeCompletion
                 if (_cellContext is null) break;
                 var type = cellReference.IsRange ? typeof(CellRange) : typeof(CellModel);
                 var name = codeToCellReferenceSyntaxRewriter.GetUserFriendlyCellReferenceText(cellReference);
-                if (outerContextVariables.ContainsKey(name)) continue;
-                outerContextVariables.Add(name, type);
+                if (variableTypeMap.ContainsKey(name)) continue;
+                variableTypeMap.Add(name, type);
             }
-
-            return outerContextVariables;
         }
 
-        private Dictionary<string, Type> CreateStandardCellFunctionGlobalVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap)
+        private void AddStandardCellFunctionToVariableToTypeMap(Dictionary<string, Type> variableTypeMap)
         {
-            var outerContextVariables = new Dictionary<string, Type> { { "c", typeof(Context) }, { "cell", typeof(CellModel) } };
+            variableTypeMap.Add("cell", typeof(CellModel));
+            variableTypeMap.Add("c", typeof(Context));
+        }
+
+        private static void AddCollectionTypesToVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap, Dictionary<string, Type> variableTypeMap)
+        {
             foreach (var (userCollectionName, typeName) in collectionNameTypeMap)
             {
                 var type = PluginModel.GetTypeFromString(typeName);
                 var enumerableType = typeof(UserList<>).MakeGenericType(type);
-                outerContextVariables.Add(userCollectionName, enumerableType);
+                variableTypeMap.Add(userCollectionName, enumerableType);
             }
-
-            return outerContextVariables;
         }
 
         private List<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
@@ -182,6 +190,13 @@ namespace Cell.Core.Execution.CodeCompletion
             return "";
         }
 
+        private bool IsNewLinePriorToCarrot(int carrotPosition)
+        {
+            if (_currentUserCodeText.Length > carrotPosition || _currentUserCodeText.Length == 0) return true;
+            var offset = carrotPosition - 1;
+            return _currentUserCodeText[offset] == '\n';
+        }
+
         private bool TryGetCompletionDataFromTheWordBeforeTheCursor(int carrotPosition, out IList<ICompletionData>? completionData)
         {
             completionData = null;
@@ -189,12 +204,30 @@ namespace Cell.Core.Execution.CodeCompletion
             if (typeNameInFrontOfCarrot == string.Empty)
             {
                 completionData = CreateCompletionDataForGlobalContext(_computedOuterContextVariables);
+                if (IsNewLinePriorToCarrot(carrotPosition))
+                {
+                    AddStandardStartOfLineKeywords(completionData);
+                }
+                if (_returnType != "void")
+                {
+                    completionData.Add(new CodeCompletionData("return", "return", "return" + "The return keyword denotes the expression whos result is output from this function.", IconChar.ArrowLeft));
+                }
             }
             else if (CellReferenceToCodeSyntaxRewriter.IsCellLocation(typeNameInFrontOfCarrot))
             {
                 completionData = CreateCompletionDataForType(typeof(CellModel));
             }
             return completionData is not null;
+        }
+
+        private static void AddStandardStartOfLineKeywords(IList<ICompletionData> completionData)
+        {
+            completionData.Add(new CodeCompletionData("var", "var", "var" + "Initializes a new variable that has a dynamically determined type", IconChar.Add));
+            completionData.Add(new CodeCompletionData("if", "if", "if" + "An if statement that executes code if a condition is met.", IconChar.Add));
+            completionData.Add(new CodeCompletionData("switch", "switch", "switch" + "An switch statement that executes different code based on the value of an expression.", IconChar.Add));
+            completionData.Add(new CodeCompletionData("while", "while", "while" + "Loops over the code in its body while a condition is true.", IconChar.Add));
+            completionData.Add(new CodeCompletionData("for", "for", "for" + "Loops over the code in its body and increments a variable until a conition is met.", IconChar.Add));
+            completionData.Add(new CodeCompletionData("foreach", "foreach", "foreach" + "Loops over the code in its body for each item in a collection.", IconChar.Add));
         }
 
         /// <summary>

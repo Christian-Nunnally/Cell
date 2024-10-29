@@ -41,8 +41,8 @@ namespace Cell
             applicationViewModel.UserCollectionLoader = userCollectionLoader;
             var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
-            var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
-            applicationViewModel.CellPopulateManager = cellPopulateManager;
+            //var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
+            //applicationViewModel.CellPopulateManager = cellPopulateManager;
             var sheetTracker = new SheetTracker(cellTracker);
             applicationViewModel.SheetTracker = sheetTracker;
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
@@ -65,6 +65,12 @@ namespace Cell
 
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells, pluginFunctionLoader);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+
+            applicationViewModel.EnsureInitialBackupIsStarted();
+            if (!persistedProject.NeedsMigration())
+            {
+                userCollectionLoader.EnsureCollectionLoadHasStarted();
+            }
         }
     }
 }

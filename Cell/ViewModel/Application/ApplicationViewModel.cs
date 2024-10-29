@@ -25,7 +25,7 @@ namespace Cell.ViewModel.Application
         private static ApplicationViewModel? _instance;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private Task _backupTask = Task.CompletedTask;
+        private Task? _backupTask;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
@@ -209,7 +209,7 @@ namespace Cell.ViewModel.Application
                 
             }
             if (SheetViewModel == null) return;
-            CellClipboard.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
+            CellClipboard?.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
         /// <summary>
@@ -331,12 +331,16 @@ namespace Cell.ViewModel.Application
         private async Task BackupAsync()
         {
             if (PersistedProject == null) return;
-            await Task.Run(() =>
-            {
-                PersistedProject.IsReadOnly = true;
-                BackupManager!.CreateBackup();
-                PersistedProject.IsReadOnly = false;
-            });
+            PersistedProject.IsReadOnly = true;
+            BackupManager!.CreateBackup();
+            PersistedProject.IsReadOnly = false;
+        }
+
+        private bool _hasVersionBeenSaved = false;
+        public void EnsureInitialBackupIsStarted()
+        {
+            if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
+            _backupTask ??= Task.Run(BackupAsync);
         }
 
         private LoadingProgressResult LoadPhase1()
@@ -353,8 +357,7 @@ namespace Cell.ViewModel.Application
                 return new LoadingProgressResult(false, "Migration needed, try loading again.");
             }
 
-            PersistedProject.SaveVersion();
-            _backupTask = BackupAsync();
+            EnsureInitialBackupIsStarted();
             return new LoadingProgressResult("Loading Collections", LoadPhase2);
         }
 
@@ -378,14 +381,19 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase5()
         {
-            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = false;
             CellLoader.LoadCells();
-            CellPopulateManager.UpdateCellsWhenANewCellIsAdded = true;
+            return new LoadingProgressResult("Initializing populate manager", LoadPhase5b);
+        }
+
+        private LoadingProgressResult LoadPhase5b()
+        {
+            CellPopulateManager = new CellPopulateManager(CellTracker, PluginFunctionLoader, UserCollectionLoader);
             return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
         }
 
         private LoadingProgressResult LoadPhase6()
         {
+            if (_backupTask is null) return new LoadingProgressResult(false, "Aborted the load because a backup has no yet been started, and I want to backup before loading to protect data.");
             _backupTask.Wait();
             IsProjectLoaded = true;
             _isProjectLoading = false;

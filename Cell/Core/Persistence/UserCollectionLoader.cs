@@ -25,6 +25,8 @@ namespace Cell.Core.Persistence
         private readonly PersistedDirectory _collectionsDirectory;
         private readonly PluginFunctionLoader _pluginFunctionLoader;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
+        private Task? _loadCollectionsTask;
+
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
         /// </summary>
@@ -126,15 +128,26 @@ namespace Cell.Core.Persistence
             }
         }
 
-        /// <summary>
-        /// Loads all collections from disk.
-        /// </summary>
-        public void LoadCollections()
+        public void EnsureCollectionLoadHasStarted()
+        {
+            _loadCollectionsTask ??= Task.Run(LoadCollectionsAsync);
+        }
+
+        private async Task LoadCollectionsAsync()
         {
             foreach (var directory in _collectionsDirectory.GetDirectories())
             {
                 LoadCollection(directory);
             }
+        }
+
+        /// <summary>
+        /// Loads all collections from disk.
+        /// </summary>
+        public void LoadCollections()
+        {
+            EnsureCollectionLoadHasStarted();
+            _loadCollectionsTask?.Wait();
         }
 
         /// <summary>

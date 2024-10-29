@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
 using System.Diagnostics;
 
@@ -23,11 +24,9 @@ namespace CellTest.Core.Execution
         public void NoCode_CompletionDataCreated_ShowsTypesProvidedToFactory()
         {
             IEnumerable<string> usings = [];
-            var code = "";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
 
-            var completionData = _testing.CreateCompletionData(code.Length);
+            var completionData = _testing.CreateCompletionData(0);
 
             Assert.Single(completionData, x => x.Text == $"c");
         }
@@ -36,13 +35,60 @@ namespace CellTest.Core.Execution
         public void NoCode_CompletionDataCreated_TypesHaveDocumentation()
         {
             IEnumerable<string> usings = [];
-            var code = "";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
 
-            var completionData = _testing.CreateCompletionData(code.Length);
+            var completionData = _testing.CreateCompletionData(0);
 
             Assert.NotEmpty(completionData.First().Description.ToString()!);
+        }
+
+        [Fact]
+        public void NoCode_CompletionDataCreated_VarKeywordSuggested()
+        {
+            IEnumerable<string> usings = [];
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+
+            var completionData = _testing.CreateCompletionData(0);
+
+            Assert.True(completionData.Count(x => x.Text == "var") == 1);
+        }
+
+        [Fact]
+        public void NoCode_CompletionDataCreated_ControlKeywordsSuggested()
+        {
+            IEnumerable<string> usings = [];
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+
+            var completionData = _testing.CreateCompletionData(0);
+
+            Assert.True(completionData.Count(x => x.Text == "if") == 1);
+            Assert.True(completionData.Count(x => x.Text == "switch") == 1);
+            Assert.True(completionData.Count(x => x.Text == "while") == 1);
+            Assert.True(completionData.Count(x => x.Text == "for") == 1);
+            Assert.True(completionData.Count(x => x.Text == "foreach") == 1);
+        }
+
+        [Fact]
+        public void NoCodeOnFunctionThatReturnsVoid_CompletionDataCreated_ReturnKeywordNotSuggested()
+        {
+            IEnumerable<string> usings = [];
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+
+            var completionData = _testing.CreateCompletionData(0);
+
+            Assert.True(completionData.Count(x => x.Text == "return") == 0);
+        }
+
+        [Fact]
+        public void NoCodeOnFunctionThatReturnsObject_CompletionDataCreated_ReturnKeywordNotSuggested()
+        {
+            IEnumerable<string> usings = [];
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(string.Empty, "object", new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(0);
+
+            Assert.True(completionData.Count(x => x.Text == "return") == 1);
         }
 
         [Fact]
@@ -51,7 +97,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -65,7 +111,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.E.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -74,12 +120,25 @@ namespace CellTest.Core.Execution
         }
 
         [Fact]
+        public void PluginContextVariableWithDotEButNoUsingProvided_CompletionDataCreated_ContainsEditContextField()
+        {
+            IEnumerable<string> usings = [];
+            var code = "c.E.";
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+
+            var completionData = _testing.CreateCompletionData(code.Length).Select(x => x.Text);
+
+            Assert.Contains(nameof(EditContext.Reason), completionData);
+        }
+
+        [Fact]
         public void PluginContextVariableWithDot_CompletionDataCreated_HasCorrectTypes()
         {
             IEnumerable<string> usings = ["Cell.Execution"];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -92,7 +151,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -106,7 +165,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -123,7 +182,7 @@ namespace CellTest.Core.Execution
                 { "cell", typeof(CellModel) }
             };
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -137,7 +196,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -151,7 +210,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.Text.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -168,7 +227,7 @@ namespace CellTest.Core.Execution
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
             for (int i = 0; i < 100; i++)
             {
                 _testing.CreateCompletionData(code.Length);

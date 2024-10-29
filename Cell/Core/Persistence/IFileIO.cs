@@ -67,6 +67,13 @@
         string ReadFile(string path);
 
         /// <summary>
+        /// Reads the contents of a file.
+        /// </summary>
+        /// <param name="path">The path of the file.</param>
+        /// <returns>The contents of the file.</returns>
+        Task<string> ReadFileAsync(string path);
+
+        /// <summary>
         /// Writes the given text to a file. Will overwrite existing file.
         /// </summary>
         /// <param name="path">The path of the file to write.</param>
