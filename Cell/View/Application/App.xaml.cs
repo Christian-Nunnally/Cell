@@ -33,16 +33,15 @@ namespace Cell
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
             applicationViewModel.PersistedProject = persistedProject;
-            var pluginFunctionLoader = new PluginFunctionLoader(persistedProject.FunctionsDirectory);
-            applicationViewModel.PluginFunctionLoader = pluginFunctionLoader;
+            var functionTracker = new FunctionTracker();
+            var pluginFunctionLoader = new FunctionLoader(persistedProject.FunctionsDirectory, functionTracker);
+            applicationViewModel.FunctionLoader = pluginFunctionLoader;
             var cellTracker = new CellTracker();
             applicationViewModel.CellTracker = cellTracker;
-            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, pluginFunctionLoader, cellTracker);
+            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, functionTracker, cellTracker);
             applicationViewModel.UserCollectionLoader = userCollectionLoader;
-            var cellTriggerManager = new CellTriggerManager(cellTracker, pluginFunctionLoader, userCollectionLoader, dialogFactory);
+            var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionLoader, dialogFactory);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
-            //var cellPopulateManager = new CellPopulateManager(cellTracker, pluginFunctionLoader, userCollectionLoader);
-            //applicationViewModel.CellPopulateManager = cellPopulateManager;
             var sheetTracker = new SheetTracker(cellTracker);
             applicationViewModel.SheetTracker = sheetTracker;
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
@@ -63,7 +62,7 @@ namespace Cell
 
             persistedProject.RegisterMigrator("1", "2", new Migration());
 
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells, pluginFunctionLoader);
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells, functionTracker);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
 
             applicationViewModel.EnsureInitialBackupIsStarted();

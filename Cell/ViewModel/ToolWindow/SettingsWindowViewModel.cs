@@ -76,7 +76,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
         }
 
@@ -84,7 +84,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (ApplicationViewModel.Instance.SheetViewModel == null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
-            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.PluginFunctionLoader);
+            var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
         }
     }

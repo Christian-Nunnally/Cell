@@ -17,7 +17,7 @@ namespace CellTest.ViewModel.Application
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellLoader _cellLoader;
         private readonly CellTriggerManager _cellTriggerManager;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionLoader _pluginFunctionLoader;
         private readonly CellTracker _cellTracker;
         private readonly SheetTracker _sheetTracker;
         private readonly ApplicationSettings _applicationSettings;
@@ -27,6 +27,7 @@ namespace CellTest.ViewModel.Application
         private readonly BackupManager _backupManager;
         private readonly CellSelector _cellSelector;
         private readonly PersistedProject _persistedProject;
+        private readonly FunctionTracker _functionTracker;
         private readonly ApplicationViewModel _testing;
 
         public ApplicationViewModelTests()
@@ -36,12 +37,13 @@ namespace CellTest.ViewModel.Application
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);
             _persistedProject = new PersistedProject(_persistedDirectory);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _functionTracker = new FunctionTracker();
+            _pluginFunctionLoader = new FunctionLoader(_persistedDirectory, _functionTracker);
             _cellTracker = new CellTracker();
             _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
             _sheetTracker = new SheetTracker(_cellTracker);
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
@@ -51,7 +53,8 @@ namespace CellTest.ViewModel.Application
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
             _testing = new ApplicationViewModel
             {
-                PluginFunctionLoader = _pluginFunctionLoader,
+                FunctionTracker = _functionTracker,
+                FunctionLoader = _pluginFunctionLoader,
                 CellTracker = _cellTracker,
                 CellLoader = _cellLoader,
                 UserCollectionLoader = _userCollectionLoader,

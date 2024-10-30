@@ -1,49 +1,39 @@
 ﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
-using CellTest.TestUtilities;
 using System.Collections.ObjectModel;
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace CellTest.ViewModel.ToolWindow
 {
     public class CellFormatEditWindowViewModelTests
     {
-        private CellTracker _cellTracker;
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private ObservableCollection<CellModel> _cellsToEdit;
-        private PluginFunctionLoader _pluginFunctionLoader;
+        private readonly CellTracker _cellTracker;
+        private readonly ObservableCollection<CellModel> _cellsToEdit;
+        private readonly FunctionTracker _functionTracker;
+        private readonly CellFormatEditWindowViewModel _testing;
 
-        private CellFormatEditWindowViewModel CreateInstance()
+        public CellFormatEditWindowViewModelTests()
         {
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            return new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _pluginFunctionLoader);
+            _functionTracker = new FunctionTracker();
+            _testing = new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _functionTracker);
         }
 
         [Fact]
         public void EmptyListOfCells_MergeCellsDown_Runs()
         {
-            var testing = CreateInstance();
-
-            testing.MergeCellsDown();
+            _testing.MergeCellsDown();
         }
 
         [Fact]
         public void SingleCell_MergeCellsDown_DoesNoSetMergedWithIdToSelf()
         {
-            var testing = CreateInstance();
             var cells = new List<CellModel>();
             var cell = new CellModel();
             cells.Add(cell);
 
-            testing.MergeCellsDown();
+            _testing.MergeCellsDown();
 
             Assert.False(cell.IsMerged());
         }
@@ -51,7 +41,6 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void TwoCellsInSameColumn_MergeCellsDown_BothCellsMerged()
         {
-            var testing = CreateInstance();
             var cell = new CellModel();
             cell.Location.Row = 0;
             var cell2 = new CellModel();
@@ -61,7 +50,7 @@ namespace CellTest.ViewModel.ToolWindow
             _cellsToEdit.Add(cell);
             _cellsToEdit.Add(cell2);
 
-            testing.MergeCellsDown();
+            _testing.MergeCellsDown();
 
             Assert.True(cell.IsMerged());
             Assert.True(cell2.IsMerged());
@@ -70,7 +59,6 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void TwoByTwoGridOfCellsWithAllSelected_MergeCellsDown_TwoMergeParentsCreated()
         {
-            var testing = CreateInstance();
             var cell = new CellModel();
             cell.Location.Row = 0;
             cell.Location.Column = 0;
@@ -92,7 +80,7 @@ namespace CellTest.ViewModel.ToolWindow
             _cellsToEdit.Add(cell3);
             _cellsToEdit.Add(cell4);
 
-            testing.MergeCellsDown();
+            _testing.MergeCellsDown();
 
             Assert.True(cell.IsMergedParent());
             Assert.True(cell2.IsMergedWith(cell));
@@ -101,5 +89,3 @@ namespace CellTest.ViewModel.ToolWindow
         }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

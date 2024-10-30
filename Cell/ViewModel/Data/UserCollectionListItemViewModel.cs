@@ -11,16 +11,16 @@ namespace Cell.ViewModel.Data
     /// </summary>
     public class UserCollectionListItemViewModel : PropertyChangedBase
     {
-        public UserCollectionListItemViewModel(UserCollection underlyingCollection, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
+        public UserCollectionListItemViewModel(UserCollection underlyingCollection, FunctionTracker functionTracker, UserCollectionLoader userCollectionLoader)
         {
             Collection = underlyingCollection;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _userCollectionLoader = userCollectionLoader;
         }
 
         public UserCollection Collection { get; private set; }
 
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Cell.ViewModel.Data
         {
             get
             {
-                var usagesWithinFunctions = _pluginFunctionLoader.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == Collection.Model.Name));
+                var usagesWithinFunctions = _functionTracker.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == Collection.Model.Name));
                 var collectionsUsingThisCollectionAsABase = _userCollectionLoader.UserCollections.Count(x => x.Model.BasedOnCollectionName == Collection.Model.Name);
                 return usagesWithinFunctions + collectionsUsingThisCollectionAsABase;
             }

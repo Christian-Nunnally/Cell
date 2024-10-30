@@ -1,35 +1,24 @@
-﻿using Cell.Core.Common;
-using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Execution.Functions;
 using Cell.Model;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text.Json;
 
-namespace Cell.Core.Persistence
+namespace Cell.Core.Data
 {
-    /// <summary>
-    /// Tracks and loads plugin functions.
-    /// </summary>
-    public class PluginFunctionLoader
+    public class FunctionTracker
     {
-        private readonly PersistedDirectory _functionsDirectory;
-        /// <summary>
-        /// Creates a new instance of the <see cref="PluginFunctionLoader"/> class.
-        /// </summary>
-        /// <param name="functionsDirectory">A directory to load and store functions to.</param>
-        public PluginFunctionLoader(PersistedDirectory functionsDirectory)
-        {
-            _functionsDirectory = functionsDirectory;
-        }
-
         /// <summary>
         /// An observable collection of all the loaded cell functions.
         /// </summary>
         public ObservableCollection<CellFunction> CellFunctions { get; private set; } = [];
 
         private Dictionary<string, Dictionary<string, CellFunction>> Namespaces { get; set; } = [];
+
+
+        public event Action<CellFunction> FunctionAdded;
+
+        public event Action<CellFunction> FunctionRemoved;
 
         /// <summary>
         /// Starts tracking a function.
@@ -41,7 +30,7 @@ namespace Cell.Core.Persistence
             if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Model.Name, function);
             else Namespaces.Add(space, new Dictionary<string, CellFunction> { { function.Model.Name, function } });
             CellFunctions.Add(function);
-            function.Model.PropertyChanged += OnCellFunctionModelPropertyChanged;
+            FunctionAdded?.Invoke(function);
         }
 
         /// <summary>
@@ -59,7 +48,6 @@ namespace Cell.Core.Persistence
             var model = new CellFunctionModel(name, code, space);
             var function = new CellFunction(model);
             AddCellFunctionToNamespace(space, function);
-            SaveCellFunction(space, function.Model);
             return function;
         }
 
@@ -71,13 +59,9 @@ namespace Cell.Core.Persistence
         {
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {
-                function.Model.PropertyChanged -= OnCellFunctionModelPropertyChanged;
                 namespaceFunctions.Remove(function.Model.Name);
                 CellFunctions.Remove(function);
-
-                if (string.IsNullOrEmpty(function.Model.Name)) return;
-                var path = Path.Combine(function.Model.ReturnType, function.Model.Name);
-                _functionsDirectory.DeleteFile(path);
+                FunctionRemoved(function);
             }
         }
 
@@ -91,49 +75,6 @@ namespace Cell.Core.Persistence
         {
             if (TryGetCellFunction(space, name, out var function)) return function;
             return CreateCellFunction(space, name);
-        }
-
-        /// <summary>
-        /// Loads all the cell functions from the project directory.
-        /// </summary>
-        public void LoadCellFunctions()
-        {
-            foreach (var namespacePath in _functionsDirectory.GetDirectories())
-            {
-                foreach (var file in _functionsDirectory.GetFiles(namespacePath))
-                {
-                    CellFunctionModel? model = LoadFunction(file);
-                    if (model == null) continue;
-                    var function = new CellFunction(model);
-                    var space = Path.GetFileName(namespacePath);
-                    AddCellFunctionToNamespace(space, function);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Loads a cell function from the given file in the directory.
-        /// </summary>
-        /// <param name="file">The function file to load.</param>
-        /// <returns>The loaded function model.</returns>
-        /// <exception cref="CellError">If the function was not able to be loaded.</exception>
-        public CellFunctionModel LoadFunction(string file)
-        {
-            var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
-            return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
-        }
-
-        /// <summary>
-        /// Saves a cell function to the directory.
-        /// </summary>
-        /// <param name="space">The namespace to save the function in.</param>
-        /// <param name="function">The function to save.</param>
-        public void SaveCellFunction(string space, CellFunctionModel function)
-        {
-            if (string.IsNullOrWhiteSpace(function.Name)) return;
-            var path = Path.Combine(space, function.Name);
-            var serializedContent = JsonSerializer.Serialize(function);
-            _functionsDirectory.SaveFile(path, serializedContent);
         }
 
         /// <summary>
@@ -156,12 +97,6 @@ namespace Cell.Core.Persistence
                 }
             }
             return false;
-        }
-
-        private void OnCellFunctionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var function = (CellFunctionModel)sender!;
-            SaveCellFunction(function.ReturnType, function);
         }
     }
 }

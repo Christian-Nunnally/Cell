@@ -1,9 +1,9 @@
 ﻿using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using Cell.Core.Data;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -12,7 +12,7 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private string _dependencciesListBoxFilterText = string.Empty;
         private string _filterCollection = string.Empty;
         private string _filterSheet = "All";
@@ -25,10 +25,10 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
         /// </summary>
-        /// <param name="pluginFunctionLoader">The object to get the functions from.</param>
-        public FunctionManagerWindowViewModel(PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="functionTracker">The object to get the functions from.</param>
+        public FunctionManagerWindowViewModel(FunctionTracker functionTracker)
         {
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the list of functions after the filter has been applied from the user.
         /// </summary>
-        public IEnumerable<CellFunctionViewModel> FilteredFunctions => _pluginFunctionLoader.CellFunctions.Select(x => new CellFunctionViewModel(x)).Where(IsFunctionIncludedInFilter);
+        public IEnumerable<CellFunctionViewModel> FilteredFunctions => _functionTracker.CellFunctions.Select(x => new CellFunctionViewModel(x)).Where(IsFunctionIncludedInFilter);
 
         /// <summary>
         /// Gets the list of users of the selected function after the filter has been applied from the user.
@@ -249,13 +249,13 @@ namespace Cell.ViewModel.ToolWindow
         {
             var index = 0;
             var newPopulateFunctionName = "NewPopulateFunction";
-            var existingNames = _pluginFunctionLoader.CellFunctions.Select(x => x.Model.Name).ToList();
+            var existingNames = _functionTracker.CellFunctions.Select(x => x.Model.Name).ToList();
             while (existingNames.Any(x => x == newPopulateFunctionName))
             {
                 index += 1;
                 newPopulateFunctionName += $"NewPopulateFunction{index}";
             }
-            _pluginFunctionLoader.CreateCellFunction("object", newPopulateFunctionName, "return \"Hello world\";");
+            _functionTracker.CreateCellFunction("object", newPopulateFunctionName, "return \"Hello world\";");
         }
 
         /// <summary>
@@ -265,13 +265,13 @@ namespace Cell.ViewModel.ToolWindow
         {
             var index = 0;
             var newTriggerFunctionName = "NewTriggerFunction";
-            var existingNames = _pluginFunctionLoader.CellFunctions.Select(x => x.Model.Name).ToList();
+            var existingNames = _functionTracker.CellFunctions.Select(x => x.Model.Name).ToList();
             while (existingNames.Any(x => x == newTriggerFunctionName))
             {
                 index += 1;
                 newTriggerFunctionName += $"NewTriggerFunction{index}";
             }
-            _pluginFunctionLoader.CreateCellFunction("void", newTriggerFunctionName, string.Empty);
+            _functionTracker.CreateCellFunction("void", newTriggerFunctionName, string.Empty);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingClosed()
         {
-            _pluginFunctionLoader.CellFunctions.CollectionChanged -= FunctionsCollectionChanged;
+            _functionTracker.CellFunctions.CollectionChanged -= FunctionsCollectionChanged;
             FilterSheetOptions.Clear();
             FilterCollectionOptions.Clear();
         }
@@ -289,7 +289,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
-            _pluginFunctionLoader.CellFunctions.CollectionChanged += FunctionsCollectionChanged;
+            _functionTracker.CellFunctions.CollectionChanged += FunctionsCollectionChanged;
             FilterSheetOptions.Add("All");
             foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
             {

@@ -13,7 +13,7 @@ namespace Cell.Core.Execution
     {
         private readonly CellModel _cell;
         private readonly CellTracker _cellTracker;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateSubscriber"/>.
@@ -21,13 +21,13 @@ namespace Cell.Core.Execution
         /// <param name="cell">The cell to populate when this subscriber is triggered.</param>
         /// <param name="cellTracker">The cell tracker used in the context when running populate.</param>
         /// <param name="userCollectionLoader">The user collection loader used in the context when running populate.</param>
-        /// <param name="pluginFunctionLoader">The function loader to load the populate function from.</param>
-        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="functionTracker">The function tracker to get the populate function from.</param>
+        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionLoader userCollectionLoader, FunctionTracker functionTracker)
         {
             _cell = cell;
             _cellTracker = cellTracker;
             _userCollectionLoader = userCollectionLoader;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Cell.Core.Execution
         private CompileResult RunPopulate(CellModel subscriber)
         {
             var pluginContext = new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), subscriber);
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
+            if (!_functionTracker.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
             var result = populateFunction.Run(pluginContext);
             if (!result.WasSuccess) return result;
             var returnedObject = result.ReturnedObject;

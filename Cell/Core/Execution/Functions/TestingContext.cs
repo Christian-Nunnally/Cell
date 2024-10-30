@@ -24,11 +24,11 @@ namespace Cell.Core.Execution.Functions
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
         /// <param name="cell">The context cell.</param>
-        /// <param name="pluginFunctionLoader">The function loader for loading sort functions for read only collections.</param>
-        public TestingContext(CellTracker cellTracker, IUserCollectionProvider userCollectionLoader, CellModel cell, PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="functionTracker">The function tracker for loading sort functions for read only collections.</param>
+        public TestingContext(CellTracker cellTracker, IUserCollectionProvider userCollectionLoader, CellModel cell, FunctionTracker functionTracker)
         {
             _cellTracker = cellTracker;
-            _userCollectionProviderThatMirrorsRealProvider = new ReadOnlyUserCollectionLoader(userCollectionLoader, pluginFunctionLoader, this);
+            _userCollectionProviderThatMirrorsRealProvider = new ReadOnlyUserCollectionLoader(userCollectionLoader, functionTracker, this);
             _originalContextCell = cell;
             ContextCell = cell.Copy();
         }

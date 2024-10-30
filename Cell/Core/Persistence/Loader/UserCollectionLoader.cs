@@ -23,7 +23,7 @@ namespace Cell.Core.Persistence
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _collectionsDirectory;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
         private Task? _loadCollectionsTask;
 
@@ -31,12 +31,12 @@ namespace Cell.Core.Persistence
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
         /// </summary>
         /// <param name="collectionsDirectory">A directory to store and load collections from.</param>
-        /// <param name="pluginFunctionLoader">The plugin function loader used to get sort functions for collections.</param>
+        /// <param name="functionTracker">The plugin function tracker used to get sort functions for collections.</param>
         /// <param name="cellTracker">The cell tracker that needs to be provided to sort functions.</param>
-        public UserCollectionLoader(PersistedDirectory collectionsDirectory, PluginFunctionLoader pluginFunctionLoader, CellTracker cellTracker)
+        public UserCollectionLoader(PersistedDirectory collectionsDirectory, FunctionTracker functionTracker, CellTracker cellTracker)
         {
             _collectionsDirectory = collectionsDirectory;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _cellTracker = cellTracker;
         }
 
@@ -66,7 +66,7 @@ namespace Cell.Core.Persistence
                 BasedOnCollectionName = baseCollectionName
             };
             var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
-            var collection = new UserCollection(model, _pluginFunctionLoader, sortContext);
+            var collection = new UserCollection(model, _functionTracker, sortContext);
             StartTrackingCollection(collection);
             SaveCollection(collection);
             EnsureLinkedToBaseCollection(collection);
@@ -164,7 +164,7 @@ namespace Cell.Core.Persistence
             _collectionsDirectory.MoveDirectory(oldName, newName);
 
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
                 {
@@ -208,7 +208,7 @@ namespace Cell.Core.Persistence
             var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
             var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
-            var collection = new UserCollection(model, _pluginFunctionLoader, sortContext);
+            var collection = new UserCollection(model, _functionTracker, sortContext);
             var itemsDirectory = Path.Combine(directory, "Items");
             var paths = !_collectionsDirectory.DirectoryExists(itemsDirectory)
                 ? []

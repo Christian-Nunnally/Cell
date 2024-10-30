@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using System.ComponentModel;
 using Cell.Core.Execution.Functions;
 
@@ -16,21 +15,21 @@ namespace Cell.Core.Data
         private readonly Dictionary<string, int?> _cachedSortFilterResult = [];
         private readonly IContext _sortFunctionContext;
         private readonly Dictionary<string, PluginModel> _items = [];
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly List<PluginModel> _sortedItems = [];
         private UserCollection? _baseCollection;
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCollection"/>.
         /// </summary>
         /// <param name="model">The underlying collection model.</param>
-        /// <param name="pluginFunctionLoader">The function loader to load the sort function from.</param>
+        /// <param name="functionTracker">The function tracker get the sort function from.</param>
         /// <param name="sortFunctionContext">The cell tracker to provide to the sort function context.</param>
-        public UserCollection(UserCollectionModel model, PluginFunctionLoader pluginFunctionLoader, IContext sortFunctionContext)
+        public UserCollection(UserCollectionModel model, FunctionTracker functionTracker, IContext sortFunctionContext)
         {
             sortFunctionContext.ContextCell = _cellModelToInjectIndexIntoSortFunction;
             Model = model;
             Model.PropertyChanged += UserCollectionModelPropertyChanged;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _sortFunctionContext = sortFunctionContext;
         }
 
@@ -160,10 +159,10 @@ namespace Cell.Core.Data
             return null;
         }
 
-        private int? RunSortFilter(PluginFunctionLoader pluginFunctionLoader, IContext pluginContext, string functionName, int indexToGetResultFor)
+        private int? RunSortFilter(FunctionTracker functionTracker, IContext pluginContext, string functionName, int indexToGetResultFor)
         {
             _cellModelToInjectIndexIntoSortFunction.Index = indexToGetResultFor;
-            if (!pluginFunctionLoader.TryGetCellFunction("object", functionName, out var populateFunction)) return 0;
+            if (!functionTracker.TryGetCellFunction("object", functionName, out var populateFunction)) return 0;
             var result = populateFunction.Run(pluginContext);
             if (result.WasSuccess)
             {
@@ -212,7 +211,7 @@ namespace Cell.Core.Data
 
         private int? RunSortFilter(int i)
         {
-            return RunSortFilter(_pluginFunctionLoader, _sortFunctionContext, Model.SortAndFilterFunctionName, i) ?? 0;
+            return RunSortFilter(_functionTracker, _sortFunctionContext, Model.SortAndFilterFunctionName, i) ?? 0;
         }
 
         private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)

@@ -24,7 +24,7 @@ namespace Cell.ViewModel.Cells
         private readonly CellTriggerManager _cellTriggerManager;
         private readonly CellTracker _cellTracker;
         private readonly SheetModel _model;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private double _sheetHeight;
         private double _sheetWidth;
         private double _panX;
@@ -39,16 +39,16 @@ namespace Cell.ViewModel.Cells
         /// <param name="cellTriggerManager">The cell trigger manager used to run trigger functions on cells.</param>
         /// <param name="cellTracker">The cell tracker used to get cells for this sheet.</param>
         /// <param name="cellSelector">The cell selector used to select cells on the sheet.</param>
-        /// <param name="pluginFunctionLoader">A plugin function loader used to get cell functions from the application.</param>
+        /// <param name="functionTracker">Used to get cell functions from the application.</param>
         public SheetViewModel(
             SheetModel model,
             CellPopulateManager cellPopulateManager,
             CellTriggerManager cellTriggerManager,
             CellTracker cellTracker,
             CellSelector cellSelector,
-            PluginFunctionLoader pluginFunctionLoader)
+            FunctionTracker functionTracker)
         {
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _cellTracker = cellTracker;
             CellSelector = cellSelector;
             cellSelector.SelectedCells.CollectionChanged += SelectedCellsChanged;
@@ -268,7 +268,7 @@ namespace Cell.ViewModel.Cells
         private void EnsureUnmerged(CellModel cell)
         {
             if (!cell.IsMergedParent()) return;
-            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker, _pluginFunctionLoader);
+            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker, _functionTracker);
             cellEditor.UnmergeCells();
         }
 

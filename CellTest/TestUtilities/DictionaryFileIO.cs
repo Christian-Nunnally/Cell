@@ -64,6 +64,11 @@ namespace CellTest.TestUtilities
             return _testFileSystem.ReadFile(path) ?? throw new FileNotFoundException(path);
         }
 
+        public Task<string> ReadFileAsync(string path)
+        {
+            return Task.FromResult(ReadFile(path));
+        }
+
         public void WriteFile(string path, string version)
         {
             var directoryName = Path.GetDirectoryName(path);

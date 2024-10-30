@@ -14,7 +14,7 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly CellTracker _cellTracker;
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly CellFunction _functionBeingEdited;
         private readonly CellModel _cellContext;
         private readonly UserCollectionLoader _userCollectionLoader;
@@ -28,11 +28,11 @@ namespace CellTest.ViewModel.ToolWindow
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _functionBeingEdited = _pluginFunctionLoader.CreateCellFunction("void", "TestFunction");
+            _functionTracker = new FunctionTracker();
+            _functionBeingEdited = _functionTracker.CreateCellFunction("void", "TestFunction");
             _cellContext = new CellModel();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _testingContext = new TestingContext(_cellTracker, _userCollectionLoader, _cellContext, _pluginFunctionLoader);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _testingContext = new TestingContext(_cellTracker, _userCollectionLoader, _cellContext, _functionTracker);
             _collectionNameMap = [];
             _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, _collectionNameMap, _testingContext);
         }

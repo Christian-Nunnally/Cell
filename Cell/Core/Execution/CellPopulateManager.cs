@@ -20,16 +20,16 @@ namespace Cell.Core.Execution
         private readonly CellTracker _cellTracker;
         private readonly CollectionChangeNotifier _collectionChangeNotifier;
         private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly Context _pluginFunctionRunContext;
         private readonly UserCollectionLoader _userCollectionLoader;
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateManager"/>.
         /// </summary>
         /// <param name="cellTracker">The cell tracker to determine cells to manage.</param>
-        /// <param name="pluginFunctionLoader">The function loader used to load the populate function.</param>
+        /// <param name="functionTracker">Used to load the populate function.</param>
         /// <param name="userCollectionLoader">The collection loader used in the context when running populate.</param>
-        public CellPopulateManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader)
+        public CellPopulateManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionLoader userCollectionLoader)
         {
             _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader, new DialogFactory(), CellModel.Null);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
@@ -38,11 +38,17 @@ namespace Cell.Core.Execution
             _cellTracker = cellTracker;
             _cellTracker.CellAdded += StartMonitoringCellForChanges;
             _cellTracker.CellRemoved += StopMonitoringCellForChanges;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
+            _functionTracker.FunctionAdded += UpdateCellsDependenciesForNewFunction;
             foreach (var cell in _cellTracker.AllCells)
             {
                 StartMonitoringCellForChanges(cell);
             }
+        }
+
+        private void UpdateCellsDependenciesForNewFunction(CellFunction function)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -113,14 +119,14 @@ namespace Cell.Core.Execution
         private void CollectionNameChangedInCellsCollectionDependencies(CellSpecificCollectionReference reference)
         {
             if (string.IsNullOrWhiteSpace(reference.Cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", reference.Cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(reference.Cell, function);
         }
 
         private CellPopulateSubscriber GetOrCreatePopulateSubscriber(CellModel cell)
         {
             if (_cellToPopulateSubscriberMap.TryGetValue(cell, out var subscriber)) return subscriber;
-            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionLoader, _pluginFunctionLoader);
+            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionLoader, _functionTracker);
             _cellToPopulateSubscriberMap.Add(cell, subscriber);
             return subscriber;
         }
@@ -195,7 +201,7 @@ namespace Cell.Core.Execution
         {
             cell.PropertyChanged += CellPropertyChanged;
             if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
@@ -207,7 +213,7 @@ namespace Cell.Core.Execution
             UnsubscribeFromAllLocationUpdates(cell);
             cell.PropertyChanged -= CellPropertyChanged;
             if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             _cellToPopulateFunctionNameMap.Remove(cell);
             RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, function);
@@ -215,7 +221,7 @@ namespace Cell.Core.Execution
 
         private void SubscribeCellToFunctionChanges(CellModel cell)
         {
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
             UpdateDependencySubscriptions(cell, function);
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
@@ -250,7 +256,7 @@ namespace Cell.Core.Execution
         {
             if (!_cellToPopulateFunctionNameMap.TryGetValue(cell, out var oldFunctionName)) return;
             _cellToPopulateFunctionNameMap.Remove(cell);
-            if (!_pluginFunctionLoader.TryGetCellFunction("object", oldFunctionName, out var oldFunction)) return;
+            if (!_functionTracker.TryGetCellFunction("object", oldFunctionName, out var oldFunction)) return;
             RemoveFromCellsToUpdateWhenFunctionChangesMap(cell, oldFunction);
         }
 

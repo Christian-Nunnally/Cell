@@ -26,16 +26,16 @@ namespace Cell.ViewModel.ToolWindow
         private UserCollectionListItemViewModel? _selectedCollection;
         private PluginModel? _selectedItem;
         private string _selectedItemSerialized = string.Empty;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
 
         /// <summary>
         /// Creates a new instance of the <see cref="CollectionManagerWindowViewModel"/>.
         /// </summary>
-        /// <param name="userCollectionLoader">The collection loader to get the collections from.</param>
-        /// <param name="pluginFunctionLoader">The plugin function loader used to determine what functions are using what collections and display it to the user.</param>
-        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader, PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="userCollectionLoader">Source of the collections.</param>
+        /// <param name="functionTracker">Used to determine what functions are using what collections and display it to the user.</param>
+        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader, FunctionTracker functionTracker)
         {
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _userCollectionLoader = userCollectionLoader;
         }
 
@@ -80,7 +80,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the collections that are currently being displayed in the list box to the user, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<UserCollectionListItemViewModel> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Model.Name.Contains(CollectionListBoxFilterText)).Select(x => new UserCollectionListItemViewModel(x, _pluginFunctionLoader, _userCollectionLoader));
+        public IEnumerable<UserCollectionListItemViewModel> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Model.Name.Contains(CollectionListBoxFilterText)).Select(x => new UserCollectionListItemViewModel(x, _functionTracker, _userCollectionLoader));
 
         /// <summary>
         /// Gets the items in the selected collection, filtered based on the users filter criteria.

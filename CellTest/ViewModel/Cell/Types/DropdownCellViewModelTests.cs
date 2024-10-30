@@ -15,7 +15,7 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
         private readonly CellTracker _cellTracker;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly SheetModel _sheetModel;
@@ -31,13 +31,13 @@ namespace CellTest.ViewModel.Cell.Types
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _functionTracker = new FunctionTracker();
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
             _cellModel = new CellModel() { CellType = CellType.Dropdown };
             _cellTracker.AddCell(_cellModel);
             _testing = new DropdownCellViewModel(_cellModel, _sheetViewModel);
@@ -51,7 +51,7 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void NoPopulateSet_PopulateFunctionSetToExistingFunction_DropdownItemsSetToFunctionResult()
         {
-            _pluginFunctionLoader.CreateCellFunction("object", "TestFunction", "return new List<string> { \"Test1\", \"Test2\", \"Test3\" };");
+            _functionTracker.CreateCellFunction("object", "TestFunction", "return new List<string> { \"Test1\", \"Test2\", \"Test3\" };");
             Assert.Empty(_testing.CollectionDisplayStrings);
 
             _cellModel.PopulateFunctionName = "TestFunction";
@@ -73,7 +73,7 @@ namespace CellTest.ViewModel.Cell.Types
         public void SelectedItemChanged_TriggerFunctionTriggered()
         {
             var assertionDialog = _testDialogFactory.Expect("passed");
-            _pluginFunctionLoader.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
+            _functionTracker.CreateCellFunction("void", "testTrigger", "c.ShowDialog(\"passed\");");
             _cellModel.TriggerFunctionName = "testTrigger";
 
             _testing.SelectedItem = "Test";

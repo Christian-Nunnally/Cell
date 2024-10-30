@@ -2,7 +2,6 @@
 using Cell.Core.Data;
 using Cell.Core.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
@@ -20,7 +19,7 @@ namespace Cell.ViewModel.ToolWindow
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly CellTracker _cellTracker;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private CellStyleModel? _cellStyleToDisplay = null;
         private CellModel _cellToDisplay = CellModel.Null;
         private bool isDetailedBorderEditingEnabled = false;
@@ -29,10 +28,10 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         /// <param name="cellsToEdit">List of cells to edit, which can change outside of the tool window and the window will adapt.</param>
         /// <param name="cellTracker">The tracker to source cells from.</param>
-        /// <param name="pluginFunctionLoader">The function loader used to update functions when cells are deleted.</param>
-        public CellFormatEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="functionTracker">Used to update functions when cells are deleted.</param>
+        public CellFormatEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, CellTracker cellTracker, FunctionTracker functionTracker)
         {
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _cellsToEdit = cellsToEdit;
             _cellTracker = cellTracker;
         }
@@ -963,7 +962,7 @@ namespace Cell.ViewModel.ToolWindow
             }
             IncrementColumnOfAllAtOrToTheRightOf(columnCell.Location.SheetName, location.Column, -1);
 
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(location.SheetName, location.Column, function, -1);
             }
@@ -982,7 +981,7 @@ namespace Cell.ViewModel.ToolWindow
             }
             IncrementRowOfAllAtOrBelow(rowCell.Location.SheetName, location.Row, -1);
 
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(location.SheetName, location.Row, function, -1);
             }
@@ -1061,7 +1060,7 @@ namespace Cell.ViewModel.ToolWindow
                 EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(sheetName, index, function, 1);
             }
@@ -1083,7 +1082,7 @@ namespace Cell.ViewModel.ToolWindow
                 EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowModel.Location.SheetName, rowModel.Location.Row, function, 1);
             }

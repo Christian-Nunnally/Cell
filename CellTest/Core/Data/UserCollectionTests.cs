@@ -16,9 +16,8 @@ namespace CellTest.Core.Data
         private readonly PersistedDirectory _persistedDirectory;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellPopulateManager _cellPopulateManager;
-        private readonly CellLoader _cellLoader;
         private readonly CellTriggerManager _cellTriggerManager;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly CellTracker _cellTracker;
         private readonly UserCollection _testing;
 
@@ -27,12 +26,11 @@ namespace CellTest.Core.Data
             _testDialogFactory = new TestDialogFactory();
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
+            _functionTracker = new FunctionTracker();
             _cellTracker = new CellTracker();
-            _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
             _testing = _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
 
@@ -68,7 +66,7 @@ namespace CellTest.Core.Data
         public void CollectionWithSortFunctionAndBasedOnOtherCollection_TwoItemsAddedToBaseCollection_ItemsInFilteredCollectionAreSorted()
         {
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -88,7 +86,7 @@ namespace CellTest.Core.Data
         public void CollectionWithReversedSortFunctionAndBasedOnOtherCollection_TwoItemsAddedToBaseCollection_ItemsInFilteredCollectionAreSorted()
         {
             var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -107,7 +105,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithSortFunction_ItemAdded_ItemAddedToCollection()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -123,7 +121,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithSortFunction_TwoItemsAdded_ItemAddedToCollectionAndSorted()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -142,8 +140,8 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithSortFunctionAndTwoItems_SortFunctionChanged_ItemOrderChanged()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
-            var sortFunction2 = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName + "2");
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction2 = _functionTracker.CreateCellFunction("object", TestSortFunctionName + "2");
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var sortCode2 = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
@@ -166,7 +164,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithSortFunctionAndTwoItems_SortPropertyChangedOnOneItem_ItemSortUpdated()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -187,7 +185,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithReversedSortFunction_TwoItemsAdded_ItemAddedToCollectionAndSorted()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);
@@ -206,7 +204,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithTwoItems_SortedCollectionCreated_ItemsAreSortedInSortedCollection()
         {
-            var sortFunction = _pluginFunctionLoader.CreateCellFunction("object", TestSortFunctionName);
+            var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNameToDataTypeMap);

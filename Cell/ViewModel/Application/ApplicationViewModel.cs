@@ -152,7 +152,9 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Gets the plugin function loader for the application, which loads and stores all plugin functions.
         /// </summary>
-        public PluginFunctionLoader? PluginFunctionLoader { get; set; }
+        public FunctionLoader? FunctionLoader { get; set; }
+
+        public FunctionTracker? FunctionTracker { get; set; }
 
         /// <summary>
         /// Gets the sheet tracker for the application, which is used to store all of the sheets in the application.
@@ -243,7 +245,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, PluginFunctionLoader);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
             ApplicationSettings.LastLoadedSheet = sheetName;
@@ -369,7 +371,7 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase3()
         {
-            PluginFunctionLoader.LoadCellFunctions();
+            FunctionLoader.LoadCellFunctions();
             return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
         }
 
@@ -387,7 +389,7 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase5b()
         {
-            CellPopulateManager = new CellPopulateManager(CellTracker, PluginFunctionLoader, UserCollectionLoader);
+            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionLoader);
             return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
         }
 

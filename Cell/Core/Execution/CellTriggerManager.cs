@@ -14,7 +14,7 @@ namespace Cell.Core.Execution
     {
         private readonly Dictionary<string, CellModel> _cellsBeingEdited = [];
         private readonly CellTracker _cellTracker;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly DialogFactoryBase _dialogFactoryForTriggers;
 
@@ -22,15 +22,15 @@ namespace Cell.Core.Execution
         /// Creates a new instance of the <see cref="CellTriggerManager"/> class.
         /// </summary>
         /// <param name="cellTracker">The cell tracker to monitor the cells within.</param>
-        /// <param name="pluginFunctionLoader">The plugin function loader to get trigger functions from.</param>
+        /// <param name="functionTracker">Used to get trigger functions from.</param>
         /// <param name="userCollectionLoader">The collection loader to provide to triggers context.</param>
         /// <param name="dialogFactoryForTriggers">The dialog factory used by trigger functions to show dialogs.</param>
-        public CellTriggerManager(CellTracker cellTracker, PluginFunctionLoader pluginFunctionLoader, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactoryForTriggers)
+        public CellTriggerManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactoryForTriggers)
         {
             _userCollectionLoader = userCollectionLoader;
             _cellTracker = cellTracker;
             _dialogFactoryForTriggers = dialogFactoryForTriggers;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Cell.Core.Execution
 
         private void CellTriggeredHandler(CellModel cell, EditContext editContext)
         {
-            if (!_pluginFunctionLoader.TryGetCellFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
+            if (!_functionTracker.TryGetCellFunction("void", cell.TriggerFunctionName, out var triggerFunction)) return;
             var context = new Context(_cellTracker, _userCollectionLoader, _dialogFactoryForTriggers, cell)
             {
                 E = editContext

@@ -14,7 +14,7 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellContentEditWindowViewModel _testing;
 
@@ -24,11 +24,11 @@ namespace CellTest.ViewModel.ToolWindow
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
+            _functionTracker = new FunctionTracker();
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
             // Enables populate tests.
-            var _ = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
-            _testing = new CellContentEditWindowViewModel(_cellsToEdit, _pluginFunctionLoader);
+            var _ = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
+            _testing = new CellContentEditWindowViewModel(_cellsToEdit, _functionTracker);
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void PopulateFunctionExists_PopulateFunctionSet_CellTextSetToPopulateResult()
         {
-            var _ = _pluginFunctionLoader.CreateCellFunction("object", "Test", "return \"Hello world\";");
+            var _ = _functionTracker.CreateCellFunction("object", "Test", "return \"Hello world\";");
             var cellBeingEdited = new CellModel();
             _cellTracker.AddCell(cellBeingEdited);
             _cellsToEdit.Add(cellBeingEdited);
@@ -132,7 +132,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void TriggerFunctionSet_TriggerFunctionChangedToEmptyString_TriggerFunctionEmptied()
         {
-            var _ = _pluginFunctionLoader.CreateCellFunction("void", "Test", "");
+            var _ = _functionTracker.CreateCellFunction("void", "Test", "");
             var cellBeingEdited = new CellModel();
             _cellsToEdit.Add(cellBeingEdited);
             _testing.HandleBeingShown();

@@ -13,19 +13,19 @@ namespace Cell.Core.Persistence
     {
         private readonly Dictionary<string, UserCollection> _readOnlyUserCollectionMap = [];
         private readonly IUserCollectionProvider _underlyingCollectionProvider;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private readonly TestingContext _sortFunctionContext;
 
         /// <summary>
         /// Creates a new instance of <see cref="ReadOnlyUserCollectionLoader"/>.
         /// </summary>
         /// <param name="underlyingCollectionProvider">The collection provider to source collections from, but not modify the collections of.</param>
-        /// <param name="pluginFunctionLoader">The function loader to load sort functions from.</param>
+        /// <param name="functionTracker">The function tracker to load sort functions from.</param>
         /// <param name="sortFunctionContext">The context used when running sort functions.</param>
-        public ReadOnlyUserCollectionLoader(IUserCollectionProvider underlyingCollectionProvider, PluginFunctionLoader pluginFunctionLoader, TestingContext sortFunctionContext)
+        public ReadOnlyUserCollectionLoader(IUserCollectionProvider underlyingCollectionProvider, FunctionTracker functionTracker, TestingContext sortFunctionContext)
         {
             _underlyingCollectionProvider = underlyingCollectionProvider;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
             _sortFunctionContext = sortFunctionContext;
         }
 
@@ -46,7 +46,7 @@ namespace Cell.Core.Persistence
             {
                 return null;
             }
-            readOnlyCollection = new UserCollection(realCollection.Model, _pluginFunctionLoader, _sortFunctionContext);
+            readOnlyCollection = new UserCollection(realCollection.Model, _functionTracker, _sortFunctionContext);
             _readOnlyUserCollectionMap.Add(name, readOnlyCollection);
 
             foreach (var item in realCollection.Items)

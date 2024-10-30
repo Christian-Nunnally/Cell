@@ -16,7 +16,7 @@ namespace CellTest.ViewModel.Cell.Types
         private DictionaryFileIO _testFileIO;
         private PersistedDirectory _persistedDirectory;
         private CellTracker _cellTracker;
-        private PluginFunctionLoader _pluginFunctionLoader;
+        private FunctionTracker _functionTracker;
         private UserCollectionLoader _userCollectionLoader;
         private CellPopulateManager _cellPopulateManager;
         private SheetModel _sheetModel;
@@ -31,13 +31,13 @@ namespace CellTest.ViewModel.Cell.Types
             _testFileIO = new DictionaryFileIO();
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
-            _pluginFunctionLoader = new PluginFunctionLoader(_persistedDirectory);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _pluginFunctionLoader, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader);
+            _functionTracker = new FunctionTracker();
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _pluginFunctionLoader, _userCollectionLoader, _testDialogFactory);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _pluginFunctionLoader);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
             _cellModel = new CellModel();
             return new CornerCellViewModel(_cellModel, _sheetViewModel);
         }

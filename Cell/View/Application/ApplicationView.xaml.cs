@@ -190,8 +190,8 @@ namespace Cell.View.Application
         {
             if (_viewModel is null) return;
             if (_viewModel.CellSelector is null) return;
-            if (_viewModel.PluginFunctionLoader is null) return;
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.PluginFunctionLoader);
+            if (_viewModel.FunctionLoader is null) return;
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.FunctionTracker);
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
         }
@@ -200,15 +200,15 @@ namespace Cell.View.Application
         {
             if (_viewModel == null) return;
             if (_viewModel.UserCollectionLoader is null) return;
-            if (_viewModel.PluginFunctionLoader is null) return;
-            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.PluginFunctionLoader);
+            if (_viewModel.FunctionLoader is null) return;
+            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.FunctionTracker);
             _viewModel.ShowToolWindow(collectionManagerViewModel);
         }
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
         {
             if (_viewModel == null) return;
-            var functionLoader = _viewModel.PluginFunctionLoader;
+            var functionLoader = _viewModel.FunctionTracker;
             if (functionLoader is null) return;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(functionManagerViewModel, Dock.Right);
@@ -273,8 +273,8 @@ namespace Cell.View.Application
         {
             if (_viewModel?.SheetViewModel == null) return;
             if (_viewModel.CellTracker is null) return;
-            if (_viewModel.PluginFunctionLoader is null) return;
-            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.PluginFunctionLoader);
+            if (_viewModel.FunctionLoader is null) return;
+            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.FunctionTracker);
             _viewModel.ShowToolWindow(viewModel);
         }
 

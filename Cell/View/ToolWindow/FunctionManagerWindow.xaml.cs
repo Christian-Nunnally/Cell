@@ -33,7 +33,7 @@ namespace Cell.View.ToolWindow
 
                 ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
-                    ApplicationViewModel.Instance.PluginFunctionLoader.DeleteCellFunction(function.Function);
+                    ApplicationViewModel.Instance.FunctionLoader.DeleteCellFunction(function.Function);
                 });
             }
         }
@@ -45,7 +45,7 @@ namespace Cell.View.ToolWindow
                 if (_viewModel.SelectedFunction == null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-                var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, cell, ApplicationViewModel.Instance.PluginFunctionLoader);
+                var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, cell, ApplicationViewModel.Instance.FunctionTracker);
                 var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToDataTypeMap, testingContext);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
             }

@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution.CodeCompletion;
+﻿using Cell.Core.Data;
+using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Persistence;
 using Cell.Model;
@@ -18,18 +19,18 @@ namespace Cell.ViewModel.ToolWindow
     public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<CellModel> _cellsToEdit;
-        private readonly PluginFunctionLoader _pluginFunctionLoader;
+        private readonly FunctionTracker _functionTracker;
         private CellModel _cellToDisplay = CellModel.Null;
         private string _multiUseUserInputText = string.Empty;
         /// <summary>
         /// Creates a new instance of the <see cref="CellContentEditWindowViewModel"/> class.
         /// </summary>
         /// <param name="cellsToEdit">The dynamic list of cells being edited by this tool window.</param>
-        /// <param name="pluginFunctionLoader">The function loader to get populate and trigger functions from.</param>
-        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, PluginFunctionLoader pluginFunctionLoader)
+        /// <param name="functionTracker">The function tracker to get populate and trigger functions from.</param>
+        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, FunctionTracker functionTracker)
         {
             _cellsToEdit = cellsToEdit;
-            _pluginFunctionLoader = pluginFunctionLoader;
+            _functionTracker = functionTracker;
         }
 
         /// <summary>
@@ -138,7 +139,7 @@ namespace Cell.ViewModel.ToolWindow
                 ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
-            var function = _pluginFunctionLoader.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
+            var function = _functionTracker.GetOrCreateFunction("object", CellToDisplay.PopulateFunctionName);
             EditFunction(function);
         }
 
@@ -170,7 +171,7 @@ namespace Cell.ViewModel.ToolWindow
                 ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
                 return;
             }
-            var function = _pluginFunctionLoader.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
+            var function = _functionTracker.GetOrCreateFunction("void", CellToDisplay.TriggerFunctionName);
             EditFunction(function);
         }
 
@@ -180,7 +181,7 @@ namespace Cell.ViewModel.ToolWindow
             var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
             if (userCollectionLoader is null) return;
             var collectionNameToDataTypeMap = userCollectionLoader.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionLoader, CellToDisplay, _pluginFunctionLoader);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionLoader, CellToDisplay, _functionTracker);
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
@@ -206,7 +207,7 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Caused the cells to update their text to the value in the <see cref="MultiUseUserInputText"/> property, or the populate function if the text starts with an equals sign.
+        /// Causes the cells to update their text to the value in the <see cref="MultiUseUserInputText"/> property, or the populate function if the text starts with an equals sign.
         /// </summary>
         public void SubmitMultiUseUserInputText()
         {
@@ -218,6 +219,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             foreach (var cell in _cellsToEdit)
             {
+                cell.PopulateFunctionName = string.Empty;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                 cell.Text = _multiUseUserInputText;
             }
@@ -269,7 +271,7 @@ namespace Cell.ViewModel.ToolWindow
         internal IEnumerable<ICompletionData> GetPopulateFunctionSuggestions()
         {
             var suggestions = new List<ICompletionData>();
-            foreach (var function in _pluginFunctionLoader.CellFunctions)
+            foreach (var function in _functionTracker.CellFunctions)
             {
                 if (function.Model.ReturnType == "void") continue;
                 suggestions.Add(new CodeCompletionData(function.Model.Name, function.Model.Name, function.Model.Description, FontAwesome.Sharp.IconChar.Code));

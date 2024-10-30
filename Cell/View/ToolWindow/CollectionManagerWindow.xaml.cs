@@ -54,10 +54,10 @@ namespace Cell.View.ToolWindow
         {
             var functionName = _viewModel.SelectedCollection?.Collection.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
-            var function = ApplicationViewModel.Instance.PluginFunctionLoader.GetOrCreateFunction("object", functionName);
+            var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);
 
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellModel.Null, ApplicationViewModel.Instance.PluginFunctionLoader);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker);
             var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
