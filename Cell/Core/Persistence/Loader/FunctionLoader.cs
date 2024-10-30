@@ -1,12 +1,12 @@
 ﻿using Cell.Core.Common;
-using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Core.Persistence
+namespace Cell.Core.Persistence.Loader
 {
     /// <summary>
     /// Tracks and loads plugin functions.
@@ -15,6 +15,7 @@ namespace Cell.Core.Persistence
     {
         private readonly PersistedDirectory _functionsDirectory;
         private readonly FunctionTracker _functionTracker;
+        private bool _shouldSaveAddedFunctions = true;
 
         /// <summary>
         /// Creates a new instance of the <see cref="FunctionLoader"/> class.
@@ -38,7 +39,7 @@ namespace Cell.Core.Persistence
         private void FunctionTrackerFunctionAdded(CellFunction function)
         {
             function.Model.PropertyChanged += FunctionModelPropertyChanged;
-            SaveCellFunction(function.Model.ReturnType, function.Model);
+            if (_shouldSaveAddedFunctions) SaveCellFunction(function.Model.ReturnType, function.Model);
         }
 
         private void FunctionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -72,18 +73,14 @@ namespace Cell.Core.Persistence
                     if (model == null) continue;
                     var function = new CellFunction(model);
                     var space = Path.GetFileName(namespacePath);
+                    _shouldSaveAddedFunctions = false;
                     _functionTracker.AddCellFunctionToNamespace(space, function);
+                    _shouldSaveAddedFunctions = true;
                 }
             }
         }
 
-        /// <summary>
-        /// Loads a cell function from the given file in the directory.
-        /// </summary>
-        /// <param name="file">The function file to load.</param>
-        /// <returns>The loaded function model.</returns>
-        /// <exception cref="CellError">If the function was not able to be loaded.</exception>
-        public CellFunctionModel LoadFunction(string file)
+        private CellFunctionModel LoadFunction(string file)
         {
             var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
             return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");

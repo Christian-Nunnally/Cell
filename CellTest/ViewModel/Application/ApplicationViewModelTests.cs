@@ -1,6 +1,8 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Core.Persistence;
+using Cell.Core.Persistence.Loader;
 using Cell.ViewModel.Application;
 using CellTest.TestUtilities;
 
@@ -13,6 +15,7 @@ namespace CellTest.ViewModel.Application
         private readonly DictionaryFileIO _testFileIO;
         private readonly PersistedDirectory _persistedDirectory;
         private readonly PersistedDirectory _backupDirectory;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly UserCollectionLoader _userCollectionLoader;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellLoader _cellLoader;
@@ -41,9 +44,10 @@ namespace CellTest.ViewModel.Application
             _pluginFunctionLoader = new FunctionLoader(_persistedDirectory, _functionTracker);
             _cellTracker = new CellTracker();
             _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _userCollectionTracker, _functionTracker, _cellTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
             _sheetTracker = new SheetTracker(_cellTracker);
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
@@ -57,6 +61,7 @@ namespace CellTest.ViewModel.Application
                 FunctionLoader = _pluginFunctionLoader,
                 CellTracker = _cellTracker,
                 CellLoader = _cellLoader,
+                UserCollectionTracker = _userCollectionTracker,
                 UserCollectionLoader = _userCollectionLoader,
                 CellPopulateManager = _cellPopulateManager,
                 CellTriggerManager = _cellTriggerManager,

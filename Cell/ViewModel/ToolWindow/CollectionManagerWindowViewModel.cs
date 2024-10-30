@@ -1,11 +1,11 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using System.Collections.Specialized;
 using System.Text.Json;
 using Cell.ViewModel.Data;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -18,7 +18,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             WriteIndented = true
         };
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private string _collectionItemListBoxFilterText = string.Empty;
         private string _collectionListBoxFilterText = string.Empty;
         private bool _isEditJsonTextBoxVisible;
@@ -31,12 +31,12 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Creates a new instance of the <see cref="CollectionManagerWindowViewModel"/>.
         /// </summary>
-        /// <param name="userCollectionLoader">Source of the collections.</param>
+        /// <param name="userCollectionTracker">Source of the collections.</param>
         /// <param name="functionTracker">Used to determine what functions are using what collections and display it to the user.</param>
-        public CollectionManagerWindowViewModel(UserCollectionLoader userCollectionLoader, FunctionTracker functionTracker)
+        public CollectionManagerWindowViewModel(UserCollectionTracker userCollectionTracker, FunctionTracker functionTracker)
         {
             _functionTracker = functionTracker;
-            _userCollectionLoader = userCollectionLoader;
+            _userCollectionTracker = userCollectionTracker;
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the collections that are currently being displayed in the list box to the user, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<UserCollectionListItemViewModel> FilteredCollections => _userCollectionLoader.UserCollections.Where(x => x.Model.Name.Contains(CollectionListBoxFilterText)).Select(x => new UserCollectionListItemViewModel(x, _functionTracker, _userCollectionLoader));
+        public IEnumerable<UserCollectionListItemViewModel> FilteredCollections => _userCollectionTracker.UserCollections.Where(x => x.Model.Name.Contains(CollectionListBoxFilterText)).Select(x => new UserCollectionListItemViewModel(x, _functionTracker, _userCollectionTracker));
 
         /// <summary>
         /// Gets the items in the selected collection, filtered based on the users filter criteria.
@@ -220,7 +220,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <param name="collection">The collection to delete entirely.</param>
         public void DeleteCollection(UserCollection collection)
         {
-            _userCollectionLoader.DeleteCollection(collection);
+            _userCollectionTracker.DeleteCollection(collection);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingClosed()
         {
-            _userCollectionLoader.UserCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
+            _userCollectionTracker.UserCollections.CollectionChanged -= GlobalCollectionsCollectionChanged;
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
-            _userCollectionLoader.UserCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
+            _userCollectionTracker.UserCollections.CollectionChanged += GlobalCollectionsCollectionChanged;
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void OpenCreateCollectionWindow()
         {
-            var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionLoader);
+            var createCollectionViewModel = new CreateCollectionWindowViewModel(_userCollectionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(createCollectionViewModel);
         }
 
@@ -260,7 +260,7 @@ namespace Cell.ViewModel.ToolWindow
         internal bool CanDeleteCollection(UserCollection collection, out string reason)
         {
             reason = string.Empty;
-            var conflictingBase = _userCollectionLoader.UserCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Model.Name);
+            var conflictingBase = _userCollectionTracker.UserCollections.FirstOrDefault(x => x.Model.BasedOnCollectionName == collection.Model.Name);
             if (conflictingBase != null) reason = $"Cannot delete '{collection.Model.Name}' because it acting as the base for '{conflictingBase.Model.Name}'.";
             return reason == string.Empty;
         }

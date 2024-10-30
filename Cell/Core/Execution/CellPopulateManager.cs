@@ -1,10 +1,9 @@
-﻿using Cell.Core.Data;
-using Cell.Model;
-using Cell.Core.Persistence;
+﻿using Cell.Model;
 using System.ComponentModel;
 using Cell.Core.Execution.Functions;
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.References;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.Core.Execution
 {
@@ -22,19 +21,21 @@ namespace Cell.Core.Execution
         private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly FunctionTracker _functionTracker;
         private readonly Context _pluginFunctionRunContext;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
+        private readonly List<CellModel> _cellsWithPopulateFunctionsThatDontYetExist = [];
+
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateManager"/>.
         /// </summary>
         /// <param name="cellTracker">The cell tracker to determine cells to manage.</param>
         /// <param name="functionTracker">Used to load the populate function.</param>
-        /// <param name="userCollectionLoader">The collection loader used in the context when running populate.</param>
-        public CellPopulateManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionLoader userCollectionLoader)
+        /// <param name="userCollectionTracker">The collection loader used in the context when running populate.</param>
+        public CellPopulateManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker)
         {
-            _pluginFunctionRunContext = new Context(cellTracker, userCollectionLoader, new DialogFactory(), CellModel.Null);
+            _pluginFunctionRunContext = new Context(cellTracker, userCollectionTracker, new DialogFactory(), CellModel.Null);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
-            _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionLoader);
-            _userCollectionLoader = userCollectionLoader;
+            _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionTracker);
+            _userCollectionTracker = userCollectionTracker;
             _cellTracker = cellTracker;
             _cellTracker.CellAdded += StartMonitoringCellForChanges;
             _cellTracker.CellRemoved += StopMonitoringCellForChanges;
@@ -48,7 +49,15 @@ namespace Cell.Core.Execution
 
         private void UpdateCellsDependenciesForNewFunction(CellFunction function)
         {
-            throw new NotImplementedException();
+            foreach (var cell in _cellsWithPopulateFunctionsThatDontYetExist)
+            {
+                if (cell.PopulateFunctionName == function.Model.Name)
+                {
+                    UpdateDependencySubscriptions(cell, function);
+                    _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
+                    AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
+                }
+            }
         }
 
         /// <summary>
@@ -126,7 +135,7 @@ namespace Cell.Core.Execution
         private CellPopulateSubscriber GetOrCreatePopulateSubscriber(CellModel cell)
         {
             if (_cellToPopulateSubscriberMap.TryGetValue(cell, out var subscriber)) return subscriber;
-            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionLoader, _functionTracker);
+            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionTracker, _functionTracker);
             _cellToPopulateSubscriberMap.Add(cell, subscriber);
             return subscriber;
         }
@@ -162,7 +171,7 @@ namespace Cell.Core.Execution
                 var collectionName = cellSpecificCollectionReference.GetCollectionName();
                 if (string.IsNullOrWhiteSpace(collectionName))
                 {
-                    throw new InvalidOperationException(collectionName + " is not a valid collection name.");
+                    continue;
                 }
                 SubscribeToCollectionUpdates(cellSpecificCollectionReference.Cell, collectionName);
             }
@@ -201,7 +210,11 @@ namespace Cell.Core.Execution
         {
             cell.PropertyChanged += CellPropertyChanged;
             if (string.IsNullOrWhiteSpace(cell.PopulateFunctionName)) return;
-            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function))
+            {
+                _cellsWithPopulateFunctionsThatDontYetExist.Add(cell);
+                return;
+            }
             UpdateDependencySubscriptions(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
@@ -209,6 +222,7 @@ namespace Cell.Core.Execution
 
         private void StopMonitoringCellForChanges(CellModel cell)
         {
+            _cellsWithPopulateFunctionsThatDontYetExist.Remove(cell);
             UnsubscribeFromAllCollectionUpdates(cell);
             UnsubscribeFromAllLocationUpdates(cell);
             cell.PropertyChanged -= CellPropertyChanged;

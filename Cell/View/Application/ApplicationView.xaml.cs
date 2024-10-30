@@ -201,7 +201,7 @@ namespace Cell.View.Application
             if (_viewModel == null) return;
             if (_viewModel.UserCollectionLoader is null) return;
             if (_viewModel.FunctionLoader is null) return;
-            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionLoader, _viewModel.FunctionTracker);
+            var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionTracker, _viewModel.FunctionTracker);
             _viewModel.ShowToolWindow(collectionManagerViewModel);
         }
 

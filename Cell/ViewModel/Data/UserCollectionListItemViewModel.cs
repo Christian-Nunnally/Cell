@@ -1,7 +1,7 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.References;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.Data
@@ -11,17 +11,17 @@ namespace Cell.ViewModel.Data
     /// </summary>
     public class UserCollectionListItemViewModel : PropertyChangedBase
     {
-        public UserCollectionListItemViewModel(UserCollection underlyingCollection, FunctionTracker functionTracker, UserCollectionLoader userCollectionLoader)
+        public UserCollectionListItemViewModel(UserCollection underlyingCollection, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker)
         {
             Collection = underlyingCollection;
             _functionTracker = functionTracker;
-            _userCollectionLoader = userCollectionLoader;
+            _userCollectionTracker = userCollectionTracker;
         }
 
         public UserCollection Collection { get; private set; }
 
         private readonly FunctionTracker _functionTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
 
         /// <summary>
         /// Gets the number of times this collection is used in other collections or functions.
@@ -31,7 +31,7 @@ namespace Cell.ViewModel.Data
             get
             {
                 var usagesWithinFunctions = _functionTracker.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == Collection.Model.Name));
-                var collectionsUsingThisCollectionAsABase = _userCollectionLoader.UserCollections.Count(x => x.Model.BasedOnCollectionName == Collection.Model.Name);
+                var collectionsUsingThisCollectionAsABase = _userCollectionTracker.UserCollections.Count(x => x.Model.BasedOnCollectionName == Collection.Model.Name);
                 return usagesWithinFunctions + collectionsUsingThisCollectionAsABase;
             }
         }
@@ -48,7 +48,7 @@ namespace Cell.ViewModel.Data
                 var newName = value;
                 ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
                 {
-                    _userCollectionLoader.ProcessCollectionRename(oldName, newName);
+                    _userCollectionTracker.ProcessCollectionRename(oldName, newName);
                     Collection.Model.Name = newName;
                     NotifyPropertyChanged(nameof(Name));
                 });

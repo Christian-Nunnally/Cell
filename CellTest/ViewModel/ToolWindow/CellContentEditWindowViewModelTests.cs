@@ -1,9 +1,7 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
-using CellTest.TestUtilities;
 using System.Collections.ObjectModel;
 
 namespace CellTest.ViewModel.ToolWindow
@@ -11,23 +9,19 @@ namespace CellTest.ViewModel.ToolWindow
     public class CellContentEditWindowViewModelTests
     {
         private readonly CellTracker _cellTracker;
-        private readonly DictionaryFileIO _testFileIO;
-        private readonly PersistedDirectory _persistedDirectory;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly FunctionTracker _functionTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly CellContentEditWindowViewModel _testing;
 
         public CellContentEditWindowViewModelTests()
         {
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
             _functionTracker = new FunctionTracker();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
             // Enables populate tests.
-            var _ = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
+            var _ = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
             _testing = new CellContentEditWindowViewModel(_cellsToEdit, _functionTracker);
         }
 

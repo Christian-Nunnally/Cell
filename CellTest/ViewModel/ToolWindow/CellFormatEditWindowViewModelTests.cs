@@ -1,4 +1,4 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;

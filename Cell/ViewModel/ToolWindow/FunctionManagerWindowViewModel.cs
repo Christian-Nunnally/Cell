@@ -3,7 +3,7 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -296,7 +296,7 @@ namespace Cell.ViewModel.ToolWindow
                 FilterSheetOptions.Add(sheet.Name);
             }
             FilterCollectionOptions.Add("All");
-            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionLoader.CollectionNames)
+            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionTracker.CollectionNames)
             {
                 FilterCollectionOptions.Add(collectionName);
             }

@@ -1,59 +1,52 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 using Cell.ViewModel.Application;
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+using Cell.Core.Data.Tracker;
 
 namespace CellTest.ViewModel.Cell.Types
 {
     public class LabelCellViewModelTests
     {
-        private DictionaryFileIO _testFileIO;
-        private PersistedDirectory _persistedDirectory;
-        private CellTracker _cellTracker;
-        private FunctionTracker _functionTracker;
-        private UserCollectionLoader _userCollectionLoader;
-        private CellPopulateManager _cellPopulateManager;
-        private CellTriggerManager _cellTriggerManager;
-        private SheetModel _sheetModel;
-        private SheetViewModel _sheetViewModel;
-        private CellModel _cellModel;
-        private CellSelector _cellSelector;
-        private DialogFactoryBase _testDialogFactory;
+        private readonly CellTracker _cellTracker;
+        private readonly FunctionTracker _functionTracker;
+        private readonly UserCollectionTracker _userCollectionTracker;
+        private readonly CellPopulateManager _cellPopulateManager;
+        private readonly CellTriggerManager _cellTriggerManager;
+        private readonly SheetModel _sheetModel;
+        private readonly SheetViewModel _sheetViewModel;
+        private readonly CellModel _cellModel;
+        private readonly CellSelector _cellSelector;
+        private readonly DialogFactoryBase _testDialogFactory;
+        private readonly LabelCellViewModel testing;
 
-        private LabelCellViewModel CreateInstance()
+        public LabelCellViewModelTests()
         {
             _testDialogFactory = new TestDialogFactory();
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _functionTracker = new FunctionTracker();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
             _cellModel = new CellModel();
-            return new LabelCellViewModel(_cellModel, _sheetViewModel);
+            testing = new LabelCellViewModel(_cellModel, _sheetViewModel);
         }
 
 
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = CreateInstance();
         }
 
         [Fact]
         public void SimpleTest_ModelTextChanged_ViewModelTextChangedNotified()
         {
-            var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
             _cellModel.Text = "wololo";
@@ -64,7 +57,6 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void SimpleTest_ModelFontSizeChanged_ViewModelFontSizeChangedNotified()
         {
-            var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
             _cellModel.Style.FontSize = 20;
@@ -75,7 +67,6 @@ namespace CellTest.ViewModel.Cell.Types
         [Fact]
         public void SimpleTest_ModelContentBorderColorChanged_ViewModelBorderColorChangedNotified()
         {
-            var testing = CreateInstance();
             var propertyChangedTester = new PropertyChangedTester(testing);
 
             _cellModel.Style.ContentBorderColor = "#efefef";
@@ -84,5 +75,3 @@ namespace CellTest.ViewModel.Cell.Types
         }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

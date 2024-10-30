@@ -1,7 +1,7 @@
 ﻿using Cell.Model;
 using System.ComponentModel;
 
-namespace Cell.Core.Data
+namespace Cell.Core.Data.Tracker
 {
     /// <summary>
     /// Contains all cells in the entire application. When a cell is tracked, it is automatically saved to the loader when it changes allows all other parts of the application to access it from this tracker.
@@ -11,7 +11,7 @@ namespace Cell.Core.Data
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<CellModel, string> _cellsToLocation = [];
-        
+
         /// <summary>
         /// Occurs when a cell is added to the tracker.
         /// </summary>
@@ -21,7 +21,7 @@ namespace Cell.Core.Data
         /// Occurs when a cell is removed from the tracker.
         /// </summary>
         public Action<CellModel>? CellRemoved;
-        
+
         /// <summary>
         /// Gets all currently tracked cells.
         /// </summary>

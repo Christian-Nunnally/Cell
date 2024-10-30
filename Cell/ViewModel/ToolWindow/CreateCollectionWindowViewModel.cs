@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -12,16 +12,16 @@ namespace Cell.ViewModel.ToolWindow
     public class CreateCollectionWindowViewModel : ToolWindowViewModel
     {
         private readonly ObservableCollection<UserCollection> _collections;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private bool _isBaseOnCheckBoxChecked;
         /// <summary>
         /// Creates a new instance of the <see cref="CreateCollectionWindowViewModel"/>.
         /// </summary>
-        /// <param name="userCollectionLoader">The user collection loader to add the collection to.</param>
-        public CreateCollectionWindowViewModel(UserCollectionLoader userCollectionLoader)
+        /// <param name="userCollectionTracker">The user collection loader to add the collection to.</param>
+        public CreateCollectionWindowViewModel(UserCollectionTracker userCollectionTracker)
         {
-            _userCollectionLoader = userCollectionLoader;
-            _collections = _userCollectionLoader.UserCollections;
+            _userCollectionTracker = userCollectionTracker;
+            _collections = _userCollectionTracker.UserCollections;
             CollectionBaseOptions = new ObservableCollection<string>(_collections.Select(x => x.Model.Name))
             {
                 "---"
@@ -111,14 +111,14 @@ namespace Cell.ViewModel.ToolWindow
                 var baseCollection = _collections.FirstOrDefault(x => x.Model.Name == basedOnCollection);
                 if (baseCollection == null) return;
 
-                _userCollectionLoader.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
+                _userCollectionTracker.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
             }
             else
             {
                 var collectionType = SelectedItemType;
                 if (string.IsNullOrEmpty(collectionType)) return;
 
-                _userCollectionLoader.CreateCollection(collectionName, collectionType);
+                _userCollectionTracker.CreateCollection(collectionName, collectionType);
             }
 
             RequestClose?.Invoke();

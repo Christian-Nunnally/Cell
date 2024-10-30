@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace Cell.Core.Data
+namespace Cell.Core.Data.Tracker
 {
     public class FunctionTracker
     {

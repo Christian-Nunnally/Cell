@@ -1,8 +1,8 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using CellTest.TestUtilities;
 
 namespace CellTest.Core.Data
@@ -12,9 +12,7 @@ namespace CellTest.Core.Data
         private const string TestCollectionName = "TestCollection";
         private const string TestSortFunctionName = "TestSortFunction";
         private readonly TestDialogFactory _testDialogFactory;
-        private readonly DictionaryFileIO _testFileIO;
-        private readonly PersistedDirectory _persistedDirectory;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellTriggerManager _cellTriggerManager;
         private readonly FunctionTracker _functionTracker;
@@ -24,14 +22,12 @@ namespace CellTest.Core.Data
         public UserCollectionTests()
         {
             _testDialogFactory = new TestDialogFactory();
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _functionTracker = new FunctionTracker();
             _cellTracker = new CellTracker();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
-            _testing = _userCollectionLoader.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            _testing = _userCollectionTracker.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
 
         [Fact]
@@ -53,7 +49,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionBasedOnOtherCollection_AddItemToBaseCollection_ItemFoundInLeafCollection()
         {
-            var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
+            var filteredCollection = _userCollectionTracker.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var testItem = new TodoItem();
             Assert.DoesNotContain(testItem, filteredCollection.Items);
 
@@ -65,7 +61,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithSortFunctionAndBasedOnOtherCollection_TwoItemsAddedToBaseCollection_ItemsInFilteredCollectionAreSorted()
         {
-            var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
+            var filteredCollection = _userCollectionTracker.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return -{TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
@@ -85,7 +81,7 @@ namespace CellTest.Core.Data
         [Fact]
         public void CollectionWithReversedSortFunctionAndBasedOnOtherCollection_TwoItemsAddedToBaseCollection_ItemsInFilteredCollectionAreSorted()
         {
-            var filteredCollection = _userCollectionLoader.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
+            var filteredCollection = _userCollectionTracker.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);
             var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
             var sortCode = $"return {TestCollectionName}[c.Index].Priority;";
             var collectionNameToDataTypeMap = new Dictionary<string, string> { { TestCollectionName, nameof(TodoItem) } };
@@ -214,7 +210,7 @@ namespace CellTest.Core.Data
             _testing.Add(testItem1);
             _testing.Add(testItem2);
 
-            var sortedCollection = _userCollectionLoader.CreateCollection("SortedCollection", nameof(TodoItem), TestCollectionName);
+            var sortedCollection = _userCollectionTracker.CreateCollection("SortedCollection", nameof(TodoItem), TestCollectionName);
 
             Assert.Equal(testItem2, sortedCollection.Items[0]);
             Assert.Equal(testItem1, sortedCollection.Items[1]);

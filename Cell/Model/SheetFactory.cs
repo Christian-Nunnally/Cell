@@ -1,4 +1,4 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Data.Tracker;
 
 namespace Cell.Model
 {

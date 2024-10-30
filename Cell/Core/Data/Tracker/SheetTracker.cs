@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace Cell.Core.Data
+namespace Cell.Core.Data.Tracker
 {
     /// <summary>
     /// The tracker for all the sheets in a project.

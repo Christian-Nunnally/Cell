@@ -4,6 +4,7 @@ using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.Core.Common;
 using Cell.ViewModel.Cells.Types;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.Core.Execution.Functions
 {

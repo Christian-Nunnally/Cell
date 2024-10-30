@@ -1,8 +1,7 @@
-﻿using Cell.Core.Data;
-using Cell.Model;
-using Cell.Core.Persistence;
+﻿using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.Functions;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.Core.Execution
 {
@@ -14,19 +13,19 @@ namespace Cell.Core.Execution
         private readonly CellModel _cell;
         private readonly CellTracker _cellTracker;
         private readonly FunctionTracker _functionTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateSubscriber"/>.
         /// </summary>
         /// <param name="cell">The cell to populate when this subscriber is triggered.</param>
         /// <param name="cellTracker">The cell tracker used in the context when running populate.</param>
-        /// <param name="userCollectionLoader">The user collection loader used in the context when running populate.</param>
+        /// <param name="userCollectionTracker">The user collection tracker used in the context when running populate.</param>
         /// <param name="functionTracker">The function tracker to get the populate function from.</param>
-        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionLoader userCollectionLoader, FunctionTracker functionTracker)
+        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionTracker userCollectionTracker, FunctionTracker functionTracker)
         {
             _cell = cell;
             _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
+            _userCollectionTracker = userCollectionTracker;
             _functionTracker = functionTracker;
         }
 
@@ -46,7 +45,7 @@ namespace Cell.Core.Execution
 
         private CompileResult RunPopulate(CellModel subscriber)
         {
-            var pluginContext = new Context(_cellTracker, _userCollectionLoader, new DialogFactory(), subscriber);
+            var pluginContext = new Context(_cellTracker, _userCollectionTracker, new DialogFactory(), subscriber);
             if (!_functionTracker.TryGetCellFunction("object", subscriber.PopulateFunctionName, out var populateFunction)) return new CompileResult { WasSuccess = false, ExecutionResult = "Populate function not found" };
             var result = populateFunction.Run(pluginContext);
             if (!result.WasSuccess) return result;

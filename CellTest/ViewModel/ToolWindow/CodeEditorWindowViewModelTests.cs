@@ -1,11 +1,11 @@
-﻿using Cell.Core.Data;
-using Cell.Model;
+﻿using Cell.Model;
 using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Common;
 using Cell.Model.Plugin;
+using Cell.Core.Data.Tracker;
 
 namespace CellTest.ViewModel.ToolWindow
 {
@@ -17,7 +17,7 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly FunctionTracker _functionTracker;
         private readonly CellFunction _functionBeingEdited;
         private readonly CellModel _cellContext;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly CodeEditorWindowViewModel _testing;
         private readonly TestingContext _testingContext;
         private readonly Dictionary<string, string> _collectionNameMap;
@@ -31,8 +31,8 @@ namespace CellTest.ViewModel.ToolWindow
             _functionTracker = new FunctionTracker();
             _functionBeingEdited = _functionTracker.CreateCellFunction("void", "TestFunction");
             _cellContext = new CellModel();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _testingContext = new TestingContext(_cellTracker, _userCollectionLoader, _cellContext, _functionTracker);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _testingContext = new TestingContext(_cellTracker, _userCollectionTracker, _cellContext, _functionTracker);
             _collectionNameMap = [];
             _testing = new CodeEditorWindowViewModel(_functionBeingEdited, _cellContext, _collectionNameMap, _testingContext);
         }
@@ -99,7 +99,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CollectionExistsWithOneItemAndTestCodeGetsItem_TestCode_LogShowsDialogContainedItemTitle()
         {
-            var realCollection = _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
             _collectionNameMap.Add("TestCollection", "TodoItem");
             var todoItem = new TodoItem
             {
@@ -116,7 +116,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CodeAddsItemToUserCollection_TestCode_ItemAddedInTest()
         {
-            _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
             _collectionNameMap.Add("TestCollection", "TodoItem");
             _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
 
@@ -128,7 +128,7 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CodeAddsItemToUserCollection_TestCode_ItemNotAddedInRealCollection()
         {
-            var realCollection = _userCollectionLoader.CreateCollection("TestCollection", "TodoItem", "");
+            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
             _collectionNameMap.Add("TestCollection", "TodoItem");
             _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
 

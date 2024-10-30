@@ -1,22 +1,20 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 
 namespace CellTest.ViewModel.Cell.Types
 {
     public class CheckboxCellViewModelTests
     {
         private readonly TestDialogFactory _testDialogFactory;
-        private readonly DictionaryFileIO _testFileIO;
-        private readonly PersistedDirectory _persistedDirectory;
         private readonly CellTracker _cellTracker;
         private readonly FunctionTracker _functionTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellTriggerManager _cellTriggerManager;
         private readonly SheetModel _sheetModel;
@@ -28,13 +26,11 @@ namespace CellTest.ViewModel.Cell.Types
         public CheckboxCellViewModelTests()
         {
             _testDialogFactory = new TestDialogFactory();
-            _testFileIO = new DictionaryFileIO();
-            _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _functionTracker = new FunctionTracker();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);

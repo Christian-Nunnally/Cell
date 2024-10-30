@@ -1,5 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Core.Execution.SyntaxWalkers.UserCollections;
@@ -7,125 +8,60 @@ using Cell.Model;
 using Cell.Model.Plugin;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Core.Persistence
+namespace Cell.Core.Persistence.Loader
 {
     /// <summary>
     /// Loads and saves user collections from a project.
     /// </summary>
-    public class UserCollectionLoader : IUserCollectionProvider
+    public class UserCollectionLoader
     {
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _collectionsDirectory;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly FunctionTracker _functionTracker;
-        private bool _hasGenerateDataTypeForCollectionMapChanged;
         private Task? _loadCollectionsTask;
+        private bool _shouldSaveAddedCollections = true;
 
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
         /// </summary>
         /// <param name="collectionsDirectory">A directory to store and load collections from.</param>
+        /// <param name="userCollectionTracker">Tracker to add loaded collections to, as well as persist changes to the collections of.</param>
         /// <param name="functionTracker">The plugin function tracker used to get sort functions for collections.</param>
         /// <param name="cellTracker">The cell tracker that needs to be provided to sort functions.</param>
-        public UserCollectionLoader(PersistedDirectory collectionsDirectory, FunctionTracker functionTracker, CellTracker cellTracker)
+        public UserCollectionLoader(PersistedDirectory collectionsDirectory, UserCollectionTracker userCollectionTracker, FunctionTracker functionTracker, CellTracker cellTracker)
         {
             _collectionsDirectory = collectionsDirectory;
+            _userCollectionTracker = userCollectionTracker;
             _functionTracker = functionTracker;
             _cellTracker = cellTracker;
+
+            _userCollectionTracker.UserCollectionAdded += UserCollectionTrackerUserCollectionAdded;
+            _userCollectionTracker.UserCollectionRemoved += UserCollectionTrackerUserCollectionRemoved;
         }
 
-        /// <summary>
-        /// Gets just the names of all loaded collections.
-        /// </summary>
-        public IEnumerable<string> CollectionNames => _collections.Keys;
-
-        /// <summary>
-        /// Gets all loaded collections.
-        /// </summary>
-        public ObservableCollection<UserCollection> UserCollections { get; private set; } = [];
-
-        /// <summary>
-        /// Creates a new collection.
-        /// </summary>
-        /// <param name="collectionName">The name of the new collection.</param>
-        /// <param name="itemTypeName">The data type of the items in the collection.</param>
-        /// <param name="baseCollectionName">The name of the collection this collection should be a projection of, if any.</param>
-        /// <returns>The new collection.</returns>
-        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName = "")
+        private void UserCollectionTrackerUserCollectionRemoved(UserCollection collection)
         {
-            var model = new UserCollectionModel
-            {
-                Name = collectionName,
-                ItemTypeName = itemTypeName,
-                BasedOnCollectionName = baseCollectionName
-            };
-            var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
-            var collection = new UserCollection(model, _functionTracker, sortContext);
-            StartTrackingCollection(collection);
-            SaveCollection(collection);
-            EnsureLinkedToBaseCollection(collection);
-            return collection;
-        }
-
-        /// <summary>
-        /// Deletes a collection from disk.
-        /// </summary>
-        /// <param name="collection">The collection to delete.</param>
-        public void DeleteCollection(UserCollection collection)
-        {
-            UnlinkFromBaseCollection(collection);
-            StopTrackingCollection(collection);
+            collection.ItemAdded -= UserCollectionItemAdded;
+            collection.ItemRemoved -= UserCollectionItemRemoved;
+            collection.ItemPropertyChanged -= UserCollectionItemChanged;
+            collection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
             _collectionsDirectory.DeleteDirectory(collection.Model.Name);
         }
 
-        /// <summary>
-        /// Gets a collection by name.
-        /// </summary>
-        /// <param name="name">The name of the collection to get.</param>
-        /// <returns>The collection if it exists, or null.</returns>
-        public virtual UserCollection? GetCollection(string name)
+        private void UserCollectionTrackerUserCollectionAdded(UserCollection collection)
         {
-            if (name == string.Empty) return null;
-            if (_collections.TryGetValue(name, out UserCollection? value)) return value;
-            return null;
-        }
-
-        /// <summary>
-        /// Gets the data type string for a collection.
-        /// </summary>
-        /// <param name="collection">The collection name to get the data type of its items from.</param>
-        /// <returns>The data type name of the items in the collection with the given name.</returns>
-        public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "object";
-
-        /// <summary>
-        /// Makes sure all collections are linked to their base collections.
-        /// </summary>
-        public void LinkUpBaseCollectionsAfterLoad()
-        {
-            var loadedCollections = new List<string>();
-            foreach (var collection in UserCollections)
-            {
-                collection.RefreshSortAndFilter();
-            }
-            while (loadedCollections.Count != UserCollections.Count)
-            {
-                foreach (var collection in UserCollections)
-                {
-                    if (loadedCollections.Contains(collection.Model.Name)) continue;
-                    var basedOnCollectionName = collection.Model.BasedOnCollectionName;
-                    if (basedOnCollectionName == string.Empty || loadedCollections.Contains(basedOnCollectionName))
-                    {
-                        loadedCollections.Add(collection.Model.Name);
-                        EnsureLinkedToBaseCollection(collection);
-                    }
-                }
-            }
+            collection.ItemAdded += UserCollectionItemAdded;
+            collection.ItemRemoved += UserCollectionItemRemoved;
+            collection.ItemPropertyChanged += UserCollectionItemChanged;
+            collection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
+            if (_shouldSaveAddedCollections) SaveCollection(collection);
         }
 
         public void EnsureCollectionLoadHasStarted()
@@ -173,33 +109,10 @@ namespace Cell.Core.Persistence
             }
         }
 
-        internal IReadOnlyDictionary<string, string> GenerateDataTypeForCollectionMap()
-        {
-            if (_hasGenerateDataTypeForCollectionMapChanged)
-            {
-                _dataTypeForCollectionMap.Clear();
-                foreach (var collectionName in CollectionNames)
-                {
-                    _dataTypeForCollectionMap.Add(collectionName, GetDataTypeStringForCollection(collectionName));
-                }
-            }
-            _hasGenerateDataTypeForCollectionMapChanged = false;
-            return _dataTypeForCollectionMap;
-        }
-
         private void DeleteItem(string collectionName, string idToRemove)
         {
             var path = Path.Combine(collectionName, "Items", idToRemove);
             _collectionsDirectory.DeleteFile(path);
-        }
-
-        private void EnsureLinkedToBaseCollection(UserCollection collection)
-        {
-            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
-            {
-                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
-                collection.BecomeViewIntoCollection(baseCollection);
-            }
         }
 
         private void LoadCollection(string directory)
@@ -207,14 +120,16 @@ namespace Cell.Core.Persistence
             var path = Path.Combine(directory, "collection");
             var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
             var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
-            var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
+            var sortContext = new Context(_cellTracker, _userCollectionTracker, new DialogFactory(), CellModel.Null);
             var collection = new UserCollection(model, _functionTracker, sortContext);
             var itemsDirectory = Path.Combine(directory, "Items");
             var paths = !_collectionsDirectory.DirectoryExists(itemsDirectory)
                 ? []
                 : _collectionsDirectory.GetFiles(itemsDirectory);
             paths.Select(LoadItem).ToList().ForEach(collection.Add);
-            StartTrackingCollection(collection);
+            _shouldSaveAddedCollections = false;
+            _userCollectionTracker.StartTrackingCollection(collection);
+            _shouldSaveAddedCollections = true;
         }
 
         private PluginModel LoadItem(string path)
@@ -241,37 +156,6 @@ namespace Cell.Core.Persistence
             var path = Path.Combine(collectionName, "Items", id);
             var serializedModel = JsonSerializer.Serialize(model);
             _collectionsDirectory.SaveFile(path, serializedModel);
-        }
-
-        private void StartTrackingCollection(UserCollection userCollection)
-        {
-            userCollection.ItemAdded += UserCollectionItemAdded;
-            userCollection.ItemRemoved += UserCollectionItemRemoved;
-            userCollection.ItemPropertyChanged += UserCollectionItemChanged;
-            userCollection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
-            _collections.Add(userCollection.Model.Name, userCollection);
-            UserCollections.Add(userCollection);
-            _hasGenerateDataTypeForCollectionMapChanged = true;
-        }
-
-        private void StopTrackingCollection(UserCollection userCollection)
-        {
-            userCollection.ItemAdded -= UserCollectionItemAdded;
-            userCollection.ItemRemoved -= UserCollectionItemRemoved;
-            userCollection.ItemPropertyChanged -= UserCollectionItemChanged;
-            userCollection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
-            _collections.Remove(userCollection.Model.Name);
-            UserCollections.Remove(userCollection);
-            _hasGenerateDataTypeForCollectionMapChanged = true;
-        }
-
-        private void UnlinkFromBaseCollection(UserCollection collection)
-        {
-            if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
-            {
-                var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
-                collection.StopBeingViewIntoCollection(baseCollection);
-            }
         }
 
         private void UserCollectionItemAdded(UserCollection collection, PluginModel model)

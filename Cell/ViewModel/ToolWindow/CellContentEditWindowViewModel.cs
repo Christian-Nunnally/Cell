@@ -1,7 +1,6 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
-using Cell.Core.Persistence;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -178,10 +177,10 @@ namespace Cell.ViewModel.ToolWindow
         private void EditFunction(CellFunction function)
         {
             if (ApplicationViewModel.Instance.CellTracker == null) return;
-            var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
-            if (userCollectionLoader is null) return;
-            var collectionNameToDataTypeMap = userCollectionLoader.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionLoader, CellToDisplay, _functionTracker);
+            var userCollectionTracker = ApplicationViewModel.Instance.UserCollectionTracker;
+            if (userCollectionTracker is null) return;
+            var collectionNameToDataTypeMap = userCollectionTracker.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionTracker, CellToDisplay, _functionTracker);
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);

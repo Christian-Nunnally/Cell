@@ -5,6 +5,7 @@ using Cell.Core.Persistence;
 using Cell.ViewModel.Cells;
 using CellTest.TestUtilities;
 using Cell.ViewModel.Cells.Types;
+using Cell.Core.Data.Tracker;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -17,7 +18,7 @@ namespace CellTest.ViewModel.Cell.Types
         private PersistedDirectory _persistedDirectory;
         private CellTracker _cellTracker;
         private FunctionTracker _functionTracker;
-        private UserCollectionLoader _userCollectionLoader;
+        private UserCollectionTracker _userCollectionTracker;
         private CellPopulateManager _cellPopulateManager;
         private SheetModel _sheetModel;
         private SheetViewModel _sheetViewModel;
@@ -32,11 +33,11 @@ namespace CellTest.ViewModel.Cell.Types
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _functionTracker = new FunctionTracker();
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _functionTracker, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionLoader);
+            _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionLoader, _testDialogFactory);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
             _cellModel = new CellModel();
             return new CornerCellViewModel(_cellModel, _sheetViewModel);

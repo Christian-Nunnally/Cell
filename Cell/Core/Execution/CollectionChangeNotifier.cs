@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 
 namespace Cell.Core.Execution
 {
@@ -11,14 +11,14 @@ namespace Cell.Core.Execution
     {
         private readonly List<string> _collectionsBeingUpdated = [];
         private readonly SubscriberNotifier _subscriberNotifier = new();
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         /// <summary>
         /// Creates a new instance of <see cref="CollectionChangeNotifier"/>.
         /// </summary>
-        /// <param name="userCollectionLoader">The collection loader to track the collections of.</param>
-        public CollectionChangeNotifier(UserCollectionLoader userCollectionLoader)
+        /// <param name="userCollectionTracker">Source of the collections to notify changes to.</param>
+        public CollectionChangeNotifier(UserCollectionTracker userCollectionTracker)
         {
-            _userCollectionLoader = userCollectionLoader;
+            _userCollectionTracker = userCollectionTracker;
             _subscriberNotifier.NewChannelSubscribedTo += StartListeningToCollectionForChanges;
             _subscriberNotifier.LastChannelUnsubscribedFrom += StopListeningToCollectionForChanges;
         }
@@ -74,7 +74,7 @@ namespace Cell.Core.Execution
 
         private void StartListeningToCollectionForChanges(string collectionName)
         {
-            var collection = _userCollectionLoader.GetCollection(collectionName);
+            var collection = _userCollectionTracker.GetCollection(collectionName);
             if (collection == null) return;
             collection.ItemAdded += ItemAddedToUserCollection;
             collection.ItemRemoved += ItemRemovedFromUserCollection;
@@ -83,7 +83,7 @@ namespace Cell.Core.Execution
 
         private void StopListeningToCollectionForChanges(string collectionName)
         {
-            var collection = _userCollectionLoader.GetCollection(collectionName);
+            var collection = _userCollectionTracker.GetCollection(collectionName);
             if (collection == null) return;
             collection.ItemAdded -= ItemAddedToUserCollection;
             collection.ItemRemoved -= ItemRemovedFromUserCollection;

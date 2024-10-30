@@ -1,9 +1,8 @@
 ﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.Model.Plugin;
-using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
-using System.Collections;
 
 namespace Cell.Core.Execution.Functions
 {
@@ -19,20 +18,20 @@ namespace Cell.Core.Execution.Functions
         /// </summary>
         public const string PluginContextArgumentName = "c";
         private readonly CellTracker _cellTracker;
-        private readonly UserCollectionLoader _userCollectionLoader;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly DialogFactoryBase _dialogFactory;
 
         /// <summary>
         /// Creates a new instance of the <see cref="Context"/> class with the context set to the given cell.
         /// </summary>
         /// <param name="cellTracker">The cell tracker used to provide cell access to the function.</param>
-        /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
+        /// <param name="userCollectionTracker">Provides collection access to the function.</param>
         /// <param name="dialogFactory">The dialog factory used to show dialogs from cell functions.</param>
         /// <param name="cell">The context cell.</param>
-        public Context(CellTracker cellTracker, UserCollectionLoader userCollectionLoader, DialogFactoryBase dialogFactory, CellModel cell)
+        public Context(CellTracker cellTracker, UserCollectionTracker userCollectionTracker, DialogFactoryBase dialogFactory, CellModel cell)
         {
             _cellTracker = cellTracker;
-            _userCollectionLoader = userCollectionLoader;
+            _userCollectionTracker = userCollectionTracker;
             _dialogFactory = dialogFactory;
             ContextCell = cell;
         }
@@ -114,7 +113,7 @@ namespace Cell.Core.Execution.Functions
         /// <returns>The user collection with the given name.</returns>
         public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
         {
-            return new UserList<T>(collection, _userCollectionLoader);
+            return new UserList<T>(collection, _userCollectionTracker);
         }
 
         /// <summary>

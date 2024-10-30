@@ -7,6 +7,8 @@ using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
+using Cell.Core.Persistence.Loader;
+using Cell.Core.Data.Tracker;
 
 namespace Cell.ViewModel.Application
 {
@@ -189,6 +191,7 @@ namespace Cell.ViewModel.Application
         /// Gets the user collection loader for the application, which loads and stores all user collections.
         /// </summary>
         public UserCollectionLoader? UserCollectionLoader { get; set; }
+        public UserCollectionTracker? UserCollectionTracker { get; set; }
 
         /// <summary>
         /// Gets the application wide undo redo manager.
@@ -377,7 +380,7 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase4()
         {
-            UserCollectionLoader.LinkUpBaseCollectionsAfterLoad();
+            UserCollectionTracker.LinkUpBaseCollectionsAfterLoad();
             return new LoadingProgressResult("Loading Cells", LoadPhase5);
         }
 
@@ -389,7 +392,7 @@ namespace Cell.ViewModel.Application
 
         private LoadingProgressResult LoadPhase5b()
         {
-            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionLoader);
+            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
             return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
         }
 

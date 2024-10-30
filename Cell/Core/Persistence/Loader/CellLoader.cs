@@ -1,11 +1,11 @@
 ﻿using Cell.Core.Common;
-using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Model;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
-namespace Cell.Core.Persistence
+namespace Cell.Core.Persistence.Loader
 {
     /// <summary>
     /// Capable of loading and saving cells to a <see cref="PersistedDirectory"/>.

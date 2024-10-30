@@ -56,8 +56,8 @@ namespace Cell.View.ToolWindow
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);
 
-            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionLoader.GenerateDataTypeForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionLoader, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker);
+            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionTracker.GenerateDataTypeForCollectionMap();
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker);
             var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
