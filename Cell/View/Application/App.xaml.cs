@@ -36,11 +36,13 @@ namespace Cell
             var persistedProject = new PersistedProject(projectDirectory);
             applicationViewModel.PersistedProject = persistedProject;
             var functionTracker = new FunctionTracker();
+            applicationViewModel.FunctionTracker = functionTracker;
             var pluginFunctionLoader = new FunctionLoader(persistedProject.FunctionsDirectory, functionTracker);
             applicationViewModel.FunctionLoader = pluginFunctionLoader;
             var cellTracker = new CellTracker();
             applicationViewModel.CellTracker = cellTracker;
             var userCollectionTracker = new UserCollectionTracker(functionTracker, cellTracker);
+            applicationViewModel.UserCollectionTracker = userCollectionTracker;
             var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker);
             applicationViewModel.UserCollectionLoader = userCollectionLoader;
             var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory);

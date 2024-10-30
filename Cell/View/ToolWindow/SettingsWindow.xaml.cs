@@ -1,7 +1,14 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.View.Cells;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Documents.Serialization;
+using System.Windows.Xps;
+using System.Windows.Xps.Packaging;
 
 namespace Cell.View.ToolWindow
 {
@@ -43,11 +50,25 @@ namespace Cell.View.ToolWindow
 
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.PersistedProject?.GetRootPath();
+            Process.Start("explorer", ApplicationViewModel.Instance.PersistedProject?.GetRootPath());
         }
 
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (File.Exists("printPreview.xps")) File.Delete("printPreview.xps");
+            XpsDocument xpsDocument = new XpsDocument("printPreview.xps", FileAccess.ReadWrite);
+            XpsDocumentWriter xpsDocumentWriter = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
+            SerializerWriterCollator serializerWriterCollator = xpsDocumentWriter.CreateVisualsCollator();
+            serializerWriterCollator.BeginBatchWrite();
+            serializerWriterCollator.Write(new SheetView(ApplicationViewModel.Instance.SheetViewModel));
+            serializerWriterCollator.EndBatchWrite();
+            FixedDocumentSequence preview = xpsDocument.GetFixedDocumentSequence();
+            xpsDocument.Close();
+
+            var previewWindow = new Window();
+            previewWindow.Content = new DocumentViewer { Document = preview };
+            previewWindow.ShowDialog();
+
             //var printDialog = new PrintDialog();
             ApplicationViewModel.Instance.DialogFactory.Show("Under construction", "Not quite ready :)");
         }

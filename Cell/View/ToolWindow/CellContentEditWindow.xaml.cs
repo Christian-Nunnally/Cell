@@ -1,7 +1,9 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
+using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -91,10 +93,19 @@ namespace Cell.View.ToolWindow
 
         private void TextEditorPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
+            if (e.Key == Key.Space && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
             {
                 OpenAutoCompleteWindow();
                 e.Handled = true;
+            }
+            else if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                if (e.Key == Key.Enter || e.Key == Key.Tab)
+                {
+                    if (sender is not TextArea textbox) return;
+                    textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                    e.Handled = true;
+                }
             }
         }
 

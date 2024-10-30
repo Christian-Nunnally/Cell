@@ -78,6 +78,7 @@
                         <Label
                             Name="ContentSite"
                             Margin="0,0,20,0"
+                            Padding="0"
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Content="{TemplateBinding SelectedValue}"
