@@ -63,8 +63,22 @@ namespace Cell
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
             persistedProject.RegisterMigrator("1", "2", new Migration());
-            await Task.Run(() => ApplicationViewModel.Instance.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker)));
+            await Task.Run(() => applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker)));
+            OpenCellContentEditWindowInDockedMode(applicationViewModel, functionTracker, cellSelector);
             OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
+            OpenInitialSheet(applicationViewModel, sheetTracker);
+        }
+
+        private static void OpenCellContentEditWindowInDockedMode(ApplicationViewModel applicationViewModel, FunctionTracker functionTracker, CellSelector cellSelector)
+        {
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(cellSelector.SelectedCells, functionTracker);
+            applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+        }
+
+        private static void OpenInitialSheet(ApplicationViewModel applicationViewModel, SheetTracker sheetTracker)
+        {
+            var firstSheet = sheetTracker.OrderedSheets.FirstOrDefault();
+            applicationViewModel.GoToSheet(firstSheet?.Name ?? string.Empty);
         }
 
         private void OnlyAllowSelectionWhenEditWindowIsOpen(ApplicationViewModel applicationViewModel, CellSelector cellSelector)

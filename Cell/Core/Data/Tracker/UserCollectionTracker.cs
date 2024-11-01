@@ -1,23 +1,22 @@
 ﻿
 using Cell.Core.Common;
 using Cell.Core.Execution.Functions;
-using Cell.Core.Execution.References;
-using Cell.Core.Execution.SyntaxWalkers.UserCollections;
-using Cell.Core.Persistence;
 using Cell.Model;
 using Cell.ViewModel.Application;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.ObjectModel;
 using Cell.Core.Persistence.Loader;
 
 namespace Cell.Core.Data.Tracker
 {
+    /// <summary>
+    /// Tracks and sorts user collections, allowing for easy access to them. Also provides events for when collections are added or removed. Finally, it provides a way to create new collections.
+    /// </summary>
     public class UserCollectionTracker : IUserCollectionProvider
     {
+        private readonly Dictionary<UserCollectionModel, string> _collectionToNameMap = [];
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
-        private readonly PersistedDirectory _collectionsDirectory;
         private readonly FunctionTracker _functionTracker;
         private bool _hasGenerateDataTypeForCollectionMapChanged;
 
@@ -42,8 +41,15 @@ namespace Cell.Core.Data.Tracker
         /// </summary>
         public ObservableCollection<UserCollection> UserCollections { get; private set; } = [];
 
-        public event Action<UserCollection> UserCollectionAdded;
-        public event Action<UserCollection> UserCollectionRemoved;
+        /// <summary>
+        /// Occurs when a collection is added to this tracker and is therefore being tracked.
+        /// </summary>
+        public event Action<UserCollection>? UserCollectionAdded;
+
+        /// <summary>
+        /// Occurs when a collection is removed from this tracker and is therefore no longer being tracked.
+        /// </summary>
+        public event Action<UserCollection>? UserCollectionRemoved;
 
         /// <summary>
         /// Creates a new collection.
@@ -68,14 +74,30 @@ namespace Cell.Core.Data.Tracker
         }
 
         /// <summary>
-        /// Deletes a collection from disk.
+        /// Removes a collection from the tracker.
         /// </summary>
         /// <param name="collection">The collection to delete.</param>
-        public void DeleteCollection(UserCollection collection)
+        public void StopTrackingCollection(UserCollection collection)
         {
             UnlinkFromBaseCollection(collection);
-            StopTrackingCollection(collection);
-            _collectionsDirectory.DeleteDirectory(collection.Model.Name);
+            _collections.Remove(collection.Model.Name);
+            UserCollections.Remove(collection);
+            _hasGenerateDataTypeForCollectionMapChanged = true;
+            _collectionToNameMap.Remove(collection.Model);
+            collection.Model.PropertyChanged -= CollectionModelPropertyChanged;
+            UserCollectionRemoved?.Invoke(collection);
+        }
+
+        private void CollectionModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            var collection = (UserCollectionModel)sender!;
+            if (e.PropertyName == nameof(UserCollectionModel.Name))
+            {
+                var oldName = _collectionToNameMap[collection];
+                _collections.Remove(oldName);
+                _collections.Add(collection.Name, UserCollections.First(x => x.Model == collection));
+                _collectionToNameMap[collection] = collection.Name;
+            }
         }
 
         /// <summary>
@@ -122,29 +144,6 @@ namespace Cell.Core.Data.Tracker
             }
         }
 
-        /// <summary>
-        /// Does the necessary work after a collection has been renamed.
-        /// </summary>
-        /// <param name="oldName">The old collection name.</param>
-        /// <param name="newName">The new collection name.</param>
-        public void ProcessCollectionRename(string oldName, string newName)
-        {
-            if (!_collections.TryGetValue(oldName, out var collection)) return;
-            if (_collections.ContainsKey(newName)) return;
-            _collections.Remove(oldName);
-            _collections.Add(newName, collection);
-            _collectionsDirectory.MoveDirectory(oldName, newName);
-
-            var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in _functionTracker.CellFunctions)
-            {
-                if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
-                {
-                    function.Model.Code = collectionRenamer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
-                }
-            }
-        }
-
         internal IReadOnlyDictionary<string, string> GenerateDataTypeForCollectionMap()
         {
             if (_hasGenerateDataTypeForCollectionMapChanged)
@@ -168,20 +167,18 @@ namespace Cell.Core.Data.Tracker
             }
         }
 
-        public void StartTrackingCollection(UserCollection userCollection)
+        /// <summary>
+        /// Starts tracking a collection.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        public void StartTrackingCollection(UserCollection collection)
         {
-            _collections.Add(userCollection.Model.Name, userCollection);
-            UserCollections.Add(userCollection);
+            _collections.Add(collection.Model.Name, collection);
+            UserCollections.Add(collection);
             _hasGenerateDataTypeForCollectionMapChanged = true;
-            UserCollectionAdded?.Invoke(userCollection);
-        }
-
-        public void StopTrackingCollection(UserCollection userCollection)
-        {
-            _collections.Remove(userCollection.Model.Name);
-            UserCollections.Remove(userCollection);
-            _hasGenerateDataTypeForCollectionMapChanged = true;
-            UserCollectionRemoved?.Invoke(userCollection);
+            _collectionToNameMap.Add(collection.Model, collection.Model.Name);
+            collection.Model.PropertyChanged += CollectionModelPropertyChanged;
+            UserCollectionAdded?.Invoke(collection);
         }
 
         private void UnlinkFromBaseCollection(UserCollection collection)

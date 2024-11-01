@@ -7,6 +7,7 @@ namespace Cell.Model
         public List<CellModel> CellsToAdd { get; set; } = [];
         public List<CellModel> CellsToRemove { get; set; } = [];
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Changed: {CellsToRestore.Count}, Removed: {CellsToAdd.Count}, Added: {CellsToRemove.Count}";

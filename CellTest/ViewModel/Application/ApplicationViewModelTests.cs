@@ -8,7 +8,6 @@ using Cell.ViewModel.Application;
 using CellTest.TestUtilities;
 
 namespace CellTest.ViewModel.Application
-
 {
     public class ApplicationViewModelTests
     {

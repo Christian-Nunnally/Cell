@@ -1,14 +1,14 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
-using Cell.Model;
 using Cell.Core.Persistence;
+using Cell.Core.Persistence.Loader;
+using Cell.Model;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
 using System.Collections.ObjectModel;
-using Cell.Core.Persistence.Loader;
-using Cell.Core.Data.Tracker;
+using System.Windows.Controls;
 
 namespace Cell.ViewModel.Application
 {
@@ -21,17 +21,16 @@ namespace Cell.ViewModel.Application
         /// Error message shown when a migration is needed but no migrator is available.
         /// </summary>
         public const string NoMigratorForVersionError = "Unable to load version";
-        public CellLoader? CellLoader;
-        public CellTriggerManager? CellTriggerManager;
         private readonly Dictionary<SheetModel, SheetViewModel> _sheetModelToViewModelMap = [];
         private static ApplicationViewModel? _instance;
+        private string _applicationBackgroundMessage = "No cells loaded";
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
+        private bool _hasVersionBeenSaved = false;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
         private TitleBarSheetNavigationViewModel? titleBarSheetNavigationViewModel;
-
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
         /// </summary>
@@ -39,6 +38,11 @@ namespace Cell.ViewModel.Application
         {
             Instance = this;
         }
+
+        /// <summary>
+        /// The handler that is called when this view model wants to move a to the top of the z order.
+        /// </summary>
+        public event Action<ToolWindowViewModel>? MoveToolWindowToTop;
 
         /// <summary>
         /// Gets the current instance of the application view model.
@@ -51,23 +55,8 @@ namespace Cell.ViewModel.Application
         public static ApplicationViewModel? SafeInstance => _instance;
 
         /// <summary>
-        /// Gets the persisted application settings for the application.
+        /// Gets or sets the message to display in the background of the application.
         /// </summary>
-        public ApplicationSettings? ApplicationSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the view model for the title bar sheet navigation.
-        /// </summary>
-        public TitleBarSheetNavigationViewModel? TitleBarSheetNavigationViewModel
-        {
-            get => titleBarSheetNavigationViewModel; set
-            {
-                if (titleBarSheetNavigationViewModel == value) return;
-                titleBarSheetNavigationViewModel = value;
-                NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
-            }
-        }
-
         public string ApplicationBackgroundMessage
         {
             get => _applicationBackgroundMessage; set
@@ -79,14 +68,9 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// A factory for showing dialogs.
+        /// Gets the persisted application settings for the application.
         /// </summary>
-        public DialogFactoryBase? DialogFactory { get; set; }
-
-        /// <summary>
-        /// Enables copy and paste though this clipboard.
-        /// </summary>
-        public CellClipboard? CellClipboard { get; set; }
+        public ApplicationSettings? ApplicationSettings { get; set; }
 
         /// <summary>
         /// Gets or sets the height of the application window.
@@ -114,17 +98,20 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public event Action<ToolWindowViewModel>? MoveToolWindowToTop;
-
-        public void MoveWindowToTop(ToolWindowViewModel toolWindow)
-        {
-            MoveToolWindowToTop?.Invoke(toolWindow);
-        }
-
         /// <summary>
         /// Gets the backup manager for the application, which is used to create backups of the project.
         /// </summary>
         public BackupManager? BackupManager { get; set; }
+
+        /// <summary>
+        /// Enables copy and paste though this clipboard.
+        /// </summary>
+        public CellClipboard? CellClipboard { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cell loader for the application, which is used to load cells into the application.
+        /// </summary>
+        public CellLoader? CellLoader { get; set; }
 
         /// <summary>
         /// Gets the populator for the application, which is used to auto populate cells in the application.
@@ -142,6 +129,26 @@ namespace Cell.ViewModel.Application
         public CellTracker? CellTracker { get; set; }
 
         /// <summary>
+        /// Gets or sets the cell trigger manager for the application, which is used to manage all cell triggers.
+        /// </summary>
+        public CellTriggerManager? CellTriggerManager { get; set; }
+
+        /// <summary>
+        /// A factory for showing dialogs.
+        /// </summary>
+        public DialogFactoryBase? DialogFactory { get; set; }
+
+        /// <summary>
+        /// Gets the plugin function loader for the application, which loads and stores all plugin functions.
+        /// </summary>
+        public FunctionLoader? FunctionLoader { get; set; }
+
+        /// <summary>
+        /// Gets or sets the main functions tracker used to manage all functions loaded into the application.
+        /// </summary>
+        public FunctionTracker? FunctionTracker { get; set; }
+
+        /// <summary>
         /// Gets or sets whether a project is currently loaded and ready to be interacted with.
         /// </summary>
         public bool IsProjectLoaded
@@ -156,19 +163,14 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
+        /// Gets the observable collection of open tool windows in the application.
+        /// </summary>
+        public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
+
+        /// <summary>
         /// Gets or sets the persisted project for the application, which is used to save and load the project.
         /// </summary>
         public PersistedProject? PersistedProject { get; set; }
-
-        /// <summary>
-        /// Gets the plugin function loader for the application, which loads and stores all plugin functions.
-        /// </summary>
-        public FunctionLoader? FunctionLoader { get; set; }
-
-        /// <summary>
-        /// Gets or sets the main functions tracker used to manage all functions loaded into the application.
-        /// </summary>
-        public FunctionTracker? FunctionTracker { get; set; }
 
         /// <summary>
         /// Gets the sheet tracker for the application, which is used to store all of the sheets in the application.
@@ -190,14 +192,22 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
+        /// Gets or sets the view model for the title bar sheet navigation.
+        /// </summary>
+        public TitleBarSheetNavigationViewModel? TitleBarSheetNavigationViewModel
+        {
+            get => titleBarSheetNavigationViewModel; set
+            {
+                if (titleBarSheetNavigationViewModel == value) return;
+                titleBarSheetNavigationViewModel = value;
+                NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
+            }
+        }
+
+        /// <summary>
         /// Gets the application wide undo redo manager.
         /// </summary>
         public UndoRedoManager? UndoRedoManager { get; set; }
-
-        /// <summary>
-        /// Gets the observable collection of open tool windows in the application.
-        /// </summary>
-        public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
 
         /// <summary>
         /// Gets the user collection tracker for the application, which tracks all user collections.
@@ -222,10 +232,26 @@ namespace Cell.ViewModel.Application
         {
             if (CellClipboard is null)
             {
-                
+
             }
             if (SheetViewModel is null) return;
             CellClipboard?.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
+        }
+
+        /// <summary>
+        /// Shows the given tool window in the main dock panel.
+        /// </summary>
+        /// <param name="viewModel">The view model for the view to display.</param>
+        /// <param name="dock">The side to put the window on.</param>
+        /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
+        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        {
+            if (!allowDuplicates && OpenToolWindowViewModels.Any(x => viewModel.GetType() == x.GetType())) return;
+            viewModel.Dock = dock;
+            viewModel.IsDocked = true;
+            viewModel.RequestClose = () => RequestClose(viewModel);
+            viewModel.HandleBeingShown();
+            OpenToolWindowViewModels.Add(viewModel);
         }
 
         /// <summary>
@@ -248,9 +274,14 @@ namespace Cell.ViewModel.Application
         /// <param name="sheetName">The name of the sheet to show.</param>
         public void GoToSheet(string sheetName)
         {
+            if (CellPopulateManager is null) throw new CellError("Unable to go to sheet without a populate manager.");
+            if (CellTracker is null) throw new CellError("Unable to go to sheet without a cell tracker.");
+            if (CellTriggerManager is null) throw new CellError("Unable to go to sheet without a trigger manager.");
+            if (CellSelector is null) throw new CellError("Unable to go to sheet without a cell selector.");
+            if (FunctionTracker is null) throw new CellError("Unable to go to sheet without a function tracker.");
             if (!SheetModel.IsValidSheetName(sheetName)) return;
             if (SheetViewModel?.SheetName == sheetName) return;
-            var sheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == sheetName);
+            var sheet = SheetTracker?.Sheets.FirstOrDefault(x => x.Name == sheetName);
             if (sheet is null) return;
             SheetViewModel?.CellSelector.UnselectAllCells();
             if (_sheetModelToViewModelMap.TryGetValue(sheet, out SheetViewModel? existingSheetViewModel))
@@ -262,7 +293,7 @@ namespace Cell.ViewModel.Application
                 SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
-            ApplicationSettings.LastLoadedSheet = sheetName;
+            if (ApplicationSettings != null) ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
         /// <summary>
@@ -279,9 +310,18 @@ namespace Cell.ViewModel.Application
             }
             catch (AggregateException e)
             {
-                throw e.InnerException;
+                throw e.InnerException!;
             }
             return new LoadingProgressResult(true, "Load Complete");
+        }
+
+        /// <summary>
+        /// Moves the given tool window to the top of the z order.
+        /// </summary>
+        /// <param name="toolWindow">The tool window.</param>
+        public void MoveWindowToTop(ToolWindowViewModel toolWindow)
+        {
+            MoveToolWindowToTop?.Invoke(toolWindow);
         }
 
         /// <summary>
@@ -315,56 +355,6 @@ namespace Cell.ViewModel.Application
             OpenToolWindowViewModels.Add(viewModel);
         }
 
-        /// <summary>
-        /// Shows the given tool window in the main dock panel.
-        /// </summary>
-        /// <param name="viewModel">The view model for the view to display.</param>
-        /// <param name="dock">The side to put the window on.</param>
-        /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
-        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
-        {
-            if (!allowDuplicates && OpenToolWindowViewModels.Any(x => viewModel.GetType() == x.GetType())) return;
-            viewModel.Dock = dock;
-            viewModel.IsDocked = true;
-            viewModel.RequestClose = () => RequestClose(viewModel);
-            viewModel.HandleBeingShown();
-            OpenToolWindowViewModels.Add(viewModel);
-        }
-
-        private void RequestClose(ToolWindowViewModel viewModel)
-        {
-            var isAllowingClose = viewModel.HandleCloseRequested();
-            if (isAllowingClose)
-            {
-                RemoveToolWindow(viewModel);
-            }
-        }
-
-        private async Task BackupAsync()
-        {
-            if (PersistedProject is null) return;
-            PersistedProject.IsReadOnly = true;
-            await BackupManager!.CreateBackupAsync();
-            PersistedProject.IsReadOnly = false;
-        }
-
-        private bool _hasVersionBeenSaved = false;
-        private string _applicationBackgroundMessage = "No cells loaded";
-
-        private async Task MigrateProjectAsync()
-        {
-            await BackupManager.CreateBackupAsync("PreMigration");
-            PersistedProject.Migrate();
-            _isProjectLoading = false;
-            DialogFactory.Show("Project migrated", "Project has been migrated to the latest version. Reload the application now.");
-        }
-
-        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
-        {
-            OpenToolWindowViewModels.Remove(toolWindowViewModel);
-            toolWindowViewModel.HandleBeingClosed();
-        }
-
         internal async Task LoadAsync(UserCollectionLoader userCollectionLoader)
         {
             if (IsProjectLoaded) throw new CellError("Already loaded");
@@ -377,16 +367,18 @@ namespace Cell.ViewModel.Application
             else await ContinueLoadingAsync(userCollectionLoader);
         }
 
-        private void PromptUserToMigrateAndContinueLoading(UserCollectionLoader userCollectionLoader)
+        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
         {
-            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
-            if (!PersistedProject.CanMigrate()) throw new CellError(NoMigratorForVersionError);
-            if (DialogFactory is null) throw new CellError("Dialog factory not initialized yet, try loading again.");
-            DialogFactory.ShowYesNo(
-                "Version Mismatch",
-                $"The version of your project is outdated. would you like to migrate it?",
-                () => { MigrateProjectAsync().Wait(); ContinueLoadingAsync(userCollectionLoader).Wait(); },
-                () => { });
+            OpenToolWindowViewModels.Remove(toolWindowViewModel);
+            toolWindowViewModel.HandleBeingClosed();
+        }
+
+        private async Task BackupAsync()
+        {
+            if (PersistedProject is null) return;
+            PersistedProject.IsReadOnly = true;
+            await BackupManager!.CreateBackupAsync();
+            PersistedProject.IsReadOnly = false;
         }
 
         private async Task ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
@@ -407,19 +399,44 @@ namespace Cell.ViewModel.Application
             if (CellLoader is null) throw new CellError("Cell loader not initialized yet, try loading again.");
             CellLoader.LoadCells();
             await backupTask;
-            ApplicationBackgroundMessage = "Load complete!";
             if (CellTracker is null) throw new CellError("Cell tracker not initialized yet, try loading again.");
             if (FunctionTracker is null) throw new CellError("Function tracker not initialized yet, try loading again.");
+            ApplicationBackgroundMessage = "Creating populate manager";
             CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
             IsProjectLoaded = true;
             _isProjectLoading = false;
-            if (CellSelector is null) throw new CellError("Cell selector not initialized yet, try loading again.");
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(CellSelector.SelectedCells, FunctionTracker);
-            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
-            {
-                DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
-            });
             ApplicationBackgroundMessage = "Open a sheet to view cells";
+        }
+
+        private async Task MigrateProjectAsync()
+        {
+            if (BackupManager is null) throw new CellError("Backup manager not initialized, unable to migrate.");
+            await BackupManager.CreateBackupAsync("PreMigration");
+            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, unable to migrate.");
+            PersistedProject.Migrate();
+            _isProjectLoading = false;
+            DialogFactory?.Show("Project migrated", "Project has been migrated to the latest version. Reload the application now.");
+        }
+
+        private void PromptUserToMigrateAndContinueLoading(UserCollectionLoader userCollectionLoader)
+        {
+            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
+            if (!PersistedProject.CanMigrate()) throw new CellError(NoMigratorForVersionError);
+            if (DialogFactory is null) throw new CellError("Dialog factory not initialized yet, try loading again.");
+            DialogFactory.ShowYesNo(
+                "Version Mismatch",
+                $"The version of your project is outdated. would you like to migrate it?",
+                () => { MigrateProjectAsync().Wait(); ContinueLoadingAsync(userCollectionLoader).Wait(); },
+                () => { });
+        }
+
+        private void RequestClose(ToolWindowViewModel viewModel)
+        {
+            var isAllowingClose = viewModel.HandleCloseRequested();
+            if (isAllowingClose)
+            {
+                RemoveToolWindow(viewModel);
+            }
         }
     }
 }

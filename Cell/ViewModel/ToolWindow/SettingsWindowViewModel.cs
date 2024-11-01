@@ -1,5 +1,4 @@
-﻿using Cell.View.Application;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using System.Windows.Forms;
 
 namespace Cell.ViewModel.ToolWindow
@@ -50,7 +49,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (ApplicationViewModel.Instance.BackupManager is null)
             {
-                ApplicationViewModel.Instance.DialogFactory.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
+                ApplicationViewModel.Instance.DialogFactory?.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
                 return;
             }
             var backup = ApplicationViewModel.Instance.BackupManager.GetBackups().FirstOrDefault();
@@ -75,6 +74,9 @@ namespace Cell.ViewModel.ToolWindow
         internal void OpenEditorForDefaultCellFormat()
         {
             if (ApplicationViewModel.Instance.SheetViewModel is null) return;
+            if (ApplicationViewModel.Instance.ApplicationSettings is null) return;
+            if (ApplicationViewModel.Instance.CellTracker is null) return;
+            if (ApplicationViewModel.Instance.FunctionTracker is null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
@@ -82,6 +84,10 @@ namespace Cell.ViewModel.ToolWindow
 
         internal void OpenEditorForDefaultRowAndColumnCellFormat()
         {
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
+            if (ApplicationViewModel.Instance.ApplicationSettings is null) return;
+            if (ApplicationViewModel.Instance.CellTracker is null) return;
+            if (ApplicationViewModel.Instance.FunctionTracker is null) return;
             if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);

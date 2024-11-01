@@ -2,7 +2,9 @@
 using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.References;
+using Cell.Core.Execution.SyntaxWalkers.UserCollections;
 using Cell.ViewModel.Application;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Cell.ViewModel.Data
 {
@@ -11,6 +13,12 @@ namespace Cell.ViewModel.Data
     /// </summary>
     public class UserCollectionListItemViewModel : PropertyChangedBase
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="UserCollectionListItemViewModel"/>.
+        /// </summary>
+        /// <param name="underlyingCollection">The collection this view model represents.</param>
+        /// <param name="functionTracker">Used to get information about what functions are using this collection.</param>
+        /// <param name="userCollectionTracker">Used to find collections that might relate ot this collection, like base collections.</param>
         public UserCollectionListItemViewModel(UserCollection underlyingCollection, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker)
         {
             Collection = underlyingCollection;
@@ -46,11 +54,19 @@ namespace Cell.ViewModel.Data
                 if (Collection.Model.Name == value) return;
                 var oldName = Collection.Model.Name;
                 var newName = value;
-                ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
+                ApplicationViewModel.Instance.DialogFactory?.ShowYesNo("Change Collection Name", $"Do you want to change the collection name from '{oldName}' to '{newName}'?", () =>
                 {
-                    _userCollectionTracker.ProcessCollectionRename(oldName, newName);
                     Collection.Model.Name = newName;
                     NotifyPropertyChanged(nameof(Name));
+
+                    var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
+                    foreach (var function in _functionTracker.CellFunctions)
+                    {
+                        if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
+                        {
+                            function.Model.Code = collectionRenamer.Visit(CSharpSyntaxTree.ParseText(function.Model.Code).GetRoot())?.ToFullString() ?? "";
+                        }
+                    }
                 });
             }
             get

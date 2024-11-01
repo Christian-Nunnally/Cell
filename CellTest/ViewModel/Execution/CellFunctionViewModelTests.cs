@@ -26,6 +26,7 @@ namespace CellTest.ViewModel.Execution
         [Fact]
         public void ValidFunctionWhereWasLastCompileSuccesfulIsTrue_InvalidCodeEntered_WasLastCompileSuccessNotifiesChange()
         {
+            _testing.Function.Compile();
             Assert.True(_testing.WasLastCompileSuccesful);
             var propertyChanged = new PropertyChangedTester(_testing);
 

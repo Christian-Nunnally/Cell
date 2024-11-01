@@ -260,7 +260,7 @@ namespace Cell.ViewModel.Cells
             get => _model.Style.Font;
             set
             {
-                ApplicationViewModel.Instance.UndoRedoManager.RecordStateIfRecording(_model);
+                ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.Font = value;
                 NotifyPropertyChanged(nameof(Font));
             }

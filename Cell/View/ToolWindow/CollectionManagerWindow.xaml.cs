@@ -40,18 +40,21 @@ namespace Cell.View.ToolWindow
             if (sender is not Button button || button.DataContext is not UserCollection collection) return;
             if (!_viewModel.CanDeleteCollection(collection, out var reason))
             {
-                ApplicationViewModel.Instance.DialogFactory.Show("Unable to delete collection", $"Cannot delete '{collection.Model.Name}' because {reason}");
+                ApplicationViewModel.Instance.DialogFactory?.Show("Unable to delete collection", $"Cannot delete '{collection.Model.Name}' because {reason}");
                 return;
             }
-            ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
+            ApplicationViewModel.Instance.DialogFactory?.ShowYesNo($"Delete '{collection.Model.Name}'?", "Are you sure you want to delete this collection?", () =>
             {
                 if (collection.Items.Count == 0) _viewModel.DeleteCollection(collection);
-                else ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Are you sure?", "Are you sure? This will delete all items in the collection", () => _viewModel.DeleteCollection(collection));
+                else ApplicationViewModel.Instance.DialogFactory?.ShowYesNo($"Are you sure?", "Are you sure? This will delete all items in the collection", () => _viewModel.DeleteCollection(collection));
             });
         }
 
         private void EditSortAndFilterFunctionButtonClick(object sender, RoutedEventArgs e)
         {
+            if (ApplicationViewModel.Instance.UserCollectionTracker is null) return;
+            if (ApplicationViewModel.Instance.CellTracker is null) return;
+            if (ApplicationViewModel.Instance.FunctionTracker is null) return;
             var functionName = _viewModel.SelectedCollection?.Collection.Model.SortAndFilterFunctionName;
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);

@@ -25,6 +25,9 @@ namespace Cell.ViewModel.Execution
             _function.PropertyChanged += FunctionPropertyChanged;
         }
 
+        /// <summary>
+        /// Called when the object is being garbage collected.
+        /// </summary>
         ~CellFunctionViewModel()
         {
             _function.PropertyChanged -= FunctionPropertyChanged;
@@ -38,7 +41,7 @@ namespace Cell.ViewModel.Execution
         /// <summary>
         /// Gets the cells that use this function.
         /// </summary>
-        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager.GetCellsThatUsePopulateFunction(_model);
+        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager?.GetCellsThatUsePopulateFunction(_model) ?? [];
 
         /// <summary>
         /// Gets the references this function depends on.
@@ -63,7 +66,7 @@ namespace Cell.ViewModel.Execution
                 var oldName = _model.Name;
                 _model.Name = value;
                 NotifyPropertyChanged(nameof(Name));
-                ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(ApplicationViewModel.Instance.CellTracker.AllCells, oldName, value));
+                ApplicationViewModel.Instance.DialogFactory?.ShowYesNo("Refactor?", $"Do you want to update cells that used '{oldName}' to use '{value}' instead?", () => RefactorCellsFunctionUseage(ApplicationViewModel.Instance.CellTracker?.AllCells ?? [], oldName, value));
             }
         }
 

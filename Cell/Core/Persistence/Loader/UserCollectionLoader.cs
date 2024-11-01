@@ -19,13 +19,13 @@ namespace Cell.Core.Persistence.Loader
     /// </summary>
     public class UserCollectionLoader
     {
+        private readonly Dictionary<UserCollectionModel, string> _collectionToNameMap = [];
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistedDirectory _collectionsDirectory;
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionTracker _userCollectionTracker;
-        private Task? _loadCollectionsTask;
         private bool _shouldSaveAddedCollections = true;
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
@@ -155,6 +155,12 @@ namespace Cell.Core.Persistence.Loader
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
+            if (e.PropertyName ==  nameof(UserCollectionModel.Name))
+            {
+                var oldName = _collectionToNameMap[model];
+                _collectionsDirectory.MoveDirectory(oldName, model.Name);
+                _collectionToNameMap[model] = model.Name;
+            }
         }
 
         private void UserCollectionTrackerUserCollectionAdded(UserCollection collection)
@@ -163,6 +169,7 @@ namespace Cell.Core.Persistence.Loader
             collection.ItemRemoved += UserCollectionItemRemoved;
             collection.ItemPropertyChanged += UserCollectionItemChanged;
             collection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
+            _collectionToNameMap.Add(collection.Model, collection.Model.Name);
             if (_shouldSaveAddedCollections) SaveCollection(collection);
         }
 
@@ -172,6 +179,7 @@ namespace Cell.Core.Persistence.Loader
             collection.ItemRemoved -= UserCollectionItemRemoved;
             collection.ItemPropertyChanged -= UserCollectionItemChanged;
             collection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
+            _collectionToNameMap.Remove(collection.Model);
             _collectionsDirectory.DeleteDirectory(collection.Model.Name);
         }
     }

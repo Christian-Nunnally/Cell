@@ -54,7 +54,7 @@ namespace Cell.Core.Execution.Functions
         {
             Model = model;
             Model.PropertyChanged += ModelPropertyChanged;
-            AttemptToRecompileMethod();
+            ExtractDependencies();
         }
 
         /// <summary>

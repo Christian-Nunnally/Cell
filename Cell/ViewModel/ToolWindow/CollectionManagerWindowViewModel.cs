@@ -220,7 +220,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <param name="collection">The collection to delete entirely.</param>
         public void DeleteCollection(UserCollection collection)
         {
-            _userCollectionTracker.DeleteCollection(collection);
+            _userCollectionTracker.StopTrackingCollection(collection);
         }
 
         /// <summary>

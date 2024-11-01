@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Common;
-using Cell.ViewModel.Cells.Types;
 using System.Text.Json.Serialization;
 
 namespace Cell.Model
@@ -29,6 +28,9 @@ namespace Cell.Model
         private string _triggerFunctionName = string.Empty;
         private double _width;
 
+        /// <summary>
+        /// Initializes a new instance of a <see cref="CellModel"/>.
+        /// </summary>
         public CellModel()
         {
             _cellStyle.CellModel = this;

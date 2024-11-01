@@ -20,6 +20,8 @@ namespace Cell.View.Application
 
         private void AddNewSheetButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (ApplicationViewModel.Instance.SheetTracker is null) return;
+            if (ApplicationViewModel.Instance.DialogFactory is null) return;
             var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker, ApplicationViewModel.Instance.DialogFactory);
             ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }

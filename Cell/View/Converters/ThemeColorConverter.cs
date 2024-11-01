@@ -10,6 +10,9 @@ namespace Cell.View.Converters
     /// </summary>
     public class ThemeColorConverter : IValueConverter
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether the current theme is dark mode.
+        /// </summary>
         public static bool IsDarkMode { get; set; } = true;
 
         /// <inheritdoc/>
@@ -17,7 +20,7 @@ namespace Cell.View.Converters
         {
             if (value is SolidColorBrush originalColor)
             {
-                return IsDarkMode ? new SolidColorBrush(ColorAdjuster.InvertBrightness(originalColor.Color)) : originalColor;
+                return IsDarkMode ? originalColor : new SolidColorBrush(ColorAdjuster.InvertBrightness(originalColor.Color));
             }
             return value;
         }

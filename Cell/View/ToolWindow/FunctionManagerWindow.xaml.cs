@@ -27,11 +27,11 @@ namespace Cell.View.ToolWindow
             {
                 if (function.UsageCount != 0)
                 {
-                    ApplicationViewModel.Instance.DialogFactory.Show("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
+                    ApplicationViewModel.Instance.DialogFactory?.Show("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
                     return;
                 }
 
-                ApplicationViewModel.Instance.DialogFactory.ShowYesNo($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
+                ApplicationViewModel.Instance.DialogFactory?.ShowYesNo($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
                 {
                     ApplicationViewModel.Instance.FunctionLoader.DeleteCellFunction(function.Function);
                 });

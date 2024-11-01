@@ -46,13 +46,16 @@ namespace Cell.Model
                 CellType = type,
                 Location = location,
             };
-            if (type.IsSpecial())
+            if (ApplicationViewModel.SafeInstance?.ApplicationSettings is not null)
             {
-                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultSpecialCellStyleCellModel.Style.CopyTo(newCell.Style);
-            }
-            else
-            {
-                ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultCellStyleCellModel.Style.CopyTo(newCell.Style);
+                if (type.IsSpecial())
+                {
+                    ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultSpecialCellStyleCellModel.Style.CopyTo(newCell.Style);
+                }
+                else
+                {
+                    ApplicationViewModel.SafeInstance?.ApplicationSettings.DefaultCellStyleCellModel.Style.CopyTo(newCell.Style);
+                }
             }
             return newCell;
         }
