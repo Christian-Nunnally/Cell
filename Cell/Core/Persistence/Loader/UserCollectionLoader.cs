@@ -21,13 +21,12 @@ namespace Cell.Core.Persistence.Loader
     {
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
-        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly PersistedDirectory _collectionsDirectory;
-        private readonly UserCollectionTracker _userCollectionTracker;
+        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly FunctionTracker _functionTracker;
+        private readonly UserCollectionTracker _userCollectionTracker;
         private Task? _loadCollectionsTask;
         private bool _shouldSaveAddedCollections = true;
-
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
         /// </summary>
@@ -46,44 +45,12 @@ namespace Cell.Core.Persistence.Loader
             _userCollectionTracker.UserCollectionRemoved += UserCollectionTrackerUserCollectionRemoved;
         }
 
-        private void UserCollectionTrackerUserCollectionRemoved(UserCollection collection)
-        {
-            collection.ItemAdded -= UserCollectionItemAdded;
-            collection.ItemRemoved -= UserCollectionItemRemoved;
-            collection.ItemPropertyChanged -= UserCollectionItemChanged;
-            collection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
-            _collectionsDirectory.DeleteDirectory(collection.Model.Name);
-        }
-
-        private void UserCollectionTrackerUserCollectionAdded(UserCollection collection)
-        {
-            collection.ItemAdded += UserCollectionItemAdded;
-            collection.ItemRemoved += UserCollectionItemRemoved;
-            collection.ItemPropertyChanged += UserCollectionItemChanged;
-            collection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
-            if (_shouldSaveAddedCollections) SaveCollection(collection);
-        }
-
-        public void EnsureCollectionLoadHasStarted()
-        {
-            _loadCollectionsTask ??= Task.Run(LoadCollectionsAsync);
-        }
-
-        private async Task LoadCollectionsAsync()
-        {
-            foreach (var directory in _collectionsDirectory.GetDirectories())
-            {
-                LoadCollection(directory);
-            }
-        }
-
         /// <summary>
         /// Loads all collections from disk.
         /// </summary>
-        public void LoadCollections()
+        public async Task LoadCollectionsAsync()
         {
-            EnsureCollectionLoadHasStarted();
-            _loadCollectionsTask?.Wait();
+            await Task.Run(LoadCollections);
         }
 
         /// <summary>
@@ -130,6 +97,14 @@ namespace Cell.Core.Persistence.Loader
             _shouldSaveAddedCollections = false;
             _userCollectionTracker.StartTrackingCollection(collection);
             _shouldSaveAddedCollections = true;
+        }
+
+        private void LoadCollections()
+        {
+            foreach (var directory in _collectionsDirectory.GetDirectories())
+            {
+                LoadCollection(directory);
+            }
         }
 
         private PluginModel LoadItem(string path)
@@ -180,6 +155,24 @@ namespace Cell.Core.Persistence.Loader
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
+        }
+
+        private void UserCollectionTrackerUserCollectionAdded(UserCollection collection)
+        {
+            collection.ItemAdded += UserCollectionItemAdded;
+            collection.ItemRemoved += UserCollectionItemRemoved;
+            collection.ItemPropertyChanged += UserCollectionItemChanged;
+            collection.Model.PropertyChanged += UserCollectionModelPropertyChanged;
+            if (_shouldSaveAddedCollections) SaveCollection(collection);
+        }
+
+        private void UserCollectionTrackerUserCollectionRemoved(UserCollection collection)
+        {
+            collection.ItemAdded -= UserCollectionItemAdded;
+            collection.ItemRemoved -= UserCollectionItemRemoved;
+            collection.ItemPropertyChanged -= UserCollectionItemChanged;
+            collection.Model.PropertyChanged -= UserCollectionModelPropertyChanged;
+            _collectionsDirectory.DeleteDirectory(collection.Model.Name);
         }
     }
 }

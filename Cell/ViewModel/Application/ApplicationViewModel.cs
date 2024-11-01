@@ -396,7 +396,7 @@ namespace Cell.ViewModel.Application
             ApplicationBackgroundMessage = "Starting backup";
             var backupTask = BackupAsync();
             ApplicationBackgroundMessage = "Loading collections";
-            userCollectionLoader.LoadCollections();
+            await userCollectionLoader.LoadCollectionsAsync();
             ApplicationBackgroundMessage = "Loading functions";
             if (FunctionLoader is null) throw new CellError("Function loader not initialized yet, try loading again.");
             FunctionLoader.LoadCellFunctions();
@@ -415,7 +415,7 @@ namespace Cell.ViewModel.Application
             _isProjectLoading = false;
             if (CellSelector is null) throw new CellError("Cell selector not initialized yet, try loading again.");
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(CellSelector.SelectedCells, FunctionTracker);
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
             {
                 DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             });

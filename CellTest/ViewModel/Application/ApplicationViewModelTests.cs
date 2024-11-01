@@ -42,11 +42,11 @@ namespace CellTest.ViewModel.Application
             _backupDirectory = new PersistedDirectory("", _testFileIO);
             _persistedProject = new PersistedProject(_persistedDirectory);
             _functionTracker = new FunctionTracker();
-            _pluginFunctionLoader = new FunctionLoader(_persistedDirectory, _functionTracker);
+            _pluginFunctionLoader = new FunctionLoader(_persistedProject.FunctionsDirectory, _functionTracker);
             _cellTracker = new CellTracker();
-            _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
+            _cellLoader = new CellLoader(_persistedProject.SheetsDirectory, _cellTracker);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
-            _userCollectionLoader = new UserCollectionLoader(_persistedDirectory, _userCollectionTracker, _functionTracker, _cellTracker);
+            _userCollectionLoader = new UserCollectionLoader(_persistedProject.CollectionsDirectory, _userCollectionTracker, _functionTracker, _cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
             _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
             _sheetTracker = new SheetTracker(_cellTracker);
