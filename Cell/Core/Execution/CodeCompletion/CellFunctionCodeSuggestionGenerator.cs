@@ -83,7 +83,7 @@ namespace Cell.Core.Execution.CodeCompletion
 
         private void AddCellReferencesToVariableTypeMap(string code, Dictionary<string, Type> variableTypeMap)
         {
-            if (_cellContext == null) return;
+            if (_cellContext is null) return;
             var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(_cellContext.Location);
             var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(_cellContext.Location);
             var cellReferenceFinder = new CellReferenceSyntaxWalker();

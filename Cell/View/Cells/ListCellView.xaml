@@ -6,10 +6,10 @@
         <ListBox
             x:Name="CellListBox"
             Margin="{Binding Margin}"
-            Background="{Binding ContentBackgroundColor}"
-            BorderBrush="{Binding ContentBorderColor}"
+            Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
+            BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
             BorderThickness="{Binding ContentBorderThickness}"
-            Foreground="{Binding ForegroundColor}"
+            Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
             ItemsSource="{Binding CollectionDisplayStrings}"
             SelectedItem="{Binding Text}"
             SelectedValue="{Binding SelectedItem}"
@@ -24,7 +24,7 @@
                         Content="{Binding}"
                         FontFamily="{Binding DataContext.Font, ElementName=CellListBox}"
                         FontSize="{Binding DataContext.FontSize, ElementName=CellListBox}"
-                        Foreground="{Binding DataContext.ForegroundColor, ElementName=CellListBox}" />
+                        Foreground="{Binding DataContext.ForegroundColor, ElementName=CellListBox, Converter={StaticResource ThemeColorConverter}}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

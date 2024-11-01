@@ -198,7 +198,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the string that is displayed in the title bar of the tool window to inform the user what function is selected.
         /// </summary>
-        public string SelectedFunctionTitleString => SelectedFunction == null ? "No function selected" : SelectedFunction.Name;
+        public string SelectedFunctionTitleString => SelectedFunction is null ? "No function selected" : SelectedFunction.Name;
 
         /// <summary>
         /// Gets or sets the user selected cell from the function users list.

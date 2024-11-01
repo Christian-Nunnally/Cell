@@ -42,7 +42,7 @@ namespace Cell.View.ToolWindow
         {
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
-                if (_viewModel.SelectedFunction == null) return;
+                if (_viewModel.SelectedFunction is null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
                 var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionTracker.GenerateDataTypeForCollectionMap();
                 var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, cell, ApplicationViewModel.Instance.FunctionTracker);
@@ -64,7 +64,7 @@ namespace Cell.View.ToolWindow
             if (sender is Button btn && btn.DataContext is CellModel cell)
             {
                 var selectedFunction = _viewModel.SelectedFunction;
-                if (selectedFunction == null) return;
+                if (selectedFunction is null) return;
                 if (cell.TriggerFunctionName == selectedFunction.Name)
                 {
                     cell.TriggerFunctionName = "";

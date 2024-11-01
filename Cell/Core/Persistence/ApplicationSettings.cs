@@ -77,7 +77,7 @@ namespace Cell.Core.Persistence
         {
             var path = Path.Combine(ApplicationSettingsSaveDirectory, ApplicationSettingsSaveFile);
             var text = persistedDirectory.LoadFile(path);
-            if (text == null) return null;
+            if (text is null) return null;
             return JsonSerializer.Deserialize<ApplicationSettings>(text);
         }
 

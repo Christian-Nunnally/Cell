@@ -70,7 +70,7 @@ namespace Cell.Core.Persistence.Loader
                 foreach (var file in _functionsDirectory.GetFiles(namespacePath))
                 {
                     CellFunctionModel? model = LoadFunction(file);
-                    if (model == null) continue;
+                    if (model is null) continue;
                     var function = new CellFunction(model);
                     var space = Path.GetFileName(namespacePath);
                     _shouldSaveAddedFunctions = false;

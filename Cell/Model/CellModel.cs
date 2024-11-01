@@ -29,6 +29,12 @@ namespace Cell.Model
         private string _triggerFunctionName = string.Empty;
         private double _width;
 
+        public CellModel()
+        {
+            _cellStyle.CellModel = this;
+            _cellLocation.CellModel = this;
+        }
+
         /// <summary>
         /// The type of cell this is such as a label, textbox, or date.
         /// 
@@ -77,7 +83,7 @@ namespace Cell.Model
             get => _id;
             set 
             {
-                if (_id == null) return;
+                if (_id is null) return;
                 _id = value; 
                 NotifyPropertyChanged(nameof(ID));
             }

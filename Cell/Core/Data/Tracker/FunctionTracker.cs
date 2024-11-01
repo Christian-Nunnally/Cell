@@ -6,6 +6,9 @@ using System.IO;
 
 namespace Cell.Core.Data.Tracker
 {
+    /// <summary>
+    /// Tracks and sorts functions into namespaces, allowing for easy access to them. Also provides events for when functions are added or removed. Finally, it provides a way to create new functions.
+    /// </summary>
     public class FunctionTracker
     {
         /// <summary>
@@ -15,10 +18,15 @@ namespace Cell.Core.Data.Tracker
 
         private Dictionary<string, Dictionary<string, CellFunction>> Namespaces { get; set; } = [];
 
+        /// <summary>
+        /// Occurs when a function is added to this tracker and is therefore being tracked.
+        /// </summary>
+        public event Action<CellFunction>? FunctionAdded;
 
-        public event Action<CellFunction> FunctionAdded;
-
-        public event Action<CellFunction> FunctionRemoved;
+        /// <summary>
+        /// Occurs when a function is removed from this tracker and is therefore no longer being tracked.
+        /// </summary>
+        public event Action<CellFunction>? FunctionRemoved;
 
         /// <summary>
         /// Starts tracking a function.
@@ -61,7 +69,7 @@ namespace Cell.Core.Data.Tracker
             {
                 namespaceFunctions.Remove(function.Model.Name);
                 CellFunctions.Remove(function);
-                FunctionRemoved(function);
+                FunctionRemoved?.Invoke(function);
             }
         }
 

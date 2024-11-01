@@ -35,7 +35,7 @@ namespace Cell.Model
             set
             {
                 if (_backgroundColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _backgroundColorHex = value;
                 NotifyPropertyChanged(nameof(BackgroundColor));
@@ -85,7 +85,7 @@ namespace Cell.Model
             set
             {
                 if (_borderColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _borderColorHex = value;
                 NotifyPropertyChanged(nameof(BorderColor));
@@ -101,7 +101,7 @@ namespace Cell.Model
             set
             {
                 if (_contentBackgroundColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _contentBackgroundColorHex = value;
                 NotifyPropertyChanged(nameof(ContentBackgroundColor));
@@ -131,7 +131,7 @@ namespace Cell.Model
             set
             {
                 if (_contentBorderColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _contentBorderColorHex = value;
                 NotifyPropertyChanged(nameof(ContentBorderColor));
@@ -189,7 +189,7 @@ namespace Cell.Model
             set
             {
                 if (_foregroundColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _foregroundColorHex = value;
                 NotifyPropertyChanged(nameof(ForegroundColor));
@@ -205,7 +205,7 @@ namespace Cell.Model
             set
             {
                 if (_highlightColorHex == value) return;
-                if (value == null) return;
+                if (value is null) return;
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 _highlightColorHex = value;
                 NotifyPropertyChanged(nameof(HighlightColor));

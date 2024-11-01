@@ -169,7 +169,7 @@ namespace Cell.View.Cells
         private void PanZoomCanvasLoaded(object sender, RoutedEventArgs e)
         {
             _panAndZoomCanvas = sender as PanAndZoomCanvas;
-            if (_panAndZoomCanvas == null) return;
+            if (_panAndZoomCanvas is null) return;
             _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
             SheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
@@ -178,7 +178,7 @@ namespace Cell.View.Cells
 
         private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (_panAndZoomCanvas == null) return;
+            if (_panAndZoomCanvas is null) return;
             if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
             if (e.PropertyName == nameof(SheetViewModel.PanX))
@@ -196,14 +196,6 @@ namespace Cell.View.Cells
             else if (e.PropertyName == nameof(SheetViewModel.IsPanningEnabled))
             {
                 _panAndZoomCanvas.IsLockedToCenter = SheetViewModel.IsLockedToCenter;
-            }
-        }
-
-        private void CellMouseEnter(object sender, MouseEventArgs e)
-        {
-            if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
-            {
-                //SheetViewModel.UnhighlightAllCells();
             }
         }
 

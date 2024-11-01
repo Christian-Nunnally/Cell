@@ -82,6 +82,7 @@
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                             Content="{TemplateBinding SelectedValue}"
+                            Foreground="{TemplateBinding Foreground}"
                             IsHitTestVisible="False" />
                         <Popup Name="Popup" IsOpen="{TemplateBinding IsDropDownOpen}">
                             <Grid

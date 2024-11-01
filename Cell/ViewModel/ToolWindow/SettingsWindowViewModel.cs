@@ -46,7 +46,7 @@ namespace Cell.ViewModel.ToolWindow
         /// 
         /// When the backup file is selected, the application is closed and the backup is restored to the project directory location so that it is loadeded when the application is opened again.
         /// </summary>
-        public void RestoreFromBackup()
+        public async Task RestoreFromBackupAsync()
         {
             if (ApplicationViewModel.Instance.BackupManager is null)
             {
@@ -54,8 +54,8 @@ namespace Cell.ViewModel.ToolWindow
                 return;
             }
             var backup = ApplicationViewModel.Instance.BackupManager.GetBackups().FirstOrDefault();
-            if (backup == null) return;
-            ApplicationViewModel.Instance.BackupManager.CreateBackup("PreRestore");
+            if (backup is null) return;
+            await ApplicationViewModel.Instance.BackupManager.CreateBackupAsync("PreRestore");
             OpenFileDialog openFileDialog = new()
             {
                 Filter = "Cell Backup Files (*.zip)",
@@ -67,14 +67,14 @@ namespace Cell.ViewModel.ToolWindow
             var result = openFileDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                ApplicationViewModel.Instance.BackupManager.RestoreBackup(openFileDialog.FileName);
+                await ApplicationViewModel.Instance.BackupManager.RestoreBackupAsync(openFileDialog.FileName);
                 App.Current.Shutdown();
             }
         }
 
         internal void OpenEditorForDefaultCellFormat()
         {
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);
@@ -82,7 +82,7 @@ namespace Cell.ViewModel.ToolWindow
 
         internal void OpenEditorForDefaultRowAndColumnCellFormat()
         {
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             var styleCell = ApplicationViewModel.Instance.ApplicationSettings.DefaultSpecialCellStyleCellModel;
             var cellFormatEditorWindowViewModel = new CellFormatEditWindowViewModel([styleCell], ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.FunctionTracker);
             ApplicationViewModel.Instance.ShowToolWindow(cellFormatEditorWindowViewModel);

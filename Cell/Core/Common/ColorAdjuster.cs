@@ -164,15 +164,60 @@ namespace Cell.Core.Common
             }
         }
 
-        private static float HueToRGB(float temp1, float temp2, float hue)
+        private static double HueToRGB(double temp1, double temp2, double hue)
         {
-            if (hue < 0f) hue += 1f;
-            if (hue > 1f) hue -= 1f;
+            if (hue < 0f) hue += 1;
+            if (hue > 1f) hue -= 1;
 
-            if (6f * hue < 1f) return temp1 + (temp2 - temp1) * 6f * hue;
-            if (2f * hue < 1f) return temp2;
-            if (3f * hue < 2f) return temp1 + (temp2 - temp1) * (2f / 3f - hue) * 6f;
+            if (6 * hue < 1) return temp1 + (temp2 - temp1) * 6.0 * hue;
+            if (2 * hue < 1) return temp2;
+            if (3 * hue < 2) return temp1 + (temp2 - temp1) * (2.0 / 3.0 - hue) * 6.0;
             return temp1;
+        }
+
+        /// <summary>
+        /// Computes the brightness of a color and returns a color with the same hue but inverted brightness.
+        /// </summary>
+        /// <param name="color">The color</param>
+        /// <returns>The inverted color</returns>
+        public static Color InvertBrightness(Color color)
+        {
+            // Convert color to HSL
+            double r = color.R / 255.0;
+            double g = color.G / 255.0;
+            double b = color.B / 255.0;
+
+            double max = Math.Max(r, Math.Max(g, b));
+            double min = Math.Min(r, Math.Min(g, b));
+            double h, s, l = (max + min) / 2.0;
+
+            // Calculate saturation
+            if (max == min)
+            {
+                h = s = 0; // achromatic
+            }
+            else
+            {
+                double delta = max - min;
+                s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+
+                // Calculate hue
+                if (max == r) h = (g - b) / delta + (g < b ? 6 : 0);
+                else if (max == g) h = (b - r) / delta + 2;
+                else h = (r - g) / delta + 4;
+
+                h /= 6;
+            }
+
+            // Invert lightness
+            l = 1 - l;
+
+            // Convert back to RGB
+            double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            double p = 2 * l - q;
+
+            double[] rgb = [HueToRGB(p, q, h + 1.0 / 3.0), HueToRGB(p, q, h), HueToRGB(p, q, h - 1.0 / 3.0)];
+            return Color.FromArgb(color.A, (byte)(rgb[0] * 255), (byte)(rgb[1] * 255), (byte)(rgb[2] * 255));
         }
     }
 }

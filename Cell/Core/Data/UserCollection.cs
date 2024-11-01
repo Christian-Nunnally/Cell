@@ -236,7 +236,7 @@ namespace Cell.Core.Data
 
                 var cachedResult = _cachedSortFilterResult[model.ID];
                 if (cachedResult == sortFilterResult) return;
-                else if (sortFilterResult == null)
+                else if (sortFilterResult is null)
                 {
                     Remove(model.ID);
                     return;

@@ -20,7 +20,7 @@ namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
-            if (node == null) return node;
+            if (node is null) return node;
 
             if (CollectionReferenceSyntaxWalker.TryGetCollectionReferenceFromNode(node, out var _))
             {

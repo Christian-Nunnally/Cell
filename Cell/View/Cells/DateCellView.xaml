@@ -132,6 +132,7 @@
                         Margin="3,0"
                         Padding="0"
                         Content="{fa:Icon Calendar}"
+                        Foreground="{TemplateBinding Foreground}"
                         IsHitTestVisible="True" />
                 </ControlTemplate>
             </Setter.Value>
@@ -209,12 +210,12 @@
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="{Binding HorizontalAlignmentForView}"
             VerticalContentAlignment="{Binding VerticalAlignmentForView}"
-            Background="{Binding ContentBackgroundColor}"
-            BorderBrush="{Binding ContentBorderColor}"
+            Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
+            BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
             BorderThickness="{Binding ContentBorderThickness}"
             FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
-            Foreground="{Binding ForegroundColor}"
+            Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
             SelectedDate="{Binding SelectedDate}" />
     </DataTemplate>
 </ResourceDictionary>

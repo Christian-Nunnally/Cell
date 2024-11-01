@@ -51,7 +51,7 @@
         <avalonEdit:TextEditor
             Name="_multiUseUserInputTextBox"
             Grid.Row="1"
-            Padding="3"
+            Padding="3,6"
             Background="{StaticResource ControlBackground}"
             BorderBrush="{StaticResource CellBorderColor}"
             BorderThickness="1"

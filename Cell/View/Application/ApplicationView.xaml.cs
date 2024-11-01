@@ -1,4 +1,5 @@
 ﻿using Cell.View.Cells;
+using Cell.View.Converters;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
@@ -102,7 +103,7 @@ namespace Cell.View.Application
 
         private void ShowSheetView(SheetViewModel? sheetViewModel)
         {
-            if (sheetViewModel == null) return;
+            if (sheetViewModel is null) return;
             if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
             {
                 sheetView = new SheetView(sheetViewModel);
@@ -110,6 +111,13 @@ namespace Cell.View.Application
             }
             _sheetViewContentControl.Content = sheetView;
             ActiveSheetView = sheetView;
+        }
+
+        private void CloseAllSheetViews()
+        {
+            if (ActiveSheetView is null) return;
+            ActiveSheetView = null;
+            _sheetViews.Clear();
         }
 
         /// <summary>
@@ -157,20 +165,6 @@ namespace Cell.View.Application
             }
         }
 
-        private void LoadProjectButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button loadButton) return;
-            loadButton.Content = "Loading...";
-            var loadProgress = ApplicationViewModel.Instance.LoadWithProgress();
-            while (!loadProgress.IsComplete)
-            {
-                loadButton.Content = loadProgress.Message;
-                App.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                loadProgress = loadProgress.Continue();
-            }
-            loadButton.Content = loadProgress.Message;
-        }
-
         private void MaximizeButtonClick(object sender, RoutedEventArgs e)
         {
             AdjustWindowSize();
@@ -190,7 +184,7 @@ namespace Cell.View.Application
         {
             if (_viewModel is null) return;
             if (_viewModel.CellSelector is null) return;
-            if (_viewModel.FunctionLoader is null) return;
+            if (_viewModel.FunctionTracker is null) return;
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.FunctionTracker);
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
@@ -198,16 +192,16 @@ namespace Cell.View.Application
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
-            if (_viewModel.UserCollectionLoader is null) return;
-            if (_viewModel.FunctionLoader is null) return;
+            if (_viewModel is null) return;
+            if (_viewModel.UserCollectionTracker is null) return;
+            if (_viewModel.FunctionTracker is null) return;
             var collectionManagerViewModel = new CollectionManagerWindowViewModel(_viewModel.UserCollectionTracker, _viewModel.FunctionTracker);
             _viewModel.ShowToolWindow(collectionManagerViewModel);
         }
 
         private void ShowFunctionManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             var functionLoader = _viewModel.FunctionTracker;
             if (functionLoader is null) return;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
@@ -217,14 +211,14 @@ namespace Cell.View.Application
 
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             var settingsWindowViewModel = new SettingsWindowViewModel();
             _viewModel.ShowToolWindow(settingsWindowViewModel);
         }
 
         private void ShowSheetManagerButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             if (_viewModel.SheetTracker is null) return;
             if (_viewModel.DialogFactory is null) return;
             var sheetManagerViewModel = new SheetManagerWindowViewModel(_viewModel.SheetTracker, _viewModel.DialogFactory);
@@ -271,9 +265,9 @@ namespace Cell.View.Application
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
         {
-            if (_viewModel?.SheetViewModel == null) return;
+            if (_viewModel?.SheetViewModel is null) return;
             if (_viewModel.CellTracker is null) return;
-            if (_viewModel.FunctionLoader is null) return;
+            if (_viewModel.FunctionTracker is null) return;
             var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.FunctionTracker);
             _viewModel.ShowToolWindow(viewModel);
         }
@@ -288,7 +282,7 @@ namespace Cell.View.Application
 
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
             if (e.IsDown && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
@@ -311,6 +305,13 @@ namespace Cell.View.Application
                 {
                     _viewModel.UndoRedoManager?.Redo();
                     e.Handled = true;
+                }
+                else if (e.Key == Key.T)
+                {
+                    ThemeColorConverter.IsDarkMode = !ThemeColorConverter.IsDarkMode;
+                    var activeSheet = _viewModel.SheetViewModel;
+                    CloseAllSheetViews();
+                    ShowSheetView(activeSheet);
                 }
             }
             else if (e.Key == Key.Tab)

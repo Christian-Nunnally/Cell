@@ -106,7 +106,7 @@ namespace Cell.Core.Execution.CodeCompletion
                 foreach (var variable in variableDeclaration.Variables)
                 {
                     if (NameToTypeMap.ContainsKey(variable.Identifier.ToString())) continue;
-                    if (typeInfo.Type == null) continue;
+                    if (typeInfo.Type is null) continue;
                     NameToTypeMap.Add(variable.Identifier.ToString(), typeInfo.Type);
                 }
             }

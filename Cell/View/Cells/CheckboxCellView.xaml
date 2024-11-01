@@ -9,14 +9,13 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             VerticalContentAlignment="Center"
-            Background="{Binding ContentBackgroundColor}"
-            BackgroundWhenMouseOver="{Binding ContentHighlightColor}"
-            BorderBrush="{Binding ContentBorderColor}"
+            Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
+            BackgroundWhenMouseOver="{Binding ContentHighlightColor, Converter={StaticResource ThemeColorConverter}}"
+            BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
             BorderThickness="{Binding ContentBorderThickness}"
-            Command="{Binding CheckboxCheckedCommand}"
             FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
-            Foreground="{Binding ForegroundColor}"
+            Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
             IsChecked="{Binding IsChecked, Mode=TwoWay}" />
     </DataTemplate>
 </ResourceDictionary>

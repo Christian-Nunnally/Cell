@@ -27,7 +27,6 @@ namespace Cell.ViewModel.Application
         private static ApplicationViewModel? _instance;
         private double _applicationWindowHeight = 1300;
         private double _applicationWindowWidth = 1200;
-        private Task? _backupTask;
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
@@ -66,6 +65,16 @@ namespace Cell.ViewModel.Application
                 if (titleBarSheetNavigationViewModel == value) return;
                 titleBarSheetNavigationViewModel = value;
                 NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
+            }
+        }
+
+        public string ApplicationBackgroundMessage
+        {
+            get => _applicationBackgroundMessage; set
+            {
+                if (_applicationBackgroundMessage == value) return;
+                _applicationBackgroundMessage = value;
+                NotifyPropertyChanged(nameof(ApplicationBackgroundMessage));
             }
         }
 
@@ -156,6 +165,9 @@ namespace Cell.ViewModel.Application
         /// </summary>
         public FunctionLoader? FunctionLoader { get; set; }
 
+        /// <summary>
+        /// Gets or sets the main functions tracker used to manage all functions loaded into the application.
+        /// </summary>
         public FunctionTracker? FunctionTracker { get; set; }
 
         /// <summary>
@@ -188,9 +200,8 @@ namespace Cell.ViewModel.Application
         public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
 
         /// <summary>
-        /// Gets the user collection loader for the application, which loads and stores all user collections.
+        /// Gets the user collection tracker for the application, which tracks all user collections.
         /// </summary>
-        public UserCollectionLoader? UserCollectionLoader { get; set; }
         public UserCollectionTracker? UserCollectionTracker { get; set; }
 
         /// <summary>
@@ -199,7 +210,7 @@ namespace Cell.ViewModel.Application
         /// <returns>The global undo/redo manager.</returns>
         public static UndoRedoManager? GetUndoRedoManager()
         {
-            if (_instance == null) return null;
+            if (_instance is null) return null;
             return Instance.UndoRedoManager;
         }
 
@@ -213,7 +224,7 @@ namespace Cell.ViewModel.Application
             {
                 
             }
-            if (SheetViewModel == null) return;
+            if (SheetViewModel is null) return;
             CellClipboard?.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
         }
 
@@ -240,7 +251,7 @@ namespace Cell.ViewModel.Application
             if (!SheetModel.IsValidSheetName(sheetName)) return;
             if (SheetViewModel?.SheetName == sheetName) return;
             var sheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == sheetName);
-            if (sheet == null) return;
+            if (sheet is null) return;
             SheetViewModel?.CellSelector.UnselectAllCells();
             if (_sheetModelToViewModelMap.TryGetValue(sheet, out SheetViewModel? existingSheetViewModel))
             {
@@ -257,24 +268,20 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Loads the entire project and then returns.
         /// </summary>
+        /// <param name="userCollectionLoader">The loader to load collections from.</param>
         /// <returns>The finish loading progress, which might be mark incomplete if the load did not finish.</returns>
-        public LoadingProgressResult Load()
+        public LoadingProgressResult Load(UserCollectionLoader userCollectionLoader)
         {
-            var progress = LoadWithProgress();
-            while (!progress.IsComplete) progress = progress.Continue();
-            return progress;
-        }
+            try
+            {
+                LoadAsync(userCollectionLoader).Wait();
 
-        /// <summary>
-        /// Starts loading the project and returns a result that can be used to continue the loading process.
-        /// </summary>
-        /// <returns>The Loading progress object.</returns>
-        public LoadingProgressResult LoadWithProgress()
-        {
-            if (IsProjectLoaded) return new LoadingProgressResult(true, "Already loaded");
-            if (_isProjectLoading) return new LoadingProgressResult(true, "Already loading");
-            _isProjectLoading = true;
-            return new LoadingProgressResult("Checking for migration", LoadPhase1);
+            }
+            catch (AggregateException e)
+            {
+                throw e.InnerException;
+            }
+            return new LoadingProgressResult(true, "Load Complete");
         }
 
         /// <summary>
@@ -282,7 +289,7 @@ namespace Cell.ViewModel.Application
         /// </summary>
         public void PasteCopiedCells()
         {
-            if (SheetViewModel == null) return;
+            if (SheetViewModel is null) return;
             UndoRedoManager?.StartRecordingUndoState();
             CellClipboard?.PasteIntoCells(SheetViewModel.CellSelector.SelectedCells);
             SheetViewModel.UpdateLayout();
@@ -335,88 +342,84 @@ namespace Cell.ViewModel.Application
 
         private async Task BackupAsync()
         {
-            if (PersistedProject == null) return;
+            if (PersistedProject is null) return;
             PersistedProject.IsReadOnly = true;
-            BackupManager!.CreateBackup();
+            await BackupManager!.CreateBackupAsync();
             PersistedProject.IsReadOnly = false;
         }
 
         private bool _hasVersionBeenSaved = false;
-        public void EnsureInitialBackupIsStarted()
-        {
-            if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
-            _backupTask ??= Task.Run(BackupAsync);
-        }
+        private string _applicationBackgroundMessage = "No cells loaded";
 
-        private LoadingProgressResult LoadPhase1()
+        private async Task MigrateProjectAsync()
         {
-            if (BackupManager is null) return new LoadingProgressResult(false, "Backup manager not initialized yet, try loading again.");
-            if (PersistedProject.NeedsMigration())
-            {
-                if (!PersistedProject.CanMigrate()) return new LoadingProgressResult(false, NoMigratorForVersionError);
-                DialogFactory.ShowYesNo(
-                    "Version Mismatch",
-                    $"The version of your project is outdated. would you like to migrate it?",
-                    MigrateProject,
-                    () => { });
-                return new LoadingProgressResult(false, "Migration needed, try loading again.");
-            }
-
-            EnsureInitialBackupIsStarted();
-            return new LoadingProgressResult("Loading Collections", LoadPhase2);
-        }
-
-        private LoadingProgressResult LoadPhase2()
-        {
-            UserCollectionLoader.LoadCollections();
-            return new LoadingProgressResult("Loading Plugins", LoadPhase3);
-        }
-
-        private LoadingProgressResult LoadPhase3()
-        {
-            FunctionLoader.LoadCellFunctions();
-            return new LoadingProgressResult("Linking Collections to Bases", LoadPhase4);
-        }
-
-        private LoadingProgressResult LoadPhase4()
-        {
-            UserCollectionTracker.LinkUpBaseCollectionsAfterLoad();
-            return new LoadingProgressResult("Loading Cells", LoadPhase5);
-        }
-
-        private LoadingProgressResult LoadPhase5()
-        {
-            CellLoader.LoadCells();
-            return new LoadingProgressResult("Initializing populate manager", LoadPhase5b);
-        }
-
-        private LoadingProgressResult LoadPhase5b()
-        {
-            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
-            return new LoadingProgressResult("Waiting for backup to complete", LoadPhase6);
-        }
-
-        private LoadingProgressResult LoadPhase6()
-        {
-            if (_backupTask is null) return new LoadingProgressResult(false, "Aborted the load because a backup has no yet been started, and I want to backup before loading to protect data.");
-            _backupTask.Wait();
-            IsProjectLoaded = true;
-            _isProjectLoading = false;
-            return new LoadingProgressResult(true, "Load Complete");
-        }
-
-        private void MigrateProject()
-        {
-            BackupManager.CreateBackup("PreMigration");
+            await BackupManager.CreateBackupAsync("PreMigration");
             PersistedProject.Migrate();
             _isProjectLoading = false;
-            DialogFactory.Show("Project migrated", "Project has been migrated to the latest version, try clicking 'Load Project' again.");
+            DialogFactory.Show("Project migrated", "Project has been migrated to the latest version. Reload the application now.");
         }
 
         internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
         {
             OpenToolWindowViewModels.Remove(toolWindowViewModel);
             toolWindowViewModel.HandleBeingClosed();
+        }
+
+        internal async Task LoadAsync(UserCollectionLoader userCollectionLoader)
+        {
+            if (IsProjectLoaded) throw new CellError("Already loaded");
+            if (_isProjectLoading) throw new CellError("Already loading");
+            _isProjectLoading = true;
+            if (BackupManager is null) throw new CellError("Backup manager not initialized yet, try loading again.");
+            ApplicationBackgroundMessage = "Checking for migration";
+            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
+            if (PersistedProject.NeedsMigration()) PromptUserToMigrateAndContinueLoading(userCollectionLoader);
+            else await ContinueLoadingAsync(userCollectionLoader);
+        }
+
+        private void PromptUserToMigrateAndContinueLoading(UserCollectionLoader userCollectionLoader)
+        {
+            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
+            if (!PersistedProject.CanMigrate()) throw new CellError(NoMigratorForVersionError);
+            if (DialogFactory is null) throw new CellError("Dialog factory not initialized yet, try loading again.");
+            DialogFactory.ShowYesNo(
+                "Version Mismatch",
+                $"The version of your project is outdated. would you like to migrate it?",
+                () => { MigrateProjectAsync().Wait(); ContinueLoadingAsync(userCollectionLoader).Wait(); },
+                () => { });
+        }
+
+        private async Task ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
+        {
+            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
+            if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
+            ApplicationBackgroundMessage = "Starting backup";
+            var backupTask = BackupAsync();
+            ApplicationBackgroundMessage = "Loading collections";
+            userCollectionLoader.LoadCollections();
+            ApplicationBackgroundMessage = "Loading functions";
+            if (FunctionLoader is null) throw new CellError("Function loader not initialized yet, try loading again.");
+            FunctionLoader.LoadCellFunctions();
+            ApplicationBackgroundMessage = "Linking collections to thier bases";
+            if (UserCollectionTracker is null) throw new CellError("User collection loader not initialized yet, try loading again.");
+            UserCollectionTracker.LinkUpBaseCollectionsAfterLoad();
+            ApplicationBackgroundMessage = "Loading cells";
+            if (CellLoader is null) throw new CellError("Cell loader not initialized yet, try loading again.");
+            CellLoader.LoadCells();
+            await backupTask;
+            ApplicationBackgroundMessage = "Load complete!";
+            if (CellTracker is null) throw new CellError("Cell tracker not initialized yet, try loading again.");
+            if (FunctionTracker is null) throw new CellError("Function tracker not initialized yet, try loading again.");
+            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
+            IsProjectLoaded = true;
+            _isProjectLoading = false;
+            if (CellSelector is null) throw new CellError("Cell selector not initialized yet, try loading again.");
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(CellSelector.SelectedCells, FunctionTracker);
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+            });
+            ApplicationBackgroundMessage = "Open a sheet to view cells";
         }
     }
 }

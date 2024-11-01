@@ -81,8 +81,7 @@
                 DockPanel.Dock="Right"
                 MouseDown="ResizerRectangleMouseDown"
                 MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp"
-                Visibility="{Binding IsBottomRightResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                MouseUp="ResizerRectangleMouseUp">
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
                         <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
@@ -99,8 +98,7 @@
                 DockPanel.Dock="Bottom"
                 MouseDown="ResizerRectangleMouseDown"
                 MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp"
-                Visibility="{Binding IsBottomRightResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                MouseUp="ResizerRectangleMouseUp">
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
                         <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
@@ -116,26 +114,5 @@
                 <ContentControl x:Name="ContentHost" Margin="10" />
             </Border>
         </DockPanel>
-        <!--<Rectangle
-            Width="10"
-            Height="10"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            MouseDown="ResizerRectangleMouseDown"
-            MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp"
-            RadiusX="5"
-            RadiusY="5">
-            <Rectangle.Style>
-                <Style TargetType="Rectangle">
-                    <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Fill" Value="{StaticResource AccentColor}" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Rectangle.Style>
-        </Rectangle>-->
     </Grid>
 </UserControl>

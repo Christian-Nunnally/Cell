@@ -43,7 +43,7 @@ namespace Cell.Core.Persistence
             }
 
             var realCollection = _underlyingCollectionProvider.GetCollection(name);
-            if (realCollection == null)
+            if (realCollection is null)
             {
                 return null;
             }

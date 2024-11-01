@@ -31,14 +31,18 @@ namespace Cell.Core.Persistence.Loader
 
         private void CellRemovedFromTracker(CellModel cell)
         {
+            cell.PropertyChanged -= TrackedCellPropertyChanged;
+            cell.Location.PropertyChanged -= TrackedCellLocationPropertyChanged;
+            cell.Style.PropertyChanged -= TrackedCellStylePropertyChanged;
+
             DeleteCell(cell);
         }
 
         private void CellAddedToTracker(CellModel cell)
         {
             cell.PropertyChanged += TrackedCellPropertyChanged;
-            cell.Location.PropertyChanged -= TrackedCellLocationPropertyChanged;
-            cell.Style.PropertyChanged -= TrackedCellStylePropertyChanged;
+            cell.Location.PropertyChanged += TrackedCellLocationPropertyChanged;
+            cell.Style.PropertyChanged += TrackedCellStylePropertyChanged;
 
             if (_isSavingAddedCells) SaveCell(cell);
         }
@@ -57,6 +61,7 @@ namespace Cell.Core.Persistence.Loader
 
         private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(CellModel.PopulateResult)) return;
             var cell = (CellModel)sender!;
             SaveCell(cell);
         }

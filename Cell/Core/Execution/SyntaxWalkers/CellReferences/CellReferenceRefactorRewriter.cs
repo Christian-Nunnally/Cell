@@ -19,7 +19,7 @@ namespace Cell.Core.Execution.SyntaxWalkers.CellReferences
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
             node = base.Visit(node);
-            if (node == null) return node;
+            if (node is null) return node;
             if (LocationReference.TryCreateReferenceFromCode(node, out var cellReference))
             {
                 var refactoredReference = _refactorFunction(cellReference);

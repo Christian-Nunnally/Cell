@@ -168,23 +168,23 @@ namespace Cell.Core.Persistence
         /// <param name="to">The directory to put the unzipped folder into.</param>
         /// <param name="fromPathZip">The directory where the zip is in this directory.</param>
         /// <param name="toPath">The directory to put the unzipped folder into.</param>
-        public void UnzipTo(PersistedDirectory to, string fromPathZip = "", string toPath = "")
+        public async Task UnzipToAsync(PersistedDirectory to, string fromPathZip = "", string toPath = "")
         {
             var fullFrom = GetFullPath(fromPathZip);
             var fullTo = to.GetFullPath(toPath);
             var zipPath = fullTo + ".zip";
-            _fileIO.ZipDirectory(fullFrom, zipPath);
+            await _fileIO.ZipDirectoryAsync(fullFrom, zipPath);
         }
 
         /// <summary>
         /// Zip a directory in place with a .zip extension.
         /// </summary>
         /// <param name="path">The path to the directory to zip.</param>
-        public void ZipFolder(string path = "")
+        public async Task ZipFolderAsync(string path = "")
         {
             var fullPath = GetFullPath(path);
             var zipPath = fullPath + ".zip";
-            _fileIO.ZipDirectory(fullPath, zipPath);
+            await _fileIO.ZipDirectoryAsync(fullPath, zipPath);
             _fileIO.DeleteDirectory(fullPath);
         }
 
@@ -194,12 +194,12 @@ namespace Cell.Core.Persistence
         /// <param name="to">The different root directory to zip in to.</param>
         /// <param name="fromPath">The path in this directory to zip from.</param>
         /// <param name="toPathZip">The path in the to directory to put the zip. A .zip will be appended automatically.</param>
-        public void ZipTo(PersistedDirectory to, string fromPath = "", string toPathZip = "")
+        public async Task ZipToAsync(PersistedDirectory to, string fromPath = "", string toPathZip = "")
         {
             var fullFrom = GetFullPath(fromPath);
             var fullTo = to.GetFullPath(toPathZip);
             var zipPath = fullTo + ".zip";
-            _fileIO.ZipDirectory(fullFrom, zipPath);
+            await _fileIO.ZipDirectoryAsync(fullFrom, zipPath);
         }
 
         internal PersistedDirectory FromDirectory(string directoryName)

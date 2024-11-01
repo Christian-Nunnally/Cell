@@ -174,7 +174,7 @@ namespace Cell.Core.Execution.CodeCompletion
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "member")
                 {
                     var rawName = xmlReader["name"];
-                    if (rawName == null) continue;
+                    if (rawName is null) continue;
                     _loadedXmlDocumentation[rawName] = xmlReader.ReadInnerXml();
                 }
             }

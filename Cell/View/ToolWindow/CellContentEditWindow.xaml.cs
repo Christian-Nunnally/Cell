@@ -112,8 +112,6 @@ namespace Cell.View.ToolWindow
         private void OpenAutoCompleteWindow()
         {
             var textArea = _multiUseUserInputTextBox.TextArea;
-            var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
-
             var suggestions = _viewModel.GetPopulateFunctionSuggestions();
 
             _completionWindow = CodeCompletionWindowFactory.Create(textArea, suggestions);

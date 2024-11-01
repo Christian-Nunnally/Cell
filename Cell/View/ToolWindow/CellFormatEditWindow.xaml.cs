@@ -62,38 +62,50 @@ namespace Cell.View.ToolWindow
 
         private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddColumnToTheLeft();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddColumnToTheRight();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddRowAbove();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddRowBelow();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.DeleteColumns();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
         {
+            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.DeleteRows();
             ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
+            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)

@@ -132,7 +132,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void EditPopulateFunction()
         {
-            if (CellToDisplay == null) return;
+            if (CellToDisplay is null) return;
             if (string.IsNullOrEmpty(CellToDisplay.PopulateFunctionName))
             {
                 ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
@@ -164,7 +164,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void EditTriggerFunction()
         {
-            if (CellToDisplay == null) return;
+            if (CellToDisplay is null) return;
             if (string.IsNullOrEmpty(CellToDisplay.TriggerFunctionName))
             {
                 ApplicationViewModel.Instance.DialogFactory?.Show("No function name to edit", "Set the name of the function before editing it.");
@@ -176,7 +176,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void EditFunction(CellFunction function)
         {
-            if (ApplicationViewModel.Instance.CellTracker == null) return;
+            if (ApplicationViewModel.Instance.CellTracker is null) return;
             var userCollectionTracker = ApplicationViewModel.Instance.UserCollectionTracker;
             if (userCollectionTracker is null) return;
             var collectionNameToDataTypeMap = userCollectionTracker.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();

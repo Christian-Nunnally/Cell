@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows;
 
 namespace Cell.Core.Data.Tracker
 {
@@ -79,7 +80,7 @@ namespace Cell.Core.Data.Tracker
         private void CellAddedToTracker(CellModel model)
         {
             var sheet = Sheets.FirstOrDefault(x => x.Name == model.Location.SheetName);
-            if (sheet == null)
+            if (sheet is null)
             {
                 sheet = new SheetModel(model.Location.SheetName);
                 Sheets.Add(sheet);
@@ -130,11 +131,14 @@ namespace Cell.Core.Data.Tracker
 
         private void RefreshOrderedSheetsList()
         {
-            OrderedSheets.Clear();
-            foreach (var sheet in Sheets.OrderBy(x => x.Order))
+            Application.Current?.Dispatcher?.Invoke(() =>
             {
-                OrderedSheets.Add(sheet);
-            }
+                OrderedSheets.Clear();
+                foreach (var sheet in Sheets.OrderBy(x => x.Order))
+                {
+                    OrderedSheets.Add(sheet);
+                }
+            });
         }
 
         private void SheetPropertyChanged(object? sender, PropertyChangedEventArgs e)

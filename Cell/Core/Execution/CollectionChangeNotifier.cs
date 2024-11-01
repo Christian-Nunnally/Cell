@@ -75,7 +75,7 @@ namespace Cell.Core.Execution
         private void StartListeningToCollectionForChanges(string collectionName)
         {
             var collection = _userCollectionTracker.GetCollection(collectionName);
-            if (collection == null) return;
+            if (collection is null) return;
             collection.ItemAdded += ItemAddedToUserCollection;
             collection.ItemRemoved += ItemRemovedFromUserCollection;
             collection.ItemPropertyChanged += ItemPropertyChangedInUserCollection;
@@ -84,7 +84,7 @@ namespace Cell.Core.Execution
         private void StopListeningToCollectionForChanges(string collectionName)
         {
             var collection = _userCollectionTracker.GetCollection(collectionName);
-            if (collection == null) return;
+            if (collection is null) return;
             collection.ItemAdded -= ItemAddedToUserCollection;
             collection.ItemRemoved -= ItemRemovedFromUserCollection;
             collection.ItemPropertyChanged -= ItemPropertyChangedInUserCollection;

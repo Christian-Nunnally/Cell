@@ -34,9 +34,9 @@ namespace CellTest.TestUtilities
         public bool Exists(string path)
         {
             var directoryPath = Path.GetDirectoryName(path);
-            if (directoryPath == null) return false;
+            if (directoryPath is null) return false;
             var directory = _testFileSystem.GetDirectory(directoryPath);
-            if (directory == null) return false;
+            if (directory is null) return false;
             var fileName = Path.GetFileName(path);
             return directory.ContainsKey(fileName) && directory[fileName] is string;
         }
@@ -50,7 +50,7 @@ namespace CellTest.TestUtilities
         public IEnumerable<string> GetFiles(string path)
         {
             var directory = _testFileSystem.GetDirectory(path);
-            if (directory == null) return [];
+            if (directory is null) return [];
             return directory.Where(x => x.Value is string).Select(x => Path.Combine(path, x.Key));
         }
 
@@ -72,14 +72,19 @@ namespace CellTest.TestUtilities
         public void WriteFile(string path, string version)
         {
             var directoryName = Path.GetDirectoryName(path);
-            if (directoryName == null) return;
+            if (directoryName is null) return;
             _testFileSystem.CreateDirectory(directoryName);
             _testFileSystem.WriteFile(path, version);
         }
 
-        public void ZipDirectory(string path, string zipPath)
+        public async Task ZipDirectoryAsync(string path, string zipPath)
         {
             CopyDirectory(path, zipPath);
+        }
+
+        internal void DeleteAll()
+        {
+            _testFileSystem.DeleteAll();
         }
     }
 }

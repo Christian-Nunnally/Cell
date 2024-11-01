@@ -43,8 +43,6 @@ namespace Cell
             applicationViewModel.CellTracker = cellTracker;
             var userCollectionTracker = new UserCollectionTracker(functionTracker, cellTracker);
             applicationViewModel.UserCollectionTracker = userCollectionTracker;
-            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker);
-            applicationViewModel.UserCollectionLoader = userCollectionLoader;
             var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
             var sheetTracker = new SheetTracker(cellTracker);
@@ -64,17 +62,18 @@ namespace Cell
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
-
             persistedProject.RegisterMigrator("1", "2", new Migration());
+            await Task.Run(() => ApplicationViewModel.Instance.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker)));
+            OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
+        }
 
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(applicationViewModel.CellSelector.SelectedCells, functionTracker);
-            applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
-
-            applicationViewModel.EnsureInitialBackupIsStarted();
-            if (!persistedProject.NeedsMigration())
+        private void OnlyAllowSelectionWhenEditWindowIsOpen(ApplicationViewModel applicationViewModel, CellSelector cellSelector)
+        {
+            applicationViewModel.OpenToolWindowViewModels.CollectionChanged += (o, e) =>
             {
-                userCollectionLoader.EnsureCollectionLoadHasStarted();
-            }
+                cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
+                if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
+            };
         }
     }
 }

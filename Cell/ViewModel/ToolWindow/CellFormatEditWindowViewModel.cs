@@ -762,7 +762,7 @@ namespace Cell.ViewModel.ToolWindow
                 .Distinct()
                 .OrderBy(x => x?.Location.Column ?? 0)
                 .FirstOrDefault();
-            if (leftmostColumnCell == null) return;
+            if (leftmostColumnCell is null) return;
             InsertColumnAtIndex(leftmostColumnCell.Location.SheetName, leftmostColumnCell.Location.Column);
         }
 
@@ -777,7 +777,7 @@ namespace Cell.ViewModel.ToolWindow
                 .Distinct()
                 .OrderByDescending(x => x?.Location.Column ?? 0)
                 .FirstOrDefault();
-            if (rightmostColumnCell == null) return;
+            if (rightmostColumnCell is null) return;
             InsertColumnAtIndex(rightmostColumnCell.Location.SheetName, rightmostColumnCell.Location.Column + 1);
         }
 
@@ -792,7 +792,7 @@ namespace Cell.ViewModel.ToolWindow
                 .Distinct()
                 .OrderBy(x => x?.Location.Row ?? 0)
                 .FirstOrDefault();
-            if (topmostRowCell == null) return;
+            if (topmostRowCell is null) return;
             InsertRowAtIndex(topmostRowCell.Location.SheetName, topmostRowCell.Location.Row);
         }
 
@@ -807,7 +807,7 @@ namespace Cell.ViewModel.ToolWindow
                 .Distinct()
                 .OrderByDescending(x => x?.Location.Row ?? 0)
                 .FirstOrDefault();
-            if (bottomMostRowCell == null) return;
+            if (bottomMostRowCell is null) return;
             InsertRowAtIndex(bottomMostRowCell.Location.SheetName, bottomMostRowCell.Location.Row + 1);
         }
 
@@ -1090,7 +1090,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private static void MergeCellIntoCellsIfTheyWereMerged(CellModel cellToMerge, CellModel? firstCell, CellModel? secondCell)
         {
-            if (firstCell == null || secondCell == null) return;
+            if (firstCell is null || secondCell is null) return;
             if (firstCell.IsMergedWith(secondCell)) cellToMerge.MergedWith = firstCell.MergedWith;
         }
 

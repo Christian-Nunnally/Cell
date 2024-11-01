@@ -53,7 +53,7 @@
         /// <exception cref="InvalidOperationException">This load progress is complete and can not be continued.</exception>
         public LoadingProgressResult Continue()
         {
-            if (_continuation == null) throw new InvalidOperationException("No continuation available");
+            if (_continuation is null) throw new InvalidOperationException("No continuation available");
             return _continuation();
         }
     }

@@ -25,7 +25,7 @@ namespace Cell.ViewModel
             _cellTracker = cellTracker;
             _cells = cells;
             _corner = _cells.OfType<CornerCellViewModel>().FirstOrDefault();
-            if (_corner == null) _canLayout = false;
+            if (_corner is null) _canLayout = false;
             _rows = [.. _cells.OfType<RowCellViewModel>().OrderBy(x => x.Row)];
             _columns = [.. _cells.OfType<ColumnCellViewModel>().OrderBy(x => x.Column)];
             if (_canLayout)
@@ -113,7 +113,7 @@ namespace Cell.ViewModel
         private void LayoutColumnCells()
         {
             var lastCell = _corner;
-            if (lastCell == null) return;
+            if (lastCell is null) return;
             foreach (var columnCellViewModel in _columns.Skip(1))
             {
                 columnCellViewModel.X = lastCell.X + lastCell.Width;
@@ -147,7 +147,7 @@ namespace Cell.ViewModel
         private void LayoutRowCells()
         {
             var lastCell = _corner;
-            if (lastCell == null) return;
+            if (lastCell is null) return;
             foreach (var cellViewModel in _rows.Skip(1))
             {
                 RowCellViewModel rowCellViewModel = (RowCellViewModel)cellViewModel;

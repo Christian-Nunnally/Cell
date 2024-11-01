@@ -1,5 +1,6 @@
 ﻿
 
+
 namespace CellTest.TestUtilities
 {
     public class TestFileSystem
@@ -27,7 +28,7 @@ namespace CellTest.TestUtilities
             var fileName = directories[^1];
             var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
-            if (parentDir == null) return;
+            if (parentDir is null) return;
             if (!parentDir.TryGetValue(fileName, out object? value)) return;
             if (value is not string) return;
             parentDir.Remove(fileName);
@@ -53,7 +54,7 @@ namespace CellTest.TestUtilities
             var fileName = directories[^1];
             var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
-            if (parentDir == null) return null;
+            if (parentDir is null) return null;
             if (!parentDir.TryGetValue(fileName, out var content)) return null;
             if (content is not string stringContent) return null;
             return stringContent;
@@ -65,17 +66,17 @@ namespace CellTest.TestUtilities
             var fileName = directories[^1];
             var parentDirPath = string.Join("\\", directories[..^1]);
             var parentDir = GetDirectory(parentDirPath);
-            if (parentDir == null) return;
+            if (parentDir is null) return;
             parentDir[fileName] = content;
         }
 
         public void CopyDirectory(string from, string to)
         {
             var fromDir = GetDirectory(from)?.ToDictionary();
-            if (fromDir == null) return;
+            if (fromDir is null) return;
             CreateDirectory(to);
             var toDir = GetDirectory(to);
-            if (toDir == null) return;
+            if (toDir is null) return;
             foreach (var (key, value) in fromDir)
             {
                 if (value is string content)
@@ -108,6 +109,11 @@ namespace CellTest.TestUtilities
                 if (value is not Dictionary<string, object> subDir) return;
                 currentDir = subDir;
             }
+        }
+
+        internal void DeleteAll()
+        {
+            _root.Clear();
         }
     }
 }

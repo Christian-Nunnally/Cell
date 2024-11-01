@@ -262,7 +262,7 @@ namespace Cell.ViewModel.Cells
             if (e.PropertyName != nameof(CellModel.CellType)) return;
             var model = (CellModel)sender!;
             var viewModel = CellViewModels.FirstOrDefault(x => x.Model == model);
-            if (viewModel == null) return;
+            if (viewModel is null) return;
             ReinstantiateCellsViewModel(viewModel);
         }
 

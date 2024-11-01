@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Core.Persistence;
@@ -62,7 +63,6 @@ namespace CellTest.ViewModel.Application
                 CellTracker = _cellTracker,
                 CellLoader = _cellLoader,
                 UserCollectionTracker = _userCollectionTracker,
-                UserCollectionLoader = _userCollectionLoader,
                 CellPopulateManager = _cellPopulateManager,
                 CellTriggerManager = _cellTriggerManager,
                 SheetTracker = _sheetTracker,
@@ -89,10 +89,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
 
-            var result = _testing.Load();
-
-            Assert.False(result.Success);
-            Assert.Equal(ApplicationViewModel.NoMigratorForVersionError, result.Message);
+            Assert.Throws<CellError>(() => _testing.Load(_userCollectionLoader));
         }
 
         [Fact]
@@ -105,7 +102,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.RegisterMigrator("0", "1", migrator);
             var dialog = _testDialogFactory.Expect();
 
-            _testing.Load();
+            _testing.Load(_userCollectionLoader);
 
             Assert.True(dialog.WasShown);
         }
@@ -121,7 +118,7 @@ namespace CellTest.ViewModel.Application
             _testDialogFactory.Expect(0);
             Assert.False(migrator.Migrated);
 
-            _testing.Load();
+            _testing.Load(_userCollectionLoader);
 
             Assert.True(migrator.Migrated);
         }

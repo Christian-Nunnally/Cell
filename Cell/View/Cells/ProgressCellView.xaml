@@ -11,7 +11,7 @@
                 Margin="{Binding Margin}"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Fill="{Binding ContentBackgroundColor}" />
+                Fill="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}" />
             <Rectangle
                 x:Name="progressRectangle"
                 Width="{Binding ProgressBarWidth}"
@@ -19,7 +19,7 @@
                 Margin="{Binding Margin}"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
-                Fill="{Binding ForegroundColor}" />
+                Fill="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

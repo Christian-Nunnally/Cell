@@ -139,7 +139,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (ToolWindowContent == null) return;
+            if (ToolWindowContent is null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
             Mouse.Capture(sender as IInputElement);
@@ -173,7 +173,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (ToolWindowContent == null) return;
+            if (ToolWindowContent is null) return;
             _resizing = false;
             Mouse.Capture(null);
             e.Handled = true;

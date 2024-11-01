@@ -59,7 +59,7 @@ namespace Cell.Core.Data
         /// <param name="index">The index of the item to remove.</param>
         public void RemoveAt(int index)
         {
-            if (UserCollection == null) return;
+            if (UserCollection is null) return;
             if (index < 0 || index >= UserCollection.Items.Count) return;
             var model = UserCollection.Items[index];
             UserCollection.Remove(model);

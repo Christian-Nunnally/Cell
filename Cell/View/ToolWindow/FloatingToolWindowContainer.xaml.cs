@@ -115,7 +115,7 @@ namespace Cell.View.ToolWindow
 
         private void SetPositionRespectingBounds(double x, double y)
         {
-            if (_toolWindowViewModel == null) return;
+            if (_toolWindowViewModel is null) return;
             _toolWindowViewModel.X = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowWidth - ActualWidth, x));
             _toolWindowViewModel.Y = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowHeight - ActualHeight, y));
         }
@@ -125,7 +125,7 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public void HandleOwningCanvasSizeChanged()
         {
-            if (_toolWindowViewModel == null) return;
+            if (_toolWindowViewModel is null) return;
             SetPositionRespectingBounds(_toolWindowViewModel.X, _toolWindowViewModel.Y);
         }
 
@@ -154,7 +154,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_resizableToolWindow == null) return;
+            if (_resizableToolWindow is null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
             Mouse.Capture(sender as IInputElement);
@@ -179,7 +179,7 @@ namespace Cell.View.ToolWindow
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
             if (_isDocked) return;
-            if (_resizableToolWindow == null) return;
+            if (_resizableToolWindow is null) return;
             _resizing = false;
             Mouse.Capture(null);
             e.Handled = true;

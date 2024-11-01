@@ -25,38 +25,39 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
         }
 
-        private void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
+        private async void CreateBackupButtonClicked(object sender, RoutedEventArgs e)
         {
             if (ApplicationViewModel.Instance.BackupManager is null)
             {
-                ApplicationViewModel.Instance.DialogFactory.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
+                ApplicationViewModel.Instance.DialogFactory?.Show("Unable to create backup", "The backup manager has not been initialized so backups can not be created at this time.");
                 return;
             }
-            ApplicationViewModel.Instance.BackupManager.CreateBackup();
-            ApplicationViewModel.Instance.DialogFactory.Show("Backup created", "Backup created successfully.");
+            await ApplicationViewModel.Instance.BackupManager.CreateBackupAsync();
+            ApplicationViewModel.Instance.DialogFactory?.Show("Backup created", "Backup created successfully.");
         }
 
         private void DefaultCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             _viewModel.OpenEditorForDefaultCellFormat();
         }
 
         private void DefaultRowColumnCellFormatEditorButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
+            if (_viewModel is null) return;
             _viewModel.OpenEditorForDefaultRowAndColumnCellFormat();
         }
 
         private void OpenSaveLocationButtonClicked(object sender, RoutedEventArgs e)
         {
-            Process.Start("explorer", ApplicationViewModel.Instance.PersistedProject?.GetRootPath());
+            Process.Start("explorer", ApplicationViewModel.Instance.PersistedProject?.GetRootPath() ?? "");
         }
 
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             if (File.Exists("printPreview.xps")) File.Delete("printPreview.xps");
-            XpsDocument xpsDocument = new XpsDocument("printPreview.xps", FileAccess.ReadWrite);
+            XpsDocument xpsDocument = new("printPreview.xps", FileAccess.ReadWrite);
             XpsDocumentWriter xpsDocumentWriter = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
             SerializerWriterCollator serializerWriterCollator = xpsDocumentWriter.CreateVisualsCollator();
             serializerWriterCollator.BeginBatchWrite();
@@ -65,18 +66,20 @@ namespace Cell.View.ToolWindow
             FixedDocumentSequence preview = xpsDocument.GetFixedDocumentSequence();
             xpsDocument.Close();
 
-            var previewWindow = new Window();
-            previewWindow.Content = new DocumentViewer { Document = preview };
+            var previewWindow = new Window
+            {
+                Content = new DocumentViewer { Document = preview }
+            };
             previewWindow.ShowDialog();
 
             //var printDialog = new PrintDialog();
-            ApplicationViewModel.Instance.DialogFactory.Show("Under construction", "Not quite ready :)");
+            ApplicationViewModel.Instance.DialogFactory?.Show("Under construction", "Not quite ready :)");
         }
 
-        private void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
+        private async void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (_viewModel == null) return;
-            _viewModel.RestoreFromBackup();
+            if (_viewModel is null) return;
+            await _viewModel.RestoreFromBackupAsync();
         }
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
@@ -91,28 +94,17 @@ namespace Cell.View.ToolWindow
             ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindowViewModel);
         }
 
-        private void ToggleAbilityToSelectCells(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button) return;
-            var cellSelector = ApplicationViewModel.Instance.CellSelector;
-            var activeSheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
-            if (cellSelector is null) return;
-            if (activeSheetViewModel is null) return;
-            cellSelector.IsSelectingEnabled = !cellSelector.IsSelectingEnabled;
-            activeSheetViewModel.IsCellHighlightOnMouseOverEnabled = cellSelector.IsSelectingEnabled;
-        }
-
         private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter = !ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter;
         }
 
         private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
         {
             if (sender is not Button) return;
-            if (ApplicationViewModel.Instance.SheetViewModel == null) return;
+            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
             ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled = !ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled;
         }
     }

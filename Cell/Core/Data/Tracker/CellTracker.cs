@@ -1,4 +1,5 @@
-﻿using Cell.Model;
+﻿using Cell.Core.Common;
+using Cell.Model;
 using System.ComponentModel;
 
 namespace Cell.Core.Data.Tracker
@@ -38,7 +39,13 @@ namespace Cell.Core.Data.Tracker
             _cellsToLocation.Add(cellModel, cellModel.Location.LocationString);
 
             cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
+            cellModel.PropertyChanged += VerifyCellsIdDoesNotChange;
             CellAdded?.Invoke(cellModel);
+        }
+
+        private void VerifyCellsIdDoesNotChange(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.ID)) throw new CellError("Cell ID cannot be changed after it has been added to the tracker.");
         }
 
         /// <summary>
@@ -74,6 +81,7 @@ namespace Cell.Core.Data.Tracker
         public void RemoveCell(CellModel cellModel)
         {
             cellModel.Location.PropertyChanged -= CellLocationPropertyChanged;
+            cellModel.PropertyChanged -= VerifyCellsIdDoesNotChange;
             RemoveFromCellsInSheetMap(cellModel, cellModel.Location.SheetName);
             _cellsToLocation.Remove(cellModel);
             RemoveFromCellsByLocationMap(cellModel);

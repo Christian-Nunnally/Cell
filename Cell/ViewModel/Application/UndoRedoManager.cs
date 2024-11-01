@@ -9,10 +9,9 @@ namespace Cell.ViewModel.Application
     public class UndoRedoManager
     {
         private readonly CellTracker _cellTracker;
-        private readonly List<string> _recordingStateIdList = [];
-        private readonly Stack<CellModel> _recordingStateList = new();
-        private readonly Stack<List<CellModel>> _redoStack = new();
-        private readonly Stack<List<CellModel>> _undoStack = new();
+        private UndoRedoState _recordingState = new();
+        private readonly Stack<UndoRedoState> _redoStack = new();
+        private readonly Stack<UndoRedoState> _undoStack = new();
         private bool _isRecordingUndoState;
         private bool _isUndoingOrRedoing;
         /// <summary>
@@ -32,7 +31,7 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// A list of string representations of the items in the redo stack.
         /// </summary>
-        public IEnumerable<string> UndoStack => _undoStack.Select(x => x.Count.ToString());
+        public IEnumerable<string> UndoStack => _undoStack.Select(x => x.ToString());
 
         /// <summary>
         /// Completes a single atomic undo/redo operation started by <see cref="StartRecordingUndoState"/>. This will add all cells recorded by <see cref="RecordStateIfRecording(CellModel)"/> since the last call to <see cref="StartRecordingUndoState"/> to the undo stack.
@@ -41,7 +40,9 @@ namespace Cell.ViewModel.Application
         {
             if (!_isRecordingUndoState) return;
             if (_isUndoingOrRedoing) return;
-            RecordCellStatesOntoUndoStack(_recordingStateList);
+            RecordStateOntoUndoStack(_recordingState);
+            _cellTracker.CellRemoved -= CellRemovedWhileRecordingUndoRedo;
+            _cellTracker.CellAdded -= CellAddedWhileRecordingUndoRedo;
             _isRecordingUndoState = false;
         }
 
@@ -54,9 +55,8 @@ namespace Cell.ViewModel.Application
             if (_isUndoingOrRedoing) return;
             if (_isRecordingUndoState)
             {
-                if (_recordingStateIdList.Contains(cell.ID)) return;
-                _recordingStateList.Push(cell.Copy());
-                _recordingStateIdList.Add(cell.ID);
+                if (_recordingState.CellsToRestore.Any(c => c.ID == cell.ID)) return;
+                _recordingState.CellsToRestore.Add(cell.Copy());
             }
         }
 
@@ -80,9 +80,20 @@ namespace Cell.ViewModel.Application
         {
             if (_isRecordingUndoState) return;
             if (_isUndoingOrRedoing) return;
-            _recordingStateList.Clear();
-            _recordingStateIdList.Clear();
+            _recordingState = new UndoRedoState();
+            _cellTracker.CellRemoved += CellRemovedWhileRecordingUndoRedo;
+            _cellTracker.CellAdded += CellAddedWhileRecordingUndoRedo;
             _isRecordingUndoState = true;
+        }
+
+        private void CellAddedWhileRecordingUndoRedo(CellModel model)
+        {
+            _recordingState.CellsToRemove.Add(model);
+        }
+
+        private void CellRemovedWhileRecordingUndoRedo(CellModel model)
+        {
+            _recordingState.CellsToAdd.Add(model);
         }
 
         /// <summary>
@@ -113,24 +124,35 @@ namespace Cell.ViewModel.Application
             cellToCopyFrom.Location.CopyTo(cellToRestoreInto.Location);
         }
 
-        private void ApplyStateFromStack(Stack<List<CellModel>> stackToRestoreStateFrom, Stack<List<CellModel>> stackToSaveOldState)
+        private void ApplyStateFromStack(Stack<UndoRedoState> stackToRestoreStateFrom, Stack<UndoRedoState> stackToSaveOldState)
         {
             var redoItems = new List<CellModel>();
             if (stackToRestoreStateFrom.Count == 0) return;
-            var cellsToRestore = stackToRestoreStateFrom.Pop();
+            var state = stackToRestoreStateFrom.Pop();
+            var cellsToRestore = state.CellsToRestore;
             foreach (var cellToCopyFrom in cellsToRestore)
             {
                 var cellToRestoreInto = _cellTracker.GetCell(cellToCopyFrom.Location);
-                if (cellToRestoreInto == null) continue;
+                if (cellToRestoreInto is null) continue;
                 redoItems.Add(cellToRestoreInto.Copy());
                 RestoreCell(cellToRestoreInto, cellToCopyFrom);
             }
-            stackToSaveOldState.Push(redoItems);
+            foreach (var cellToRemove in state.CellsToRemove)
+            {
+                _cellTracker.RemoveCell(cellToRemove);
+            }
+            foreach (var cellToAdd in state.CellsToAdd)
+            {
+                _cellTracker.AddCell(cellToAdd);
+            }
+
+            var redoState = new UndoRedoState { CellsToRestore = redoItems, CellsToAdd = state.CellsToRemove, CellsToRemove = state.CellsToAdd };
+            stackToSaveOldState.Push(redoState);
         }
 
-        private void RecordCellStatesOntoUndoStack(IEnumerable<CellModel> cellsToRecordTheStateOf)
+        private void RecordStateOntoUndoStack(UndoRedoState state)
         {
-            _undoStack.Push(cellsToRecordTheStateOf.Select(x => x.Copy()).ToList());
+            _undoStack.Push(state);
             _redoStack.Clear();
             UndoStackChanged?.Invoke();
         }

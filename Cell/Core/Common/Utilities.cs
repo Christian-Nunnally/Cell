@@ -214,7 +214,7 @@ namespace Cell.Core.Common
 
             // Target property exists
             var targetProperty = targetType.GetProperty(sourceProperty.Name);
-            if (targetProperty == null) return;
+            if (targetProperty is null) return;
 
             // Property is not blacklisted
             if (blacklist.Contains(sourceProperty.Name)) return;
@@ -224,7 +224,7 @@ namespace Cell.Core.Common
             var nonPrivateSetMethod = targetProperty.GetSetMethod(true);
             if (nonPrivateSetMethod != null && nonPrivateSetMethod.IsPrivate) return;
             var setMethod = targetProperty.GetSetMethod();
-            if (setMethod == null) return;
+            if (setMethod is null) return;
             if ((setMethod.Attributes & MethodAttributes.Static) != 0) return;
 
             // Target property type is assignable from source property type

@@ -16,14 +16,14 @@
                         Margin="{Binding Margin}"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        BorderBrush="{Binding ContentBorderColor}"
+                        BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
                         BorderThickness="{Binding ContentBorderThickness}">
                         <Border.Style>
                             <Style>
-                                <Setter Property="Border.Background" Value="{Binding ContentBackgroundColor}" />
+                                <Setter Property="Border.Background" Value="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}" />
                                 <Style.Triggers>
                                     <Trigger Property="Border.IsMouseOver" Value="True">
-                                        <Setter Property="Border.Background" Value="{StaticResource SelectedColor}" />
+                                        <Setter Property="Border.Background" Value="{Binding ContentHighlightColor, Converter={StaticResource ThemeColorConverter}}" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -40,7 +40,7 @@
                 FontSize="{Binding FontSize}"
                 FontStyle="{Binding FontStyleForView}"
                 FontWeight="{Binding FontWeightForView}"
-                Foreground="{Binding ForegroundColor}"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
                 Text="{Binding Path=Text}"
                 TextAlignment="{Binding TextAlignmentForView}"
                 TextDecorations="{Binding TextDecorationsForView}" />

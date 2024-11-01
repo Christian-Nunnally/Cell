@@ -127,10 +127,13 @@ namespace Cell.Core.Persistence
         /// </summary>
         /// <param name="path">The path to the directory to zip.</param>
         /// <param name="zipPath">The path to the zip file that will be created.</param>
-        public void ZipDirectory(string path, string zipPath)
+        public async Task ZipDirectoryAsync(string path, string zipPath)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(zipPath)!);
-            ZipFile.CreateFromDirectory(path, zipPath);
+            await Task.Run(() =>
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(zipPath)!);
+                ZipFile.CreateFromDirectory(path, zipPath);
+            });
         }
 
         private static void CopyAllFiles(string from, string to)

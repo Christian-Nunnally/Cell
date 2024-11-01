@@ -109,7 +109,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (string.IsNullOrEmpty(basedOnCollection)) return;
 
                 var baseCollection = _collections.FirstOrDefault(x => x.Model.Name == basedOnCollection);
-                if (baseCollection == null) return;
+                if (baseCollection is null) return;
 
                 _userCollectionTracker.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
             }

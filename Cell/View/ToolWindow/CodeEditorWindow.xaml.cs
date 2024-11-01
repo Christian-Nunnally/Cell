@@ -77,8 +77,6 @@ namespace Cell.View.ToolWindow
         private void OpenAutoCompleteWindow()
         {
             var textArea = textEditor.TextArea;
-            var userCollectionLoader = ApplicationViewModel.Instance.UserCollectionLoader;
-
             var suggestions = _viewModel.CreateAutoCompleteSuggestions(textArea.Caret.Offset);
 
             _completionWindow = CodeCompletionWindowFactory.Create(textArea, suggestions);

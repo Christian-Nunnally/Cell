@@ -37,7 +37,7 @@ namespace Cell.Core.Execution.CodeCompletion
         private static Type? GetArrayType(IArrayTypeSymbol arrayTypeSymbol)
         {
             var elementType = GetTypeFromSymbol(arrayTypeSymbol.ElementType);
-            if (elementType == null) return null;
+            if (elementType is null) return null;
             return arrayTypeSymbol.Rank switch
             {
                 1 => elementType.MakeArrayType(),
@@ -48,7 +48,7 @@ namespace Cell.Core.Execution.CodeCompletion
         private static Type? GetNamedType(INamedTypeSymbol namedTypeSymbol)
         {
             var typeArguments = namedTypeSymbol.TypeArguments.Select(GetTypeFromSymbol).OfType<Type>().ToArray() ?? [];
-            if (typeArguments == null) return null;
+            if (typeArguments is null) return null;
             var typeName = namedTypeSymbol.ToDisplayString();
             typeName = TypeSymbolNameToReflectionTypeName(typeName);
             if (typeName == "void") return null;

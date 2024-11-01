@@ -12,4 +12,5 @@
     <converters:EnumToStringConverter x:Key="EnumToStringConverter" />
     <converters:HexToColorConverter x:Key="HexToColorConverter" />
     <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
+    <converters:ThemeColorConverter x:Key="ThemeColorConverter" />
 </ResourceDictionary>

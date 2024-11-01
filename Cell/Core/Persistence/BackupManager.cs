@@ -22,9 +22,9 @@
         /// Captures a new backup with a name that includes the given backupName and the current date and time.
         /// </summary>
         /// <param name="backupName">An extra name to add to the backup file name.</param>
-        public void CreateBackup(string backupName = "backup")
+        public async Task CreateBackupAsync(string backupName = "backup")
         {
-            _projectDirectory.ZipTo(_backupDirectory, "", $"Cell_{backupName}_{CreateFileFriendlyCurrentDateTime()}");
+            await _projectDirectory.ZipToAsync(_backupDirectory, "", $"Cell_{backupName}_{CreateFileFriendlyCurrentDateTime()}");
         }
 
         /// <summary>
@@ -40,9 +40,9 @@
         /// Replaces the contents of the project directory with the contents of the backup with the specified name.
         /// </summary>
         /// <param name="backupName">The backup to restore.</param>
-        public void RestoreBackup(string backupName)
+        public async Task RestoreBackupAsync(string backupName)
         {
-            _backupDirectory.UnzipTo(_projectDirectory, backupName, "");
+            await _backupDirectory.UnzipToAsync(_projectDirectory, backupName, "");
         }
 
         private static string CreateFileFriendlyCurrentDateTime()

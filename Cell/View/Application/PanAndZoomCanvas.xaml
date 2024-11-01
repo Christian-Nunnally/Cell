@@ -7,4 +7,5 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    Background="{StaticResource CellBackground}"
     mc:Ignorable="d" />
