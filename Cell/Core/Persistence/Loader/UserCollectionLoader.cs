@@ -19,10 +19,10 @@ namespace Cell.Core.Persistence.Loader
     /// </summary>
     public class UserCollectionLoader
     {
-        private readonly Dictionary<UserCollectionModel, string> _collectionToNameMap = [];
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
         private readonly PersistedDirectory _collectionsDirectory;
+        private readonly Dictionary<UserCollectionModel, string> _collectionToNameMap = [];
         private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly FunctionTracker _functionTracker;
         private readonly UserCollectionTracker _userCollectionTracker;
@@ -155,7 +155,7 @@ namespace Cell.Core.Persistence.Loader
         {
             if (sender is not UserCollectionModel model) return;
             SaveCollectionSettings(model);
-            if (e.PropertyName ==  nameof(UserCollectionModel.Name))
+            if (e.PropertyName == nameof(UserCollectionModel.Name))
             {
                 var oldName = _collectionToNameMap[model];
                 _collectionsDirectory.MoveDirectory(oldName, model.Name);

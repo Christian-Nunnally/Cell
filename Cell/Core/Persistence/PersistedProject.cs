@@ -39,9 +39,9 @@ namespace Cell.Core.Persistence
         public PersistedDirectory FunctionsDirectory { get; private set; }
 
         /// <summary>
-        /// The directory where templates are stored within the project directory.
+        /// Gets or sets whether this directory can be written to from this <see cref="PersistedProject"/>.
         /// </summary>
-        public PersistedDirectory TemplatesDirectory { get; private set; }
+        public bool IsReadOnly { get => _projectDirectory.IsReadOnly; set => _projectDirectory.IsReadOnly = value; }
 
         /// <summary>
         /// The directory where sheets are stored within the project directory.
@@ -49,9 +49,9 @@ namespace Cell.Core.Persistence
         public PersistedDirectory SheetsDirectory { get; private set; }
 
         /// <summary>
-        /// Gets or sets whether this directory can be written to from this <see cref="PersistedProject"/>.
+        /// The directory where templates are stored within the project directory.
         /// </summary>
-        public bool IsReadOnly { get => _projectDirectory.IsReadOnly; set => _projectDirectory.IsReadOnly = value; }
+        public PersistedDirectory TemplatesDirectory { get; private set; }
 
         /// <summary>
         /// Gets whether the project actually stored here can be migrated to the current version of this project directory object.

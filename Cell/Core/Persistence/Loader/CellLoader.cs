@@ -12,10 +12,9 @@ namespace Cell.Core.Persistence.Loader
     /// </summary>
     public class CellLoader
     {
-        private bool _isSavingAddedCells = true;
-        private readonly PersistedDirectory _sheetsDirectory;
         private readonly CellTracker _cellTracker;
-
+        private readonly PersistedDirectory _sheetsDirectory;
+        private bool _isSavingAddedCells = true;
         /// <summary>
         /// Creates a new instance of <see cref="CellLoader"/>.
         /// </summary>
@@ -27,43 +26,6 @@ namespace Cell.Core.Persistence.Loader
             _cellTracker = cellTracker;
             cellTracker.CellAdded += CellAddedToTracker;
             cellTracker.CellRemoved += CellRemovedFromTracker;
-        }
-
-        private void CellRemovedFromTracker(CellModel cell)
-        {
-            cell.PropertyChanged -= TrackedCellPropertyChanged;
-            cell.Location.PropertyChanged -= TrackedCellLocationPropertyChanged;
-            cell.Style.PropertyChanged -= TrackedCellStylePropertyChanged;
-
-            DeleteCell(cell);
-        }
-
-        private void CellAddedToTracker(CellModel cell)
-        {
-            cell.PropertyChanged += TrackedCellPropertyChanged;
-            cell.Location.PropertyChanged += TrackedCellLocationPropertyChanged;
-            cell.Style.PropertyChanged += TrackedCellStylePropertyChanged;
-
-            if (_isSavingAddedCells) SaveCell(cell);
-        }
-
-        private void TrackedCellStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var style = (CellStyleModel)sender!;
-            SaveCell(style.CellModel!);
-        }
-
-        private void TrackedCellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var style = (CellLocationModel)sender!;
-            SaveCell(style.CellModel!);
-        }
-
-        private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(CellModel.PopulateResult)) return;
-            var cell = (CellModel)sender!;
-            SaveCell(cell);
         }
 
         /// <summary>
@@ -133,11 +95,48 @@ namespace Cell.Core.Persistence.Loader
             _sheetsDirectory.SaveFile(path, serialized);
         }
 
+        private void CellAddedToTracker(CellModel cell)
+        {
+            cell.PropertyChanged += TrackedCellPropertyChanged;
+            cell.Location.PropertyChanged += TrackedCellLocationPropertyChanged;
+            cell.Style.PropertyChanged += TrackedCellStylePropertyChanged;
+
+            if (_isSavingAddedCells) SaveCell(cell);
+        }
+
+        private void CellRemovedFromTracker(CellModel cell)
+        {
+            cell.PropertyChanged -= TrackedCellPropertyChanged;
+            cell.Location.PropertyChanged -= TrackedCellLocationPropertyChanged;
+            cell.Style.PropertyChanged -= TrackedCellStylePropertyChanged;
+
+            DeleteCell(cell);
+        }
+
         private void LoadCell(string file)
         {
             var text = _sheetsDirectory.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
             _cellTracker.AddCell(cell);
+        }
+
+        private void TrackedCellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var style = (CellLocationModel)sender!;
+            SaveCell(style.CellModel!);
+        }
+
+        private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellModel.PopulateResult)) return;
+            var cell = (CellModel)sender!;
+            SaveCell(cell);
+        }
+
+        private void TrackedCellStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var style = (CellStyleModel)sender!;
+            SaveCell(style.CellModel!);
         }
     }
 }

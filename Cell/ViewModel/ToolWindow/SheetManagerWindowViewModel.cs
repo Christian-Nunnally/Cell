@@ -129,7 +129,11 @@ namespace Cell.ViewModel.ToolWindow
 
         private void OpenExportWindow()
         {
-            var exportWindow = new ExportWindowViewModel();
+            var exportWindow = new ExportWindowViewModel
+            {
+                SheetNames = _sheetTracker.OrderedSheets.Select(x => x.Name),
+                SheetNameToExport = _sheetTracker.OrderedSheets.FirstOrDefault()?.Name ?? ""
+            };
             ApplicationViewModel.Instance.ShowToolWindow(exportWindow);
         }
 

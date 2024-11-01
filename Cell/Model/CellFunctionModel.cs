@@ -86,6 +86,6 @@ namespace Cell.Model
         /// <summary>
         /// The description of the function.
         /// </summary>
-        public string Description { get; internal set; }
+        public string Description { get; internal set; } = string.Empty;
     }
 }

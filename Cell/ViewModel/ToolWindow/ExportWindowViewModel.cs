@@ -27,12 +27,12 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets a list of all current sheet names.
         /// </summary>
-        public IEnumerable<string> SheetNames => ApplicationViewModel.Instance.SheetTracker.OrderedSheets.Select(x => x.Name);
+        public IEnumerable<string> SheetNames { get; set; } = [];
 
         /// <summary>
         /// Gets the name of the sheet to export.
         /// </summary>
-        public string SheetNameToExport { get; set; } = ApplicationViewModel.Instance.SheetTracker.OrderedSheets.Select(x => x.Name).FirstOrDefault("");
+        public string SheetNameToExport { get; set; } = ApplicationViewModel.Instance.SheetTracker?.OrderedSheets.Select(x => x.Name).FirstOrDefault("") ?? "";
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

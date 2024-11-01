@@ -63,7 +63,7 @@ namespace Cell.Core.Data.Tracker
         /// Deletes a cell function from the project, which means it will be deleted from disk.
         /// </summary>
         /// <param name="function">The function to delete.</param>
-        public void DeleteCellFunction(CellFunction function)
+        public void StopTrackingFunction(CellFunction function)
         {
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {

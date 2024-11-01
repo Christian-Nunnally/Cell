@@ -26,6 +26,10 @@ namespace Cell.ViewModel.Data
             _userCollectionTracker = userCollectionTracker;
         }
 
+
+        /// <summary>
+        /// The underlying collection this view model represents.
+        /// </summary>
         public UserCollection Collection { get; private set; }
 
         private readonly FunctionTracker _functionTracker;

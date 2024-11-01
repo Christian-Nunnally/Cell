@@ -12,11 +12,10 @@ namespace Cell.Core.Persistence
     /// </summary>
     public class ReadOnlyUserCollectionLoader : IUserCollectionProvider
     {
-        private readonly Dictionary<string, UserCollection> _readOnlyUserCollectionMap = [];
-        private readonly IUserCollectionProvider _underlyingCollectionProvider;
         private readonly FunctionTracker _functionTracker;
+        private readonly Dictionary<string, UserCollection> _readOnlyUserCollectionMap = [];
         private readonly TestingContext _sortFunctionContext;
-
+        private readonly IUserCollectionProvider _underlyingCollectionProvider;
         /// <summary>
         /// Creates a new instance of <see cref="ReadOnlyUserCollectionLoader"/>.
         /// </summary>

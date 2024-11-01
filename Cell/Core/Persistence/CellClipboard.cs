@@ -59,27 +59,6 @@ namespace Cell.Core.Persistence
             else PasteEachCopiedCellInRespectingOffsetFromStart(pasteIntoCellStart, cells!, centerOfCopy);
         }
 
-        private bool TryGetCellsFromClipboard(out IEnumerable<CellModel>? cells)
-        {
-            cells = [];
-            if (_textClipboard.ContainsText())
-            {
-                try
-                {
-                    if (JsonSerializer.Deserialize(_textClipboard.GetText(), typeof(List<CellModel>)) is List<CellModel> cellsFromClipboard)
-                    {
-                        cells = cellsFromClipboard;
-                    }
-                }
-                catch
-                {
-                    _copyTextOnly = true;
-                    cells = [new CellModel { Text = _textClipboard.GetText() }];
-                }
-            }
-            return cells.Any();
-        }
-
         private void PasteCopiedCell(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
@@ -127,6 +106,27 @@ namespace Cell.Core.Persistence
                 if (_copyTextOnly) cell.Text = cellToPaste.Text;
                 else PasteSingleCell(cellToPaste, cell);
             }
+        }
+
+        private bool TryGetCellsFromClipboard(out IEnumerable<CellModel>? cells)
+        {
+            cells = [];
+            if (_textClipboard.ContainsText())
+            {
+                try
+                {
+                    if (JsonSerializer.Deserialize(_textClipboard.GetText(), typeof(List<CellModel>)) is List<CellModel> cellsFromClipboard)
+                    {
+                        cells = cellsFromClipboard;
+                    }
+                }
+                catch
+                {
+                    _copyTextOnly = true;
+                    cells = [new CellModel { Text = _textClipboard.GetText() }];
+                }
+            }
+            return cells.Any();
         }
 
         private bool TryGetCellToReplace(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy, [MaybeNullWhen(false)] out CellModel cellToReplace)

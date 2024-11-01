@@ -16,7 +16,6 @@ namespace Cell.Core.Persistence.Loader
         private readonly PersistedDirectory _functionsDirectory;
         private readonly FunctionTracker _functionTracker;
         private bool _shouldSaveAddedFunctions = true;
-
         /// <summary>
         /// Creates a new instance of the <see cref="FunctionLoader"/> class.
         /// </summary>
@@ -28,24 +27,6 @@ namespace Cell.Core.Persistence.Loader
             _functionTracker = functionTracker;
             _functionTracker.FunctionAdded += FunctionTrackerFunctionAdded;
             _functionTracker.FunctionRemoved -= FunctionTrackerFunctionRemoved;
-        }
-
-        private void FunctionTrackerFunctionRemoved(CellFunction function)
-        {
-            DeleteCellFunction(function);
-            function.Model.PropertyChanged -= FunctionModelPropertyChanged;
-        }
-
-        private void FunctionTrackerFunctionAdded(CellFunction function)
-        {
-            function.Model.PropertyChanged += FunctionModelPropertyChanged;
-            if (_shouldSaveAddedFunctions) SaveCellFunction(function.Model.ReturnType, function.Model);
-        }
-
-        private void FunctionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var function = (CellFunctionModel)sender!;
-            SaveCellFunction(function.ReturnType, function);
         }
 
         /// <summary>
@@ -80,12 +61,6 @@ namespace Cell.Core.Persistence.Loader
             }
         }
 
-        private CellFunctionModel LoadFunction(string file)
-        {
-            var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
-            return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
-        }
-
         /// <summary>
         /// Saves a cell function to the directory.
         /// </summary>
@@ -97,6 +72,30 @@ namespace Cell.Core.Persistence.Loader
             var path = Path.Combine(space, function.Name);
             var serializedContent = JsonSerializer.Serialize(function);
             _functionsDirectory.SaveFile(path, serializedContent);
+        }
+
+        private void FunctionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var function = (CellFunctionModel)sender!;
+            SaveCellFunction(function.ReturnType, function);
+        }
+
+        private void FunctionTrackerFunctionAdded(CellFunction function)
+        {
+            function.Model.PropertyChanged += FunctionModelPropertyChanged;
+            if (_shouldSaveAddedFunctions) SaveCellFunction(function.Model.ReturnType, function.Model);
+        }
+
+        private void FunctionTrackerFunctionRemoved(CellFunction function)
+        {
+            function.Model.PropertyChanged -= FunctionModelPropertyChanged;
+            DeleteCellFunction(function);
+        }
+
+        private CellFunctionModel LoadFunction(string file)
+        {
+            var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
+            return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
         }
     }
 }
