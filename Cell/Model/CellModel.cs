@@ -33,6 +33,7 @@ namespace Cell.Model
         /// </summary>
         public CellModel()
         {
+            _customProperties.CellModel = this;
             _cellStyle.CellModel = this;
             _cellLocation.CellModel = this;
         }

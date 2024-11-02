@@ -100,8 +100,15 @@ namespace Cell.Core.Persistence.Loader
             cell.PropertyChanged += TrackedCellPropertyChanged;
             cell.Location.PropertyChanged += TrackedCellLocationPropertyChanged;
             cell.Style.PropertyChanged += TrackedCellStylePropertyChanged;
+            cell.Properties.PropertyChanged += TrackedCellCustomPropertyChanged;
 
             if (_isSavingAddedCells) SaveCell(cell);
+        }
+
+        private void TrackedCellCustomPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var properties = (CellModelCustomPropertiesModel)sender!;
+            SaveCell(properties.CellModel!);
         }
 
         private void CellRemovedFromTracker(CellModel cell)

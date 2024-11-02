@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Common;
+using System.Text.Json.Serialization;
 
 namespace Cell.Model
 {
@@ -22,6 +23,12 @@ namespace Cell.Model
             get => GetCustomProperty(key);
             set => SetCustomProperty(key, value);
         }
+
+        /// <summary>
+        /// The <see cref="CellModel"/> that this location is associated with.
+        /// </summary>
+        [JsonIgnore]
+        public CellModel? CellModel { get; internal set; }
 
         /// <summary>
         /// Gets a custom string property stored on the cell.
