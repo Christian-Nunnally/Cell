@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Cell.View.Cells
 {
@@ -121,6 +122,11 @@ namespace Cell.View.Cells
             }
         }
 
+        public void SetBackgroundColor(Brush brush)
+        {
+            Background = brush;
+        }
+
         private void CellPreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
@@ -173,6 +179,7 @@ namespace Cell.View.Cells
             _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
             _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
             SheetViewModel.PropertyChanged += SheetViewModelPropertyChanged;
+            _panAndZoomCanvas.Background = Background;
             _panAndZoomCanvas.EnsureCenteredIfLocked();
         }
 

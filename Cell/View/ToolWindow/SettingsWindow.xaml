@@ -13,11 +13,6 @@
     <Grid>
         <StackPanel>
             <Button
-                Click="ToggleCenterLockButtonClick"
-                Content="Snap position of sheet to center"
-                DockPanel.Dock="Left"
-                ToolTip="Toggles auto snapping to center" />
-            <Button
                 Click="ShowLogWindowButtonClick"
                 Content="Open Application Logs Window"
                 DockPanel.Dock="Left" />

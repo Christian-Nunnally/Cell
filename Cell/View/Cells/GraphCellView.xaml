@@ -9,6 +9,6 @@
             StrokeEndLineCap="Round"
             StrokeMiterLimit="0"
             StrokeStartLineCap="Round"
-            StrokeThickness="2" />
+            StrokeThickness="{Binding ContentBorderThickness.Top}" />
     </DataTemplate>
 </ResourceDictionary>

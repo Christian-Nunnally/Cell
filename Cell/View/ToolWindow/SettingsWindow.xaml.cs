@@ -56,24 +56,26 @@ namespace Cell.View.ToolWindow
         private void PrintCurrentSheetButtonClicked(object sender, RoutedEventArgs e)
         {
             if (ApplicationViewModel.Instance.SheetViewModel is null) return;
+
+            var sheetView = new SheetView(ApplicationViewModel.Instance.SheetViewModel);
+            sheetView.SetBackgroundColor(System.Windows.Media.Brushes.White);
+
             if (File.Exists("printPreview.xps")) File.Delete("printPreview.xps");
             XpsDocument xpsDocument = new("printPreview.xps", FileAccess.ReadWrite);
             XpsDocumentWriter xpsDocumentWriter = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
             SerializerWriterCollator serializerWriterCollator = xpsDocumentWriter.CreateVisualsCollator();
             serializerWriterCollator.BeginBatchWrite();
-            serializerWriterCollator.Write(new SheetView(ApplicationViewModel.Instance.SheetViewModel));
+            serializerWriterCollator.Write(sheetView);
             serializerWriterCollator.EndBatchWrite();
             FixedDocumentSequence preview = xpsDocument.GetFixedDocumentSequence();
             xpsDocument.Close();
 
             var previewWindow = new Window
             {
-                Content = new DocumentViewer { Document = preview }
+                Content = new DocumentViewer { Document = preview, Background = System.Windows.Media.Brushes.White }
             };
+            previewWindow.Background = System.Windows.Media.Brushes.White;
             previewWindow.ShowDialog();
-
-            //var printDialog = new PrintDialog();
-            ApplicationViewModel.Instance.DialogFactory?.Show("Under construction", "Not quite ready :)");
         }
 
         private async void RestoreFromBackupButtonClicked(object sender, RoutedEventArgs e)
@@ -92,20 +94,6 @@ namespace Cell.View.ToolWindow
         {
             var undoRedoStackWindowViewModel = new UndoRedoStackWindowViewModel();
             ApplicationViewModel.Instance.ShowToolWindow(undoRedoStackWindowViewModel);
-        }
-
-        private void ToggleCenterLockButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button) return;
-            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
-            ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter = !ApplicationViewModel.Instance.SheetViewModel.IsLockedToCenter;
-        }
-
-        private void TogglePanLockButtonClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button) return;
-            if (ApplicationViewModel.Instance.SheetViewModel is null) return;
-            ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled = !ApplicationViewModel.Instance.SheetViewModel.IsPanningEnabled;
         }
     }
 }
