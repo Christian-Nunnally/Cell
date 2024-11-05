@@ -8,6 +8,8 @@ namespace Cell.Model
     /// </summary>
     public class CellModelCustomPropertiesModel : PropertyChangedBase
     {
+        private CellModel? cellModel;
+
         /// <summary>
         /// A dictionary of string properties that can be set on the cell.
         /// </summary>
@@ -28,7 +30,13 @@ namespace Cell.Model
         /// The <see cref="CellModel"/> that this location is associated with.
         /// </summary>
         [JsonIgnore]
-        public CellModel? CellModel { get; internal set; }
+        public CellModel? CellModel
+        {
+            get => cellModel; internal set
+            {
+                cellModel = value;
+            }
+        }
 
         /// <summary>
         /// Gets a custom string property stored on the cell.

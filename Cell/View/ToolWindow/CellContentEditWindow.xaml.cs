@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
-using Cell.ViewModel.Application;
+using Cell.View.Skin;
 using Cell.ViewModel.ToolWindow;
-using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using System.ComponentModel;
@@ -26,6 +25,7 @@ namespace Cell.View.ToolWindow
             _viewModel = viewModel;
             InitializeComponent();
 
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_multiUseUserInputTextBox);
             _multiUseUserInputTextBox.Text = _viewModel.MultiUseUserInputText;
             _viewModel.PropertyChanged += CellContentEditWindowViewModelPropertyChanged;
             _multiUseUserInputTextBox.TextArea.TextEntering += OnTextEntering;

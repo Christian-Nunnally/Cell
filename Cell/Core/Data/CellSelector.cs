@@ -27,6 +27,7 @@ namespace Cell.Core.Data
         {
             get => _isSelectingEnabled; internal set
             {
+                if (_isSelectingEnabled == value) return;
                 _isSelectingEnabled = value;
                 UnselectAllCells();
             }

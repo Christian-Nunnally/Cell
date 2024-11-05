@@ -18,8 +18,8 @@ namespace Cell.ViewModel.Cells.Types
         public CollectionCellViewModel(CellModel model, SheetViewModel sheet) : base(model, sheet)
         {
             model.PropertyChanged += ModelPropertyChanged;
-            if (!string.IsNullOrEmpty(model.PopulateFunctionName)) sheet.CellPopulateManager.RunPopulateForCell(model);
-            NotifyPropertyChanged(nameof(SelectedItem));
+            //if (!string.IsNullOrEmpty(model.PopulateFunctionName)) sheet.CellPopulateManager.RunPopulateForCell(model);
+            //NotifyPropertyChanged(nameof(SelectedItem));
         }
 
         /// <summary>
@@ -60,10 +60,12 @@ namespace Cell.ViewModel.Cells.Types
             get => Text;
             set
             {
-                var oldValue = Model.Text;
+                if (value is null) return;
+                var oldValue = Text;
                 if (oldValue == value) return;
                 _sheetViewModel.CellTriggerManager.CellTriggered(Model, new EditContext(nameof(SelectedItem), oldValue, value));
-                Model.Text = value;
+                Text = value;
+                NotifyPropertyChanged(nameof(Text));
             }
         }
 

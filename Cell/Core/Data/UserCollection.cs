@@ -130,6 +130,7 @@ namespace Cell.Core.Data
 
                 _baseCollection?.Items.ForEach(InsertItemWithSortAndFilter);
             }
+            UpdateModelItems();
         }
 
         /// <summary>
@@ -208,6 +209,17 @@ namespace Cell.Core.Data
         {
             var inserter = new SortedListInserter<PluginModel>(RunSortFilter);
             inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
+            UpdateModelItems();
+        }
+
+        private void UpdateModelItems()
+        {
+            Model.ItemIDs.Clear();
+            foreach (var item in _sortedItems)
+            {
+                Model.ItemIDs.Add(item.ID);
+            }
+            Model.NotifyPropertyChanged(nameof(UserCollectionModel.ItemIDs));
         }
 
         private int? RunSortFilter(int i)
@@ -247,6 +259,7 @@ namespace Cell.Core.Data
                     _sortedItems.RemoveAt(currentIndex);
                     InsertSorted(model, sortFilterResult);
                     OrderChanged?.Invoke(this);
+                    UpdateModelItems();
                 }
             }
         }
@@ -260,6 +273,7 @@ namespace Cell.Core.Data
             item.PropertyChanged -= PropertyChangedOnItemInCollection;
             ItemRemoved?.Invoke(this, item);
             _baseCollection?.Remove(item);
+            UpdateModelItems();
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

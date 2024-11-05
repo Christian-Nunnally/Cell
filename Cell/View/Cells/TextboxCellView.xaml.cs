@@ -66,25 +66,25 @@ namespace Cell.View.Cells
             if (e.Key == Key.Enter)
             {
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector.MoveSelectionUp();
-                else ApplicationViewModel.Instance.CellSelector.MoveSelectionDown();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector?.MoveSelectionUp();
+                else ApplicationViewModel.Instance.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Tab)
             {
                 textbox.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector.MoveSelectionLeft();
-                else ApplicationViewModel.Instance.CellSelector.MoveSelectionRight();
+                if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector?.MoveSelectionLeft();
+                else ApplicationViewModel.Instance.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                ApplicationViewModel.Instance.CellSelector.MoveSelectionDown();
+                ApplicationViewModel.Instance.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                ApplicationViewModel.Instance.CellSelector.MoveSelectionUp();
+                ApplicationViewModel.Instance.CellSelector?.MoveSelectionUp();
                 e.Handled = true;
             }
         }

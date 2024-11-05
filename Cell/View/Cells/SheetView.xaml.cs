@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Cell.View.Cells
 {
@@ -120,11 +119,6 @@ namespace Cell.View.Cells
                     ApplicationViewModel.Instance.GoToCell(cell.Model);
                 }
             }
-        }
-
-        public void SetBackgroundColor(Brush brush)
-        {
-            Background = brush;
         }
 
         private void CellPreviewMouseMove(object sender, MouseEventArgs e)

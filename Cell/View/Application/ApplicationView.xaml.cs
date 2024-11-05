@@ -1,5 +1,6 @@
 ﻿using Cell.View.Cells;
 using Cell.View.Converters;
+using Cell.View.Skin;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
@@ -10,7 +11,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace Cell.View.Application
 {
@@ -49,30 +49,95 @@ namespace Cell.View.Application
         {
             if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)
             {
-                foreach (var item in e.NewItems)
+                foreach (var toolWindowViewModel in e.NewItems.Cast<ToolWindowViewModel>())
                 {
-                    if (item is ToolWindowViewModel toolWindowViewModel)
-                    {
-                        if (toolWindowViewModel.IsDocked)
-                        {
-                            ShowToolWindowInDockedContainer(toolWindowViewModel, toolWindowViewModel.Dock);
-                        }
-                        else
-                        {
-                            ShowToolWindowInFloatingContainer(toolWindowViewModel);
-                        }
-                    }
+                    toolWindowViewModel.PropertyChanged += ToolWindowViewModelPropertyChanged;
+                    AddToolWindowToView(toolWindowViewModel);
                 }
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is not null)
             {
-                foreach (var item in e.OldItems)
+                foreach (var toolWindowViewModel in e.OldItems.Cast<ToolWindowViewModel>())
                 {
-                    if (item is ToolWindowViewModel toolWindowViewModel)
-                    {
-                        RemoveToolWindowFromView(toolWindowViewModel);
-                    }
+                    toolWindowViewModel.PropertyChanged -= ToolWindowViewModelPropertyChanged;
+                    RemoveToolWindowFromView(toolWindowViewModel);
                 }
+            }
+        }
+
+        private void AddToolWindowToView(ToolWindowViewModel toolWindowViewModel)
+        {
+            if (toolWindowViewModel.IsDocked)
+            {
+                ShowToolWindowInDockedContainer(toolWindowViewModel, toolWindowViewModel.Dock);
+            }
+            else
+            {
+                ShowToolWindowInFloatingContainer(toolWindowViewModel);
+            }
+        }
+
+        private void ToolWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var toolWindowViewModel = (ToolWindowViewModel)sender!;
+            if (e.PropertyName == nameof(ToolWindowViewModel.IsDocked))
+            {
+                RemoveToolWindowFromView(toolWindowViewModel);
+                AddToolWindowToView(toolWindowViewModel);
+            }
+        }
+
+        private void ShowDockSites()
+        {
+            var topDock = new Border();
+            DockPanel.SetDock(topDock, Dock.Top);
+            topDock.Height = 10;
+            topDock.Background = ColorConstants.ForegroundColorConstantBrush;
+            topDock.Tag = "[DockSite]";
+            topDock.MouseDown += DockMouseDown;
+            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, topDock);
+
+            var bottomDock = new Border();
+            DockPanel.SetDock(bottomDock, Dock.Bottom);
+            bottomDock.Height = 10;
+            bottomDock.Background = ColorConstants.ForegroundColorConstantBrush;
+            bottomDock.Tag = "[DockSite]";
+            bottomDock.MouseDown += DockMouseDown;
+            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, bottomDock);
+
+            var leftDock = new Border();
+            DockPanel.SetDock(leftDock, Dock.Left);
+            leftDock.Width = 10;
+            leftDock.Background = ColorConstants.ForegroundColorConstantBrush;
+            leftDock.Tag = "[DockSite]";
+            leftDock.MouseDown += DockMouseDown;
+            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, leftDock);
+
+            var rightDock = new Border();
+            DockPanel.SetDock(rightDock, Dock.Right);
+            rightDock.Width = 10;
+            rightDock.Background = ColorConstants.ForegroundColorConstantBrush;
+            rightDock.Tag = "[DockSite]";
+            rightDock.MouseDown += DockMouseDown;
+            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, rightDock);
+        }
+
+        private void DockMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var dockSite = (Border)sender!;
+            var dockSide = DockPanel.GetDock(dockSite);
+            HideDockSites();
+            var topItemInCanvas = _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>().LastOrDefault();
+            if (topItemInCanvas?.ToolWindowContent is null) return;
+            topItemInCanvas.ToolWindowContent.ToolViewModel.Dock = dockSide;
+            topItemInCanvas.ToolWindowContent.ToolViewModel.IsDocked = true;
+        }
+
+        private void HideDockSites()
+        {
+            foreach (var dockSite in _toolWindowDockPanel.Children.OfType<Border>().Where(x => x.Tag as string == "[DockSite]").ToList())
+            {
+                _toolWindowDockPanel.Children.Remove(dockSite);
             }
         }
 
@@ -260,7 +325,7 @@ namespace Cell.View.Application
                 ToolWindowContent = resizableToolWindow
             };
             DockPanel.SetDock(toolbox, dockSide);
-            _toolWindowDockPanel.Children.Insert(0, toolbox);
+            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, toolbox);
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)
@@ -312,6 +377,14 @@ namespace Cell.View.Application
                     var activeSheet = _viewModel.SheetViewModel;
                     CloseAllSheetViews();
                     ShowSheetView(activeSheet);
+                }
+                else if (e.Key == Key.Q)
+                {
+                    ShowDockSites();
+                }
+                else if (e.Key == Key.W)
+                {
+                    HideDockSites();
                 }
             }
             else if (e.Key == Key.Tab)

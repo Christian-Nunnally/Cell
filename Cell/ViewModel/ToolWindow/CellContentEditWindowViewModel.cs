@@ -83,7 +83,7 @@ namespace Cell.ViewModel.ToolWindow
             get => _multiUseUserInputText;
             set
             {
-                if (value == _multiUseUserInputText) return;
+               if (value == _multiUseUserInputText) return;
                 _multiUseUserInputText = value;
                 NotifyPropertyChanged(nameof(MultiUseUserInputText));
                 NotifyPropertyChanged(nameof(IsEditFunctionButtonVisible));

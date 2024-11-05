@@ -57,9 +57,10 @@ namespace Cell.View.ToolWindow
         {
             if (ApplicationViewModel.Instance.SheetViewModel is null) return;
 
-            var sheetView = new SheetView(ApplicationViewModel.Instance.SheetViewModel);
-            sheetView.SetBackgroundColor(System.Windows.Media.Brushes.White);
-
+            var sheetView = new SheetView(ApplicationViewModel.Instance.SheetViewModel)
+            {
+                Background = System.Windows.Media.Brushes.White
+            };
             if (File.Exists("printPreview.xps")) File.Delete("printPreview.xps");
             XpsDocument xpsDocument = new("printPreview.xps", FileAccess.ReadWrite);
             XpsDocumentWriter xpsDocumentWriter = XpsDocument.CreateXpsDocumentWriter(xpsDocument);
@@ -72,9 +73,8 @@ namespace Cell.View.ToolWindow
 
             var previewWindow = new Window
             {
-                Content = new DocumentViewer { Document = preview, Background = System.Windows.Media.Brushes.White }
+                Content = new DocumentViewer { Document = preview },
             };
-            previewWindow.Background = System.Windows.Media.Brushes.White;
             previewWindow.ShowDialog();
         }
 

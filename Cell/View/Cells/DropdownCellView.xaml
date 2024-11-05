@@ -1,4 +1,5 @@
 ﻿<ResourceDictionary
+    x:Class="Cell.View.Cells.DropdownCellView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Cell.View.Controls"
@@ -13,12 +14,12 @@
             Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
             BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
             BorderThickness="{Binding ContentBorderThickness}"
+            DropDownOpened="DropdownOpened"
             FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
             HighlightBrush="{Binding ContentHighlightColor, Converter={StaticResource ThemeColorConverter}}"
             ItemsSource="{Binding CollectionDisplayStrings}"
-            SelectedItem="{Binding SelectedItem}"
-            Text="{Binding Path=Text, Mode=TwoWay}" />
+            SelectedItem="{Binding SelectedItem}" />
     </DataTemplate>
 </ResourceDictionary>

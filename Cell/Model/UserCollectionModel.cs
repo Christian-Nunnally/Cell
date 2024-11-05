@@ -58,5 +58,10 @@ namespace Cell.Model
                 NotifyPropertyChanged(nameof(SortAndFilterFunctionName));
             }
         }
+
+        /// <summary>
+        /// Gets or sets the saved list of item IDs in this collection. This is how the collection stores item order and filtering.
+        /// </summary>
+        public List<string> ItemIDs { get; set; } = [];
     }
 }
