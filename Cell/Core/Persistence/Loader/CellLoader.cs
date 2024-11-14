@@ -44,11 +44,11 @@ namespace Cell.Core.Persistence.Loader
         /// Loads all cells from the project.
         /// </summary>
         /// <returns>All loaded cells.</returns>
-        public void LoadCells()
+        public async Task LoadCellsAsync()
         {
             foreach (var sheetDirectory in _sheetsDirectory.GetDirectories())
             {
-                LoadSheet(sheetDirectory);
+                await LoadSheetAsync(sheetDirectory);
             }
         }
 
@@ -57,10 +57,10 @@ namespace Cell.Core.Persistence.Loader
         /// </summary>
         /// <param name="sheet">The name of the sheet to load all cells from.</param>
         /// <returns>All the loaded cells.</returns>
-        public void LoadSheet(string sheet)
+        public async Task LoadSheetAsync(string sheet)
         {
             _isSavingAddedCells = false;
-            foreach (var file in _sheetsDirectory.GetFiles(sheet)) LoadCell(file);
+            foreach (var file in _sheetsDirectory.GetFiles(sheet)) await LoadCellAsync(file);
             _isSavingAddedCells = true;
         }
 
@@ -120,9 +120,9 @@ namespace Cell.Core.Persistence.Loader
             DeleteCell(cell);
         }
 
-        private void LoadCell(string file)
+        private async Task LoadCellAsync(string file)
         {
-            var text = _sheetsDirectory.LoadFile(file) ?? throw new CellError($"Error loading file {file}");
+            var text = await _sheetsDirectory.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
             var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
             _cellTracker.AddCell(cell);
         }

@@ -111,6 +111,7 @@ namespace Cell.ViewModel.ToolWindow
                 var baseCollection = _collections.FirstOrDefault(x => x.Model.Name == basedOnCollection);
                 if (baseCollection is null) return;
 
+                var userCollectionModel = 
                 _userCollectionTracker.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
             }
             else

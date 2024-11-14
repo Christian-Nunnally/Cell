@@ -69,6 +69,8 @@ namespace Cell.Core.Data
         /// </summary>
         public UserCollectionModel Model { get; private set; }
 
+        public bool IsSortOnInsertEnabled { get; set; } = true;
+
         /// <summary>
         /// Gets the data type of items in this collection.
         /// </summary>
@@ -186,6 +188,14 @@ namespace Cell.Core.Data
         private void InsertItemWithSortAndFilter(PluginModel model)
         {
             if (_items.ContainsKey(model.ID)) return;
+            if (!IsSortOnInsertEnabled)
+            {
+                _items.Add(model.ID, model);
+                _sortedItems.Add(model);
+                model.PropertyChanged += PropertyChangedOnItemInCollection;
+                ItemAdded?.Invoke(this, model);
+                return;
+            }
             int? sortFilterResult = GetSortFilterResultFromItemNotInList(model);
             if (sortFilterResult != null || string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
@@ -245,8 +255,7 @@ namespace Cell.Core.Data
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
                 var sortFilterResult = RunSortFilter(currentIndex);
-
-                var cachedResult = _cachedSortFilterResult[model.ID];
+                var cachedResult = _cachedSortFilterResult.TryGetValue(model.ID, out var result) ? result : null;
                 if (cachedResult == sortFilterResult) return;
                 else if (sortFilterResult is null)
                 {
@@ -273,7 +282,8 @@ namespace Cell.Core.Data
             item.PropertyChanged -= PropertyChangedOnItemInCollection;
             ItemRemoved?.Invoke(this, item);
             _baseCollection?.Remove(item);
-            UpdateModelItems();
+            Model.ItemIDs.Remove(id);
+            Model.NotifyPropertyChanged(nameof(UserCollectionModel.ItemIDs));
         }
 
         private void UserCollectionModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

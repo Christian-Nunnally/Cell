@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Collections.Specialized;
@@ -119,6 +120,44 @@ namespace Cell.ViewModel.ToolWindow
         public void RefreshSheetsList()
         {
             NotifyPropertyChanged(nameof(FilteredSheets));
+        }
+
+        /// <summary>
+        /// Moves the given sheet down in the order of the sheets.
+        /// </summary>
+        /// <param name="sheetModel">The sheet.</param>
+        /// <exception cref="CellError">Thrown when the sheet is not tracked and thus has no relative ordering.</exception>
+        public void MoveSheetDownInOrder(SheetModel sheetModel)
+        {
+            if (!_sheetTracker.Sheets.Contains(sheetModel)) throw new CellError($"Sheet {sheetModel.Name} must be tracked in order to change the ordering.");
+            MakeSureSheetOrderingIsConsecutive();
+            sheetModel.Order += 3;
+            RefreshSheetsList();
+            MakeSureSheetOrderingIsConsecutive();
+        }
+
+        /// <summary>
+        /// Moves the given sheet up in the order of the sheets.
+        /// </summary>
+        /// <param name="sheetModel">The sheet.</param>
+        /// <exception cref="CellError">Thrown when the sheet is not tracked and thus has no relative ordering.</exception>
+        public void MoveSheetUpInOrder(SheetModel sheetModel)
+        {
+            if (!_sheetTracker.Sheets.Contains(sheetModel)) throw new CellError($"Sheet {sheetModel.Name} must be tracked in order to change the ordering.");
+            MakeSureSheetOrderingIsConsecutive();
+            sheetModel.Order -= 3;
+            RefreshSheetsList();
+            MakeSureSheetOrderingIsConsecutive();
+        }
+
+        private void MakeSureSheetOrderingIsConsecutive()
+        {
+            var i = 1;
+            foreach (var sheet in _sheetTracker.OrderedSheets.ToList())
+            {
+                sheet.Order = i;
+                i += 2;
+            }
         }
 
         private void OpenAddNewSheetWindow()

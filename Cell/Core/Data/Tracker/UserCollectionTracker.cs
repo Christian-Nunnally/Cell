@@ -125,10 +125,6 @@ namespace Cell.Core.Data.Tracker
         public void LinkUpBaseCollectionsAfterLoad()
         {
             var loadedCollections = new List<string>();
-            foreach (var collection in UserCollections)
-            {
-                collection.RefreshSortAndFilter();
-            }
             while (loadedCollections.Count != UserCollections.Count)
             {
                 foreach (var collection in UserCollections)

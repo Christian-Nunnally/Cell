@@ -19,16 +19,6 @@ namespace Cell.View.ToolWindow
 
         private readonly SheetManagerWindowViewModel _viewModel;
 
-        private static void MakeSureSheetOrderingIsConsecutive()
-        {
-            var i = 0;
-            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.OrderedSheets.ToList())
-            {
-                sheet.Order = i;
-                i += 2;
-            }
-        }
-
         private void CopySheetButtonClicked(object sender, RoutedEventArgs e)
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
@@ -60,19 +50,13 @@ namespace Cell.View.ToolWindow
         private void OrderSheetDownButtonClicked(object sender, RoutedEventArgs e)
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
-            MakeSureSheetOrderingIsConsecutive();
-            sheetModel.Order += 3;
-            _viewModel.RefreshSheetsList();
-            MakeSureSheetOrderingIsConsecutive();
+            _viewModel.MoveSheetDownInOrder(sheetModel);
         }
 
         private void OrderSheetUpButtonClicked(object sender, RoutedEventArgs e)
         {
             if (!ViewUtilities.TryGetSendersDataContext<SheetModel>(sender, out var sheetModel)) return;
-            MakeSureSheetOrderingIsConsecutive();
-            sheetModel.Order -= 3;
-            _viewModel.RefreshSheetsList();
-            MakeSureSheetOrderingIsConsecutive();
+            _viewModel.MoveSheetUpInOrder(sheetModel);
         }
     }
 }

@@ -20,5 +20,13 @@ namespace CellTest.TestUtilities
                 Assert.Fail("Expected " + count + " notifications for " + propertyName + " but got " + Notifications.Count(x => x == propertyName) + " notifications.");
             }
         }
+
+        internal void AssertPropertyNotChanged(string propertyName, int count = 1)
+        {
+            if (count <= Notifications.Count(x => x == propertyName))
+            {
+                Assert.Fail("Expected not to get" + count + " notifications for " + propertyName + " but got " + Notifications.Count(x => x == propertyName) + " notifications.");
+            }
+        }
     }
 }

@@ -44,13 +44,13 @@ namespace Cell.Core.Persistence.Loader
         /// <summary>
         /// Loads all the cell functions from the project directory.
         /// </summary>
-        public void LoadCellFunctions()
+        public async Task LoadCellFunctionsAsync()
         {
             foreach (var namespacePath in _functionsDirectory.GetDirectories())
             {
                 foreach (var file in _functionsDirectory.GetFiles(namespacePath))
                 {
-                    CellFunctionModel? model = LoadFunction(file);
+                    CellFunctionModel? model = await LoadFunctionAsync(file);
                     if (model is null) continue;
                     var function = new CellFunction(model);
                     var space = Path.GetFileName(namespacePath);
@@ -92,9 +92,9 @@ namespace Cell.Core.Persistence.Loader
             DeleteCellFunction(function);
         }
 
-        private CellFunctionModel LoadFunction(string file)
+        private async Task<CellFunctionModel> LoadFunctionAsync(string file)
         {
-            var text = _functionsDirectory.LoadFile(file) ?? throw new CellError($"Unable to load function from {file}");
+            var text = await _functionsDirectory.LoadFileAsync(file) ?? throw new CellError($"Unable to load function from {file}");
             return JsonSerializer.Deserialize<CellFunctionModel>(text) ?? throw new CellError($"Unable to load function from {file}");
         }
     }

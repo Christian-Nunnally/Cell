@@ -10,18 +10,21 @@ using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
+using System.Collections.Specialized;
 
 namespace Cell
 {
     public partial class App : Application
     {
+        private SheetTracker sheetTracker = new (new CellTracker());
+        private ApplicationViewModel applicationViewModel = new();
+
         /// <summary>
         /// The entry point for the entire application.
         /// </summary>
         /// <param name="e">Start up event arguments.</param>
         protected override async void OnStartup(StartupEventArgs e)
         {
-            var applicationViewModel = new ApplicationViewModel();
             var applicationView = new ApplicationView(applicationViewModel);
             applicationView.Show();
 
@@ -45,7 +48,8 @@ namespace Cell
             applicationViewModel.UserCollectionTracker = userCollectionTracker;
             var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
-            var sheetTracker = new SheetTracker(cellTracker);
+            sheetTracker = new SheetTracker(cellTracker);
+            sheetTracker.Sheets.CollectionChanged += OpenFirstAddedSheet;
             applicationViewModel.SheetTracker = sheetTracker;
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
             applicationViewModel.CellLoader = cellLoader;
@@ -63,10 +67,20 @@ namespace Cell
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
             persistedProject.RegisterMigrator("1", "2", new Migration());
-            await Task.Run(() => applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker)));
+            await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
             OpenCellContentEditWindowInDockedMode(applicationViewModel, functionTracker, cellSelector);
             OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
-            OpenInitialSheet(applicationViewModel, sheetTracker);
+            //OpenInitialSheet(applicationViewModel, sheetTracker);
+        }
+
+        private void OpenFirstAddedSheet(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                var sheet = sheetTracker.Sheets.FirstOrDefault();
+                if (sheet is not null) applicationViewModel.GoToSheet(sheet.Name);
+                sheetTracker.Sheets.CollectionChanged -= OpenFirstAddedSheet;
+            });
         }
 
         private static void OpenCellContentEditWindowInDockedMode(ApplicationViewModel applicationViewModel, FunctionTracker functionTracker, CellSelector cellSelector)

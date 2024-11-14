@@ -94,7 +94,7 @@ namespace Cell.Core.Execution
                 cell.PropertyChanged += TrackedCellPropertyChanged;
                 cell.Location.PropertyChanged += CellLocationChanged;
                 // Ensure anyone already listening to this location is updated because now a cell exists here.
-                if (NotifyWhenCellIsAdded) _subscriberNotifier.NotifySubscribers(locationString);
+                //if (NotifyWhenCellIsAdded) _subscriberNotifier.NotifySubscribers(locationString);
             }
             else if (!_locationsThatNeedToBeTrackedIfCellsAreAddedThere.Contains(locationString)) _locationsThatNeedToBeTrackedIfCellsAreAddedThere.Add(locationString);
         }

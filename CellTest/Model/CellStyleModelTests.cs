@@ -1,8 +1,7 @@
 ﻿using Cell.Model;
 using CellTest.TestUtilities;
-using System.Windows;
 
-namespace CellTest
+namespace CellTest.Model
 {
     public class CellStyleModelTests
     {

@@ -162,7 +162,6 @@ namespace Cell.Core.Execution
         private void ResolveCollectionDependenciesForCell(CellModel cell, CellFunction function)
         {
             UnsubscribeFromAllCollectionUpdates(cell);
-            function.Compile();
             foreach (var collectionReference in function.CollectionDependencies)
             {
                 var cellSpecificCollectionReference = new CellSpecificCollectionReference(cell, collectionReference, _cellTextChangesAtLocationNotifier, _pluginFunctionRunContext);
@@ -179,7 +178,6 @@ namespace Cell.Core.Execution
 
         private void ResolveLocationDependenciesForCell(CellModel cell, CellFunction function)
         {
-            function.Compile();
             UnsubscribeFromAllLocationUpdates(cell);
             var thisLocation = cell.Location.LocationString;
             foreach (var locationDependency in function.LocationDependencies)
@@ -302,7 +300,6 @@ namespace Cell.Core.Execution
         private void UpdateDependencySubscriptions(CellModel cell, CellFunction function)
         {
             if (string.IsNullOrWhiteSpace(cell.Location.SheetName)) return;
-            function.Compile();
             UntrackCollectionReferences(cell);
             ResolveLocationDependenciesForCell(cell, function);
             ResolveCollectionDependenciesForCell(cell, function);

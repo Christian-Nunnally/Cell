@@ -5,6 +5,7 @@ using Cell.Core.Execution.Functions;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using ICSharpCode.AvalonEdit.CodeCompletion;
+using System.Collections;
 using System.ComponentModel;
 
 namespace Cell.ViewModel.ToolWindow
@@ -195,7 +196,23 @@ namespace Cell.ViewModel.ToolWindow
             }
             _lastCompileResult = result;
             Logger.Instance.Log($"Test run complete!");
-            Logger.Instance.Log($"Result: '{result.ReturnedObject?.ToString() ?? "<null>"}'");
+            var returnedObject = result.ReturnedObject;
+            if (returnedObject is not null)
+            {
+                if (returnedObject is not string && returnedObject is IEnumerable<object> collection)
+                {
+                    Logger.Instance.Log($"Result: Collection of {collection.Count()} items");
+                    var i = 0;
+                    foreach (var item in collection)
+                    {
+                        Logger.Instance.Log($"[{i++}] {item?.ToString() ?? "<null>"}");
+                    }
+                }
+                else
+                {
+                    Logger.Instance.Log($"Result: '{returnedObject?.ToString() ?? "<null>"}'");
+                }
+            }
         }
 
         private void ToggleSyntaxTreePreview(string code)

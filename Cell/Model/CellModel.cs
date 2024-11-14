@@ -179,7 +179,9 @@ namespace Cell.Model
             set
             {
                 if (_customProperties == value) return;
+                if (_customProperties != null) _customProperties.CellModel = null;
                 _customProperties = value;
+                if (_customProperties != null) _customProperties.CellModel = this;
                 NotifyPropertyChanged(nameof(Properties));
             }
         }

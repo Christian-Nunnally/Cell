@@ -47,6 +47,54 @@ namespace CellTest.Core.Data
         }
 
         [Fact]
+        public void NoItemInCollection_AddItem_ItemIdAddedToModel()
+        {
+            var testItem = new TodoItem();
+            Assert.DoesNotContain(testItem, _testing.Items);
+
+            _testing.Add(testItem);
+
+            Assert.Contains(testItem.ID, _testing.Model.ItemIDs);
+        }
+
+        [Fact]
+        public void NoItemInCollection_AddItem_ModelItemIdsPropertyChangeNotified()
+        {
+            var testItem = new TodoItem();
+            Assert.DoesNotContain(testItem, _testing.Items);
+            var modelPropertyChangedTester = new PropertyChangedTester(_testing.Model);
+
+            _testing.Add(testItem);
+
+            modelPropertyChangedTester.AssertPropertyChanged(nameof(_testing.Model.ItemIDs));
+        }
+
+        [Fact]
+        public void OneItemInCollection_RemoveItem_ModelItemIdsRemovedFromModel()
+        {
+            var testItem = new TodoItem();
+            _testing.Add(testItem);
+            Assert.Contains(testItem.ID, _testing.Model.ItemIDs);
+            
+            _testing.Remove(testItem);
+
+            Assert.DoesNotContain(testItem.ID, _testing.Model.ItemIDs);
+        }
+
+        [Fact]
+        public void OneItemInCollection_RemoveItem_ModelItemIdsPropertyChangeNotified()
+        {
+            var testItem = new TodoItem();
+            _testing.Add(testItem);
+            var modelPropertyChangedTester = new PropertyChangedTester(_testing.Model);
+            modelPropertyChangedTester.AssertPropertyNotChanged(nameof(_testing.Model.ItemIDs));
+
+            _testing.Remove(testItem);
+
+            modelPropertyChangedTester.AssertPropertyChanged(nameof(_testing.Model.ItemIDs));
+        }
+
+        [Fact]
         public void CollectionBasedOnOtherCollection_AddItemToBaseCollection_ItemFoundInLeafCollection()
         {
             var filteredCollection = _userCollectionTracker.CreateCollection("FilteredCollection", nameof(TodoItem), TestCollectionName);

@@ -91,6 +91,7 @@ namespace Cell.Core.Data.Tracker
             if (model.CellType == CellType.Corner)
             {
                 sheet.CornerCell = model;
+                if (sheet.Order == 0) sheet.Order = Sheets.Any() ? Sheets.Select(x => x.Order).Max() + 1 : 1;
             }
         }
 

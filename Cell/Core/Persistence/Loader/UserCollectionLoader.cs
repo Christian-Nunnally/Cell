@@ -50,6 +50,7 @@ namespace Cell.Core.Persistence.Loader
         /// </summary>
         public async Task LoadCollectionsAsync()
         {
+            // do no do this on background.
             await Task.Run(LoadCollections);
         }
 
@@ -82,18 +83,21 @@ namespace Cell.Core.Persistence.Loader
             _collectionsDirectory.DeleteFile(path);
         }
 
-        private void LoadCollection(string directory)
+        private void LoadCollection(PersistedDirectory collectionDirectory)
         {
-            var path = Path.Combine(directory, "collection");
-            var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Error while loading {path}");
-            var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {path}");
+            var text = collectionDirectory.LoadFile("collection") ?? throw new CellError($"Error while loading 'collection' file for {collectionDirectory.GetFullPath()}");
+            var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {collectionDirectory.GetFullPath()}");
             var sortContext = new Context(_cellTracker, _userCollectionTracker, new DialogFactory(), CellModel.Null);
             var collection = new UserCollection(model, _functionTracker, sortContext);
-            var itemsDirectory = Path.Combine(directory, "Items");
-            var paths = !_collectionsDirectory.DirectoryExists(itemsDirectory)
-                ? []
-                : _collectionsDirectory.GetFiles(itemsDirectory);
-            paths.Select(LoadItem).ToList().ForEach(collection.Add);
+            var itemsDirectory = collectionDirectory.FromDirectory("Items");
+
+            collection.IsSortOnInsertEnabled = false;
+            foreach (var itemId in model.ItemIDs)
+            {
+                collection.Add(new UnloadedItem(itemsDirectory, itemId).Load());
+            }
+            collection.IsSortOnInsertEnabled = true;
+
             _shouldSaveAddedCollections = false;
             _userCollectionTracker.StartTrackingCollection(collection);
             _shouldSaveAddedCollections = true;
@@ -103,7 +107,7 @@ namespace Cell.Core.Persistence.Loader
         {
             foreach (var directory in _collectionsDirectory.GetDirectories())
             {
-                LoadCollection(directory);
+                LoadCollection(_collectionsDirectory.FromDirectory(directory));
             }
         }
 

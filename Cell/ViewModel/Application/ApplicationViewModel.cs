@@ -293,7 +293,6 @@ namespace Cell.ViewModel.Application
                 SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
-            if (ApplicationSettings != null) ApplicationSettings.LastLoadedSheet = sheetName;
         }
 
         /// <summary>
@@ -391,20 +390,21 @@ namespace Cell.ViewModel.Application
             await userCollectionLoader.LoadCollectionsAsync();
             ApplicationBackgroundMessage = "Loading functions";
             if (FunctionLoader is null) throw new CellError("Function loader not initialized yet, try loading again.");
-            FunctionLoader.LoadCellFunctions();
+            await FunctionLoader.LoadCellFunctionsAsync();
             ApplicationBackgroundMessage = "Linking collections to thier bases";
             if (UserCollectionTracker is null) throw new CellError("User collection loader not initialized yet, try loading again.");
             UserCollectionTracker.LinkUpBaseCollectionsAfterLoad();
             ApplicationBackgroundMessage = "Loading cells";
             if (CellLoader is null) throw new CellError("Cell loader not initialized yet, try loading again.");
-            CellLoader.LoadCells();
-            await backupTask;
             if (CellTracker is null) throw new CellError("Cell tracker not initialized yet, try loading again.");
             if (FunctionTracker is null) throw new CellError("Function tracker not initialized yet, try loading again.");
-            ApplicationBackgroundMessage = "Creating populate manager";
             CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
             IsProjectLoaded = true;
+            await CellLoader.LoadCellsAsync();
+            ApplicationBackgroundMessage = "Creating populate manager";
             _isProjectLoading = false;
+            //ApplicationBackgroundMessage = "Waiting for backup to finish";
+            //await backupTask;
             ApplicationBackgroundMessage = "Open a sheet to view cells";
         }
 

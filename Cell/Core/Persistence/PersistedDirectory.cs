@@ -138,6 +138,20 @@ namespace Cell.Core.Persistence
         }
 
         /// <summary>
+        /// Loads the contents of a file from this <see cref="PersistedDirectory"/>.
+        /// </summary>
+        /// <param name="path">The path to load.</param>
+        /// <returns>The contents of the file, or null if the file does not exist.</returns>
+        /// <exception cref="CellError">If the given path is not a valid path format.</exception>
+        public async Task<string?> LoadFileAsync(string path)
+        {
+            if (path.StartsWith("//") || path.StartsWith('\\')) throw new CellError("Invalid path");
+            var fullPath = GetFullPath(path);
+            if (!_fileIO.Exists(fullPath)) return null;
+            return await _fileIO.ReadFileAsync(fullPath);
+        }
+
+        /// <summary>
         /// Moves a directory from one location to another within this <see cref="PersistedDirectory"/>.
         /// </summary>
         /// <param name="from">The relative to path.</param>
