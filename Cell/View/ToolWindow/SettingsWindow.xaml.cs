@@ -86,7 +86,7 @@ namespace Cell.View.ToolWindow
 
         private void ShowLogWindowButtonClick(object sender, RoutedEventArgs e)
         {
-            var logWindowViewModel = new LogWindowViewModel();
+            var logWindowViewModel = new LogWindowViewModel(ApplicationViewModel.Instance.Logger);
             ApplicationViewModel.Instance.ShowToolWindow(logWindowViewModel);
         }
 

@@ -59,6 +59,10 @@ namespace Cell.ViewModel.Cells
             _model.Cells.CollectionChanged += CellsCollectionChanged;
         }
 
+        /// <summary>
+        /// Creates cell view models for all the cells in the sheet.
+        /// </summary>
+        /// <returns></returns>
         public async Task InitializeCellViewModelsAsync()
         {
             foreach (var cell in _model.Cells)
@@ -253,6 +257,7 @@ namespace Cell.ViewModel.Cells
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 foreach (CellModel cell in e.OldItems!) RemoveCellViewModel(cell);
+                UpdateLayout();
             }
             else if (e.Action == NotifyCollectionChangedAction.Reset)
             {

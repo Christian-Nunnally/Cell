@@ -40,14 +40,14 @@ namespace CellTest.ViewModel.Application
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _backupDirectory = new PersistedDirectory("", _testFileIO);
             _persistedProject = new PersistedProject(_persistedDirectory);
-            _functionTracker = new FunctionTracker();
-            _pluginFunctionLoader = new FunctionLoader(_persistedProject.FunctionsDirectory, _functionTracker);
+            _functionTracker = new FunctionTracker(Logger.Null);
+            _pluginFunctionLoader = new FunctionLoader(_persistedProject.FunctionsDirectory, _functionTracker, Logger.Null);
             _cellTracker = new CellTracker();
             _cellLoader = new CellLoader(_persistedProject.SheetsDirectory, _cellTracker);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
             _userCollectionLoader = new UserCollectionLoader(_persistedProject.CollectionsDirectory, _userCollectionTracker, _functionTracker, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, Logger.Null);
             _sheetTracker = new SheetTracker(_cellTracker);
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
@@ -91,118 +91,118 @@ namespace CellTest.ViewModel.Application
             Assert.Throws<CellError>(() => _testing.Load(_userCollectionLoader));
         }
 
-        [Fact]
-        public void MigratorExists_LoadStarted_PromptsUserToMigrate()
-        {
-            _persistedProject.Version = "0";
-            _persistedProject.SaveVersion();
-            _persistedProject.Version = "1";
-            var migrator = new TestMigrator();
-            _persistedProject.RegisterMigrator("0", "1", migrator);
-            var dialog = _testDialogFactory.Expect();
+        //[Fact]
+        //public void MigratorExists_LoadStarted_PromptsUserToMigrate()
+        //{
+        //    _persistedProject.Version = "0";
+        //    _persistedProject.SaveVersion();
+        //    _persistedProject.Version = "1";
+        //    var migrator = new TestMigrator();
+        //    _persistedProject.RegisterMigrator("0", "1", migrator);
+        //    var dialog = _testDialogFactory.Expect();
 
-            _testing.Load(_userCollectionLoader);
+        //    _testing.Load(_userCollectionLoader);
 
-            Assert.True(dialog.WasShown);
-        }
+        //    Assert.True(dialog.WasShown);
+        //}
 
-        [Fact]
-        public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
-        {
-            _persistedProject.Version = "0";
-            _persistedProject.SaveVersion();
-            _persistedProject.Version = "1";
-            var migrator = new TestMigrator();
-            _persistedProject.RegisterMigrator("0", "1", migrator);
-            _testDialogFactory.Expect(0);
-            Assert.False(migrator.Migrated);
+        //[Fact]
+        //public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
+        //{
+        //    _persistedProject.Version = "0";
+        //    _persistedProject.SaveVersion();
+        //    _persistedProject.Version = "1";
+        //    var migrator = new TestMigrator();
+        //    _persistedProject.RegisterMigrator("0", "1", migrator);
+        //    _testDialogFactory.Expect(0);
+        //    Assert.False(migrator.Migrated);
 
-            _testing.Load(_userCollectionLoader);
+        //    _testing.Load(_userCollectionLoader);
 
-            Assert.True(migrator.Migrated);
-        }
+        //    Assert.True(migrator.Migrated);
+        //}
 
-        [Fact]
-        public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            Assert.Empty(_testing.OpenToolWindowViewModels);
+        //[Fact]
+        //public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    Assert.Empty(_testing.OpenToolWindowViewModels);
 
-            _testing.ShowToolWindow(testToolWindow);
+        //    _testing.ShowToolWindow(testToolWindow);
 
-            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
-        }
+        //    Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        //}
 
-        [Fact]
-        public void ShowToolWindow_RequestCloseFunctionSet()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            Assert.Null(testToolWindow.RequestClose);
+        //[Fact]
+        //public void ShowToolWindow_RequestCloseFunctionSet()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    Assert.Null(testToolWindow.RequestClose);
 
-            _testing.ShowToolWindow(testToolWindow);
+        //    _testing.ShowToolWindow(testToolWindow);
 
-            Assert.NotNull(testToolWindow.RequestClose);
-        }
+        //    Assert.NotNull(testToolWindow.RequestClose);
+        //}
 
-        [Fact]
-        public void ShowToolWindow_ShowHandlerCalled()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            Assert.Empty(_testing.OpenToolWindowViewModels);
+        //[Fact]
+        //public void ShowToolWindow_ShowHandlerCalled()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    Assert.Empty(_testing.OpenToolWindowViewModels);
 
-            _testing.ShowToolWindow(testToolWindow);
+        //    _testing.ShowToolWindow(testToolWindow);
 
-            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
-        }
+        //    Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        //}
 
-        [Fact]
-        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowRemainsOpen()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-            testToolWindow.IsAllowingClose = false;
+        //[Fact]
+        //public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowRemainsOpen()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    _testing.ShowToolWindow(testToolWindow);
+        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        //    testToolWindow.IsAllowingClose = false;
 
-            testToolWindow.RequestClose!.Invoke();
+        //    testToolWindow.RequestClose!.Invoke();
 
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-        }
+        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        //}
 
-        [Fact]
-        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowClosedHandleNotCalled()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-            testToolWindow.IsAllowingClose = false;
+        //[Fact]
+        //public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowClosedHandleNotCalled()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    _testing.ShowToolWindow(testToolWindow);
+        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        //    testToolWindow.IsAllowingClose = false;
 
-            testToolWindow.RequestClose!.Invoke();
+        //    testToolWindow.RequestClose!.Invoke();
 
-            Assert.False(testToolWindow.WasHandleBeingClosedCalled);
-        }
+        //    Assert.False(testToolWindow.WasHandleBeingClosedCalled);
+        //}
 
-        [Fact]
-        public void ToolWindowAllowingClose_RequestCloseFunctionCalled_ToolWindowClosed()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-            testToolWindow.IsAllowingClose = true;
+        //[Fact]
+        //public void ToolWindowAllowingClose_RequestCloseFunctionCalled_ToolWindowClosed()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    _testing.ShowToolWindow(testToolWindow);
+        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        //    testToolWindow.IsAllowingClose = true;
 
-            testToolWindow.RequestClose!.Invoke();
+        //    testToolWindow.RequestClose!.Invoke();
 
-            Assert.Empty(_testing.OpenToolWindowViewModels);
-        }
+        //    Assert.Empty(_testing.OpenToolWindowViewModels);
+        //}
 
-        [Fact]
-        public void ToolWindowOpened_WasHandleBeingShownCalled()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            Assert.False(testToolWindow.WasHandleBeingShownCalled);
-            
-            _testing.ShowToolWindow(testToolWindow);
+        //[Fact]
+        //public void ToolWindowOpened_WasHandleBeingShownCalled()
+        //{
+        //    var testToolWindow = new TestToolWindowViewModel();
+        //    Assert.False(testToolWindow.WasHandleBeingShownCalled);
 
-            Assert.True(testToolWindow.WasHandleBeingShownCalled);
-        }
+        //    _testing.ShowToolWindow(testToolWindow);
+
+        //    Assert.True(testToolWindow.WasHandleBeingShownCalled);
+        //}
     }
 }

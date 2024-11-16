@@ -6,6 +6,7 @@ using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 using Cell.ViewModel.Application;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Common;
 
 namespace CellTest.ViewModel.Cell.Types
 {
@@ -27,15 +28,17 @@ namespace CellTest.ViewModel.Cell.Types
         {
             _testDialogFactory = new TestDialogFactory();
             _cellTracker = new CellTracker();
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(Logger.Null);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, Logger.Null);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
-            _cellModel = new CellModel();
-            _cellModel.CellType = CellType.Graph;
+            _cellModel = new CellModel
+            {
+                CellType = CellType.Graph
+            };
             _cellTracker.AddCell(_cellModel);
             _testing = new GraphCellViewModel(_cellModel, _sheetViewModel);
         }

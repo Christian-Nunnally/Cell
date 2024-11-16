@@ -60,8 +60,8 @@ namespace Cell.View.ToolWindow
             var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);
 
             var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionTracker.GenerateDataTypeForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker);
-            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker, ApplicationViewModel.Instance.Logger);
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext, ApplicationViewModel.Instance.Logger);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
 

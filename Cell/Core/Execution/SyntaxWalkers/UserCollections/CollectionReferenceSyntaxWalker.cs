@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Model;
 using Microsoft.CodeAnalysis;
@@ -46,7 +47,7 @@ namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
             var collectionReferenceSyntax = argument.Expression.ToString();
             var codeWithReturn = $"return {collectionReferenceSyntax};";
             var functionModel = new CellFunctionModel("collectionReference", codeWithReturn, "object");
-            var function = new CellFunction(functionModel);
+            var function = new CellFunction(functionModel, Logger.Null);
             collectionReference = new DynamicCollectionReference(function);
             return true;
         }

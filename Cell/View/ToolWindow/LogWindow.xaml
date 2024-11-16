@@ -13,9 +13,9 @@
     <Grid>
         <ScrollViewer x:Name="_logScrollViewer">
             <TextBox
+                VerticalContentAlignment="Top"
                 Background="Transparent"
                 BorderThickness="0"
-                VerticalContentAlignment="Top"
                 FontFamily="{StaticResource ProgrammingFont}"
                 Foreground="{StaticResource ForegroundColor}"
                 IsManipulationEnabled="True"

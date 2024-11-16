@@ -45,14 +45,17 @@
                     <Button
                         Width="16"
                         Height="16"
-                        Cursor="Arrow"
                         BorderThickness="0"
                         Click="UndockButtonClicked"
                         Content="{fa:Icon LockOpen}"
+                        Cursor="Arrow"
                         DockPanel.Dock="Right"
                         FontSize="9"
                         ToolTip="Undocks this tool window." />
-                    <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}" Cursor="Arrow">
+                    <ItemsControl
+                        Cursor="Arrow"
+                        DockPanel.Dock="Right"
+                        ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />

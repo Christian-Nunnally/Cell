@@ -14,7 +14,12 @@ namespace Cell.Core.Persistence.Loader
     {
         private readonly CellTracker _cellTracker;
         private readonly PersistedDirectory _sheetsDirectory;
+        /// <summary>
+        /// Occurs when all the sheets have finished loading. What is not the same as all cells being loaded.
+        /// </summary>
+        public Action SheetsLoaded;
         private bool _isSavingAddedCells = true;
+        private readonly List<PersistedDirectory> _partiallyLoadedSheets = [];
         /// <summary>
         /// Creates a new instance of <see cref="CellLoader"/>.
         /// </summary>
@@ -44,34 +49,57 @@ namespace Cell.Core.Persistence.Loader
         /// Loads all cells from the project.
         /// </summary>
         /// <returns>All loaded cells.</returns>
-        public async Task LoadCellsAsync()
+        public async Task FinishLoadingSheetsAsync()
         {
-            foreach (var sheetDirectory in _sheetsDirectory.GetDirectories().Reverse())
+            _isSavingAddedCells = false;
+            foreach (var sheetDirectory in _partiallyLoadedSheets)
             {
-                await LoadSheetAsync(sheetDirectory);
+                var rows = sheetDirectory.FromDirectory("Rows");
+                var columns = sheetDirectory.FromDirectory("Columns");
+                foreach (var file in rows.GetFiles(""))
+                {
+                    var cellJson = await rows.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
+                    AddSerializedCell(cellJson);
+                }
+                foreach (var file in columns.GetFiles(""))
+                {
+                    var cellJson = await columns.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
+                    AddSerializedCell(cellJson);
+                }
+                foreach (var file in sheetDirectory.GetFiles(""))
+                {
+                    var cellJson = await sheetDirectory.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
+                    AddSerializedCell(cellJson);
+                }
             }
+            _partiallyLoadedSheets.Clear();
+            _isSavingAddedCells = true;
         }
 
         /// <summary>
-        /// Loads all the cells from a specific sheet.
+        /// Loads the corner cell of all sheets.
         /// </summary>
-        /// <param name="sheet">The name of the sheet to load all cells from.</param>
-        /// <returns>All the loaded cells.</returns>
-        public async Task LoadSheetAsync(string sheet)
+        /// <returns>All loaded cells.</returns>
+        public async Task LoadSheetsAsync()
         {
-            _isSavingAddedCells = false;
-            var sheetDirectory = _sheetsDirectory.FromDirectory(sheet);
-            var cornerCell = await sheetDirectory.LoadFileAsync("corner");
-            if (!string.IsNullOrWhiteSpace(cornerCell))
+            foreach (var sheetDirectory in _sheetsDirectory.GetDirectories())
             {
-                AddSerializedCell(cornerCell);
+                _isSavingAddedCells = false;
+                var persistedSheetDirectory = _sheetsDirectory.FromDirectory(sheetDirectory);
+                var cornerDirectory = persistedSheetDirectory.FromDirectory("Corner");
+                var cornerCell = await cornerDirectory.LoadFileAsync("corner");
+                if (!string.IsNullOrWhiteSpace(cornerCell))
+                {
+                    AddSerializedCell(cornerCell);
+                    _partiallyLoadedSheets.Add(persistedSheetDirectory);
+                }
+                else
+                {
+                    throw new NotImplementedException("Load when no 'corner' cell is found");
+                }
+                _isSavingAddedCells = true;
             }
-            foreach (var file in _sheetsDirectory.GetFiles(sheet))
-            {
-                if (file.EndsWith("corner")) continue;
-                await LoadCellAsync(file);
-            }
-            _isSavingAddedCells = true;
+            SheetsLoaded?.Invoke();
         }
 
         /// <summary>
@@ -101,16 +129,37 @@ namespace Cell.Core.Persistence.Loader
         public void SaveCell(string directory, CellModel cell)
         {
             var fileName = cell.ID;
-            if (cell.CellType == CellType.Corner)
-            {
-                // TODO: removed after migration
-                //DeleteCell(cell);
-                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
-                fileName = "corner";
-            }
             var serialized = JsonSerializer.Serialize(cell);
             var path = Path.Combine(directory, fileName);
+            if (cell.CellType == CellType.Corner)
+            {
+                fileName = "corner";
+                // TODO: removed after migration
+                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
+
+                path = Path.Combine(directory, "Corner", fileName);
+            }
+            if (cell.CellType == CellType.Row)
+            {
+                // TODO: removed after migration
+                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
+
+                path = Path.Combine(directory, "Rows", fileName);
+            }
+            if (cell.CellType == CellType.Column)
+            {
+                // TODO: removed after migration
+                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
+
+                path = Path.Combine(directory, "Columns", fileName);
+            }
             _sheetsDirectory.SaveFile(path, serialized);
+        }
+
+        private void AddSerializedCell(string cellJson)
+        {
+            var cell = JsonSerializer.Deserialize<CellModel>(cellJson) ?? throw new CellError($"Deserialization failed for {cellJson}");
+            _cellTracker.AddCell(cell);
         }
 
         private void CellAddedToTracker(CellModel cell)
@@ -123,12 +172,6 @@ namespace Cell.Core.Persistence.Loader
             if (_isSavingAddedCells) SaveCell(cell);
         }
 
-        private void TrackedCellCustomPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            var properties = (CellModelCustomPropertiesModel)sender!;
-            SaveCell(properties.CellModel!);
-        }
-
         private void CellRemovedFromTracker(CellModel cell)
         {
             cell.PropertyChanged -= TrackedCellPropertyChanged;
@@ -138,16 +181,10 @@ namespace Cell.Core.Persistence.Loader
             DeleteCell(cell);
         }
 
-        private async Task LoadCellAsync(string file)
+        private void TrackedCellCustomPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            var cellJson = await _sheetsDirectory.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
-            AddSerializedCell(cellJson);
-        }
-
-        private void AddSerializedCell(string cellJson)
-        {
-            var cell = JsonSerializer.Deserialize<CellModel>(cellJson) ?? throw new CellError($"Deserialization failed for {cellJson}");
-            _cellTracker.AddCell(cell);
+            var properties = (CellModelCustomPropertiesModel)sender!;
+            SaveCell(properties.CellModel!);
         }
 
         private void TrackedCellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
@@ -17,6 +18,7 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class CellContentEditWindowViewModel : ToolWindowViewModel
     {
+        private readonly Logger _logger;
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly FunctionTracker _functionTracker;
         private CellModel _cellToDisplay = CellModel.Null;
@@ -26,8 +28,10 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         /// <param name="cellsToEdit">The dynamic list of cells being edited by this tool window.</param>
         /// <param name="functionTracker">The function tracker to get populate and trigger functions from.</param>
-        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, FunctionTracker functionTracker)
+        /// <param name="logger">The logger to log messeges to.</param>
+        public CellContentEditWindowViewModel(ObservableCollection<CellModel> cellsToEdit, FunctionTracker functionTracker, Logger logger)
         {
+            _logger = logger;
             _cellsToEdit = cellsToEdit;
             _functionTracker = functionTracker;
         }
@@ -180,8 +184,8 @@ namespace Cell.ViewModel.ToolWindow
             var userCollectionTracker = ApplicationViewModel.Instance.UserCollectionTracker;
             if (userCollectionTracker is null) return;
             var collectionNameToDataTypeMap = userCollectionTracker.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionTracker, CellToDisplay, _functionTracker);
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext);
+            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionTracker, CellToDisplay, _functionTracker, _logger);
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext, _logger);
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
             else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);

@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data;
+﻿using Cell.Core.Common;
+using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Model;
@@ -22,11 +23,11 @@ namespace CellTest.Core.Data
         public UserCollectionTests()
         {
             _testDialogFactory = new TestDialogFactory();
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(Logger.Null);
             _cellTracker = new CellTracker();
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, Logger.Null);
             _testing = _userCollectionTracker.CreateCollection(TestCollectionName, nameof(TodoItem), string.Empty);
         }
 

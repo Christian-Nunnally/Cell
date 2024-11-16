@@ -9,7 +9,14 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class LogWindowViewModel : ToolWindowViewModel
     {
+        public LogWindowViewModel(Logger logger)
+        {
+            _logger = logger;
+        }
+
         private readonly StringBuilder _logBufferBuilder = new();
+        private readonly Logger _logger;
+
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
@@ -62,7 +69,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingClosed()
         {
-            Logger.Instance.LogAdded -= AddLog;
+            _logger.LogAdded -= AddLog;
             ClearBuffer();
         }
 
@@ -71,8 +78,8 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
-            Logger.Instance.LogAdded += AddLog;
-            foreach (var log in Logger.Instance.Logs.Take(100))
+            _logger.LogAdded += AddLog;
+            foreach (var log in _logger.Logs.Take(100))
             {
                 AddLog(log);
             }

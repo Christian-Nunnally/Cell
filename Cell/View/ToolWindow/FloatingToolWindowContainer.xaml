@@ -41,7 +41,7 @@
                         Click="DockButtonClicked"
                         Content="{fa:Icon Lock}"
                         DockPanel.Dock="Right"
-                        ToolTip="Shows sites this tool window can be docked to."/>
+                        ToolTip="Shows sites this tool window can be docked to." />
                     <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

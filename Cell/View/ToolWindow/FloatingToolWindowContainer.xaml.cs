@@ -27,6 +27,9 @@ namespace Cell.View.ToolWindow
             _applicationViewModel = applicationViewModel;
         }
 
+        /// <summary>
+        /// The action that is invoked when this tool window wants to show the dock options.
+        /// </summary>
         public Action? ShowDockOptions;
 
         /// <summary>
@@ -108,20 +111,20 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public string ToolWindowTitle => _resizableToolWindow?.ToolViewModel.ToolWindowTitle ?? "";
 
-        private void SetPositionRespectingBounds(double x, double y)
+        private void SetPositionRespectingBounds(double canvasWidth, double canvasHeight, double x, double y)
         {
             if (ToolWindowViewModel is null) return;
-            ToolWindowViewModel.X = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowWidth - ActualWidth, x));
-            ToolWindowViewModel.Y = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowHeight - ActualHeight, y));
+            ToolWindowViewModel.X = Math.Max(0, Math.Min(canvasWidth - ActualWidth, x));
+            ToolWindowViewModel.Y = Math.Max(0, Math.Min(canvasHeight - ActualHeight, y));
         }
 
         /// <summary>
         /// Ensures the tool window is sized to fit entirely within the canvas it is displayed on by moving it. Will resize the tool window as a last resort.
         /// </summary>
-        public void HandleOwningCanvasSizeChanged()
+        public void HandleOwningCanvasSizeChanged(double canvasWidth, double canvasHeight)
         {
             if (ToolWindowViewModel is null) return;
-            SetPositionRespectingBounds(ToolWindowViewModel.X, ToolWindowViewModel.Y);
+            SetPositionRespectingBounds(canvasWidth, canvasHeight, ToolWindowViewModel.X, ToolWindowViewModel.Y);
         }
 
         private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
@@ -218,7 +221,7 @@ namespace Cell.View.ToolWindow
 
                 var desiredX = position.X - offset.X;
                 var desiredY = position.Y - offset.Y;
-                SetPositionRespectingBounds(desiredX, desiredY);
+                SetPositionRespectingBounds(canvas.ActualWidth, canvas.ActualHeight, desiredX, desiredY);
             }
         }
 

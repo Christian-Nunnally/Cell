@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -11,6 +12,13 @@ namespace Cell.Core.Data.Tracker
     /// </summary>
     public class FunctionTracker
     {
+        private readonly Logger _logger;
+
+        public FunctionTracker(Logger logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// An observable collection of all the loaded cell functions.
         /// </summary>
@@ -54,7 +62,7 @@ namespace Cell.Core.Data.Tracker
             if (space.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) throw new InvalidOperationException("Invalid space name for function, can not contain characters that are invalid in a file name.");
             var model = new CellFunctionModel(name, code, space);
-            var function = new CellFunction(model);
+            var function = new CellFunction(model, _logger);
             AddCellFunctionToNamespace(space, function);
             return function;
         }

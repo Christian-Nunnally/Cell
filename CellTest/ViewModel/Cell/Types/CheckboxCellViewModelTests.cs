@@ -22,15 +22,17 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly CellModel _cellModel;
         private readonly CellSelector _cellSelector;
         private readonly CheckboxCellViewModel _testing;
+        private readonly Logger _logger;
 
         public CheckboxCellViewModelTests()
         {
+            _logger = new Logger();
             _testDialogFactory = new TestDialogFactory();
             _cellTracker = new CellTracker();
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(_logger);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
-            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
-            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory);
+            _cellPopulateManager = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, _logger);
+            _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, _logger);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
@@ -89,7 +91,7 @@ namespace CellTest.ViewModel.Cell.Types
 
             _testing.IsChecked = true;
 
-            Assert.Empty(Logger.Instance.Logs);
+            Assert.Empty(_logger.Logs);
             Assert.True(assertionDialog.WasShown);
         }
     }

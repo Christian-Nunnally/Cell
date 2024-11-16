@@ -1,4 +1,5 @@
-﻿using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Common;
+using Cell.Core.Execution.Functions;
 using Cell.Model;
 
 namespace CellTest.Core.Execution
@@ -9,7 +10,7 @@ namespace CellTest.Core.Execution
         public void UserFriendlyCodeSet_UserFriendlyCodeReturned_CodeUnchanged()
         {
             var model = new CellFunctionModel();
-            var testing = new CellFunction(model);
+            var testing = new CellFunction(model, Logger.Null);
             var testCode = @"
 var itemsToSearch = new List<TodoItem>();
 itemsToSearch.Add(todoItem);
@@ -33,7 +34,7 @@ while (itemsToSearch.Any())
         public void UserFriendlyCodeSetWithTabs_UserFriendlyCodeReturned_CodeNowContainsSpaces()
         {
             var model = new CellFunctionModel();
-            var testing = new CellFunction(model);
+            var testing = new CellFunction(model, Logger.Null);
             var testCode = "\treturn test;";
             testing.SetUserFriendlyCode(testCode, CellModel.Null, new Dictionary<string, string>());
 

@@ -5,7 +5,6 @@ using Cell.Core.Execution.Functions;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using ICSharpCode.AvalonEdit.CodeCompletion;
-using System.Collections;
 using System.ComponentModel;
 
 namespace Cell.ViewModel.ToolWindow
@@ -21,6 +20,7 @@ namespace Cell.ViewModel.ToolWindow
         private CompileResult _lastCompileResult;
         private string _syntaxTreePreviewText = string.Empty;
         private string _currentTextInEditor;
+        private readonly Logger _logger;
         private readonly CellFunctionCodeSuggestionGenerator _cellFunctionCodeSuggestionGenerator;
 
         /// <summary>
@@ -30,8 +30,9 @@ namespace Cell.ViewModel.ToolWindow
         /// <param name="cellContextFromWhichTheFunctionIsBeingEdited">The cell context from which the function is ceing edited.</param>
         /// <param name="collectionNameToDataTypeMap">A map from collection names to thier data types for code completion stuff.</param>
         /// <param name="contextToTestWith">The context used when testing the code.</param>
-        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, IContext contextToTestWith)
+        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, IContext contextToTestWith, Logger logger)
         {
+            _logger = logger;
             _cellFunctionCodeSuggestionGenerator = new CellFunctionCodeSuggestionGenerator(CellFunction.UsingNamespaces, cellContextFromWhichTheFunctionIsBeingEdited);
             FunctionBeingEdited = functionToBeEdited;
             _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToDataTypeMap);
@@ -122,9 +123,9 @@ namespace Cell.ViewModel.ToolWindow
 
         private void TestCodeAndOpenLogWindow()
         {
-            Logger.Instance.Clear();
+            _logger.Clear();
             TestCode();
-            var logWindowViewModel = new LogWindowViewModel();
+            var logWindowViewModel = new LogWindowViewModel(_logger);
             ApplicationViewModel.Instance.ShowToolWindow(logWindowViewModel);
         }
 
@@ -180,37 +181,37 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (CellContext is null)
             {
-                Logger.Instance.Log($"Unable to test sort/filter functions for now :(");
+                _logger.Log($"Unable to test sort/filter functions for now :(");
                 return;
             }
 
             var model = new CellFunctionModel("test", string.Empty, FunctionBeingEdited.Model.ReturnType);
-            var function = new CellFunction(model);
+            var function = new CellFunction(model, _logger);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
             if (_contextToTestWith is TestingContext testingContext) testingContext.Reset();
             var result = function.Run(_contextToTestWith);
             if (!result.WasSuccess)
             {
-                Logger.Instance.Log($"Error occured in function during test: {result.ExecutionResult}");
+                _logger.Log($"Error occured in function during test: {result.ExecutionResult}");
                 return;
             }
             _lastCompileResult = result;
-            Logger.Instance.Log($"Test run complete!");
+            _logger.Log($"Test run complete!");
             var returnedObject = result.ReturnedObject;
             if (returnedObject is not null)
             {
                 if (returnedObject is not string && returnedObject is IEnumerable<object> collection)
                 {
-                    Logger.Instance.Log($"Result: Collection of {collection.Count()} items");
+                    _logger.Log($"Result: Collection of {collection.Count()} items");
                     var i = 0;
                     foreach (var item in collection)
                     {
-                        Logger.Instance.Log($"[{i++}] {item?.ToString() ?? "<null>"}");
+                        _logger.Log($"[{i++}] {item?.ToString() ?? "<null>"}");
                     }
                 }
                 else
                 {
-                    Logger.Instance.Log($"Result: '{returnedObject?.ToString() ?? "<null>"}'");
+                    _logger.Log($"Result: '{returnedObject?.ToString() ?? "<null>"}'");
                 }
             }
         }
@@ -253,7 +254,7 @@ namespace Cell.ViewModel.ToolWindow
         private void ShowSyntaxTreePreview(string code)
         {
             var model = new CellFunctionModel("test", "", FunctionBeingEdited.Model.ReturnType);
-            var function = new CellFunction(model);
+            var function = new CellFunction(model, _logger);
             if (CellContext is null) return;
             function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
             var syntaxTree = function.SyntaxTree;
@@ -279,7 +280,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 contextHelp = string.Empty;
             }
-            Logger.Instance.Log($"Info at carot positon {offset}: '{contextHelp}'");
+            _logger.Log($"Info at carot positon {offset}: '{contextHelp}'");
         }
 
         internal IList<ICompletionData> CreateAutoCompleteSuggestions(int offset)

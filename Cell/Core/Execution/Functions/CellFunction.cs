@@ -22,7 +22,7 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// A null function that can be used as a placeholder.
         /// </summary>
-        public static readonly CellFunction Null = new(CellFunctionModel.Null);
+        public static readonly CellFunction Null = new(CellFunctionModel.Null, Logger.Null);
         /// <summary>
         /// The namespaces that are available to all functions preformatted for use in code.
         /// </summary>
@@ -49,9 +49,11 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// Creates a new instance of <see cref="CellFunction"/>
         /// </summary>
-        /// <param name="model"></param>
-        public CellFunction(CellFunctionModel model)
+        /// <param name="model">The function model.</param>
+        /// <param name="logger">The logger to log messages to.</param>
+        public CellFunction(CellFunctionModel model, Logger logger)
         {
+            _logger = logger;
             Model = model;
             Model.PropertyChanged += ModelPropertyChanged;
             ExtractDependencies();
@@ -81,6 +83,8 @@ namespace Cell.Core.Execution.Functions
         /// Gets a list of all of the location references function has.
         /// </summary>
         public List<LocationReference> LocationDependencies { get; set; } = [];
+
+        private readonly Logger _logger;
 
         /// <summary>
         /// The persisted model for this function.
@@ -209,11 +213,11 @@ namespace Cell.Core.Execution.Functions
             }
             catch (CellError e)
             {
-                Logger.Instance.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
+                _logger.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
             }
             catch (InvalidCastException e)
             {
-                Logger.Instance.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
+                _logger.Log($"Error in {nameof(ExtractDependencies)}: {e.Message}");
             }
             SyntaxTree = root.SyntaxTree;
             _fingerprintOfProcessedDependencies = Model.Fingerprint;
@@ -234,5 +238,7 @@ namespace Cell.Core.Execution.Functions
             ExecutionResult = "Success",
             ReturnedObject = method?.Invoke(null, [pluginContext, pluginContext.ContextCell])
         };
+
+        internal void Log(string messege) => _logger.Log(messege);
     }
 }

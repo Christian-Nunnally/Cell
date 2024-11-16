@@ -80,6 +80,7 @@ namespace Cell.ViewModel.Application
             get { return _applicationWindowHeight; }
             set
             {
+                if (_applicationWindowHeight == value) return;
                 _applicationWindowHeight = value;
                 NotifyPropertyChanged(nameof(ApplicationWindowHeight));
             }
@@ -93,6 +94,7 @@ namespace Cell.ViewModel.Application
             get { return _applicationWindowWidth; }
             set
             {
+                if (_applicationWindowWidth == value) return;
                 _applicationWindowWidth = value;
                 NotifyPropertyChanged(nameof(ApplicationWindowWidth));
             }
@@ -215,6 +217,11 @@ namespace Cell.ViewModel.Application
         public UserCollectionTracker? UserCollectionTracker { get; set; }
 
         /// <summary>
+        /// The logger for the application.
+        /// </summary>
+        public Logger Logger { get; set; } = Logger.Null;
+
+        /// <summary>
         /// Gets the application wide undo redo manager.
         /// </summary>
         /// <returns>The global undo/redo manager.</returns>
@@ -291,7 +298,7 @@ namespace Cell.ViewModel.Application
             else
             {
                 SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
-                SheetViewModel.InitializeCellViewModelsAsync().Wait();
+                SheetViewModel.InitializeCellViewModelsAsync();
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
         }
@@ -414,7 +421,7 @@ namespace Cell.ViewModel.Application
             if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
             if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
             ApplicationBackgroundMessage = "Starting backup";
-            var backupTask = BackupAsync();
+            BackupAsync();
             ApplicationBackgroundMessage = "Loading collections";
             await userCollectionLoader.LoadCollectionsAsync();
             ApplicationBackgroundMessage = "Loading functions";
@@ -427,9 +434,10 @@ namespace Cell.ViewModel.Application
             if (CellLoader is null) throw new CellError("Cell loader not initialized yet, try loading again.");
             if (CellTracker is null) throw new CellError("Cell tracker not initialized yet, try loading again.");
             if (FunctionTracker is null) throw new CellError("Function tracker not initialized yet, try loading again.");
-            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker);
+            CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker, Logger ?? Logger.Null);
             IsProjectLoaded = true;
-            await CellLoader.LoadCellsAsync();
+            await CellLoader.LoadSheetsAsync();
+            await CellLoader.FinishLoadingSheetsAsync();
             ApplicationBackgroundMessage = "Creating populate manager";
             _isProjectLoading = false;
             //ApplicationBackgroundMessage = "Waiting for backup to finish";

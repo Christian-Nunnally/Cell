@@ -14,6 +14,7 @@ namespace Cell.Core.Execution
         private readonly CellModel _cell;
         private readonly CellTracker _cellTracker;
         private readonly FunctionTracker _functionTracker;
+        private readonly Logger _logger;
         private readonly UserCollectionTracker _userCollectionTracker;
         /// <summary>
         /// Creates a new instance of <see cref="CellPopulateSubscriber"/>.
@@ -22,12 +23,14 @@ namespace Cell.Core.Execution
         /// <param name="cellTracker">The cell tracker used in the context when running populate.</param>
         /// <param name="userCollectionTracker">The user collection tracker used in the context when running populate.</param>
         /// <param name="functionTracker">The function tracker to get the populate function from.</param>
-        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionTracker userCollectionTracker, FunctionTracker functionTracker)
+        /// <param name="logger">The logger to log messages to.</param>
+        public CellPopulateSubscriber(CellModel cell, CellTracker cellTracker, UserCollectionTracker userCollectionTracker, FunctionTracker functionTracker, Logger logger)
         {
             _cell = cell;
             _cellTracker = cellTracker;
             _userCollectionTracker = userCollectionTracker;
             _functionTracker = functionTracker;
+            _logger = logger;
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace Cell.Core.Execution
             {
                 if (result.ExecutionResult == "Populate function not found")
                 {
-                    Logger.Instance.Log($"The populate function for {subscriber.Location.UserFriendlyLocationString}, '{subscriber.PopulateFunctionName}', does not exist yet.");
+                    _logger.Log($"The populate function for {subscriber.Location.UserFriendlyLocationString}, '{subscriber.PopulateFunctionName}', does not exist yet.");
                 }
                 else
                 {

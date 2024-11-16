@@ -140,10 +140,6 @@ namespace Cell.Core.Common
                       .ToArray();
         }
 
-        //public static string GetUnqiueLocationString(string sheet, int row, int column) => $"{sheet}_{row}_{column}";
-
-        //public static string GetUnqiueLocationString(this CellModel model) => GetUnqiueLocationString(model.Location.SheetName, model.Location.Row, model.Location.Column);
-
         [GeneratedRegex(@"[#][0-9A-Fa-f]{6}\b")]
         public static partial Regex IsHexidecimalColorCode();
 

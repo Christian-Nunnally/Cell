@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
 using System.Collections.Specialized;
+using Cell.Core.Common;
 
 namespace Cell
 {
@@ -27,6 +28,7 @@ namespace Cell
             var applicationView = new ApplicationView(applicationViewModel);
             applicationView.Show();
 
+            applicationViewModel.Logger = new Logger();
             var dialogFactory = new DialogFactory();
             applicationViewModel.DialogFactory = dialogFactory;
             var appDataPath = Environment.SpecialFolder.ApplicationData;
@@ -37,18 +39,18 @@ namespace Cell
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
             applicationViewModel.PersistedProject = persistedProject;
-            var functionTracker = new FunctionTracker();
+            var functionTracker = new FunctionTracker(applicationViewModel.Logger);
             applicationViewModel.FunctionTracker = functionTracker;
-            var pluginFunctionLoader = new FunctionLoader(persistedProject.FunctionsDirectory, functionTracker);
+            var pluginFunctionLoader = new FunctionLoader(persistedProject.FunctionsDirectory, functionTracker, applicationViewModel.Logger);
             applicationViewModel.FunctionLoader = pluginFunctionLoader;
             var cellTracker = new CellTracker();
             applicationViewModel.CellTracker = cellTracker;
             var userCollectionTracker = new UserCollectionTracker(functionTracker, cellTracker);
             applicationViewModel.UserCollectionTracker = userCollectionTracker;
-            var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory);
+            var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory, applicationViewModel.Logger);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
             sheetTracker = new SheetTracker(cellTracker);
-            sheetTracker.Sheets.CollectionChanged += OpenFirstAddedSheet;
+            //sheetTracker.Sheets.CollectionChanged += OpenFirstAddedSheet;
             applicationViewModel.SheetTracker = sheetTracker;
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
             applicationViewModel.CellLoader = cellLoader;
@@ -65,9 +67,19 @@ namespace Cell
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
+            cellLoader.SheetsLoaded += OnAllSheetsLoaded;
             await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
             OpenCellContentEditWindowInDockedMode(applicationViewModel, functionTracker, cellSelector);
             OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
+        }
+
+        private void OnAllSheetsLoaded()
+        {
+            Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                var sheet = sheetTracker.OrderedSheets.FirstOrDefault();
+                if (sheet is not null) applicationViewModel.GoToSheetAsync(sheet.Name);
+            });
         }
 
         private void OpenFirstAddedSheet(object? sender, NotifyCollectionChangedEventArgs e)
@@ -82,7 +94,7 @@ namespace Cell
 
         private static void OpenCellContentEditWindowInDockedMode(ApplicationViewModel applicationViewModel, FunctionTracker functionTracker, CellSelector cellSelector)
         {
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(cellSelector.SelectedCells, functionTracker);
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(cellSelector.SelectedCells, functionTracker, applicationViewModel.Logger);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
         }
 

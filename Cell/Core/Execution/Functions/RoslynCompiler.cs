@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Common;
-using Cell.Core.Execution.Functions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -7,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Cell.Core.Execution
+namespace Cell.Core.Execution.Functions
 {
     /// <summary>
     /// A compiler that uses Roslyn to compile C# code into executable types.
@@ -50,7 +49,7 @@ namespace Cell.Core.Execution
         private static void CheckForErrors(EmitResult result)
         {
             static bool IsConsideredError(Diagnostic d) => d.IsWarningAsError || d.Severity == DiagnosticSeverity.Error;
-            
+
             if (result.Success) return;
             var compilationErrors = result.Diagnostics.Where(IsConsideredError).ToList();
             if (compilationErrors.Count == 0) return;

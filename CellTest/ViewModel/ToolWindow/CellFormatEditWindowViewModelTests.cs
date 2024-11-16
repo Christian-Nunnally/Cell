@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
@@ -16,7 +17,7 @@ namespace CellTest.ViewModel.ToolWindow
         {
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(Logger.Null);
             _testing = new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _functionTracker);
         }
 

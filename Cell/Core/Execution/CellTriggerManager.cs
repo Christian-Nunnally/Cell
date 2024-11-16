@@ -14,6 +14,7 @@ namespace Cell.Core.Execution
         private readonly Dictionary<string, CellModel> _cellsBeingEdited = [];
         private readonly CellTracker _cellTracker;
         private readonly FunctionTracker _functionTracker;
+        private readonly Logger _logger;
         private readonly UserCollectionTracker _userCollectionTracker;
         private readonly DialogFactoryBase _dialogFactoryForTriggers;
 
@@ -24,12 +25,14 @@ namespace Cell.Core.Execution
         /// <param name="functionTracker">Used to get trigger functions from.</param>
         /// <param name="userCollectionTracker">The collection loader to provide to triggers context.</param>
         /// <param name="dialogFactoryForTriggers">The dialog factory used by trigger functions to show dialogs.</param>
-        public CellTriggerManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker, DialogFactoryBase dialogFactoryForTriggers)
+        /// <param name="logger">The logger to log messages to.</param>
+        public CellTriggerManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker, DialogFactoryBase dialogFactoryForTriggers, Logger logger)
         {
             _userCollectionTracker = userCollectionTracker;
             _cellTracker = cellTracker;
             _dialogFactoryForTriggers = dialogFactoryForTriggers;
             _functionTracker = functionTracker;
+            _logger = logger;
         }
 
         /// <summary>
@@ -55,7 +58,7 @@ namespace Cell.Core.Execution
             };
             var result = triggerFunction.Run(context);
             if (result.WasSuccess) return;
-            Logger.Instance.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");
+            _logger.Log($"Error: Trigger function {cell.TriggerFunctionName} has the following error '{result.ExecutionResult ?? "Error message is null"}'");
         }
     }
 }

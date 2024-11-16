@@ -233,7 +233,9 @@ namespace Cell.View.Application
         {
             if (e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowWidth) || e.PropertyName == nameof(ApplicationViewModel.ApplicationWindowHeight))
             {
-                UpdateToolWindowLocation();
+                Width = _viewModel.ApplicationWindowWidth;
+                Height = _viewModel.ApplicationWindowHeight;
+                UpdateToolWindowLocation(ActualWidth, ActualHeight);
             }
             else if (e.PropertyName == nameof(ApplicationViewModel.SheetViewModel))
             {
@@ -261,7 +263,7 @@ namespace Cell.View.Application
             if (_viewModel is null) return;
             if (_viewModel.CellSelector is null) return;
             if (_viewModel.FunctionTracker is null) return;
-            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.FunctionTracker);
+            var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.FunctionTracker, _viewModel.Logger);
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
             else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
         }
@@ -351,11 +353,11 @@ namespace Cell.View.Application
             _viewModel.ShowToolWindow(viewModel);
         }
 
-        private void UpdateToolWindowLocation()
+        private void UpdateToolWindowLocation(double canvasWidth, double canvasHeight)
         {
-            foreach (var toolWindow in _toolWindowCanvas.Children.Cast<FloatingToolWindowContainer>())
+            foreach (var toolWindow in _toolWindowCanvas?.Children.Cast<FloatingToolWindowContainer>() ?? [])
             {
-                toolWindow.HandleOwningCanvasSizeChanged();
+                toolWindow.HandleOwningCanvasSizeChanged(canvasWidth, canvasHeight);
             }
         }
 
@@ -456,6 +458,7 @@ namespace Cell.View.Application
         {
             if (WindowState == WindowState.Maximized) BorderThickness = new Thickness(7.5);
             else BorderThickness = new Thickness(0);
+            UpdateToolWindowLocation(ActualWidth, ActualHeight);
         }
     }
 }

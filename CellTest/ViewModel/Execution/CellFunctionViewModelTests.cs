@@ -2,6 +2,7 @@
 using CellTest.TestUtilities;
 using Cell.ViewModel.Execution;
 using Cell.Core.Execution.Functions;
+using Cell.Core.Common;
 
 namespace CellTest.ViewModel.Execution
 {
@@ -14,7 +15,7 @@ namespace CellTest.ViewModel.Execution
         public CellFunctionViewModelTests()
         {
             _cellFunctionModel = new CellFunctionModel("Test", "return \"Hello world\";", "object");
-            _cellFunction = new CellFunction(_cellFunctionModel);
+            _cellFunction = new CellFunction(_cellFunctionModel, Logger.Null);
             _testing = new CellFunctionViewModel(_cellFunction);
         }
 

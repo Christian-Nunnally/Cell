@@ -66,14 +66,17 @@ namespace Cell.View.ToolWindow
         /// <summary>
         /// Gets whether the tool window is currently docked.
         /// </summary>
-        public bool IsDocked => _resizableToolWindow.ToolViewModel.IsDocked;
+        public bool IsDocked => _resizableToolWindow?.ToolViewModel.IsDocked ?? false;
 
         /// <summary>
         /// Gets whether the resizer should appear in the bottom right (true) or top left (false).
         /// </summary>
         public bool IsBottomRightResizerVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Top || ToolWindowContent?.ToolViewModel.Dock == Dock.Left;
-        public bool AreSideResizersVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Left || ToolWindowContent?.ToolViewModel.Dock == Dock.Right;
 
+        /// <summary>
+        /// Gets whether the resizer should appear on the left and right of the tool window.
+        /// </summary>
+        public bool AreSideResizersVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Left || ToolWindowContent?.ToolViewModel.Dock == Dock.Right;
 
         /// <summary>
         /// Gets or sets the content displated within this tool window container.
@@ -127,6 +130,7 @@ namespace Cell.View.ToolWindow
 
         private void UndockButtonClicked(object sender, RoutedEventArgs e)
         {
+            if (_resizableToolWindow == null) return;
             _resizableToolWindow.ToolViewModel.IsDocked = false;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }

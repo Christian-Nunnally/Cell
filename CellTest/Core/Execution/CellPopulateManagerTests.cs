@@ -5,6 +5,7 @@ using Cell.Core.Persistence;
 using CellTest.TestUtilities;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Common;
 
 namespace CellTest.Core.Execution
 {
@@ -24,9 +25,9 @@ namespace CellTest.Core.Execution
             _persistedDirectory = new PersistedDirectory("", _testFileIO);
             _cellTracker = new CellTracker();
             _cellLoader = new CellLoader(_persistedDirectory, _cellTracker);
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(Logger.Null);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
-            testing = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
+            testing = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, Logger.Null);
         }
 
         [Fact]

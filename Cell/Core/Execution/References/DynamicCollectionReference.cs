@@ -1,5 +1,4 @@
-﻿using Cell.Core.Common;
-using Cell.Core.Execution.Functions;
+﻿using Cell.Core.Execution.Functions;
 using Cell.Model;
 
 namespace Cell.Core.Execution.References
@@ -36,7 +35,7 @@ namespace Cell.Core.Execution.References
             pluginFunctionRunContext.ContextCell = cell;
             var result = _calculateCollectionNameFunction.Run(pluginFunctionRunContext);
             if (result.WasSuccess && result.ReturnedObject is not null) return result.ReturnedObject.ToString() ?? "";
-            Logger.Instance.Log($"Error calculating collection name from function {_calculateCollectionNameFunction}: {result.ExecutionResult}");
+            _calculateCollectionNameFunction.Log($"Error calculating collection name from function {_calculateCollectionNameFunction}: {result.ExecutionResult}");
             return string.Empty;
         }
 

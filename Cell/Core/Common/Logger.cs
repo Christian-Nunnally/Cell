@@ -7,21 +7,17 @@
     {
         private const int MaxRetainedLogs = 1000;
         private readonly Queue<string> _logsQueue = new();
-        private static Logger? _instance;
         /// <summary>
         /// Occurs when a new log is added.
         /// </summary>
         public event Action<string>? LogAdded;
 
         /// <summary>
-        /// Gets the instance of the logger.
-        /// </summary>
-        public static Logger Instance => _instance ??= new Logger();
-
-        /// <summary>
         /// Gets the list of logs.
         /// </summary>
         public IEnumerable<string> Logs => _logsQueue.AsEnumerable();
+
+        public static Logger Null { get; internal set; } = new();
 
         /// <summary>
         /// Logs a message.

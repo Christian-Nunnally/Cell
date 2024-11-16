@@ -9,7 +9,6 @@ using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Drawing;
 using System.Reflection;
 
 namespace Cell.Core.Execution.CodeCompletion

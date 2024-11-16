@@ -1,4 +1,5 @@
-﻿using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Model;
 using Cell.ViewModel.ToolWindow;
@@ -18,11 +19,11 @@ namespace CellTest.ViewModel.ToolWindow
         {
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
-            _functionTracker = new FunctionTracker();
+            _functionTracker = new FunctionTracker(Logger.Null);
             _userCollectionTracker = new UserCollectionTracker(_functionTracker, _cellTracker);
             // Enables populate tests.
-            var _ = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker);
-            _testing = new CellContentEditWindowViewModel(_cellsToEdit, _functionTracker);
+            var _ = new CellPopulateManager(_cellTracker, _functionTracker, _userCollectionTracker, Logger.Null);
+            _testing = new CellContentEditWindowViewModel(_cellsToEdit, _functionTracker, Logger.Null);
         }
 
         [Fact]

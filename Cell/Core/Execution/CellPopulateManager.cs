@@ -4,6 +4,7 @@ using Cell.Core.Execution.Functions;
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.References;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Common;
 
 namespace Cell.Core.Execution
 {
@@ -20,6 +21,7 @@ namespace Cell.Core.Execution
         private readonly CollectionChangeNotifier _collectionChangeNotifier;
         private readonly Dictionary<CellModel, List<CellSpecificCollectionReference>> _collectionDependenciesForCellsPopulateFunction = [];
         private readonly FunctionTracker _functionTracker;
+        private readonly Logger _logger;
         private readonly Context _pluginFunctionRunContext;
         private readonly UserCollectionTracker _userCollectionTracker;
         private readonly List<CellModel> _cellsWithPopulateFunctionsThatDontYetExist = [];
@@ -30,8 +32,10 @@ namespace Cell.Core.Execution
         /// <param name="cellTracker">The cell tracker to determine cells to manage.</param>
         /// <param name="functionTracker">Used to load the populate function.</param>
         /// <param name="userCollectionTracker">The collection loader used in the context when running populate.</param>
-        public CellPopulateManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker)
+        /// <param name="logger">The logger to log messeges to.</param>
+        public CellPopulateManager(CellTracker cellTracker, FunctionTracker functionTracker, UserCollectionTracker userCollectionTracker, Logger logger)
         {
+            _logger = logger;
             _pluginFunctionRunContext = new Context(cellTracker, userCollectionTracker, new DialogFactory(), CellModel.Null);
             _cellTextChangesAtLocationNotifier = new CellTextChangesAtLocationNotifier(cellTracker);
             _collectionChangeNotifier = new CollectionChangeNotifier(userCollectionTracker);
@@ -135,7 +139,7 @@ namespace Cell.Core.Execution
         private CellPopulateSubscriber GetOrCreatePopulateSubscriber(CellModel cell)
         {
             if (_cellToPopulateSubscriberMap.TryGetValue(cell, out var subscriber)) return subscriber;
-            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionTracker, _functionTracker);
+            subscriber = new CellPopulateSubscriber(cell, _cellTracker, _userCollectionTracker, _functionTracker, _logger);
             _cellToPopulateSubscriberMap.Add(cell, subscriber);
             return subscriber;
         }

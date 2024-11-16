@@ -16,6 +16,7 @@ namespace Cell.Core.Execution.Functions
     public class TestingContext : IContext
     {
         private readonly Dictionary<string, CellModel> _copiedCellsForTestingMap = [];
+        private readonly Logger _logger;
         private readonly CellTracker _cellTracker;
         private readonly CellModel _originalContextCell;
         private readonly ReadOnlyUserCollectionLoader _userCollectionProviderThatMirrorsRealProvider;
@@ -26,8 +27,10 @@ namespace Cell.Core.Execution.Functions
         /// <param name="userCollectionLoader">The collection loader used to provide collection access to the function.</param>
         /// <param name="cell">The context cell.</param>
         /// <param name="functionTracker">The function tracker for loading sort functions for read only collections.</param>
-        public TestingContext(CellTracker cellTracker, IUserCollectionProvider userCollectionLoader, CellModel cell, FunctionTracker functionTracker)
+        /// <param name="logger">The logger to log messages to.</param>
+        public TestingContext(CellTracker cellTracker, IUserCollectionProvider userCollectionLoader, CellModel cell, FunctionTracker functionTracker, Logger logger)
         {
+            _logger = logger;
             _cellTracker = cellTracker;
             _userCollectionProviderThatMirrorsRealProvider = new ReadOnlyUserCollectionLoader(userCollectionLoader, functionTracker, this);
             _originalContextCell = cell;
@@ -67,7 +70,7 @@ namespace Cell.Core.Execution.Functions
         /// <returns>The found cell, or a null cell if no real cell exists there.</returns>
         public CellModel GetCell(string sheet, int row, int column)
         {
-            Logger.Instance.Log($"Pretending to get cell at {sheet} - {ColumnCellViewModel.GetColumnName(column)}{row}");
+            _logger.Log($"Pretending to get cell at {sheet} - {ColumnCellViewModel.GetColumnName(column)}{row}");
             var locationModel = new CellLocationModel(sheet, row, column);
             if (_copiedCellsForTestingMap.TryGetValue(locationModel.LocationString, out var cell)) return cell;
             cell = _cellTracker.GetCell(sheet, row, column)?.Copy() ?? CellModel.Null;
@@ -126,8 +129,8 @@ namespace Cell.Core.Execution.Functions
         /// <param name="cell">The cell to move to.</param>
         public void GoToCell(CellModel cell)
         {
-            Logger.Instance.Log($"Pretending to go to sheet '{cell.Location.SheetName}'");
-            Logger.Instance.Log($"Pretending to go to cell '{cell.Location.UserFriendlyLocationString}'");
+            _logger.Log($"Pretending to go to sheet '{cell.Location.SheetName}'");
+            _logger.Log($"Pretending to go to cell '{cell.Location.UserFriendlyLocationString}'");
         }
 
         /// <summary>
@@ -136,7 +139,7 @@ namespace Cell.Core.Execution.Functions
         /// <param name="sheetName">The name of the sheet to open.</param>
         public void GoToSheet(string sheetName)
         {
-            Logger.Instance.Log($"Pretending to go to sheet '{sheetName}'");
+            _logger.Log($"Pretending to go to sheet '{sheetName}'");
         }
 
         /// <summary>
@@ -146,7 +149,7 @@ namespace Cell.Core.Execution.Functions
         public void ShowDialog(string text)
         {
             var title = ContextCell?.Location.UserFriendlyLocationString ?? "Function";
-            Logger.Instance.Log($"Pretending to show dialog '{title}' : '{text}'");
+            _logger.Log($"Pretending to show dialog '{title}' : '{text}'");
         }
 
         /// <summary>

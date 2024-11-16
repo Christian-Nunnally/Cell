@@ -13,6 +13,7 @@ namespace Cell.Core.Persistence.Loader
     /// </summary>
     public class FunctionLoader
     {
+        private readonly Logger _logger;
         private readonly PersistedDirectory _functionsDirectory;
         private readonly FunctionTracker _functionTracker;
         private bool _shouldSaveAddedFunctions = true;
@@ -21,8 +22,10 @@ namespace Cell.Core.Persistence.Loader
         /// </summary>
         /// <param name="functionsDirectory">A directory to load and store functions to.</param>
         /// <param name="functionTracker">A tracker to add loaded functions to.</param>
-        public FunctionLoader(PersistedDirectory functionsDirectory, FunctionTracker functionTracker)
+        /// <param name="logger">The logger to log messeges to.</param>
+        public FunctionLoader(PersistedDirectory functionsDirectory, FunctionTracker functionTracker, Logger logger)
         {
+            _logger = logger;
             _functionsDirectory = functionsDirectory;
             _functionTracker = functionTracker;
             _functionTracker.FunctionAdded += FunctionTrackerFunctionAdded;
@@ -52,7 +55,7 @@ namespace Cell.Core.Persistence.Loader
                 {
                     CellFunctionModel? model = await LoadFunctionAsync(file);
                     if (model is null) continue;
-                    var function = new CellFunction(model);
+                    var function = new CellFunction(model, _logger);
                     var space = Path.GetFileName(namespacePath);
                     _shouldSaveAddedFunctions = false;
                     _functionTracker.AddCellFunctionToNamespace(space, function);
