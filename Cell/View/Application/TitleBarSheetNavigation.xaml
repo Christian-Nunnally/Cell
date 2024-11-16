@@ -26,7 +26,7 @@
                 <DataTemplate>
                     <Button
                         Width="Auto"
-                        Click="GoToSheetButtonClicked"
+                        Click="GoToSheetButtonClickedAsync"
                         Style="{StaticResource TitleButtonStyle}"
                         Visibility="{Binding IsVisibleInTopBar, Converter={StaticResource BooleanToVisibilityConverter}}"
                         WindowChrome.IsHitTestVisibleInChrome="True">

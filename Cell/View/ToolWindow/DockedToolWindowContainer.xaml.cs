@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Cell.View.ToolWindow
 {
@@ -14,7 +13,6 @@ namespace Cell.View.ToolWindow
         private readonly ApplicationViewModel _applicationViewModel;
         private double _contentHeight;
         private double _contentWidth;
-        private bool _isDocked;
         private bool _resizing;
         private Point _resizingStartPosition;
         private ResizableToolWindow? _resizableToolWindow;
@@ -66,19 +64,16 @@ namespace Cell.View.ToolWindow
         }
 
         /// <summary>
-        /// Gets whether the tool window is currently docked (can not be moved or resized if docked).
+        /// Gets whether the tool window is currently docked.
         /// </summary>
-        public bool IsDocked => _isDocked;
+        public bool IsDocked => _resizableToolWindow.ToolViewModel.IsDocked;
 
         /// <summary>
         /// Gets whether the resizer should appear in the bottom right (true) or top left (false).
         /// </summary>
         public bool IsBottomRightResizerVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Top || ToolWindowContent?.ToolViewModel.Dock == Dock.Left;
+        public bool AreSideResizersVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Left || ToolWindowContent?.ToolViewModel.Dock == Dock.Right;
 
-        /// <summary>
-        /// Gets whether the tool window is currently undocked (can not be moved or resized if docked).
-        /// </summary>
-        public bool IsUndocked => !_isDocked;
 
         /// <summary>
         /// Gets or sets the content displated within this tool window container.
@@ -99,6 +94,7 @@ namespace Cell.View.ToolWindow
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowContent)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsBottomRightResizerVisible)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AreSideResizersVisible)));
                     ContentWidth = _resizableToolWindow.ToolViewModel.DefaultWidth;
                     ContentHeight = _resizableToolWindow.ToolViewModel.DefaultHeight;
                     SetSizeWhileRespectingBounds(ContentWidth, ContentHeight);
@@ -129,16 +125,14 @@ namespace Cell.View.ToolWindow
             ToolWindowContent?.ToolViewModel?.RequestClose?.Invoke();
         }
 
-        private void DockButtonClicked(object sender, RoutedEventArgs e)
+        private void UndockButtonClicked(object sender, RoutedEventArgs e)
         {
-            _isDocked = true;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
+            _resizableToolWindow.ToolViewModel.IsDocked = false;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isDocked) return;
             if (ToolWindowContent is null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
@@ -148,7 +142,6 @@ namespace Cell.View.ToolWindow
 
         private void ResizerRectangleMouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDocked) return;
             if (_resizing)
             {
                 var mousePosition = e.GetPosition(this);
@@ -172,7 +165,6 @@ namespace Cell.View.ToolWindow
 
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isDocked) return;
             if (ToolWindowContent is null) return;
             _resizing = false;
             Mouse.Capture(null);
@@ -211,13 +203,6 @@ namespace Cell.View.ToolWindow
         private void ToolViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ToolWindowViewModel.ToolWindowTitle)) PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-        }
-
-        private void UndockButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _isDocked = false;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
     }
 }

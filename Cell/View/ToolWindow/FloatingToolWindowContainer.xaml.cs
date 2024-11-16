@@ -14,7 +14,6 @@ namespace Cell.View.ToolWindow
         private readonly ApplicationViewModel _applicationViewModel;
         private double _contentHeight;
         private double _contentWidth;
-        private bool _isDocked;
         private bool _resizing;
         private Point _resizingStartPosition;
 
@@ -28,6 +27,8 @@ namespace Cell.View.ToolWindow
             _applicationViewModel = applicationViewModel;
         }
 
+        public Action? ShowDockOptions;
+
         /// <summary>
         /// Gets or sets the content displated within this tool window container.
         /// </summary>
@@ -35,24 +36,24 @@ namespace Cell.View.ToolWindow
         {
             get => _resizableToolWindow; set
             {
-                if (_resizableToolWindow != null && _toolWindowViewModel is not null)
+                if (_resizableToolWindow != null && ToolWindowViewModel is not null)
                 {
                     Commands.Clear();
-                    _toolWindowViewModel.PropertyChanged -= ToolViewModelPropertyChanged;
+                    ToolWindowViewModel.PropertyChanged -= ToolViewModelPropertyChanged;
                 }
                 _resizableToolWindow = value;
-                if (_resizableToolWindow != null && _toolWindowViewModel is not null)
+                if (_resizableToolWindow != null && ToolWindowViewModel is not null)
                 {
                     ContentHost.Content = _resizableToolWindow;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowContent)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-                    ContentWidth = _toolWindowViewModel.DefaultWidth;
-                    ContentHeight = _toolWindowViewModel.DefaultHeight;
+                    ContentWidth = ToolWindowViewModel.DefaultWidth;
+                    ContentHeight = ToolWindowViewModel.DefaultHeight;
                     SetCanvasLeft();
                     SetCanvasTop();
                     DataContext = this;
-                    _toolWindowViewModel.ToolBarCommands.ForEach(Commands.Add);
-                    _toolWindowViewModel.PropertyChanged += ToolViewModelPropertyChanged;
+                    ToolWindowViewModel.ToolBarCommands.ForEach(Commands.Add);
+                    ToolWindowViewModel.PropertyChanged += ToolViewModelPropertyChanged;
                 }
             }
         }
@@ -96,17 +97,11 @@ namespace Cell.View.ToolWindow
         /// <summary>
         /// Gets whether the tool window is currently docked (can not be moved or resized if docked).
         /// </summary>
-        public bool IsDocked => _isDocked;
-
-        /// <summary>
-        /// Gets whether the tool window is currently undocked (can not be moved or resized if docked).
-        /// </summary>
-        public bool IsUndocked => !_isDocked;
-
+        public bool IsDocked => _resizableToolWindow?.ToolViewModel.IsDocked ?? false;
 
         private ResizableToolWindow? _resizableToolWindow;
 
-        private ToolWindowViewModel? _toolWindowViewModel => _resizableToolWindow?.ToolViewModel;
+        private ToolWindowViewModel? ToolWindowViewModel => _resizableToolWindow?.ToolViewModel;
 
         /// <summary>
         /// Gets the title string for the tool window.
@@ -115,9 +110,9 @@ namespace Cell.View.ToolWindow
 
         private void SetPositionRespectingBounds(double x, double y)
         {
-            if (_toolWindowViewModel is null) return;
-            _toolWindowViewModel.X = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowWidth - ActualWidth, x));
-            _toolWindowViewModel.Y = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowHeight - ActualHeight, y));
+            if (ToolWindowViewModel is null) return;
+            ToolWindowViewModel.X = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowWidth - ActualWidth, x));
+            ToolWindowViewModel.Y = Math.Max(0, Math.Min(_applicationViewModel.ApplicationWindowHeight - ActualHeight, y));
         }
 
         /// <summary>
@@ -125,8 +120,8 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public void HandleOwningCanvasSizeChanged()
         {
-            if (_toolWindowViewModel is null) return;
-            SetPositionRespectingBounds(_toolWindowViewModel.X, _toolWindowViewModel.Y);
+            if (ToolWindowViewModel is null) return;
+            SetPositionRespectingBounds(ToolWindowViewModel.X, ToolWindowViewModel.Y);
         }
 
         private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
@@ -138,22 +133,20 @@ namespace Cell.View.ToolWindow
 
         private void DockButtonClicked(object sender, RoutedEventArgs e)
         {
-            _isDocked = true;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
+            ShowDockOptions?.Invoke();
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
         }
 
         private void MoveToolboxToFrontOfCanvas(FloatingToolWindowContainer toolbox)
         {
-            if (toolbox._toolWindowViewModel is not null)
+            if (toolbox.ToolWindowViewModel is not null)
             {
-                _applicationViewModel.MoveWindowToTop(toolbox._toolWindowViewModel);
+                _applicationViewModel.MoveWindowToTop(toolbox.ToolWindowViewModel);
             }
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isDocked) return;
             if (_resizableToolWindow is null) return;
             _resizing = true;
             _resizingStartPosition = e.GetPosition(this);
@@ -163,7 +156,6 @@ namespace Cell.View.ToolWindow
 
         private void ResizerRectangleMouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDocked) return;
             if (_resizing)
             {
                 var mousePosition = e.GetPosition(this);
@@ -178,7 +170,6 @@ namespace Cell.View.ToolWindow
 
         private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isDocked) return;
             if (_resizableToolWindow is null) return;
             _resizing = false;
             Mouse.Capture(null);
@@ -195,7 +186,6 @@ namespace Cell.View.ToolWindow
 
         private void ToolboxMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (_isDocked) return;
             if (sender is FloatingToolWindowContainer toolbox)
             {
                 DependencyObject parent = VisualTreeHelper.GetParent(toolbox);
@@ -219,7 +209,6 @@ namespace Cell.View.ToolWindow
 
         private void ToolboxMouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDocked) return;
             if (sender is FloatingToolWindowContainer toolbox && toolbox.IsMouseCaptured)
             {
                 DependencyObject parent = VisualTreeHelper.GetParent(toolbox);
@@ -237,13 +226,13 @@ namespace Cell.View.ToolWindow
         {
             switch (e.PropertyName)
             {
-                case nameof(ToolWindowViewModel.ToolWindowTitle):
+                case nameof(ViewModel.ToolWindow.ToolWindowViewModel.ToolWindowTitle):
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
                     break;
-                case nameof(ToolWindowViewModel.X):
+                case nameof(ViewModel.ToolWindow.ToolWindowViewModel.X):
                     SetCanvasLeft();
                     break;
-                case nameof(ToolWindowViewModel.Y):
+                case nameof(ViewModel.ToolWindow.ToolWindowViewModel.Y):
                     SetCanvasTop();
                     break;
             }
@@ -252,12 +241,5 @@ namespace Cell.View.ToolWindow
         private void SetCanvasTop() => Canvas.SetTop(this, _resizableToolWindow?.ToolViewModel.Y ?? 0);
 
         private void SetCanvasLeft() => Canvas.SetLeft(this, _resizableToolWindow?.ToolViewModel.X ?? 0);
-
-        private void UndockButtonClicked(object sender, RoutedEventArgs e)
-        {
-            _isDocked = false;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUndocked)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
-        }
     }
 }

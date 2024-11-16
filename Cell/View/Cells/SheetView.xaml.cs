@@ -135,7 +135,12 @@ namespace Cell.View.Cells
                         }
                         else
                         {
-                            SheetViewModel?.CellSelector.UnselectAllCells();
+                            var currentlySelectedCells = new Dictionary<CellModel, bool>();
+                            foreach (var currentlySelectedCell in SheetViewModel?.CellSelector.SelectedCells ?? [])
+                            {
+                                currentlySelectedCells.Add(currentlySelectedCell, false);
+                            }
+                            //SheetViewModel?.CellSelector.UnselectAllCells();
                             var startColumn = Math.Min(_selectionStart!.Column, cell.Column);
                             var endColumn = Math.Max(_selectionStart!.Column, cell.Column);
                             var startRow = Math.Min(_selectionStart!.Row, cell.Row);
@@ -145,8 +150,17 @@ namespace Cell.View.Cells
                                 for (var column = startColumn; column <= endColumn; column++)
                                 {
                                     var cellToSelect = SheetViewModel?.CellTracker.GetCell(SheetViewModel.SheetName, row, column);
-                                    if (CanSelectCell(cellToSelect)) SheetViewModel?.CellSelector.SelectCell(cellToSelect!);
+                                    if (CanSelectCell(cellToSelect))
+                                    {
+                                        currentlySelectedCells[cellToSelect] = true;
+                                        //SheetViewModel?.CellSelector.SelectCell(cellToSelect!);
+                                    }
                                 }
+                            }
+                            foreach (var cellToSelect in currentlySelectedCells)
+                            {
+                                if (cellToSelect.Value) SheetViewModel?.CellSelector.SelectCell(cellToSelect.Key);
+                                else SheetViewModel?.CellSelector.UnselectCell(cellToSelect.Key);
                             }
                             var topLeftCell = SheetViewModel?.CellTracker.GetCell(SheetViewModel.SheetName, startRow, startColumn);
                             if (topLeftCell is not null) SheetViewModel?.CellSelector.SelectCell(topLeftCell);
@@ -180,8 +194,16 @@ namespace Cell.View.Cells
         private void SheetViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (_panAndZoomCanvas is null) return;
-            if (e.PropertyName == nameof(SheetViewModel.SheetWidth)) _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
-            else if (e.PropertyName == nameof(SheetViewModel.SheetHeight)) _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+            if (e.PropertyName == nameof(SheetViewModel.SheetWidth))
+            {
+                _panAndZoomCanvas.LaidOutWidth = SheetViewModel.SheetWidth;
+                _panAndZoomCanvas.EnsureCenteredIfLocked();
+            }
+            else if (e.PropertyName == nameof(SheetViewModel.SheetHeight))
+            {
+                _panAndZoomCanvas.LaidOutHeight = SheetViewModel.SheetHeight;
+                _panAndZoomCanvas.EnsureCenteredIfLocked();
+            }
             if (e.PropertyName == nameof(SheetViewModel.PanX))
             {
                 _panAndZoomCanvas?.PanCanvasTo(SheetViewModel.PanX, _panAndZoomCanvas.YPan);

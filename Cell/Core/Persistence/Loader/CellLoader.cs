@@ -46,7 +46,7 @@ namespace Cell.Core.Persistence.Loader
         /// <returns>All loaded cells.</returns>
         public async Task LoadCellsAsync()
         {
-            foreach (var sheetDirectory in _sheetsDirectory.GetDirectories())
+            foreach (var sheetDirectory in _sheetsDirectory.GetDirectories().Reverse())
             {
                 await LoadSheetAsync(sheetDirectory);
             }
@@ -60,7 +60,17 @@ namespace Cell.Core.Persistence.Loader
         public async Task LoadSheetAsync(string sheet)
         {
             _isSavingAddedCells = false;
-            foreach (var file in _sheetsDirectory.GetFiles(sheet)) await LoadCellAsync(file);
+            var sheetDirectory = _sheetsDirectory.FromDirectory(sheet);
+            var cornerCell = await sheetDirectory.LoadFileAsync("corner");
+            if (!string.IsNullOrWhiteSpace(cornerCell))
+            {
+                AddSerializedCell(cornerCell);
+            }
+            foreach (var file in _sheetsDirectory.GetFiles(sheet))
+            {
+                if (file.EndsWith("corner")) continue;
+                await LoadCellAsync(file);
+            }
             _isSavingAddedCells = true;
         }
 
@@ -90,8 +100,16 @@ namespace Cell.Core.Persistence.Loader
         /// <param name="cell">The cell to save.</param>
         public void SaveCell(string directory, CellModel cell)
         {
+            var fileName = cell.ID;
+            if (cell.CellType == CellType.Corner)
+            {
+                // TODO: removed after migration
+                //DeleteCell(cell);
+                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
+                fileName = "corner";
+            }
             var serialized = JsonSerializer.Serialize(cell);
-            var path = Path.Combine(directory, cell.ID);
+            var path = Path.Combine(directory, fileName);
             _sheetsDirectory.SaveFile(path, serialized);
         }
 
@@ -122,8 +140,13 @@ namespace Cell.Core.Persistence.Loader
 
         private async Task LoadCellAsync(string file)
         {
-            var text = await _sheetsDirectory.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
-            var cell = JsonSerializer.Deserialize<CellModel>(text) ?? throw new CellError($"Deserialization failed for {text} at {file}");
+            var cellJson = await _sheetsDirectory.LoadFileAsync(file) ?? throw new CellError($"Error loading file {file}");
+            AddSerializedCell(cellJson);
+        }
+
+        private void AddSerializedCell(string cellJson)
+        {
+            var cell = JsonSerializer.Deserialize<CellModel>(cellJson) ?? throw new CellError($"Deserialization failed for {cellJson}");
             _cellTracker.AddCell(cell);
         }
 

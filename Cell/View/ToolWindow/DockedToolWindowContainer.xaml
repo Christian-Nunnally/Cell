@@ -22,8 +22,9 @@
                 BorderThickness="1"
                 DockPanel.Dock="Top">
                 <DockPanel
-                    Height="14"
+                    Height="16"
                     Background="{StaticResource ToolWindowHeaderColor}"
+                    Cursor="SizeAll"
                     LastChildFill="False"
                     MouseDown="ResizerRectangleMouseDown"
                     MouseMove="ResizerRectangleMouseMove"
@@ -33,15 +34,25 @@
                         Content="{Binding ToolWindowTitle}"
                         DockPanel.Dock="Left" />
                     <Button
-                        Width="14"
-                        Height="14"
+                        Width="16"
+                        Height="16"
                         BorderThickness="0"
                         Click="CloseButtonClicked"
                         Content="{fa:Icon XMark}"
+                        Cursor="Arrow"
                         DockPanel.Dock="Right"
-                        ToolTip="Closes this tool window."
-                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
+                        ToolTip="Closes this tool window." />
+                    <Button
+                        Width="16"
+                        Height="16"
+                        Cursor="Arrow"
+                        BorderThickness="0"
+                        Click="UndockButtonClicked"
+                        Content="{fa:Icon LockOpen}"
+                        DockPanel.Dock="Right"
+                        FontSize="9"
+                        ToolTip="Undocks this tool window." />
+                    <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}" Cursor="Arrow">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Orientation="Horizontal" />
@@ -65,7 +76,45 @@
                 </DockPanel>
             </Border>
             <Rectangle
-                Height="2"
+                Width="3"
+                Cursor="SizeAll"
+                DockPanel.Dock="Right"
+                MouseDown="ResizerRectangleMouseDown"
+                MouseMove="ResizerRectangleMouseMove"
+                MouseUp="ResizerRectangleMouseUp"
+                Visibility="{Binding AreSideResizersVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <Rectangle
+                Width="3"
+                Cursor="SizeAll"
+                DockPanel.Dock="Left"
+                MouseDown="ResizerRectangleMouseDown"
+                MouseMove="ResizerRectangleMouseMove"
+                MouseUp="ResizerRectangleMouseUp"
+                Visibility="{Binding AreSideResizersVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <Rectangle
+                Height="3"
                 DockPanel.Dock="Bottom"
                 MouseDown="ResizerRectangleMouseDown"
                 MouseMove="ResizerRectangleMouseMove"
@@ -82,7 +131,7 @@
                     </Style>
                 </Rectangle.Style>
             </Rectangle>
-            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,2,0">
+            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0,0,0,0">
                 <ContentControl x:Name="ContentHost" Margin="4" />
             </Border>
         </DockPanel>

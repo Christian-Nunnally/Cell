@@ -291,7 +291,36 @@ namespace Cell.ViewModel.Application
             else
             {
                 SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
+                SheetViewModel.InitializeCellViewModelsAsync().Wait();
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
+            }
+        }
+
+        /// <summary>
+        /// Opens the sheet with the given name in the application.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to show.</param>
+        public async Task GoToSheetAsync(string sheetName)
+        {
+            if (CellPopulateManager is null) throw new CellError("Unable to go to sheet without a populate manager.");
+            if (CellTracker is null) throw new CellError("Unable to go to sheet without a cell tracker.");
+            if (CellTriggerManager is null) throw new CellError("Unable to go to sheet without a trigger manager.");
+            if (CellSelector is null) throw new CellError("Unable to go to sheet without a cell selector.");
+            if (FunctionTracker is null) throw new CellError("Unable to go to sheet without a function tracker.");
+            if (!SheetModel.IsValidSheetName(sheetName)) return;
+            if (SheetViewModel?.SheetName == sheetName) return;
+            var sheet = SheetTracker?.Sheets.FirstOrDefault(x => x.Name == sheetName);
+            if (sheet is null) return;
+            SheetViewModel?.CellSelector.UnselectAllCells();
+            if (_sheetModelToViewModelMap.TryGetValue(sheet, out SheetViewModel? existingSheetViewModel))
+            {
+                SheetViewModel = existingSheetViewModel;
+            }
+            else
+            {
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
+                _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
+                await SheetViewModel.InitializeCellViewModelsAsync();
             }
         }
 

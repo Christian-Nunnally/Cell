@@ -124,6 +124,24 @@ namespace CellTest.ViewModel.ToolWindow
         }
 
         [Fact]
+        public void PopulateFunctionExistsAndSet_MultiSelectTextboxSetToEmptyString_CellTextIsEmpty()
+        {
+            var _ = _functionTracker.CreateCellFunction("object", "Test", "return \"Hello world\";");
+            var cellBeingEdited = new CellModel();
+            _cellTracker.AddCell(cellBeingEdited);
+            _cellsToEdit.Add(cellBeingEdited);
+            _testing.HandleBeingShown();
+            _testing.MultiUseUserInputText = "=Test";
+            _testing.SubmitMultiUseUserInputText();
+            Assert.Equal("Hello world", cellBeingEdited.Text);
+
+            _testing.MultiUseUserInputText = string.Empty;
+            _testing.SubmitMultiUseUserInputText();
+
+            Assert.Equal(string.Empty, _testing.MultiUseUserInputText);
+        }
+
+        [Fact]
         public void TriggerFunctionSet_TriggerFunctionChangedToEmptyString_TriggerFunctionEmptied()
         {
             var _ = _functionTracker.CreateCellFunction("void", "Test", "");

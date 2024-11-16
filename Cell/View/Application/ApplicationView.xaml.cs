@@ -87,39 +87,50 @@ namespace Cell.View.Application
             }
         }
 
+        private Border CreateDockSiteBorder()
+        {
+            var border = new Border();
+            border.MouseEnter += DockSiteMouseEnter;
+            border.MouseLeave += DockSiteMouseLeave;
+            border.Background = ColorConstants.ForegroundColorConstantBrush;
+            border.MouseDown += DockMouseDown;
+            border.Tag = "[DockSite]";
+            return border;
+        }
+
         private void ShowDockSites()
         {
-            var topDock = new Border();
+            var topDock = CreateDockSiteBorder();
             DockPanel.SetDock(topDock, Dock.Top);
             topDock.Height = 10;
-            topDock.Background = ColorConstants.ForegroundColorConstantBrush;
-            topDock.Tag = "[DockSite]";
-            topDock.MouseDown += DockMouseDown;
             _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, topDock);
 
-            var bottomDock = new Border();
+            var bottomDock = CreateDockSiteBorder();
             DockPanel.SetDock(bottomDock, Dock.Bottom);
             bottomDock.Height = 10;
-            bottomDock.Background = ColorConstants.ForegroundColorConstantBrush;
-            bottomDock.Tag = "[DockSite]";
-            bottomDock.MouseDown += DockMouseDown;
             _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, bottomDock);
 
-            var leftDock = new Border();
+            var leftDock = CreateDockSiteBorder();
             DockPanel.SetDock(leftDock, Dock.Left);
             leftDock.Width = 10;
-            leftDock.Background = ColorConstants.ForegroundColorConstantBrush;
-            leftDock.Tag = "[DockSite]";
-            leftDock.MouseDown += DockMouseDown;
             _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, leftDock);
 
-            var rightDock = new Border();
+            var rightDock = CreateDockSiteBorder();
             DockPanel.SetDock(rightDock, Dock.Right);
             rightDock.Width = 10;
-            rightDock.Background = ColorConstants.ForegroundColorConstantBrush;
-            rightDock.Tag = "[DockSite]";
-            rightDock.MouseDown += DockMouseDown;
             _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, rightDock);
+        }
+
+        private void DockSiteMouseLeave(object sender, MouseEventArgs e)
+        {
+            var border = (Border)sender!;
+            border.Background = ColorConstants.ForegroundColorConstantBrush;
+        }
+
+        private void DockSiteMouseEnter(object sender, MouseEventArgs e)
+        {
+            var border = (Border)sender!;
+            border.Background = ColorConstants.AccentColorConstantBrush;
         }
 
         private void DockMouseDown(object sender, MouseButtonEventArgs e)
@@ -292,7 +303,10 @@ namespace Cell.View.Application
 
         private void OpenToolWindowInFloatingContainer(ResizableToolWindow resizableToolWindow)
         {
-            var toolbox = new FloatingToolWindowContainer(_viewModel);
+            var toolbox = new FloatingToolWindowContainer(_viewModel)
+            {
+                ShowDockOptions = ShowDockSites
+            };
             if (resizableToolWindow.ToolViewModel.X < 0) resizableToolWindow.ToolViewModel.X = (_toolWindowCanvas.ActualWidth / 2) - (resizableToolWindow.ToolViewModel.DefaultWidth / 2);
             if (resizableToolWindow.ToolViewModel.Y < 0) resizableToolWindow.ToolViewModel.Y = (_toolWindowCanvas.ActualHeight / 2) - (resizableToolWindow.ToolViewModel.DefaultHeight / 2);
             toolbox.ToolWindowContent = resizableToolWindow;

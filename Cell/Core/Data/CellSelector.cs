@@ -37,6 +37,7 @@ namespace Cell.Core.Data
         /// Gets an observable collection of the currently selected cells.
         /// </summary>
         public ObservableCollection<CellModel> SelectedCells { get; } = [];
+        private HashSet<CellModel> SelectedCellsHashSet { get; } = [];
 
         /// <summary>
         /// A null cell selector.
@@ -103,6 +104,8 @@ namespace Cell.Core.Data
         public void SelectCell(CellModel cell)
         {
             if (!IsSelectingEnabled) return;
+            if(SelectedCellsHashSet.Contains(cell)) return;
+            SelectedCellsHashSet.Add(cell);
             SelectedCells.Add(cell);
         }
 
@@ -121,6 +124,7 @@ namespace Cell.Core.Data
         public void UnselectCell(CellModel cell)
         {
             SelectedCells.Remove(cell);
+            SelectedCellsHashSet.Remove(cell);
         }
     }
 }

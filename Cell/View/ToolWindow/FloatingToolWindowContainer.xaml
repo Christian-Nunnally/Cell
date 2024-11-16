@@ -33,26 +33,15 @@
                         Click="CloseButtonClicked"
                         Content="{fa:Icon XMark}"
                         DockPanel.Dock="Right"
-                        ToolTip="Closes this tool window."
-                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <Button
-                        Width="28"
-                        Height="28"
-                        BorderThickness="0"
-                        Click="UndockButtonClicked"
-                        Content="{fa:Icon Lock}"
-                        DockPanel.Dock="Right"
-                        ToolTip="Disables the ability to move and close this tool window. Click again to re-enable."
-                        Visibility="{Binding IsDocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        ToolTip="Closes this tool window." />
                     <Button
                         Width="28"
                         Height="28"
                         BorderThickness="0"
                         Click="DockButtonClicked"
-                        Content="{fa:Icon LockOpen}"
+                        Content="{fa:Icon Lock}"
                         DockPanel.Dock="Right"
-                        ToolTip="Enables the ability to move and close this tool window. Click again to disable again."
-                        Visibility="{Binding IsUndocked, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        ToolTip="Shows sites this tool window can be docked to."/>
                     <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

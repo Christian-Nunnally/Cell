@@ -12,11 +12,16 @@
     mc:Ignorable="d">
     <Grid>
         <ScrollViewer x:Name="_logScrollViewer">
-            <TextBlock
-                IsManipulationEnabled="True"
+            <TextBox
+                Background="Transparent"
+                BorderThickness="0"
+                VerticalContentAlignment="Top"
                 FontFamily="{StaticResource ProgrammingFont}"
                 Foreground="{StaticResource ForegroundColor}"
-                Text="{Binding LogBuffer}" />
+                IsManipulationEnabled="True"
+                IsReadOnly="True"
+                Text="{Binding LogBuffer, Mode=OneWay}"
+                TextWrapping="Wrap" />
         </ScrollViewer>
     </Grid>
 </view:ResizableToolWindow>

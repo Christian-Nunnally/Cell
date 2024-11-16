@@ -26,12 +26,12 @@ namespace Cell.View.Application
             ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
         }
 
-        private void GoToSheetButtonClicked(object sender, RoutedEventArgs e)
+        private async void GoToSheetButtonClickedAsync(object sender, RoutedEventArgs e)
         {
             if (sender is not Button button) return;
             if (button.Content is not Label label) return;
             if (label.Content is not string sheetName) return;
-            ApplicationViewModel.Instance.GoToSheet(sheetName);
+            await ApplicationViewModel.Instance.GoToSheetAsync(sheetName);
         }
     }
 }

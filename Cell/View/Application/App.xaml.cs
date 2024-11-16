@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Execution;
-using Cell.Core.Persistence.Migration;
 using Cell.Core.Persistence;
 using Cell.View.Application;
 using Cell.ViewModel.Application;
@@ -17,7 +16,7 @@ namespace Cell
     public partial class App : Application
     {
         private SheetTracker sheetTracker = new (new CellTracker());
-        private ApplicationViewModel applicationViewModel = new();
+        private readonly ApplicationViewModel applicationViewModel = new();
 
         /// <summary>
         /// The entry point for the entire application.
@@ -66,11 +65,9 @@ namespace Cell
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
-            persistedProject.RegisterMigrator("1", "2", new Migration());
             await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
             OpenCellContentEditWindowInDockedMode(applicationViewModel, functionTracker, cellSelector);
             OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
-            //OpenInitialSheet(applicationViewModel, sheetTracker);
         }
 
         private void OpenFirstAddedSheet(object? sender, NotifyCollectionChangedEventArgs e)
@@ -87,12 +84,6 @@ namespace Cell
         {
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(cellSelector.SelectedCells, functionTracker);
             applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
-        }
-
-        private static void OpenInitialSheet(ApplicationViewModel applicationViewModel, SheetTracker sheetTracker)
-        {
-            var firstSheet = sheetTracker.OrderedSheets.FirstOrDefault();
-            applicationViewModel.GoToSheet(firstSheet?.Name ?? string.Empty);
         }
 
         private void OnlyAllowSelectionWhenEditWindowIsOpen(ApplicationViewModel applicationViewModel, CellSelector cellSelector)

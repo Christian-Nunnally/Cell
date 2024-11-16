@@ -2,6 +2,7 @@
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Common;
 
 namespace Cell.Core.Execution
 {
@@ -70,7 +71,14 @@ namespace Cell.Core.Execution
             }
             else
             {
-                subscriber.Text = result.ExecutionResult ?? "Execution result was null";
+                if (result.ExecutionResult == "Populate function not found")
+                {
+                    Logger.Instance.Log($"The populate function for {subscriber.Location.UserFriendlyLocationString}, '{subscriber.PopulateFunctionName}', does not exist yet.");
+                }
+                else
+                {
+                    subscriber.Text = result.ExecutionResult ?? "Execution result was null";
+                }
             }
         }
     }

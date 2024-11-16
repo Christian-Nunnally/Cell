@@ -1,8 +1,7 @@
 ﻿using Cell.Core.Data.Tracker;
-using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 
-namespace Cell.ViewModel
+namespace Cell.ViewModel.Cells
 {
     /// <summary>
     /// Layouts the cells in a sheet.

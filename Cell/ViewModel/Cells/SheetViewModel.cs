@@ -2,12 +2,12 @@
 using Cell.Core.Data;
 using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Core.Persistence;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Cell.Core.Data.Tracker;
+using System.Windows.Threading;
 
 namespace Cell.ViewModel.Cells
 {
@@ -57,11 +57,16 @@ namespace Cell.ViewModel.Cells
             _cellTriggerManager = cellTriggerManager;
             _model = model;
             _model.Cells.CollectionChanged += CellsCollectionChanged;
+        }
+
+        public async Task InitializeCellViewModelsAsync()
+        {
             foreach (var cell in _model.Cells)
             {
                 AddCellViewModel(cell);
+                UpdateLayout();
+                await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             }
-            UpdateLayout();
         }
 
         /// <summary>
