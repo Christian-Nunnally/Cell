@@ -21,6 +21,11 @@ namespace Cell.Model
         /// </summary>
         public List<CellModel> CellsToRemove { get; set; } = [];
 
+        /// <summary>
+        /// List of cells that were added.
+        /// </summary>
+        public List<CellFunctionModel> FunctionsToRestore { get; set; } = [];
+
         /// <inheritdoc/>
         public override string ToString()
         {

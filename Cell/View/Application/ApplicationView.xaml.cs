@@ -349,7 +349,7 @@ namespace Cell.View.Application
             if (_viewModel?.SheetViewModel is null) return;
             if (_viewModel.CellTracker is null) return;
             if (_viewModel.FunctionTracker is null) return;
-            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.FunctionTracker);
+            var viewModel = new CellFormatEditWindowViewModel(_viewModel.SheetViewModel.CellSelector.SelectedCells, _viewModel.CellTracker, _viewModel.FunctionTracker, _viewModel.UndoRedoManager);
             _viewModel.ShowToolWindow(viewModel);
         }
 

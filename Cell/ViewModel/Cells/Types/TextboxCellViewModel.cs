@@ -10,6 +10,10 @@ namespace Cell.ViewModel.Cells.Types
     public class TextboxCellViewModel : CellViewModel
     {
 
+        public Action FocusTextbox { get; set; } = () => { };
+        public Action UnfocusTextbox { get; set; } = () => { };
+        public Action SelectAllText { get; set; } = () => { };
+
         /// <summary>
         /// Creates a new instance of <see cref="TextboxCellViewModel"/>.
         /// </summary>

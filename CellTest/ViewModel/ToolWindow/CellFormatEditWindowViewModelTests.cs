@@ -1,6 +1,7 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data.Tracker;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 
@@ -12,13 +13,15 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly ObservableCollection<CellModel> _cellsToEdit;
         private readonly FunctionTracker _functionTracker;
         private readonly CellFormatEditWindowViewModel _testing;
+        private readonly UndoRedoManager _undoRedoManager;
 
         public CellFormatEditWindowViewModelTests()
         {
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
             _functionTracker = new FunctionTracker(Logger.Null);
-            _testing = new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _functionTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _testing = new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _functionTracker, _undoRedoManager);
         }
 
         [Fact]
@@ -87,6 +90,86 @@ namespace CellTest.ViewModel.ToolWindow
             Assert.True(cell2.IsMergedWith(cell));
             Assert.True(cell3.IsMergedParent());
             Assert.True(cell4.IsMergedWith(cell3));
+        }
+
+        [Fact]
+        public void OneRowDeleted_UndoPerformed_RowRestored()
+        {
+            SheetFactory.CreateSheet("TestSheet", 2, 2, _cellTracker);
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 1, 0));
+            _testing.DeleteRows();
+            Assert.Null(_cellTracker.GetCell("TestSheet", 2, 0));
+
+            _undoRedoManager.Undo();
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    if (_cellTracker.GetCell("TestSheet", x, y) is null) Assert.Fail($"Expected cell at x:{x} y:{y} but got null.");
+                }
+            }
+        }
+
+        [Fact]
+        public void TwoRowsDeleted_UndoPerformed_RowsRestored()
+        {
+            SheetFactory.CreateSheet("TestSheet", 2, 2, _cellTracker);
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 1, 0));
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 2, 0));
+            _testing.DeleteRows();
+            Assert.Null(_cellTracker.GetCell("TestSheet", 1, 0));
+            Assert.Null(_cellTracker.GetCell("TestSheet", 2, 0));
+
+            _undoRedoManager.Undo();
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    if (_cellTracker.GetCell("TestSheet", x, y) is null) Assert.Fail($"Expected cell at x:{x} y:{y} but got null.");
+                }
+            }
+        }
+
+        [Fact]
+        public void OneColumnDeleted_UndoPerformed_ColumnRestored()
+        {
+            SheetFactory.CreateSheet("TestSheet", 2, 2, _cellTracker);
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 0, 1));
+            _testing.DeleteColumns();
+            Assert.Null(_cellTracker.GetCell("TestSheet", 0, 2));
+
+            _undoRedoManager.Undo();
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    if (_cellTracker.GetCell("TestSheet", x, y) is null) Assert.Fail($"Expected cell at x:{x} y:{y} but got null.");
+                }
+            }
+        }
+
+        [Fact]
+        public void TwoColumnsDeleted_UndoPerformed_ColumnsRestored()
+        {
+            SheetFactory.CreateSheet("TestSheet", 2, 2, _cellTracker);
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 0, 1));
+            _cellsToEdit.Add(_cellTracker.GetCell("TestSheet", 0, 2));
+            _testing.DeleteColumns();
+            Assert.Null(_cellTracker.GetCell("TestSheet", 0, 1));
+            Assert.Null(_cellTracker.GetCell("TestSheet", 0, 2));
+
+            _undoRedoManager.Undo();
+
+            for (int x = 0; x < 3; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    if (_cellTracker.GetCell("TestSheet", x, y) is null) Assert.Fail($"Expected cell at x:{x} y:{y} but got null.");
+                }
+            }
         }
     }
 }

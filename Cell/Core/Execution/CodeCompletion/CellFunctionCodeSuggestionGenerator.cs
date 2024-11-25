@@ -82,21 +82,28 @@ namespace Cell.Core.Execution.CodeCompletion
 
         private void AddCellReferencesToVariableTypeMap(string code, Dictionary<string, Type> variableTypeMap)
         {
-            if (_cellContext is null) return;
-            var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(_cellContext.Location);
-            var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(_cellContext.Location);
-            var cellReferenceFinder = new CellReferenceSyntaxWalker();
-            var syntaxTree = CSharpSyntaxTree.ParseText(code);
-            var root = syntaxTree.GetRoot();
-            root = cellReferenceToCodeSyntaxRewriter.Visit(root);
-            cellReferenceFinder.Visit(root);
-            foreach (var cellReference in cellReferenceFinder.LocationReferences)
+            try
             {
-                if (_cellContext is null) break;
-                var type = cellReference.IsRange ? typeof(CellRange) : typeof(CellModel);
-                var name = codeToCellReferenceSyntaxRewriter.GetUserFriendlyCellReferenceText(cellReference);
-                if (variableTypeMap.ContainsKey(name)) continue;
-                variableTypeMap.Add(name, type);
+                if (_cellContext is null) return;
+                var cellReferenceToCodeSyntaxRewriter = new CellReferenceToCodeSyntaxRewriter(_cellContext.Location);
+                var codeToCellReferenceSyntaxRewriter = new CodeToCellReferenceSyntaxRewriter(_cellContext.Location);
+                var cellReferenceFinder = new CellReferenceSyntaxWalker();
+                var syntaxTree = CSharpSyntaxTree.ParseText(code);
+                var root = syntaxTree.GetRoot();
+                root = cellReferenceToCodeSyntaxRewriter.Visit(root);
+                cellReferenceFinder.Visit(root);
+                foreach (var cellReference in cellReferenceFinder.LocationReferences)
+                {
+                    if (_cellContext is null) break;
+                    var type = cellReference.IsRange ? typeof(CellRange) : typeof(CellModel);
+                    var name = codeToCellReferenceSyntaxRewriter.GetUserFriendlyCellReferenceText(cellReference);
+                    if (variableTypeMap.ContainsKey(name)) continue;
+                    variableTypeMap.Add(name, type);
+                }
+            }
+            catch
+            {
+
             }
         }
 

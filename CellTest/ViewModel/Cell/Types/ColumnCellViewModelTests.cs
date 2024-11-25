@@ -3,6 +3,7 @@ using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Model;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
@@ -21,6 +22,7 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly SheetViewModel _sheetViewModel;
         private readonly CellModel _cellModel;
         private readonly CellSelector _cellSelector;
+        private readonly UndoRedoManager _undoRedoManager;
         private readonly ColumnCellViewModel _testing;
 
         public ColumnCellViewModelTests()
@@ -33,7 +35,8 @@ namespace CellTest.ViewModel.Cell.Types
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _undoRedoManager, _functionTracker);
             _cellModel = new CellModel();
             _testing = new ColumnCellViewModel(_cellModel, _sheetViewModel);
         }

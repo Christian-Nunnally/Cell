@@ -1,5 +1,8 @@
 ﻿using Cell.Core.Data.Tracker;
+using Cell.Model;
 using Cell.ViewModel.Cells.Types;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Cell.ViewModel.Cells
 {
@@ -8,18 +11,19 @@ namespace Cell.ViewModel.Cells
     /// </summary>
     public class CellLayout
     {
-        private readonly bool _canLayout = true;
+        private bool _canLayout = true;
         private readonly IEnumerable<CellViewModel> _cells;
+        private readonly Dictionary<CellModel, CellViewModel> _cellModelToViewModelMap = [];
         private readonly CellTracker _cellTracker;
-        private readonly List<CellViewModel> _columns;
-        private readonly CellViewModel? _corner;
-        private readonly List<CellViewModel> _rows;
+        private List<CellViewModel> _columns;
+        private CellViewModel? _corner;
+        private List<CellViewModel> _rows;
         /// <summary>
         /// Creates a new instance of <see cref="CellLayout"/>.
         /// </summary>
         /// <param name="cells">The cell view models to perform a layout on.</param>
         /// <param name="cellTracker">The cell tracker to get cell models from.</param>
-        public CellLayout(IEnumerable<CellViewModel> cells, CellTracker cellTracker)
+        public CellLayout(ObservableCollection<CellViewModel> cells, CellTracker cellTracker)
         {
             _cellTracker = cellTracker;
             _cells = cells;
@@ -31,6 +35,84 @@ namespace Cell.ViewModel.Cells
             {
                 _rows.Insert(0, _corner!);
                 _columns.Insert(0, _corner!);
+            }
+
+            cells.CollectionChanged += CellsViewModelsCollectionChanged;
+
+            foreach (var cell in _cells)
+            {
+                AddCellToLayout(cell);
+            }
+        }
+
+        private void AddCellToLayout(CellViewModel cell)
+        {
+            cell.Model.PropertyChanged += CellModelPropertyChanged;
+            cell.Model.Location.PropertyChanged += CellLocationPropertyChanged;
+            _cellModelToViewModelMap[cell.Model] = cell;
+        }
+
+        public event Action? LayoutUpdated;
+
+        private void CellsViewModelsCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                foreach (CellViewModel cell in e.NewItems)
+                {
+                    AddCellToLayout(cell);
+                }
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                foreach (CellViewModel cell in e.OldItems)
+                {
+                    RemoveCellFromLayout(cell);
+                }
+            }
+
+            _corner = _cells.OfType<CornerCellViewModel>().FirstOrDefault();
+            _canLayout = _corner is not null;
+            _rows = [.. _cells.OfType<RowCellViewModel>().OrderBy(x => x.Row)];
+            _columns = [.. _cells.OfType<ColumnCellViewModel>().OrderBy(x => x.Column)];
+            if (_canLayout)
+            {
+                _rows.Insert(0, _corner!);
+                _columns.Insert(0, _corner!);
+            }
+
+            UpdateLayout();
+        }
+
+        private void RemoveCellFromLayout(CellViewModel cell)
+        {
+            cell.Model.PropertyChanged -= CellModelPropertyChanged;
+            cell.Model.Location.PropertyChanged -= CellLocationPropertyChanged;
+            _cellModelToViewModelMap.Remove(cell.Model);
+        }
+
+        private void CellLocationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CellLocationModel.Column) ||
+                e.PropertyName == nameof(CellLocationModel.Row))
+            {
+                UpdateLayout();
+            }
+        }
+
+        private void CellModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            var cell = (CellModel)sender;
+            if (e.PropertyName == nameof(CellModel.Width) ||
+                e.PropertyName == nameof(CellModel.Height) ||
+                e.PropertyName == nameof(CellModel.MergedWith))
+            {
+                if (cell.CellType.IsSpecial()) UpdateLayout();
+                else
+                {
+                    var cellViewModel = _cellModelToViewModelMap[cell];
+                    LayoutSingleNonSpecialCell(cellViewModel);
+                }
             }
         }
 
@@ -53,6 +135,7 @@ namespace Cell.ViewModel.Cells
             LayoutRowCells();
             LayoutColumnCells();
             LayoutOtherCells();
+            LayoutUpdated?.Invoke();
         }
 
         private double ComputeMergedCellsHeight(CellViewModel cell)
@@ -135,11 +218,18 @@ namespace Cell.ViewModel.Cells
             foreach (var cell in _cells)
             {
                 if (IsRowOrColumn(cell)) continue;
-                if (IsMergedCell(cell)) LayoutMergedCell(cell);
-                else LayoutCell(cell);
+                LayoutSingleNonSpecialCell(cell);
             }
 
             static bool IsRowOrColumn(CellViewModel cell) => cell.Row == 0 || cell.Column == 0;
+
+        }
+
+        private void LayoutSingleNonSpecialCell(CellViewModel cell)
+        {
+            if (IsMergedCell(cell)) LayoutMergedCell(cell);
+            else LayoutCell(cell);
+
             static bool IsMergedCell(CellViewModel cell) => !string.IsNullOrEmpty(cell.Model.MergedWith);
         }
 

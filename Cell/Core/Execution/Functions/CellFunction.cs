@@ -6,6 +6,7 @@ using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Cell.Core.Execution.Functions
 {

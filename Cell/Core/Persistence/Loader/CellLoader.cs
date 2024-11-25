@@ -17,7 +17,7 @@ namespace Cell.Core.Persistence.Loader
         /// <summary>
         /// Occurs when all the sheets have finished loading. What is not the same as all cells being loaded.
         /// </summary>
-        public Action SheetsLoaded;
+        public Action? SheetsLoaded;
         private bool _isSavingAddedCells = true;
         private readonly List<PersistedDirectory> _partiallyLoadedSheets = [];
         /// <summary>
@@ -41,6 +41,18 @@ namespace Cell.Core.Persistence.Loader
         {
             var cellDirectory = cellModel.Location.SheetName;
             var cellPath = Path.Combine(cellModel.Location.SheetName, cellModel.ID);
+            if (cellModel.CellType == CellType.Corner)
+            {
+                cellPath = Path.Combine(cellModel.Location.SheetName, "Corner", cellModel.ID);
+            }
+            if (cellModel.CellType == CellType.Row)
+            {
+                cellPath = Path.Combine(cellModel.Location.SheetName, "Rows", cellModel.ID);
+            }
+            if (cellModel.CellType == CellType.Column)
+            {
+                cellPath = Path.Combine(cellModel.Location.SheetName, "Columns", cellModel.ID);
+            }
             _sheetsDirectory.DeleteFile(cellPath);
             if (!_sheetsDirectory.GetFiles(cellDirectory).Any()) _sheetsDirectory.DeleteDirectory(cellDirectory);
         }

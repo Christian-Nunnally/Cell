@@ -81,10 +81,6 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.BackgroundColor = value;
-                var color = (Color)ColorConverter.ConvertFromString(value);
-                BackgroundColor = new SolidColorBrush(color);
-                SelectionColor = new(ColorAdjuster.GetHighlightColor(color, 100));
-                SelectionBorderColor = new(ColorAdjuster.GetHighlightColor(color, 175));
             }
         }
 
@@ -112,8 +108,6 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.BorderColor = value;
-                var color = (Color)ColorConverter.ConvertFromString(BorderColorHex);
-                BorderColor = new SolidColorBrush(color);
             }
         }
 
@@ -177,8 +171,6 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.ContentBackgroundColor = value;
-                ContentBackgroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBackgroundColorHex));
-                NotifyPropertyChanged(nameof(ContentBackgroundColor));
             }
         }
 
@@ -207,8 +199,6 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.ContentBorderColor = value;
-                ContentBorderColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentBorderColorHex));
-                NotifyPropertyChanged(nameof(ContentBorderColor));
             }
         }
 
@@ -248,7 +238,7 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.HighlightColor = value;
-                ContentHighlightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ContentHighlightColorHex));
+                
             }
         }
 
@@ -314,7 +304,6 @@ namespace Cell.ViewModel.Cells
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(_model);
                 _model.Style.ForegroundColor = value;
-                ForegroundColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(ForegroundColorHex));
             }
         }
 
@@ -614,7 +603,10 @@ namespace Cell.ViewModel.Cells
         {
             if (e.PropertyName == nameof(CellStyleModel.BackgroundColor))
             {
-                BackgroundColor = ColorAdjuster.ConvertHexStringToBrush(BackgroundColorHex);
+                var color = (Color)ColorConverter.ConvertFromString(BackgroundColorHex);
+                BackgroundColor = new SolidColorBrush(color);
+                SelectionColor = new(ColorAdjuster.GetHighlightColor(color, 100));
+                SelectionBorderColor = new(ColorAdjuster.GetHighlightColor(color, 175));
                 NotifyPropertyChanged(nameof(BackgroundColorHex));
             }
             else if (e.PropertyName == nameof(CellStyleModel.ContentBackgroundColor))

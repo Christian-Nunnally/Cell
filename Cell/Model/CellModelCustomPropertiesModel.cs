@@ -109,5 +109,13 @@ namespace Cell.Model
                 ? doubleResult
                 : defaultValue;
         }
+
+        internal void CopyTo(CellModelCustomPropertiesModel properties)
+        {
+            foreach (var (key, value) in CustomProperties)
+            {
+                properties.CustomProperties[key] = value;
+            }
+        }
     }
 }

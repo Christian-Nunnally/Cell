@@ -57,7 +57,7 @@ namespace Cell.Core.Persistence
         /// Gets whether the project actually stored here can be migrated to the current version of this project directory object.
         /// </summary>
         /// <returns></returns>
-        public bool CanMigrate() => _registeredMigrators.ContainsKey(IMigrator.GetMigratorKey(LoadVersion(), Version));
+        public async Task<bool> CanMigrateAsync() => _registeredMigrators.ContainsKey(IMigrator.GetMigratorKey(await LoadVersionAsync(), Version));
 
         /// <summary>
         /// Gets the names of all templates stored in the project directory.
@@ -66,6 +66,16 @@ namespace Cell.Core.Persistence
         public IEnumerable<string> GetTemplateNames()
         {
             return TemplatesDirectory.GetDirectories().Select(Path.GetFileName).OfType<string>();
+        }
+
+        /// <summary>
+        /// Loads the version of the project stored in the project directory.
+        /// </summary>
+        /// <returns>The version of the persisted model on disk.</returns>
+        public async Task<string> LoadVersionAsync()
+        {
+            var version = await _projectDirectory.LoadFileAsync(VersionFileName);
+            return version is null ? Version : version;
         }
 
         /// <summary>

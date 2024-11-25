@@ -8,6 +8,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Cell.Core.Data.Tracker;
 using System.Windows.Threading;
+using Cell.ViewModel.Application;
 
 namespace Cell.ViewModel.Cells
 {
@@ -19,7 +20,7 @@ namespace Cell.ViewModel.Cells
         /// <summary>
         /// A null sheet that can be used as a placeholder.
         /// </summary>
-        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, CellSelector.Null, null!);
+        public static readonly SheetViewModel NullSheet = new(SheetModel.Null, null!, null!, null!, CellSelector.Null, null!, null!);
         private readonly Dictionary<CellModel, CellViewModel> _cellModelToCellViewModelMap = [];
         private readonly CellPopulateManager _cellPopulateManager;
         private readonly CellTriggerManager _cellTriggerManager;
@@ -32,6 +33,9 @@ namespace Cell.ViewModel.Cells
         private double _panY;
         private bool _isPanningEnabled;
         private bool _isLockedToCenter;
+        private UndoRedoManager _undoRedoManager;
+        private CellLayout _layout;
+
         /// <summary>
         /// Creates a new instance of <see cref="SheetViewModel"/>.
         /// </summary>
@@ -40,6 +44,7 @@ namespace Cell.ViewModel.Cells
         /// <param name="cellTriggerManager">The cell trigger manager used to run trigger functions on cells.</param>
         /// <param name="cellTracker">The cell tracker used to get cells for this sheet.</param>
         /// <param name="cellSelector">The cell selector used to select cells on the sheet.</param>
+        /// <param name="undoRedoManager">The undo redo manager used by this sheet.</param>
         /// <param name="functionTracker">Used to get cell functions from the application.</param>
         public SheetViewModel(
             SheetModel model,
@@ -47,6 +52,7 @@ namespace Cell.ViewModel.Cells
             CellTriggerManager cellTriggerManager,
             CellTracker cellTracker,
             CellSelector cellSelector,
+            UndoRedoManager undoRedoManager,
             FunctionTracker functionTracker)
         {
             _functionTracker = functionTracker;
@@ -56,7 +62,10 @@ namespace Cell.ViewModel.Cells
             _cellPopulateManager = cellPopulateManager;
             _cellTriggerManager = cellTriggerManager;
             _model = model;
+            _undoRedoManager = undoRedoManager;
             _model.Cells.CollectionChanged += CellsCollectionChanged;
+            _layout = new CellLayout(CellViewModels, _cellTracker);
+            _layout.LayoutUpdated += HandleLayoutUpdated;
         }
 
         /// <summary>
@@ -68,7 +77,6 @@ namespace Cell.ViewModel.Cells
             foreach (var cell in _model.Cells)
             {
                 AddCellViewModel(cell);
-                UpdateLayout();
                 await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
             }
         }
@@ -216,7 +224,6 @@ namespace Cell.ViewModel.Cells
         {
             RemoveCellViewModel(cellViewModel.Model);
             AddCellViewModel(cellViewModel.Model);
-            UpdateLayout();
         }
 
         /// <summary>
@@ -231,12 +238,10 @@ namespace Cell.ViewModel.Cells
         /// <summary>
         /// Recalculates the layout of the cells on the sheet.
         /// </summary>
-        public void UpdateLayout()
+        public void HandleLayoutUpdated()
         {
-            var layout = new CellLayout(CellViewModels, _cellTracker);
-            layout.UpdateLayout();
-            SheetWidth = layout.LayoutWidth;
-            SheetHeight = layout.LayoutHeight;
+            SheetWidth = _layout.LayoutWidth;
+            SheetHeight = _layout.LayoutHeight;
         }
 
         private void AddCellViewModel(CellModel newModel)
@@ -252,18 +257,15 @@ namespace Cell.ViewModel.Cells
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 foreach (CellModel cell in e.NewItems!) AddCellViewModel(cell);
-                UpdateLayout();
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
                 foreach (CellModel cell in e.OldItems!) RemoveCellViewModel(cell);
-                UpdateLayout();
             }
             else if (e.Action == NotifyCollectionChangedAction.Reset)
             {
                 CellViewModels.Clear();
                 foreach (var cell in _model.Cells) AddCellViewModel(cell);
-                UpdateLayout();
             }
         }
 
@@ -279,7 +281,7 @@ namespace Cell.ViewModel.Cells
         private void EnsureUnmerged(CellModel cell)
         {
             if (!cell.IsMergedParent()) return;
-            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker, _functionTracker);
+            var cellEditor = new CellFormatEditWindowViewModel([cell], _cellTracker, _functionTracker, _undoRedoManager);
             cellEditor.UnmergeCells();
         }
 

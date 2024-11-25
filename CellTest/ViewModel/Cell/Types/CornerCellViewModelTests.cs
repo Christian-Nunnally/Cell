@@ -6,6 +6,7 @@ using CellTest.TestUtilities;
 using Cell.ViewModel.Cells.Types;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Common;
+using Cell.ViewModel.Application;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -23,6 +24,7 @@ namespace CellTest.ViewModel.Cell.Types
         private CellModel _cellModel;
         private CellSelector _cellSelector;
         private CellTriggerManager _cellTriggerManager;
+        private UndoRedoManager _undoRedoManager;
 
         private CornerCellViewModel CreateInstance()
         {
@@ -34,7 +36,8 @@ namespace CellTest.ViewModel.Cell.Types
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _undoRedoManager, _functionTracker);
             _cellModel = new CellModel();
             return new CornerCellViewModel(_cellModel, _sheetViewModel);
         }

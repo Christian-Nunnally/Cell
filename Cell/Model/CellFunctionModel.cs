@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Common;
+using System.Text.Json;
 
 namespace Cell.Model
 {
@@ -87,5 +88,23 @@ namespace Cell.Model
         /// The description of the function.
         /// </summary>
         public string Description { get; internal set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Extension methods for <see cref="CellFunctionModel"/>.
+    /// </summary>
+    public static class CellFunctionModelExtensions
+    {
+        /// <summary>
+        /// Performs a deep copy of the given cell model by serializing and deserializing it.
+        /// </summary>
+        /// <param name="modelToCopy">The cell to copy.</param>
+        /// <returns>The copied cell.</returns>
+        /// <exception cref="CellError">If there was an issue during serialization.</exception>
+        public static CellFunctionModel Copy(this CellFunctionModel modelToCopy)
+        {
+            var serialized = JsonSerializer.Serialize(modelToCopy);
+            return JsonSerializer.Deserialize<CellFunctionModel>(serialized) ?? throw new CellError("Unable to copy model");
+        }
     }
 }

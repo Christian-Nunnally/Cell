@@ -61,7 +61,7 @@ namespace Cell
             var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
             var backupDirectory = new PersistedDirectory(backupPath, fileIo);
             applicationViewModel.BackupManager = new BackupManager(projectDirectory, backupDirectory);
-            var undoRedoManager = new UndoRedoManager(cellTracker);
+            var undoRedoManager = new UndoRedoManager(cellTracker, functionTracker);
             applicationViewModel.UndoRedoManager = undoRedoManager;
             var textClipboard = new TextClipboard();
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);

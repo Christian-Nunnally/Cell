@@ -84,17 +84,10 @@ namespace Cell.Core.Persistence
         private void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
             _undoRedoManager.RecordStateIfRecording(cellToReplace);
-            List<string> blacklist = [
-                nameof(CellModel.ID),
-                nameof(CellModel.Location),
-                nameof(CellModel.Width),
-                nameof(CellModel.Height),
-                nameof(CellModel.MergedWith),
-                nameof(CellModel.Value),
-                nameof(CellModel.Date),
-                nameof(CellModel.Int)];
-            if (cellToReplace.CellType.IsSpecial()) blacklist.Add(nameof(CellModel.CellType));
-            cellToPaste.CopyPublicProperties(cellToReplace, [.. blacklist]);
+
+            if (!cellToReplace.CellType.IsSpecial()) cellToReplace.CellType = cellToPaste.CellType;
+            cellToReplace.Text = cellToPaste.Text;
+            cellToReplace.Properties.CopyTo(cellToPaste.Properties);
             cellToPaste.Style.CopyTo(cellToReplace.Style);
         }
 

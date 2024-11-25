@@ -4,6 +4,7 @@ using Cell.Core.Data.Tracker;
 using Cell.Core.Execution;
 using Cell.Core.Persistence;
 using Cell.Core.Persistence.Loader;
+using Cell.Model;
 using Cell.ViewModel.Application;
 using CellTest.TestUtilities;
 
@@ -52,7 +53,7 @@ namespace CellTest.ViewModel.Application
             _backupManager = new BackupManager(_persistedDirectory, _backupDirectory);
             _cellSelector = new CellSelector(_cellTracker);
             _applicationSettings = new ApplicationSettings();
-            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker, _functionTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
             _testing = new ApplicationViewModel
@@ -78,6 +79,40 @@ namespace CellTest.ViewModel.Application
         [Fact]
         public void BasicLaunchTest()
         {
+        }
+
+        [Fact]
+        public void NoCellsSelected_FullCopySelectedCells_NoError()
+        {
+            Assert.Empty(_cellSelector.SelectedCells);
+
+            _testing.CopySelectedCells(true);
+        }
+
+        [Fact]
+        public void OneCellsSelected_FullCopySelectedCells_NoError()
+        {
+            CellModelFactory.Create(1,1, CellType.Label, "TestSheet", _cellTracker);
+            _cellSelector.SelectCell(_cellTracker.GetCell("TestSheet", 1, 1)!);
+            Assert.Single(_cellSelector.SelectedCells);
+
+            _testing.CopySelectedCells(true);
+        }
+
+        [Fact]
+        public void OneCellCopiedWithBackgroundColorSet_PastedIntoNeighboringCell_BackgroundSetInPastedCell()
+        {
+            var cellToCopy = CellModelFactory.Create(1, 1, CellType.Label, "TestSheet", _cellTracker);
+            var cellToPaste = CellModelFactory.Create(1, 2, CellType.Label, "TestSheet", _cellTracker);
+            cellToCopy.Style.BackgroundColor = "#deadbe";
+            _cellSelector.SelectCell(_cellTracker.GetCell("TestSheet", 1, 1)!);
+            _testing.CopySelectedCells(false);
+            _cellSelector.UnselectCell(cellToCopy);
+            _cellSelector.SelectCell(cellToPaste);
+
+            _testing.PasteCopiedCells();
+
+            Assert.Equal("#deadbe", cellToPaste.Style.BackgroundColor);
         }
 
         [Fact]

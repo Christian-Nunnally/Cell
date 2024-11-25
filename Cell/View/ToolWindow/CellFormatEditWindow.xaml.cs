@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Common;
 using Cell.Model;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -37,7 +36,6 @@ namespace Cell.View.ToolWindow
             if (sender is not Button button) return;
             var cellTypeString = button.Content is Label label ? label.Content.ToString() : button.Content.ToString();
             if (Enum.TryParse(cellTypeString, out CellType newType)) _viewModel.CellType = newType;
-            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void ColorPicker_Loaded(object sender, RoutedEventArgs e)
@@ -62,68 +60,47 @@ namespace Cell.View.ToolWindow
 
         private void CreateNewColumnToTheLeftButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddColumnToTheLeft();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewColumnToTheRightButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddColumnToTheRight();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewRowAboveButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddRowAbove();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void CreateNewRowBelowButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.AddRowBelow();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void DeleteColumnButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.DeleteColumns();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void DeleteRowButtonClicked(object sender, RoutedEventArgs e)
         {
-            ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
             _viewModel.DeleteRows();
-            ApplicationViewModel.Instance.SheetViewModel!.UpdateLayout();
-            ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
         }
 
         private void MergeAcrossButtonClicked(object sender, RoutedEventArgs e)
         {
             _viewModel.MergeCellsAcross();
-            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeButtonClicked(object sender, RoutedEventArgs e)
         {
             _viewModel.MergeCells();
-            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void MergeDownButtonClicked(object sender, RoutedEventArgs e)
         {
             _viewModel.MergeCellsDown();
-            ApplicationViewModel.Instance.SheetViewModel?.UpdateLayout();
         }
 
         private void SetAlignmentToBottomButtonClick(object sender, RoutedEventArgs e)

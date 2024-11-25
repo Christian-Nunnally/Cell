@@ -6,6 +6,7 @@ using Cell.ViewModel.Cells.Types;
 using CellTest.TestUtilities;
 using Cell.Core.Common;
 using Cell.Core.Data.Tracker;
+using Cell.ViewModel.Application;
 
 namespace CellTest.ViewModel.Cell.Types
 {
@@ -23,6 +24,7 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly CellSelector _cellSelector;
         private readonly CheckboxCellViewModel _testing;
         private readonly Logger _logger;
+        private readonly UndoRedoManager _undoRedoManager;
 
         public CheckboxCellViewModelTests()
         {
@@ -35,7 +37,8 @@ namespace CellTest.ViewModel.Cell.Types
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, _logger);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _undoRedoManager, _functionTracker);
             _cellModel = new CellModel();
             _testing = new CheckboxCellViewModel(_cellModel, _sheetViewModel);
         }

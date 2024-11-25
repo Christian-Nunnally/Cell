@@ -12,6 +12,7 @@ namespace Cell.Core.Data.Tracker
         private readonly Dictionary<string, List<CellModel>> _cellsByLocation = [];
         private readonly Dictionary<string, Dictionary<string, CellModel>> _cellsBySheetMap = [];
         private readonly Dictionary<CellModel, string> _cellsToLocation = [];
+        private readonly Dictionary<string, CellModel> _cellsById = [];
 
         /// <summary>
         /// Occurs when a cell is added to the tracker.
@@ -37,7 +38,7 @@ namespace Cell.Core.Data.Tracker
             AddToCellsInSheetMap(cellModel);
             AddCellToCellByLocationMap(cellModel);
             _cellsToLocation.Add(cellModel, cellModel.Location.LocationString);
-
+            _cellsById.Add(cellModel.ID, cellModel);
             cellModel.Location.PropertyChanged += CellLocationPropertyChanged;
             cellModel.PropertyChanged += VerifyCellsIdDoesNotChange;
             CellAdded?.Invoke(cellModel);
@@ -63,6 +64,13 @@ namespace Cell.Core.Data.Tracker
         /// <param name="column">The column to look for the cell in.</param>
         /// <returns>The cell, or null if no cell exists at the given location.</returns>
         public CellModel? GetCell(string sheet, int row, int column) => _cellsByLocation.TryGetValue(new CellLocationModel(sheet, row, column).LocationString, out var list) ? list.FirstOrDefault() : null;
+        
+        /// <summary>
+        /// Gets a cell by ID.
+        /// </summary>
+        /// <param name="id">The id.</param>
+        /// <returns>The cell with the given ID.</returns>
+        public CellModel? GetCell(string id) => _cellsById.TryGetValue(id, out var cell) ? cell : null;
 
         /// <summary>
         /// Gets all the cells with a given sheet name.
@@ -86,6 +94,7 @@ namespace Cell.Core.Data.Tracker
             _cellsToLocation.Remove(cellModel);
             RemoveFromCellsByLocationMap(cellModel);
             CellRemoved?.Invoke(cellModel);
+            _cellsById.Remove(cellModel.ID);
         }
 
         private void AddCellToCellByLocationMap(CellModel cellModel)

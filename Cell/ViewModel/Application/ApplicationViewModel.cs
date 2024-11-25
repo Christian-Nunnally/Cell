@@ -108,12 +108,12 @@ namespace Cell.ViewModel.Application
         /// <summary>
         /// Enables copy and paste though this clipboard.
         /// </summary>
-        public CellClipboard? CellClipboard { get; set; }
+        public CellClipboard? CellClipboard { private get; set; }
 
         /// <summary>
         /// Gets or sets the cell loader for the application, which is used to load cells into the application.
         /// </summary>
-        public CellLoader? CellLoader { get; set; }
+        public CellLoader? CellLoader { private get; set; }
 
         /// <summary>
         /// Gets the populator for the application, which is used to auto populate cells in the application.
@@ -237,12 +237,8 @@ namespace Cell.ViewModel.Application
         /// <param name="copyTextOnly">Whether to only copy the text of the cells.</param>
         public void CopySelectedCells(bool copyTextOnly)
         {
-            if (CellClipboard is null)
-            {
-
-            }
-            if (SheetViewModel is null) return;
-            CellClipboard?.CopyCells(SheetViewModel.CellSelector.SelectedCells, copyTextOnly);
+            if (CellSelector is null) return;
+            CellClipboard?.CopyCells(CellSelector.SelectedCells, copyTextOnly);
         }
 
         /// <summary>
@@ -297,7 +293,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, UndoRedoManager, FunctionTracker);
                 SheetViewModel.InitializeCellViewModelsAsync();
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
             }
@@ -325,7 +321,7 @@ namespace Cell.ViewModel.Application
             }
             else
             {
-                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, FunctionTracker);
+                SheetViewModel = new SheetViewModel(sheet, CellPopulateManager, CellTriggerManager, CellTracker, CellSelector, UndoRedoManager, FunctionTracker);
                 _sheetModelToViewModelMap.Add(sheet, SheetViewModel);
                 await SheetViewModel.InitializeCellViewModelsAsync();
             }
@@ -364,10 +360,9 @@ namespace Cell.ViewModel.Application
         /// </summary>
         public void PasteCopiedCells()
         {
-            if (SheetViewModel is null) return;
+            if (CellSelector is null) return;
             UndoRedoManager?.StartRecordingUndoState();
-            CellClipboard?.PasteIntoCells(SheetViewModel.CellSelector.SelectedCells);
-            SheetViewModel.UpdateLayout();
+            CellClipboard?.PasteIntoCells(CellSelector.SelectedCells);
             UndoRedoManager?.FinishRecordingUndoState();
         }
 
@@ -398,7 +393,7 @@ namespace Cell.ViewModel.Application
             if (BackupManager is null) throw new CellError("Backup manager not initialized yet, try loading again.");
             ApplicationBackgroundMessage = "Checking for migration";
             if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
-            if (PersistedProject.NeedsMigration()) PromptUserToMigrateAndContinueLoading(userCollectionLoader);
+            if (PersistedProject.NeedsMigration()) await MigrateAndContinueLoadingAsync(userCollectionLoader);
             else await ContinueLoadingAsync(userCollectionLoader);
         }
 
@@ -451,20 +446,14 @@ namespace Cell.ViewModel.Application
             await BackupManager.CreateBackupAsync("PreMigration");
             if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, unable to migrate.");
             PersistedProject.Migrate();
-            _isProjectLoading = false;
-            DialogFactory?.Show("Project migrated", "Project has been migrated to the latest version. Reload the application now.");
         }
 
-        private void PromptUserToMigrateAndContinueLoading(UserCollectionLoader userCollectionLoader)
+        private async Task MigrateAndContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
         {
             if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
-            if (!PersistedProject.CanMigrate()) throw new CellError(NoMigratorForVersionError);
-            if (DialogFactory is null) throw new CellError("Dialog factory not initialized yet, try loading again.");
-            DialogFactory.ShowYesNo(
-                "Version Mismatch",
-                $"The version of your project is outdated. would you like to migrate it?",
-                () => { MigrateProjectAsync().Wait(); ContinueLoadingAsync(userCollectionLoader).Wait(); },
-                () => { });
+            if (!await PersistedProject.CanMigrateAsync()) throw new CellError(NoMigratorForVersionError);
+            await MigrateProjectAsync(); 
+            await ContinueLoadingAsync(userCollectionLoader);
         }
 
         private void RequestClose(ToolWindowViewModel viewModel)

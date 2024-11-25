@@ -20,6 +20,7 @@ namespace Cell.Model.Plugin
         private string _taskID = Utilities.GenerateUnqiueId(12);
         private string _parentTaskID = Utilities.GenerateUnqiueId(12);
         private string _title = string.Empty;
+        private bool _isExpanded = false;
         /// <summary>
         /// The category of the todo item in a string format.
         /// </summary>
@@ -131,6 +132,15 @@ namespace Cell.Model.Plugin
         {
             get => _title;
             set { if (value != _title) { _title = value; NotifyPropertyChanged(nameof(Title)); } }
+        }
+
+        /// <summary>
+        /// The title of the todo item.
+        /// </summary>
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set { if (value != _isExpanded) { _isExpanded = value; NotifyPropertyChanged(nameof(IsExpanded)); } }
         }
 
         /// <summary>

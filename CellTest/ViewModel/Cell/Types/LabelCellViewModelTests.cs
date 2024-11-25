@@ -21,6 +21,7 @@ namespace CellTest.ViewModel.Cell.Types
         private readonly SheetViewModel _sheetViewModel;
         private readonly CellModel _cellModel;
         private readonly CellSelector _cellSelector;
+        private readonly UndoRedoManager _undoRedoManager;
         private readonly DialogFactoryBase _testDialogFactory;
         private readonly LabelCellViewModel testing;
 
@@ -34,11 +35,11 @@ namespace CellTest.ViewModel.Cell.Types
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _functionTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _undoRedoManager, _functionTracker);
             _cellModel = new CellModel();
             testing = new LabelCellViewModel(_cellModel, _sheetViewModel);
         }
-
 
         [Fact]
         public void BasicLaunchTest()
