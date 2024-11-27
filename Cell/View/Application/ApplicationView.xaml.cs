@@ -200,12 +200,10 @@ namespace Cell.View.Application
         /// Opens a tool window with the specified view model.
         /// </summary>
         /// <param name="viewModel">The tool window view model to open.</param>
-        /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
-        private void ShowToolWindowInFloatingContainer(ToolWindowViewModel viewModel, bool allowDuplicates = false)
+        private void ShowToolWindowInFloatingContainer(ToolWindowViewModel viewModel)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
-            if (!allowDuplicates && IsWindowOfTypeOpen(window.GetType())) return;
             OpenToolWindowInFloatingContainer(window);
         }
 
@@ -214,12 +212,10 @@ namespace Cell.View.Application
         /// </summary>
         /// <param name="viewModel">The tool window view model to open.</param>
         /// <param name="dock">The side to dock to.</param>
-        /// <param name="allowDuplicates">Whether or not to open the new window if one already exists of the same type.</param>
-        public void ShowToolWindowInDockedContainer(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        public void ShowToolWindowInDockedContainer(ToolWindowViewModel viewModel, Dock dock)
         {
             var window = ToolWindowViewFactory.Create(viewModel);
             if (window is null) return;
-            if (!allowDuplicates && IsWindowOfTypeOpen(window.GetType())) return;
             ShowToolWindowInDockedContainer(window, dock);
         }
 

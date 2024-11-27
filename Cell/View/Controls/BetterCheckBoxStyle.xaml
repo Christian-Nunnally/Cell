@@ -11,7 +11,7 @@
                 <ControlTemplate TargetType="{x:Type local:BetterCheckBox}">
                     <Border
                         x:Name="CheckBoxBorder"
-                        Width="{TemplateBinding Width}"
+                        Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
                         Height="{TemplateBinding Height}"
                         HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                         VerticalAlignment="{TemplateBinding VerticalAlignment}"

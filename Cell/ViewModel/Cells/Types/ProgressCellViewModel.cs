@@ -34,7 +34,7 @@ namespace Cell.ViewModel.Cells.Types
         /// </summary>
         public double ProgressBarWidth => IsVerticalOrientation ? Width : Model.Value * (Width - Margin.Left - Margin.Right - 6);
 
-        private void ModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CellModel.Text))
             {
@@ -45,7 +45,8 @@ namespace Cell.ViewModel.Cells.Types
 
         private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            NotifyPropertyChanged(nameof(IsVerticalOrientation));
+            NotifyPropertyChanged(nameof(ProgressBarWidth));
+            NotifyPropertyChanged(nameof(ProgressBarHeight));
         }
     }
 }

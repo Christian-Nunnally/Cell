@@ -5,21 +5,32 @@
     xmlns:viewModel="clr-namespace:Cell.ViewModel.Cells.Types"
     x:ClassModifier="public">
     <DataTemplate DataType="{x:Type viewModel:TextboxCellViewModel}">
-        <TextBox
-            Margin="{Binding Margin}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            HorizontalContentAlignment="{Binding HorizontalAlignmentForViewCenter}"
-            VerticalContentAlignment="{Binding VerticalAlignmentForViewCenter}"
-            Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
-            BorderBrush="{Binding ContentBorderColor}"
-            BorderThickness="{Binding ContentBorderThickness}"
-            FontFamily="{Binding Font}"
-            FontSize="{Binding FontSize}"
-            Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
-            GotFocus="CellTextBoxGotFocus"
-            Loaded="CellTextBoxLoaded"
-            PreviewKeyDown="PreviewTextBoxKeyDownForCell"
-            Text="{Binding Path=TextboxText, Mode=TwoWay}" />
+        <Border BorderThickness="{Binding ContentBorderThickness}">
+            <TextBox
+                Margin="{Binding Margin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                HorizontalContentAlignment="{Binding HorizontalAlignmentForViewCenter}"
+                VerticalContentAlignment="{Binding VerticalAlignmentForViewCenter}"
+                Background="{Binding ContentBackgroundColor, Converter={StaticResource ThemeColorConverter}}"
+                BorderThickness="0"
+                FontFamily="{Binding Font}"
+                FontSize="{Binding FontSize}"
+                Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"
+                GotFocus="CellTextBoxGotFocus"
+                Loaded="CellTextBoxLoaded"
+                PreviewKeyDown="PreviewTextBoxKeyDownForCell"
+                Text="{Binding Path=TextboxText, Mode=TwoWay}" />
+            <Border.Style>
+                <Style TargetType="{x:Type Border}">
+                    <Setter Property="BorderBrush" Value="{Binding ContentBorderColor}" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="{Binding ContentHighlightColor}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
     </DataTemplate>
 </ResourceDictionary>
