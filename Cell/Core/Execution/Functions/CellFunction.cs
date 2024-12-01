@@ -54,6 +54,7 @@ namespace Cell.Core.Execution.Functions
         /// <param name="logger">The logger to log messages to.</param>
         public CellFunction(CellFunctionModel model, Logger logger)
         {
+            CompileResult = new CompileResult { ExecutionResult ="Not compiled"};
             _logger = logger;
             Model = model;
             Model.PropertyChanged += ModelPropertyChanged;

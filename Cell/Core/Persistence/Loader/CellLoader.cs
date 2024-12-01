@@ -146,23 +146,14 @@ namespace Cell.Core.Persistence.Loader
             if (cell.CellType == CellType.Corner)
             {
                 fileName = "corner";
-                // TODO: removed after migration
-                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
-
                 path = Path.Combine(directory, "Corner", fileName);
             }
             if (cell.CellType == CellType.Row)
             {
-                // TODO: removed after migration
-                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
-
                 path = Path.Combine(directory, "Rows", fileName);
             }
             if (cell.CellType == CellType.Column)
             {
-                // TODO: removed after migration
-                if (!string.IsNullOrEmpty(_sheetsDirectory.LoadFile(Path.Combine(directory, fileName)))) _sheetsDirectory.DeleteFile(Path.Combine(directory, fileName));
-
                 path = Path.Combine(directory, "Columns", fileName);
             }
             _sheetsDirectory.SaveFile(path, serialized);

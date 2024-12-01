@@ -109,7 +109,7 @@ namespace Cell.Core.Execution
         private void TrackedCellPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             var cell = (CellModel)sender!;
-            if (e.PropertyName == nameof(CellModel.Text))
+            if (e.PropertyName == nameof(CellModel.Text) || e.PropertyName == nameof(CellModel.Index))
             {
                 var locationString = cell.Location.LocationString;
                 _subscriberNotifier.NotifySubscribers(locationString);

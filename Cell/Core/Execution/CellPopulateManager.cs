@@ -237,7 +237,14 @@ namespace Cell.Core.Execution
 
         private void SubscribeCellToFunctionChanges(CellModel cell)
         {
-            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function)) return;
+            if (!_functionTracker.TryGetCellFunction("object", cell.PopulateFunctionName, out var function))
+            {
+                if (!_cellsWithPopulateFunctionsThatDontYetExist.Contains(cell))
+                {
+                    _cellsWithPopulateFunctionsThatDontYetExist.Add(cell);
+                }
+                return;
+            }
             UpdateDependencySubscriptions(cell, function);
             AddToCellsToUpdateWhenFunctionChangesMap(cell, function);
             _cellToPopulateFunctionNameMap[cell] = cell.PopulateFunctionName;

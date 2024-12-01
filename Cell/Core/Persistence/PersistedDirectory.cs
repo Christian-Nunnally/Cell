@@ -105,7 +105,7 @@ namespace Cell.Core.Persistence
         /// </summary>
         /// <param name="path">The path to the directory to list files within.</param>
         /// <returns>A list of file names.</returns>
-        public IEnumerable<string> GetFiles(string path)
+        public IEnumerable<string> GetFiles(string path = "")
         {
             var fullPath = GetFullPath(path);
             var fullPaths = _fileIO.GetFiles(fullPath);

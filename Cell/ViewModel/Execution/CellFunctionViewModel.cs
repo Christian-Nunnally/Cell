@@ -35,7 +35,11 @@ namespace Cell.ViewModel.Execution
 
         private void FunctionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellFunction.CompileResult)) NotifyPropertyChanged(nameof(WasLastCompileSuccesful));
+            if (e.PropertyName == nameof(CellFunction.CompileResult))
+            {
+                NotifyPropertyChanged(nameof(WasLastCompileSuccesful));
+                NotifyPropertyChanged(nameof(IsCompiled));
+            }
         }
 
         /// <summary>
@@ -79,6 +83,11 @@ namespace Cell.ViewModel.Execution
         /// Gets the number of cells that use this function.
         /// </summary>
         public int UsageCount => CellsThatUseFunction.Count;
+
+        /// <summary>
+        /// Get whether the last time this function was compiled it returned no errors.
+        /// </summary>
+        public bool IsCompiled => Function.CompileResult.WasSuccess || Function.CompileResult.ExecutionResult != "Not compiled";
 
         /// <summary>
         /// Get whether the last time this function was compiled it returned no errors.

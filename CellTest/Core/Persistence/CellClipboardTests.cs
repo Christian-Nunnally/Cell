@@ -3,6 +3,7 @@ using Cell.Core.Persistence;
 using Cell.ViewModel.Application;
 using CellTest.TestUtilities;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Common;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -17,7 +18,7 @@ namespace CellTest.Core.Persistence
         private CellClipboard CreateInstance()
         {
             _cellTracker = new CellTracker();
-            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker, new FunctionTracker(new Logger()));
             _textClipboard = new TestTextClipboard();
             return new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
         }

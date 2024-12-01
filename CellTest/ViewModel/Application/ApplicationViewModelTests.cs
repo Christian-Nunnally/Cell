@@ -126,20 +126,20 @@ namespace CellTest.ViewModel.Application
             Assert.Throws<CellError>(() => _testing.Load(_userCollectionLoader));
         }
 
-        //[Fact]
-        //public void MigratorExists_LoadStarted_PromptsUserToMigrate()
-        //{
-        //    _persistedProject.Version = "0";
-        //    _persistedProject.SaveVersion();
-        //    _persistedProject.Version = "1";
-        //    var migrator = new TestMigrator();
-        //    _persistedProject.RegisterMigrator("0", "1", migrator);
-        //    var dialog = _testDialogFactory.Expect();
+        [Fact]
+        public void VersionDoesNotMatchSavedVersion_LoadStarted_PromptsUserToMigrate()
+        {
+            _persistedProject.Version = "0";
+            _persistedProject.SaveVersion();
+            _persistedProject.Version = "1";
+            var migrator = new TestMigrator();
+            _persistedProject.RegisterMigrator("0", "1", migrator);
+            var dialog = _testDialogFactory.Expect();
 
-        //    _testing.Load(_userCollectionLoader);
+            _testing.Load(_userCollectionLoader);
 
-        //    Assert.True(dialog.WasShown);
-        //}
+            Assert.True(dialog.WasShown);
+        }
 
         //[Fact]
         //public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()

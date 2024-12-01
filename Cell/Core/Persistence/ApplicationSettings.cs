@@ -1,5 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Model;
+using Cell.View.Skin;
 using System.IO;
 using System.Text.Json;
 
@@ -20,6 +21,12 @@ namespace Cell.Core.Persistence
         /// </summary>
         public ApplicationSettings()
         {
+            _defaultCellStyleCellModel.Style.ForegroundColor = ColorConstants.ForegroundColorConstantHex;
+            _defaultCellStyleCellModel.Style.HighlightColor = ColorConstants.AccentColorConstantHex;
+            _defaultCellStyleCellModel.Style.ContentBorderColor = ColorConstants.BorderColorConstantHex;
+            _defaultCellStyleCellModel.Style.ContentBorder = "1";
+
+            _defaultSpecialCellStyleCellModel.Style.ForegroundColor = ColorConstants.ForegroundColorConstantHex;
         }
 
         /// <summary>

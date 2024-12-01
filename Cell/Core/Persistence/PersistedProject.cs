@@ -14,7 +14,7 @@ namespace Cell.Core.Persistence
         /// <summary>
         /// The version of the projects persisted model.
         /// </summary>
-        public string Version = "2";
+        public string Version = "0.3.0";
         /// <summary>
         /// Creates a new instance of <see cref="PersistedProject"/> at the given directory.
         /// </summary>

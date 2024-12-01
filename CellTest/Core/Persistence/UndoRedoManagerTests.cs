@@ -1,73 +1,70 @@
-﻿using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Common;
+using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.ViewModel.Application;
-
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 namespace CellTest.Core.Persistence
 {
     public class UndoRedoManagerTests
     {
-        private CellTracker _cellTracker;
+        private readonly CellTracker _cellTracker;
+        private readonly UndoRedoManager _testing;
+        private readonly FunctionTracker _functionTracker;
+        private readonly Logger _logger;
 
-        private UndoRedoManager GetInstance()
+        public UndoRedoManagerTests()
         {
             _cellTracker = new CellTracker();
-            return new UndoRedoManager(_cellTracker);
+            _logger = new Logger();
+            _functionTracker = new FunctionTracker(_logger);
+            _testing = new UndoRedoManager(_cellTracker, _functionTracker);
         }
 
         [Fact]
         public void BasicLaunchTest()
         {
-            var _ = GetInstance();
         }
 
         [Fact]
         public void StartRecordingUndoState_Runs()
         {
-            var testing = GetInstance();
-            testing.StartRecordingUndoState();
+            _testing.StartRecordingUndoState();
         }
 
         [Fact]
         public void FinishRecordingUndoState_Runs()
         {
-            var testing = GetInstance();
-            testing.FinishRecordingUndoState();
+            _testing.FinishRecordingUndoState();
         }
 
         [Fact]
         public void RecordStateIfRecording_Runs()
         {
-            var testing = GetInstance();
-            testing.RecordStateIfRecording(CellModel.Null);
+            _testing.RecordStateIfRecording(CellModel.Null);
         }
 
         [Fact]
         public void Undo_Runs()
         {
-            var testing = GetInstance();
-            testing.Undo();
+            _testing.Undo();
         }
 
         [Fact]
         public void Redo_Runs()
         {
-            var testing = GetInstance();
-            testing.Redo();
+            _testing.Redo();
         }
 
         [Fact]
         public void SingleChangeRecordedButCellNotTracked_Undo_OldStateNotRestored()
         {
-            var testing = GetInstance();
             var model = new CellModel();
-            testing.StartRecordingUndoState();
-            testing.RecordStateIfRecording(model);
-            testing.FinishRecordingUndoState();
+            _testing.StartRecordingUndoState();
+            _testing.RecordStateIfRecording(model);
+            _testing.FinishRecordingUndoState();
             model.Text = "New Text";
 
-            testing.Undo();
+            _testing.Undo();
 
             Assert.Equal("New Text", model.Text);
         }
@@ -75,20 +72,17 @@ namespace CellTest.Core.Persistence
         [Fact]
         public void SingleChangeRecordedOnTrackedCell_Undo_OldStateRestored()
         {
-            var testing = GetInstance();
             var model = new CellModel();
             _cellTracker!.AddCell(model);
-            testing.StartRecordingUndoState();
-            testing.RecordStateIfRecording(model);
-            testing.FinishRecordingUndoState();
+            _testing.StartRecordingUndoState();
+            _testing.RecordStateIfRecording(model);
+            _testing.FinishRecordingUndoState();
             var oldText = model.Text;
             model.Text = "New Text";
 
-            testing.Undo();
+            _testing.Undo();
 
             Assert.Equal(oldText, model.Text);
         }
     }
 }
-
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

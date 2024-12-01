@@ -85,6 +85,9 @@
                                             <DataTrigger Binding="{Binding WasLastCompileSuccesful}" Value="False">
                                                 <Setter Property="Foreground" Value="{StaticResource ErrorForegroundColor}" />
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsCompiled}" Value="False">
+                                                <Setter Property="Foreground" Value="Yellow" />
+                                            </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
@@ -103,6 +106,9 @@
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding WasLastCompileSuccesful}" Value="False">
                                                     <Setter Property="Foreground" Value="{StaticResource ErrorForegroundColor}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsCompiled}" Value="False">
+                                                    <Setter Property="Foreground" Value="Yellow" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -185,21 +191,12 @@
                                         Style="{StaticResource ListItemInlineButtonStyle}"
                                         ToolTip="Makes this cell stop using the selected function"
                                         Visibility="Hidden" />
-                                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                                         <TextBlock
                                             Padding="5,0"
                                             VerticalAlignment="Center"
                                             FontFamily="{StaticResource ProgrammingFont}"
                                             Text="{Binding Location}"
                                             ToolTip="Cell name" />
-                                        <TextBlock
-                                            Padding="5,2"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource ProgrammingFont}"
-                                            FontSize="10"
-                                            Text="{Binding SheetName}"
-                                            ToolTip="Sheet name" />
-                                    </StackPanel>
                                     <Button
                                         x:Name="_viewButton"
                                         Margin="0,0,20,0"

@@ -20,7 +20,7 @@ namespace CellTest.ViewModel.ToolWindow
             _cellTracker = new CellTracker();
             _cellsToEdit = [];
             _functionTracker = new FunctionTracker(Logger.Null);
-            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker, _functionTracker);
             _testing = new CellFormatEditWindowViewModel(_cellsToEdit, _cellTracker, _functionTracker, _undoRedoManager);
         }
 

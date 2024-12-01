@@ -9,7 +9,6 @@ using Cell.ViewModel.ToolWindow;
 using System.Windows.Controls;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
-using System.Collections.Specialized;
 using Cell.Core.Common;
 
 namespace Cell
@@ -38,6 +37,9 @@ namespace Cell
             var fileIo = new FileIO();
             var projectDirectory = new PersistedDirectory(savePath, fileIo);
             var persistedProject = new PersistedProject(projectDirectory);
+
+            persistedProject.RegisterMigrator("2", "0.3.0", new FasterLoadMigrator());
+
             applicationViewModel.PersistedProject = persistedProject;
             var functionTracker = new FunctionTracker(applicationViewModel.Logger);
             applicationViewModel.FunctionTracker = functionTracker;
@@ -50,7 +52,6 @@ namespace Cell
             var cellTriggerManager = new CellTriggerManager(cellTracker, functionTracker, userCollectionTracker, dialogFactory, applicationViewModel.Logger);
             applicationViewModel.CellTriggerManager = cellTriggerManager;
             sheetTracker = new SheetTracker(cellTracker);
-            //sheetTracker.Sheets.CollectionChanged += OpenFirstAddedSheet;
             applicationViewModel.SheetTracker = sheetTracker;
             var cellLoader = new CellLoader(persistedProject.SheetsDirectory, cellTracker);
             applicationViewModel.CellLoader = cellLoader;
@@ -68,7 +69,17 @@ namespace Cell
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
             cellLoader.SheetsLoaded += OnAllSheetsLoaded;
-            await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
+            var loadResult = await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
+            
+            if (!loadResult.WasSuccess)
+            {
+                if (!string.IsNullOrEmpty(loadResult.MigrationCommit))
+                {
+                    dialogFactory.Show("Migration required to load", loadResult.Details);
+                    return;
+                }
+            }
+
             OpenCellContentEditWindowInDockedMode(applicationViewModel, functionTracker, cellSelector);
             OnlyAllowSelectionWhenEditWindowIsOpen(applicationViewModel, cellSelector);
         }
@@ -79,16 +90,6 @@ namespace Cell
             {
                 var sheet = sheetTracker.OrderedSheets.FirstOrDefault();
                 if (sheet is not null) applicationViewModel.GoToSheetAsync(sheet.Name);
-            });
-        }
-
-        private void OpenFirstAddedSheet(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            Application.Current?.Dispatcher?.Invoke(() =>
-            {
-                var sheet = sheetTracker.Sheets.FirstOrDefault();
-                if (sheet is not null) applicationViewModel.GoToSheet(sheet.Name);
-                sheetTracker.Sheets.CollectionChanged -= OpenFirstAddedSheet;
             });
         }
 

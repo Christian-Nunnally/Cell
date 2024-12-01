@@ -35,7 +35,7 @@ namespace CellTest.ViewModel.Cell.Types
             _cellTriggerManager = new CellTriggerManager(_cellTracker, _functionTracker, _userCollectionTracker, _testDialogFactory, Logger.Null);
             _sheetModel = new SheetModel("sheet");
             _cellSelector = new CellSelector(_cellTracker);
-            _undoRedoManager = new UndoRedoManager(_cellTracker);
+            _undoRedoManager = new UndoRedoManager(_cellTracker, _functionTracker);
             _sheetViewModel = new SheetViewModel(_sheetModel, _cellPopulateManager, _cellTriggerManager, _cellTracker, _cellSelector, _undoRedoManager, _functionTracker);
             _cellModel = new CellModel();
             testing = new LabelCellViewModel(_cellModel, _sheetViewModel);

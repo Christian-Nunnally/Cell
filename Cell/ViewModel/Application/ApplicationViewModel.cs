@@ -7,8 +7,12 @@ using Cell.Core.Persistence.Loader;
 using Cell.Model;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Controls;
+using System.Windows.Forms;
 
 namespace Cell.ViewModel.Application
 {
@@ -385,16 +389,16 @@ namespace Cell.ViewModel.Application
             OpenToolWindowViewModels.Add(viewModel);
         }
 
-        internal async Task LoadAsync(UserCollectionLoader userCollectionLoader)
+        internal async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader)
         {
-            if (IsProjectLoaded) throw new CellError("Already loaded");
-            if (_isProjectLoading) throw new CellError("Already loading");
+            if (IsProjectLoaded) return FailLoad("Already loaded", "");
+            if (_isProjectLoading) return FailLoad("Already loading", "");
             _isProjectLoading = true;
-            if (BackupManager is null) throw new CellError("Backup manager not initialized yet, try loading again.");
+            if (BackupManager is null) return FailLoad("Backup manager not initialized yet, try loading again.", "");
             ApplicationBackgroundMessage = "Checking for migration";
-            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
-            if (PersistedProject.NeedsMigration()) await MigrateAndContinueLoadingAsync(userCollectionLoader);
-            else await ContinueLoadingAsync(userCollectionLoader);
+            if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
+            if (PersistedProject.NeedsMigration()) return await MigrateAndContinueLoadingAsync(userCollectionLoader);
+            else return await ContinueLoadingAsync(userCollectionLoader);
         }
 
         internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
@@ -411,24 +415,24 @@ namespace Cell.ViewModel.Application
             PersistedProject.IsReadOnly = false;
         }
 
-        private async Task ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
+        private async Task<LoadResult> ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
         {
-            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
+            if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
             if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
             ApplicationBackgroundMessage = "Starting backup";
             BackupAsync();
             ApplicationBackgroundMessage = "Loading collections";
             await userCollectionLoader.LoadCollectionsAsync();
             ApplicationBackgroundMessage = "Loading functions";
-            if (FunctionLoader is null) throw new CellError("Function loader not initialized yet, try loading again.");
+            if (FunctionLoader is null) return FailLoad("Function loader not initialized yet, try loading again.", "");
             await FunctionLoader.LoadCellFunctionsAsync();
             ApplicationBackgroundMessage = "Linking collections to thier bases";
-            if (UserCollectionTracker is null) throw new CellError("User collection loader not initialized yet, try loading again.");
+            if (UserCollectionTracker is null) return FailLoad("User collection loader not initialized yet, try loading again.", "");
             UserCollectionTracker.LinkUpBaseCollectionsAfterLoad();
             ApplicationBackgroundMessage = "Loading cells";
-            if (CellLoader is null) throw new CellError("Cell loader not initialized yet, try loading again.");
-            if (CellTracker is null) throw new CellError("Cell tracker not initialized yet, try loading again.");
-            if (FunctionTracker is null) throw new CellError("Function tracker not initialized yet, try loading again.");
+            if (CellLoader is null) return FailLoad("Cell loader not initialized yet, try loading again.", "");
+            if (CellTracker is null) return FailLoad("Cell tracker not initialized yet, try loading again.", "");
+            if (FunctionTracker is null) return FailLoad("Function tracker not initialized yet, try loading again.", "");
             CellPopulateManager = new CellPopulateManager(CellTracker, FunctionTracker, UserCollectionTracker, Logger ?? Logger.Null);
             IsProjectLoaded = true;
             await CellLoader.LoadSheetsAsync();
@@ -438,23 +442,81 @@ namespace Cell.ViewModel.Application
             //ApplicationBackgroundMessage = "Waiting for backup to finish";
             //await backupTask;
             ApplicationBackgroundMessage = "Open a sheet to view cells";
+            return new LoadResult { WasSuccess = true };
         }
 
         private async Task MigrateProjectAsync()
         {
             if (BackupManager is null) throw new CellError("Backup manager not initialized, unable to migrate.");
+            ApplicationBackgroundMessage = "Creating pre-migration backup";
             await BackupManager.CreateBackupAsync("PreMigration");
             if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, unable to migrate.");
+            ApplicationBackgroundMessage = $"Starting migration to {PersistedProject.Version}";
             PersistedProject.Migrate();
         }
 
-        private async Task MigrateAndContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
+        private async Task<LoadResult> MigrateAndContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
         {
-            if (PersistedProject is null) throw new CellError("Persisted project not initialized yet, try loading again.");
-            if (!await PersistedProject.CanMigrateAsync()) throw new CellError(NoMigratorForVersionError);
+            if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
+            if (!await PersistedProject.CanMigrateAsync())
+            {
+                if (!HelpUserCheckoutCommit(PersistedProject.Version)) return FailLoad($"Migration needed but unable to complete until ${PersistedProject.Version} is checked out.", PersistedProject.Version);
+                else return FailLoad($"Checkout attempted, close the application, rebuild, and relaunch it to complete the migration. You can then go back to the latest commit.", PersistedProject.Version);
+            }
             await MigrateProjectAsync(); 
-            await ContinueLoadingAsync(userCollectionLoader);
+            return await ContinueLoadingAsync(userCollectionLoader);
         }
+
+        private bool HelpUserCheckoutCommit(string commitId)
+        {
+            string batchFilePath = Path.Combine(Path.GetTempPath(), "tempScript.bat");
+            var script =
+                """
+                @echo off
+                cd ..
+                cd ..
+                cd ..
+                cd ..
+                echo <PROMPT>
+                set /p userinput=(y/n): 
+                if "%userinput%"=="y" (
+                    <COMMAND>
+                    pause
+                    exit 0
+                ) else if "%userinput%"=="n" (
+                    echo Exiting...
+                ) else (
+                    echo Invalid input. Exiting...
+                )
+                pause
+                exit 1
+                """;
+            script = script.Replace("<PROMPT>", $"Do you want to automatically check out commit {commitId}");
+            script = script.Replace("<COMMAND>", $"git checkout {commitId}");
+            File.WriteAllText(batchFilePath, script);
+        
+            Process cmdProcess = new Process();
+            cmdProcess.StartInfo.FileName = "cmd.exe";
+            cmdProcess.StartInfo.Arguments = "/C \"" + batchFilePath + "\"";
+            cmdProcess.StartInfo.UseShellExecute = false;
+            cmdProcess.StartInfo.CreateNoWindow = false;
+            cmdProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+            cmdProcess.Start();
+            cmdProcess.WaitForExit();
+            File.Delete(batchFilePath);
+
+            if (cmdProcess.ExitCode == 0)
+            {
+                ApplicationBackgroundMessage = $"Commit {commitId} checkout attempted, rebuild and relaunch to migrate";
+            }
+            else
+            {
+                ApplicationBackgroundMessage = $"Must be on version {commitId} to migrate this project.";
+            }
+            return cmdProcess.ExitCode == 0;
+        }
+
 
         private void RequestClose(ToolWindowViewModel viewModel)
         {
@@ -464,5 +526,22 @@ namespace Cell.ViewModel.Application
                 RemoveToolWindow(viewModel);
             }
         }
+
+        private LoadResult FailLoad(string details, string migrationCommit)
+        {
+            return new LoadResult 
+            { 
+                WasSuccess = false,
+                Details = details,
+                MigrationCommit = migrationCommit
+            };
+        }
+    }
+
+    public struct LoadResult
+    {
+        public bool WasSuccess;
+        public string MigrationCommit;
+        public string Details;
     }
 }
