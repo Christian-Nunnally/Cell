@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.View.Skin;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
@@ -59,9 +58,9 @@ namespace Cell.View.ToolWindow
             if (string.IsNullOrEmpty(functionName)) return;
             var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);
 
-            var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionTracker.GenerateDataTypeForCollectionMap();
+            var propertyNamesForCollectionMap = ApplicationViewModel.Instance.UserCollectionTracker.GeneratePropertyNamesForCollectionMap();
             var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker, ApplicationViewModel.Instance.Logger);
-            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, collectionNameToDataTypeMap, testingContext, ApplicationViewModel.Instance.Logger);
+            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, propertyNamesForCollectionMap, testingContext, ApplicationViewModel.Instance.Logger);
             ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
         }
 
@@ -72,7 +71,7 @@ namespace Cell.View.ToolWindow
 
         private void RemoveItemFromCollectionClick(object sender, RoutedEventArgs e)
         {
-            if (sender is not Button button || button.DataContext is not PluginModel item) return;
+            if (sender is not Button button || button.DataContext is not UserItem item) return;
             _viewModel.RemoveItemFromSelectedCollection(item);
         }
 

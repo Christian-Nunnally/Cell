@@ -90,6 +90,26 @@ namespace CellTest.TestUtilities
             }
         }
 
+        public async Task CopyDirectoryAsync(string from, string to)
+        {
+            var fromDir = GetDirectory(from)?.ToDictionary();
+            if (fromDir is null) return;
+            CreateDirectory(to);
+            var toDir = GetDirectory(to);
+            if (toDir is null) return;
+            foreach (var (key, value) in fromDir)
+            {
+                if (value is string content)
+                {
+                    toDir[key] = content;
+                }
+                else if (value is Dictionary<string, object>)
+                {
+                    await CopyDirectoryAsync($"{from}\\{key}", $"{to}\\{key}");
+                }
+            }
+        }
+
         public void DeleteDirectory(string path)
         {
             var directories = path.Split('\\');

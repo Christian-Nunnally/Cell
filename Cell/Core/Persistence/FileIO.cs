@@ -166,5 +166,10 @@ namespace Cell.Core.Persistence
                 Directory.CreateDirectory(directory.Replace(from, to));
             }
         }
+
+        public async Task CopyDirectoryAsync(string from, string to)
+        {
+            CopyFilesRecursively(from, to);
+        }
     }
 }

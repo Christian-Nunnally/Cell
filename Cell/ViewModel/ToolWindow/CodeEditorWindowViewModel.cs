@@ -14,7 +14,7 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class CodeEditorWindowViewModel : ToolWindowViewModel
     {
-        private readonly IReadOnlyDictionary<string, string> _collectionNameToDataTypeMap;
+        private readonly IReadOnlyDictionary<string, List<string>> _collectionNameToPropertyNameMap;
         private bool _isAllowingCloseWhileDirty = false;
         private bool _isDirty = false;
         private CompileResult _lastCompileResult;
@@ -28,16 +28,16 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         /// <param name="functionToBeEdited">The function to be edited.</param>
         /// <param name="cellContextFromWhichTheFunctionIsBeingEdited">The cell context from which the function is ceing edited.</param>
-        /// <param name="collectionNameToDataTypeMap">A map from collection names to thier data types for code completion stuff.</param>
+        /// <param name="collectionNameToPropertyNameMap">A map from collection names to thier data types for code completion stuff.</param>
         /// <param name="contextToTestWith">The context used when testing the code.</param>
-        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap, IContext contextToTestWith, Logger logger)
+        public CodeEditorWindowViewModel(CellFunction functionToBeEdited, CellModel? cellContextFromWhichTheFunctionIsBeingEdited, IReadOnlyDictionary<string, List<string>> collectionNameToPropertyNameMap, IContext contextToTestWith, Logger logger)
         {
             _logger = logger;
             _cellFunctionCodeSuggestionGenerator = new CellFunctionCodeSuggestionGenerator(CellFunction.UsingNamespaces, cellContextFromWhichTheFunctionIsBeingEdited);
             FunctionBeingEdited = functionToBeEdited;
-            _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToDataTypeMap);
-            _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, functionToBeEdited.Model.ReturnType, collectionNameToDataTypeMap);
-            _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
+            _currentTextInEditor = functionToBeEdited.GetUserFriendlyCode(cellContextFromWhichTheFunctionIsBeingEdited, collectionNameToPropertyNameMap.Keys.ToList());
+            _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, functionToBeEdited.Model.ReturnType, collectionNameToPropertyNameMap);
+            _collectionNameToPropertyNameMap = collectionNameToPropertyNameMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
             _contextToTestWith = contextToTestWith;
         }
@@ -59,7 +59,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 _currentTextInEditor = value;
                 _isDirty = true;
-                _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, FunctionBeingEdited.Model.ReturnType, _collectionNameToDataTypeMap);
+                _cellFunctionCodeSuggestionGenerator.UpdateCode(_currentTextInEditor, FunctionBeingEdited.Model.ReturnType, _collectionNameToPropertyNameMap);
                 NotifyPropertyChanged(nameof(CurrentTextInEditor));
                 NotifyPropertyChanged(nameof(ToolWindowTitle));
             }
@@ -187,7 +187,7 @@ namespace Cell.ViewModel.ToolWindow
 
             var model = new CellFunctionModel("test", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model, _logger);
-            function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
+            function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
             if (_contextToTestWith is TestingContext testingContext) testingContext.Reset();
             var result = function.Run(_contextToTestWith);
             if (!result.WasSuccess)
@@ -235,7 +235,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void ReloadFunctionCodeWhenItChanges(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CellFunctionModel.Code)) CurrentTextInEditor = FunctionBeingEdited.GetUserFriendlyCode(CellContext, _collectionNameToDataTypeMap);
+            if (e.PropertyName == nameof(CellFunctionModel.Code)) CurrentTextInEditor = FunctionBeingEdited.GetUserFriendlyCode(CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
         }
 
         private void SaveAndClose()
@@ -246,7 +246,7 @@ namespace Cell.ViewModel.ToolWindow
 
         private void Save()
         {
-            FunctionBeingEdited.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToDataTypeMap);
+            FunctionBeingEdited.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
             _isDirty = false;
             NotifyPropertyChanged(nameof(ToolWindowTitle));
         }
@@ -256,7 +256,7 @@ namespace Cell.ViewModel.ToolWindow
             var model = new CellFunctionModel("test", "", FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model, _logger);
             if (CellContext is null) return;
-            function.SetUserFriendlyCode(code, CellContext, _collectionNameToDataTypeMap);
+            function.SetUserFriendlyCode(code, CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
             var syntaxTree = function.SyntaxTree;
             SyntaxTreePreviewText = syntaxTree.ToString();
         }

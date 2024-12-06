@@ -87,7 +87,7 @@ namespace CellTest.ViewModel.Cell.Types
             var propertyChangedTester = new PropertyChangedTester(_testing);
             var twoPointsFunction = _functionTracker.GetOrCreateFunction("object", "TwoPoints");
             var code = "return new List<int> { 1, 2 };";
-            twoPointsFunction.SetUserFriendlyCode(code, _testing.Model, new Dictionary<string, string>());
+            twoPointsFunction.SetUserFriendlyCode(code, _testing.Model, []);
 
             _cellModel.PopulateFunctionName = "TwoPoints";
 

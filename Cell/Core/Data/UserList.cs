@@ -1,4 +1,4 @@
-﻿using Cell.Model.Plugin;
+﻿using Cell.Model;
 using System.Collections;
 
 namespace Cell.Core.Data
@@ -6,8 +6,7 @@ namespace Cell.Core.Data
     /// <summary>
     /// A user created list of items that can be used from a cell function.
     /// </summary>
-    /// <typeparam name="T">The type of the items in the list.</typeparam>
-    public class UserList<T> : IEnumerable<T> where T : PluginModel, new()
+    public class UserList : IEnumerable<UserItem>
     {
         private readonly string _collectionName;
         private readonly IUserCollectionProvider _userCollectionLoader;
@@ -31,7 +30,7 @@ namespace Cell.Core.Data
         /// Gets an enumerator that iterates through the items in this list.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public IEnumerator<T> GetEnumerator() => UserCollection?.Items.OfType<T>().GetEnumerator() ?? new List<T>().GetEnumerator();
+        public IEnumerator<UserItem> GetEnumerator() => UserCollection?.Items.GetEnumerator() ?? new List<UserItem>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -39,7 +38,7 @@ namespace Cell.Core.Data
         /// Adds an item to the user collection.
         /// </summary>
         /// <param name="item">The item to add.</param>
-        public void Add(T item)
+        public void Add(UserItem item)
         {
             UserCollection?.Add(item);
         }
@@ -48,7 +47,7 @@ namespace Cell.Core.Data
         /// Removes an item from the user collection, this will delete the item.
         /// </summary>
         /// <param name="item">The item to remove.</param>
-        public void Remove(T item)
+        public void Remove(UserItem item)
         {
             UserCollection?.Remove(item);
         }
@@ -70,9 +69,11 @@ namespace Cell.Core.Data
         /// </summary>
         /// <param name="index">The index of the item to get.</param>
         /// <returns></returns>
-        public T? this[int index]
+        public UserItem this[int index]
         {
-            get => index >= 0 && index < (UserCollection?.Items.Count ?? 0) ? (T?)UserCollection?.Items[index] : new T();
+            get => (UserCollection is not null && index >= 0 && index < UserCollection.Items.Count) 
+                ? UserCollection.Items[index]
+                : UserItem.Null;
         }
 
         /// <summary>

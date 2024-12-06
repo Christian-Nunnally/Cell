@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data;
-using Cell.Model.Plugin;
+using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Collections.Specialized;
 using System.Text.Json;
@@ -24,7 +24,7 @@ namespace Cell.ViewModel.ToolWindow
         private bool _isEditJsonTextBoxVisible;
         private bool _isSaveItemJsonButtonVisible;
         private UserCollectionListItemViewModel? _selectedCollection;
-        private PluginModel? _selectedItem;
+        private UserItem? _selectedItem;
         private string _selectedItemSerialized = string.Empty;
         private readonly FunctionTracker _functionTracker;
 
@@ -85,7 +85,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the items in the selected collection, filtered based on the users filter criteria.
         /// </summary>
-        public IEnumerable<PluginModel> FilteredItemsInSelectedCollection => _selectedCollection?.Collection.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
+        public IEnumerable<UserItem> FilteredItemsInSelectedCollection => _selectedCollection?.Collection.Items.Where(x => x.ToString().Contains(CollectionItemListBoxFilterText)) ?? [];
 
         /// <summary>
         /// Gets whether the json text box for editing the selected item is visible.
@@ -158,7 +158,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// The item the user has selected in the items list box.
         /// </summary>
-        public PluginModel? SelectedItem
+        public UserItem? SelectedItem
         {
             get => _selectedItem;
             set
@@ -185,10 +185,10 @@ namespace Cell.ViewModel.ToolWindow
                 try
                 {
                     var stringToDeserialize = value.StartsWith('{') ? value : $"{{\n{value}\n}}";
-                    var item = JsonSerializer.Deserialize<PluginModel>(stringToDeserialize);
+                    var item = JsonSerializer.Deserialize<UserItem>(stringToDeserialize);
                     if (item != null && _selectedItem != null)
                     {
-                        item.CopyPublicProperties(_selectedItem, [nameof(PluginModel.ID)]);
+                        item.CopyPublicProperties(_selectedItem, [nameof(UserItem.ID)]);
                         IsSaveItemJsonButtonVisible = false;
                         _selectedItemSerialized = value.StartsWith('{') ? value[1..^1].Trim().Replace("\n  ", "\n") : value;
                         NotifyPropertyChanged(nameof(SelectedItemSerialized));
@@ -196,7 +196,7 @@ namespace Cell.ViewModel.ToolWindow
                 }
                 catch (JsonException)
                 {
-                    ApplicationViewModel.Instance.DialogFactory.Show("Did not save", "Invalid json for item");
+                    ApplicationViewModel.Instance.DialogFactory?.Show("Did not save", "Invalid json for item");
                 }
             }
         }
@@ -252,7 +252,7 @@ namespace Cell.ViewModel.ToolWindow
         /// Deleted the given item from the selected collection.
         /// </summary>
         /// <param name="item">The item to delete from the selected collection.</param>
-        public void RemoveItemFromSelectedCollection(PluginModel item)
+        public void RemoveItemFromSelectedCollection(UserItem item)
         {
             SelectedCollection?.Collection.Remove(item);
         }
@@ -275,7 +275,7 @@ namespace Cell.ViewModel.ToolWindow
             NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }
 
-        private void SelectedCollectionChanged(UserCollection collection, PluginModel model)
+        private void SelectedCollectionChanged(UserCollection collection, UserItem model)
         {
             NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }

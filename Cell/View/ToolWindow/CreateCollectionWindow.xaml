@@ -20,12 +20,11 @@
             <RowDefinition Height="1*" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
             <RowDefinition Height="40" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
         <Button
-            Grid.Row="4"
+            Grid.Row="3"
             Grid.ColumnSpan="2"
             Width="200"
             Height="30"
@@ -39,18 +38,9 @@
             Height="25"
             HorizontalContentAlignment="Center"
             Text="{Binding NewCollectionName}" />
-        <Label
-            Name="_collectionTypeOptionsLabel"
-            Grid.Row="2"
-            Grid.Column="0"
-            Width="63"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Center"
-            Content="Item type"
-            Visibility="{Binding CollectionTypeSettingVisibility}" />
         <CheckBox
             Name="_collectionTypeOptionsCheckBox"
-            Grid.Row="3"
+            Grid.Row="2"
             Grid.Column="0"
             Margin="5,0,-3,0"
             VerticalAlignment="Center"
@@ -58,17 +48,8 @@
             Content="Projection of"
             IsChecked="{Binding IsBaseOnCheckBoxChecked}" />
         <controls:BetterComboBox
-            x:Name="_collectionTypeOptionsComboBox"
-            Grid.Row="2"
-            Grid.Column="1"
-            Height="25"
-            HorizontalContentAlignment="Center"
-            ItemsSource="{Binding PluginTypeNames}"
-            SelectedItem="{Binding SelectedItemType}"
-            Visibility="{Binding CollectionTypeSettingVisibility}" />
-        <controls:BetterComboBox
             x:Name="_collectionBaseOptionsComboBox"
-            Grid.Row="3"
+            Grid.Row="2"
             Grid.Column="1"
             Height="25"
             ItemsSource="{Binding CollectionBaseOptions}"

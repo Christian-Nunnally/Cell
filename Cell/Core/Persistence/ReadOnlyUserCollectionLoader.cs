@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.Functions;
-using Cell.Model.Plugin;
 
 namespace Cell.Core.Persistence
 {
@@ -52,7 +51,7 @@ namespace Cell.Core.Persistence
             foreach (var item in realCollection.Items)
             {
                 // TODO: make this only copy the items that are asked for.
-                readOnlyCollection.Add((PluginModel)item.Clone());
+                readOnlyCollection.Add(item.Clone());
             }
 
             return readOnlyCollection;

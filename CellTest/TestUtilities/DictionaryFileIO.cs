@@ -11,6 +11,11 @@ namespace CellTest.TestUtilities
             _testFileSystem.CopyDirectory(from, to);
         }
 
+        public async Task CopyDirectoryAsync(string from, string to)
+        {
+            await _testFileSystem.CopyDirectoryAsync(from, to);
+        }
+
         public void CreateDirectory(string path)
         {
             _testFileSystem.CreateDirectory(path);

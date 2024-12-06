@@ -16,9 +16,7 @@ namespace Cell.Core.Data.Tracker
         private readonly Dictionary<UserCollectionModel, string> _collectionToNameMap = [];
         private readonly CellTracker _cellTracker;
         private readonly Dictionary<string, UserCollection> _collections = [];
-        private readonly Dictionary<string, string> _dataTypeForCollectionMap = [];
         private readonly FunctionTracker _functionTracker;
-        private bool _hasGenerateDataTypeForCollectionMapChanged;
 
         /// <summary>
         /// Creates a new instance of <see cref="UserCollectionLoader"/>.
@@ -55,15 +53,13 @@ namespace Cell.Core.Data.Tracker
         /// Creates a new collection.
         /// </summary>
         /// <param name="collectionName">The name of the new collection.</param>
-        /// <param name="itemTypeName">The data type of the items in the collection.</param>
         /// <param name="baseCollectionName">The name of the collection this collection should be a projection of, if any.</param>
         /// <returns>The new collection.</returns>
-        public UserCollection CreateCollection(string collectionName, string itemTypeName, string baseCollectionName = "")
+        public UserCollection CreateCollection(string collectionName, string baseCollectionName = "")
         {
             var model = new UserCollectionModel
             {
                 Name = collectionName,
-                ItemTypeName = itemTypeName,
                 BasedOnCollectionName = baseCollectionName
             };
             var sortContext = new Context(_cellTracker, this, new DialogFactory(), CellModel.Null);
@@ -82,7 +78,6 @@ namespace Cell.Core.Data.Tracker
             UnlinkFromBaseCollection(collection);
             _collections.Remove(collection.Model.Name);
             UserCollections.Remove(collection);
-            _hasGenerateDataTypeForCollectionMapChanged = true;
             _collectionToNameMap.Remove(collection.Model);
             collection.Model.PropertyChanged -= CollectionModelPropertyChanged;
             UserCollectionRemoved?.Invoke(collection);
@@ -113,13 +108,6 @@ namespace Cell.Core.Data.Tracker
         }
 
         /// <summary>
-        /// Gets the data type string for a collection.
-        /// </summary>
-        /// <param name="collection">The collection name to get the data type of its items from.</param>
-        /// <returns>The data type name of the items in the collection with the given name.</returns>
-        public string GetDataTypeStringForCollection(string collection) => GetCollection(collection)?.Model.ItemTypeName ?? "object";
-
-        /// <summary>
         /// Makes sure all collections are linked to their base collections.
         /// </summary>
         public void LinkUpBaseCollectionsAfterLoad()
@@ -140,20 +128,6 @@ namespace Cell.Core.Data.Tracker
             }
         }
 
-        internal IReadOnlyDictionary<string, string> GenerateDataTypeForCollectionMap()
-        {
-            if (_hasGenerateDataTypeForCollectionMapChanged)
-            {
-                _dataTypeForCollectionMap.Clear();
-                foreach (var collectionName in CollectionNames)
-                {
-                    _dataTypeForCollectionMap.Add(collectionName, GetDataTypeStringForCollection(collectionName));
-                }
-            }
-            _hasGenerateDataTypeForCollectionMapChanged = false;
-            return _dataTypeForCollectionMap;
-        }
-
         private void EnsureLinkedToBaseCollection(UserCollection collection)
         {
             if (!string.IsNullOrEmpty(collection.Model.BasedOnCollectionName))
@@ -171,7 +145,6 @@ namespace Cell.Core.Data.Tracker
         {
             _collections.Add(collection.Model.Name, collection);
             UserCollections.Add(collection);
-            _hasGenerateDataTypeForCollectionMapChanged = true;
             _collectionToNameMap.Add(collection.Model, collection.Model.Name);
             collection.Model.PropertyChanged += CollectionModelPropertyChanged;
             UserCollectionAdded?.Invoke(collection);
@@ -184,6 +157,16 @@ namespace Cell.Core.Data.Tracker
                 var baseCollection = GetCollection(collection.Model.BasedOnCollectionName) ?? throw new CellError($"Collection {collection.Model.Name} is based on {collection.Model.BasedOnCollectionName} which does not exist.");
                 collection.StopBeingViewIntoCollection(baseCollection);
             }
+        }
+
+        public IReadOnlyDictionary<string, List<string>> GeneratePropertyNamesForCollectionMap()
+        {
+            var dictionary = new Dictionary<string, List<string>>();
+            foreach (var collection in UserCollections)
+            {
+                dictionary.Add(collection.Model.Name, collection.GeneratePropertyNames());
+            }
+            return dictionary;
         }
     }
 }

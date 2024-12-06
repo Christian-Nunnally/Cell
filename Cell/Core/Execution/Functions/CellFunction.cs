@@ -6,7 +6,6 @@ using Cell.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
-using System.Text.Json;
 
 namespace Cell.Core.Execution.Functions
 {
@@ -34,7 +33,6 @@ namespace Cell.Core.Execution.Functions
             "System.Collections",
             "System.Collections.Generic",
             "Cell.Model",
-            "Cell.Model.Plugin",
             "Cell.ViewModel",
             "Cell.Core.Execution.Functions",
             "Cell.ViewModel.Cells.Types",
@@ -114,11 +112,11 @@ namespace Cell.Core.Execution.Functions
         /// Gets the user friendly code for this function, which uses collection names like "myCollection." for collections and symbols like "A1" for cells.
         /// </summary>
         /// <param name="cell">The cell to resolve references for to make the code user friendly.</param>
-        /// <param name="collectionNameToDataTypeMap">The map of collections to thier types.</param>
-        /// <returns></returns>
-        public string GetUserFriendlyCode(CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
+        /// <param name="collectionNames">The list of all valid collections.</param>
+        /// <returns>The code formatted without context references.</returns>
+        public string GetUserFriendlyCode(CellModel? cell, IReadOnlyList<string> collectionNames)
         {
-            var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformTo(Model.Code);
+            var intermediateCode = new CollectionReferenceSyntaxTransformer(collectionNames).TransformTo(Model.Code);
             if (cell != null) intermediateCode = new CellLocationReferenceSyntaxTransformer(cell.Location).TransformTo(intermediateCode);
             return intermediateCode.Replace("_Range_", "..");
         }
@@ -147,12 +145,12 @@ namespace Cell.Core.Execution.Functions
         /// </summary>
         /// <param name="userFriendlyCode">The user friendly code.</param>
         /// <param name="cell">The cell the user is editing this code from.</param>
-        /// <param name="collectionNameToDataTypeMap">The list of all valid collections and thier items data types.</param>
-        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, IReadOnlyDictionary<string, string> collectionNameToDataTypeMap)
+        /// <param name="collectionNames">The list of all valid collections.</param>
+        public void SetUserFriendlyCode(string userFriendlyCode, CellModel? cell, IReadOnlyList<string> collectionNames)
         {
             var intermediateCode = userFriendlyCode.Replace("..", "_Range_").Replace("\t", "    ");
             if (cell != null) intermediateCode = new CellLocationReferenceSyntaxTransformer(cell.Location).TransformFrom(intermediateCode);
-            Model.Code = new CollectionReferenceSyntaxTransformer(collectionNameToDataTypeMap).TransformFrom(intermediateCode);
+            Model.Code = new CollectionReferenceSyntaxTransformer(collectionNames).TransformFrom(intermediateCode);
         }
 
         private void AttemptToRecompileMethod()

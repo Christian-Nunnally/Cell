@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Common;
-using Cell.Model.Plugin;
 
 namespace Cell.Model
 {
@@ -18,18 +17,6 @@ namespace Cell.Model
         /// with the exception that the items will be filtered and sorted with the function specified in <see cref="SortAndFilterFunctionName"/>.
         /// </summary>
         public string BasedOnCollectionName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// The name of the <see cref="PluginModel"/> subclass that this collection contains.
-        /// 
-        /// If <see cref="BasedOnCollectionName"/> is set this is ignored because the type of the items in this collection is the same as the items in the collection with the name <see cref="BasedOnCollectionName"/>.
-        /// </summary>
-        public string ItemTypeName { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets either the <see cref="ItemTypeName"/> or the <see cref="BasedOnCollectionName"/> depending on which one is set and being used.
-        /// </summary>
-        public string ItemTypeOrBasedOnCollectionName => BasedOnCollectionName == string.Empty ? ItemTypeName : BasedOnCollectionName;
 
         /// <summary>
         /// Gets or sets the name of the collection.

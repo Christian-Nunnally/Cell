@@ -1,6 +1,6 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
-using Cell.Model.Plugin;
+using Cell.Model;
 
 namespace Cell.Core.Execution
 {
@@ -49,17 +49,17 @@ namespace Cell.Core.Execution
             _subscriberNotifier.UnsubscribeFromAllChannels(subscriber);
         }
 
-        private void ItemAddedToUserCollection(UserCollection collection, PluginModel model)
+        private void ItemAddedToUserCollection(UserCollection collection, UserItem model)
         {
             NotifyCollectionUpdated(collection.Model.Name);
         }
 
-        private void ItemPropertyChangedInUserCollection(UserCollection collection, PluginModel model)
+        private void ItemPropertyChangedInUserCollection(UserCollection collection, UserItem model)
         {
             NotifyCollectionUpdated(collection.Model.Name);
         }
 
-        private void ItemRemovedFromUserCollection(UserCollection collection, PluginModel model)
+        private void ItemRemovedFromUserCollection(UserCollection collection, UserItem model)
         {
             NotifyCollectionUpdated(collection.Model.Name);
         }

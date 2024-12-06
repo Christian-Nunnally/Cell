@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Data;
 using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using Cell.Core.Common;
 using Cell.ViewModel.Cells.Types;
@@ -115,12 +114,11 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// Gets the user defined list of objects with the given name.
         /// </summary>
-        /// <typeparam name="T">The type of the items in the list.</typeparam>
         /// <param name="collection">The name of the list.</param>
         /// <returns>The user collection with the given name.</returns>
-        public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new()
+        public UserList GetUserList(string collection)
         {
-            return new UserList<T>(collection, _userCollectionProviderThatMirrorsRealProvider);
+            return new UserList(collection, _userCollectionProviderThatMirrorsRealProvider);
         }
 
         /// <summary>

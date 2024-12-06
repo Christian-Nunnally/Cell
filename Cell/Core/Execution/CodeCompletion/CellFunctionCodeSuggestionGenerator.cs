@@ -1,9 +1,7 @@
 ﻿using Cell.Core.Common;
-using Cell.Core.Data;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.SyntaxWalkers.CellReferences;
 using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.Plugin.SyntaxWalkers;
 using FontAwesome.Sharp;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -45,12 +43,11 @@ namespace Cell.Core.Execution.CodeCompletion
         /// </summary>
         /// <param name="code">The code to analyze for code completion suggestions.</param>
         /// <param name="returnType">The return type of the code for additional suggestion support.</param>
-        /// <param name="collectionNameToTypeMap">A dictionary of variable names and thier type to be considered as valid even if they are not declared in the given code.</param>
-        public void UpdateCode(string code, string returnType, IReadOnlyDictionary<string, string> collectionNameToTypeMap)
+        /// <param name="collectionNameToPropertyNameMap">A dictionary of variable names and the properties currently set on items in them.</param>
+        public void UpdateCode(string code, string returnType, IReadOnlyDictionary<string, List<string>> collectionNameToPropertyNameMap)
         {
             _currentUserCodeText = code;
             _computedOuterContextVariables = CreateOuterContextVariablesForFunction();
-            AddCollectionTypesToVariableTypeMap(collectionNameToTypeMap, _computedOuterContextVariables);
             AddCellReferencesToVariableTypeMap(code, _computedOuterContextVariables);
             _returnType = returnType;
             _semanticAnalyzer.UpdateCode(code, _computedOuterContextVariables);
@@ -113,16 +110,6 @@ namespace Cell.Core.Execution.CodeCompletion
             variableTypeMap.Add("c", typeof(Context));
         }
 
-        private static void AddCollectionTypesToVariableTypeMap(IReadOnlyDictionary<string, string> collectionNameTypeMap, Dictionary<string, Type> variableTypeMap)
-        {
-            foreach (var (userCollectionName, typeName) in collectionNameTypeMap)
-            {
-                var type = PluginModel.GetTypeFromString(typeName);
-                var enumerableType = typeof(UserList<>).MakeGenericType(type);
-                variableTypeMap.Add(userCollectionName, enumerableType);
-            }
-        }
-
         private List<ICompletionData> CreateCompletionDataForGlobalContext(Dictionary<string, Type> variableNameToTypeMapForOuterContext)
         {
             if (_cachedGlobalCompletionData != null) return _cachedGlobalCompletionData;
@@ -139,8 +126,7 @@ namespace Cell.Core.Execution.CodeCompletion
             var prettyTypeName = type.GetPrettyGenericTypeName();
 
             var icon = IconChar.Globe;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(UserList<>)) icon = IconChar.List;
-            else if (type.IsEnum) icon = IconChar.ListAlt;
+            if (type.IsEnum) icon = IconChar.ListAlt;
             else if (type.IsValueType) icon = IconChar.Cube;
             else if (type.IsInterface) icon = IconChar.ObjectGroup;
             else if (type.IsClass) icon = IconChar.ObjectGroup;

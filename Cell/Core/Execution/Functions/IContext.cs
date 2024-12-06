@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Data;
-using Cell.Model.Plugin;
 using Cell.Model;
 
 namespace Cell.Core.Execution.Functions
@@ -69,10 +68,9 @@ namespace Cell.Core.Execution.Functions
         /// <summary>
         /// Gets the user defined list of objects with the given name.
         /// </summary>
-        /// <typeparam name="T">The type of the items in the list.</typeparam>
         /// <param name="collection">The name of the list.</param>
         /// <returns>The user collection with the given name.</returns>
-        public UserList<T> GetUserList<T>(string collection) where T : PluginModel, new();
+        public UserList GetUserList(string collection);
 
         /// <summary>
         /// Goes to the given cell in the UI. Will change the sheet if the cell is on a different sheet.

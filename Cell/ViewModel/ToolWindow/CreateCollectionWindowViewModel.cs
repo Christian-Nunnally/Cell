@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Data;
 using Cell.Core.Data.Tracker;
-using Cell.Model.Plugin;
 using System.Collections.ObjectModel;
 using System.Windows;
 
@@ -26,7 +25,6 @@ namespace Cell.ViewModel.ToolWindow
             {
                 "---"
             };
-            SelectedItemType = PluginTypeNames.FirstOrDefault(string.Empty);
         }
 
         /// <summary>
@@ -80,16 +78,6 @@ namespace Cell.ViewModel.ToolWindow
         public string NewCollectionName { get; set; } = string.Empty;
 
         /// <summary>
-        /// A list of all the data types that can be used to create a new collection.
-        /// </summary>
-        public ObservableCollection<string> PluginTypeNames { get; } = new ObservableCollection<string>(PluginModel.GetPluginDataTypeNames());
-
-        /// <summary>
-        /// The data type of the items in the new collection.
-        /// </summary>
-        public string SelectedItemType { get; set; } = string.Empty;
-
-        /// <summary>
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
         public override string ToolWindowTitle => "New collection";
@@ -112,14 +100,11 @@ namespace Cell.ViewModel.ToolWindow
                 if (baseCollection is null) return;
 
                 var userCollectionModel = 
-                _userCollectionTracker.CreateCollection(collectionName, baseCollection.Model.ItemTypeName, baseCollection.Model.Name);
+                _userCollectionTracker.CreateCollection(collectionName, baseCollection.Model.Name);
             }
             else
             {
-                var collectionType = SelectedItemType;
-                if (string.IsNullOrEmpty(collectionType)) return;
-
-                _userCollectionTracker.CreateCollection(collectionName, collectionType);
+                _userCollectionTracker.CreateCollection(collectionName);
             }
 
             RequestClose?.Invoke();

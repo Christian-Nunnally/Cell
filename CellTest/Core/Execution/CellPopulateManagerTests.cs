@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Execution;
 using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.Core.Persistence;
 using CellTest.TestUtilities;
 using Cell.Core.Persistence.Loader;
@@ -53,7 +52,7 @@ namespace CellTest.Core.Execution
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
             var function = _functionTracker.CreateCellFunction("object", "testHelloWorld");
-            function.SetUserFriendlyCode("return A2.Text;", a1, new Dictionary<string, string>());
+            function.SetUserFriendlyCode("return A2.Text;", a1, []);
             a1.PopulateFunctionName = function.Model.Name;
 
             a2.Text += "HelloWorld";
@@ -65,13 +64,13 @@ namespace CellTest.Core.Execution
         public void CellWithPopulateFunctionDependingOnCollection_ItemAddedToCollection_PopulateFunctionRunsToSetTheTextToItsResult()
         {
             var cell = CellModelFactory.Create(0, 0, CellType.Label, "Sheet1", _cellTracker);
-            var collection = _userCollectionTracker.CreateCollection("testList", nameof(TodoItem));
+            var collection = _userCollectionTracker.CreateCollection("testList");
             var function = _functionTracker.CreateCellFunction("object", "testHelloWorld");
-            var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
-            function.SetUserFriendlyCode("return testList.Count();", cell, collectionNameToDataTypeMap);
+            var collectionNames = new List<string> { "testList" };
+            function.SetUserFriendlyCode("return testList.Count();", cell, collectionNames);
             cell.PopulateFunctionName = function.Model.Name;
 
-            collection.Add(new TodoItem());
+            collection.Add(new UserItem());
 
             Assert.Equal("1", cell.Text);
         }
@@ -81,10 +80,10 @@ namespace CellTest.Core.Execution
         {
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
-            var collection = _userCollectionTracker.CreateCollection("testList", "TodoItem");
+            var collection = _userCollectionTracker.CreateCollection("testList");
             var function = _functionTracker.CreateCellFunction("object", "testHelloWorld");
-            var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
-            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
+            var collectionNames = new List<string> { "testList" };
+            function.SetUserFriendlyCode("return c.GetUserList(A2.Text).Count();", a1, collectionNames);
             a1.PopulateFunctionName = function.Model.Name;
 
             a2.Text = "testList";
@@ -97,11 +96,11 @@ namespace CellTest.Core.Execution
         {
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
-            var collection = _userCollectionTracker.CreateCollection("testList", nameof(TodoItem));
-            var collection2 = _userCollectionTracker.CreateCollection("testList2", nameof(TodoItem));
+            var collection = _userCollectionTracker.CreateCollection("testList");
+            var collection2 = _userCollectionTracker.CreateCollection("testList2");
             var function = _functionTracker.CreateCellFunction("object", "testHelloWorld");
-            var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
-            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
+            var collectionNames = new List<string> { "testList" };
+            function.SetUserFriendlyCode("return c.GetUserList(A2.Text).Count();", a1, collectionNames);
             a1.PopulateFunctionName = function.Model.Name;
             a2.Text = "testList";
             Assert.Contains("testList", testing.GetAllCollectionSubscriptions(a1));
@@ -116,14 +115,14 @@ namespace CellTest.Core.Execution
         {
             var a1 = CellModelFactory.Create(1, 1, CellType.Label, "Sheet1", _cellTracker);
             var a2 = CellModelFactory.Create(2, 1, CellType.Label, "Sheet1", _cellTracker);
-            var collection = _userCollectionTracker.CreateCollection("testList", nameof(TodoItem));
+            var collection = _userCollectionTracker.CreateCollection("testList");
             var function = _functionTracker.CreateCellFunction("object", "testHelloWorld");
-            var collectionNameToDataTypeMap = new Dictionary<string, string> { { "testList", nameof(TodoItem) } };
-            function.SetUserFriendlyCode("return c.GetUserList<TodoItem>(A2.Text).Count();", a1, collectionNameToDataTypeMap);
+            var collectionNames = new List<string> { "testList" };
+            function.SetUserFriendlyCode("return c.GetUserList(A2.Text).Count();", a1, collectionNames);
             a1.PopulateFunctionName = function.Model.Name;
             a2.Text = "testList";
 
-            _userCollectionTracker.GetCollection("testList")!.Add(new TodoItem());
+            _userCollectionTracker.GetCollection("testList")!.Add(new UserItem());
 
             Assert.Equal("1", a1.Text);
         }

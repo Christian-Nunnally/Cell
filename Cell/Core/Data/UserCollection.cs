@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Common;
 using Cell.Model;
-using Cell.Model.Plugin;
 using System.ComponentModel;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Data.Tracker;
@@ -15,9 +14,9 @@ namespace Cell.Core.Data
         private readonly CellModel _cellModelToInjectIndexIntoSortFunction = new();
         private readonly Dictionary<string, int?> _cachedSortFilterResult = [];
         private readonly IContext _sortFunctionContext;
-        private readonly Dictionary<string, PluginModel> _items = [];
+        private readonly Dictionary<string, UserItem> _items = [];
         private readonly FunctionTracker _functionTracker;
-        private readonly List<PluginModel> _sortedItems = [];
+        private readonly List<UserItem> _sortedItems = [];
         private UserCollection? _baseCollection;
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCollection"/>.
@@ -37,17 +36,17 @@ namespace Cell.Core.Data
         /// <summary>
         /// Occurs when an item is added to the collection.
         /// </summary>
-        public event Action<UserCollection, PluginModel>? ItemAdded;
+        public event Action<UserCollection, UserItem>? ItemAdded;
 
         /// <summary>
         /// Occurs when a property of an item in the collection changes.
         /// </summary>
-        public event Action<UserCollection, PluginModel>? ItemPropertyChanged;
+        public event Action<UserCollection, UserItem>? ItemPropertyChanged;
 
         /// <summary>
         /// Occurs when an item is removed from the collection.
         /// </summary>
-        public event Action<UserCollection, PluginModel>? ItemRemoved;
+        public event Action<UserCollection, UserItem>? ItemRemoved;
 
         /// <summary>
         /// Occurs when the order of items in the collection changes.
@@ -62,7 +61,7 @@ namespace Cell.Core.Data
         /// <summary>
         /// Gets the items in this collection.
         /// </summary>
-        public List<PluginModel> Items => _sortedItems;
+        public List<UserItem> Items => _sortedItems;
 
         /// <summary>
         /// The underlying collection model.
@@ -80,7 +79,7 @@ namespace Cell.Core.Data
         /// Adds an item to the collection.
         /// </summary>
         /// <param name="item">The item to add.</param>
-        public void Add(PluginModel item)
+        public void Add(UserItem item)
         {
             InsertItemWithSortAndFilter(item);
         }
@@ -107,7 +106,7 @@ namespace Cell.Core.Data
         {
             if (string.IsNullOrEmpty(Model.BasedOnCollectionName))
             {
-                var itemsToSortResultMap = new Dictionary<PluginModel, int?>();
+                var itemsToSortResultMap = new Dictionary<UserItem, int?>();
                 int i = 0;
                 foreach (var item in _sortedItems)
                 {
@@ -139,7 +138,7 @@ namespace Cell.Core.Data
         /// Removes the item from this collection.
         /// </summary>
         /// <param name="item">The item to remove.</param>
-        public void Remove(PluginModel item) => Remove(item.ID);
+        public void Remove(UserItem item) => Remove(item.ID);
 
         /// <summary>
         /// Unlinks this collection from its base collection and removes all items from the collection.
@@ -175,17 +174,17 @@ namespace Cell.Core.Data
             return 0;
         }
 
-        private void BaseCollectionItemAdded(UserCollection collection, PluginModel model)
+        private void BaseCollectionItemAdded(UserCollection collection, UserItem model)
         {
             InsertItemWithSortAndFilter(model);
         }
 
-        private void BaseCollectionItemRemoved(UserCollection collection, PluginModel model)
+        private void BaseCollectionItemRemoved(UserCollection collection, UserItem model)
         {
             Remove(model);
         }
 
-        private void InsertItemWithSortAndFilter(PluginModel model)
+        private void InsertItemWithSortAndFilter(UserItem model)
         {
             if (_items.ContainsKey(model.ID)) return;
             if (!IsSortOnInsertEnabled)
@@ -207,7 +206,7 @@ namespace Cell.Core.Data
             }
         }
 
-        private int? GetSortFilterResultFromItemNotInList(PluginModel model)
+        private int? GetSortFilterResultFromItemNotInList(UserItem model)
         {
             _sortedItems.Add(model);
             var sortFilterResult = RunSortFilter(_sortedItems.Count - 1);
@@ -215,9 +214,9 @@ namespace Cell.Core.Data
             return sortFilterResult;
         }
 
-        private void InsertSorted(PluginModel model, int? sortFilterResult)
+        private void InsertSorted(UserItem model, int? sortFilterResult)
         {
-            var inserter = new SortedListInserter<PluginModel>(RunSortFilter);
+            var inserter = new SortedListInserter<UserItem>(RunSortFilter);
             inserter.InsertSorted(_sortedItems, model, sortFilterResult ?? 0);
             UpdateModelItems();
         }
@@ -237,7 +236,7 @@ namespace Cell.Core.Data
             return RunSortFilter(_functionTracker, _sortFunctionContext, Model.SortAndFilterFunctionName, i) ?? 0;
         }
 
-        private void PropertyChangedOnItemInBaseCollection(UserCollection collection, PluginModel model)
+        private void PropertyChangedOnItemInBaseCollection(UserCollection collection, UserItem model)
         {
             if (Model.SortAndFilterFunctionName is not null)
             {
@@ -250,7 +249,7 @@ namespace Cell.Core.Data
 
         private void PropertyChangedOnItemInCollection(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is PluginModel model && Model.SortAndFilterFunctionName is not null)
+            if (sender is UserItem model && Model.SortAndFilterFunctionName is not null)
             {
                 ItemPropertyChanged?.Invoke(this, model);
                 var currentIndex = _sortedItems.IndexOf(model);
@@ -292,6 +291,22 @@ namespace Cell.Core.Data
             {
                 RefreshSortAndFilter();
             }
+        }
+
+        internal List<string> GeneratePropertyNames()
+        {
+            var propertyNames = new List<string>();
+            foreach (var item in _sortedItems)
+            {
+                foreach (var propertyName in item.Properties.Keys)
+                {
+                    if (!propertyNames.Contains(propertyName))
+                    {
+                        propertyNames.Add(propertyName);
+                    }
+                }
+            }
+            return propertyNames;
         }
     }
 }

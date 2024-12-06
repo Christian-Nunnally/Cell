@@ -84,7 +84,7 @@ namespace CellTest.Core.Execution
         {
             IEnumerable<string> usings = [];
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(string.Empty, "object", new Dictionary<string, string>());
+            _testing.UpdateCode(string.Empty, "object", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(0);
 
@@ -97,7 +97,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -111,7 +111,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.E.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -125,7 +125,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.E.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length).Select(x => x.Text);
 
@@ -138,7 +138,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = ["Cell.Execution"];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -151,7 +151,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -165,7 +165,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = [];
             var code = "c.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -182,7 +182,7 @@ namespace CellTest.Core.Execution
                 { "cell", typeof(CellModel) }
             };
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -196,7 +196,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -210,7 +210,7 @@ namespace CellTest.Core.Execution
             IEnumerable<string> usings = ["Cell.Model"];
             var code = "A1.Text.";
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
 
             var completionData = _testing.CreateCompletionData(code.Length);
 
@@ -227,7 +227,7 @@ namespace CellTest.Core.Execution
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
-            _testing.UpdateCode(code, "void", new Dictionary<string, string>());
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
             for (int i = 0; i < 100; i++)
             {
                 _testing.CreateCompletionData(code.Length);

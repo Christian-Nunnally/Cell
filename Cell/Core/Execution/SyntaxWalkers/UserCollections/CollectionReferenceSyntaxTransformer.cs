@@ -8,8 +8,7 @@
         /// <summary>
         /// Create a new instance of the <see cref="CollectionReferenceSyntaxTransformer"/> class.
         /// </summary>
-        /// <param name="collectionNameToDataTypeMap">The mapping of collection names and thier items data type.</param>
-        public CollectionReferenceSyntaxTransformer(IReadOnlyDictionary<string, string> collectionNameToDataTypeMap) : base(new CodeToCollectionReferenceSyntaxRewriter(), new CollectionReferenceToCodeSyntaxRewriter(collectionNameToDataTypeMap))
+        public CollectionReferenceSyntaxTransformer(IReadOnlyList<string> collectionNames) : base(new CodeToCollectionReferenceSyntaxRewriter(), new CollectionReferenceToCodeSyntaxRewriter(collectionNames))
         {
         }
     }

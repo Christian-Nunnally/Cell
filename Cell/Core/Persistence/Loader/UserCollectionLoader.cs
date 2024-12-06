@@ -5,7 +5,6 @@ using Cell.Core.Execution.Functions;
 using Cell.Core.Execution.References;
 using Cell.Core.Execution.SyntaxWalkers.UserCollections;
 using Cell.Model;
-using Cell.Model.Plugin;
 using Cell.ViewModel.Application;
 using Microsoft.CodeAnalysis.CSharp;
 using System.ComponentModel;
@@ -111,10 +110,10 @@ namespace Cell.Core.Persistence.Loader
             }
         }
 
-        private PluginModel LoadItem(string path)
+        private UserItem LoadItem(string path)
         {
-            var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}");
-            return JsonSerializer.Deserialize<PluginModel>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(PluginModel)}. File contents = {text}");
+            var text = _collectionsDirectory.LoadFile(path) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(UserItem)}");
+            return JsonSerializer.Deserialize<UserItem>(text) ?? throw new CellError($"Failed to load {path} because it is not a valid {nameof(UserItem)}. File contents = {text}");
         }
 
         private void SaveCollection(UserCollection collection)
@@ -130,26 +129,26 @@ namespace Cell.Core.Persistence.Loader
             _collectionsDirectory.SaveFile(path, serializedModel);
         }
 
-        private void SaveItem(string collectionName, string id, PluginModel model)
+        private void SaveItem(string collectionName, string id, UserItem model)
         {
             var path = Path.Combine(collectionName, "Items", id);
             var serializedModel = JsonSerializer.Serialize(model);
             _collectionsDirectory.SaveFile(path, serializedModel);
         }
 
-        private void UserCollectionItemAdded(UserCollection collection, PluginModel model)
+        private void UserCollectionItemAdded(UserCollection collection, UserItem model)
         {
             if (collection.IsFilteredView) return;
             SaveItem(collection.Model.Name, model.ID, model);
         }
 
-        private void UserCollectionItemChanged(UserCollection collection, PluginModel model)
+        private void UserCollectionItemChanged(UserCollection collection, UserItem model)
         {
             if (collection.IsFilteredView) return;
             SaveItem(collection.Model.Name, model.ID, model);
         }
 
-        private void UserCollectionItemRemoved(UserCollection collection, PluginModel model)
+        private void UserCollectionItemRemoved(UserCollection collection, UserItem model)
         {
             if (collection.IsFilteredView) return;
             DeleteItem(collection.Model.Name, model.ID);

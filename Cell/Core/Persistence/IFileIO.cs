@@ -10,7 +10,7 @@
         /// </summary>
         /// <param name="path">The path to the directory to zip.</param>
         /// <param name="zipPath">The path to the zip file that will be created.</param>
-        public Task ZipDirectoryAsync(string path, string zipPath);
+        Task ZipDirectoryAsync(string path, string zipPath);
 
         /// <summary>
         /// Copies a directory from one location to another.
@@ -18,6 +18,13 @@
         /// <param name="from">Path to the directory to copy.</param>
         /// <param name="to">Path to the directory to paste in to.</param>
         void CopyDirectory(string from, string to);
+
+        /// <summary>
+        /// Copies a directory from one location to another.
+        /// </summary>
+        /// <param name="from">Path to the directory to copy.</param>
+        /// <param name="to">Path to the directory to paste in to.</param>
+        Task CopyDirectoryAsync(string from, string to);
 
         /// <summary>
         /// Creates a directory at the given path.

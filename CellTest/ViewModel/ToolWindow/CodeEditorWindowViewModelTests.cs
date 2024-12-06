@@ -2,7 +2,6 @@
 using Cell.ViewModel.ToolWindow;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Common;
-using Cell.Model.Plugin;
 using Cell.Core.Data.Tracker;
 
 namespace CellTest.ViewModel.ToolWindow
@@ -16,7 +15,7 @@ namespace CellTest.ViewModel.ToolWindow
         private readonly UserCollectionTracker _userCollectionTracker;
         private readonly CodeEditorWindowViewModel _testing;
         private readonly TestingContext _testingContext;
-        private readonly Dictionary<string, string> _collectionNameMap;
+        private readonly Dictionary<string, List<string>> _collectionNameMap;
         private readonly Logger _logger;
 
         public CodeEditorWindowViewModelTests()
@@ -94,14 +93,12 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CollectionExistsWithOneItemAndTestCodeGetsItem_TestCode_LogShowsDialogContainedItemTitle()
         {
-            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
-            _collectionNameMap.Add("TestCollection", "TodoItem");
-            var todoItem = new TodoItem
-            {
-                Title = "test passed"
-            };
+            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "");
+            _collectionNameMap.Add("TestCollection", []);
+            var todoItem = new UserItem();
+            todoItem["Title"] = "test passed";
             realCollection.Add(todoItem);
-            _testing.CurrentTextInEditor = "c.ShowDialog(TestCollection.First().Title);";
+            _testing.CurrentTextInEditor = "c.ShowDialog(TestCollection.First()[\"Title\"]);";
 
             _testing.TestCode();
 
@@ -111,9 +108,9 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CodeAddsItemToUserCollection_TestCode_ItemAddedInTest()
         {
-            _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
-            _collectionNameMap.Add("TestCollection", "TodoItem");
-            _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
+            _userCollectionTracker.CreateCollection("TestCollection", "");
+            _collectionNameMap.Add("TestCollection", []);
+            _testing.CurrentTextInEditor = "var item = new UserItem(); item[\"Title\"] = \"test passed\"; TestCollection.Add(item); c.ShowDialog(TestCollection.First()[\"Title\"]);";
 
             _testing.TestCode();
 
@@ -123,9 +120,9 @@ namespace CellTest.ViewModel.ToolWindow
         [Fact]
         public void CodeAddsItemToUserCollection_TestCode_ItemNotAddedInRealCollection()
         {
-            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "TodoItem", "");
-            _collectionNameMap.Add("TestCollection", "TodoItem");
-            _testing.CurrentTextInEditor = "TestCollection.Add(new TodoItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First().Title);";
+            var realCollection = _userCollectionTracker.CreateCollection("TestCollection", "");
+            _collectionNameMap.Add("TestCollection", []);
+            _testing.CurrentTextInEditor = "TestCollection.Add(new UserItem() { Title = \"test passed\" }); c.ShowDialog(TestCollection.First()[\"Title\"]);";
 
             _testing.TestCode();
 

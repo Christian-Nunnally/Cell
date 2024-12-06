@@ -49,9 +49,9 @@ namespace Cell.View.ToolWindow
             {
                 if (_viewModel.SelectedFunction is null) return;
                 var capturedFunction = _viewModel.SelectedFunction;
-                var collectionNameToDataTypeMap = ApplicationViewModel.Instance.UserCollectionTracker.GenerateDataTypeForCollectionMap();
+                var collectionNameToPropertyNameMap = ApplicationViewModel.Instance.UserCollectionTracker.GeneratePropertyNamesForCollectionMap();
                 var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, cell, ApplicationViewModel.Instance.FunctionTracker, ApplicationViewModel.Instance.Logger);
-                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToDataTypeMap, testingContext, ApplicationViewModel.Instance.Logger);
+                var codeEditorWindowViewModel = new CodeEditorWindowViewModel(capturedFunction.Function, cell, collectionNameToPropertyNameMap, testingContext, ApplicationViewModel.Instance.Logger);
                 ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
             }
         }

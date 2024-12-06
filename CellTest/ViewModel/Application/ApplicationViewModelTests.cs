@@ -127,117 +127,101 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        public void VersionDoesNotMatchSavedVersion_LoadStarted_PromptsUserToMigrate()
+        public void VersionDoesNotMatchSavedVersionButMigratorExists_LoadStarted_MigratorRun()
         {
             _persistedProject.Version = "0";
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
             var migrator = new TestMigrator();
             _persistedProject.RegisterMigrator("0", "1", migrator);
-            var dialog = _testDialogFactory.Expect();
+            Assert.False(migrator.Migrated);
 
             _testing.Load(_userCollectionLoader);
 
-            Assert.True(dialog.WasShown);
+            Assert.True(migrator.Migrated);
         }
 
-        //[Fact]
-        //public void MigrationConfirmationDialogOpen_UserConfirms_MigratorInvoked()
-        //{
-        //    _persistedProject.Version = "0";
-        //    _persistedProject.SaveVersion();
-        //    _persistedProject.Version = "1";
-        //    var migrator = new TestMigrator();
-        //    _persistedProject.RegisterMigrator("0", "1", migrator);
-        //    _testDialogFactory.Expect(0);
-        //    Assert.False(migrator.Migrated);
+        [Fact]
+        public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Empty(_testing.OpenToolWindowViewModels);
 
-        //    _testing.Load(_userCollectionLoader);
+            _testing.ShowToolWindow(testToolWindow);
 
-        //    Assert.True(migrator.Migrated);
-        //}
+            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        }
 
-        //[Fact]
-        //public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    Assert.Empty(_testing.OpenToolWindowViewModels);
+        [Fact]
+        public void ShowToolWindow_RequestCloseFunctionSet()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Null(testToolWindow.RequestClose);
 
-        //    _testing.ShowToolWindow(testToolWindow);
+            _testing.ShowToolWindow(testToolWindow);
 
-        //    Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
-        //}
+            Assert.NotNull(testToolWindow.RequestClose);
+        }
 
-        //[Fact]
-        //public void ShowToolWindow_RequestCloseFunctionSet()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    Assert.Null(testToolWindow.RequestClose);
+        [Fact]
+        public void ShowToolWindow_ShowHandlerCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.Empty(_testing.OpenToolWindowViewModels);
 
-        //    _testing.ShowToolWindow(testToolWindow);
+            _testing.ShowToolWindow(testToolWindow);
 
-        //    Assert.NotNull(testToolWindow.RequestClose);
-        //}
+            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+        }
 
-        //[Fact]
-        //public void ShowToolWindow_ShowHandlerCalled()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    Assert.Empty(_testing.OpenToolWindowViewModels);
+        [Fact]
+        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowRemainsOpen()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = false;
 
-        //    _testing.ShowToolWindow(testToolWindow);
+            testToolWindow.RequestClose!.Invoke();
 
-        //    Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
-        //}
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+        }
 
-        //[Fact]
-        //public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowRemainsOpen()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    _testing.ShowToolWindow(testToolWindow);
-        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-        //    testToolWindow.IsAllowingClose = false;
+        [Fact]
+        public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowClosedHandleNotCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = false;
 
-        //    testToolWindow.RequestClose!.Invoke();
+            testToolWindow.RequestClose!.Invoke();
 
-        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-        //}
+            Assert.False(testToolWindow.WasHandleBeingClosedCalled);
+        }
 
-        //[Fact]
-        //public void ToolWindowNotAllowingClose_RequestCloseFunctionCalled_ToolWindowClosedHandleNotCalled()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    _testing.ShowToolWindow(testToolWindow);
-        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-        //    testToolWindow.IsAllowingClose = false;
+        [Fact]
+        public void ToolWindowAllowingClose_RequestCloseFunctionCalled_ToolWindowClosed()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindow);
+            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            testToolWindow.IsAllowingClose = true;
 
-        //    testToolWindow.RequestClose!.Invoke();
+            testToolWindow.RequestClose!.Invoke();
 
-        //    Assert.False(testToolWindow.WasHandleBeingClosedCalled);
-        //}
+            Assert.Empty(_testing.OpenToolWindowViewModels);
+        }
 
-        //[Fact]
-        //public void ToolWindowAllowingClose_RequestCloseFunctionCalled_ToolWindowClosed()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    _testing.ShowToolWindow(testToolWindow);
-        //    Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
-        //    testToolWindow.IsAllowingClose = true;
+        [Fact]
+        public void ToolWindowOpened_WasHandleBeingShownCalled()
+        {
+            var testToolWindow = new TestToolWindowViewModel();
+            Assert.False(testToolWindow.WasHandleBeingShownCalled);
 
-        //    testToolWindow.RequestClose!.Invoke();
+            _testing.ShowToolWindow(testToolWindow);
 
-        //    Assert.Empty(_testing.OpenToolWindowViewModels);
-        //}
-
-        //[Fact]
-        //public void ToolWindowOpened_WasHandleBeingShownCalled()
-        //{
-        //    var testToolWindow = new TestToolWindowViewModel();
-        //    Assert.False(testToolWindow.WasHandleBeingShownCalled);
-
-        //    _testing.ShowToolWindow(testToolWindow);
-
-        //    Assert.True(testToolWindow.WasHandleBeingShownCalled);
-        //}
+            Assert.True(testToolWindow.WasHandleBeingShownCalled);
+        }
     }
 }

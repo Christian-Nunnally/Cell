@@ -7,10 +7,18 @@ namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
     /// <summary>
     /// Traverse the syntax tree and replace user collection references with the appropriate code.
     /// </summary>
-    /// <param name="collectionNameToDataTypeMap"></param>
-    public class CollectionReferenceToCodeSyntaxRewriter(IReadOnlyDictionary<string, string> collectionNameToDataTypeMap) : CSharpSyntaxRewriter
+    public class CollectionReferenceToCodeSyntaxRewriter : CSharpSyntaxRewriter
     {
-        private readonly IReadOnlyDictionary<string, string> _collectionNameToDataTypeMap = collectionNameToDataTypeMap;
+        private readonly IReadOnlyList<string> _collectionNames;
+
+        /// <summary>
+        /// Create a new instance of <see cref="CollectionReferenceToCodeSyntaxRewriter"/>.
+        /// </summary>
+        /// <param name="collectionNames">The valid list of collection names.</param>
+        public CollectionReferenceToCodeSyntaxRewriter(IReadOnlyList<string> collectionNames)
+        {
+            _collectionNames = collectionNames;
+        }
         /// <summary>
         /// Represents a <see cref="CSharpSyntaxVisitor"/> that descends an entire <see cref="CSharpSyntaxNode"/> graph
         /// visiting each CSharpSyntaxNode and its child SyntaxNodes and <see cref="SyntaxToken"/>s in depth-first order.
@@ -24,8 +32,7 @@ namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
                 var variableName = identifierSyntax.Identifier.ToString();
                 if (IsCollectionName(variableName))
                 {
-                    var dataType = _collectionNameToDataTypeMap[variableName];
-                    var code = $"c.GetUserList<{dataType}>(\"{variableName}\")";
+                    var code = $"c.GetUserList(\"{variableName}\")";
                     return SyntaxUtilities.CreateSyntaxNodePreservingTrivia(node, code);
                 }
             }
@@ -34,7 +41,7 @@ namespace Cell.Core.Execution.SyntaxWalkers.UserCollections
 
         private bool IsCollectionName(string input)
         {
-            return !string.IsNullOrWhiteSpace(input) && _collectionNameToDataTypeMap.ContainsKey(input);
+            return !string.IsNullOrWhiteSpace(input) && _collectionNames.Contains(input);
         }
     }
 }

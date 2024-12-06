@@ -183,9 +183,9 @@ namespace Cell.ViewModel.ToolWindow
             if (ApplicationViewModel.Instance.CellTracker is null) return;
             var userCollectionTracker = ApplicationViewModel.Instance.UserCollectionTracker;
             if (userCollectionTracker is null) return;
-            var collectionNameToDataTypeMap = userCollectionTracker.GenerateDataTypeForCollectionMap() ?? new Dictionary<string, string>();
+            var collectionNameToPropertyNameMap = userCollectionTracker.GeneratePropertyNamesForCollectionMap();
             var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionTracker, CellToDisplay, _functionTracker, _logger);
-            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToDataTypeMap, testingContext, _logger);
+            var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToPropertyNameMap, testingContext, _logger);
 
             if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
             else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
