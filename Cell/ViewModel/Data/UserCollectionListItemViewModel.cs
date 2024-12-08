@@ -42,7 +42,7 @@ namespace Cell.ViewModel.Data
         {
             get
             {
-                var usagesWithinFunctions = _functionTracker.CellFunctions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == Collection.Model.Name));
+                var usagesWithinFunctions = _functionTracker.Functions.Sum(x => x.CollectionDependencies.OfType<ConstantCollectionReference>().Count(x => x.ConstantCollectionName == Collection.Model.Name));
                 var collectionsUsingThisCollectionAsABase = _userCollectionTracker.UserCollections.Count(x => x.Model.BasedOnCollectionName == Collection.Model.Name);
                 return usagesWithinFunctions + collectionsUsingThisCollectionAsABase;
             }
@@ -64,7 +64,7 @@ namespace Cell.ViewModel.Data
                     NotifyPropertyChanged(nameof(Name));
 
                     var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-                    foreach (var function in _functionTracker.CellFunctions)
+                    foreach (var function in _functionTracker.Functions)
                     {
                         if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
                         {

@@ -981,7 +981,7 @@ namespace Cell.ViewModel.ToolWindow
             }
             IncrementColumnOfAllAtOrToTheRightOf(columnCell.Location.SheetName, location.Column, -1);
 
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(location.SheetName, location.Column, function, -1);
             }
@@ -1000,7 +1000,7 @@ namespace Cell.ViewModel.ToolWindow
             }
             IncrementRowOfAllAtOrBelow(rowCell.Location.SheetName, location.Row, -1);
 
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(location.SheetName, location.Row, function, -1);
             }
@@ -1087,7 +1087,7 @@ namespace Cell.ViewModel.ToolWindow
                 EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 IncrementColumnReferenceOfAbsoluteReferencesForInsertedColumn(sheetName, index, function, 1);
             }
@@ -1109,7 +1109,7 @@ namespace Cell.ViewModel.ToolWindow
                 EnsureIndexStaysCumulativeBetweenNeighborsWhenAdding(cell, firstNeighbor, secondNeighbor, _cellTracker);
             }
 
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 IncrementRowReferenceOfAbsoluteReferencesForInsertedRow(rowModel.Location.SheetName, rowModel.Location.Row, function, 1);
             }

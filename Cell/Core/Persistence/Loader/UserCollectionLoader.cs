@@ -67,7 +67,7 @@ namespace Cell.Core.Persistence.Loader
             _collectionsDirectory.MoveDirectory(oldName, newName);
 
             var collectionRenamer = new CollectionReferenceRenameRewriter(oldName, newName);
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 if (function.CollectionDependencies.OfType<ConstantCollectionReference>().Select(x => x.ConstantCollectionName).Contains(oldName))
                 {

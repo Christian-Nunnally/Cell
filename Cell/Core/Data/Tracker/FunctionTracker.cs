@@ -26,7 +26,7 @@ namespace Cell.Core.Data.Tracker
         /// <summary>
         /// An observable collection of all the loaded cell functions.
         /// </summary>
-        public ObservableCollection<CellFunction> CellFunctions { get; private set; } = [];
+        public ObservableCollection<CellFunction> Functions { get; private set; } = [];
 
         private Dictionary<string, Dictionary<string, CellFunction>> Namespaces { get; set; } = [];
 
@@ -49,7 +49,7 @@ namespace Cell.Core.Data.Tracker
         {
             if (Namespaces.TryGetValue(space, out var namespaceFunctions)) namespaceFunctions.Add(function.Model.Name, function);
             else Namespaces.Add(space, new Dictionary<string, CellFunction> { { function.Model.Name, function } });
-            CellFunctions.Add(function);
+            Functions.Add(function);
             FunctionAdded?.Invoke(function);
         }
 
@@ -80,7 +80,7 @@ namespace Cell.Core.Data.Tracker
             if (Namespaces.TryGetValue(function.Model.ReturnType, out var namespaceFunctions))
             {
                 namespaceFunctions.Remove(function.Model.Name);
-                CellFunctions.Remove(function);
+                Functions.Remove(function);
                 FunctionRemoved?.Invoke(function);
             }
         }

@@ -288,7 +288,7 @@ namespace Cell.ViewModel.ToolWindow
         internal IEnumerable<ICompletionData> GetPopulateFunctionSuggestions()
         {
             var suggestions = new List<ICompletionData>();
-            foreach (var function in _functionTracker.CellFunctions)
+            foreach (var function in _functionTracker.Functions)
             {
                 if (function.Model.ReturnType == "void") continue;
                 suggestions.Add(new CodeCompletionData(function.Model.Name, function.Model.Name, function.Model.Description, FontAwesome.Sharp.IconChar.Code));
