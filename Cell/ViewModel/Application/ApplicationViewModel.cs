@@ -7,12 +7,10 @@ using Cell.Core.Persistence.Loader;
 using Cell.Model;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Controls;
-using System.Windows.Forms;
 
 namespace Cell.ViewModel.Application
 {
@@ -34,7 +32,8 @@ namespace Cell.ViewModel.Application
         private bool _isProjectLoaded;
         private bool _isProjectLoading;
         private SheetViewModel? _sheetViewModel;
-        private TitleBarSheetNavigationViewModel? titleBarSheetNavigationViewModel;
+        private TitleBarSheetNavigationViewModel? _titleBarSheetNavigationViewModel;
+        private TitleBarNotificationButtonViewModel? _titleBarNotificationButtonViewModel;
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
         /// </summary>
@@ -202,11 +201,24 @@ namespace Cell.ViewModel.Application
         /// </summary>
         public TitleBarSheetNavigationViewModel? TitleBarSheetNavigationViewModel
         {
-            get => titleBarSheetNavigationViewModel; set
+            get => _titleBarSheetNavigationViewModel; set
             {
-                if (titleBarSheetNavigationViewModel == value) return;
-                titleBarSheetNavigationViewModel = value;
+                if (_titleBarSheetNavigationViewModel == value) return;
+                _titleBarSheetNavigationViewModel = value;
                 NotifyPropertyChanged(nameof(TitleBarSheetNavigationViewModel));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the view model for the title bar notifcation button.
+        /// </summary>
+        public TitleBarNotificationButtonViewModel? TitleBarNotificationButtonViewModel
+        {
+            get => _titleBarNotificationButtonViewModel; set
+            {
+                if (_titleBarNotificationButtonViewModel == value) return;
+                _titleBarNotificationButtonViewModel = value;
+                NotifyPropertyChanged(nameof(TitleBarNotificationButtonViewModel));
             }
         }
 
@@ -535,6 +547,60 @@ namespace Cell.ViewModel.Application
                 Details = details,
                 MigrationCommit = migrationCommit
             };
+        }
+
+        internal void GoToNextSheet()
+        {
+            if (SheetTracker is null) return;
+            if (SheetViewModel is null) return;
+            var currentSheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == SheetViewModel.SheetName);
+            if (currentSheet is null) return;
+            var startingIndex = SheetTracker.OrderedSheets.IndexOf(currentSheet);
+            for (int i = startingIndex + 1; i < SheetTracker.OrderedSheets.Count; i++)
+            {
+                var sheet = SheetTracker.OrderedSheets[i];
+                if (sheet is not null && sheet.IsVisibleInTopBar)
+                {
+                    GoToSheet(sheet.Name);
+                    return;
+                }
+            }
+            for (int i = 0; i < SheetTracker.OrderedSheets.Count; i++)
+            {
+                var sheet = SheetTracker.OrderedSheets[i];
+                if (sheet is not null && sheet.IsVisibleInTopBar)
+                {
+                    GoToSheet(sheet.Name);
+                    return;
+                }
+            }
+        }
+
+        internal void GoToPreviousSheet()
+        {
+            if (SheetTracker is null) return;
+            if (SheetViewModel is null) return;
+            var currentSheet = SheetTracker.Sheets.FirstOrDefault(x => x.Name == SheetViewModel.SheetName);
+            if (currentSheet is null) return;
+            var startingIndex = SheetTracker.OrderedSheets.IndexOf(currentSheet);
+            for (int i = startingIndex - 1; i >= 0; i--)
+            {
+                var sheet = SheetTracker.OrderedSheets[i];
+                if (sheet is not null && sheet.IsVisibleInTopBar)
+                {
+                    GoToSheet(sheet.Name);
+                    return;
+                }
+            }
+            for (int i = SheetTracker.OrderedSheets.Count - 1; i >= 0; i--)
+            {
+                var sheet = SheetTracker.OrderedSheets[i];
+                if (sheet is not null && sheet.IsVisibleInTopBar)
+                {
+                    GoToSheet(sheet.Name);
+                    return;
+                }
+            }
         }
     }
 

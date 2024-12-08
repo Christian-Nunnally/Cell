@@ -5,7 +5,8 @@
     /// </summary>
     public class Logger
     {
-        private const int MaxRetainedLogs = 1000;
+        private bool _enabled = true;
+        private readonly int _maxRetainedLogs = 1000;
         private readonly Queue<string> _logsQueue = new();
         /// <summary>
         /// Occurs when a new log is added.
@@ -17,7 +18,10 @@
         /// </summary>
         public IEnumerable<string> Logs => _logsQueue.AsEnumerable();
 
-        public static Logger Null { get; internal set; } = new();
+        /// <summary>
+        /// A null logger.
+        /// </summary>
+        public readonly static Logger Null = new() { _enabled = false };
 
         /// <summary>
         /// Logs a message.
@@ -25,11 +29,12 @@
         /// <param name="message">The message to log.</param>
         public void Log(string message)
         {
+            if (!_enabled) return;
             var log = $"[{DateTime.Now:HH:mm:ss}] {message}";
             Console.WriteLine(log);
             LogAdded?.Invoke(log);
             _logsQueue.Enqueue(log);
-            if (_logsQueue.Count > MaxRetainedLogs)
+            if (_logsQueue.Count > _maxRetainedLogs)
             {
                 _logsQueue.Dequeue();
             }

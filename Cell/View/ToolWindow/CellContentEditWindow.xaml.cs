@@ -75,6 +75,7 @@ namespace Cell.View.ToolWindow
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
+            _viewModel.ArePendingChangesInMultiEditTextBox = true;
             static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e) => e.Text.Length == 1 && e.Text == "=";
             if (ShouldOpenAutoCompleteWindow(e)) OpenAutoCompleteWindow();
         }
@@ -118,6 +119,11 @@ namespace Cell.View.ToolWindow
             if (_completionWindow is null) return;
             _completionWindow.Show();
             _completionWindow.Closed += delegate { _completionWindow = null; };
+        }
+
+        private void SubmitMultiEditTextLabelMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _viewModel.SubmitMultiUseUserInputText();
         }
     }
 }

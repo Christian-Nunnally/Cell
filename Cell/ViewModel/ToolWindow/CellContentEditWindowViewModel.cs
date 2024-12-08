@@ -23,6 +23,8 @@ namespace Cell.ViewModel.ToolWindow
         private readonly FunctionTracker _functionTracker;
         private CellModel _cellToDisplay = CellModel.Null;
         private string _multiUseUserInputText = string.Empty;
+        private bool arePendingChangesInMultiEditTextBox;
+
         /// <summary>
         /// Creates a new instance of the <see cref="CellContentEditWindowViewModel"/> class.
         /// </summary>
@@ -70,7 +72,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the minimum height this tool window is allowed to be resized to.
         /// </summary>
-        public override double MinimumHeight => 60;
+        public override double MinimumHeight => 62;
 
         /// <summary>
         /// Gets the minimum width this tool window is allowed to be resized to.
@@ -91,6 +93,17 @@ namespace Cell.ViewModel.ToolWindow
                 _multiUseUserInputText = value;
                 NotifyPropertyChanged(nameof(MultiUseUserInputText));
                 NotifyPropertyChanged(nameof(IsEditFunctionButtonVisible));
+            }
+        }
+
+        public bool ArePendingChangesInMultiEditTextBox
+        {
+            get => arePendingChangesInMultiEditTextBox;
+            set 
+            {
+                if (arePendingChangesInMultiEditTextBox == value) return;
+                arePendingChangesInMultiEditTextBox = value;
+                NotifyPropertyChanged(nameof(ArePendingChangesInMultiEditTextBox));
             }
         }
 
@@ -216,6 +229,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             if (_multiUseUserInputText.StartsWith('=')) SetCellsPopulateFunctionFromMultiUseEditBox();
             else SetCellsTextFromMultiUseEditBox();
+            ArePendingChangesInMultiEditTextBox = false;
         }
 
         private void SetCellsTextFromMultiUseEditBox()

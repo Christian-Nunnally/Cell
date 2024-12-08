@@ -2,6 +2,7 @@
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Cell.View.Application
 {
@@ -31,7 +32,16 @@ namespace Cell.View.Application
             if (sender is not Button button) return;
             if (button.Content is not Label label) return;
             if (label.Content is not string sheetName) return;
-            await ApplicationViewModel.Instance.GoToSheetAsync(sheetName);
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                var sheetToolWindowViewModel = new SheetToolWindowViewModel();
+                ApplicationViewModel.Instance.ShowToolWindow(sheetToolWindowViewModel);
+                sheetToolWindowViewModel.SheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
+            }
+            else
+            {
+                await ApplicationViewModel.Instance.GoToSheetAsync(sheetName);
+            }
         }
     }
 }

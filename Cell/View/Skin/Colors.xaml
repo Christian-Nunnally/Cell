@@ -11,5 +11,6 @@
     <SolidColorBrush x:Key="AccentColor" Color="{x:Static colorConstants:ColorConstants.AccentColorConstant}" />
     <SolidColorBrush x:Key="ToolWindowHeaderColor" Color="{x:Static colorConstants:ColorConstants.ToolWindowHeaderColorConstant}" />
     <SolidColorBrush x:Key="ErrorForegroundColor" Color="{x:Static colorConstants:ColorConstants.ErrorForegroundColorConstant}" />
+    <SolidColorBrush x:Key="PendingColor" Color="{x:Static colorConstants:ColorConstants.PendingColorConstant}" />
 </ResourceDictionary>
 

@@ -13,6 +13,7 @@
             BackgroundWhenMouseOver="{Binding ContentHighlightColor, Converter={StaticResource ThemeColorConverter}}"
             BorderBrush="{Binding ContentBorderColor, Converter={StaticResource ThemeColorConverter}}"
             BorderThickness="{Binding ContentBorderThickness}"
+            Focusable="True"
             FontFamily="{Binding Font}"
             FontSize="{Binding FontSize}"
             Foreground="{Binding ForegroundColor, Converter={StaticResource ThemeColorConverter}}"

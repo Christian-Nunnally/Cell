@@ -14,6 +14,7 @@ namespace Cell.View.Skin
         public const string BackgroundColorConstantHex = "#1e1e1e";
         public const string BorderColorConstantHex = "#3D3D3D";
         public const string ControlBackgroundColorConstantHex = "#252525";
+        public const string PendingColorConstantHex = "#8a8449";
         public const string ErrorForegroundColorConstantHex = "#ff6666";
         public const string ForegroundColorConstantHex = "#ffffff";
         public const string SelectedBorderColorConstantHex = "#707070";
@@ -24,6 +25,7 @@ namespace Cell.View.Skin
         public static readonly Color BorderColorConstant = ColorAdjuster.ConvertHexStringToColor(BorderColorConstantHex);
         public static readonly Color ControlBackgroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ControlBackgroundColorConstantHex);
         public static readonly Color ErrorForegroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ErrorForegroundColorConstantHex);
+        public static readonly Color PendingColorConstant = ColorAdjuster.ConvertHexStringToColor(PendingColorConstantHex);
         public static readonly Color ForegroundColorConstant = ColorAdjuster.ConvertHexStringToColor(ForegroundColorConstantHex);
         public static readonly Color SelectedBorderColorConstant = ColorAdjuster.ConvertHexStringToColor(SelectedBorderColorConstantHex);
         public static readonly Color SelectedColorConstant = ColorAdjuster.ConvertHexStringToColor(SelectedColorConstantHex);

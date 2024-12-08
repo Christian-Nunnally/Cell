@@ -40,15 +40,6 @@ namespace Cell.View.Controls
         }
 
         /// <summary>
-        /// Gets or sets the command that is executed when the checkbox is clicked.
-        /// </summary>
-        public ICommand Command
-        {
-            get { return (ICommand)GetValue(CommandProperty); }
-            set { SetValue(CommandProperty, value); }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the checkbox is checked.
         /// </summary>
         public bool IsChecked
@@ -68,7 +59,6 @@ namespace Cell.View.Controls
 
         private void CheckBoxBorderMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Command?.Execute(null);
             IsChecked = !IsChecked;
         }
 
@@ -77,12 +67,22 @@ namespace Cell.View.Controls
             if (_checkboxBorder != null)
             {
                 _checkboxBorder.MouseDown -= new MouseButtonEventHandler(CheckBoxBorderMouseDown);
+                _checkboxBorder.PreviewKeyDown -= new KeyEventHandler(CheckBoxBorderKeyDown);
             }
             _checkboxBorder = value;
 
             if (_checkboxBorder != null)
             {
                 _checkboxBorder.MouseDown += new MouseButtonEventHandler(CheckBoxBorderMouseDown);
+                _checkboxBorder.PreviewKeyDown += new KeyEventHandler(CheckBoxBorderKeyDown);
+            }
+        }
+
+        private void CheckBoxBorderKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                IsChecked = !IsChecked;
             }
         }
     }

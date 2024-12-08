@@ -11,6 +11,7 @@
     d:DataContext="{d:DesignInstance Type=viewModel:CellContentEditWindowViewModel}"
     d:DesignHeight="30"
     d:DesignWidth="600"
+    SnapsToDevicePixels="True"
     mc:Ignorable="d">
     <DockPanel>
         <Button
@@ -48,20 +49,53 @@
             Content="{fa:Icon Bolt}"
             DockPanel.Dock="Right"
             ToolTip="Opens the code editor for the populate function this cell is using." />
-        <avalonEdit:TextEditor
-            Name="_multiUseUserInputTextBox"
-            Grid.Row="1"
-            Padding="3,6"
-            Background="{StaticResource ControlBackground}"
-            BorderBrush="{StaticResource CellBorderColor}"
-            BorderThickness="1"
-            FontSize="15"
-            Foreground="{StaticResource ForegroundColor}"
-            HorizontalScrollBarVisibility="Auto"
-            LostFocus="MultiUseUserInputTextBoxLostFocus"
-            PreviewKeyDown="TextBoxPreviewKeyDown"
-            SyntaxHighlighting="C#"
-            ToolTip="Sets a cells text. To compute the text using a function, type '=' and then the function name, like '=MyFunction'"
-            VerticalScrollBarVisibility="Auto" />
+        <Grid>
+            <avalonEdit:TextEditor
+                Name="_multiUseUserInputTextBox"
+                Grid.Row="1"
+                Padding="3,6"
+                Background="{StaticResource ControlBackground}"
+                BorderBrush="{StaticResource CellBorderColor}"
+                BorderThickness="1"
+                FontSize="15"
+                Foreground="{StaticResource ForegroundColor}"
+                HorizontalScrollBarVisibility="Auto"
+                LostFocus="MultiUseUserInputTextBoxLostFocus"
+                PreviewKeyDown="TextBoxPreviewKeyDown"
+                SyntaxHighlighting="C#"
+                ToolTip="Sets a cells text. To compute the text using a function, type '=' and then the function name, like '=MyFunction'"
+                VerticalScrollBarVisibility="Auto" />
+            <Border
+                BorderBrush="{StaticResource PendingColor}"
+                BorderThickness="1"
+                SnapsToDevicePixels="True"
+                Visibility="{Binding ArePendingChangesInMultiEditTextBox, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Label
+                    Height="30"
+                    Margin="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Content="↩"
+                    MouseDown="SubmitMultiEditTextLabelMouseDown"
+                    ToolTip="Press `Enter` to apply changes to selected cells">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <!--  Trigger for mouse over event  -->
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource SelectedColor}" />
+                                    <!--  Change color on hover  -->
+                                </Trigger>
+                                <!--  Optional: Change the foreground color back to original when mouse is not over  -->
+                                <Trigger Property="IsMouseOver" Value="False">
+                                    <Setter Property="Foreground" Value="{StaticResource PendingColor}" />
+                                    <!--  Original color  -->
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+            </Border>
+        </Grid>
     </DockPanel>
 </view:ResizableToolWindow>

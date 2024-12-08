@@ -14,6 +14,10 @@ namespace Cell.Core.Data.Tracker
     {
         private readonly Logger _logger;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="FunctionTracker"/>.
+        /// </summary>
+        /// <param name="logger">The logger to provide to new functions.</param>
         public FunctionTracker(Logger logger)
         {
             _logger = logger;

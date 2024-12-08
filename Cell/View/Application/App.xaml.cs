@@ -57,6 +57,8 @@ namespace Cell
             applicationViewModel.CellLoader = cellLoader;
             var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
             applicationViewModel.TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
+            var titleBarNotificationButtonViewModel = new TitleBarNotificationButtonViewModel();
+            applicationViewModel.TitleBarNotificationButtonViewModel = titleBarNotificationButtonViewModel;
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
             applicationViewModel.ApplicationSettings = applicationSettings;
             var backupPath = Path.Combine(appPersistanceRoot, "CellBackups");
@@ -103,7 +105,7 @@ namespace Cell
         {
             applicationViewModel.OpenToolWindowViewModels.CollectionChanged += (o, e) =>
             {
-                cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
+                //cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
                 if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
             };
         }

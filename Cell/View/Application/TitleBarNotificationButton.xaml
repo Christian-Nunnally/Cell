@@ -1,0 +1,23 @@
+﻿<UserControl
+    x:Class="Cell.View.Application.TitleBarNotificationButton"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+    xmlns:local="clr-namespace:Cell.View.Application"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModel="clr-namespace:Cell.ViewModel.Application"
+    d:DataContext="{d:DesignInstance Type=viewModel:TitleBarNotificationButtonViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <Button
+            Click="ShowNotifcationsWindowButtonClick"
+            Content="{fa:Icon Info}"
+            DockPanel.Dock="Right"
+            Style="{StaticResource TitleButtonStyle}"
+            ToolTip="Notifcations"
+            Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+    </Grid>
+</UserControl>

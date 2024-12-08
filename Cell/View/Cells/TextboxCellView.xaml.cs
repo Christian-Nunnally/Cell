@@ -64,23 +64,27 @@ namespace Cell.View.Cells
             if (sender is not TextBox textbox) return;
             if (e.Key == Key.Enter)
             {
+                ClearFocus(textbox);
                 if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector?.MoveSelectionUp();
                 else ApplicationViewModel.Instance.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Tab)
             {
+                ClearFocus(textbox);
                 if (Keyboard.Modifiers == ModifierKeys.Shift) ApplicationViewModel.Instance.CellSelector?.MoveSelectionLeft();
                 else ApplicationViewModel.Instance.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
+                ClearFocus(textbox);
                 ApplicationViewModel.Instance.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
+                ClearFocus(textbox);
                 ApplicationViewModel.Instance.CellSelector?.MoveSelectionUp();
                 e.Handled = true;
             }
@@ -88,6 +92,7 @@ namespace Cell.View.Cells
             {
                 if (textbox.CaretIndex == 0)
                 {
+                    ClearFocus(textbox);
                     ApplicationViewModel.Instance.CellSelector?.MoveSelectionLeft();
                     e.Handled = true;
                 }
@@ -96,10 +101,17 @@ namespace Cell.View.Cells
             {
                 if (textbox.CaretIndex == textbox.Text.Length)
                 {
+                    ClearFocus(textbox);
                     ApplicationViewModel.Instance.CellSelector?.MoveSelectionRight();
                     e.Handled = true;
                 }
             }
+        }
+
+        private void ClearFocus(TextBox textbox)
+        {
+            DependencyObject scope = FocusManager.GetFocusScope(textbox);
+            FocusManager.SetFocusedElement(scope, System.Windows.Application.Current.MainWindow);
         }
     }
 }

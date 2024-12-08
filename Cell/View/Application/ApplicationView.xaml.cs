@@ -360,7 +360,8 @@ namespace Cell.View.Application
         private void WindowPreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (_viewModel is null) return;
-            if (Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox) return; // Disable keyboard shortcuts when typing in a textbox
+            bool IsUserTypingIntTextbox = Mouse.DirectlyOver is TextArea || Mouse.DirectlyOver is TextBox || Keyboard.FocusedElement is TextArea || Keyboard.FocusedElement is TextBox;
+            if (IsUserTypingIntTextbox) return;
             if (e.IsDown && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
             {
                 if (e.Key == Key.C)
@@ -385,50 +386,58 @@ namespace Cell.View.Application
                 }
                 else if (e.Key == Key.T)
                 {
+                    if (ApplicationViewModel.Instance.SheetTracker is null) return;
+                    if (ApplicationViewModel.Instance.DialogFactory is null) return;
+                    var createSheetWindowViewModel = new CreateSheetWindowViewModel(ApplicationViewModel.Instance.SheetTracker, ApplicationViewModel.Instance.DialogFactory);
+                    ApplicationViewModel.Instance.ShowToolWindow(createSheetWindowViewModel);
+                }
+                else if (e.Key == Key.S)
+                {
                     ThemeColorConverter.IsDarkMode = !ThemeColorConverter.IsDarkMode;
                     var activeSheet = _viewModel.SheetViewModel;
                     CloseAllSheetViews();
                     ShowSheetView(activeSheet);
                 }
-                else if (e.Key == Key.Q)
+                else if (e.Key == Key.Tab)
                 {
-                    ShowDockSites();
-                }
-                else if (e.Key == Key.W)
-                {
-                    HideDockSites();
+                    if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.GoToPreviousSheet();
+                    else _viewModel.GoToNextSheet();
                 }
             }
             else if (e.Key == Key.Tab)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector?.MoveSelectionLeft();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.MoveSelectionLeft();
                 else _viewModel.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Enter)
             {
-                if (Keyboard.Modifiers == ModifierKeys.Shift) _viewModel.CellSelector?.MoveSelectionUp();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.MoveSelectionUp();
                 else _viewModel.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Up)
             {
-                _viewModel.CellSelector?.MoveSelectionUp();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.AddToSelectionUp();
+                else _viewModel.CellSelector?.MoveSelectionUp();
                 e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
-                _viewModel.CellSelector?.MoveSelectionDown();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.AddToSelectionDown();
+                else _viewModel.CellSelector?.MoveSelectionDown();
                 e.Handled = true;
             }
             else if (e.Key == Key.Left)
             {
-                _viewModel.CellSelector?.MoveSelectionLeft();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.AddToSelectionLeft();
+                else _viewModel.CellSelector?.MoveSelectionLeft();
                 e.Handled = true;
             }
             else if (e.Key == Key.Right)
             {
-                _viewModel.CellSelector?.MoveSelectionRight();
+                if ((Keyboard.Modifiers & ModifierKeys.Shift) != 0) _viewModel.CellSelector?.AddToSelectionRight();
+                else _viewModel.CellSelector?.MoveSelectionRight();
                 e.Handled = true;
             }
             else if (e.Key == Key.Delete)
@@ -448,6 +457,7 @@ namespace Cell.View.Application
                 _viewModel.SheetViewModel?.CellSelector.UnselectAllCells();
                 e.Handled = true;
             }
+            
         }
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)

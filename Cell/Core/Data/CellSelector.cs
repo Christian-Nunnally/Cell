@@ -51,16 +51,36 @@ namespace Cell.Core.Data
         /// <param name="rowOffset">How many rows the selection should move by. Can be negative to move up.</param>
         public void MoveSelection(int columnOffset, int rowOffset)
         {
-            if (!SelectedCells.Any()) return;
-            var singleSelectedCell = SelectedCells.First();
-            if (columnOffset > 0) columnOffset += CountCellsMergedToRight(singleSelectedCell);
-            if (rowOffset > 0) rowOffset += CountCellsMergedBelow(singleSelectedCell);
-            var row = singleSelectedCell.Location.Row + rowOffset;
-            var column = singleSelectedCell.Location.Column + columnOffset;
-            var cellToSelect = _cellTracker.GetCell(singleSelectedCell.Location.SheetName, row, column);
-            if (cellToSelect is null) return;
-            UnselectAllCells();
-            SelectCell(cellToSelect);
+            var cellsToSelect = GetCellsOffsetFromCurrentlySelectedCells(ref columnOffset, ref rowOffset);
+            if (cellsToSelect.Count != 0) UnselectAllCells();
+            SelectCells(cellsToSelect);
+        }
+
+        private List<CellModel> GetCellsOffsetFromCurrentlySelectedCells(ref int columnOffset, ref int rowOffset)
+        {
+            var cellsToSelect = new List<CellModel>();
+            foreach (var selectedCell in SelectedCells)
+            {
+                if (columnOffset > 0) columnOffset += CountCellsMergedToRight(selectedCell);
+                if (rowOffset > 0) rowOffset += CountCellsMergedBelow(selectedCell);
+                var row = selectedCell.Location.Row + rowOffset;
+                var column = selectedCell.Location.Column + columnOffset;
+                var cellToSelect = _cellTracker.GetCell(selectedCell.Location.SheetName, row, column);
+                if (cellToSelect is not null) cellsToSelect.Add(cellToSelect);
+            }
+
+            return cellsToSelect;
+        }
+
+        /// <summary>
+        /// Adds cells to the current selection that are next to the currently selected cells in the with the given offset.
+        /// </summary>
+        /// <param name="columnOffset">How many columns the selection should move by. Can be negative to move left.</param>
+        /// <param name="rowOffset">How many rows the selection should move by. Can be negative to move up.</param>
+        public void AddToSelection(int columnOffset, int rowOffset)
+        {
+            var cellsToSelect = GetCellsOffsetFromCurrentlySelectedCells(ref columnOffset, ref rowOffset);
+            SelectCells(cellsToSelect);
         }
 
         private int CountCellsMergedBelow(CellModel model)
@@ -98,6 +118,26 @@ namespace Cell.Core.Data
         public void MoveSelectionUp() => MoveSelection(0, -1);
 
         /// <summary>
+        /// Adds to the selection down, selecting the cells below the current selection.
+        /// </summary>
+        public void AddToSelectionDown() => AddToSelection(0, 1);
+
+        /// <summary>
+        /// Adds to the selection left, selecting the cells to the left of the current selection.
+        /// </summary>
+        public void AddToSelectionLeft() => AddToSelection(-1, 0);
+
+        /// <summary>
+        /// Adds to the selection right, selecting the cells to the right of the current selection.
+        /// </summary>
+        public void AddToSelectionRight() => AddToSelection(1, 0);
+
+        /// <summary>
+        /// Adds to the selection up, selecting the cells above the current selection.
+        /// </summary>
+        public void AddToSelectionUp() => AddToSelection(0, -1);
+
+        /// <summary>
         /// Adds a cell to the selection.
         /// </summary>
         /// <param name="cell">The cell to add.</param>
@@ -107,6 +147,15 @@ namespace Cell.Core.Data
             if(SelectedCellsHashSet.Contains(cell)) return;
             SelectedCellsHashSet.Add(cell);
             SelectedCells.Add(cell);
+        }
+
+        /// <summary>
+        /// Adds a list of cells to the selection.
+        /// </summary>
+        /// <param name="cells">The cells to select.</param>
+        public void SelectCells(IEnumerable<CellModel> cells)
+        {
+            foreach (var cell in cells) SelectCell(cell);
         }
 
         /// <summary>
