@@ -71,6 +71,7 @@ namespace Cell.Core.Execution
                 {
                     if (result.ExecutionResult != null) subscriber.Text = result.ExecutionResult;
                 }
+                subscriber.Properties["Error"] = "";
             }
             else
             {
@@ -80,7 +81,7 @@ namespace Cell.Core.Execution
                 }
                 else
                 {
-                    subscriber.Text = result.ExecutionResult ?? "Execution result was null";
+                    subscriber.Properties["Error"] = result.ExecutionResult ?? "Execution result was null";
                 }
             }
         }

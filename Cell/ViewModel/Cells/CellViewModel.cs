@@ -55,6 +55,15 @@ namespace Cell.ViewModel.Cells
             UpdateMargin(model.Style.ContentMargin);
             model.PropertyChanged += ModelPropertyChanged;
             model.Style.PropertyChanged += ModelStylePropertyChanged;
+            model.Properties.PropertyChanged += ModelPropertiesPropertyChanged;
+        }
+
+        private void ModelPropertiesPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Error")
+            {
+                NotifyPropertyChanged(nameof(ShouldShowErrorBorder));
+            }
         }
 
         /// <summary>
@@ -440,6 +449,11 @@ namespace Cell.ViewModel.Cells
         /// Gets a value indicating whether the selection border should be shown.
         /// </summary>
         public virtual bool ShouldShowSelectionBorder => IsSelected || IsHighlighted;
+
+        /// <summary>
+        /// Gets a value indicating whether the selection border should be shown.
+        /// </summary>
+        public virtual bool ShouldShowErrorBorder => Model.Properties["Error"] != string.Empty;
 
         /// <summary>
         /// Gets a value indicating whether the selection fill should be shown.

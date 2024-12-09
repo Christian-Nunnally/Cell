@@ -30,6 +30,8 @@ namespace Cell
             applicationViewModel.Logger = new Logger();
             var dialogFactory = new DialogFactory();
             applicationViewModel.DialogFactory = dialogFactory;
+            var notificationLogger = new Logger();
+            applicationViewModel.NotificationLogger = notificationLogger;
             var appDataPath = Environment.SpecialFolder.ApplicationData;
             var appDataRoot = Environment.GetFolderPath(appDataPath);
             var appPersistanceRoot = Path.Combine(appDataRoot, "LGF");
@@ -57,7 +59,7 @@ namespace Cell
             applicationViewModel.CellLoader = cellLoader;
             var titleBarSheetNavigationViewModel = new TitleBarSheetNavigationViewModel(sheetTracker);
             applicationViewModel.TitleBarSheetNavigationViewModel = titleBarSheetNavigationViewModel;
-            var titleBarNotificationButtonViewModel = new TitleBarNotificationButtonViewModel();
+            var titleBarNotificationButtonViewModel = new TitleBarNotificationButtonViewModel(notificationLogger);
             applicationViewModel.TitleBarNotificationButtonViewModel = titleBarNotificationButtonViewModel;
             var applicationSettings = ApplicationSettings.CreateInstance(projectDirectory);
             applicationViewModel.ApplicationSettings = applicationSettings;

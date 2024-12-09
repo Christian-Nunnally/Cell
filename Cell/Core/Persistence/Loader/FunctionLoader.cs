@@ -29,7 +29,7 @@ namespace Cell.Core.Persistence.Loader
             _functionsDirectory = functionsDirectory;
             _functionTracker = functionTracker;
             _functionTracker.FunctionAdded += FunctionTrackerFunctionAdded;
-            _functionTracker.FunctionRemoved -= FunctionTrackerFunctionRemoved;
+            _functionTracker.FunctionRemoved += FunctionTrackerFunctionRemoved;
         }
 
         /// <summary>

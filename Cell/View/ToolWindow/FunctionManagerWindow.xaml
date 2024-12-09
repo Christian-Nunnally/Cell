@@ -56,46 +56,26 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid HorizontalAlignment="Stretch">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="20" />
-                                <ColumnDefinition Width="70" />
-                                <ColumnDefinition Width="1*" />
-                            </Grid.ColumnDefinitions>
-                            <Button
-                                x:Name="_removeButton"
-                                HorizontalAlignment="Left"
-                                Click="DeleteFunctionButtonClicked"
-                                Content="{fa:Icon XMark}"
-                                Foreground="{StaticResource ErrorForegroundColor}"
-                                Style="{StaticResource ListItemInlineButtonStyle}"
-                                ToolTip="Delete this function"
-                                Visibility="Hidden" />
-                            <TextBlock
-                                Grid.Column="1"
-                                Padding="16,0"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                FontFamily="{StaticResource ProgrammingFont}"
-                                FontSize="13"
-                                Text="{Binding ReturnType}">
-                                <TextBlock.Style>
-                                    <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="{x:Type TextBlock}">
-                                        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding WasLastCompileSuccesful}" Value="False">
-                                                <Setter Property="Foreground" Value="{StaticResource ErrorForegroundColor}" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsCompiled}" Value="False">
-                                                <Setter Property="Foreground" Value="Yellow" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    x:Name="_removeButton"
+                                    HorizontalAlignment="Left"
+                                    Click="DeleteFunctionButtonClicked"
+                                    Content="{fa:Icon XMark}"
+                                    Foreground="{StaticResource ErrorForegroundColor}"
+                                    Style="{StaticResource ListItemInlineButtonStyle}"
+                                    ToolTip="Delete this function"
+                                    Visibility="Hidden" />
+                                <ToggleButton
+                                    x:Name="_renameButton"
+                                    HorizontalAlignment="Left"
+                                    Content="{fa:Icon PenToSquare}"
+                                    Style="{StaticResource ListItemInlineToggleButtonStyle}"
+                                    ToolTip="Rename this function"
+                                    Visibility="Hidden" />
                                 <TextBlock
                                     Name="_nameLabel"
-                                    Grid.Column="2"
+                                    Margin="5,0,0,0"
                                     VerticalAlignment="Center"
                                     FontFamily="{StaticResource ProgrammingFont}"
                                     FontSize="13"
@@ -121,13 +101,31 @@
                                     FontSize="13"
                                     Text="{Binding Name}"
                                     Visibility="Collapsed" />
-                                <ToggleButton
-                                    x:Name="_renameButton"
-                                    Margin="10,0"
-                                    HorizontalAlignment="Left"
-                                    Content="{fa:Icon PenToSquare}"
-                                    Style="{StaticResource ListItemInlineToggleButtonStyle}"
-                                    ToolTip="Rename this function"
+                            </StackPanel>
+                            <StackPanel
+                                HorizontalAlignment="Right"
+                                FlowDirection="RightToLeft"
+                                Orientation="Horizontal">
+                                <!--<Button
+                                    x:Name="_showUsersButton"
+                                    Click="ShowFunctionUsersButtonClicked"
+                                    Content="{fa:Icon User}"
+                                    Style="{StaticResource ListItemInlineButtonStyle}"
+                                    ToolTip="Shows users of the function"
+                                    Visibility="Hidden" />
+                                <Button
+                                    x:Name="_showDependenciesButton"
+                                    Click="ShowFunctionDependenciesButtonClicked"
+                                    Content="{fa:Icon RightToBracket}"
+                                    Style="{StaticResource ListItemInlineButtonStyle}"
+                                    ToolTip="Shows dependencies of the function"
+                                    Visibility="Hidden" />-->
+                                <Button
+                                    x:Name="_copyFunctionButton"
+                                    Click="CopyFunctionButtonClicked"
+                                    Content="{fa:Icon Copy}"
+                                    Style="{StaticResource ListItemInlineButtonStyle}"
+                                    ToolTip="Copies the function"
                                     Visibility="Hidden" />
                             </StackPanel>
                         </Grid>
@@ -139,6 +137,9 @@
                             </Trigger>
                             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource TemplatedParent}}" Value="True">
                                 <Setter TargetName="_removeButton" Property="Visibility" Value="Visible" />
+                                <!--<Setter TargetName="_showUsersButton" Property="Visibility" Value="Visible" />
+                                <Setter TargetName="_showDependenciesButton" Property="Visibility" Value="Visible" />-->
+                                <Setter TargetName="_copyFunctionButton" Property="Visibility" Value="Visible" />
                                 <Setter TargetName="_renameButton" Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </DataTemplate.Triggers>
@@ -191,12 +192,13 @@
                                         Style="{StaticResource ListItemInlineButtonStyle}"
                                         ToolTip="Makes this cell stop using the selected function"
                                         Visibility="Hidden" />
-                                        <TextBlock
-                                            Padding="5,0"
-                                            VerticalAlignment="Center"
-                                            FontFamily="{StaticResource ProgrammingFont}"
-                                            Text="{Binding Location}"
-                                            ToolTip="Cell name" />
+                                    <TextBlock
+                                        Margin="20,0,0,0"
+                                        Padding="5,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="{StaticResource ProgrammingFont}"
+                                        Text="{Binding Location}"
+                                        ToolTip="Cell name" />
                                     <Button
                                         x:Name="_viewButton"
                                         Margin="0,0,20,0"

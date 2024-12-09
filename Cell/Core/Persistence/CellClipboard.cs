@@ -62,6 +62,7 @@ namespace Cell.Core.Persistence
         private void PasteCopiedCell(CellModel pasteIntoCell, CellModel cellToPaste, CellModel centerOfCopy)
         {
             if (!TryGetCellToReplace(pasteIntoCell, cellToPaste, centerOfCopy, out var cellToReplace)) return;
+            _undoRedoManager.RecordStateIfRecording(cellToReplace);
             PasteSingleCell(cellToPaste, cellToReplace);
         }
 
@@ -83,8 +84,6 @@ namespace Cell.Core.Persistence
 
         private void PasteSingleCell(CellModel cellToPaste, CellModel cellToReplace)
         {
-            _undoRedoManager.RecordStateIfRecording(cellToReplace);
-
             if (!cellToReplace.CellType.IsSpecial()) cellToReplace.CellType = cellToPaste.CellType;
             cellToReplace.Text = cellToPaste.Text;
             cellToReplace.Properties.CopyTo(cellToPaste.Properties);
@@ -96,6 +95,7 @@ namespace Cell.Core.Persistence
             var cellToPaste = clipboard.First();
             foreach (var cell in selectedCells.ToList())
             {
+                _undoRedoManager.RecordStateIfRecording(cell);
                 if (_copyTextOnly) cell.Text = cellToPaste.Text;
                 else PasteSingleCell(cellToPaste, cell);
             }

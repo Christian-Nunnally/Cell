@@ -35,7 +35,7 @@ namespace Cell.View.Application
             if (Keyboard.Modifiers == ModifierKeys.Control)
             {
                 var sheetToolWindowViewModel = new SheetToolWindowViewModel();
-                ApplicationViewModel.Instance.ShowToolWindow(sheetToolWindowViewModel);
+                ApplicationViewModel.Instance.ShowToolWindow(sheetToolWindowViewModel, true);
                 sheetToolWindowViewModel.SheetViewModel = ApplicationViewModel.Instance.SheetViewModel;
             }
             else

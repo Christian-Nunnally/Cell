@@ -5,7 +5,6 @@
     /// </summary>
     public class BackupManager
     {
-        private readonly PersistedDirectory _backupDirectory;
         private readonly PersistedDirectory _projectDirectory;
         /// <summary>
         /// Creates a new instance of the <see cref="BackupManager"/> class.
@@ -15,8 +14,13 @@
         public BackupManager(PersistedDirectory projectDirectory, PersistedDirectory backupDirectory)
         {
             _projectDirectory = projectDirectory;
-            _backupDirectory = backupDirectory;
+            BackupDirectory = backupDirectory;
         }
+
+        /// <summary>
+        /// Gets the directory where backups are stored by this manager.
+        /// </summary>
+        public PersistedDirectory BackupDirectory { get; private set; }
 
         /// <summary>
         /// Captures a new backup with a name that includes the given backupName and the current date and time.
@@ -24,7 +28,7 @@
         /// <param name="backupName">An extra name to add to the backup file name.</param>
         public async Task CreateBackupAsync(string backupName = "backup")
         {
-            await _projectDirectory.ZipToAsync(_backupDirectory, "", $"Cell_{backupName}_{CreateFileFriendlyCurrentDateTime()}");
+            await _projectDirectory.ZipToAsync(BackupDirectory, "", $"Cell_{backupName}_{CreateFileFriendlyCurrentDateTime()}");
         }
 
         /// <summary>
@@ -33,7 +37,7 @@
         /// <returns>A list of paths to backups.</returns>
         public IEnumerable<string> GetBackups()
         {
-            return _backupDirectory.GetDirectories("");
+            return BackupDirectory.GetDirectories("");
         }
 
         /// <summary>
@@ -42,7 +46,7 @@
         /// <param name="backupName">The backup to restore.</param>
         public async Task RestoreBackupAsync(string backupName)
         {
-            await _backupDirectory.UnzipToAsync(_projectDirectory, backupName, "");
+            await BackupDirectory.UnzipToAsync(_projectDirectory, backupName, "");
         }
 
         private static string CreateFileFriendlyCurrentDateTime()

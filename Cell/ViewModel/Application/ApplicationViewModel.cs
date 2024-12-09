@@ -238,6 +238,11 @@ namespace Cell.ViewModel.Application
         public Logger Logger { get; set; } = Logger.Null;
 
         /// <summary>
+        /// Logger used to notify the user in the title bar.
+        /// </summary>
+        public Logger NotificationLogger { get; internal set; }
+
+        /// <summary>
         /// Gets the application wide undo redo manager.
         /// </summary>
         /// <returns>The global undo/redo manager.</returns>
@@ -425,6 +430,7 @@ namespace Cell.ViewModel.Application
             PersistedProject.IsReadOnly = true;
             await BackupManager!.CreateBackupAsync();
             PersistedProject.IsReadOnly = false;
+            NotificationLogger.Log($"Backup created at {BackupManager.BackupDirectory.GetFullPath()}");
         }
 
         private async Task<LoadResult> ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
@@ -432,7 +438,7 @@ namespace Cell.ViewModel.Application
             if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
             if (!_hasVersionBeenSaved) { PersistedProject.SaveVersion(); _hasVersionBeenSaved = true; }
             ApplicationBackgroundMessage = "Starting backup";
-            BackupAsync();
+            var backupTask = BackupAsync();
             ApplicationBackgroundMessage = "Loading collections";
             await userCollectionLoader.LoadCollectionsAsync();
             ApplicationBackgroundMessage = "Loading functions";
@@ -451,8 +457,8 @@ namespace Cell.ViewModel.Application
             await CellLoader.FinishLoadingSheetsAsync();
             ApplicationBackgroundMessage = "Creating populate manager";
             _isProjectLoading = false;
-            //ApplicationBackgroundMessage = "Waiting for backup to finish";
-            //await backupTask;
+            ApplicationBackgroundMessage = "Waiting for backup to finish";
+            await backupTask;
             ApplicationBackgroundMessage = "Open a sheet to view cells";
             return new LoadResult { WasSuccess = true };
         }

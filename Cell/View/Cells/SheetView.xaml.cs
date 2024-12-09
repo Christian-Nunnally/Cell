@@ -1,7 +1,9 @@
-﻿using Cell.Model;
+﻿using Cell.Core.Common;
+using Cell.Model;
 using Cell.View.Application;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
+using Cell.ViewModel.ToolWindow;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -227,6 +229,19 @@ namespace Cell.View.Cells
             if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
             {
                 SheetViewModel.UnhighlightAllCells();
+            }
+        }
+
+        private void CellErrorBorderMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewUtilities.TryGetSendersDataContext(sender, out CellViewModel? cell) && cell is not null)
+            {
+                var logger = new Logger();
+                var logWindowViewModel = new LogWindowViewModel(logger);
+                ApplicationViewModel.Instance.ShowToolWindow(logWindowViewModel, true);
+                var error = cell.Model.Properties["Error"];
+                var location = cell.Model.Location.UserFriendlyLocationString;
+                logger.Log($"Error from cell {location}: {error}");
             }
         }
     }

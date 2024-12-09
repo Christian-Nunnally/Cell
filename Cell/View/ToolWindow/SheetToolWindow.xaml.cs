@@ -21,6 +21,7 @@ namespace Cell.View.ToolWindow
             _viewModel = viewModel;
             InitializeComponent();
             viewModel.PropertyChanged += SheetToolWindowViewModelPropertyChanged;
+            ShowSheetView(_viewModel.SheetViewModel);
         }
 
         private void ShowSheetView(SheetViewModel? sheetViewModel)
@@ -29,6 +30,7 @@ namespace Cell.View.ToolWindow
             if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
             {
                 sheetView = new SheetView(sheetViewModel);
+                sheetView.IsPanningEnabled = false;
                 _sheetViews.Add(sheetViewModel, sheetView);
             }
             _sheetViewContentControl.Content = sheetView;
@@ -37,7 +39,7 @@ namespace Cell.View.ToolWindow
 
         private void SheetToolWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(ApplicationViewModel.SheetViewModel))
+            if (e.PropertyName == nameof(SheetToolWindowViewModel.SheetViewModel))
             {
                 ShowSheetView(_viewModel.SheetViewModel);
             }

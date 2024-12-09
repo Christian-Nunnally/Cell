@@ -4,6 +4,7 @@ using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Execution.Functions;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -219,8 +220,8 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
-            new CommandViewModel("New Populate", CreateNewPopulateFunction) { ToolTip = "Create a new function that returns a value" },
-            new CommandViewModel("New Trigger", CreateNewTriggerFunction) { ToolTip = "Create a new function that does not return a value" },
+            new CommandViewModel("New Populate", () => CreateNewPopulateFunction()) { ToolTip = "Create a new function that returns a value" },
+            new CommandViewModel("New Trigger", () => CreateNewTriggerFunction()) { ToolTip = "Create a new function that does not return a value" },
         ];
 
         /// <summary>
@@ -245,33 +246,28 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Creates a new populate function with a default name.
         /// </summary>
-        public void CreateNewPopulateFunction()
+        public void CreateNewPopulateFunction(string name = "PopulateFunction")
+        {
+            var newName = GetNewFunctionName(name);
+            _functionTracker.CreateCellFunction("object", newName, "return \"Hi\";");
+        }
+
+        private string GetNewFunctionName(string name)
         {
             var index = 0;
-            var newPopulateFunctionName = "NewPopulateFunction";
+            var newName = $"{name}";
             var existingNames = _functionTracker.Functions.Select(x => x.Model.Name).ToList();
-            while (existingNames.Any(x => x == newPopulateFunctionName))
-            {
-                index += 1;
-                newPopulateFunctionName += $"NewPopulateFunction{index}";
-            }
-            _functionTracker.CreateCellFunction("object", newPopulateFunctionName, "return \"Hello world\";");
+            while (existingNames.Any(x => x == (newName = $"{name}{index++}"))) ;
+            return newName;
         }
 
         /// <summary>
         /// Creates a new trigger function with a default name.
         /// </summary>
-        public void CreateNewTriggerFunction()
+        public void CreateNewTriggerFunction(string name = "TriggerFunction")
         {
-            var index = 0;
-            var newTriggerFunctionName = "NewTriggerFunction";
-            var existingNames = _functionTracker.Functions.Select(x => x.Model.Name).ToList();
-            while (existingNames.Any(x => x == newTriggerFunctionName))
-            {
-                index += 1;
-                newTriggerFunctionName += $"NewTriggerFunction{index}";
-            }
-            _functionTracker.CreateCellFunction("void", newTriggerFunctionName, string.Empty);
+            var newName = GetNewFunctionName(name);
+            _functionTracker.CreateCellFunction("void", newName, string.Empty);
         }
 
         /// <summary>
@@ -300,6 +296,30 @@ namespace Cell.ViewModel.ToolWindow
             {
                 FilterCollectionOptions.Add(collectionName);
             }
+        }
+
+        /// <summary>
+        /// Creates a copy of the selected function.
+        /// </summary>
+        public void CreateCopyOfSelectedFunction()
+        {
+            if (SelectedFunction is null) return;
+            if (SelectedFunction.ReturnType == "void") CreateNewTriggerFunction();
+            else CreateNewPopulateFunction();
+        }
+
+        internal void PromptUserToDeleteFunctionFromProject(CellFunctionViewModel functionViewModel)
+        {
+            if (functionViewModel.UsageCount != 0)
+            {
+                ApplicationViewModel.Instance.DialogFactory?.Show("Function in use", $"Cannot delete '{functionViewModel.Name}' because it is being used by {functionViewModel.UsageCount} cells.");
+                return;
+            }
+
+            ApplicationViewModel.Instance.DialogFactory?.ShowYesNo($"Delete '{functionViewModel.Name}'?", "Are you sure you want to delete this function?", () =>
+            {
+                _functionTracker.StopTrackingFunction(functionViewModel.Function);
+            });
         }
 
         private void FunctionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)

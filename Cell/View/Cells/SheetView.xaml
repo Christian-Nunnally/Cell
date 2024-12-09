@@ -79,6 +79,26 @@
                                         SnapsToDevicePixels="True"
                                         Visibility="{Binding ShouldShowSelectionFill, Converter={StaticResource BooleanToVisibilityConverter}}" />
                                 </Border>
+                                <Border
+                                    BorderThickness="2"
+                                    IsHitTestVisible="True"
+                                    MouseDown="CellErrorBorderMouseDown"
+                                    SnapsToDevicePixels="True"
+                                    ToolTip="This cell has an error, click to view it."
+                                    Visibility="{Binding ShouldShowErrorBorder, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <Trigger Property="Border.IsMouseOver" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource SelectedBorderColor}" />
+                                                </Trigger>
+                                                <Trigger Property="Border.IsMouseOver" Value="False">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource ErrorForegroundColor}" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>

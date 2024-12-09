@@ -25,18 +25,9 @@ namespace Cell.View.ToolWindow
         private void DeleteFunctionButtonClicked(object sender, RoutedEventArgs e)
         {
             if (ApplicationViewModel.Instance.FunctionTracker is null) throw new CellError("Unable to delete functions cells without FunctionLoader, which is null");
-            if (sender is Button button && button.DataContext is CellFunctionViewModel function)
+            if (sender is Button button && button.DataContext is CellFunctionViewModel functionViewModel)
             {
-                if (function.UsageCount != 0)
-                {
-                    ApplicationViewModel.Instance.DialogFactory?.Show("Function in use", $"Cannot delete '{function.Name}' because it is being used by {function.UsageCount} cells.");
-                    return;
-                }
-
-                ApplicationViewModel.Instance.DialogFactory?.ShowYesNo($"Delete '{function.Name}'?", "Are you sure you want to delete this function?", () =>
-                {
-                    ApplicationViewModel.Instance.FunctionTracker.StopTrackingFunction(function.Function);
-                });
+                _viewModel.PromptUserToDeleteFunctionFromProject(functionViewModel);
             }
         }
 
@@ -81,6 +72,20 @@ namespace Cell.View.ToolWindow
                 _viewModel.SelectedFunction = null;
                 _viewModel.SelectedFunction = selectedFunction;
             }
+        }
+        private void ShowFunctionUsersButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ShowFunctionDependenciesButtonClicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CopyFunctionButtonClicked(object sender, RoutedEventArgs e)
+        {
+            _viewModel.CreateCopyOfSelectedFunction();
         }
     }
 }

@@ -9,8 +9,11 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class LogWindowViewModel : ToolWindowViewModel
     {
-        public LogWindowViewModel(Logger logger)
+        private readonly string _title;
+
+        public LogWindowViewModel(Logger logger, string title = "Logs")
         {
+            _title = title;
             _logger = logger;
         }
 
@@ -53,7 +56,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
-        public override string ToolWindowTitle => "Logs";
+        public override string ToolWindowTitle => _title;
 
         /// <summary>
         /// Clears out the log buffer and notifies the UI that it has changed.
