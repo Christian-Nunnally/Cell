@@ -70,6 +70,7 @@ namespace Cell
             applicationViewModel.UndoRedoManager = undoRedoManager;
             var textClipboard = new TextClipboard();
             applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
+            applicationViewModel.CellViewModelFlasher = new CellViewModelFlasher();
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
             cellLoader.SheetsLoaded += OnAllSheetsLoaded;

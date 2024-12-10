@@ -60,6 +60,7 @@ namespace Cell.ViewModel.Cells
 
         private void ModelPropertiesPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            ApplicationViewModel.Instance.CellViewModelFlasher?.Flash(this);
             if (e.PropertyName == "Error")
             {
                 NotifyPropertyChanged(nameof(ShouldShowErrorBorder));
@@ -72,7 +73,7 @@ namespace Cell.ViewModel.Cells
         public virtual SolidColorBrush BackgroundColor
         {
             get => _backgroundColor;
-            private set
+            set
             {
                 _backgroundColor = value;
                 NotifyPropertyChanged(nameof(BackgroundColor));
@@ -610,11 +611,13 @@ namespace Cell.ViewModel.Cells
 
         private void ModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            ApplicationViewModel.Instance.CellViewModelFlasher?.Flash(this);
             NotifyPropertyChanged(e.PropertyName!);
         }
 
         private void ModelStylePropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            ApplicationViewModel.Instance.CellViewModelFlasher?.Flash(this);
             if (e.PropertyName == nameof(CellStyleModel.BackgroundColor))
             {
                 var color = (Color)ColorConverter.ConvertFromString(BackgroundColorHex);

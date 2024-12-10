@@ -112,6 +112,7 @@ namespace Cell.ViewModel.Application
         /// Enables copy and paste though this clipboard.
         /// </summary>
         public CellClipboard? CellClipboard { private get; set; }
+        public CellViewModelFlasher? CellViewModelFlasher { get; set; }
 
         /// <summary>
         /// Gets or sets the cell loader for the application, which is used to load cells into the application.
