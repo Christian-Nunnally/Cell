@@ -513,7 +513,7 @@ namespace Cell.ViewModel.Application
             script = script.Replace("<COMMAND>", $"git checkout {commitId}");
             File.WriteAllText(batchFilePath, script);
         
-            Process cmdProcess = new Process();
+            Process cmdProcess = new();
             cmdProcess.StartInfo.FileName = "cmd.exe";
             cmdProcess.StartInfo.Arguments = "/C \"" + batchFilePath + "\"";
             cmdProcess.StartInfo.UseShellExecute = false;

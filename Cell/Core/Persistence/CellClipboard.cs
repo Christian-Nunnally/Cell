@@ -1,5 +1,4 @@
-﻿using Cell.Core.Common;
-using Cell.Core.Data.Tracker;
+﻿using Cell.Core.Data.Tracker;
 using Cell.Model;
 using Cell.ViewModel.Application;
 using System.Diagnostics.CodeAnalysis;

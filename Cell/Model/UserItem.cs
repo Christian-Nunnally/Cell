@@ -11,6 +11,7 @@ namespace Cell.Model
         private UserItemDates? _dates;
         private UserItemNumbers? _numbers;
         private UserItemBools? _bools;
+        private UserItemLists? _lists;
 
         /// <summary>
         /// The unique ID of this plugin data item. Should be unique across all plugin data items of any type.
@@ -29,7 +30,20 @@ namespace Cell.Model
         /// <summary>
         /// This items properties.
         /// </summary>
-        public Dictionary<string, string> Properties { get; set; } = [];
+        public Dictionary<string, string> BackingProperties { get; set; } = [];
+
+        /// <summary>
+        /// This items list properties.
+        /// </summary>
+        public Dictionary<string, List<string>> BackingLists { get; set; } = [];
+
+        /// <summary>
+        /// Gets the list of string properties of this user item.
+        /// </summary>
+        public UserItemLists List
+        {
+            get => _lists ??= new UserItemLists(this);
+        }
 
         /// <summary>
         /// A null object for this class.
@@ -44,7 +58,7 @@ namespace Cell.Model
         {
             var clone = new UserItem
             {
-                Properties = Properties.ToDictionary()
+                BackingProperties = BackingProperties.ToDictionary()
             };
             return clone;
         }
@@ -62,11 +76,11 @@ namespace Cell.Model
         /// <returns>The value of the property.</returns>
         public string this[string key]
         {
-            get => Properties.TryGetValue(key, out var value) ? value : string.Empty;
+            get => BackingProperties.TryGetValue(key, out var value) ? value : string.Empty;
             set
             {
-                if (Properties.TryGetValue(key, out var existingValue) && existingValue == value) return;
-                Properties[key] = value;
+                if (BackingProperties.TryGetValue(key, out var existingValue) && existingValue == value) return;
+                BackingProperties[key] = value;
                 NotifyPropertyChanged(key);
             }
         }
@@ -176,8 +190,44 @@ namespace Cell.Model
         /// <returns>The value of the property as a bool.</returns>
         public bool this[string key]
         {
-            get => bool.TryParse(_userItem[key], out var result) ? result : false;
+            get => bool.TryParse(_userItem[key], out var result) && result;
             set => _userItem[key] = value.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Accessor for the list of string properties of a user item.
+    /// </summary>
+    public class UserItemLists
+    {
+        private readonly UserItem _userItem;
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="UserItemBools"/>.
+        /// </summary>
+        /// <param name="userItem">The underlying user item.</param>
+        public UserItemLists(UserItem userItem)
+        {
+            _userItem = userItem;
+        }
+
+        /// <summary>
+        /// Gets the property with the given name as a bool.
+        /// </summary>
+        /// <param name="key">The name of the property to get.</param>
+        /// <returns>The value of the property as a bool.</returns>
+        public List<string> this[string key]
+        {
+            get
+            {
+                if (_userItem.BackingLists.TryGetValue(key, out var value))
+                {
+                    return value;
+                }
+                _userItem.BackingLists[key] = [];
+                return _userItem.BackingLists[key];
+            }
+            set => _userItem.BackingLists[key] = value;
         }
     }
 }

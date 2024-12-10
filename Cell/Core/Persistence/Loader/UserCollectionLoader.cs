@@ -84,8 +84,8 @@ namespace Cell.Core.Persistence.Loader
 
         private void LoadCollection(PersistedDirectory collectionDirectory)
         {
-            var text = collectionDirectory.LoadFile("collection") ?? throw new CellError($"Error while loading 'collection' file for {collectionDirectory.GetFullPath()}");
-            var model = JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {collectionDirectory.GetFullPath()}");
+            var text = collectionDirectory.LoadFile("collection");
+            var model = text is null ? new UserCollectionModel() : JsonSerializer.Deserialize<UserCollectionModel>(text) ?? throw new CellError($"Error while loading {collectionDirectory.GetFullPath()}");
             var sortContext = new Context(_cellTracker, _userCollectionTracker, new DialogFactory(), CellModel.Null);
             var collection = new UserCollection(model, _functionTracker, sortContext);
             var itemsDirectory = collectionDirectory.FromDirectory("Items");

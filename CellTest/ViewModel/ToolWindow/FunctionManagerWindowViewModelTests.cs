@@ -1,11 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Data.Tracker;
 using Cell.ViewModel.ToolWindow;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CellTest.ViewModel.ToolWindow
 {

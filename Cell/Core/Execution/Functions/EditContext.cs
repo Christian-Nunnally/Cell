@@ -11,7 +11,7 @@
         /// <param name="propertyName">The name of the property that was edited.</param>
         /// <param name="newValue">The new value of the property that was edited.</param>
         /// <param name="oldValue">The old value of the property that was edited.</param>
-        public EditContext(string propertyName, object newValue, object oldValue)
+        public EditContext(string propertyName, string newValue, string oldValue)
         {
             Reason = "PropertyChanged";
             PropertyName = propertyName;
@@ -36,12 +36,12 @@
         /// <summary>
         /// Gets the new value of the cell after the edit.
         /// </summary>
-        public object NewValue { get; private set; } = string.Empty;
+        public string NewValue { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the old value of the cell before the edit.
         /// </summary>
-        public object OldValue { get; private set; } = string.Empty;
+        public string OldValue { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the name of the property that was changed.

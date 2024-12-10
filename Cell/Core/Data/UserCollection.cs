@@ -298,7 +298,7 @@ namespace Cell.Core.Data
             var propertyNames = new List<string>();
             foreach (var item in _sortedItems)
             {
-                foreach (var propertyName in item.Properties.Keys)
+                foreach (var propertyName in item.BackingProperties.Keys)
                 {
                     if (!propertyNames.Contains(propertyName))
                     {

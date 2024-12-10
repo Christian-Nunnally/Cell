@@ -4,7 +4,6 @@ using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Cell.Core.Data.Tracker;
-using Cell.Core.Execution.Functions;
 
 namespace Cell.ViewModel.ToolWindow
 {
