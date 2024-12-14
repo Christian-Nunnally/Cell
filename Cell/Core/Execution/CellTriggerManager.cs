@@ -3,6 +3,7 @@ using Cell.Model;
 using Cell.ViewModel.Application;
 using Cell.Core.Execution.Functions;
 using Cell.Core.Data.Tracker;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Cell.Core.Execution
 {
@@ -47,6 +48,11 @@ namespace Cell.Core.Execution
             _cellsBeingEdited.Add(cell.ID, cell);
             CellTriggeredHandler(cell, editContext);
             _cellsBeingEdited.Remove(cell.ID);
+        }
+
+        internal IEnumerable<CellModel> GetCellsThatUseTriggerFunction(CellFunctionModel model)
+        {
+            return _cellTracker.AllCells.Where(x => x.TriggerFunctionName == model.Name);
         }
 
         private void CellTriggeredHandler(CellModel cell, EditContext editContext)

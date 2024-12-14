@@ -47,7 +47,7 @@ namespace CellTest.ViewModel.ToolWindow
             _testing.SelectedFunction = _testing.FilteredFunctions.First();
             Assert.Single(_functionTracker.Functions);
 
-            _testing.CreateCopyOfSelectedFunction();
+            _testing.CreateCopyOfFunction(_testing.SelectedFunction);
 
             Assert.Equal(2, _functionTracker.Functions.Count);
         }

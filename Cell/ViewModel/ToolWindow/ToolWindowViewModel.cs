@@ -12,23 +12,20 @@ namespace Cell.ViewModel.ToolWindow
         private double x = -1;
         private double y = -1;
         private bool isDocked = false;
+        private WindowDockPanelViewModel? _hostingPanel;
 
         /// <summary>
         /// Whether or not this tool window is currently docked in the main window or floating in its own border.
         /// </summary>
-        public virtual bool IsDocked
+        public virtual WindowDockPanelViewModel? HostingPanel
         {
-            get => isDocked; set
+            get => _hostingPanel; set
             {
-                if (isDocked == value) return;
-                isDocked = value;
-                NotifyPropertyChanged(nameof(IsDocked));
+                if (_hostingPanel == value) return;
+                _hostingPanel = value;
+                NotifyPropertyChanged(nameof(HostingPanel));
             }
         }
-        /// <summary>
-        /// What side of the main window this tool window should be docked to.
-        /// </summary>
-        public virtual Dock Dock { get; set; } = Dock.Top;
 
         /// <summary>
         /// Gets the default height of this tool window when it is shown.

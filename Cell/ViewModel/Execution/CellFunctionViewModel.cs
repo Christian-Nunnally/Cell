@@ -45,7 +45,15 @@ namespace Cell.ViewModel.Execution
         /// <summary>
         /// Gets the cells that use this function.
         /// </summary>
-        public List<CellModel> CellsThatUseFunction => ApplicationViewModel.Instance.CellPopulateManager?.GetCellsThatUsePopulateFunction(_model) ?? [];
+        public List<CellModel> CellsThatUseFunction
+        {
+            get
+            {
+                var users = ApplicationViewModel.Instance.CellPopulateManager?.GetCellsThatUsePopulateFunction(_model) ?? [];
+                users.AddRange(ApplicationViewModel.Instance.CellTriggerManager?.GetCellsThatUseTriggerFunction(_model) ?? []);
+                return users;
+            }
+        }
 
         /// <summary>
         /// Gets the references this function depends on.

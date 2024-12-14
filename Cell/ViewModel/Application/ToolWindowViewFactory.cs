@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Common;
+using Cell.View.Application;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.ToolWindow;
 
@@ -34,6 +35,9 @@ namespace Cell.ViewModel.Application
                 CodeEditorWindowViewModel convertedViewModel => new CodeEditorWindow(convertedViewModel),
                 DialogWindowViewModel convertedViewModel => new DialogWindow(convertedViewModel),
                 SheetToolWindowViewModel convertedViewModel => new SheetToolWindow(convertedViewModel),
+                FunctionUsersWindowViewModel convertedViewModel => new FunctionUsersWindow(convertedViewModel),
+                FunctionDependenciesWindowViewModel convertedViewModel => new FunctionDependenciesWindow(convertedViewModel),
+                CollectionItemsListWindowViewModel convertedViewModel => new CollectionItemsListWindow(convertedViewModel),
                 _ => throw new CellError($"Unable to create window view for view model {viewModel.GetType().FullName}. Add a type mapping to {nameof(ToolWindowViewFactory)} for {viewModel.GetType().FullName}."),
             };
         }

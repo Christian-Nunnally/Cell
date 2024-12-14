@@ -1,4 +1,5 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.View.Application;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -10,7 +11,6 @@ namespace Cell.View.ToolWindow
 {
     public partial class DockedToolWindowContainer : UserControl, INotifyPropertyChanged
     {
-        private readonly ApplicationViewModel _applicationViewModel;
         private double _contentHeight;
         private double _contentWidth;
         private bool _resizing;
@@ -20,11 +20,9 @@ namespace Cell.View.ToolWindow
         /// <summary>
         /// Creates a new instance of the <see cref="DockedToolWindowContainer"/>.
         /// </summary>
-        /// <param name="applicationViewModel">The application view model that owns this <see cref="DockedToolWindowContainer"/>.</param>
-        public DockedToolWindowContainer(ApplicationViewModel applicationViewModel)
+        public DockedToolWindowContainer()
         {
             InitializeComponent();
-            _applicationViewModel = applicationViewModel;
         }
 
         /// <summary>
@@ -64,19 +62,14 @@ namespace Cell.View.ToolWindow
         }
 
         /// <summary>
-        /// Gets whether the tool window is currently docked.
-        /// </summary>
-        public bool IsDocked => _resizableToolWindow?.ToolViewModel.IsDocked ?? false;
-
-        /// <summary>
         /// Gets whether the resizer should appear in the bottom right (true) or top left (false).
         /// </summary>
-        public bool IsBottomRightResizerVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Top || ToolWindowContent?.ToolViewModel.Dock == Dock.Left;
+        public bool IsBottomRightResizerVisible => DockPanel.GetDock(this) == Dock.Top || DockPanel.GetDock(this) == Dock.Left;
 
         /// <summary>
         /// Gets whether the resizer should appear on the left and right of the tool window.
         /// </summary>
-        public bool AreSideResizersVisible => ToolWindowContent?.ToolViewModel.Dock == Dock.Left || ToolWindowContent?.ToolViewModel.Dock == Dock.Right;
+        public bool AreSideResizersVisible => DockPanel.GetDock(this) == Dock.Left || DockPanel.GetDock(this) == Dock.Right;
 
         /// <summary>
         /// Gets or sets the content displated within this tool window container.
@@ -113,6 +106,8 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public string ToolWindowTitle => ToolWindowContent?.ToolViewModel.ToolWindowTitle ?? "";
 
+        public Action<DockedToolWindowContainer> Undock { get; set; }
+
         /// <summary>
         /// Ensures the tool window is sized to fit entirely within the canvas it is displayed on by moving it. Will resize the tool window as a last resort.
         /// </summary>
@@ -131,8 +126,7 @@ namespace Cell.View.ToolWindow
         private void UndockButtonClicked(object sender, RoutedEventArgs e)
         {
             if (_resizableToolWindow == null) return;
-            _resizableToolWindow.ToolViewModel.IsDocked = false;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
+            Undock?.Invoke(this);
         }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
@@ -177,16 +171,18 @@ namespace Cell.View.ToolWindow
 
         private void SetSizeWhileRespectingBounds(double desiredWidth, double desiredHeight)
         {
-            var dock = ToolWindowContent?.ToolViewModel.Dock;
+            var minimumWidth = ToolWindowContent?.ToolViewModel?.MinimumWidth ?? 50;
+            var minimumHeight = ToolWindowContent?.ToolViewModel?.MinimumHeight ?? 50;
+            var dock = DockPanel.GetDock(this);
             if (dock == Dock.Left || dock == Dock.Right)
             {
-                var boundedWidth = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowWidth-30, desiredWidth));
+                var boundedWidth = Math.Max(minimumWidth, Math.Min(1000, desiredWidth));
                 ContentWidth = boundedWidth;
                 ContentHeight = double.NaN;
             }
             else
             {
-                var boundedHeight = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowHeight-30, desiredHeight));
+                var boundedHeight = Math.Max(minimumHeight, Math.Min(1000, desiredHeight));
                 ContentHeight = boundedHeight;
                 ContentWidth = double.NaN;
             }

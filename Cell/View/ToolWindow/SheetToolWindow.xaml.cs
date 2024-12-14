@@ -1,4 +1,5 @@
-﻿using Cell.View.Cells;
+﻿using Cell.View.Application;
+using Cell.View.Cells;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
@@ -34,7 +35,6 @@ namespace Cell.View.ToolWindow
                 _sheetViews.Add(sheetViewModel, sheetView);
             }
             _sheetViewContentControl.Content = sheetView;
-            //ActiveSheetView = sheetView;
         }
 
         private void SheetToolWindowViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cell.View.ToolWindow
+namespace Cell.View.Application
 {
     /// <summary>
     /// The view for a tool window that can be resized.

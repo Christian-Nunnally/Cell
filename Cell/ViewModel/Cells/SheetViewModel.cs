@@ -33,8 +33,8 @@ namespace Cell.ViewModel.Cells
         private double _panY;
         private bool _isPanningEnabled;
         private bool _isLockedToCenter;
-        private UndoRedoManager _undoRedoManager;
-        private CellLayout _layout;
+        private readonly UndoRedoManager _undoRedoManager;
+        private readonly CellLayout _layout;
 
         /// <summary>
         /// Creates a new instance of <see cref="SheetViewModel"/>.

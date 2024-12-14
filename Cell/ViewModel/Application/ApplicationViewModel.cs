@@ -5,6 +5,7 @@ using Cell.Core.Execution;
 using Cell.Core.Persistence;
 using Cell.Core.Persistence.Loader;
 using Cell.Model;
+using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
@@ -34,6 +35,8 @@ namespace Cell.ViewModel.Application
         private SheetViewModel? _sheetViewModel;
         private TitleBarSheetNavigationViewModel? _titleBarSheetNavigationViewModel;
         private TitleBarNotificationButtonViewModel? _titleBarNotificationButtonViewModel;
+        private WindowDockPanelViewModel? _windowDockPanelViewModel;
+
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
         /// </summary>
@@ -103,6 +106,16 @@ namespace Cell.ViewModel.Application
             }
         }
 
+        public WindowDockPanelViewModel WindowDockPanelViewModel
+        {
+            get => _windowDockPanelViewModel; set
+            {
+                if (_windowDockPanelViewModel == value) return;
+                _windowDockPanelViewModel = value;
+                NotifyPropertyChanged(nameof(WindowDockPanelViewModel));
+            }
+        }
+
         /// <summary>
         /// Gets the backup manager for the application, which is used to create backups of the project.
         /// </summary>
@@ -112,6 +125,10 @@ namespace Cell.ViewModel.Application
         /// Enables copy and paste though this clipboard.
         /// </summary>
         public CellClipboard? CellClipboard { private get; set; }
+
+        /// <summary>
+        /// The object responsible for flashing cells to bring the users attention to them.
+        /// </summary>
         public CellViewModelFlasher? CellViewModelFlasher { get; set; }
 
         /// <summary>
@@ -168,10 +185,10 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        /// <summary>
-        /// Gets the observable collection of open tool windows in the application.
-        /// </summary>
-        public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
+        ///// <summary>
+        ///// Gets the observable collection of open tool windows in the application.
+        ///// </summary>
+        //public ObservableCollection<ToolWindowViewModel> OpenToolWindowViewModels { get; } = [];
 
         /// <summary>
         /// Gets or sets the persisted project for the application, which is used to save and load the project.
@@ -269,14 +286,9 @@ namespace Cell.ViewModel.Application
         /// <param name="viewModel">The view model for the view to display.</param>
         /// <param name="dock">The side to put the window on.</param>
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
-        public void DockToolWindow(ToolWindowViewModel viewModel, Dock dock, bool allowDuplicates = false)
+        public void DockToolWindow(ToolWindowViewModel viewModel, WindowDockType dock, bool allowDuplicates = false)
         {
-            if (!allowDuplicates && OpenToolWindowViewModels.Any(x => viewModel.GetType() == x.GetType())) return;
-            viewModel.Dock = dock;
-            viewModel.IsDocked = true;
-            viewModel.RequestClose = () => RequestClose(viewModel);
-            viewModel.HandleBeingShown();
-            OpenToolWindowViewModels.Add(viewModel);
+            _windowDockPanelViewModel?.ShowToolWindow(viewModel, dock, allowDuplicates);
         }
 
         /// <summary>
@@ -369,15 +381,6 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// Moves the given tool window to the top of the z order.
-        /// </summary>
-        /// <param name="toolWindow">The tool window.</param>
-        public void MoveWindowToTop(ToolWindowViewModel toolWindow)
-        {
-            MoveToolWindowToTop?.Invoke(toolWindow);
-        }
-
-        /// <summary>
         /// Pastes the copied cells into the selected cells.
         /// </summary>
         public void PasteCopiedCells()
@@ -395,16 +398,7 @@ namespace Cell.ViewModel.Application
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
-            var existingWindowOfSameType = OpenToolWindowViewModels.FirstOrDefault(x => viewModel.GetType() == x.GetType());
-            if (existingWindowOfSameType is not null)
-            {
-                OpenToolWindowViewModels.Remove(existingWindowOfSameType);
-                OpenToolWindowViewModels.Add(existingWindowOfSameType);
-                if (!allowDuplicates) return;
-            }
-            viewModel.RequestClose = () => RequestClose(viewModel);
-            viewModel.HandleBeingShown();
-            OpenToolWindowViewModels.Add(viewModel);
+            _windowDockPanelViewModel.ShowToolWindow(viewModel, allowDuplicates);
         }
 
         internal async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader)
@@ -417,12 +411,6 @@ namespace Cell.ViewModel.Application
             if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
             if (PersistedProject.NeedsMigration()) return await MigrateAndContinueLoadingAsync(userCollectionLoader);
             else return await ContinueLoadingAsync(userCollectionLoader);
-        }
-
-        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
-        {
-            OpenToolWindowViewModels.Remove(toolWindowViewModel);
-            toolWindowViewModel.HandleBeingClosed();
         }
 
         private async Task BackupAsync()
@@ -536,16 +524,6 @@ namespace Cell.ViewModel.Application
             return cmdProcess.ExitCode == 0;
         }
 
-
-        private void RequestClose(ToolWindowViewModel viewModel)
-        {
-            var isAllowingClose = viewModel.HandleCloseRequested();
-            if (isAllowingClose)
-            {
-                RemoveToolWindow(viewModel);
-            }
-        }
-
         private LoadResult FailLoad(string details, string migrationCommit)
         {
             return new LoadResult 
@@ -608,6 +586,21 @@ namespace Cell.ViewModel.Application
                     return;
                 }
             }
+        }
+
+        public void ShowDockSites(ToolWindowViewModel toolWindowViewModel)
+        {
+            WindowDockPanelViewModel.WindowToDock = toolWindowViewModel;
+        }
+
+        /// <summary>
+        /// Stops the application in an expected way.
+        /// </summary>
+        public void ShutdownApplicationGracefully()
+        {
+            WindowDockPanelViewModel.CloseAllWindows();
+            Logger.Log("Application sutting down gracefully.");
+            System.Windows.Application.Current.Shutdown();
         }
     }
 

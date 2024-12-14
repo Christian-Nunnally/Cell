@@ -928,9 +928,12 @@ namespace Cell.ViewModel.ToolWindow
         {
             foreach (var cell in cellsToMerge)
             {
+                if (cell == topLeftCell) continue;
                 ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                 cell.MergedWith = topLeftCell.ID;
             }
+            ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(topLeftCell);
+            topLeftCell.MergedWith = topLeftCell.ID;
         }
 
         private void CellsToEditCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => PickDisplayedCell();

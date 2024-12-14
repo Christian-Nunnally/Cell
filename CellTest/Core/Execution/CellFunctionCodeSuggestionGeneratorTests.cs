@@ -219,6 +219,33 @@ namespace CellTest.Core.Execution
         }
 
         [Fact]
+        public void NewKeywordFollowedBySpace_CompletionDataCreated_ContainsUserItem()
+        {
+            IEnumerable<string> usings = ["Cell.Model"];
+            var code = "var item = new ";
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
+
+            Assert.NotEmpty(completionData);
+            Assert.Single(completionData, x => (x.Content as string) == "UserItem");
+        }
+
+        [Fact]
+        public void NewKeywordFollowedBySpace_CompletionDataCreated_ContainsExpectedNumberOfSuggestions()
+        {
+            IEnumerable<string> usings = ["Cell.Model"];
+            var code = "var item = new ";
+            _testing = new CellFunctionCodeSuggestionGenerator(usings, _contextCell);
+            _testing.UpdateCode(code, "void", new Dictionary<string, List<string>>());
+
+            var completionData = _testing.CreateCompletionData(code.Length);
+
+            Assert.Single(completionData);
+        }
+
+        [Fact]
         public void Performance()
         {
             IEnumerable<string> usings = ["Cell.Model"];

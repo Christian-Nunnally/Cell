@@ -1,10 +1,8 @@
 ﻿using Cell.Core.Data;
-using Cell.Core.Execution.Functions;
-using Cell.Model;
-using Cell.View.Skin;
+using Cell.View.Application;
 using Cell.ViewModel.Application;
+using Cell.ViewModel.Data;
 using Cell.ViewModel.ToolWindow;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -20,18 +18,7 @@ namespace Cell.View.ToolWindow
         public CollectionManagerWindow(CollectionManagerWindowViewModel viewModel) : base(viewModel)
         {
             _viewModel = viewModel;
-            _viewModel.PropertyChanged += CollectionManagerWindowPropertyChanged;
             InitializeComponent();
-            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
-        }
-
-        private void CollectionManagerWindowPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(_viewModel.SelectedItemSerialized))
-            {
-                _itemJsonEditor.Text = _viewModel.SelectedItemSerialized;
-                _viewModel.IsSaveItemJsonButtonVisible = false;
-            }
         }
 
         private void DeleteCollectionButtonClicked(object sender, RoutedEventArgs e)
@@ -49,35 +36,10 @@ namespace Cell.View.ToolWindow
             });
         }
 
-        private void EditSortAndFilterFunctionButtonClick(object sender, RoutedEventArgs e)
+        private void ShowCollectionButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (ApplicationViewModel.Instance.UserCollectionTracker is null) return;
-            if (ApplicationViewModel.Instance.CellTracker is null) return;
-            if (ApplicationViewModel.Instance.FunctionTracker is null) return;
-            var functionName = _viewModel.SelectedCollection?.Collection.Model.SortAndFilterFunctionName;
-            if (string.IsNullOrEmpty(functionName)) return;
-            var function = ApplicationViewModel.Instance.FunctionTracker.GetOrCreateFunction("object", functionName);
-
-            var propertyNamesForCollectionMap = ApplicationViewModel.Instance.UserCollectionTracker.GeneratePropertyNamesForCollectionMap();
-            var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, ApplicationViewModel.Instance.UserCollectionTracker, CellModel.Null, ApplicationViewModel.Instance.FunctionTracker, ApplicationViewModel.Instance.Logger);
-            var codeEditorWindowViewModel = new CodeEditorWindowViewModel(function, null, propertyNamesForCollectionMap, testingContext, ApplicationViewModel.Instance.Logger);
-            ApplicationViewModel.Instance.ShowToolWindow(codeEditorWindowViewModel, true);
-        }
-
-        private void ItemJsonEditorTextChanged(object sender, EventArgs e)
-        {
-            _viewModel.IsSaveItemJsonButtonVisible = true;
-        }
-
-        private void RemoveItemFromCollectionClick(object sender, RoutedEventArgs e)
-        {
-            if (sender is not Button button || button.DataContext is not UserItem item) return;
-            _viewModel.RemoveItemFromSelectedCollection(item);
-        }
-
-        private void SaveSelectedItemJsonButtonClick(object sender, RoutedEventArgs e)
-        {
-            _viewModel.SelectedItemSerialized = _itemJsonEditor.Text;
+            if (!ViewUtilities.TryGetSendersDataContext<UserCollectionListItemViewModel>(sender, out var collectionListItemViewModel)) return;
+            _viewModel.ShowCollection(collectionListItemViewModel.Collection);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
+using Cell.View.Application;
 using Cell.View.Skin;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
@@ -57,8 +58,12 @@ namespace Cell.View.ToolWindow
 
         private void OnTextEntered(object sender, TextCompositionEventArgs e)
         {
-            static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e) => e.Text == ".";
             if (ShouldOpenAutoCompleteWindow(e)) OpenAutoCompleteWindow();
+        }
+
+        private static bool ShouldOpenAutoCompleteWindow(TextCompositionEventArgs e)
+        {
+            return e.Text == "." || e.Text == " ";
         }
 
         private void OnTextEntering(object sender, TextCompositionEventArgs e)
@@ -89,6 +94,11 @@ namespace Cell.View.ToolWindow
             if (e.Key == Key.Space && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 OpenAutoCompleteWindow();
+                e.Handled = true;
+            }
+            if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                _viewModel.Save();
                 e.Handled = true;
             }
             else if (e.Key == Key.OemQuestion)

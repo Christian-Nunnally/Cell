@@ -1,4 +1,5 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.View.Application;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,26 +12,26 @@ namespace Cell.View.ToolWindow
 {
     public partial class FloatingToolWindowContainer : UserControl, INotifyPropertyChanged
     {
-        private readonly ApplicationViewModel _applicationViewModel;
         private double _contentHeight;
         private double _contentWidth;
         private bool _resizing;
         private Point _resizingStartPosition;
+        private readonly WindowDockPanelViewModel _windowDockPanelViewModel;
 
         /// <summary>
         /// Creates a new instance of the <see cref="FloatingToolWindowContainer"/>.
         /// </summary>
-        /// <param name="applicationViewModel">The application view model that owns this <see cref="FloatingToolWindowContainer"/>.</param>
-        public FloatingToolWindowContainer(ApplicationViewModel applicationViewModel)
+        /// <param name="windowDockPanelViewModel"></param>
+        public FloatingToolWindowContainer(WindowDockPanelViewModel windowDockPanelViewModel)
         {
             InitializeComponent();
-            _applicationViewModel = applicationViewModel;
+            _windowDockPanelViewModel = windowDockPanelViewModel;
         }
 
         /// <summary>
         /// The action that is invoked when this tool window wants to show the dock options.
         /// </summary>
-        public Action? ShowDockOptions;
+        public Action<ToolWindowViewModel?>? ShowDockOptions;
 
         /// <summary>
         /// Gets or sets the content displated within this tool window container.
@@ -97,11 +98,6 @@ namespace Cell.View.ToolWindow
             }
         }
 
-        /// <summary>
-        /// Gets whether the tool window is currently docked (can not be moved or resized if docked).
-        /// </summary>
-        public bool IsDocked => _resizableToolWindow?.ToolViewModel.IsDocked ?? false;
-
         private ResizableToolWindow? _resizableToolWindow;
 
         private ToolWindowViewModel? ToolWindowViewModel => _resizableToolWindow?.ToolViewModel;
@@ -136,15 +132,14 @@ namespace Cell.View.ToolWindow
 
         private void DockButtonClicked(object sender, RoutedEventArgs e)
         {
-            ShowDockOptions?.Invoke();
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDocked)));
+            ShowDockOptions?.Invoke(ToolWindowViewModel);
         }
 
         private void MoveToolboxToFrontOfCanvas(FloatingToolWindowContainer toolbox)
         {
             if (toolbox.ToolWindowViewModel is not null)
             {
-                _applicationViewModel.MoveWindowToTop(toolbox.ToolWindowViewModel);
+                _windowDockPanelViewModel.MoveToolWindowToTop(toolbox.ToolWindowViewModel);
             }
         }
 
@@ -181,8 +176,8 @@ namespace Cell.View.ToolWindow
 
         private void SetSizeWhileRespectingBounds(double desiredWidth, double desiredHeight)
         {
-            var boundedWidth = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowWidth- Canvas.GetLeft(this), desiredWidth));
-            var boundedHeight = Math.Max(50, Math.Min(_applicationViewModel.ApplicationWindowHeight - Canvas.GetTop(this), desiredHeight));
+            var boundedWidth = Math.Max(ToolWindowViewModel.MinimumWidth, Math.Min(1000- Canvas.GetLeft(this), desiredWidth));
+            var boundedHeight = Math.Max(ToolWindowViewModel.MinimumHeight, Math.Min(1000 - Canvas.GetTop(this), desiredHeight));
             ContentWidth = boundedWidth;
             ContentHeight = boundedHeight;
         }

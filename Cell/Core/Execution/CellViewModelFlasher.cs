@@ -1,89 +1,134 @@
 ﻿using Cell.Core.Common;
+using Cell.Model;
 using Cell.ViewModel.Cells;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Cell.Core.Execution
 {
+    /// <summary>
+    /// Class to handle flashing of cells.
+    /// </summary>
     public class CellViewModelFlasher
     {
-        private Dictionary<CellViewModel, DateTime> _flashingCells = new Dictionary<CellViewModel, DateTime>();
-
-        private DispatcherTimer? _timer;
-
-        private Color _startColor = Colors.White;  // Starting color
-        private double _brightnessFactor = 0;    // To control brightness
-        private bool _increasingBrightness = true; // To toggle brightness increase/decrease
+        private const int NumberOfFrames = 16;
         private const double _brightnessSpeed = 0.01;
+        private readonly Dictionary<CellViewModel, int> _flashingCells = [];
+        private readonly Dictionary<CellViewModel, CellStyleModel> _cellStartColors = [];
+        private DispatcherTimer _timer;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="CellViewModelFlasher"/>.
+        /// </summary>
+        public CellViewModelFlasher()
+        {
+            _timer = new DispatcherTimer(DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(16), // ~60 FPS
+            };
+            _timer.Tick += TimerTick;
+        }
+
+        /// <summary>
+        /// Causes the given cell to flash.
+        /// </summary>
+        /// <param name="cellViewModel"></param>
         public void Flash(CellViewModel cellViewModel)
         {
-            if (!_flashingCells.ContainsKey(cellViewModel))
+            if (_flashingCells.TryAdd(cellViewModel, NumberOfFrames))
             {
-                var shouldStartAnimationTimer = _flashingCells.Count == 0;
-                
-                _flashingCells.Add(cellViewModel, DateTime.Now);
-
+                _cellStartColors.Add(cellViewModel, cellViewModel.Model.Style);
+                var shouldStartAnimationTimer = _flashingCells.Count != 0;
                 if (shouldStartAnimationTimer)
                 {
-                    _timer?.Stop();
-                    _timer = new DispatcherTimer
-                    {
-                        Interval = TimeSpan.FromMilliseconds(16) // ~60 FPS
-                    };
-                    _timer.Tick += TimerTick;
                     _timer.Start();
                 }
             }
         }
 
+        /// <summary>
+        /// Adjusts the brightness of a color in a way agnostic to the original color.
+        /// </summary>
+        /// <param name="originalColor">The starting color.</param>
+        /// <param name="adjustmentFactor">The amount the adjust the brightness to flash the color.</param>
+        /// <returns></returns>
+        public static Color FlashColor(Color originalColor, double adjustmentFactor)
+        {
+            int r = originalColor.R;
+            int g = originalColor.G;
+            int b = originalColor.B;
+
+            float brightness = (r + g + b) / 3f;
+
+            if (r == 0 && g == 0 && b == 0)
+            {
+                r = (int)Math.Min(r + (255 * adjustmentFactor), 255);
+                g = (int)Math.Min(g + (255 * adjustmentFactor), 255);
+                b = (int)Math.Min(b + (255 * adjustmentFactor), 255);
+            }
+            else if (brightness < 128)
+            {
+                r = (int)Math.Min(r * (1 + adjustmentFactor), 255);
+                g = (int)Math.Min(g * (1 + adjustmentFactor), 255);
+                b = (int)Math.Min(b * (1 + adjustmentFactor), 255);
+            }
+            else if (brightness > 128)
+            {
+                r = (int)Math.Max(r * (1 - adjustmentFactor), 0);
+                g = (int)Math.Max(g * (1 - adjustmentFactor), 0);
+                b = (int)Math.Max(b * (1 - adjustmentFactor), 0);
+            }
+            else 
+            {
+                r = (int)Math.Min(Math.Max(r * (1 + adjustmentFactor), 0), 255);
+                g = (int)Math.Min(Math.Max(g * (1 + adjustmentFactor), 0), 255);
+                b = (int)Math.Min(Math.Max(b * (1 + adjustmentFactor), 0), 255);
+            }
+
+            return Color.FromArgb(255, (byte)r, (byte)g, (byte)b);
+        }
+
         private void TimerTick(object? sender, EventArgs e)
         {
-            foreach (var (cellViewModel, startTime) in _flashingCells.ToDictionary())
+            var cellsToRemove = new List<CellViewModel>();
+            foreach (var (cellViewModel, framesLeft) in _flashingCells)
             {
-                if (startTime.AddMilliseconds(500) < DateTime.Now)
+                if (framesLeft <= 0)
                 {
                     cellViewModel.BackgroundColor = ColorAdjuster.ConvertHexStringToBrush(cellViewModel.Model.Style.BackgroundColor);
-                    _flashingCells.Remove(cellViewModel);
+                    cellViewModel.ContentBackgroundColor = ColorAdjuster.ConvertHexStringToBrush(cellViewModel.Model.Style.ContentBackgroundColor);
+                    cellViewModel.ForegroundColor = ColorAdjuster.ConvertHexStringToBrush(cellViewModel.Model.Style.ForegroundColor);
+                    cellsToRemove.Add(cellViewModel);
                     continue;
                 }
 
-                // Determine the new brightness factor using sine wave-like behavior
-                if (_increasingBrightness)
-                {
-                    _brightnessFactor += _brightnessSpeed; // Increase brightness
-                    if (_brightnessFactor >= 1) _increasingBrightness = false; // Switch to decrease
-                }
-                else
-                {
-                    _brightnessFactor -= _brightnessSpeed; // Decrease brightness
-                    if (_brightnessFactor <= 0) _increasingBrightness = true; // Switch to increase
-                }
+                _flashingCells[cellViewModel]--;
 
-                // Calculate the new color based on the brightness factor
-                Color newColor = AdjustBrightness(_startColor, _brightnessFactor);
+                var colorBackground = ColorAdjuster.ConvertHexStringToColor(_cellStartColors[cellViewModel].BackgroundColor);
+                Color newColorBackground = FlashColor(colorBackground, .5 * Math.Sin(framesLeft / (double)NumberOfFrames * Math.PI));
+                var brushBackground = new SolidColorBrush(newColorBackground);
+                cellViewModel.BackgroundColor = brushBackground;
 
-                cellViewModel.BackgroundColor = new SolidColorBrush(newColor);
+                var colorContentBackgroundColor = ColorAdjuster.ConvertHexStringToColor(_cellStartColors[cellViewModel].ContentBackgroundColor);
+                Color newColorContentBackgroundColor = FlashColor(colorContentBackgroundColor, .5 * Math.Sin(framesLeft / (double)NumberOfFrames * Math.PI));
+                var brushContentBackgroundColor = new SolidColorBrush(newColorContentBackgroundColor);
+                cellViewModel.ContentBackgroundColor = brushContentBackgroundColor;
+
+                var colorForegroundColor = ColorAdjuster.ConvertHexStringToColor(_cellStartColors[cellViewModel].ForegroundColor);
+                Color newColorForegroundColor = FlashColor(colorForegroundColor, .5 * Math.Sin(framesLeft / (double)NumberOfFrames * Math.PI));
+                var brushForegroundColor = new SolidColorBrush(newColorForegroundColor);
+                cellViewModel.ForegroundColor = brushForegroundColor;
+
+            }
+            foreach (var cell in cellsToRemove)
+            {
+                _flashingCells.Remove(cell);
+                _cellStartColors.Remove(cell);
             }
             if (_flashingCells.Count == 0)
             {
                 _timer?.Stop();
             }
-        }
-
-        // Function to adjust the brightness of a color based on a factor (0.0 to 1.0)
-        private Color AdjustBrightness(Color baseColor, double brightnessFactor)
-        {
-            // Ensure that brightnessFactor is between 0 and 1
-            brightnessFactor = Math.Max(0, Math.Min(1, brightnessFactor));
-
-            // Apply the brightness adjustment by modifying each RGB component
-            byte r = (byte)(baseColor.R * brightnessFactor);
-            byte g = (byte)(baseColor.G * brightnessFactor);
-            byte b = (byte)(baseColor.B * brightnessFactor);
-
-            return Color.FromArgb(baseColor.A, r, g, b); // Return the new color with adjusted brightness
         }
     }
 }

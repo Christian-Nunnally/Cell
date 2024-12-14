@@ -158,12 +158,12 @@ namespace Cell.ViewModel.Cells
         }
 
         /// <summary>
-        /// Gets or sets the content background color of the cell.
+        /// Gets or sets the content background color of the cell. Setting this directly will not change the models value.
         /// </summary>
         public virtual SolidColorBrush ContentBackgroundColor
         {
             get => _contentBackgroundColor;
-            private set
+            set
             {
                 _contentBackgroundColor = value;
                 NotifyPropertyChanged(nameof(ContentBackgroundColor));
@@ -190,7 +190,7 @@ namespace Cell.ViewModel.Cells
         public virtual SolidColorBrush ContentBorderColor
         {
             get => _contentBorderColor;
-            private set
+            set
             {
                 if (_contentBorderColor == value) return;
                 _contentBorderColor = value;
@@ -296,7 +296,7 @@ namespace Cell.ViewModel.Cells
         public virtual SolidColorBrush ForegroundColor
         {
             get => _foregroundColor;
-            private set
+            set
             {
                 _foregroundColor = value;
                 NotifyPropertyChanged(nameof(ForegroundColor));

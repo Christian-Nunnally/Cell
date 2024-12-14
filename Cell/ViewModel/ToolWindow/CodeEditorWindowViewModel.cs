@@ -179,12 +179,6 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void TestCode()
         {
-            if (CellContext is null)
-            {
-                _logger.Log($"Unable to test sort/filter functions for now :(");
-                return;
-            }
-
             var model = new CellFunctionModel("test", string.Empty, FunctionBeingEdited.Model.ReturnType);
             var function = new CellFunction(model, _logger);
             function.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
@@ -244,7 +238,10 @@ namespace Cell.ViewModel.ToolWindow
             RequestClose?.Invoke();
         }
 
-        private void Save()
+        /// <summary>
+        /// Saves the current code in the editor into the function being edited.
+        /// </summary>
+        public void Save()
         {
             FunctionBeingEdited.SetUserFriendlyCode(CurrentTextInEditor, CellContext, _collectionNameToPropertyNameMap.Keys.ToList());
             _isDirty = false;

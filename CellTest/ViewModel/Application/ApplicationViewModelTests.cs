@@ -142,14 +142,14 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        public void ShowToolWindow_ToolWindowAddedToListOfOpenWindows()
+        public void ShowToolWindow_ToolWindowShownInFloatingWindowList()
         {
             var testToolWindow = new TestToolWindowViewModel();
-            Assert.Empty(_testing.OpenToolWindowViewModels);
+            Assert.Empty(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating);
 
             _testing.ShowToolWindow(testToolWindow);
 
-            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
         }
 
         [Fact]
@@ -167,11 +167,11 @@ namespace CellTest.ViewModel.Application
         public void ShowToolWindow_ShowHandlerCalled()
         {
             var testToolWindow = new TestToolWindowViewModel();
-            Assert.Empty(_testing.OpenToolWindowViewModels);
+            Assert.Empty(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating);
 
             _testing.ShowToolWindow(testToolWindow);
 
-            Assert.True(_testing.OpenToolWindowViewModels.Single() == testToolWindow);
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
         }
 
         [Fact]
@@ -179,12 +179,12 @@ namespace CellTest.ViewModel.Application
         {
             var testToolWindow = new TestToolWindowViewModel();
             _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
             testToolWindow.IsAllowingClose = false;
 
             testToolWindow.RequestClose!.Invoke();
 
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace CellTest.ViewModel.Application
         {
             var testToolWindow = new TestToolWindowViewModel();
             _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
             testToolWindow.IsAllowingClose = false;
 
             testToolWindow.RequestClose!.Invoke();
@@ -205,12 +205,12 @@ namespace CellTest.ViewModel.Application
         {
             var testToolWindow = new TestToolWindowViewModel();
             _testing.ShowToolWindow(testToolWindow);
-            Assert.Equal(testToolWindow, _testing.OpenToolWindowViewModels.Single());
+            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
             testToolWindow.IsAllowingClose = true;
 
             testToolWindow.RequestClose!.Invoke();
 
-            Assert.Empty(_testing.OpenToolWindowViewModels);
+            Assert.Empty(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating);
         }
 
         [Fact]

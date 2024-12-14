@@ -7,8 +7,6 @@
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
-    Width="{Binding ContentWidth}"
-    Height="{Binding ContentHeight}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     MouseDown="ToolboxMouseDown"
@@ -65,7 +63,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button
-                                    Height="14"
+                                    Height="16"
                                     VerticalAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     BorderThickness="0"
@@ -135,7 +133,11 @@
                 </Rectangle.Style>
             </Rectangle>
             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0,0,0,0">
-                <ContentControl x:Name="ContentHost" Margin="4" />
+                <ContentControl
+                    x:Name="ContentHost"
+                    Width="{Binding ContentWidth}"
+                    Height="{Binding ContentHeight}"
+                    Margin="4" />
             </Border>
         </DockPanel>
     </Grid>

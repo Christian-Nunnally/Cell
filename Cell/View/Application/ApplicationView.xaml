@@ -106,9 +106,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Content="{Binding ApplicationBackgroundMessage}" />
-            <DockPanel x:Name="_toolWindowDockPanel">
-                <ContentControl x:Name="_sheetViewContentControl" />
-            </DockPanel>
+            <ContentControl x:Name="_windowDockPanel" />
             <Canvas x:Name="_toolWindowCanvas" />
         </Grid>
     </DockPanel>

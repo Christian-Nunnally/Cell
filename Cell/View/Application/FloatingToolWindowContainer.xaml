@@ -8,8 +8,6 @@
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
-    Width="{Binding ContentWidth}"
-    Height="{Binding ContentHeight}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     MouseDown="ToolboxMouseDown"
@@ -22,11 +20,7 @@
                 BorderBrush="{StaticResource CellBorderColor}"
                 BorderThickness="1"
                 DockPanel.Dock="Top">
-                <DockPanel
-                    Height="28"
-                    Background="{StaticResource ToolWindowHeaderColor}"
-                    LastChildFill="False">
-                    <Label Content="{Binding ToolWindowTitle}" DockPanel.Dock="Left" />
+                <DockPanel Height="28" Background="{StaticResource ToolWindowHeaderColor}">
                     <Button
                         Width="28"
                         Height="28"
@@ -64,6 +58,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <Label Content="{Binding ToolWindowTitle}" DockPanel.Dock="Left" />
                 </DockPanel>
             </Border>
             <Rectangle
@@ -101,7 +96,11 @@
                 </Rectangle.Style>
             </Rectangle>
             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,0,0">
-                <ContentControl x:Name="ContentHost" Margin="10" />
+                <ContentControl
+                    x:Name="ContentHost"
+                    Width="{Binding ContentWidth}"
+                    Height="{Binding ContentHeight}"
+                    Margin="10" />
             </Border>
         </DockPanel>
     </Grid>

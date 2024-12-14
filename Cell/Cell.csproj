@@ -42,10 +42,10 @@
     <Compile Update="View\Application\TitleBarNotificationButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\ToolWindow\DockedToolWindowContainer.xaml.cs">
+    <Compile Update="View\Application\DockedToolWindowContainer.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\ToolWindow\ResizableToolWindow.cs">
+    <Compile Update="View\Application\ResizableToolWindow.cs">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>

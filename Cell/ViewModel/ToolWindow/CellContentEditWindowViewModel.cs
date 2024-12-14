@@ -41,7 +41,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
-        public override double DefaultHeight => 60;
+        public override double DefaultHeight => 35;
 
         /// <summary>
         /// Gets the default width of this tool window when it is shown.
@@ -68,11 +68,6 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets whether the edit function button should be visible in the UI.
         /// </summary>
         public bool IsEditFunctionButtonVisible => _multiUseUserInputText.StartsWith('=');
-
-        /// <summary>
-        /// Gets the minimum height this tool window is allowed to be resized to.
-        /// </summary>
-        public override double MinimumHeight => 62;
 
         /// <summary>
         /// Gets the minimum width this tool window is allowed to be resized to.

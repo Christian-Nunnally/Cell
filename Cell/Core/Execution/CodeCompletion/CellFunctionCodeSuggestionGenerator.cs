@@ -174,7 +174,15 @@ namespace Cell.Core.Execution.CodeCompletion
         {
             if (_currentUserCodeText.Length > carrotPosition || _currentUserCodeText.Length == 0) return "";
             var offset = carrotPosition - 1;
-            if (_currentUserCodeText[offset] == '.')
+            var characterRightBeforeCursor = _currentUserCodeText[offset];
+            if (characterRightBeforeCursor == ' ')
+            {
+                if (offset >= 3 && _currentUserCodeText[(offset - 3)..offset] == "new")
+                {
+                    return "new";
+                }
+            }
+            if (characterRightBeforeCursor == '.')
             {
                 while (offset > 0 && char.IsLetterOrDigit(_currentUserCodeText[offset - 1])) offset--;
                 return _currentUserCodeText[offset..(carrotPosition - 1)];
@@ -208,6 +216,13 @@ namespace Cell.Core.Execution.CodeCompletion
             else if (CellReferenceToCodeSyntaxRewriter.IsCellLocation(typeNameInFrontOfCarrot))
             {
                 completionData = CreateCompletionDataForType(typeof(CellModel));
+            }
+            else if (typeNameInFrontOfCarrot == "new")
+            {
+                completionData =
+                [
+                    new CodeCompletionData("UserItem()", "UserItem", "" + "An item to represent something and store information about it.", IconChar.ObjectGroup),
+                ];
             }
             return completionData is not null;
         }

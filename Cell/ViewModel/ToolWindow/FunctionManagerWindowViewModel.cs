@@ -1,9 +1,9 @@
-﻿using Cell.Model;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using Cell.Core.Data.Tracker;
+using Cell.Core.Execution.Functions;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -13,15 +13,12 @@ namespace Cell.ViewModel.ToolWindow
     public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
         private readonly FunctionTracker _functionTracker;
-        private string _dependencciesListBoxFilterText = string.Empty;
         private string _filterCollection = string.Empty;
         private string _filterSheet = "All";
         private string _filterString = string.Empty;
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
         private CellFunctionViewModel? _selectedFunction;
-        private CellModel? _selectedUserOfTheSelectedFunction;
-        private string _usersListBoxFilterText = string.Empty;
         /// <summary>
         /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
         /// </summary>
@@ -40,20 +37,6 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the default width of this tool window when it is shown.
         /// </summary>
         public override double DefaultWidth => 650;
-
-        /// <summary>
-        /// Gets the string that the user has entered to filter the selected functions dependencies list box.
-        /// </summary>
-        public string DependenciesListBoxFilterText
-        {
-            get => _dependencciesListBoxFilterText; set
-            {
-                if (_dependencciesListBoxFilterText == value) return;
-                _dependencciesListBoxFilterText = value;
-                NotifyPropertyChanged(nameof(DependenciesListBoxFilterText));
-                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
-            }
-        }
 
         /// <summary>
         /// Gets or sets the string that the user has entered to filter the collection of functions to functions that depend on a given collection name.
@@ -75,36 +58,9 @@ namespace Cell.ViewModel.ToolWindow
         public ObservableCollection<string> FilterCollectionOptions { get; set; } = [];
 
         /// <summary>
-        /// Gets the list of the selected function dependencies after the filter has been applied from the user.
-        /// </summary>
-        public IEnumerable<string> FilteredDependenciesOfTheSelectedFunction
-        {
-            get
-            {
-                if (SelectedUserOfTheSelectedFunction is null)
-                {
-                    return SelectedFunction?.Dependencies
-                        .Select(x => x.ResolveUserFriendlyCellAgnosticName())
-                        .Where(x => x.Contains(DependenciesListBoxFilterText)) ?? [];
-                }
-                else
-                {
-                    return SelectedFunction?.Dependencies
-                        .Select(x => x.ResolveUserFriendlyNameForCell(SelectedUserOfTheSelectedFunction))
-                        .Where(x => x.Contains(DependenciesListBoxFilterText)) ?? [];
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets the list of functions after the filter has been applied from the user.
         /// </summary>
         public IEnumerable<CellFunctionViewModel> FilteredFunctions => _functionTracker.Functions.Select(x => new CellFunctionViewModel(x)).Where(IsFunctionIncludedInFilter);
-
-        /// <summary>
-        /// Gets the list of users of the selected function after the filter has been applied from the user.
-        /// </summary>
-        public IEnumerable<CellModel> FilteredUsersOfTheSelectedFunction => SelectedFunction?.CellsThatUseFunction.Where(x => x.Location.ToString().Contains(UsersListBoxFilterText)) ?? [];
 
         /// <summary>
         /// Gets or sets the string that the user has entered to filter the collection of functions to a given sheet name.
@@ -189,28 +145,6 @@ namespace Cell.ViewModel.ToolWindow
                 if (_selectedFunction == value) return;
                 _selectedFunction = value;
                 NotifyPropertyChanged(nameof(SelectedFunction));
-                NotifyPropertyChanged(nameof(SelectedFunctionTitleString));
-                NotifyPropertyChanged(nameof(FilteredUsersOfTheSelectedFunction));
-                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
-            }
-        }
-
-        /// <summary>
-        /// Gets the string that is displayed in the title bar of the tool window to inform the user what function is selected.
-        /// </summary>
-        public string SelectedFunctionTitleString => SelectedFunction is null ? "No function selected" : SelectedFunction.Name;
-
-        /// <summary>
-        /// Gets or sets the user selected cell from the function users list.
-        /// </summary>
-        public CellModel? SelectedUserOfTheSelectedFunction
-        {
-            get => _selectedUserOfTheSelectedFunction; set
-            {
-                if (_selectedUserOfTheSelectedFunction == value) return;
-                _selectedUserOfTheSelectedFunction = value;
-                NotifyPropertyChanged(nameof(SelectedUserOfTheSelectedFunction));
-                NotifyPropertyChanged(nameof(FilteredDependenciesOfTheSelectedFunction));
             }
         }
 
@@ -219,9 +153,18 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override List<CommandViewModel> ToolBarCommands =>
         [
+            new CommandViewModel("Compile All", () => CompileAllFunctions()) { ToolTip = "Create a new function that returns a value" },
             new CommandViewModel("New Populate", () => CreateNewPopulateFunction()) { ToolTip = "Create a new function that returns a value" },
             new CommandViewModel("New Trigger", () => CreateNewTriggerFunction()) { ToolTip = "Create a new function that does not return a value" },
         ];
+
+        private void CompileAllFunctions()
+        {
+            foreach (var function in _functionTracker.Functions)
+            {
+                function.Compile();
+            }
+        }
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.
@@ -229,26 +172,12 @@ namespace Cell.ViewModel.ToolWindow
         public override string ToolWindowTitle => "Function Manager";
 
         /// <summary>
-        /// Gets or sets the string that the user has entered to filter the users of the selected function.
-        /// </summary>
-        public string UsersListBoxFilterText
-        {
-            get => _usersListBoxFilterText; set
-            {
-                if (_usersListBoxFilterText == value) return;
-                _usersListBoxFilterText = value;
-                NotifyPropertyChanged(nameof(UsersListBoxFilterText));
-                NotifyPropertyChanged(nameof(FilteredUsersOfTheSelectedFunction));
-            }
-        }
-
-        /// <summary>
         /// Creates a new populate function with a default name.
         /// </summary>
-        public void CreateNewPopulateFunction(string name = "PopulateFunction")
+        public CellFunction CreateNewPopulateFunction(string name = "PopulateFunction")
         {
             var newName = GetNewFunctionName(name);
-            _functionTracker.CreateCellFunction("object", newName, "return \"Hi\";");
+            return _functionTracker.CreateCellFunction("object", newName, "return \"Hi\";");
         }
 
         private string GetNewFunctionName(string name)
@@ -263,10 +192,10 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Creates a new trigger function with a default name.
         /// </summary>
-        public void CreateNewTriggerFunction(string name = "TriggerFunction")
+        public CellFunction CreateNewTriggerFunction(string name = "TriggerFunction")
         {
             var newName = GetNewFunctionName(name);
-            _functionTracker.CreateCellFunction("void", newName, string.Empty);
+            return _functionTracker.CreateCellFunction("void", newName, string.Empty);
         }
 
         /// <summary>
@@ -286,12 +215,12 @@ namespace Cell.ViewModel.ToolWindow
         {
             _functionTracker.Functions.CollectionChanged += FunctionsCollectionChanged;
             FilterSheetOptions.Add("All");
-            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker.Sheets)
+            foreach (var sheet in ApplicationViewModel.Instance.SheetTracker?.Sheets ?? [])
             {
                 FilterSheetOptions.Add(sheet.Name);
             }
             FilterCollectionOptions.Add("All");
-            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionTracker.CollectionNames)
+            foreach (var collectionName in ApplicationViewModel.Instance.UserCollectionTracker?.CollectionNames ?? [])
             {
                 FilterCollectionOptions.Add(collectionName);
             }
@@ -300,11 +229,13 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Creates a copy of the selected function.
         /// </summary>
-        public void CreateCopyOfSelectedFunction()
+        /// <param name="function">The function to copy.</param>
+        public void CreateCopyOfFunction(CellFunctionViewModel function)
         {
             if (SelectedFunction is null) return;
-            if (SelectedFunction.ReturnType == "void") CreateNewTriggerFunction();
-            else CreateNewPopulateFunction();
+            var copy = function.ReturnType == "void" 
+                ? CreateNewTriggerFunction()
+                : CreateNewPopulateFunction();
         }
 
         internal void PromptUserToDeleteFunctionFromProject(CellFunctionViewModel functionViewModel)
@@ -333,6 +264,18 @@ namespace Cell.ViewModel.ToolWindow
             if (function.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.ReturnType == "object") return IncludePopulateFunctions;
             return true;
+        }
+
+        internal void OpenUsersWindowForFunction(CellFunctionViewModel function)
+        {
+            var window = new FunctionUsersWindowViewModel(function);
+            ApplicationViewModel.Instance.ShowToolWindow(window);
+        }
+
+        internal void OpenDependenciesWindowForFunction(CellFunctionViewModel function)
+        {
+            var window = new FunctionDependenciesWindowViewModel(function, null);
+            ApplicationViewModel.Instance.ShowToolWindow(window);
         }
     }
 }

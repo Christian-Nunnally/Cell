@@ -1,4 +1,5 @@
 ﻿using Cell.Model;
+using Cell.View.Application;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
@@ -37,7 +38,21 @@ namespace Cell.View.ToolWindow
 
             ApplicationViewModel.Instance.DialogFactory.ShowYesNo("Delete sheet?", $"Are you sure you want to delete the sheet {sheetModel.Name}?", () =>
             {
-                ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name).ForEach(x => ApplicationViewModel.Instance.CellTracker.RemoveCell(x));
+                ApplicationViewModel.Instance.UndoRedoManager?.StartRecordingUndoState();
+                var allCellsInSheet = ApplicationViewModel.Instance.CellTracker.GetCellModelsForSheet(sheetModel.Name);
+                foreach (var cell in allCellsInSheet)
+                {
+                    ApplicationViewModel.Instance.UndoRedoManager?.RecordStateIfRecording(cell);
+                }
+                foreach (var cell in allCellsInSheet)
+                {
+                    cell.PopulateFunctionName = string.Empty;
+                }
+                foreach (var cell in allCellsInSheet)
+                {
+                    ApplicationViewModel.Instance.CellTracker.RemoveCell(cell);
+                }
+                ApplicationViewModel.Instance.UndoRedoManager?.FinishRecordingUndoState();
             });
         }
 

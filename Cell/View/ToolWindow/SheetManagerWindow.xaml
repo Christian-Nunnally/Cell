@@ -29,24 +29,23 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="20" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="100" />
-                        </Grid.ColumnDefinitions>
-                        <Button
-                            x:Name="_removeButton"
-                            HorizontalAlignment="Left"
-                            Click="DeleteSheetButtonClicked"
-                            Content="{fa:Icon XMark}"
-                            Foreground="{StaticResource ErrorForegroundColor}"
-                            Style="{StaticResource ListItemInlineButtonStyle}"
-                            ToolTip="Delete this sheet"
-                            Visibility="Hidden" />
-                        <StackPanel
-                            Grid.Column="1"
-                            Margin="5,0"
-                            Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <Button
+                                x:Name="_removeButton"
+                                HorizontalAlignment="Left"
+                                Click="DeleteSheetButtonClicked"
+                                Content="{fa:Icon XMark}"
+                                Foreground="{StaticResource ErrorForegroundColor}"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Delete this sheet"
+                                Visibility="Hidden" />
+                            <ToggleButton
+                                x:Name="_renameButton"
+                                HorizontalAlignment="Left"
+                                Content="{fa:Icon PenToSquare}"
+                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
+                                ToolTip="Rename this function"
+                                Visibility="Hidden" />
                             <Label Name="_nameLabel" Content="{Binding Name}" />
                             <TextBox
                                 Name="_renameTextbox"
@@ -55,16 +54,11 @@
                                 FontSize="13"
                                 Text="{Binding Name}"
                                 Visibility="Collapsed" />
-                            <ToggleButton
-                                x:Name="_renameButton"
-                                Margin="10,0"
-                                HorizontalAlignment="Left"
-                                Content="{fa:Icon PenToSquare}"
-                                Style="{StaticResource ListItemInlineToggleButtonStyle}"
-                                ToolTip="Rename this function"
-                                Visibility="Hidden" />
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <StackPanel
+                            HorizontalAlignment="Right"
+                            FlowDirection="RightToLeft"
+                            Orientation="Horizontal">
                             <ToggleButton
                                 x:Name="_isVisibleInTopBarButton"
                                 HorizontalAlignment="Right"

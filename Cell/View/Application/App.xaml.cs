@@ -42,6 +42,7 @@ namespace Cell
 
             persistedProject.RegisterMigrator("2", "0.3.0", new FasterLoadMigrator());
 
+            applicationViewModel.WindowDockPanelViewModel = new WindowDockPanelViewModel();
             applicationViewModel.PersistedProject = persistedProject;
             var functionTracker = new FunctionTracker(applicationViewModel.Logger);
             applicationViewModel.FunctionTracker = functionTracker;
@@ -106,10 +107,10 @@ namespace Cell
 
         private void OnlyAllowSelectionWhenEditWindowIsOpen(ApplicationViewModel applicationViewModel, CellSelector cellSelector)
         {
-            applicationViewModel.OpenToolWindowViewModels.CollectionChanged += (o, e) =>
+            applicationViewModel.WindowDockPanelViewModel.FloatingToolWindowViewModels.CollectionChanged += (o, e) =>
             {
                 //cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
-                if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
+                if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.WindowDockPanelViewModel.FloatingToolWindowViewModels.Any();
             };
         }
     }

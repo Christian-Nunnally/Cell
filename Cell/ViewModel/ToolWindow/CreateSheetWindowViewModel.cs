@@ -28,7 +28,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
         /// </summary>
-        public override double DefaultHeight => 200;
+        public override double DefaultHeight => 150;
 
         /// <summary>
         /// Gets the default width of this tool window when it is shown.
@@ -49,6 +49,14 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(InitialColumns));
             }
         }
+
+        /// <summary>
+        /// Provides a list of commands to display in the title bar of the tool window.
+        /// </summary>
+        public override List<CommandViewModel> ToolBarCommands =>
+        [
+            new CommandViewModel("Save New Sheet", AddNewSheet) { ToolTip = "Submits the current sheet configuration and saves the sheet." }
+        ];
 
         /// <summary>
         /// The number of rows to create in the new sheet.

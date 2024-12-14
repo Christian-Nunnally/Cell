@@ -9,9 +9,19 @@ namespace Cell.ViewModel.Cells.Types
     /// </summary>
     public class TextboxCellViewModel : CellViewModel
     {
-
+        /// <summary>
+        /// When attached to a textbox view, this action will focus the textbox.
+        /// </summary>
         public Action FocusTextbox { get; set; } = () => { };
+
+        /// <summary>
+        /// When attached to a textbox view, this action will unfocus the textbox.
+        /// </summary>
         public Action UnfocusTextbox { get; set; } = () => { };
+
+        /// <summary>
+        /// When attached to a textbox view, this action will select all the text in the textbox.
+        /// </summary>
         public Action SelectAllText { get; set; } = () => { };
 
         /// <summary>

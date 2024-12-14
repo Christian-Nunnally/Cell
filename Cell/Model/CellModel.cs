@@ -262,6 +262,7 @@ namespace Cell.Model
             get => _width;
             set 
             {
+                var oldValue = _width;
                 if (_width == value) return;
                 _width = value; 
                 NotifyPropertyChanged(nameof(Width)); 
