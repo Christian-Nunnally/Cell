@@ -23,6 +23,9 @@ namespace Cell.ViewModel.ToolWindow
         {
             _sheetTracker = sheetTracker;
             _dialogFactory = dialogFactory;
+            ToolBarCommands.Add(new CommandViewModel("Export", OpenExportWindow) { ToolTip = "Opens the export tool window." });
+            ToolBarCommands.Add(new CommandViewModel("Import", OpenImportWindow) { ToolTip = "Opens the import tool window" });
+            ToolBarCommands.Add(new CommandViewModel("New Sheet", OpenAddNewSheetWindow) { ToolTip = "Opens the create new sheet tool window." });
         }
 
         /// <summary>
@@ -68,16 +71,6 @@ namespace Cell.ViewModel.ToolWindow
                 RefreshSheetsList();
             }
         }
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("Export", OpenExportWindow) { ToolTip = "Opens the export tool window." },
-            new CommandViewModel("Import", OpenImportWindow) { ToolTip = "Opens the import tool window" },
-            new CommandViewModel("New Sheet", OpenAddNewSheetWindow) { ToolTip = "Opens the create new sheet tool window." }
-        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

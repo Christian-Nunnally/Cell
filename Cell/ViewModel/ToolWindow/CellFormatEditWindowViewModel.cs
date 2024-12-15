@@ -37,6 +37,7 @@ namespace Cell.ViewModel.ToolWindow
             _cellsToEdit = cellsToEdit;
             _cellTracker = cellTracker;
             _undoRedoManager = undoRedoManager;
+            ToolBarCommands.Add(new CommandViewModel("╾╼", () => IsDetailedBorderEditingEnabled = !IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." });
         }
 
         /// <summary>
@@ -658,14 +659,6 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the text decorations to display the IsFontStrikethrough of the cell on the format window.
         /// </summary>
         public TextDecorationCollection? TextDecorationsForView => IsFontStrikethrough ? TextDecorations.Strikethrough : null;
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("╾╼", () => IsDetailedBorderEditingEnabled = !IsDetailedBorderEditingEnabled) { ToolTip = "Show/Hide the text boxes that allow editing the border and margins left/right/top/bottom sides individually." }
-        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

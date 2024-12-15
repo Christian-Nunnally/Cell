@@ -1,5 +1,4 @@
-﻿using Cell.View.Application;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -95,7 +94,10 @@ namespace Cell.View.ToolWindow
                     ContentHeight = _resizableToolWindow.ToolViewModel.DefaultHeight;
                     SetSizeWhileRespectingBounds(ContentWidth, ContentHeight);
                     DataContext = this;
-                    _resizableToolWindow.ToolViewModel.ToolBarCommands.ForEach(Commands.Add);
+                    foreach (var command in _resizableToolWindow.ToolViewModel.ToolBarCommands)
+                    {
+                        Commands.Add(command);
+                    }
                     _resizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
                 }
             }
@@ -106,8 +108,6 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public string ToolWindowTitle => ToolWindowContent?.ToolViewModel.ToolWindowTitle ?? "";
 
-        public Action<DockedToolWindowContainer> Undock { get; set; }
-
         /// <summary>
         /// Ensures the tool window is sized to fit entirely within the canvas it is displayed on by moving it. Will resize the tool window as a last resort.
         /// </summary>
@@ -117,17 +117,6 @@ namespace Cell.View.ToolWindow
         }
 
         private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
-
-        private void CloseButtonClicked(object sender, RoutedEventArgs e)
-        {
-            ToolWindowContent?.ToolViewModel?.RequestClose?.Invoke();
-        }
-
-        private void UndockButtonClicked(object sender, RoutedEventArgs e)
-        {
-            if (_resizableToolWindow == null) return;
-            Undock?.Invoke(this);
-        }
 
         private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
         {

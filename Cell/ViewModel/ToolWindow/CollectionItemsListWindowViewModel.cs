@@ -162,13 +162,6 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-        ];
-
-        /// <summary>
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
         public override string ToolWindowTitle => $"'{_userCollection.Model.Name}' User Collection";

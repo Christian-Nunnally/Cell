@@ -1,4 +1,8 @@
 ﻿using Cell.Core.Common;
+using Cell.View.Skin;
+using FontAwesome.Sharp;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.ViewModel.Application
@@ -43,5 +47,7 @@ namespace Cell.ViewModel.Application
         /// Gets or sets a tooltip for the command.
         /// </summary>
         public string ToolTip { get; set; }
+
+        public IconChar Icon { get; set; } = IconChar.None;
     }
 }

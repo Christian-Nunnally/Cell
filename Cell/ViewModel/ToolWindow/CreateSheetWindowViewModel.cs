@@ -23,6 +23,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             _sheetTracker = sheetTracker;
             _dialogFactory = dialogFactory;
+            ToolBarCommands.Add(new CommandViewModel("Save New Sheet", AddNewSheet) { ToolTip = "Submits the current sheet configuration and saves the sheet." });
         }
 
         /// <summary>
@@ -49,14 +50,6 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(InitialColumns));
             }
         }
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("Save New Sheet", AddNewSheet) { ToolTip = "Submits the current sheet configuration and saves the sheet." }
-        ];
 
         /// <summary>
         /// The number of rows to create in the new sheet.

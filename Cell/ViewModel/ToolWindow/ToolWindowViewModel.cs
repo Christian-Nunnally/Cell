@@ -1,6 +1,7 @@
 ﻿using Cell.Core.Common;
 using Cell.ViewModel.Application;
-using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using FontAwesome.Sharp;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -85,7 +86,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Provides a list of commands to display in the title bar of the tool window.
         /// </summary>
-        public virtual List<CommandViewModel> ToolBarCommands => [];
+        public ObservableCollection<CommandViewModel> ToolBarCommands { get; } = [];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

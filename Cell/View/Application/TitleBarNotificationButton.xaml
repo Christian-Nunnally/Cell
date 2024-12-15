@@ -17,7 +17,6 @@
             Content="{fa:Icon Info}"
             DockPanel.Dock="Right"
             Style="{StaticResource TitleButtonStyle}"
-            ToolTip="Notifcations"
-            Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            ToolTip="Notifcations" />
     </Grid>
 </UserControl>

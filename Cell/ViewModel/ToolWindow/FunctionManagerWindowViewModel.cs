@@ -26,6 +26,10 @@ namespace Cell.ViewModel.ToolWindow
         public FunctionManagerWindowViewModel(FunctionTracker functionTracker)
         {
             _functionTracker = functionTracker;
+
+            ToolBarCommands.Add(new CommandViewModel("Compile All", () => CompileAllFunctions()) { ToolTip = "Create a new function that returns a value" });
+            ToolBarCommands.Add(new CommandViewModel("New Populate", () => CreateNewPopulateFunction()) { ToolTip = "Create a new function that returns a value" });
+            ToolBarCommands.Add(new CommandViewModel("New Trigger", () => CreateNewTriggerFunction()) { ToolTip = "Create a new function that does not return a value" });
         }
 
         /// <summary>
@@ -147,16 +151,6 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(SelectedFunction));
             }
         }
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("Compile All", () => CompileAllFunctions()) { ToolTip = "Create a new function that returns a value" },
-            new CommandViewModel("New Populate", () => CreateNewPopulateFunction()) { ToolTip = "Create a new function that returns a value" },
-            new CommandViewModel("New Trigger", () => CreateNewTriggerFunction()) { ToolTip = "Create a new function that does not return a value" },
-        ];
 
         private void CompileAllFunctions()
         {

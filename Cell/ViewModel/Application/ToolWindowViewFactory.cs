@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Common;
-using Cell.View.Application;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.ToolWindow;
 

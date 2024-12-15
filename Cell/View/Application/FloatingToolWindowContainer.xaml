@@ -52,9 +52,8 @@
                                     VerticalContentAlignment="Stretch"
                                     BorderThickness="0"
                                     Command="{Binding Command}"
-                                    ToolTip="{Binding ToolTip}">
-                                    <Label Padding="10,0" Content="{Binding Name}" />
-                                </Button>
+                                    Content="{Binding Content}"
+                                    ToolTip="{Binding ToolTip}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

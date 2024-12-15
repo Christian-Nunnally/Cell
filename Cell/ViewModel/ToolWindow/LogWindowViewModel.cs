@@ -15,6 +15,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             _title = title;
             _logger = logger;
+            ToolBarCommands.Add(new("Clear", ClearBuffer) { ToolTip = "Clears the list of logs." });
         }
 
         private readonly StringBuilder _logBufferBuilder = new();
@@ -44,14 +45,6 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the minimum width this tool window is allowed to be reized to.
         /// </summary>
         public override double MinimumWidth => 100;
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new("Clear", ClearBuffer) { ToolTip = "Clears the list of logs." }
-        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

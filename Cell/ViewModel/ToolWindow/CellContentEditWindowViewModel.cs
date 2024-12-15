@@ -3,6 +3,7 @@ using Cell.Core.Data.Tracker;
 using Cell.Core.Execution.CodeCompletion;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
+using Cell.View.Application;
 using Cell.ViewModel.Application;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.Collections.ObjectModel;
@@ -103,13 +104,6 @@ namespace Cell.ViewModel.ToolWindow
         }
 
         /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-        ];
-
-        /// <summary>
         /// Gets the string displayed in top bar of this tool window.
         /// </summary>
         public override string ToolWindowTitle
@@ -195,7 +189,7 @@ namespace Cell.ViewModel.ToolWindow
             var testingContext = new TestingContext(ApplicationViewModel.Instance.CellTracker, userCollectionTracker, CellToDisplay, _functionTracker, _logger);
             var codeEditWindowViewModel = new CodeEditorWindowViewModel(function, CellToDisplay, collectionNameToPropertyNameMap, testingContext, _logger);
 
-            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, Dock.Bottom, true);
+            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) ApplicationViewModel.Instance.DockToolWindow(codeEditWindowViewModel, WindowDockType.DockedBottom, true);
             else ApplicationViewModel.Instance.ShowToolWindow(codeEditWindowViewModel, true);
         }
 

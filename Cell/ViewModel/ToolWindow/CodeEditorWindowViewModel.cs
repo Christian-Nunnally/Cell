@@ -40,6 +40,10 @@ namespace Cell.ViewModel.ToolWindow
             _collectionNameToPropertyNameMap = collectionNameToPropertyNameMap;
             CellContext = cellContextFromWhichTheFunctionIsBeingEdited;
             _contextToTestWith = contextToTestWith;
+            ToolBarCommands.Add(new CommandViewModel("Test", TestCodeAndOpenLogWindow) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." });
+            ToolBarCommands.Add(new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." });
+            ToolBarCommands.Add(new CommandViewModel("Save", Save) { ToolTip = "Saves the current code in the editor into the function being edited." });
+            ToolBarCommands.Add(new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." });
         }
 
         /// <summary>
@@ -109,17 +113,6 @@ namespace Cell.ViewModel.ToolWindow
                 NotifyPropertyChanged(nameof(IsTransformedSyntaxTreeViewerVisible));
             }
         }
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("Test", TestCodeAndOpenLogWindow) { ToolTip = "Runs the current code and displays the result, or just 'success' if the function isn't supposed to return a value." },
-            new CommandViewModel("Syntax", () => ToggleSyntaxTreePreview(CurrentTextInEditor)) { ToolTip = "Shows what the code looks like after references have been converted to 'real' code." },
-            new CommandViewModel("Save", Save) { ToolTip = "Saves the current code in the editor into the function being edited." },
-            new CommandViewModel("Save and Close", SaveAndClose) { ToolTip = "Saves the edited code to the function and closes this tool window." }
-        ];
 
         private void TestCodeAndOpenLogWindow()
         {

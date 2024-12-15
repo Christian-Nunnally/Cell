@@ -1,5 +1,4 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
-using Cell.View.Application;
 using Cell.View.Skin;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;

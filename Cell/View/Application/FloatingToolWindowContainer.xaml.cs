@@ -1,7 +1,7 @@
-﻿using Cell.View.Application;
-using Cell.ViewModel.Application;
+﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -56,8 +56,30 @@ namespace Cell.View.ToolWindow
                     SetCanvasLeft();
                     SetCanvasTop();
                     DataContext = this;
-                    ToolWindowViewModel.ToolBarCommands.ForEach(Commands.Add);
+                    foreach (var command in ToolWindowViewModel.ToolBarCommands)
+                    {
+                        Commands.Add(command);
+                    }
+                    ToolWindowViewModel.ToolBarCommands.CollectionChanged += ToolBarCommandsCollectionChanged;
                     ToolWindowViewModel.PropertyChanged += ToolViewModelPropertyChanged;
+                }
+            }
+        }
+
+        private void ToolBarCommandsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (CommandViewModel command in e.NewItems)
+                {
+                    Commands.Add(command);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (CommandViewModel command in e.OldItems)
+                {
+                    Commands.Remove(command);
                 }
             }
         }

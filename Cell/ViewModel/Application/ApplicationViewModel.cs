@@ -5,6 +5,7 @@ using Cell.Core.Execution;
 using Cell.Core.Persistence;
 using Cell.Core.Persistence.Loader;
 using Cell.Model;
+using Cell.View.Application;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
@@ -398,7 +399,7 @@ namespace Cell.ViewModel.Application
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
-            _windowDockPanelViewModel.ShowToolWindow(viewModel, allowDuplicates);
+            _windowDockPanelViewModel.ShowToolWindow(viewModel, WindowDockType.Floating, allowDuplicates);
         }
 
         internal async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader)

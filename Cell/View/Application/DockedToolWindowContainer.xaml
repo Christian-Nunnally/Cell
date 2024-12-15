@@ -31,32 +31,13 @@
                         Padding="5,1"
                         Content="{Binding ToolWindowTitle}"
                         DockPanel.Dock="Left" />
-                    <Button
-                        Width="16"
-                        Height="16"
-                        BorderThickness="0"
-                        Click="CloseButtonClicked"
-                        Content="{fa:Icon XMark}"
-                        Cursor="Arrow"
-                        DockPanel.Dock="Right"
-                        ToolTip="Closes this tool window." />
-                    <Button
-                        Width="16"
-                        Height="16"
-                        BorderThickness="0"
-                        Click="UndockButtonClicked"
-                        Content="{fa:Icon LockOpen}"
-                        Cursor="Arrow"
-                        DockPanel.Dock="Right"
-                        FontSize="9"
-                        ToolTip="Undocks this tool window." />
                     <ItemsControl
                         Cursor="Arrow"
                         DockPanel.Dock="Right"
                         ItemsSource="{Binding Commands}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
+                                <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
 
@@ -64,12 +45,23 @@
                             <DataTemplate>
                                 <Button
                                     Height="16"
+                                    MinWidth="16"
                                     VerticalAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
                                     BorderThickness="0"
                                     Command="{Binding Command}"
                                     ToolTip="{Binding ToolTip}">
-                                    <Label Padding="10,0" Content="{Binding Name}" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <fa:IconImage
+                                            Width="9"
+                                            Height="9"
+                                            Foreground="{StaticResource ForegroundColor}"
+                                            Icon="{Binding Icon}" />
+                                        <Label
+                                            Padding="1"
+                                            Content="{Binding Name}"
+                                            Visibility="{Binding Name, Converter={StaticResource EmptyStringToVisibilityConverter}}" />
+                                    </StackPanel>
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -133,11 +125,11 @@
                 </Rectangle.Style>
             </Rectangle>
             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0,0,0,0">
-                <ContentControl
-                    x:Name="ContentHost"
+                <ContentControl x:Name="ContentHost" Margin="4" />
+                <!--
                     Width="{Binding ContentWidth}"
                     Height="{Binding ContentHeight}"
-                    Margin="4" />
+                -->
             </Border>
         </DockPanel>
     </Grid>

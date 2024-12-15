@@ -1,6 +1,5 @@
 ﻿using Cell.Core.Common;
 using Cell.Model;
-using Cell.View.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Windows;

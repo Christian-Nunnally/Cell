@@ -57,7 +57,10 @@
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Opens settings window"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <local:TitleBarNotificationButton DataContext="{Binding TitleBarNotificationButtonViewModel}" DockPanel.Dock="Right" />
+                <local:TitleBarNotificationButton
+                    DataContext="{Binding TitleBarNotificationButtonViewModel}"
+                    DockPanel.Dock="Right"
+                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <Button
                     Click="ToggleEditPanelButtonClick"
                     Content="{fa:Icon PaintRoller}"

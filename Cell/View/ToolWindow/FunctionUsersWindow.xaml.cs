@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.Core.Execution.Functions;
 using Cell.Model;
-using Cell.View.Application;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;

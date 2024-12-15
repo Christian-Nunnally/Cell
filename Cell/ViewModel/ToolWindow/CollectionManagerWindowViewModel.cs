@@ -37,6 +37,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             _functionTracker = functionTracker;
             _userCollectionTracker = userCollectionTracker;
+            ToolBarCommands.Add(new CommandViewModel("New Collection", OpenCreateCollectionWindow) { ToolTip = "Opens the 'Create new collection' tool window." });
         }
 
         /// <summary>
@@ -200,14 +201,6 @@ namespace Cell.ViewModel.ToolWindow
                 }
             }
         }
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new CommandViewModel("New Collection", OpenCreateCollectionWindow) { ToolTip = "Opens the 'Create new collection' tool window." },
-        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

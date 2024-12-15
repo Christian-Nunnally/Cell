@@ -102,15 +102,16 @@ namespace Cell
         private static void OpenCellContentEditWindowInDockedMode(ApplicationViewModel applicationViewModel, FunctionTracker functionTracker, CellSelector cellSelector)
         {
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(cellSelector.SelectedCells, functionTracker, applicationViewModel.Logger);
-            applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
+            applicationViewModel.DockToolWindow(cellContentEditWindowViewModel, WindowDockType.DockedTop);
         }
 
         private void OnlyAllowSelectionWhenEditWindowIsOpen(ApplicationViewModel applicationViewModel, CellSelector cellSelector)
         {
-            applicationViewModel.WindowDockPanelViewModel.FloatingToolWindowViewModels.CollectionChanged += (o, e) =>
+            // TODO: Fix this to look at all open window.
+            applicationViewModel.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.CollectionChanged += (o, e) =>
             {
                 //cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
-                if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.WindowDockPanelViewModel.FloatingToolWindowViewModels.Any();
+                if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Any();
             };
         }
     }

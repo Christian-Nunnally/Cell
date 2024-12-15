@@ -19,6 +19,8 @@ namespace Cell.ViewModel.ToolWindow
             {
                 undoRedoManager.UndoStackChanged += () => UpdateUndoStackForViewModel(undoRedoManager);
                 UpdateUndoStackForViewModel(undoRedoManager);
+                ToolBarCommands.Add(new("Undo", new RelayCommand(x => undoRedoManager.Undo())));
+                ToolBarCommands.Add(new("Redo", new RelayCommand(x => undoRedoManager.Redo())));
             }
         }
 
@@ -31,15 +33,6 @@ namespace Cell.ViewModel.ToolWindow
         /// Gets the default width of this tool window when it is shown.
         /// </summary>
         public override double DefaultWidth => 180;
-
-        /// <summary>
-        /// Provides a list of commands to display in the title bar of the tool window.
-        /// </summary>
-        public override List<CommandViewModel> ToolBarCommands =>
-        [
-            new("Undo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Undo())),
-            new("Redo", new RelayCommand(x => ApplicationViewModel.GetUndoRedoManager()?.Redo()))
-        ];
 
         /// <summary>
         /// Gets the string displayed in top bar of this tool window.

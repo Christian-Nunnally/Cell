@@ -83,8 +83,7 @@ namespace Cell.View.Application
             if (_viewModel.CellSelector is null) return;
             if (_viewModel.FunctionTracker is null) return;
             var cellContentEditWindowViewModel = new CellContentEditWindowViewModel(_viewModel.CellSelector.SelectedCells, _viewModel.FunctionTracker, _viewModel.Logger);
-            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(cellContentEditWindowViewModel, Dock.Top);
-            else _viewModel.ShowToolWindow(cellContentEditWindowViewModel);
+            _viewModel.DockToolWindow(cellContentEditWindowViewModel, WindowDockType.DockedTop);
         }
 
         private void ShowCollectionManagerButtonClick(object sender, RoutedEventArgs e)
@@ -100,8 +99,7 @@ namespace Cell.View.Application
             var functionLoader = _viewModel.FunctionTracker;
             if (functionLoader is null) return;
             var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
-            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control)) _viewModel.DockToolWindow(functionManagerViewModel, Dock.Right);
-            else _viewModel.ShowToolWindow(functionManagerViewModel);
+            _viewModel.ShowToolWindow(functionManagerViewModel);
         }
 
         private void ShowSettingsWindowButtonClick(object sender, RoutedEventArgs e)
@@ -126,7 +124,9 @@ namespace Cell.View.Application
                 sheetView = new SheetView(sheetViewModel);
                 _sheetViews.Add(sheetViewModel, sheetView);
             }
-            _viewModel.WindowDockPanelViewModel.MainContent = sheetView;
+            var sheetToolWindowViewModel = new SheetToolWindowViewModel();
+            sheetToolWindowViewModel.SheetViewModel = sheetViewModel;
+            _viewModel.WindowDockPanelViewModel.MainContent = sheetToolWindowViewModel;
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)

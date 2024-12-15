@@ -1,4 +1,5 @@
 ﻿using Cell.Core.Common;
+using Cell.View.Application;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
@@ -48,16 +49,33 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// Gets the observable collection of open tool windows in the application.
+        /// Gets or sets the tool window in the middle of this window dock panel.
         /// </summary>
         public ToolWindowViewModel? MainContent
         {
-            get => _mainContent; set
+            get => _mainContent; 
+            set
             {
                 if (_mainContent == value) return;
                 _mainContent = value;
+                if (_mainContent is not null)
+                {
+                    _mainContent.RequestClose = () => RequestClose(_mainContent);
+                    _mainContent.ToolBarCommands.Add(new CommandViewModel("", () => RequestClose(_mainContent)) { Icon = FontAwesome.Sharp.IconChar.Xmark});
+                    _mainContent.ToolBarCommands.Add(new CommandViewModel("", UndockWindow) { Icon = FontAwesome.Sharp.IconChar.LockOpen });
+                    _mainContent.HandleBeingShown();
+                }
                 NotifyPropertyChanged(nameof(MainContent));
             }
+        }
+
+        private void UndockWindow()
+        {
+            if (MainContent == null) return;
+            var newChildWindowDockPanel = new WindowDockPanelViewModel();
+            newChildWindowDockPanel.MainContent = MainContent;
+            VisibleContentAreasThatAreFloating.Add(newChildWindowDockPanel);
+            MainContent = null;
         }
 
         public ToolWindowViewModel WindowToDock
@@ -83,7 +101,7 @@ namespace Cell.ViewModel.Application
 
         public void BringWindowToFront(ToolWindowViewModel viewModel)
         {
-            var view = VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent is FloatingToolWindowContainer toolWindow && toolWindow.ToolWindowContent.ToolViewModel == viewModel);
+            var view = VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent == viewModel);
             if (view is null) return;
             VisibleContentAreasThatAreFloating.Remove(view);
             VisibleContentAreasThatAreFloating.Add(view);
@@ -96,6 +114,14 @@ namespace Cell.ViewModel.Application
 
         internal void RemoveToolWindowWithoutClosingIt(ToolWindowViewModel toolWindowViewModel)
         {
+            if (MainContent == toolWindowViewModel)
+            {
+                MainContent = null;
+            }
+            else
+            {
+                throw new NotImplementedException("Tool window not found in this window dock panel.");
+            }
             //VisibleContentAreasThatAreFloating.Remove(toolWindowViewModel);
         }
 
