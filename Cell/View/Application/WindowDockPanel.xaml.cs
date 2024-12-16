@@ -4,58 +4,47 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Cell.View.Application
 {
+    public enum WindowDockType
+    {
+        DockedRight,
+        DockedLeft,
+        DockedTop,
+        DockedBottom,
+        Floating,
+    }
+
     /// <summary>
     /// Interaction logic for WindowDockPanel.xaml
     /// </summary>
     public partial class WindowDockPanel : UserControl
     {
-        private readonly Canvas _toolWindowCanvas;
-        private readonly WindowDockPanelViewModel _viewModel;
         private readonly WindowDockPanel? _parentWindowDockPanel;
+        private readonly Canvas _toolWindowCanvas;
+        private bool _resizing;
+        private Point _resizingStartPosition;
+
         public WindowDockPanel(WindowDockPanelViewModel viewModel, Canvas toolWindowCanvas, WindowDockPanel? parentWindowDockPanel = null)
         {
             _parentWindowDockPanel = parentWindowDockPanel;
             _toolWindowCanvas = toolWindowCanvas;
-            _viewModel = viewModel;
+            ViewModel = viewModel;
             viewModel.VisibleContentAreasThatAreFloating.CollectionChanged += FloatingToolWindowsCollectionChanged;
             DataContext = viewModel;
-            _viewModel.PropertyChanged += WindowDockPanelViewModelPropertyChanged;
+            ViewModel.PropertyChanged += WindowDockPanelViewModelPropertyChanged;
             InitializeComponent();
         }
 
+        public WindowDockPanelViewModel ViewModel { get; }
+
         public void MoveToolWindowToTop(ToolWindowViewModel toolWindow)
         {
-            foreach (var floatingContainer in _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>())
-            {
-                if (floatingContainer.ToolWindowContent?.ToolViewModel == toolWindow)
-                {
-                    _toolWindowCanvas.Children.Remove(floatingContainer);
-                    _toolWindowCanvas.Children.Add(floatingContainer);
-                    return;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Opens a tool window with the specified view model.
-        /// </summary>
-        /// <param name="viewModel">The tool window view model to open.</param>
-        /// <param name="dock">The side to dock to.</param>
-        public void ShowToolWindowInDockedContainer(ToolWindowViewModel viewModel, Dock dock)
-        {
-            var window = ToolWindowViewFactory.Create(viewModel);
-            if (window is null) return;
-            var childDockWindowViewModel = new WindowDockPanelViewModel(_viewModel);
-            var childDockWindow = new WindowDockPanel(childDockWindowViewModel, _toolWindowCanvas, this);
-            childDockWindow._viewModel.MainContent = viewModel;
-            _toolWindowDockPanel.Children.Insert(_toolWindowDockPanel.Children.Count - 1, childDockWindow);
+            throw new NotImplementedException();
         }
 
         public void UpdateToolWindowLocation(double canvasWidth, double canvasHeight)
@@ -85,31 +74,31 @@ namespace Cell.View.Application
             if (dockSite.Tag is not ToolWindowViewModel toolWindowToDock) return;
             toolWindowToDock.HostingPanel?.RemoveToolWindowWithoutClosingIt(toolWindowToDock);
 
-            var hostingPanel = new WindowDockPanelViewModel(_viewModel);
+            var hostingPanel = new WindowDockPanelViewModel(ViewModel);
             hostingPanel.MainContent = toolWindowToDock;
 
             if (dockSide == Dock.Bottom)
             {
-                _viewModel.VisibleContentAreasThatAreDockedOnBottom.Add(hostingPanel);
+                ViewModel.VisibleContentAreasThatAreDockedOnBottom.Add(hostingPanel);
                 return;
             }
             if (dockSide == Dock.Top)
             {
-                _viewModel.VisibleContentAreasThatAreDockedOnTop.Add(hostingPanel);
+                ViewModel.VisibleContentAreasThatAreDockedOnTop.Add(hostingPanel);
                 return;
             }
             if (dockSide == Dock.Left)
             {
-                _viewModel.VisibleContentAreasThatAreDockedOnLeft.Add(hostingPanel);
+                ViewModel.VisibleContentAreasThatAreDockedOnLeft.Add(hostingPanel);
                 return;
             }
             if (dockSide == Dock.Right)
             {
-                _viewModel.VisibleContentAreasThatAreDockedOnRight.Add(hostingPanel);
+                ViewModel.VisibleContentAreasThatAreDockedOnRight.Add(hostingPanel);
                 return;
             }
 
-            _viewModel.WindowToDock = null;
+            ViewModel.WindowToDock = null;
         }
 
         private void DockSiteMouseEnter(object sender, MouseEventArgs e)
@@ -124,16 +113,31 @@ namespace Cell.View.Application
             border.Background = ColorConstants.ForegroundColorConstantBrush;
         }
 
-        private void HideDockSitesFromParent()
+        private void FloatingToolWindowsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (_parentWindowDockPanel is not null)
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)
             {
-                _parentWindowDockPanel.HideDockSitesFromParent();
+                foreach (var windowDockPanelViewModel in e.NewItems.Cast<WindowDockPanelViewModel>())
+                {
+                    var floatingToolWindow = new FloatingToolWindowContainer(ViewModel);
+                    _toolWindowCanvas.Children.Add(floatingToolWindow);
+                    var windowDockPanel = new WindowDockPanel(windowDockPanelViewModel, _toolWindowCanvas, this);
+                    floatingToolWindow.WindowDockPanel = windowDockPanel;
+                }
             }
-            else
+            if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is not null)
             {
-                HideDockSites();
+                foreach (var windowDockPanelViewModel in e.OldItems.Cast<WindowDockPanelViewModel>())
+                {
+                    var floatingToolWindowToRemove = _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>().FirstOrDefault(x => x.WindowDockPanel?.ViewModel == windowDockPanelViewModel);
+                    _toolWindowCanvas.Children.Remove(floatingToolWindowToRemove);
+                }
             }
+        }
+
+        private IEnumerable<WindowDockPanel> GetChildPanels()
+        {
+            return _toolWindowDockPanel.Children.OfType<WindowDockPanel>();
         }
 
         private void HideDockSites()
@@ -149,46 +153,26 @@ namespace Cell.View.Application
             }
         }
 
-        private IEnumerable<WindowDockPanel> GetChildPanels()
+        private void HideDockSitesFromParent()
         {
-            return _toolWindowDockPanel.Children.OfType<WindowDockPanel>();
-        }
-
-        private void OpenToolWindowInFloatingContainer(ResizableToolWindow resizableToolWindow)
-        {
-            var toolbox = new FloatingToolWindowContainer(_viewModel)
+            if (_parentWindowDockPanel is not null)
             {
-                ShowDockOptions = window => ApplicationViewModel.Instance.ShowDockSites(window!)
-            };
-            if (resizableToolWindow.ToolViewModel.X < 0) resizableToolWindow.ToolViewModel.X = (_toolWindowCanvas.ActualWidth / 2) - (resizableToolWindow.ToolViewModel.DefaultWidth / 2);
-            if (resizableToolWindow.ToolViewModel.Y < 0) resizableToolWindow.ToolViewModel.Y = (_toolWindowCanvas.ActualHeight / 2) - (resizableToolWindow.ToolViewModel.DefaultHeight / 2);
-            toolbox.ToolWindowContent = resizableToolWindow;
-            _toolWindowCanvas.Children.Add(toolbox);
-        }
-
-        private void FloatingToolWindowsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems is not null)
-            {
-                foreach (var floatingToolWindowContainer in e.NewItems.Cast<WindowDockPanelViewModel>())
-                {
-                    var windowDockPanel = new WindowDockPanel(floatingToolWindowContainer, _toolWindowCanvas, this);
-                    _toolWindowCanvas.Children.Add(windowDockPanel);
-                }
+                _parentWindowDockPanel.HideDockSitesFromParent();
             }
-            //else if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems is not null)
-            //{
-            //    foreach (var windowDockPanel in e.OldItems.Cast<WindowDockPanel>())
-            //    {
-            //        toolWindowViewModel.HostingPanel = null;
-            //        RemoveToolWindowFromView(toolWindowViewModel);
-            //    }
-            //}
+            else
+            {
+                HideDockSites();
+            }
+        }
+
+        private void OnMainContentControlLoaded(object sender, RoutedEventArgs e)
+        {
+            ShowMainContentFromViewModel();
         }
 
         private void RemoveDockedToolWindowView(ToolWindowViewModel toolWindowViewModel)
         {
-            if (_viewModel.MainContent == toolWindowViewModel)
+            if (ViewModel.MainContent == toolWindowViewModel)
             {
                 // TODO: make the docked child the new center panel and don't remove it if there is a child.
                 _parentWindowDockPanel?._toolWindowDockPanel.Children.Remove(this);
@@ -202,14 +186,7 @@ namespace Cell.View.Application
 
         private void RemoveFloatingToolWindowView(ToolWindowViewModel toolWindowViewModel)
         {
-            foreach (var floatingContainer in _toolWindowCanvas.Children.OfType<FloatingToolWindowContainer>())
-            {
-                if (floatingContainer.ToolWindowContent?.ToolViewModel == toolWindowViewModel)
-                {
-                    _toolWindowCanvas.Children.Remove(floatingContainer);
-                    return;
-                }
-            }
+            throw new NotImplementedException();
         }
 
         private void RemoveToolWindowFromView(ToolWindowViewModel toolWindowViewModel)
@@ -246,41 +223,11 @@ namespace Cell.View.Application
             }
         }
 
-        private void ShowToolWindowInFloatingContainer(ToolWindowViewModel viewModel)
-        {
-            var window = ToolWindowViewFactory.Create(viewModel);
-            if (window is null) return;
-            OpenToolWindowInFloatingContainer(window);
-        }
-
-        private void WindowDockPanelViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(WindowDockPanelViewModel.WindowToDock))
-            {
-                if (_viewModel.WindowToDock is null)
-                {
-                    HideDockSites();
-                }
-                else
-                {
-                    ShowDockSites(_viewModel.WindowToDock);
-                }
-                foreach (var childDockPanel in _toolWindowDockPanel.Children.OfType<WindowDockPanel>())
-                {
-                    childDockPanel._viewModel.WindowToDock = _viewModel.WindowToDock;
-                }
-            }
-            if (e.PropertyName == nameof(WindowDockPanelViewModel.MainContent))
-            {
-                ShowMainContentFromViewModel();
-            }
-        }
-
         private void ShowMainContentFromViewModel()
         {
-            if (_viewModel.MainContent is not null)
+            if (ViewModel.MainContent is not null)
             {
-                var toolWindowContentView = ToolWindowViewFactory.Create(_viewModel.MainContent);
+                var toolWindowContentView = ToolWindowViewFactory.Create(ViewModel.MainContent);
                 var dockedToolWindowContainer = new DockedToolWindowContainer()
                 {
                     ToolWindowContent = toolWindowContentView,
@@ -294,18 +241,60 @@ namespace Cell.View.Application
             }
         }
 
-        private void OnMainContentControlLoaded(object sender, RoutedEventArgs e)
+        private void WindowDockPanelViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            ShowMainContentFromViewModel();
+            if (e.PropertyName == nameof(WindowDockPanelViewModel.WindowToDock))
+            {
+                if (ViewModel.WindowToDock is null)
+                {
+                    HideDockSites();
+                }
+                else
+                {
+                    ShowDockSites(ViewModel.WindowToDock);
+                }
+                foreach (var childDockPanel in _toolWindowDockPanel.Children.OfType<WindowDockPanel>())
+                {
+                    childDockPanel.ViewModel.WindowToDock = ViewModel.WindowToDock;
+                }
+            }
+            if (e.PropertyName == nameof(WindowDockPanelViewModel.MainContent))
+            {
+                ShowMainContentFromViewModel();
+            }
         }
-    }
 
-    public enum WindowDockType
-    {
-        DockedRight,
-        DockedLeft,
-        DockedTop,
-        DockedBottom,
-        Floating,
+        private void ResizerRectangleMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _resizing = true;
+            _resizingStartPosition = e.GetPosition(this);
+            Mouse.Capture(sender as IInputElement);
+            e.Handled = true;
+        }
+
+        private void ResizerRectangleMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_resizing)
+            {
+                var mousePosition = e.GetPosition(this);
+                var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
+                var desiredWidth = ViewModel.DesiredWidth - delta.X;
+                var desiredHeight = ViewModel.DesiredHeight - delta.Y;
+                ViewModel.DesiredWidth = desiredWidth;
+                ViewModel.DesiredHeight = desiredHeight;
+                //ViewModel.MainContent.SetSizeWhileRespectingBounds(desiredWidth, desiredHeight);
+                _resizingStartPosition = mousePosition;
+                e.Handled = true;
+            }
+        }
+
+        private static Point DifferenceBetweenTwoPoints(Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
+
+        private void ResizerRectangleMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _resizing = false;
+            Mouse.Capture(null);
+            e.Handled = true;
+        }
     }
 }

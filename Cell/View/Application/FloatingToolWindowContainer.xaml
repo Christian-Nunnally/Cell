@@ -15,92 +15,11 @@
     MouseUp="ToolboxMouseLeftButtonUp"
     mc:Ignorable="d">
     <Grid>
-        <DockPanel Background="{StaticResource CellBackground}">
-            <Border
-                BorderBrush="{StaticResource CellBorderColor}"
-                BorderThickness="1"
-                DockPanel.Dock="Top">
-                <DockPanel Height="28" Background="{StaticResource ToolWindowHeaderColor}">
-                    <Button
-                        Width="28"
-                        Height="28"
-                        BorderThickness="0"
-                        Click="CloseButtonClicked"
-                        Content="{fa:Icon XMark}"
-                        DockPanel.Dock="Right"
-                        ToolTip="Closes this tool window." />
-                    <Button
-                        Width="28"
-                        Height="28"
-                        BorderThickness="0"
-                        Click="DockButtonClicked"
-                        Content="{fa:Icon Lock}"
-                        DockPanel.Dock="Right"
-                        ToolTip="Shows sites this tool window can be docked to." />
-                    <ItemsControl DockPanel.Dock="Right" ItemsSource="{Binding Commands}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button
-                                    Height="28"
-                                    VerticalAlignment="Stretch"
-                                    VerticalContentAlignment="Stretch"
-                                    BorderThickness="0"
-                                    Command="{Binding Command}"
-                                    Content="{Binding Content}"
-                                    ToolTip="{Binding ToolTip}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <Label Content="{Binding ToolWindowTitle}" DockPanel.Dock="Left" />
-                </DockPanel>
-            </Border>
-            <Rectangle
-                Width="{x:Static applicationConstants:ApplicationConstants.ToolWindowResizerSize}"
-                DockPanel.Dock="Right"
-                MouseDown="ResizerRectangleMouseDown"
-                MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp">
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-            <Rectangle
-                Height="{Binding Source={x:Static applicationConstants:ApplicationConstants.ToolWindowResizerSize}}"
-                DockPanel.Dock="Bottom"
-                MouseDown="ResizerRectangleMouseDown"
-                MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp">
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="2,0,0,0">
-                <ContentControl
-                    x:Name="ContentHost"
-                    Width="{Binding ContentWidth}"
-                    Height="{Binding ContentHeight}"
-                    Margin="10" />
-            </Border>
+        <DockPanel
+            MinWidth="100"
+            MinHeight="100"
+            Background="{StaticResource CellBackground}">
+            <ContentControl x:Name="ContentHost" />
         </DockPanel>
     </Grid>
 </UserControl>

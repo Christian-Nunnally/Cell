@@ -23,10 +23,7 @@
                     Height="16"
                     Background="{StaticResource ToolWindowHeaderColor}"
                     Cursor="SizeAll"
-                    LastChildFill="False"
-                    MouseDown="ResizerRectangleMouseDown"
-                    MouseMove="ResizerRectangleMouseMove"
-                    MouseUp="ResizerRectangleMouseUp">
+                    LastChildFill="False">
                     <Label
                         Padding="5,1"
                         Content="{Binding ToolWindowTitle}"
@@ -68,7 +65,7 @@
                     </ItemsControl>
                 </DockPanel>
             </Border>
-            <Rectangle
+            <!--<Rectangle
                 Width="3"
                 Cursor="SizeAll"
                 DockPanel.Dock="Right"
@@ -123,7 +120,7 @@
                         </Style.Triggers>
                     </Style>
                 </Rectangle.Style>
-            </Rectangle>
+            </Rectangle>-->
             <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0,0,0,0">
                 <ContentControl x:Name="ContentHost" Margin="4" />
                 <!--

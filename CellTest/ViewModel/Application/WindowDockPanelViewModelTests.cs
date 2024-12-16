@@ -83,7 +83,7 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        public void ToolWindowOpenInMainContent_DockCommandExecutedFromToolWindow_ToolWindowRemovedFromMainContent()
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_ToolWindowRemovedFromMainContent()
         {
             var testToolWindowViewModel = new ToolWindowViewModel();
             Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.LockOpen));
@@ -95,7 +95,7 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        public void ToolWindowOpenInMainContent_DockCommandExecutedFromToolWindow_ToolWindowBecomesFloatingWindow()
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_ToolWindowBecomesFloatingWindow()
         {
             var testToolWindowViewModel = new ToolWindowViewModel();
             Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.LockOpen));
@@ -105,6 +105,67 @@ namespace CellTest.ViewModel.Application
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
 
             Assert.Single(_testing.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindowViewModel));
+        }
+
+        [Fact]
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_FloatingToolViewHasDockCommandInPosition1()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.Lock));
+            _testing.MainContent = testToolWindowViewModel;
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            Assert.Equal(IconChar.Lock, testToolWindowViewModel.ToolBarCommands[1].Icon);
+        }
+
+        [Fact]
+        public void ToolWindowJustUndocked_CloseButtonExecuted_FloatingToolWindowsAreEmpty()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Xmark).Command.Execute(null);
+
+            Assert.Empty(_testing.VisibleContentAreasThatAreFloating);
+        }
+
+        [Fact]
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_FloatingToolViewHasCloseCommandInPosition0()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            Assert.Equal(IconChar.Xmark, testToolWindowViewModel.ToolBarCommands[0].Icon);
+        }
+
+        [Fact]
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_FloatingToolViewDoesNotHaveUndockCommand()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.LockOpen));
+            _testing.MainContent = testToolWindowViewModel;
+            Assert.Empty(_testing.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindowViewModel));
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.LockOpen));
+        }
+
+        [Fact]
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_NewlyFloatingToolWindowHasSingleCloseCommand()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            Assert.Empty(testToolWindowViewModel.ToolBarCommands.Where(x => x.Icon == IconChar.LockOpen));
+            _testing.MainContent = testToolWindowViewModel;
+            Assert.Empty(_testing.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindowViewModel));
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            Assert.Single(_testing.VisibleContentAreasThatAreFloating.First(x => x.MainContent == testToolWindowViewModel).MainContent?.ToolBarCommands.Where(x => x.Icon == IconChar.Xmark) ?? []);
         }
 
         [Fact]

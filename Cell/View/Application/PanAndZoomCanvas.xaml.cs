@@ -184,6 +184,7 @@ namespace Cell.View.Application
             {
                 _initialMousePosition = _transform.Inverse.Transform(e.GetPosition(this));
                 Mouse.Capture(canvas);
+                e.Handled = true;
             }
         }
 

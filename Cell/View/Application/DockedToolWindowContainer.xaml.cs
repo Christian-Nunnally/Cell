@@ -1,6 +1,7 @@
 ﻿using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -98,7 +99,26 @@ namespace Cell.View.ToolWindow
                     {
                         Commands.Add(command);
                     }
+                    _resizableToolWindow.ToolViewModel.ToolBarCommands.CollectionChanged += ToolBarCommandsCollectionChanged;
                     _resizableToolWindow.ToolViewModel.PropertyChanged += ToolViewModelPropertyChanged;
+                }
+            }
+        }
+
+        private void ToolBarCommandsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (CommandViewModel command in e.NewItems)
+                {
+                    Commands.Add(command);
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (CommandViewModel command in e.OldItems)
+                {
+                    Commands.Remove(command);
                 }
             }
         }
