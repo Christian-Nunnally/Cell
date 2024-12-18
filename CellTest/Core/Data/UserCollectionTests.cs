@@ -111,14 +111,14 @@ namespace CellTest.Core.Data
         {
             var filteredCollection = _userCollectionTracker.CreateCollection("FilteredCollection", TestCollectionName);
             var sortFunction = _functionTracker.CreateCellFunction("object", TestSortFunctionName);
-            var sortCode = $"return int.Parse({TestCollectionName}[c.Index][\"Priority\"]);";
+            var sortCode = $"return {TestCollectionName}[c.Index].Num[\"Priority\"]);";
             var collectionNames = new List<string> { TestCollectionName };
             sortFunction.SetUserFriendlyCode(sortCode, CellModel.Null, collectionNames);
             filteredCollection.Model.SortAndFilterFunctionName = TestSortFunctionName;
             var testItem1 = new UserItem();
-            testItem1["Priority"] = "1";
+            testItem1.Num["Priority"] = 1;
             var testItem2 = new UserItem();
-            testItem2["Priority"] = "2";
+            testItem2.Num["Priority"] = 2;
             Assert.DoesNotContain(testItem1, filteredCollection.Items);
 
             _testing.Add(testItem1);

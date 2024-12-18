@@ -19,7 +19,8 @@
             DockPanel.Dock="Bottom"
             MouseDown="ResizerRectangleMouseDown"
             MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp">
+            MouseUp="ResizerRectangleMouseUp"
+            Visibility="{Binding IsBottomResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
@@ -36,7 +37,8 @@
             DockPanel.Dock="Top"
             MouseDown="ResizerRectangleMouseDown"
             MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp">
+            MouseUp="ResizerRectangleMouseUp"
+            Visibility="{Binding IsTopResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
@@ -53,7 +55,8 @@
             DockPanel.Dock="Right"
             MouseDown="ResizerRectangleMouseDown"
             MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp">
+            MouseUp="ResizerRectangleMouseUp"
+            Visibility="{Binding IsRightResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
@@ -70,7 +73,8 @@
             DockPanel.Dock="Left"
             MouseDown="ResizerRectangleMouseDown"
             MouseMove="ResizerRectangleMouseMove"
-            MouseUp="ResizerRectangleMouseUp">
+            MouseUp="ResizerRectangleMouseUp"
+            Visibility="{Binding IsLeftResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Rectangle.Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />

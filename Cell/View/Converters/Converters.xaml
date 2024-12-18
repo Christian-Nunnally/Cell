@@ -13,5 +13,5 @@
     <converters:HexToColorConverter x:Key="HexToColorConverter" />
     <converters:HexToBrushConverter x:Key="HexToBrushConverter" />
     <converters:ThemeColorConverter x:Key="ThemeColorConverter" />
-    <converters:EmptyStringToVisibilityConverter x:Key="EmptyStringToVisibilityConverter"/>
+    <converters:EmptyStringToVisibilityConverter x:Key="EmptyStringToVisibilityConverter" />
 </ResourceDictionary>

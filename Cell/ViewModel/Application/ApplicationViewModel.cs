@@ -399,7 +399,7 @@ namespace Cell.ViewModel.Application
         /// <param name="allowDuplicates">Whether or not to actually open the window if one of the same type is already open.</param>
         public void ShowToolWindow(ToolWindowViewModel viewModel, bool allowDuplicates = false)
         {
-            _windowDockPanelViewModel.ShowToolWindow(viewModel, WindowDockType.Floating, allowDuplicates);
+            _windowDockPanelViewModel?.ShowToolWindow(viewModel, WindowDockType.Floating, allowDuplicates);
         }
 
         internal async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader)

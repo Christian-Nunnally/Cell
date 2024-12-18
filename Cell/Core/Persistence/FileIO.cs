@@ -18,6 +18,11 @@ namespace Cell.Core.Persistence
             CopyFilesRecursively(from, to);
         }
 
+        public async Task CopyDirectoryAsync(string from, string to)
+        {
+            CopyFilesRecursively(from, to);
+        }
+
         /// <summary>
         /// Creates a directory at the given path.
         /// </summary>
@@ -165,11 +170,6 @@ namespace Cell.Core.Persistence
             {
                 Directory.CreateDirectory(directory.Replace(from, to));
             }
-        }
-
-        public async Task CopyDirectoryAsync(string from, string to)
-        {
-            CopyFilesRecursively(from, to);
         }
     }
 }

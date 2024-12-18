@@ -1,20 +1,13 @@
-﻿using Cell.Core.Data.Tracker;
-using Cell.Model;
+﻿using Cell.View.ToolWindow;
 using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 using FontAwesome.Sharp;
-using System.Collections.ObjectModel;
-using System.Runtime.ExceptionServices;
 
 namespace CellTest.ViewModel.Application
 {
     public class WindowDockPanelViewModelTests
     {
-        private readonly CellTracker _cellTracker;
-        private readonly ObservableCollection<CellModel> _cellsToEdit;
-        private readonly FunctionTracker _functionTracker;
-        private readonly UserCollectionTracker _userCollectionTracker;
         private readonly WindowDockPanelViewModel _testing;
 
         public WindowDockPanelViewModelTests()
@@ -46,6 +39,17 @@ namespace CellTest.ViewModel.Application
             _testing.MainContent = testToolWindowViewModel;
 
             Assert.NotNull(testToolWindowViewModel.RequestClose);
+        }
+
+        [Fact]
+        public void SetMainContent_HostingPanelSetToOwningPanel()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            Assert.Null(testToolWindowViewModel.RequestClose);
+
+            _testing.MainContent = testToolWindowViewModel;
+
+            Assert.Equal(_testing, testToolWindowViewModel.HostingPanel);
         }
 
         [Fact]
@@ -120,6 +124,18 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
+        public void ToolWindowOpenInMainContent_UndockCommandExecutedFromToolWindow_FloatingToolViewDesiredSizeSetToDefaultToolWindowSize()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            Assert.Equal(testToolWindowViewModel.MinimumWidth, _testing.VisibleContentAreasThatAreFloating.First().DesiredWidth);
+            Assert.Equal(testToolWindowViewModel.MinimumHeight + DockedToolWindowContainer.ToolBoxHeaderHeight, _testing.VisibleContentAreasThatAreFloating.First().DesiredHeight);
+        }
+
+        [Fact]
         public void ToolWindowJustUndocked_CloseButtonExecuted_FloatingToolWindowsAreEmpty()
         {
             var testToolWindowViewModel = new ToolWindowViewModel();
@@ -129,6 +145,44 @@ namespace CellTest.ViewModel.Application
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Xmark).Command.Execute(null);
 
             Assert.Empty(_testing.VisibleContentAreasThatAreFloating);
+        }
+
+        [Fact]
+        public void ToolWindowJustUndocked_DockButtonExecuted_WindowToDockSetToToolWindowViewModel()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Lock).Command.Execute(null);
+
+            Assert.Equal(testToolWindowViewModel, _testing.WindowToDock);
+        }
+
+        [Fact]
+        public void DockButtonExecuted_DockSiteClicked_WindowIsNowInTopDockedList()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Lock).Command.Execute(null);
+
+            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, System.Windows.Controls.Dock.Top);
+
+            Assert.Equal(testToolWindowViewModel, _testing.VisibleContentAreasThatAreDockedOnTop.Single().MainContent);
+        }
+
+        [Fact]
+        public void DockButtonExecuted_DockSiteClicked_WindowIsNoLongerInFloatingWindowList()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.MainContent = testToolWindowViewModel;
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
+            testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Lock).Command.Execute(null);
+
+            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, System.Windows.Controls.Dock.Top);
+
+            Assert.Empty(_testing.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindowViewModel));
         }
 
         [Fact]
@@ -179,6 +233,27 @@ namespace CellTest.ViewModel.Application
             testToolWindowViewModel?.RequestClose?.Invoke();
 
             Assert.Null(_testing.MainContent);
+        }
+
+        [Fact]
+        public void ShowToolWindowFloating_OneFloatingWindowExists()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            Assert.Empty(_testing.VisibleContentAreasThatAreFloating);
+
+            _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.Floating, false);
+
+            Assert.Single(_testing.VisibleContentAreasThatAreFloating);
+        }
+
+        [Fact]
+        public void ShowToolWindowFloating_HasDockCommandInPosition1()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+
+            _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.Floating, false);
+
+            Assert.Equal(IconChar.Lock, testToolWindowViewModel.ToolBarCommands[1].Icon);
         }
     }
 }

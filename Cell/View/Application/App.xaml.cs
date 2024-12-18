@@ -6,7 +6,6 @@ using Cell.ViewModel.Application;
 using System.Windows;
 using System.IO;
 using Cell.ViewModel.ToolWindow;
-using System.Windows.Controls;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Common;

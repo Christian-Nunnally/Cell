@@ -20,7 +20,7 @@
                 BorderThickness="1"
                 DockPanel.Dock="Top">
                 <DockPanel
-                    Height="16"
+                    Height="18"
                     Background="{StaticResource ToolWindowHeaderColor}"
                     Cursor="SizeAll"
                     LastChildFill="False">
@@ -55,7 +55,7 @@
                                             Foreground="{StaticResource ForegroundColor}"
                                             Icon="{Binding Icon}" />
                                         <Label
-                                            Padding="1"
+                                            Padding="0,0,5,0"
                                             Content="{Binding Name}"
                                             Visibility="{Binding Name, Converter={StaticResource EmptyStringToVisibilityConverter}}" />
                                     </StackPanel>
@@ -65,69 +65,7 @@
                     </ItemsControl>
                 </DockPanel>
             </Border>
-            <!--<Rectangle
-                Width="3"
-                Cursor="SizeAll"
-                DockPanel.Dock="Right"
-                MouseDown="ResizerRectangleMouseDown"
-                MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp"
-                Visibility="{Binding AreSideResizersVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-            <Rectangle
-                Width="3"
-                Cursor="SizeAll"
-                DockPanel.Dock="Left"
-                MouseDown="ResizerRectangleMouseDown"
-                MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp"
-                Visibility="{Binding AreSideResizersVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-            <Rectangle
-                Height="3"
-                DockPanel.Dock="Bottom"
-                MouseDown="ResizerRectangleMouseDown"
-                MouseMove="ResizerRectangleMouseMove"
-                MouseUp="ResizerRectangleMouseUp"
-                Visibility="{Binding IsBottomRightResizerVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <Rectangle.Style>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Fill" Value="{StaticResource CellBorderColor}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="{StaticResource SelectedBorderColor}" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>-->
-            <Border BorderBrush="{StaticResource CellBorderColor}" BorderThickness="0,0,0,0">
-                <ContentControl x:Name="ContentHost" Margin="4" />
-                <!--
-                    Width="{Binding ContentWidth}"
-                    Height="{Binding ContentHeight}"
-                -->
-            </Border>
+            <ContentControl x:Name="ContentHost" />
         </DockPanel>
     </Grid>
 </UserControl>

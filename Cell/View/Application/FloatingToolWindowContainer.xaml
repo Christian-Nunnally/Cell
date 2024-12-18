@@ -14,12 +14,5 @@
     MouseMove="ToolboxMouseMove"
     MouseUp="ToolboxMouseLeftButtonUp"
     mc:Ignorable="d">
-    <Grid>
-        <DockPanel
-            MinWidth="100"
-            MinHeight="100"
-            Background="{StaticResource CellBackground}">
-            <ContentControl x:Name="ContentHost" />
-        </DockPanel>
-    </Grid>
+    <ContentControl x:Name="ContentHost" />
 </UserControl>

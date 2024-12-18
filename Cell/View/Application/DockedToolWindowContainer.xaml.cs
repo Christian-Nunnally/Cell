@@ -16,6 +16,10 @@ namespace Cell.View.ToolWindow
         private bool _resizing;
         private Point _resizingStartPosition;
         private ResizableToolWindow? _resizableToolWindow;
+        /// <summary>
+        /// The extra height from the tool box header.
+        /// </summary>
+        public static double ToolBoxHeaderHeight = 20;
 
         /// <summary>
         /// Creates a new instance of the <see cref="DockedToolWindowContainer"/>.
@@ -107,19 +111,10 @@ namespace Cell.View.ToolWindow
 
         private void ToolBarCommandsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            Commands.Clear();
+            foreach (var command in _resizableToolWindow?.ToolViewModel.ToolBarCommands ?? [])
             {
-                foreach (CommandViewModel command in e.NewItems)
-                {
-                    Commands.Add(command);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (CommandViewModel command in e.OldItems)
-                {
-                    Commands.Remove(command);
-                }
+                Commands.Add(command);
             }
         }
 
