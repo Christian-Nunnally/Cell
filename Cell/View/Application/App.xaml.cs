@@ -9,6 +9,7 @@ using Cell.ViewModel.ToolWindow;
 using Cell.Core.Persistence.Loader;
 using Cell.Core.Data.Tracker;
 using Cell.Core.Common;
+using System.Diagnostics;
 
 namespace Cell
 {
@@ -68,13 +69,14 @@ namespace Cell
             applicationViewModel.BackupManager = new BackupManager(projectDirectory, backupDirectory);
             var undoRedoManager = new UndoRedoManager(cellTracker, functionTracker);
             applicationViewModel.UndoRedoManager = undoRedoManager;
-            var textClipboard = new TextClipboard();
-            applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, textClipboard);
+            applicationViewModel.TextClipboard = new TextClipboard();
+            applicationViewModel.CellClipboard = new CellClipboard(undoRedoManager, cellTracker, applicationViewModel.TextClipboard);
             applicationViewModel.CellViewModelFlasher = new CellViewModelFlasher();
             var cellSelector = new CellSelector(cellTracker);
             applicationViewModel.CellSelector = cellSelector;
             cellLoader.SheetsLoaded += OnAllSheetsLoaded;
-            var loadResult = await applicationViewModel.LoadAsync(new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker));
+            var userCollectionLoader = new UserCollectionLoader(persistedProject.CollectionsDirectory, userCollectionTracker, functionTracker, cellTracker);
+            var loadResult = await applicationViewModel.LoadAsync(userCollectionLoader, HelpUserCheckoutCommit);
             
             if (!loadResult.WasSuccess)
             {
@@ -112,6 +114,56 @@ namespace Cell
                 //cellSelector.IsSelectingEnabled = applicationViewModel.OpenToolWindowViewModels.Any();
                 if (applicationViewModel.SheetViewModel is not null) applicationViewModel.SheetViewModel.IsCellHighlightOnMouseOverEnabled = applicationViewModel.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Any();
             };
+        }
+
+        private bool HelpUserCheckoutCommit(string commitId)
+        {
+            string batchFilePath = Path.Combine(Path.GetTempPath(), "tempScript.bat");
+            var script =
+                """
+                @echo off
+                cd ..
+                cd ..
+                cd ..
+                cd ..
+                echo <PROMPT>
+                set /p userinput=(y/n): 
+                if "%userinput%"=="y" (
+                    <COMMAND>
+                    pause
+                    exit 0
+                ) else if "%userinput%"=="n" (
+                    echo Exiting...
+                ) else (
+                    echo Invalid input. Exiting...
+                )
+                pause
+                exit 1
+                """;
+            script = script.Replace("<PROMPT>", $"Do you want to automatically check out commit {commitId}");
+            script = script.Replace("<COMMAND>", $"git checkout {commitId}");
+            File.WriteAllText(batchFilePath, script);
+
+            Process cmdProcess = new();
+            cmdProcess.StartInfo.FileName = "cmd.exe";
+            cmdProcess.StartInfo.Arguments = "/C \"" + batchFilePath + "\"";
+            cmdProcess.StartInfo.UseShellExecute = false;
+            cmdProcess.StartInfo.CreateNoWindow = false;
+            cmdProcess.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+            cmdProcess.Start();
+            cmdProcess.WaitForExit();
+            File.Delete(batchFilePath);
+
+            if (cmdProcess.ExitCode == 0)
+            {
+                applicationViewModel.ApplicationBackgroundMessage = $"Commit {commitId} checkout attempted, rebuild and relaunch to migrate";
+            }
+            else
+            {
+                applicationViewModel.ApplicationBackgroundMessage = $"Must be on version {commitId} to migrate this project.";
+            }
+            return cmdProcess.ExitCode == 0;
         }
     }
 }

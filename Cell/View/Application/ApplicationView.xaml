@@ -59,10 +59,7 @@
                     Style="{StaticResource TitleButtonStyle}"
                     ToolTip="Opens settings window"
                     Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <local:TitleBarNotificationButton
-                    DataContext="{Binding TitleBarNotificationButtonViewModel}"
-                    DockPanel.Dock="Right"
-                    Visibility="{Binding IsProjectLoaded, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <local:TitleBarNotificationButton DataContext="{Binding TitleBarNotificationButtonViewModel}" DockPanel.Dock="Right" />
                 <Button
                     Click="ToggleEditPanelButtonClick"
                     Content="{fa:Icon PaintRoller}"
@@ -113,6 +110,35 @@
                 Content="{Binding ApplicationBackgroundMessage}" />
             <ContentControl x:Name="_windowDockPanel" />
             <Canvas x:Name="_toolWindowCanvas" />
+            <!--<Canvas>-->
+            <Border
+                Name="PopupText"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                BorderBrush="{StaticResource SelectedBorderColor}"
+                BorderThickness="4"
+                ClipToBounds="False"
+                CornerRadius="8"
+                Visibility="Collapsed">
+                <Border
+                    BorderBrush="{StaticResource CellBackground}"
+                    BorderThickness="4"
+                    ClipToBounds="False"
+                    CornerRadius="4">
+                    <TextBlock
+                        Padding="4,3"
+                        Background="{StaticResource CellBackground}"
+                        FontFamily="{StaticResource MainFont}"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{StaticResource ForegroundColor}"
+                        Text="{Binding PopupText}" />
+                </Border>
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="PopupTransform" />
+                </Border.RenderTransform>
+            </Border>
+            <!--</Canvas>-->
         </Grid>
     </DockPanel>
 </Window>

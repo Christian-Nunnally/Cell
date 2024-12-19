@@ -1,11 +1,10 @@
 ﻿using Cell.Core.Common;
-using Cell.View.Application;
 using Cell.View.ToolWindow;
 using Cell.ViewModel.ToolWindow;
 using FontAwesome.Sharp;
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 
 namespace Cell.ViewModel.Application
 {
@@ -14,42 +13,29 @@ namespace Cell.ViewModel.Application
     /// </summary>
     public class WindowDockPanelViewModel : PropertyChangedBase
     {
-        private ToolWindowViewModel? _mainContent;
-        private bool _showDockSites;
-        private ToolWindowViewModel _windowToDock;
-        private ToolWindowViewModel _topWindow;
-        private readonly WindowDockPanelViewModel? _parentPanel;
-        private CommandViewModel _closeMainContentCommand;
-        private CommandViewModel _undockMainContentCommand;
-        private CommandViewModel _dockMainContentCommand;
+        private readonly CommandViewModel _closeMainContentCommand;
+        private readonly CommandViewModel _dockMainContentCommand;
+        public WindowDockPanelViewModel? ParentPanel { get; }
+        private readonly CommandViewModel _undockMainContentCommand;
         private double _desiredHeight = 100;
         private double _desiredWidth = 100;
         private WindowDockType _dockType;
-
+        private ToolWindowViewModel? _mainContent;
+        private ToolWindowViewModel? _topFloatingWindow;
+        private ToolWindowViewModel? _windowToDock;
         /// <summary>
-        /// Gets the observable collection of visible floating tool windows in the application.
+        /// Creates a new instance of a <see cref="WindowDockPanelViewModel"/>.
         /// </summary>
-        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreFloating { get; } = [];
+        /// <param name="parentWindowDockPanel">The optional parent if this is hosted inside another dock panel.</param>
+        public WindowDockPanelViewModel(WindowDockPanelViewModel? parentWindowDockPanel = null)
+        {
+            ParentPanel = parentWindowDockPanel;
+            _closeMainContentCommand = new CommandViewModel("", CloseMainContent) { Icon = IconChar.Xmark, ToolTip = "Close this tool window." };
+            _undockMainContentCommand = new CommandViewModel("", UndockWindow) { Icon = IconChar.LockOpen, ToolTip = "Undocks this tool window." };
+            _dockMainContentCommand = new CommandViewModel("", StartWindowDocking) { Icon = IconChar.Lock, ToolTip = "Docks this tool window." };
+        }
 
-        /// <summary>
-        /// Gets the observable collection of visible docked (top) tool windows in the application.
-        /// </summary>
-        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnTop { get; } = [];
-
-        /// <summary>
-        /// Gets the observable collection of visible docked (bottom) tool windows in the application.
-        /// </summary>
-        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnBottom { get; } = [];
-
-        /// <summary>
-        /// Gets the observable collection of visible docked (left) tool windows in the application.
-        /// </summary>
-        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnLeft { get; } = [];
-
-        /// <summary>
-        /// Gets the observable collection of visible docked (right) tool windows in the application.
-        /// </summary>
-        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnRight { get; } = [];
+        public Size CanvasSize { get; set; }
 
         /// <summary>
         /// Gets or sets the height the tool window should give its content.
@@ -59,8 +45,10 @@ namespace Cell.ViewModel.Application
             get
             {
                 if (DockType == WindowDockType.DockedRight || DockType == WindowDockType.DockedLeft) return double.NaN;
-                if (_parentPanel is null) return double.NaN;
-                return _desiredHeight;
+                if (ParentPanel is null) return double.NaN;
+                var sideMinimumHeight = VisibleContentAreasThatAreDockedOnLeft.Concat(VisibleContentAreasThatAreDockedOnRight).Select(x => x.MainContent?.MinimumHeight ?? 0).DefaultIfEmpty(0).Max();
+                var minimumHeight = (MainContent?.MinimumHeight ?? 0)+ VisibleContentAreasThatAreDockedOnTop.Concat(VisibleContentAreasThatAreDockedOnBottom).Select(x => x.MainContent?.MinimumHeight ?? 0).Sum();
+                return Math.Max(_desiredHeight, Math.Max(sideMinimumHeight, minimumHeight) + DockedToolWindowContainer.ToolBoxHeaderHeight);
             }
 
             set
@@ -78,7 +66,7 @@ namespace Cell.ViewModel.Application
             get
             {
                 if (DockType == WindowDockType.DockedTop || DockType == WindowDockType.DockedBottom) return double.NaN;
-                if (_parentPanel is null) return double.NaN;
+                if (ParentPanel is null) return double.NaN;
                 return _desiredWidth;
             }
 
@@ -87,33 +75,6 @@ namespace Cell.ViewModel.Application
                 _desiredWidth = Math.Max(value, MainContent?.MinimumWidth ?? 100);
                 NotifyPropertyChanged(nameof(DesiredWidth));
             }
-        }
-
-        public WindowDockPanelViewModel(WindowDockPanelViewModel? parentWindowDockPanel = null)
-        {
-            _parentPanel = parentWindowDockPanel;
-            _closeMainContentCommand = new CommandViewModel("", CloseMainContent) { Icon = IconChar.Xmark };
-            _undockMainContentCommand = new CommandViewModel("", UndockWindow) { Icon = IconChar.LockOpen };
-            _dockMainContentCommand = new CommandViewModel("", StartWindowDocking) { Icon = IconChar.Lock };
-        }
-
-        private bool IsFloating
-        {
-            get
-            {
-                var currentPanel = this;
-                while (currentPanel._parentPanel is not null)
-                {
-                    if (VisibleContentAreasThatAreFloating.Contains(this)) return true;
-                    currentPanel = currentPanel._parentPanel;
-                }
-                return false;
-            }
-        }
-
-        private void StartWindowDocking()
-        {
-            WindowToDock = MainContent;
         }
 
         public WindowDockType DockType
@@ -132,18 +93,20 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        private void CloseMainContent()
-        {
-            if (_mainContent is null) return;
-            RequestClose(_mainContent);
-        }
+        public bool IsBottomResizerVisible => ParentPanel is not null && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedRight && DockType != WindowDockType.DockedLeft;
+
+        public bool IsLeftResizerVisible => ParentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedLeft;
+
+        public bool IsRightResizerVisible => ParentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedRight;
+
+        public bool IsTopResizerVisible => ParentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedRight && DockType != WindowDockType.DockedLeft;
 
         /// <summary>
         /// Gets or sets the tool window in the middle of this window dock panel.
         /// </summary>
         public ToolWindowViewModel? MainContent
         {
-            get => _mainContent; 
+            get => _mainContent;
             set
             {
                 if (_mainContent == value) return;
@@ -180,45 +143,62 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public bool IsTopResizerVisible => _parentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedRight && DockType != WindowDockType.DockedLeft;
-
-        public bool IsBottomResizerVisible => _parentPanel is not null && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedRight && DockType != WindowDockType.DockedLeft;
-
-        public bool IsLeftResizerVisible => _parentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedLeft;
-
-        public bool IsRightResizerVisible => _parentPanel is not null && DockType != WindowDockType.DockedTop && DockType != WindowDockType.DockedBottom && DockType != WindowDockType.DockedRight;
-
-        private void UndockWindow()
+        /// <summary>
+        /// Sets the windows that should be shown on top. The window must be added to the list of floating windows first.
+        /// </summary>
+        public ToolWindowViewModel? TopFloatingWindow
         {
-            if (MainContent == null) return;
-            MainContent.ToolBarCommands.Remove(_undockMainContentCommand);
-            MainContent.ToolBarCommands.Remove(_dockMainContentCommand);
-            MainContent.ToolBarCommands.Remove(_closeMainContentCommand);
-            var newChildWindowDockPanel = new WindowDockPanelViewModel(this);
-            newChildWindowDockPanel.DockType = WindowDockType.Floating;
-            var mainContent = MainContent;
-            MainContent = null;
-            newChildWindowDockPanel.MainContent = mainContent;
-            //newChildWindowDockPanel.MainContent.ToolBarCommands.Clear();
-            //newChildWindowDockPanel.MainContent.ToolBarCommands.Insert(0, newChildWindowDockPanel._dockMainContentCommand);
-            //newChildWindowDockPanel.MainContent.ToolBarCommands.Insert(0, newChildWindowDockPanel._closeMainContentCommand);
-            RemoveToolWindowWithoutClosingIt(MainContent);
-            VisibleContentAreasThatAreFloating.Add(newChildWindowDockPanel);
+            get => _topFloatingWindow;
+            set
+            {
+                if (VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent == value) is null) throw new InvalidOperationException("The window to set as top is not in the list of floating windows. Add it first.");
+                if (_topFloatingWindow == value) return;
+                _topFloatingWindow = value;
+                NotifyPropertyChanged(nameof(TopFloatingWindow));
+            }
         }
 
-        public ToolWindowViewModel WindowToDock
+        /// <summary>
+        /// Gets the observable collection of visible docked (bottom) tool windows in the application.
+        /// </summary>
+        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnBottom { get; } = [];
+
+        /// <summary>
+        /// Gets the observable collection of visible docked (left) tool windows in the application.
+        /// </summary>
+        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnLeft { get; } = [];
+
+        /// <summary>
+        /// Gets the observable collection of visible docked (right) tool windows in the application.
+        /// </summary>
+        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnRight { get; } = [];
+
+        /// <summary>
+        /// Gets the observable collection of visible docked (top) tool windows in the application.
+        /// </summary>
+        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreDockedOnTop { get; } = [];
+
+        /// <summary>
+        /// Gets the observable collection of visible floating tool windows in the application.
+        /// </summary>
+        public ObservableCollection<WindowDockPanelViewModel> VisibleContentAreasThatAreFloating { get; } = [];
+
+        /// <summary>
+        /// Gets or sets the window that is currently being docked. After this is set, calling DockWindowThatIsCurrentlyFloating will actually dock the window.
+        /// </summary>
+        public ToolWindowViewModel? WindowToDock
         {
             get
             {
-                if (_parentPanel is not null) return _parentPanel.WindowToDock;
+                if (ParentPanel is not null) return ParentPanel.WindowToDock;
                 return _windowToDock;
             }
 
             set
             {
-                if (_parentPanel is not null)
+                if (ParentPanel is not null)
                 {
-                    _parentPanel.WindowToDock = value;
+                    ParentPanel.WindowToDock = value;
                     return;
                 }
                 if (_windowToDock == value) return;
@@ -227,123 +207,36 @@ namespace Cell.ViewModel.Application
             }
         }
 
-        public void BringWindowToFront(ToolWindowViewModel viewModel)
-        {
-            var view = VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent == viewModel);
-            if (view is null) return;
-            VisibleContentAreasThatAreFloating.Remove(view);
-            VisibleContentAreasThatAreFloating.Add(view);
-        }
-
-        internal void MoveToolWindowToTop(ToolWindowViewModel toolWindow)
-        {
-            //TopWindow = toolWindow;
-        }
-
-        internal void RemoveToolWindowWithoutClosingIt(ToolWindowViewModel toolWindowViewModel)
-        {
-            if (MainContent == toolWindowViewModel)
-            {
-                MainContent = null;
-                if (_parentPanel is not null)
-                {
-                    //if (!AreAnyWindowsOpen())
-                    //{
-                        _parentPanel.VisibleContentAreasThatAreFloating.Remove(this);
-                        _parentPanel.VisibleContentAreasThatAreDockedOnBottom.Remove(this);
-                        _parentPanel.VisibleContentAreasThatAreDockedOnLeft.Remove(this);
-                        _parentPanel.VisibleContentAreasThatAreDockedOnRight.Remove(this);
-                        _parentPanel.VisibleContentAreasThatAreDockedOnTop.Remove(this);
-                    //}
-                }
-            }
-            else
-            {
-                throw new NotImplementedException("Tool window not found in this window dock panel.");
-            }
-            //VisibleContentAreasThatAreFloating.Remove(toolWindowViewModel);
-        }
-
-        private bool AreAnyWindowsOpen()
-        {
-            return VisibleContentAreasThatAreDockedOnBottom.Any()
-                || VisibleContentAreasThatAreDockedOnLeft.Any()
-                || VisibleContentAreasThatAreDockedOnRight.Any()
-                || VisibleContentAreasThatAreDockedOnTop.Any()
-                || VisibleContentAreasThatAreFloating.Any();
-        }
-
-        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
-        {
-            RemoveToolWindowWithoutClosingIt(toolWindowViewModel);
-            toolWindowViewModel.HandleBeingClosed();
-        }
-
-        private void RequestClose(ToolWindowViewModel viewModel)
-        {
-            var isAllowingClose = viewModel.HandleCloseRequested();
-            if (isAllowingClose)
-            {
-                RemoveToolWindow(viewModel);
-            }
-        }
-
-        public WindowDockPanelViewModel? GetPanelContainingToolWindowMatchingTitle(string title)
-        {
-            var result = VisibleContentAreasThatAreDockedOnRight.FirstOrDefault(x => x.MainContent?.ToolWindowTitle == title);
-            if (result is not null) return result;
-            result = VisibleContentAreasThatAreDockedOnBottom.FirstOrDefault(x => x.MainContent?.ToolWindowTitle == title);
-            if (result is not null) return result;
-            result = VisibleContentAreasThatAreDockedOnLeft.FirstOrDefault(x => x.MainContent?.ToolWindowTitle == title);
-            if (result is not null) return result;
-            result = VisibleContentAreasThatAreDockedOnTop.FirstOrDefault(x => x.MainContent?.ToolWindowTitle == title);
-            if (result is not null) return result;
-            result = VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent?.ToolWindowTitle == title);
-            return result;
-        }
-
-        public void ShowToolWindow(ToolWindowViewModel viewModel, WindowDockType dockType, bool allowDuplicates)
-        {
-            var existingWindowOfSameType = GetPanelContainingToolWindowMatchingTitle(viewModel.ToolWindowTitle);
-            if (existingWindowOfSameType is not null)
-            {
-                VisibleContentAreasThatAreFloating.Remove(existingWindowOfSameType);
-                VisibleContentAreasThatAreFloating.Add(existingWindowOfSameType);
-                if (!allowDuplicates) return;
-            }
-            var childWindowDockPanel = new WindowDockPanelViewModel(this);
-            childWindowDockPanel.DockType = dockType;
-            childWindowDockPanel.MainContent = viewModel;
-            viewModel.RequestClose = () => RequestClose(viewModel);
-            viewModel.HandleBeingShown();
-            ShowAlreadyOpenedToolWindow(dockType, childWindowDockPanel);
-        }
-
-        private void ShowAlreadyOpenedToolWindow(WindowDockType dockType, WindowDockPanelViewModel childWindowDockPanel)
-        {
-            switch (dockType)
-            {
-                case WindowDockType.DockedTop:
-                    VisibleContentAreasThatAreDockedOnTop.Add(childWindowDockPanel);
-                    break;
-                case WindowDockType.DockedBottom:
-                    VisibleContentAreasThatAreDockedOnBottom.Add(childWindowDockPanel);
-                    break;
-                case WindowDockType.DockedLeft:
-                    VisibleContentAreasThatAreDockedOnLeft.Add(childWindowDockPanel);
-                    break;
-                case WindowDockType.DockedRight:
-                    VisibleContentAreasThatAreDockedOnRight.Add(childWindowDockPanel);
-                    break;
-                case WindowDockType.Floating:
-                    VisibleContentAreasThatAreFloating.Add(childWindowDockPanel);
-                    break;
-            }
-        }
-
         public void CloseAllWindows()
         {
-            // TODO: close all windows.
+            foreach (var dockedWindow in VisibleContentAreasThatAreDockedOnBottom.ToList())
+            {
+                dockedWindow.MainContent?.HandleBeingClosed();
+                VisibleContentAreasThatAreDockedOnBottom.Remove(dockedWindow);
+            }
+            foreach (var dockedWindow in VisibleContentAreasThatAreDockedOnLeft.ToList())
+            {
+                dockedWindow.MainContent?.HandleBeingClosed();
+                VisibleContentAreasThatAreDockedOnLeft.Remove(dockedWindow);
+            }
+            foreach (var dockedWindow in VisibleContentAreasThatAreDockedOnRight.ToList())
+            {
+                dockedWindow.MainContent?.HandleBeingClosed();
+                VisibleContentAreasThatAreDockedOnRight.Remove(dockedWindow);
+            }
+            foreach (var dockedWindow in VisibleContentAreasThatAreDockedOnTop.ToList())
+            {
+                dockedWindow.MainContent?.HandleBeingClosed();
+                VisibleContentAreasThatAreDockedOnTop.Remove(dockedWindow);
+            }
+            if (ParentPanel is null)
+            {
+                foreach (var floatingWindow in VisibleContentAreasThatAreFloating.ToList())
+                {
+                    floatingWindow.MainContent?.HandleBeingClosed();
+                    VisibleContentAreasThatAreFloating.Remove(floatingWindow);
+                }
+            }
         }
 
         public void DockWindowThatIsCurrentlyFloating(ToolWindowViewModel toolWindowToDock, Dock dockSide)
@@ -372,25 +265,156 @@ namespace Cell.ViewModel.Application
             if (dockSide == Dock.Bottom)
             {
                 ShowAlreadyOpenedToolWindow(WindowDockType.DockedBottom, hostingPanel);
-                return;
             }
-            if (dockSide == Dock.Top)
+            else if (dockSide == Dock.Top)
             {
                 ShowAlreadyOpenedToolWindow(WindowDockType.DockedTop, hostingPanel);
-                return;
             }
-            if (dockSide == Dock.Left)
+            else if (dockSide == Dock.Left)
             {
                 ShowAlreadyOpenedToolWindow(WindowDockType.DockedLeft, hostingPanel);
-                return;
             }
-            if (dockSide == Dock.Right)
+            else if (dockSide == Dock.Right)
             {
                 ShowAlreadyOpenedToolWindow(WindowDockType.DockedRight, hostingPanel);
-                return;
             }
 
             WindowToDock = null;
+        }
+
+        /// <summary>
+        /// Opens a tool window in the specified dock type.
+        /// </summary>
+        /// <param name="viewModel">The view model of the tool window to open.</param>
+        /// <param name="dockType">The dock position of the window.</param>
+        /// <param name="allowDuplicates">Whether to allow the window to be opened.</param>
+        public void ShowToolWindow(ToolWindowViewModel viewModel, WindowDockType dockType, bool allowDuplicates)
+        {
+            var existingWindowOfSameType = GetPanelContainingToolWindowMatchingTitleAndType(viewModel.GetType(), viewModel.ToolWindowTitle);
+            if (existingWindowOfSameType is not null && !allowDuplicates) return;
+            var childWindowDockPanel = new WindowDockPanelViewModel(this)
+            {
+                DockType = dockType,
+                MainContent = viewModel
+            };
+            viewModel.RequestClose = () => childWindowDockPanel.RequestClose(viewModel);
+            viewModel.HandleBeingShown();
+            ShowAlreadyOpenedToolWindow(dockType, childWindowDockPanel);
+        }
+
+        internal void RemoveToolWindow(ToolWindowViewModel toolWindowViewModel)
+        {
+            RemoveToolWindowWithoutClosingIt(toolWindowViewModel);
+            toolWindowViewModel.HandleBeingClosed();
+        }
+
+        internal void RemoveToolWindowWithoutClosingIt(ToolWindowViewModel toolWindowViewModel)
+        {
+            if (MainContent == toolWindowViewModel)
+            {
+                MainContent = null;
+                if (ParentPanel is not null)
+                {
+                    CloseAllWindows();
+                    ParentPanel.VisibleContentAreasThatAreFloating.Remove(this);
+                    ParentPanel.VisibleContentAreasThatAreDockedOnBottom.Remove(this);
+                    ParentPanel.VisibleContentAreasThatAreDockedOnLeft.Remove(this);
+                    ParentPanel.VisibleContentAreasThatAreDockedOnRight.Remove(this);
+                    ParentPanel.VisibleContentAreasThatAreDockedOnTop.Remove(this);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException("Tool window not found in this window dock panel.");
+            }
+        }
+
+        private void AddPanelToFloatingListAndCenterIt(WindowDockPanelViewModel childWindowDockPanel)
+        {
+            if (childWindowDockPanel.MainContent == null) throw new InvalidOperationException("Unable to center a tool window that has no main content.");
+            childWindowDockPanel.MainContent.X = (CanvasSize.Width / 2) - (childWindowDockPanel.DesiredWidth / 2);
+            childWindowDockPanel.MainContent.Y = (CanvasSize.Height / 2) - (childWindowDockPanel.DesiredHeight / 2);
+            VisibleContentAreasThatAreFloating.Add(childWindowDockPanel);
+        }
+
+        private bool AreAnyWindowsDocked()
+        {
+            return VisibleContentAreasThatAreDockedOnBottom.Any()
+                || VisibleContentAreasThatAreDockedOnLeft.Any()
+                || VisibleContentAreasThatAreDockedOnRight.Any()
+                || VisibleContentAreasThatAreDockedOnTop.Any();
+        }
+
+        private void CloseMainContent()
+        {
+            if (_mainContent is null) return;
+            RequestClose(_mainContent);
+        }
+
+        private WindowDockPanelViewModel? GetPanelContainingToolWindowMatchingTitleAndType(Type type, string title)
+        {
+            var result = VisibleContentAreasThatAreDockedOnRight.FirstOrDefault(x => x.MainContent?.GetType() == type && x.MainContent?.ToolWindowTitle == title);
+            if (result is not null) return result;
+            result = VisibleContentAreasThatAreDockedOnBottom.FirstOrDefault(x => x.MainContent?.GetType() == type && x.MainContent?.ToolWindowTitle == title);
+            if (result is not null) return result;
+            result = VisibleContentAreasThatAreDockedOnLeft.FirstOrDefault(x => x.MainContent?.GetType() == type && x.MainContent?.ToolWindowTitle == title);
+            if (result is not null) return result;
+            result = VisibleContentAreasThatAreDockedOnTop.FirstOrDefault(x => x.MainContent?.GetType() == type && x.MainContent?.ToolWindowTitle == title);
+            if (result is not null) return result;
+            result = VisibleContentAreasThatAreFloating.FirstOrDefault(x => x.MainContent?.GetType() == type && x.MainContent?.ToolWindowTitle == title);
+            return result;
+        }
+
+        private void RequestClose(ToolWindowViewModel viewModel)
+        {
+            var isAllowingClose = viewModel.HandleCloseRequested();
+            if (isAllowingClose)
+            {
+                RemoveToolWindow(viewModel);
+            }
+        }
+
+        private void ShowAlreadyOpenedToolWindow(WindowDockType dockType, WindowDockPanelViewModel childWindowDockPanel)
+        {
+            if (childWindowDockPanel.MainContent == null) throw new InvalidOperationException("Unable to show a tool window that has no main content.");
+            switch (dockType)
+            {
+                case WindowDockType.DockedTop:
+                    VisibleContentAreasThatAreDockedOnTop.Add(childWindowDockPanel);
+                    break;
+                case WindowDockType.DockedBottom:
+                    VisibleContentAreasThatAreDockedOnBottom.Add(childWindowDockPanel);
+                    break;
+                case WindowDockType.DockedLeft:
+                    VisibleContentAreasThatAreDockedOnLeft.Add(childWindowDockPanel);
+                    break;
+                case WindowDockType.DockedRight:
+                    VisibleContentAreasThatAreDockedOnRight.Add(childWindowDockPanel);
+                    break;
+                case WindowDockType.Floating:
+                    AddPanelToFloatingListAndCenterIt(childWindowDockPanel);
+                    break;
+            }
+        }
+
+        private void StartWindowDocking()
+        {
+            WindowToDock = MainContent;
+        }
+
+        private void UndockWindow()
+        {
+            if (MainContent == null) return;
+            MainContent.ToolBarCommands.Remove(_undockMainContentCommand);
+            MainContent.ToolBarCommands.Remove(_dockMainContentCommand);
+            MainContent.ToolBarCommands.Remove(_closeMainContentCommand);
+            var newChildWindowDockPanel = new WindowDockPanelViewModel(this);
+            newChildWindowDockPanel.DockType = WindowDockType.Floating;
+            var mainContent = MainContent;
+            MainContent = null;
+            newChildWindowDockPanel.MainContent = mainContent;
+            RemoveToolWindowWithoutClosingIt(MainContent);
+            AddPanelToFloatingListAndCenterIt(newChildWindowDockPanel);
         }
     }
 }

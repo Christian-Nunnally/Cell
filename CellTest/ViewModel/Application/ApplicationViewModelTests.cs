@@ -28,6 +28,7 @@ namespace CellTest.ViewModel.Application
         private readonly UndoRedoManager _undoRedoManager;
         private readonly ITextClipboard _textClipboard;
         private readonly CellClipboard _cellClipboard;
+        private readonly WindowDockPanelViewModel _windowDockPanelViewModel;
         private readonly BackupManager _backupManager;
         private readonly CellSelector _cellSelector;
         private readonly PersistedProject _persistedProject;
@@ -56,6 +57,7 @@ namespace CellTest.ViewModel.Application
             _undoRedoManager = new UndoRedoManager(_cellTracker, _functionTracker);
             _textClipboard = new TestTextClipboard();
             _cellClipboard = new CellClipboard(_undoRedoManager, _cellTracker, _textClipboard);
+            _windowDockPanelViewModel = new WindowDockPanelViewModel();
             _testing = new ApplicationViewModel
             {
                 FunctionTracker = _functionTracker,
@@ -72,7 +74,8 @@ namespace CellTest.ViewModel.Application
                 CellSelector = _cellSelector,
                 DialogFactory = _testDialogFactory,
                 PersistedProject = _persistedProject,
-                ApplicationSettings = _applicationSettings
+                ApplicationSettings = _applicationSettings,
+                WindowDockPanelViewModel = _windowDockPanelViewModel
             };
         }
 
@@ -116,18 +119,20 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
-        public void UpgradeRequired_LoadStarted_FailsWithoutMigrator()
+        public async Task UpgradeRequired_LoadStarted_FailsWithoutMigrator()
         {
             _persistedProject.Version = "0";
             Assert.NotEqual("1", _persistedProject.Version);
             _persistedProject.SaveVersion();
             _persistedProject.Version = "1";
 
-            Assert.Throws<CellError>(() => _testing.Load(_userCollectionLoader));
+            var result = await _testing.LoadAsync(_userCollectionLoader, x => true);
+            
+            Assert.False(result.WasSuccess);
         }
 
         [Fact]
-        public void VersionDoesNotMatchSavedVersionButMigratorExists_LoadStarted_MigratorRun()
+        public async Task VersionDoesNotMatchSavedVersionButMigratorExists_LoadStarted_MigratorRun()
         {
             _persistedProject.Version = "0";
             _persistedProject.SaveVersion();
@@ -136,7 +141,7 @@ namespace CellTest.ViewModel.Application
             _persistedProject.RegisterMigrator("0", "1", migrator);
             Assert.False(migrator.Migrated);
 
-            _testing.Load(_userCollectionLoader);
+            await _testing.LoadAsync(_userCollectionLoader, x => true);
 
             Assert.True(migrator.Migrated);
         }
@@ -162,18 +167,6 @@ namespace CellTest.ViewModel.Application
             _testing.ShowToolWindow(testToolWindow);
 
             Assert.NotNull(testToolWindow.RequestClose);
-        }
-
-        [Fact]
-        public void ShowToolWindow_ShowHandlerCalled()
-        {
-            var testToolWindow = new TestToolWindowViewModel();
-            Assert.Empty(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating);
-            _testing.WindowDockPanelViewModel = new WindowDockPanelViewModel();
-
-            _testing.ShowToolWindow(testToolWindow);
-
-            Assert.Single(_testing.WindowDockPanelViewModel.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindow));
         }
 
         [Fact]

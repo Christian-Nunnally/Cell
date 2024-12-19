@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace Cell.View.Application
 {
@@ -56,8 +58,37 @@ namespace Cell.View.Application
             {
                 CreateWindowDockPanelView();
             }
-        }
+            else if (e.PropertyName == nameof(ApplicationViewModel.PopupText))
+            {
+                var mousePosition = Mouse.GetPosition(App.Current.MainWindow);
 
+                const int yOffsetFromCursor = 10;
+                PopupText.Visibility = Visibility.Visible;
+                PopupTransform.X = mousePosition.X - PopupText.ActualWidth / 2;
+                PopupTransform.Y = mousePosition.Y + yOffsetFromCursor;
+
+                var fadeInOutAnimation = new DoubleAnimationUsingKeyFrames();
+                fadeInOutAnimation.KeyFrames.Add(new SplineDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+                fadeInOutAnimation.KeyFrames.Add(new SplineDoubleKeyFrame(.5, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.07))));
+                fadeInOutAnimation.KeyFrames.Add(new SplineDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.25))));
+                fadeInOutAnimation.KeyFrames.Add(new SplineDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(0.8))));
+                fadeInOutAnimation.KeyFrames.Add(new SplineDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromSeconds(.9))));
+                PopupText.BeginAnimation(OpacityProperty, fadeInOutAnimation);
+
+                if (_popupCloseTimer is not null) _popupCloseTimer.Stop();
+                _popupCloseTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
+                };
+                _popupCloseTimer.Tick += (s, args) =>
+                {
+                    PopupText.Visibility = Visibility.Collapsed;
+                    _popupCloseTimer.Stop();
+                };
+                _popupCloseTimer.Start();
+            }
+        }
+        private DispatcherTimer _popupCloseTimer;
         private void CloseAllSheetViews()
         {
             _sheetViews.Clear();

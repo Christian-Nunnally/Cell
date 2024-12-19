@@ -3,6 +3,7 @@ using Cell.ViewModel.ToolWindow;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,8 @@ namespace Cell.View.ToolWindow
         /// The extra height from the tool box header.
         /// </summary>
         public static double ToolBoxHeaderHeight = 20;
+        private double _contentHeightMinimum;
+        private double _contentWidthMinimum;
 
         /// <summary>
         /// Creates a new instance of the <see cref="DockedToolWindowContainer"/>.
@@ -38,6 +41,34 @@ namespace Cell.View.ToolWindow
         /// Gets or sets the commands that are available to the user in the title bar of the tool window.
         /// </summary>
         public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
+
+        /// <summary>
+        /// Gets or sets the height the tool window should give its content.
+        /// </summary>
+        public double ContentHeightMinimum
+        {
+            get => _contentHeightMinimum;
+            set
+            {
+                if (_contentHeightMinimum != value)
+                _contentHeightMinimum = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeightMinimum)));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the width the tool window should give its contentMinimum.
+        /// </summary>
+        public double ContentWidthMinimum
+        {
+            get => _contentWidthMinimum;
+            set
+            {
+                if (_contentWidthMinimum != value)
+                _contentWidthMinimum = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidthMinimum)));
+            }
+        }
 
         /// <summary>
         /// Gets or sets the height the tool window should give its content.
@@ -68,7 +99,7 @@ namespace Cell.View.ToolWindow
         /// <summary>
         /// Gets whether the resizer should appear in the bottom right (true) or top left (false).
         /// </summary>
-        public bool IsBottomRightResizerVisible => DockPanel.GetDock(this) == Dock.Top || DockPanel.GetDock(this) == Dock.Left;
+        public bool IsDockedOnTopOrLeft => DockPanel.GetDock(this) == Dock.Top || DockPanel.GetDock(this) == Dock.Left;
 
         /// <summary>
         /// Gets whether the resizer should appear on the left and right of the tool window.
@@ -93,10 +124,12 @@ namespace Cell.View.ToolWindow
                     ContentHost.Content = _resizableToolWindow;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowContent)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsBottomRightResizerVisible)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AreSideResizersVisible)));
                     ContentWidth = _resizableToolWindow.ToolViewModel.DefaultWidth;
                     ContentHeight = _resizableToolWindow.ToolViewModel.DefaultHeight;
+                    ContentWidthMinimum = _resizableToolWindow.ToolViewModel.MinimumWidth;
+                    ContentHeightMinimum = _resizableToolWindow.ToolViewModel.MinimumHeight;
+
                     SetSizeWhileRespectingBounds(ContentWidth, ContentHeight);
                     DataContext = this;
                     foreach (var command in _resizableToolWindow.ToolViewModel.ToolBarCommands)
@@ -148,7 +181,7 @@ namespace Cell.View.ToolWindow
             {
                 var mousePosition = e.GetPosition(this);
                 var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                if (!IsBottomRightResizerVisible)
+                if (!IsDockedOnTopOrLeft)
                 {
                     var desiredWidth = ContentWidth + delta.X;
                     var desiredHeight = ContentHeight + delta.Y;

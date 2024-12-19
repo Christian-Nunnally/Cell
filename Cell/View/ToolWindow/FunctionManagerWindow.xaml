@@ -74,6 +74,7 @@
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
+                                MouseDown="OnNmeLabelMouseDown"
                                 Text="{Binding Name}">
                                 <TextBlock.Style>
                                     <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="{x:Type TextBlock}">

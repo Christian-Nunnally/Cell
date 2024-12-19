@@ -37,6 +37,7 @@ namespace Cell.ViewModel.Application
         private TitleBarSheetNavigationViewModel? _titleBarSheetNavigationViewModel;
         private TitleBarNotificationButtonViewModel? _titleBarNotificationButtonViewModel;
         private WindowDockPanelViewModel? _windowDockPanelViewModel;
+        private string _popupText;
 
         /// <summary>
         /// Creates a new instance of <see cref="ApplicationViewModel"/>.
@@ -114,6 +115,15 @@ namespace Cell.ViewModel.Application
                 if (_windowDockPanelViewModel == value) return;
                 _windowDockPanelViewModel = value;
                 NotifyPropertyChanged(nameof(WindowDockPanelViewModel));
+            }
+        }
+
+        public string PopupText
+        {
+            get => _popupText; set
+            {
+                _popupText = value;
+                NotifyPropertyChanged(nameof(PopupText));
             }
         }
 
@@ -260,6 +270,7 @@ namespace Cell.ViewModel.Application
         /// Logger used to notify the user in the title bar.
         /// </summary>
         public Logger NotificationLogger { get; internal set; }
+        public TextClipboard TextClipboard { get; internal set; }
 
         /// <summary>
         /// Gets the application wide undo redo manager.
@@ -363,25 +374,6 @@ namespace Cell.ViewModel.Application
         }
 
         /// <summary>
-        /// Loads the entire project and then returns.
-        /// </summary>
-        /// <param name="userCollectionLoader">The loader to load collections from.</param>
-        /// <returns>The finish loading progress, which might be mark incomplete if the load did not finish.</returns>
-        public LoadingProgressResult Load(UserCollectionLoader userCollectionLoader)
-        {
-            try
-            {
-                LoadAsync(userCollectionLoader).Wait();
-
-            }
-            catch (AggregateException e)
-            {
-                throw e.InnerException!;
-            }
-            return new LoadingProgressResult(true, "Load Complete");
-        }
-
-        /// <summary>
         /// Pastes the copied cells into the selected cells.
         /// </summary>
         public void PasteCopiedCells()
@@ -402,7 +394,13 @@ namespace Cell.ViewModel.Application
             _windowDockPanelViewModel?.ShowToolWindow(viewModel, WindowDockType.Floating, allowDuplicates);
         }
 
-        internal async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader)
+        /// <summary>
+        /// Starts the loading process for the application.
+        /// </summary>
+        /// <param name="userCollectionLoader">The collection loader object to load collections from.</param>
+        /// <param name="checkoutCommitFunction">The function to check out a commit if needed.</param>
+        /// <returns>A task representing the entire load process.</returns>
+        public async Task<LoadResult> LoadAsync(UserCollectionLoader userCollectionLoader, Predicate<string> checkoutCommitFunction)
         {
             if (IsProjectLoaded) return FailLoad("Already loaded", "");
             if (_isProjectLoading) return FailLoad("Already loading", "");
@@ -410,7 +408,7 @@ namespace Cell.ViewModel.Application
             if (BackupManager is null) return FailLoad("Backup manager not initialized yet, try loading again.", "");
             ApplicationBackgroundMessage = "Checking for migration";
             if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
-            if (PersistedProject.NeedsMigration()) return await MigrateAndContinueLoadingAsync(userCollectionLoader);
+            if (PersistedProject.NeedsMigration()) return await MigrateAndContinueLoadingAsync(userCollectionLoader, checkoutCommitFunction);
             else return await ContinueLoadingAsync(userCollectionLoader);
         }
 
@@ -420,7 +418,7 @@ namespace Cell.ViewModel.Application
             PersistedProject.IsReadOnly = true;
             await BackupManager!.CreateBackupAsync();
             PersistedProject.IsReadOnly = false;
-            NotificationLogger.Log($"Backup created at {BackupManager.BackupDirectory.GetFullPath()}");
+            NotificationLogger?.Log($"Backup created at {BackupManager.BackupDirectory.GetFullPath()}");
         }
 
         private async Task<LoadResult> ContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
@@ -463,12 +461,12 @@ namespace Cell.ViewModel.Application
             PersistedProject.Migrate();
         }
 
-        private async Task<LoadResult> MigrateAndContinueLoadingAsync(UserCollectionLoader userCollectionLoader)
+        private async Task<LoadResult> MigrateAndContinueLoadingAsync(UserCollectionLoader userCollectionLoader, Predicate<string> checkoutCommitFunction)
         {
             if (PersistedProject is null) return FailLoad("Persisted project not initialized yet, try loading again.", "");
             if (!await PersistedProject.CanMigrateAsync())
             {
-                if (!HelpUserCheckoutCommit(PersistedProject.Version)) return FailLoad($"Migration needed but unable to complete until ${PersistedProject.Version} is checked out.", PersistedProject.Version);
+                if (!checkoutCommitFunction(PersistedProject.Version)) return FailLoad($"Migration needed but unable to complete until ${PersistedProject.Version} is checked out.", PersistedProject.Version);
                 else return FailLoad($"Checkout attempted, close the application, rebuild, and relaunch it to complete the migration. You can then go back to the latest commit.", PersistedProject.Version);
             }
             await MigrateProjectAsync(); 

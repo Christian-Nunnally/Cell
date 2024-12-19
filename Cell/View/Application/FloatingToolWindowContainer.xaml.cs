@@ -13,10 +13,6 @@ namespace Cell.View.ToolWindow
 {
     public partial class FloatingToolWindowContainer : UserControl, INotifyPropertyChanged
     {
-        private double _contentHeight;
-        private double _contentWidth;
-        private bool _resizing;
-        private Point _resizingStartPosition;
         private readonly WindowDockPanelViewModel _windowDockPanelViewModel;
 
         /// <summary>
@@ -34,13 +30,16 @@ namespace Cell.View.ToolWindow
         /// </summary>
         public Action<ToolWindowViewModel?>? ShowDockOptions;
 
+        /// <summary>
+        /// Gets or sets the main content of this floating window.
+        /// </summary>
         public WindowDockPanel? WindowDockPanel
         {
-            get => _windowDockPanel; set
+            get => _windowDockPanel; 
+            set
             {
                 if (_windowDockPanel != null && ToolWindowViewModel is not null)
                 {
-                    Commands.Clear();
                     ToolWindowViewModel.PropertyChanged -= ToolViewModelPropertyChanged;
                 }
                 _windowDockPanel = value;
@@ -49,35 +48,10 @@ namespace Cell.View.ToolWindow
                     ContentHost.Content = _windowDockPanel;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(WindowDockPanel)));
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToolWindowTitle)));
-                    ContentWidth = ToolWindowViewModel.DefaultWidth;
-                    ContentHeight = ToolWindowViewModel.DefaultHeight;
                     SetCanvasLeft();
                     SetCanvasTop();
                     DataContext = this;
-                    foreach (var command in ToolWindowViewModel.ToolBarCommands)
-                    {
-                        Commands.Add(command);
-                    }
-                    ToolWindowViewModel.ToolBarCommands.CollectionChanged += ToolBarCommandsCollectionChanged;
                     ToolWindowViewModel.PropertyChanged += ToolViewModelPropertyChanged;
-                }
-            }
-        }
-
-        private void ToolBarCommandsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (CommandViewModel command in e.NewItems)
-                {
-                    Commands.Add(command);
-                }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                foreach (CommandViewModel command in e.OldItems)
-                {
-                    Commands.Remove(command);
                 }
             }
         }
@@ -86,37 +60,6 @@ namespace Cell.View.ToolWindow
         /// Occurs when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// Gets or sets the commands that are available to the user in the title bar of the tool window.
-        /// </summary>
-        public ObservableCollection<CommandViewModel> Commands { get; set; } = [];
-
-        /// <summary>
-        /// Gets or sets the height the tool window should give its content.
-        /// </summary>
-        public double ContentHeight
-        {
-            get => _contentHeight;
-            set
-            {
-                _contentHeight = Math.Max(value, ToolWindowViewModel?.MinimumHeight ?? 100);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentHeight)));
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the width the tool window should give its content.
-        /// </summary>
-        public double ContentWidth
-        {
-            get => _contentWidth;
-            set
-            {
-                _contentWidth = Math.Max(value, ToolWindowViewModel?.MinimumWidth ?? 100);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ContentWidth)));
-            }
-        }
 
         private WindowDockPanel? _windowDockPanel;
 
@@ -147,16 +90,8 @@ namespace Cell.View.ToolWindow
         {
             if (toolbox.ToolWindowViewModel is not null)
             {
-                _windowDockPanelViewModel.MoveToolWindowToTop(toolbox.ToolWindowViewModel);
+                _windowDockPanelViewModel.TopFloatingWindow = toolbox.ToolWindowViewModel;
             }
-        }
-
-        private void SetSizeWhileRespectingBounds(double desiredWidth, double desiredHeight)
-        {
-            var boundedWidth = Math.Max(ToolWindowViewModel.MinimumWidth, Math.Min(1000- Canvas.GetLeft(this), desiredWidth));
-            var boundedHeight = Math.Max(ToolWindowViewModel.MinimumHeight, Math.Min(1000 - Canvas.GetTop(this), desiredHeight));
-            ContentWidth = boundedWidth;
-            ContentHeight = boundedHeight;
         }
 
         private void ToolboxMouseDown(object sender, MouseButtonEventArgs e)

@@ -4,6 +4,7 @@ using Cell.ViewModel.Execution;
 using Cell.ViewModel.ToolWindow;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace Cell.View.ToolWindow
 {
@@ -45,6 +46,13 @@ namespace Cell.View.ToolWindow
         {
             if (!ViewUtilities.TryGetSendersDataContext<CellFunctionViewModel>(sender, out var function)) return;
             _viewModel.CreateCopyOfFunction(function);
+        }
+
+        private void OnNmeLabelMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var label = (TextBlock)sender;
+            ApplicationViewModel.Instance.PopupText = $"Copied '{label.Text}'";
+            ApplicationViewModel.Instance.TextClipboard.SetText(label.Text ?? "");
         }
     }
 }

@@ -3,6 +3,7 @@ using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using CellTest.TestUtilities;
 using FontAwesome.Sharp;
+using System.Windows;
 
 namespace CellTest.ViewModel.Application
 {
@@ -136,6 +137,20 @@ namespace CellTest.ViewModel.Application
         }
 
         [Fact]
+        public void ChildToolWindow_SecondWindowDockedToTop_MinimumHeightOfPanelIncludesBothPanels()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.DockedTop, false);
+            var testToolWindowViewModel2 = new ToolWindowViewModel();
+            var topWindowPanel = _testing.VisibleContentAreasThatAreDockedOnTop.Single();
+            Assert.NotNull(topWindowPanel.ParentPanel);
+
+            topWindowPanel.ShowToolWindow(testToolWindowViewModel2, WindowDockType.DockedTop, false);
+
+            Assert.Equal(testToolWindowViewModel.MinimumHeight + testToolWindowViewModel2.MinimumHeight + DockedToolWindowContainer.ToolBoxHeaderHeight, topWindowPanel.DesiredHeight);
+        }
+
+        [Fact]
         public void ToolWindowJustUndocked_CloseButtonExecuted_FloatingToolWindowsAreEmpty()
         {
             var testToolWindowViewModel = new ToolWindowViewModel();
@@ -254,6 +269,28 @@ namespace CellTest.ViewModel.Application
             _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.Floating, false);
 
             Assert.Equal(IconChar.Lock, testToolWindowViewModel.ToolBarCommands[1].Icon);
+        }
+
+        [Fact]
+        public void ShowToolWindowFloating_HasCloseCommandInPosition0()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+
+            _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.Floating, false);
+
+            Assert.Equal(IconChar.Xmark, testToolWindowViewModel.ToolBarCommands[0].Icon);
+        }
+
+        [Fact]
+        public void ShowToolWindowFloating_PositionSetToCenterOfCanvas()
+        {
+            var testToolWindowViewModel = new ToolWindowViewModel();
+            _testing.CanvasSize = new Size(1000, 900);
+
+            _testing.ShowToolWindow(testToolWindowViewModel, WindowDockType.Floating, false);
+
+            Assert.Equal(400, testToolWindowViewModel.X);
+            Assert.Equal(350 - (DockedToolWindowContainer.ToolBoxHeaderHeight / 2), testToolWindowViewModel.Y);
         }
     }
 }

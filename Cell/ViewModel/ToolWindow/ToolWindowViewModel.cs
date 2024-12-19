@@ -1,7 +1,6 @@
 ﻿using Cell.Core.Common;
 using Cell.ViewModel.Application;
 using System.Collections.ObjectModel;
-using FontAwesome.Sharp;
 
 namespace Cell.ViewModel.ToolWindow
 {

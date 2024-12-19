@@ -29,7 +29,9 @@ namespace Cell.View.Application
         {
             _parentWindowDockPanel = parentWindowDockPanel;
             _toolWindowCanvas = toolWindowCanvas;
+            _toolWindowCanvas.SizeChanged += ToolWindowCanvasSizeChanged;
             ViewModel = viewModel;
+            ViewModel.CanvasSize = _toolWindowCanvas.RenderSize;
             viewModel.VisibleContentAreasThatAreFloating.CollectionChanged += FloatingToolWindowsCollectionChanged;
             viewModel.VisibleContentAreasThatAreDockedOnTop.CollectionChanged += TopDockedToolWindowsCollectionChanged;
             viewModel.VisibleContentAreasThatAreDockedOnBottom.CollectionChanged += BottomDockedToolWindowsCollectionChanged;
@@ -38,6 +40,11 @@ namespace Cell.View.Application
             DataContext = viewModel;
             ViewModel.PropertyChanged += WindowDockPanelViewModelPropertyChanged;
             InitializeComponent();
+        }
+
+        private void ToolWindowCanvasSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ViewModel.CanvasSize = e.NewSize;
         }
 
         /// <summary>
@@ -215,7 +222,7 @@ namespace Cell.View.Application
             {
                 var mousePosition = Mouse.GetPosition(App.Current.MainWindow);
                 var delta = DifferenceBetweenTwoPoints(_resizingStartPosition, mousePosition);
-                if (ViewModel.DockType == WindowDockType.DockedTop || ViewModel.DockType == WindowDockType.DockedLeft)
+                if (ViewModel.DockType == WindowDockType.DockedTop || ViewModel.DockType == WindowDockType.DockedLeft || ViewModel.DockType == WindowDockType.Floating)
                 {
                     ViewModel.DesiredWidth -= delta.X;
                     ViewModel.DesiredHeight -= delta.Y;
@@ -341,9 +348,21 @@ namespace Cell.View.Application
                     childDockPanel.ViewModel.WindowToDock = ViewModel.WindowToDock;
                 }
             }
-            if (e.PropertyName == nameof(WindowDockPanelViewModel.MainContent))
+            else if (e.PropertyName == nameof(WindowDockPanelViewModel.MainContent))
             {
                 ShowMainContentFromViewModel();
+            }
+            else if (e.PropertyName == nameof(WindowDockPanelViewModel.TopFloatingWindow))
+            {
+                var windowToMove = _toolWindowCanvas.Children
+                    .OfType<FloatingToolWindowContainer>()
+                    .FirstOrDefault(x => x.WindowDockPanel?.ViewModel.MainContent == ViewModel.TopFloatingWindow);
+                if (windowToMove is not null)
+                {
+                    // Remove and re-add to ensure it is on top (z-index)
+                    _toolWindowCanvas.Children.Remove(windowToMove);
+                    _toolWindowCanvas.Children.Add(windowToMove);
+                }
             }
         }
     }
