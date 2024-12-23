@@ -129,7 +129,7 @@ namespace Cell.View.Application
         {
             var functionLoader = _viewModel.FunctionTracker;
             if (functionLoader is null) return;
-            var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader);
+            var functionManagerViewModel = new FunctionManagerWindowViewModel(functionLoader, _viewModel.CellSelector);
             _viewModel.ShowToolWindow(functionManagerViewModel);
         }
 
@@ -150,14 +150,16 @@ namespace Cell.View.Application
         private void ShowSheetView(SheetViewModel? sheetViewModel)
         {
             if (sheetViewModel is null) return;
-            if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
+            if (_viewModel.WindowDockPanelViewModel.MainContent is SheetToolWindowViewModel sheetToolWindowViewModel)
             {
-                sheetView = new SheetView(sheetViewModel);
-                _sheetViews.Add(sheetViewModel, sheetView);
+                sheetToolWindowViewModel.SheetViewModel = sheetViewModel;
             }
-            var sheetToolWindowViewModel = new SheetToolWindowViewModel();
-            sheetToolWindowViewModel.SheetViewModel = sheetViewModel;
-            _viewModel.WindowDockPanelViewModel.MainContent = sheetToolWindowViewModel;
+            else
+            {
+                var newSheetToolWindow = new SheetToolWindowViewModel(new Dictionary<SheetViewModel, SheetView>());
+                newSheetToolWindow.SheetViewModel = sheetViewModel;
+                _viewModel.WindowDockPanelViewModel.MainContent = newSheetToolWindow;
+            }
         }
 
         private void ToggleEditPanelButtonClick(object sender, RoutedEventArgs e)

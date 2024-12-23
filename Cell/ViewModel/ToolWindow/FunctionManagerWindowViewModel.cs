@@ -1,9 +1,10 @@
-﻿using Cell.ViewModel.Application;
+﻿using Cell.Core.Data;
+using Cell.Core.Data.Tracker;
+using Cell.Core.Execution.Functions;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using Cell.Core.Data.Tracker;
-using Cell.Core.Execution.Functions;
 
 namespace Cell.ViewModel.ToolWindow
 {
@@ -12,10 +13,13 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class FunctionManagerWindowViewModel : ToolWindowViewModel
     {
+        private readonly CellSelector _cellSelector;
         private readonly FunctionTracker _functionTracker;
         private string _filterCollection = string.Empty;
         private string _filterSheet = "All";
         private string _filterString = string.Empty;
+        private FunctionUsersWindowViewModel _functionUsersWindowViewModel = new FunctionUsersWindowViewModel();
+        private FunctionDependenciesWindowViewModel _functionDependenciesWindowViewModel = new FunctionDependenciesWindowViewModel();
         private bool _includePopulateFunctions = true;
         private bool _includeTriggerFunctions = true;
         private CellFunctionViewModel? _selectedFunction;
@@ -23,11 +27,13 @@ namespace Cell.ViewModel.ToolWindow
         /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
         /// </summary>
         /// <param name="functionTracker">The object to get the functions from.</param>
-        public FunctionManagerWindowViewModel(FunctionTracker functionTracker)
+        public FunctionManagerWindowViewModel(FunctionTracker functionTracker, CellSelector cellSelector)
         {
+            _cellSelector = cellSelector;
             _functionTracker = functionTracker;
 
-            ToolBarCommands.Add(new CommandViewModel("Compile All", () => CompileAllFunctions()) { ToolTip = "Create a new function that returns a value" });
+            var compileAllFunctionsAsync = new AsyncCommand(CompileAllFunctionsAsync);
+            ToolBarCommands.Add(new CommandViewModel("Compile All", compileAllFunctionsAsync) { ToolTip = "Create a new function that returns a value" });
             ToolBarCommands.Add(new CommandViewModel("New Populate", () => CreateNewPopulateFunction()) { ToolTip = "Create a new function that returns a value" });
             ToolBarCommands.Add(new CommandViewModel("New Trigger", () => CreateNewTriggerFunction()) { ToolTip = "Create a new function that does not return a value" });
         }
@@ -148,15 +154,13 @@ namespace Cell.ViewModel.ToolWindow
             {
                 if (_selectedFunction == value) return;
                 _selectedFunction = value;
-                NotifyPropertyChanged(nameof(SelectedFunction));
-            }
-        }
+                if (_functionUsersWindowViewModel is not null) _functionUsersWindowViewModel.SelectedFunction = value;
+                if (_functionDependenciesWindowViewModel is not null) _functionDependenciesWindowViewModel.SelectedFunction = value;
 
-        private void CompileAllFunctions()
-        {
-            foreach (var function in _functionTracker.Functions)
-            {
-                function.Compile();
+                _cellSelector.UnselectAllCells();
+                _cellSelector.SelectCells(_selectedFunction?.CellsThatUseFunction ?? []);
+
+                NotifyPropertyChanged(nameof(SelectedFunction));
             }
         }
 
@@ -166,21 +170,24 @@ namespace Cell.ViewModel.ToolWindow
         public override string ToolWindowTitle => "Function Manager";
 
         /// <summary>
+        /// Creates a copy of the selected function.
+        /// </summary>
+        /// <param name="function">The function to copy.</param>
+        public void CreateCopyOfFunction(CellFunctionViewModel function)
+        {
+            if (SelectedFunction is null) return;
+            var copy = function.ReturnType == "void"
+                ? CreateNewTriggerFunction()
+                : CreateNewPopulateFunction();
+        }
+
+        /// <summary>
         /// Creates a new populate function with a default name.
         /// </summary>
         public CellFunction CreateNewPopulateFunction(string name = "PopulateFunction")
         {
             var newName = GetNewFunctionName(name);
             return _functionTracker.CreateCellFunction("object", newName, "return \"Hi\";");
-        }
-
-        private string GetNewFunctionName(string name)
-        {
-            var index = 0;
-            var newName = $"{name}";
-            var existingNames = _functionTracker.Functions.Select(x => x.Model.Name).ToList();
-            while (existingNames.Any(x => x == (newName = $"{name}{index++}"))) ;
-            return newName;
         }
 
         /// <summary>
@@ -220,16 +227,16 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        /// <summary>
-        /// Creates a copy of the selected function.
-        /// </summary>
-        /// <param name="function">The function to copy.</param>
-        public void CreateCopyOfFunction(CellFunctionViewModel function)
+        internal void OpenDependenciesWindowForFunction(CellFunctionViewModel function)
         {
-            if (SelectedFunction is null) return;
-            var copy = function.ReturnType == "void" 
-                ? CreateNewTriggerFunction()
-                : CreateNewPopulateFunction();
+            _functionDependenciesWindowViewModel.SelectedFunction = function;
+            ApplicationViewModel.Instance.ShowToolWindow(_functionDependenciesWindowViewModel);
+        }
+
+        internal void OpenUsersWindowForFunction(CellFunctionViewModel function)
+        {
+            _functionUsersWindowViewModel.SelectedFunction = function;
+            ApplicationViewModel.Instance.ShowToolWindow(_functionUsersWindowViewModel);
         }
 
         internal void PromptUserToDeleteFunctionFromProject(CellFunctionViewModel functionViewModel)
@@ -246,9 +253,27 @@ namespace Cell.ViewModel.ToolWindow
             });
         }
 
+        private async Task CompileAllFunctionsAsync()
+        {
+            foreach (var function in _functionTracker.Functions)
+            {
+                function.Compile();
+                await Task.Delay(1);
+            }
+        }
+
         private void FunctionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             NotifyPropertyChanged(nameof(FilteredFunctions));
+        }
+
+        private string GetNewFunctionName(string name)
+        {
+            var index = 0;
+            var newName = $"{name}";
+            var existingNames = _functionTracker.Functions.Select(x => x.Model.Name).ToList();
+            while (existingNames.Any(x => x == (newName = $"{name}{index++}"))) ;
+            return newName;
         }
 
         private bool IsFunctionIncludedInFilter(CellFunctionViewModel function)
@@ -258,18 +283,6 @@ namespace Cell.ViewModel.ToolWindow
             if (function.ReturnType == "void") return IncludeTriggerFunctions;
             if (function.ReturnType == "object") return IncludePopulateFunctions;
             return true;
-        }
-
-        internal void OpenUsersWindowForFunction(CellFunctionViewModel function)
-        {
-            var window = new FunctionUsersWindowViewModel(function);
-            ApplicationViewModel.Instance.ShowToolWindow(window);
-        }
-
-        internal void OpenDependenciesWindowForFunction(CellFunctionViewModel function)
-        {
-            var window = new FunctionDependenciesWindowViewModel(function, null);
-            ApplicationViewModel.Instance.ShowToolWindow(window);
         }
     }
 }

@@ -10,22 +10,22 @@ namespace Cell.ViewModel.ToolWindow
     /// </summary>
     public class FunctionDependenciesWindowViewModel : ToolWindowViewModel
     {
-        private readonly CellModel _cellContextToResolveDependencies;
+        public CellModel? CellContextToResolveDependencies
+        {
+            get => _cellContextToResolveDependencies; set
+            {
+                if (_cellContextToResolveDependencies == value) return;
+                _cellContextToResolveDependencies = value;
+                NotifyPropertyChanged(nameof(CellContextToResolveDependencies));
+                NotifyPropertyChanged(nameof(CellContextToResolveDependencies));
+            }
+        }
         private string _dependencciesListBoxFilterText = string.Empty;
         private string _filterCollection = string.Empty;
         private string _filterSheet = "All";
         private CellFunctionViewModel? _selectedFunction;
         private string _usersListBoxFilterText = string.Empty;
-        /// <summary>
-        /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
-        /// </summary>
-        /// <param name="function">The function to get dependencies from.</param>
-        /// <param name="cellContextToResolveDependencies"></param>
-        public FunctionDependenciesWindowViewModel(CellFunctionViewModel function, CellModel cellContextToResolveDependencies)
-        {
-            SelectedFunction = function;
-            _cellContextToResolveDependencies = cellContextToResolveDependencies;
-        }
+        private CellModel? _cellContextToResolveDependencies;
 
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
@@ -76,7 +76,7 @@ namespace Cell.ViewModel.ToolWindow
         {
             get
             {
-                if (_cellContextToResolveDependencies is null)
+                if (CellContextToResolveDependencies is null)
                 {
                     return SelectedFunction?.Dependencies
                         .Select(x => x.ResolveUserFriendlyCellAgnosticName())
@@ -85,7 +85,7 @@ namespace Cell.ViewModel.ToolWindow
                 else
                 {
                     return SelectedFunction?.Dependencies
-                        .Select(x => x.ResolveUserFriendlyNameForCell(_cellContextToResolveDependencies))
+                        .Select(x => x.ResolveUserFriendlyNameForCell(CellContextToResolveDependencies))
                         .Where(x => x.Contains(DependenciesListBoxFilterText)) ?? [];
                 }
             }

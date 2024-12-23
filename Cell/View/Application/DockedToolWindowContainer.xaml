@@ -7,8 +7,6 @@
     xmlns:local="clr-namespace:Cell.View.ToolWindow"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:Cell.View.ToolWindow"
-    MinWidth="{Binding ContentHeightMinimum}"
-    MinHeight="{Binding ContentWidthMinimum}"
     d:DesignHeight="450"
     d:DesignWidth="800"
     MouseDown="ToolboxMouseDown"

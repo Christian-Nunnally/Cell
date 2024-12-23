@@ -1,5 +1,6 @@
 ﻿using Cell.Core.Execution.CodeCompletion;
 using Cell.View.Skin;
+using Cell.ViewModel.Application;
 using Cell.ViewModel.ToolWindow;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using System.ComponentModel;
@@ -20,8 +21,10 @@ namespace Cell.View.ToolWindow
         {
             _viewModel = viewModel;
             InitializeComponent();
-            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor);
-            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer);
+            var collectionTracker = ApplicationViewModel.Instance.UserCollectionTracker;
+            var collectionNames = collectionTracker?.UserCollections.Select(c => c.Model.Name).ToList() ?? [];
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(textEditor, collectionNames);
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(syntaxTreePreviewViewer, collectionNames);
 
             textEditor.Text = _viewModel.CurrentTextInEditor;
             _viewModel.PropertyChanged += CodeEditorWindowViewModelPropertyChanged;

@@ -23,9 +23,9 @@ namespace Cell.ViewModel.ToolWindow
         {
             _sheetTracker = sheetTracker;
             _dialogFactory = dialogFactory;
-            ToolBarCommands.Add(new CommandViewModel("Export", OpenExportWindow) { ToolTip = "Opens the export tool window." });
+            ToolBarCommands.Add(new CommandViewModel("Export", OpenExportWindow) { ToolTip = "Opens the export tool window" });
             ToolBarCommands.Add(new CommandViewModel("Import", OpenImportWindow) { ToolTip = "Opens the import tool window" });
-            ToolBarCommands.Add(new CommandViewModel("New Sheet", OpenAddNewSheetWindow) { ToolTip = "Opens the create new sheet tool window." });
+            ToolBarCommands.Add(new CommandViewModel("New Sheet", OpenAddNewSheetWindow) { ToolTip = "Opens the create new sheet tool window" });
         }
 
         /// <summary>

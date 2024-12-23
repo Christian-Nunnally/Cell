@@ -1,5 +1,4 @@
 ﻿using Cell.Model;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Execution;
 
 namespace Cell.ViewModel.ToolWindow
@@ -11,16 +10,27 @@ namespace Cell.ViewModel.ToolWindow
     {
         private CellModel? _selectedUser;
         private string _usersListBoxFilterText = string.Empty;
+        private CellFunctionViewModel? _selectedFunction;
+
         /// <summary>
         /// Creates a new instance of the <see cref="FunctionManagerWindowViewModel"/>.
         /// </summary>
-        /// <param name="function">The object to get the functions from.</param>
-        public FunctionUsersWindowViewModel(CellFunctionViewModel function)
+        public FunctionUsersWindowViewModel()
         {
-            SelectedFunction = function;
         }
 
-        public CellFunctionViewModel SelectedFunction { get; set; }
+        public CellFunctionViewModel? SelectedFunction
+        {
+            get => _selectedFunction; set
+            {
+                if (_selectedFunction == value) return;
+                _selectedFunction = value;
+                SelectedUser = null;
+                NotifyPropertyChanged(nameof(SelectedFunction));
+                NotifyPropertyChanged(nameof(FilteredUsersOfFunction));
+                NotifyPropertyChanged(nameof(ToolWindowTitle));
+            }
+        }
 
         /// <summary>
         /// Gets the default height of this tool window when it is shown.
@@ -32,7 +42,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override double DefaultWidth => 300;
 
-        private IEnumerable<CellModel> UsersOfFunction => SelectedFunction.CellsThatUseFunction;
+        private IEnumerable<CellModel> UsersOfFunction => SelectedFunction?.CellsThatUseFunction ?? [];
 
         /// <summary>
         /// Gets the list of users of the selected function after the filter has been applied from the user.
@@ -72,7 +82,7 @@ namespace Cell.ViewModel.ToolWindow
                 if (SelectedFunction is null) return "Select a function to view users";
                 var name = SelectedFunction.Name;
                 var totalCount = UsersOfFunction.Count();
-                return $"Users of function '{name}' ({totalCount})";
+                return $"{totalCount} Users of {name}";
 
             }
         }
@@ -103,6 +113,20 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
+        }
+
+        public void UnassignFunctionFromCell(CellModel cell)
+        {
+            if (SelectedFunction is null) return;
+            if (cell.TriggerFunctionName == SelectedFunction.Name)
+            {
+                cell.TriggerFunctionName = "";
+            }
+            else if (cell.PopulateFunctionName == SelectedFunction.Name)
+            {
+                cell.PopulateFunctionName = "";
+            }
+            NotifyPropertyChanged(nameof(FilteredUsersOfFunction));
         }
     }
 }

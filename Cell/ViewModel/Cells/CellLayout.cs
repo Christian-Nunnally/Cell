@@ -206,11 +206,20 @@ namespace Cell.ViewModel.Cells
             LayoutWidth = lastCell.X + lastCell.Width;
         }
 
-        private void LayoutMergedCell(CellViewModel cellModel)
+        private void LayoutMergedCell(CellViewModel cell)
         {
-            var height = ComputeMergedCellsHeight(cellModel);
-            var width = ComputeMergedCellsWidth(cellModel);
-            LayoutCell(cellModel, width, height);
+            var height = ComputeMergedCellsHeight(cell);
+            var width = ComputeMergedCellsWidth(cell);
+            LayoutCell(cell, width, height);
+            if (cell.Model.IsMerged() && !cell.Model.IsMergedParent())
+            {
+                var possibleMergeParent = _cellTracker.GetCell(cell.Model.MergedWith);
+                if (possibleMergeParent is null) return;
+                if (_cellModelToViewModelMap.TryGetValue(possibleMergeParent, out var mergeParent))
+                {
+                    LayoutSingleNonSpecialCell(mergeParent);
+                }
+            }
         }
 
         private void LayoutOtherCells()

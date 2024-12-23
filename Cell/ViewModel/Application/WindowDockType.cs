@@ -1,4 +1,6 @@
 ﻿
+using System.Windows.Controls;
+
 namespace Cell.ViewModel.Application
 {
     /// <summary>
@@ -30,5 +32,32 @@ namespace Cell.ViewModel.Application
         /// The content is floating in the host.
         /// </summary>
         Floating,
+    }
+
+    public static class WindowDockTypeExtensions
+    {
+        public static Dock ToDock(this WindowDockType dockType)
+        {
+            return dockType switch
+            {
+                WindowDockType.DockedRight => Dock.Right,
+                WindowDockType.DockedLeft => Dock.Left,
+                WindowDockType.DockedTop => Dock.Top,
+                WindowDockType.DockedBottom => Dock.Bottom,
+                _ => Dock.Left,
+            };
+        }
+
+        public static WindowDockType ToWindowDockType(Dock dock)
+        {
+            return dock switch
+            {
+                Dock.Right => WindowDockType.DockedRight,
+                Dock.Left => WindowDockType.DockedLeft,
+                Dock.Top => WindowDockType.DockedTop,
+                Dock.Bottom => WindowDockType.DockedBottom,
+                _ => WindowDockType.DockedLeft,
+            };
+        }
     }
 }

@@ -48,14 +48,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.BackgroundColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.BackgroundColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -67,14 +66,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.BorderColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.BorderColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -143,14 +141,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Bottom.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.Border = $"{currentThickness.Left},{currentThickness.Top},{currentThickness.Right},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -162,14 +159,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Left.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.Border = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -181,14 +177,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Right.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.Border = $"{currentThickness.Left},{currentThickness.Top},{value},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -200,7 +195,7 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.Border).Top.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
@@ -209,7 +204,6 @@ namespace Cell.ViewModel.ToolWindow
                         ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
                         : $"{value},{value},{value},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -221,14 +215,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellToDisplay.CellType;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     if (cell.CellType.IsSpecial()) return;
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.CellType = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -240,14 +233,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.ContentBackgroundColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentBackgroundColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -259,14 +251,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.ContentBorderColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentBorderColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -278,14 +269,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Bottom.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentBorder = $"{currentThickness.Left},{currentThickness.Top},{currentThickness.Right},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -297,14 +287,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Left.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentBorder = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -316,14 +305,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Right.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentBorder = $"{currentThickness.Left},{currentThickness.Top},{value},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -337,7 +325,7 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder).Top.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentBorder);
                 foreach (var cell in _cellsToEdit)
                 {
@@ -346,7 +334,6 @@ namespace Cell.ViewModel.ToolWindow
                          ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
                          : $"{value},{value},{value},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -358,14 +345,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.HighlightColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.HighlightColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -377,13 +363,12 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.Font;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.Font = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -395,13 +380,12 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.FontSize;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.FontSize = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -423,14 +407,13 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.ForegroundColor;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 if (!Utilities.IsHexidecimalColorCode().IsMatch(value)) return;
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ForegroundColor = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -444,7 +427,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 if (value < 5) return;
                 if (value > 500) return;
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     var rowCell = _cellTracker.GetCell(cell.Location.SheetName, cell.Location.Row, 0);
@@ -452,7 +435,6 @@ namespace Cell.ViewModel.ToolWindow
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(rowCell);
                     rowCell.Height = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -464,13 +446,12 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.HorizontalAlignment;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.HorizontalAlignment = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -495,7 +476,7 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.Bold;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
@@ -503,7 +484,6 @@ namespace Cell.ViewModel.ToolWindow
                 }
                 NotifyPropertyChanged(nameof(IsFontBold));
                 NotifyPropertyChanged(nameof(FontWeightForView));
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -515,7 +495,7 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.Italic;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
@@ -523,7 +503,6 @@ namespace Cell.ViewModel.ToolWindow
                 }
                 NotifyPropertyChanged(nameof(IsFontItalic));
                 NotifyPropertyChanged(nameof(FontStyleForView));
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -535,7 +514,7 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.Strikethrough;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
@@ -543,7 +522,6 @@ namespace Cell.ViewModel.ToolWindow
                 }
                 NotifyPropertyChanged(nameof(IsFontStrikethrough));
                 NotifyPropertyChanged(nameof(TextDecorationsForView));
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -555,14 +533,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Bottom.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentMargin = $"{currentThickness.Left},{currentThickness.Top},{currentThickness.Right},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -574,14 +551,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Left.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentMargin = $"{value},{currentThickness.Top},{currentThickness.Right},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
             }
         }
 
@@ -593,14 +569,13 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Right.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin);
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.ContentMargin = $"{currentThickness.Left},{currentThickness.Top},{value},{currentThickness.Bottom}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -614,7 +589,7 @@ namespace Cell.ViewModel.ToolWindow
             get => Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin).Top.ToString();
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 var currentThickness = Utilities.ParseStringIntoThickness(CellStyleToDisplay.ContentMargin);
                 foreach (var cell in _cellsToEdit)
                 {
@@ -623,7 +598,6 @@ namespace Cell.ViewModel.ToolWindow
                      ? $"{currentThickness.Left},{value},{currentThickness.Right},{currentThickness.Bottom}"
                      : $"{value},{value},{value},{value}";
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -645,13 +619,12 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.TextAlignment;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.TextAlignment = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -683,13 +656,12 @@ namespace Cell.ViewModel.ToolWindow
             get => CellStyleToDisplay.VerticalAlignment;
             set
             {
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(cell);
                     cell.Style.VerticalAlignment = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -703,7 +675,7 @@ namespace Cell.ViewModel.ToolWindow
             {
                 if (value < 5) return;
                 if (value > 500) return;
-                ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+                using var _ = UndoRedoManager.RecordUndo();
                 foreach (var cell in _cellsToEdit)
                 {
                     if (cell.Width == value) continue;
@@ -712,7 +684,6 @@ namespace Cell.ViewModel.ToolWindow
                     ApplicationViewModel.GetUndoRedoManager()?.RecordStateIfRecording(columnCell);
                     columnCell.Width = value;
                 }
-                ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
             }
         }
 
@@ -870,9 +841,8 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void MergeCells()
         {
-            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            using var _ = UndoRedoManager.RecordUndo();
             MergeCells(_cellsToEdit);
-            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
         /// <summary>
@@ -880,7 +850,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void MergeCellsAcross()
         {
-            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            using var _ = UndoRedoManager.RecordUndo();
             var selectedCells = _cellsToEdit.ToList();
             var rows = selectedCells?.Select(x => x.Location.Row).Distinct().ToList() ?? [];
             foreach (var row in rows)
@@ -888,7 +858,6 @@ namespace Cell.ViewModel.ToolWindow
                 var cellsToMerge = selectedCells?.Where(x => x.Location.Row == row).ToList() ?? [];
                 MergeCells(cellsToMerge);
             }
-            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
         /// <summary>
@@ -896,7 +865,7 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void MergeCellsDown()
         {
-            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            using var _ = UndoRedoManager.RecordUndo();
             var selectedCells = _cellsToEdit.ToList();
             var columns = selectedCells?.Select(x => x.Location.Column).Distinct().ToList() ?? [];
             foreach (var column in columns)
@@ -904,7 +873,6 @@ namespace Cell.ViewModel.ToolWindow
                 var cellsToMerge = selectedCells?.Where(x => x.Location.Column == column).ToList();
                 MergeCells(cellsToMerge ?? []);
             }
-            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
         /// <summary>
@@ -912,9 +880,8 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public void UnmergeCells()
         {
-            ApplicationViewModel.GetUndoRedoManager()?.StartRecordingUndoState();
+            using var _ = UndoRedoManager.RecordUndo();
             UnmergeCells(_cellsToEdit.Where(x => x.IsMergedParent()));
-            ApplicationViewModel.GetUndoRedoManager()?.FinishRecordingUndoState();
         }
 
         private static void SetMergedWithToCellsId(List<CellModel> cellsToMerge, CellModel topLeftCell)

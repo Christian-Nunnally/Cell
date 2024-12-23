@@ -24,7 +24,7 @@
     WindowStyle="None"
     mc:Ignorable="d">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="28" />
+        <WindowChrome CaptionHeight="25" />
     </WindowChrome.WindowChrome>
     <DockPanel x:Name="RootWindow">
         <Grid DockPanel.Dock="Top">

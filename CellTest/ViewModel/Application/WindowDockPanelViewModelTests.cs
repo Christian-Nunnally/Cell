@@ -182,7 +182,7 @@ namespace CellTest.ViewModel.Application
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Lock).Command.Execute(null);
 
-            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, System.Windows.Controls.Dock.Top);
+            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, WindowDockType.DockedTop);
 
             Assert.Equal(testToolWindowViewModel, _testing.VisibleContentAreasThatAreDockedOnTop.Single().MainContent);
         }
@@ -195,7 +195,7 @@ namespace CellTest.ViewModel.Application
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.LockOpen).Command.Execute(null);
             testToolWindowViewModel.ToolBarCommands.First(x => x.Icon == IconChar.Lock).Command.Execute(null);
 
-            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, System.Windows.Controls.Dock.Top);
+            _testing.DockWindowThatIsCurrentlyFloating(testToolWindowViewModel, WindowDockType.DockedTop);
 
             Assert.Empty(_testing.VisibleContentAreasThatAreFloating.Where(x => x.MainContent == testToolWindowViewModel));
         }

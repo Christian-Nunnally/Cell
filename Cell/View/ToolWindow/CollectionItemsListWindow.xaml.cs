@@ -20,7 +20,7 @@ namespace Cell.View.ToolWindow
             _viewModel = viewModel;
             _viewModel.PropertyChanged += CollectionManagerWindowPropertyChanged;
             InitializeComponent();
-            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor);
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_itemJsonEditor, []);
         }
 
         private void CollectionManagerWindowPropertyChanged(object? sender, PropertyChangedEventArgs e)

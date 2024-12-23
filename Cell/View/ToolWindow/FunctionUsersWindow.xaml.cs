@@ -39,27 +39,14 @@ namespace Cell.View.ToolWindow
 
         private void GoToCellButtonClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is CellModel cell)
-            {
-                ApplicationViewModel.Instance.GoToCell(cell);
-            }
+            if (!ViewUtilities.TryGetSendersDataContext<CellModel>(sender, out var cell)) return;
+            ApplicationViewModel.Instance.GoToCell(cell);
         }
 
         private void RemoveFunctionReferenceFromCellButtonClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is CellModel cell)
-            {
-                var selectedFunction = _viewModel.SelectedFunction;
-                if (selectedFunction is null) return;
-                if (cell.TriggerFunctionName == selectedFunction.Name)
-                {
-                    cell.TriggerFunctionName = "";
-                }
-                else if (cell.PopulateFunctionName == selectedFunction.Name)
-                {
-                    cell.PopulateFunctionName = "";
-                }
-            }
+            if (!ViewUtilities.TryGetSendersDataContext<CellModel>(sender, out var cell)) return;
+            _viewModel.UnassignFunctionFromCell(cell);
         }
     }
 }

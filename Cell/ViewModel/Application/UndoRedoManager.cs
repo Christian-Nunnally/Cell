@@ -123,6 +123,10 @@ namespace Cell.ViewModel.Application
             UndoStackChanged?.Invoke();
         }
 
+        public IDisposable StartOfUndoRecording() => new UndoStateFinisher(this);
+
+        public static IDisposable? RecordUndo() => ApplicationViewModel.Instance?.UndoRedoManager?.StartOfUndoRecording();
+
         private static void RestoreCell(CellModel cellToRestoreInto, CellModel cellToCopyFrom)
         {
             cellToRestoreInto.Width = cellToCopyFrom.Width;
@@ -176,6 +180,22 @@ namespace Cell.ViewModel.Application
             _undoStack.Push(state);
             _redoStack.Clear();
             UndoStackChanged?.Invoke();
+        }
+    }
+
+    public class UndoStateFinisher : IDisposable
+    {
+        private readonly UndoRedoManager _manager;
+
+        public UndoStateFinisher(UndoRedoManager manager)
+        {
+            _manager = manager;
+            _manager.StartRecordingUndoState();
+        }
+
+        void IDisposable.Dispose()
+        {
+            _manager.FinishRecordingUndoState();
         }
     }
 }

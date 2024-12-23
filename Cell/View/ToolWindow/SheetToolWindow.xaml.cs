@@ -1,5 +1,4 @@
 ﻿using Cell.View.Cells;
-using Cell.ViewModel.Application;
 using Cell.ViewModel.Cells;
 using Cell.ViewModel.ToolWindow;
 using System.ComponentModel;
@@ -8,8 +7,6 @@ namespace Cell.View.ToolWindow
 {
     public partial class SheetToolWindow : ResizableToolWindow
     {
-        private readonly Dictionary<SheetViewModel, SheetView> _sheetViews = [];
-
         private readonly SheetToolWindowViewModel _viewModel;
 
         /// <summary>
@@ -22,16 +19,17 @@ namespace Cell.View.ToolWindow
             InitializeComponent();
             viewModel.PropertyChanged += SheetToolWindowViewModelPropertyChanged;
             ShowSheetView(_viewModel.SheetViewModel);
+            
         }
 
         private void ShowSheetView(SheetViewModel? sheetViewModel)
         {
             if (sheetViewModel is null) return;
-            if (!_sheetViews.TryGetValue(sheetViewModel, out var sheetView))
+            if (!_viewModel.SheetViewCache.TryGetValue(sheetViewModel, out var sheetView))
             {
                 sheetView = new SheetView(sheetViewModel);
                 sheetView.IsPanningEnabled = false;
-                _sheetViews.Add(sheetViewModel, sheetView);
+                _viewModel.SheetViewCache.Add(sheetViewModel, sheetView);
             }
             _sheetViewContentControl.Content = sheetView;
         }

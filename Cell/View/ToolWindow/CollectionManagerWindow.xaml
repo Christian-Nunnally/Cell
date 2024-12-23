@@ -66,25 +66,28 @@
                             HorizontalAlignment="Right"
                             FlowDirection="RightToLeft"
                             Orientation="Horizontal">
+                            <Button
+                                x:Name="_showButton"
+                                Width="40"
+                                Click="ShowCollectionButtonClicked"
+                                Content="Items"
+                                Style="{StaticResource ListItemInlineButtonStyle}"
+                                ToolTip="Look at the items in this collection"
+                                Visibility="Hidden" />
                             <TextBlock
+                                Margin="5,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
                                 Text="{Binding Collection.Items.Count}" />
                             <TextBlock
+                                Margin="5,0"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 FontFamily="{StaticResource ProgrammingFont}"
                                 FontSize="13"
                                 Text="{Binding UsageCount}" />
-                            <Button
-                                x:Name="_showButton"
-                                Click="ShowCollectionButtonClicked"
-                                Content="{fa:Icon Eye}"
-                                Style="{StaticResource ListItemInlineButtonStyle}"
-                                ToolTip="Look at the items in this collection"
-                                Visibility="Hidden" />
                         </StackPanel>
                     </Grid>
                     <DataTemplate.Triggers>

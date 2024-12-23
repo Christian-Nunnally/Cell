@@ -100,8 +100,8 @@ namespace Cell.View.Application
             var dockSide = DockPanel.GetDock(dockSite);
             HideDockSitesFromParent();
             if (dockSite.Tag is not ToolWindowViewModel toolWindowToDock) return;
-
-            ViewModel.DockWindowThatIsCurrentlyFloating(toolWindowToDock, dockSide);
+            var side = WindowDockTypeExtensions.ToWindowDockType(dockSide);
+            ViewModel.DockWindowThatIsCurrentlyFloating(toolWindowToDock, side);
         }
 
         private void DockSiteMouseEnter(object sender, MouseEventArgs e)

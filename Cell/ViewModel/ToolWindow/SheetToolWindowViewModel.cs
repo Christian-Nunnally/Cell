@@ -1,4 +1,5 @@
 ﻿
+using Cell.View.Cells;
 using Cell.ViewModel.Cells;
 
 namespace Cell.ViewModel.ToolWindow
@@ -6,6 +7,7 @@ namespace Cell.ViewModel.ToolWindow
     public class SheetToolWindowViewModel : ToolWindowViewModel
     {
         private SheetViewModel? _sheetViewModel;
+        public Dictionary<SheetViewModel, SheetView> SheetViewCache;
 
         /// <summary>
         /// Gets or sets the current sheet view model that is being displayed in the tool window.
@@ -21,8 +23,9 @@ namespace Cell.ViewModel.ToolWindow
             }
         }
 
-        public SheetToolWindowViewModel()
+        public SheetToolWindowViewModel(Dictionary<SheetViewModel, SheetView> sheetViewCache)
         {
+            SheetViewCache = sheetViewCache;
         }
 
         public override double DefaultHeight => SheetViewModel?.SheetHeight ?? 200;

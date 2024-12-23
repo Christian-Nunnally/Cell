@@ -28,7 +28,6 @@ namespace Cell.Model
         /// <returns>True if the two cells are merged.</returns>
         public static bool IsMergedWith(this CellModel cell, CellModel other) => cell.IsMerged() && cell.MergedWith == other.MergedWith;
 
-
         /// <summary>
         /// Sets both the border and the content border of the cell to the same color.
         /// </summary>

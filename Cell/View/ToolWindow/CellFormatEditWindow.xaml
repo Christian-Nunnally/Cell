@@ -28,7 +28,8 @@
                 Height="20"
                 Content="{fa:Icon XMark}"
                 FontSize="14"
-                Foreground="{StaticResource ErrorForegroundColor}">
+                Foreground="{StaticResource ErrorForegroundColor}"
+                ToolTip="Show options for deleting this cell">
                 <ToggleButton.Style>
                     <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
                         <Setter Property="BorderBrush" Value="{StaticResource CellBorderColor}" />
@@ -62,11 +63,13 @@
                         <Button
                             Click="DeleteRowButtonClicked"
                             Content="Delete row(s)"
-                            Foreground="{StaticResource ErrorForegroundColor}" />
+                            Foreground="{StaticResource ErrorForegroundColor}"
+                            ToolTip="Delete all of the rows that the selected cells are in" />
                         <Button
                             Click="DeleteColumnButtonClicked"
                             Content="Delete columns(s)"
-                            Foreground="{StaticResource ErrorForegroundColor}" />
+                            Foreground="{StaticResource ErrorForegroundColor}"
+                            ToolTip="Delete all of the columns that the selected cells are in" />
                     </StackPanel>
                 </Border>
             </Popup>
@@ -176,7 +179,8 @@
             HorizontalContentAlignment="Center"
             ClipToBounds="False"
             PreviewKeyDown="TextBoxPreviewKeyDown"
-            Text="{Binding Height, Mode=TwoWay}">
+            Text="{Binding Height, Mode=TwoWay}"
+            ToolTip="Set the height of all cells in selected rows">
             <TextBox.LayoutTransform>
                 <RotateTransform Angle="-90" CenterX="10" CenterY="10" />
             </TextBox.LayoutTransform>
@@ -190,36 +194,42 @@
             HorizontalContentAlignment="Center"
             ClipToBounds="False"
             PreviewKeyDown="TextBoxPreviewKeyDown"
-            Text="{Binding Width, Mode=TwoWay}" />
+            Text="{Binding Width, Mode=TwoWay}"
+            ToolTip="Set the width of all cells in selected rows" />
         <Grid Grid.Row="1" Grid.Column="1">
             <xctk:ColorPicker
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}" />
+                SelectedColor="{Binding BorderColor, Converter={StaticResource HexToColorConverter}}"
+                ToolTip="Set the cell broder color" />
             <xctk:ColorPicker
                 Margin="15"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}" />
+                SelectedColor="{Binding BackgroundColor, Converter={StaticResource HexToColorConverter}}"
+                ToolTip="Set the cell background color" />
             <xctk:ColorPicker
                 Margin="45"
                 ButtonStyle="{StaticResource BorderColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}" />
+                SelectedColor="{Binding ContentBorderColor, Converter={StaticResource HexToColorConverter}}"
+                ToolTip="Set the content border color" />
             <xctk:ColorPicker
                 Margin="60"
                 ButtonStyle="{StaticResource BackgroundColorPickerToggleButtonStyle}"
                 Foreground="{StaticResource ForegroundColor}"
                 Loaded="ColorPicker_Loaded"
-                SelectedColor="{Binding ContentBackgroundColor, Converter={StaticResource HexToColorConverter}}" />
+                SelectedColor="{Binding ContentBackgroundColor, Converter={StaticResource HexToColorConverter}}"
+                ToolTip="Set the content background color" />
             <Grid Margin="40">
                 <ToggleButton
                     x:Name="TextFormattingTogglePopupButton"
                     Grid.Row="1"
-                    Grid.Column="1">
+                    Grid.Column="1"
+                    ToolTip="Format the text and alignment of the cell">
                     <ToggleButton.Style>
                         <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
                             <Setter Property="Background" Value="{StaticResource ControlBackground}" />
@@ -277,46 +287,56 @@
                                 <TextBox
                                     Width="125"
                                     PreviewKeyDown="TextBoxPreviewKeyDown"
-                                    Text="{Binding Path=Font, UpdateSourceTrigger=LostFocus}" />
+                                    Text="{Binding Path=Font, UpdateSourceTrigger=LostFocus}"
+                                    ToolTip="Set the font of the cell" />
                                 <TextBox
                                     Width="25"
                                     HorizontalContentAlignment="Center"
                                     PreviewKeyDown="TextBoxPreviewKeyDown"
-                                    Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}" />
+                                    Text="{Binding Path=FontSize, UpdateSourceTrigger=LostFocus}"
+                                    ToolTip="Set the font size of the cell" />
                                 <ToggleButton
                                     Width="25"
                                     Content="{fa:Icon Bold}"
-                                    IsChecked="{Binding IsFontBold}" />
+                                    IsChecked="{Binding IsFontBold}"
+                                    ToolTip="Set whether the text of the cell is bolded" />
                                 <ToggleButton
                                     Width="25"
                                     Content="{fa:Icon Italic}"
-                                    IsChecked="{Binding IsFontItalic}" />
+                                    IsChecked="{Binding IsFontItalic}"
+                                    ToolTip="Set whether the text of the cell is italicised" />
                                 <ToggleButton
                                     Width="25"
                                     Content="{fa:Icon Strikethrough}"
-                                    IsChecked="{Binding IsFontStrikethrough}" />
+                                    IsChecked="{Binding IsFontStrikethrough}"
+                                    ToolTip="Set whether the text of the cell is struck through" />
 
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <xctk:ColorPicker
-                                    Width="25"
-                                    ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
-                                    Foreground="{StaticResource ForegroundColor}"
-                                    Loaded="ColorPicker_Loaded"
-                                    SelectedColor="{Binding ForegroundColor, Converter={StaticResource HexToColorConverter}}" />
-                                <Label Width="75" Content="Foreground" />
-                                <xctk:ColorPicker
-                                    Width="25"
-                                    ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
-                                    Loaded="ColorPicker_Loaded"
-                                    SelectedColor="{Binding ContentHighlightColor, Converter={StaticResource HexToColorConverter}}" />
-                                <Label Width="75" Content="Highlight" />
+                                <Grid Width="100">
+                                    <xctk:ColorPicker
+                                        ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                        Foreground="{StaticResource ForegroundColor}"
+                                        Loaded="ColorPicker_Loaded"
+                                        SelectedColor="{Binding ForegroundColor, Converter={StaticResource HexToColorConverter}}"
+                                        ToolTip="Set the cells text/foreground color" />
+                                    <Label Content="Foreground" IsHitTestVisible="False" />
+                                </Grid>
+                                <Grid Width="100">
+                                    <xctk:ColorPicker
+                                        ButtonStyle="{StaticResource ColorPickerToggleButtonStyle}"
+                                        Loaded="ColorPicker_Loaded"
+                                        SelectedColor="{Binding ContentHighlightColor, Converter={StaticResource HexToColorConverter}}"
+                                        ToolTip="Set the cells hover/highlight color" />
+                                    <Label Content="Highlight" IsHitTestVisible="False" />
+                                </Grid>
                                 <Grid>
                                     <ToggleButton
                                         x:Name="TogglePopupButton"
                                         Width="25"
                                         Content="{fa:Icon ArrowsUpDownLeftRight}"
-                                        FontSize="14">
+                                        FontSize="14"
+                                        ToolTip="Adjust text/content alignment">
                                         <ToggleButton.Style>
                                             <Style BasedOn="{StaticResource {x:Type ToggleButton}}" TargetType="{x:Type ToggleButton}">
                                                 <Setter Property="Background" Value="{StaticResource ControlBackground}" />
@@ -354,57 +374,69 @@
                                                     <Button
                                                         Click="SetAlignmentToTopLeftButtonClick"
                                                         Content="↖"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to top left corner" />
                                                     <Button
                                                         Click="SetAlignmentToTopButtonClick"
                                                         Content="↑"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to top edge" />
                                                     <Button
                                                         Click="SetAlignmentToTopRightButtonClick"
                                                         Content="↗"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to top right corner" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <Button
                                                         Click="SetAlignmentToLeftButtonClick"
                                                         Content="←"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to left edge" />
                                                     <Button
                                                         Click="SetAlignmentToCenterButtonClick"
                                                         Content="•"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to center" />
                                                     <Button
                                                         Click="SetAlignmentToRightButtonClick"
                                                         Content="→"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to right edge" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <Button
                                                         Click="SetAlignmentToBottomLeftButtonClick"
                                                         Content="↙"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to bottom left corner" />
                                                     <Button
                                                         Click="SetAlignmentToBottomButtonClick"
                                                         Content="↓"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to bottom edge" />
                                                     <Button
                                                         Click="SetAlignmentToBottomRightButtonClick"
                                                         Content="↘"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set alignment to bottom right corner" />
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal">
                                                     <Button
                                                         Click="SetTextAlignmentToLeftButtonClick"
                                                         Content="{fa:Icon AlignLeft}"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set text margin to left align" />
                                                     <Button
                                                         Click="SetTextAlignmentToCenterButtonClick"
                                                         Content="{fa:Icon AlignCenter}"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set text margin to center align" />
                                                     <Button
                                                         Click="SetTextAlignmentToRightButtonClick"
                                                         Content="{fa:Icon AlignRight}"
-                                                        Style="{StaticResource AlignmentButtonStyle}" />
+                                                        Style="{StaticResource AlignmentButtonStyle}"
+                                                        ToolTip="Set text margin to left align" />
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>

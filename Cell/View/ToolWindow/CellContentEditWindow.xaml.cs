@@ -25,7 +25,7 @@ namespace Cell.View.ToolWindow
             _viewModel = viewModel;
             InitializeComponent();
 
-            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_multiUseUserInputTextBox);
+            SyntaxHighlightingColors.ApplySyntaxHighlightingToEditor(_multiUseUserInputTextBox, []);
             _multiUseUserInputTextBox.Text = _viewModel.MultiUseUserInputText;
             _viewModel.PropertyChanged += CellContentEditWindowViewModelPropertyChanged;
             _multiUseUserInputTextBox.TextArea.TextEntering += OnTextEntering;

@@ -171,6 +171,13 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingClosed()
         {
+            _userCollection.ItemAdded -= UserCollectionItemsChanged;
+            _userCollection.ItemRemoved -= UserCollectionItemsChanged;
+        }
+
+        private void UserCollectionItemsChanged(UserCollection collection, UserItem item)
+        {
+            NotifyPropertyChanged(nameof(FilteredItemsInSelectedCollection));
         }
 
         /// <summary>
@@ -178,6 +185,8 @@ namespace Cell.ViewModel.ToolWindow
         /// </summary>
         public override void HandleBeingShown()
         {
+            _userCollection.ItemAdded += UserCollectionItemsChanged;
+            _userCollection.ItemRemoved += UserCollectionItemsChanged;
         }
 
         /// <summary>

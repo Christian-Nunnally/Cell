@@ -73,7 +73,7 @@ namespace Cell.ViewModel.ToolWindow
         /// <summary>
         /// Gets the minimum width this tool window is allowed to be resized to.
         /// </summary>
-        public override double MinimumWidth => 200;
+        public override double MinimumWidth => 350;
 
         /// <summary>
         /// Gets or sets the text that the user has input into the content editor text box.
